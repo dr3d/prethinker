@@ -16,7 +16,9 @@
       "line": 1417,
       "reason": "adult-roster count question needs count-value surface rather than broad role membership rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -31,7 +33,9 @@
       "line": 1399,
       "reason": "applicant identity question needs source-author/actor surface rather than generic event role rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -46,7 +50,9 @@
       "line": 1065,
       "reason": "arbitrator-unresolved-question row needs dispute-scope/topic surface rather than broad dispute-status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -61,7 +67,9 @@
       "line": 1264,
       "reason": "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -76,7 +84,9 @@
       "line": 1462,
       "reason": "authority/source identity question needs issue-status authority surface rather than ownership claim rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -91,7 +101,9 @@
       "line": 1453,
       "reason": "authority/source identity question needs the surface carrying the named judicial actor",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -106,7 +118,9 @@
       "line": 1444,
       "reason": "authority/source identity question needs the surface carrying the named note actor",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -121,7 +135,9 @@
       "line": 961,
       "reason": "badge-id question with unresolved holder needs identity-status badge surface rather than nearest source-record usage",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -136,7 +152,9 @@
       "line": 1972,
       "reason": "collector identity question needs direct collector predicate surface rather than broad status/note evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -151,7 +169,9 @@
       "line": 1643,
       "reason": "combined role-identity question needs source/participant surface rather than single-role evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -166,7 +186,9 @@
       "line": 2264,
       "reason": "contract-validity question needs authority-source surface rather than unrelated ownership or entity rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -181,7 +203,9 @@
       "line": 2257,
       "reason": "contract-validity question needs explicit acting-authority surface rather than generic rule evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -196,7 +220,9 @@
       "line": 1885,
       "reason": "credential question needs explicit credential-status surface rather than access-log volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -211,7 +237,9 @@
       "line": 2643,
       "reason": "destruction-supervisor question needs person role plus destruction event surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -226,7 +254,9 @@
       "line": 2156,
       "reason": "festival-director identity question needs direct person-role surface rather than meeting/ruling volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -241,7 +271,9 @@
       "line": 2415,
       "reason": "guardianship-validity question needs residence/resumption condition surface rather than bare guardianship status",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -256,7 +288,9 @@
       "line": 810,
       "reason": "identity question has baseline name/role support and candidate is broad action-heavy",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -271,7 +305,9 @@
       "line": 3034,
       "reason": "intake-actor question needs explicit item-received-from provenance surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -286,7 +322,9 @@
       "line": 3043,
       "reason": "intake-actor question needs handoff/location event surface rather than ledger-entry rows alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -301,7 +339,9 @@
       "line": 2180,
       "reason": "official identity question needs role-authority definition surface rather than action volume or title-only rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -316,7 +356,9 @@
       "line": 1435,
       "reason": "panel-chair identity question needs panel list-member surface rather than generic person-role rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -331,7 +373,9 @@
       "line": 1662,
       "reason": "parent-sample identifier question needs source or row sample-ID surface rather than ambiguous sample-id hierarchy",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if deterministic identifier/source pinboards make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -346,7 +390,9 @@
       "line": 1634,
       "reason": "project-PI identity question needs direct role/assignment surface rather than archival row volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -361,7 +407,9 @@
       "line": 1032,
       "reason": "publication-authority question needs publication holder plus active restriction surface rather than broad access-authority volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -376,7 +424,9 @@
       "line": 2696,
       "reason": "recovery-identity question needs direct testimony/recovery surface rather than custody or zone rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -391,7 +441,9 @@
       "line": 2218,
       "reason": "reinstatement question needs focused role-history surface rather than broad current-role or rule evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -406,7 +458,9 @@
       "line": 990,
       "reason": "same-item question needs current item identity/description surface rather than withdrawn-label evidence alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -421,7 +475,9 @@
       "line": 2873,
       "reason": "same-name distinction question needs alias plus group-membership surface rather than identity table alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -436,7 +492,9 @@
       "line": 1653,
       "reason": "school role/driver identity question needs direct role predicate rather than row-value volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -451,7 +509,9 @@
       "line": 1408,
       "reason": "school-principal identity question needs source-record authority surface rather than roster row volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -466,7 +526,9 @@
       "line": 2118,
       "reason": "station-supervisor question needs explicit station_supervisor surface rather than standing group-supervision rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -481,7 +543,9 @@
       "line": 1743,
       "reason": "student-location supervision question needs statement plus event-attribute surface rather than role roster volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -496,7 +560,9 @@
       "line": 2763,
       "reason": "substitute-scorer identity question needs compact service-role surface rather than certification/result volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -511,7 +577,9 @@
       "line": 2167,
       "reason": "superlative identity question needs explicit age/identity surface rather than broad role membership rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -526,7 +594,9 @@
       "line": 2900,
       "reason": "surveyor-certification lapse question needs direct certification-status surface rather than survey-result role rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -541,7 +611,9 @@
       "line": 3062,
       "reason": "adjusted-expiration question needs explicit current-expiration surface rather than extension-label or original-date evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -556,7 +628,9 @@
       "line": 2087,
       "reason": "appeal-status question needs appeal event plus no-decision/deadline surface rather than bare docket status",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -571,7 +645,9 @@
       "line": 3173,
       "reason": "board-concern decision question needs event/action concern history rather than bare pending status",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -586,7 +662,9 @@
       "line": 950,
       "reason": "clear-sample clock snapshot question needs segment-plus-elapsed-time helper surface rather than snapshot text alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -601,7 +679,9 @@
       "line": 3117,
       "reason": "commit-readiness question needs unresolved process evidence rather than a bare status value",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -616,7 +696,9 @@
       "line": 1175,
       "reason": "communications-officer drafting question needs notice-issued plus person-role surface rather than name lookup alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -631,7 +713,9 @@
       "line": 2147,
       "reason": "completion-report incident list needs trip-outcome plus issue/medical/hazard surfaces",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -646,7 +730,9 @@
       "line": 2030,
       "reason": "contract-rescission status question keeps request/outcome surface over approval vote surface alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -661,7 +747,9 @@
       "line": 888,
       "reason": "contract-rescission status question needs request/outcome surface rather than approval vote surface alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -676,7 +764,9 @@
       "line": 979,
       "reason": "corrected-duration question needs paired raw/corrected badge-event surface rather than corrected timestamp volume alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -691,7 +781,9 @@
       "line": 970,
       "reason": "corrected-timestamp question needs explicit corrected-timestamp surface rather than rule-description context",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -706,7 +798,9 @@
       "line": 862,
       "reason": "counterfactual or hold/readiness question has direct baseline rule/status support and candidate is broad or relaxed-heavy",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -721,7 +815,9 @@
       "line": 1924,
       "reason": "court-determination question needs packet/source status surface rather than broad unresolved labels",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -736,7 +832,9 @@
       "line": 2424,
       "reason": "current operational status question needs explicit final-state surface rather than adjacent event/action evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -751,7 +849,9 @@
       "line": 3262,
       "reason": "current-constitution eligibility question needs applicant-type plus controlling interpretation surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -766,7 +866,9 @@
       "line": 1797,
       "reason": "date-event anchor enumeration needs incident-anchor surface rather than source-section volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -781,7 +883,9 @@
       "line": 3199,
       "reason": "deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -796,7 +900,9 @@
       "line": 3164,
       "reason": "decision-status question needs explicit decision surface rather than adjacent application/status evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -811,7 +917,9 @@
       "line": 1671,
       "reason": "erratum report-of-record question needs archival document/version surface rather than generic document-status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -826,7 +934,9 @@
       "line": 1121,
       "reason": "expected-order question needs explicit expected-order surface rather than open-exception volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -841,7 +951,9 @@
       "line": 1806,
       "reason": "governing-board vote-status question needs explicit pending-determination surface rather than unrelated negative records",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -856,7 +968,9 @@
       "line": 2799,
       "reason": "group-designation suspension question needs event plus interval-membership surface rather than broad fallback rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -871,7 +985,9 @@
       "line": 1867,
       "reason": "medication lot-number question needs source-record event attributes rather than self-check paraphrase or row-volume evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if structural scoring penalizes broad row-volume well enough to pass the birth rows without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -886,7 +1002,9 @@
       "line": 2864,
       "reason": "no-touch hazard question needs incident/hazard observation surface rather than broad attendance roster",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -901,7 +1019,9 @@
       "line": 1381,
       "reason": "order-series identifier question needs exact document-identifier surface rather than section/event volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if deterministic identifier/source pinboards make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -916,7 +1036,9 @@
       "line": 1220,
       "reason": "packet-close audit-exception count needs semantic open-exception surface rather than expanded source-row evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -931,7 +1053,9 @@
       "line": 1320,
       "reason": "pending-rather-than-approved question needs determination reason and pending-verification surface over raw source rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -946,7 +1070,9 @@
       "line": 1981,
       "reason": "planning-application request question needs application-summary plus unit-mix surface rather than claim/status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -961,7 +1087,9 @@
       "line": 2822,
       "reason": "post-reassignment group-count question needs stable membership/count surface over role-task volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -976,7 +1104,9 @@
       "line": 2001,
       "reason": "prior-proposal disposition question needs proposal-version/procedural-status surface rather than current-application volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -991,7 +1121,9 @@
       "line": 3151,
       "reason": "priority question needs explicit priority predicate surface rather than an underlying condition predicate",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1006,7 +1138,9 @@
       "line": 2433,
       "reason": "public-use extension question needs extension purpose/status surface rather than broad permit lifecycle volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1021,7 +1155,9 @@
       "line": 918,
       "reason": "raw-timestamp question needs explicit raw_timestamp surface rather than corrected/event-correlation volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1036,7 +1172,9 @@
       "line": 3103,
       "reason": "request filing timeliness question needs request/reinstatement threshold evidence rather than completion-window evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1051,7 +1189,9 @@
       "line": 1954,
       "reason": "resolved-status question needs direct unresolved/disputed-status surface rather than archival evidence volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1066,7 +1206,9 @@
       "line": 874,
       "reason": "response-content question needs compact filed-response surface rather than broad procedural expansion",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1081,7 +1223,9 @@
       "line": 3283,
       "reason": "resubmission eligibility question needs proof/rule resolution surface rather than current applicant status surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1096,7 +1240,9 @@
       "line": 1689,
       "reason": "review-completion question needs explicit status-at surface rather than broad uncertainty labels",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1111,7 +1257,9 @@
       "line": 1184,
       "reason": "sampler-offline interval count needs explicit interval surface rather than state-start/end fragments",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1126,7 +1274,9 @@
       "line": 1191,
       "reason": "sampler-offline interval count needs sampler-state transition surface rather than event-log volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1141,7 +1291,9 @@
       "line": 941,
       "reason": "snapshot-state question needs explicit sampler_state surface rather than broad event-description or status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1156,7 +1308,9 @@
       "line": 927,
       "reason": "snapshot-state question needs sampler state-plus-cause surface when the snapshot row asks why that state held",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1171,7 +1325,9 @@
       "line": 934,
       "reason": "snapshot-state question needs sampler status surface rather than broad event-description volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1186,7 +1342,9 @@
       "line": 2127,
       "reason": "station-arrival-time question needs event/timestamp surface rather than roster identity rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1201,7 +1359,9 @@
       "line": 842,
       "reason": "status question has direct baseline application/status support and candidate is broad or relaxed-heavy",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1216,7 +1376,9 @@
       "line": 828,
       "reason": "status question has direct baseline status/rule support",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1231,7 +1393,9 @@
       "line": 2788,
       "reason": "student-count question needs scoped final-attendance surface rather than broad roster volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1246,7 +1410,9 @@
       "line": 2098,
       "reason": "temporary-availability question needs attendance plus authority-transfer surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1261,7 +1427,9 @@
       "line": 2136,
       "reason": "temporary-role question needs roster-state role-hint support rather than bare group membership",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1276,7 +1444,9 @@
       "line": 2808,
       "reason": "temporary-supervisor absence question needs location-change plus supervision/medical-event surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1291,7 +1461,9 @@
       "line": 2842,
       "reason": "temporary-team roster question needs scoped group-formation surface rather than standing roster volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1306,7 +1478,9 @@
       "line": 1858,
       "reason": "timekeeping clock-out question needs timekeeping or assignment interval surface rather than badge-exit event rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1321,7 +1495,9 @@
       "line": 1347,
       "reason": "trip-date question needs roster-state schedule surface rather than roster-version/source-record volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1336,7 +1512,9 @@
       "line": 1904,
       "reason": "unresolved policy-deviation question needs review/open-issue status surface rather than archival event volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1351,7 +1529,9 @@
       "line": 2569,
       "reason": "unrestricted-active count question needs baseline status, restriction, suspension, and violation surfaces",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1366,7 +1546,9 @@
       "line": 2720,
       "reason": "alternative-inscription question needs candidate-origin plus inscription/attribute surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1381,7 +1563,9 @@
       "line": 2756,
       "reason": "banner-change rationale question needs banner succession/creation surface rather than protest or score rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1396,7 +1580,9 @@
       "line": 2978,
       "reason": "boundary-discrepancy cause question needs measurement/marker-shift surface rather than survey-summary rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1411,7 +1597,9 @@
       "line": 3138,
       "reason": "cause question has explicit baseline rationale-note support and candidate is broad record/event surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1426,7 +1614,9 @@
       "line": 2882,
       "reason": "conservator-date question needs source-recorded value surface rather than generic discrepancy rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1441,7 +1631,9 @@
       "line": 3052,
       "reason": "correction-authorship question needs handwriting/expert-attribution surface rather than correction-status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1456,7 +1648,9 @@
       "line": 2853,
       "reason": "day-3 found-object question needs focused event/found-object surface rather than broad hazard summary",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1471,7 +1665,9 @@
       "line": 3016,
       "reason": "discrepancy-explanation question needs factual-discrepancy/incident-outcome surface rather than fictional event rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1486,7 +1682,9 @@
       "line": 2891,
       "reason": "display-authority question needs controlling governance/source-authority surface rather than display text rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1501,7 +1699,9 @@
       "line": 2553,
       "reason": "display-outcome question needs date-specific permit validity plus incident/inspection surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1516,7 +1716,9 @@
       "line": 2546,
       "reason": "display-outcome question needs inspection/outcome plus permit-status surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1531,7 +1733,9 @@
       "line": 1150,
       "reason": "evidence-source count question needs source-id catalog surface rather than generic evidence-source rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1546,7 +1750,9 @@
       "line": 1157,
       "reason": "evidence-source count question needs source-id catalog surface rather than unresolved-fact volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1561,7 +1767,9 @@
       "line": 3084,
       "reason": "evidentiary-status report question needs explicit witness/report surface rather than generic claim-status surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1576,7 +1784,9 @@
       "line": 2517,
       "reason": "failed-vendor rationale question needs inspection, vendor-status, and violation-detail surfaces together",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1591,7 +1801,9 @@
       "line": 2510,
       "reason": "failed-vendor rationale question needs itemized vendor-deficiency surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1606,7 +1818,9 @@
       "line": 1963,
       "reason": "false-conflict consistency question needs paired intake/photo interpretation surface rather than row ledger fragments",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1621,7 +1835,9 @@
       "line": 2964,
       "reason": "fictional-order question needs plot-outcome surface rather than plot-event summary rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1636,7 +1852,9 @@
       "line": 2770,
       "reason": "hold-call rationale question needs event-condition timing surface rather than broad witness/incident volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1651,7 +1869,9 @@
       "line": 1680,
       "reason": "interval behavior-plus-cause question needs system-log event attributes rather than row-value volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1666,7 +1886,9 @@
       "line": 2952,
       "reason": "maintenance-evidence question needs receipt/evidence-source surface rather than witness/hearsay rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1681,7 +1903,9 @@
       "line": 1132,
       "reason": "memo-establish question needs memo-content plus reliability-scope surface rather than broad investigative context",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1696,7 +1920,9 @@
       "line": 1616,
       "reason": "memo-resolution question needs claim plus unresolved-issue surface rather than permit/status fragments",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1711,7 +1937,9 @@
       "line": 2747,
       "reason": "missing-evidence question needs claimant testimony plus explicit absence/claim surfaces",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1726,7 +1954,9 @@
       "line": 1166,
       "reason": "negative-reliability question needs source-reliability scope rather than unresolved-activity status alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1741,7 +1971,9 @@
       "line": 3182,
       "reason": "not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1756,7 +1988,9 @@
       "line": 2927,
       "reason": "permission-request question needs direct witness-statement surface rather than evidence-date volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1771,7 +2005,9 @@
       "line": 1141,
       "reason": "phone-ping granularity question needs device-ping granularity surface rather than evidence-source summary",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1786,7 +2022,9 @@
       "line": 1822,
       "reason": "position-source question needs statement/source-author surface rather than generic row-source labels",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1801,7 +2039,9 @@
       "line": 1847,
       "reason": "printed source-provenance question needs archival row/source labels rather than generic packet identifiers",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if deterministic identifier/source pinboards make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1816,7 +2056,9 @@
       "line": 1933,
       "reason": "reply-memo theory question needs archival memo row value rather than generic source-document presence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1831,7 +2073,9 @@
       "line": 2562,
       "reason": "second-violation duration question needs violation-record plus suspension-period surfaces together",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1846,7 +2090,9 @@
       "line": 2709,
       "reason": "source-belief question needs claimant testimony surface rather than identification-status summary",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1861,7 +2107,9 @@
       "line": 2918,
       "reason": "source-claim question needs witness-statement surface rather than finding/provenance summary rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1876,7 +2124,9 @@
       "line": 2833,
       "reason": "source-specific witness question needs Brigid report/claim surface rather than unresolved-discrepancy summary",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1891,7 +2141,9 @@
       "line": 3224,
       "reason": "split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1906,7 +2158,9 @@
       "line": 3210,
       "reason": "split rationale question needs explicit source-note rationale plus viability context",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1921,7 +2175,9 @@
       "line": 2634,
       "reason": "status-elevation rationale question needs lab/location/status context rather than bare status-change reason",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1936,7 +2192,9 @@
       "line": 2936,
       "reason": "survey-commission question needs explicit report-commission provenance surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1951,7 +2209,9 @@
       "line": 1831,
       "reason": "timestamped message-source question needs direct log-entry surface rather than row-source fallback",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1966,7 +2226,9 @@
       "line": 3235,
       "reason": "viability-concern question needs explicit source-note contrast plus viability context",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1981,7 +2243,9 @@
       "line": 2815,
       "reason": "yellow-to-blue reassignment question keeps baseline transition surface over partial interval membership rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -1996,7 +2260,9 @@
       "line": 2303,
       "reason": "counterfactual reclassification deadline question needs classification-bound deadline surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2011,7 +2277,9 @@
       "line": 2616,
       "reason": "initial-affected greenhouse question needs greenhouse-status plus exclusion/location surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2026,7 +2294,9 @@
       "line": 2292,
       "reason": "lot-affected question needs explicit target-lot exclusion/check surface rather than broad affected-lot listing",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2041,7 +2311,9 @@
       "line": 1045,
       "reason": "personal-letter reading-access question needs semantic access authority plus publication-restriction boundary, not raw source rows alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2056,7 +2328,9 @@
       "line": 2588,
       "reason": "placed-under-quarantine count needs mistaken-movement surface rather than broad quarantine-scope volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2071,7 +2345,9 @@
       "line": 2600,
       "reason": "split-lot never-quarantined count needs quarantine-scope surface rather than broad lot status history",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2086,7 +2362,9 @@
       "line": 2283,
       "reason": "termination-denial question needs rationale plus quantity-threshold support rather than status text alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2101,7 +2379,9 @@
       "line": 2274,
       "reason": "universal-scope question needs broad set-enumeration surface rather than narrower report-detail joins",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2116,7 +2396,9 @@
       "line": 2383,
       "reason": "amendment-recall question needs recall-authority surface rather than threshold-only legal-opinion rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2131,7 +2413,9 @@
       "line": 2467,
       "reason": "appeal-hearing question needs filed-appeal/hearing-scheduled surface rather than broad status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2146,7 +2430,9 @@
       "line": 2076,
       "reason": "appeal-tolling question needs rule text plus appeal/deadline surface rather than isolated tolling labels",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2161,7 +2447,9 @@
       "line": 2537,
       "reason": "approved-display count question needs approval/validity surface rather than broad current-status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2176,7 +2464,9 @@
       "line": 2321,
       "reason": "component-problem question needs project-category plus rule-condition surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2191,7 +2481,9 @@
       "line": 2336,
       "reason": "counterfactual-recusal outcome question needs both procedure path and eligibility surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2206,7 +2498,9 @@
       "line": 2312,
       "reason": "deferment-rationale question needs interpreted decision support rather than rule text alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2221,7 +2515,9 @@
       "line": 2501,
       "reason": "failed-reinspection count question needs compact aggregate inspection-result surface rather than lifecycle status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2236,7 +2532,9 @@
       "line": 2399,
       "reason": "hypothetical reserve-status question keeps baseline arithmetic inputs over derived rule status",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2251,7 +2549,9 @@
       "line": 2406,
       "reason": "hypothetical reserve-status question needs baseline arithmetic inputs rather than derived rule status",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2266,7 +2566,9 @@
       "line": 1876,
       "reason": "override-rule requirement question needs explicit source-record rule requirement surface rather than archival row values",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2281,7 +2583,9 @@
       "line": 2578,
       "reason": "permit-action list question needs suspension, restriction, status, and deadline surfaces together",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2296,7 +2600,9 @@
       "line": 2526,
       "reason": "permitted-hours question needs explicit operational-hours rule surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2311,7 +2617,9 @@
       "line": 2354,
       "reason": "post-recusal vote question needs recusal/vote/rule surface without misleading quorum-status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2326,7 +2634,9 @@
       "line": 2345,
       "reason": "recusal-rationale question needs recusal rule surface rather than eligibility determination surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2341,7 +2651,9 @@
       "line": 2392,
       "reason": "rejection-cause question needs correction/clarification surface rather than derived status alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2356,7 +2668,9 @@
       "line": 880,
       "reason": "rescission-request eligibility question needs request/validity surface rather than generic vote-rule volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2371,7 +2685,9 @@
       "line": 2065,
       "reason": "revised-plan monitoring question needs plan/rejection rule surface rather than observation-status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2386,7 +2702,9 @@
       "line": 1503,
       "reason": "rule-effect question needs archival memo row value rather than ownership/status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2401,7 +2719,9 @@
       "line": 1487,
       "reason": "rule-effect question needs archival rule text rather than partial requirement rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2416,7 +2736,9 @@
       "line": 1480,
       "reason": "rule-effect question needs direct bylaw-rule surface rather than partial requirement rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2431,7 +2753,9 @@
       "line": 1496,
       "reason": "rule-effect question needs explicit transfer requirement surface rather than ownership/status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2446,7 +2770,9 @@
       "line": 1471,
       "reason": "rule-effect question needs supersession plus status/event surface rather than adjacent rule text",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2461,7 +2787,9 @@
       "line": 2476,
       "reason": "suspension-trigger question needs explicit violation-record plus permit-suspension surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2476,7 +2804,9 @@
       "line": 2485,
       "reason": "suspension-trigger question needs violation event plus suspension surface, not suspension interval volume alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2491,7 +2821,9 @@
       "line": 2458,
       "reason": "unrenewed-expiry question needs original validity endpoint surface rather than renewed lifecycle rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2506,7 +2838,9 @@
       "line": 2451,
       "reason": "unrenewed-expiry question needs validity plus deadline/requirement surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2521,7 +2855,9 @@
       "line": 2442,
       "reason": "valid-period extension question needs original validity plus extension-validity surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2536,7 +2872,9 @@
       "line": 2363,
       "reason": "window-merit question needs explicit rule-condition plus prior-history surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2551,7 +2889,9 @@
       "line": 2372,
       "reason": "window-merit question needs prior-history plus interpretation surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2566,7 +2906,9 @@
       "line": 1085,
       "reason": "MOU-scope expansion question needs agreement-clause plus access/addition surface rather than static right-scope volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2581,7 +2923,9 @@
       "line": 2207,
       "reason": "award placement question needs explicit award-result surface rather than nearby device/person rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2596,7 +2940,9 @@
       "line": 819,
       "reason": "award/result question has baseline awarded support and candidate lacks awarded rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2611,7 +2957,9 @@
       "line": 1372,
       "reason": "barcode-supersession question needs scan/correction surface rather than broad current-barcode volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2626,7 +2974,9 @@
       "line": 2228,
       "reason": "carry question needs direct possession surface rather than broad title or event evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2641,7 +2991,9 @@
       "line": 3025,
       "reason": "client-ledger pickup question needs asset-state/location surface rather than broad item provenance rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2656,7 +3008,9 @@
       "line": 3075,
       "reason": "correction-entitlement question needs entitlement rule plus extension effect surface rather than correction/admission rows alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2671,7 +3025,9 @@
       "line": 2189,
       "reason": "current object-component question needs direct current-state/component surface rather than transition history volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2686,7 +3042,9 @@
       "line": 2676,
       "reason": "current possession/maintenance question needs physical-possessor plus gift/dispute surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2701,7 +3059,9 @@
       "line": 1112,
       "reason": "custody-release question needs custody/status surface rather than scan-record volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2716,7 +3076,9 @@
       "line": 1913,
       "reason": "dated physical-location question needs archival row location plus row-time support rather than synthesized cold self-check",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2731,7 +3093,9 @@
       "line": 2909,
       "reason": "disputed-strip feature question needs object-location surface rather than broad finding/survey rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2746,7 +3110,9 @@
       "line": 1056,
       "reason": "governing-2024-custody-document question needs exact amendment source-row text with custody/notice clauses",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2761,7 +3127,9 @@
       "line": 2738,
       "reason": "insurance-link question needs direct insured-by surface rather than contingent ownership claim rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2776,7 +3144,9 @@
       "line": 2248,
       "reason": "legal-title contest question needs claim/default/transfer surface rather than static ownership rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2791,7 +3161,9 @@
       "line": 1076,
       "reason": "location-plus-publication-pause question needs custody plus publication restriction surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2806,7 +3178,9 @@
       "line": 999,
       "reason": "near-duplicate bin-code question needs collision-risk plus bin-location surface rather than generic current-label rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2821,7 +3195,9 @@
       "line": 1103,
       "reason": "photograph-album interval question needs access/recall custody surface rather than broad conservation-scope volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2836,7 +3212,9 @@
       "line": 1094,
       "reason": "photograph-album interval question needs exact access-log custody surface rather than broad access-event volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2851,7 +3229,9 @@
       "line": 3004,
       "reason": "physical inventory count question needs incident/count outcome surface rather than title-name rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2866,7 +3246,9 @@
       "line": 1019,
       "reason": "physical-custody item-count question needs grouped custody count helper rather than raw custodian row count",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2881,7 +3263,9 @@
       "line": 2239,
       "reason": "possession-versus-ownership question needs inherit/own/possess distinction surface rather than broad event/rule evidence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2896,7 +3280,9 @@
       "line": 2665,
       "reason": "post-death legal-ownership question needs court/inheritance status surface rather than stale legal-owner interval",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2911,7 +3297,9 @@
       "line": 2654,
       "reason": "provisional-control question needs holder plus pending estate/claim context rather than bare holder row",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2926,7 +3314,9 @@
       "line": 2687,
       "reason": "solicitor-advice question needs advice plus adverse-possession caveat surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2941,7 +3331,9 @@
       "line": 1571,
       "reason": "tree-amendment measurement question needs archival row-value surface preserving species/DBH/source basis",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2956,7 +3348,9 @@
       "line": 2198,
       "reason": "why-have question needs custody-transfer surface rather than adjacent action or object-property rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2971,7 +3365,9 @@
       "line": 1010,
       "reason": "active-held count question needs current-label/status plus withdrawn-label filter surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -2986,7 +3382,9 @@
       "line": 1698,
       "reason": "active-lot count question needs archival inventory row enumeration rather than contaminant/status volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3001,7 +3399,9 @@
       "line": 1287,
       "reason": "application-count question needs canonical application-status surface rather than source-record duplicate rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3016,7 +3416,9 @@
       "line": 1229,
       "reason": "application-disposition question needs status/determination surface rather than source-record-facts gap",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3031,7 +3433,9 @@
       "line": 1390,
       "reason": "application-number identifier question needs exact document-identifier surface rather than score/event volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "pinboard_or_source_addressability",
       "retirement_condition": "Retire if deterministic identifier/source pinboards make the selector choose correctly without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3046,7 +3450,9 @@
       "line": 2109,
       "reason": "attendance-count question needs explicit session_attendance_count surface rather than interval roster volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3061,7 +3467,9 @@
       "line": 2054,
       "reason": "board-review-period question needs calculated-deadline surface rather than loose deadline values",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3076,7 +3484,9 @@
       "line": 2010,
       "reason": "build-out timeline question needs site-measure plus draft-condition surface rather than permit-expiry status alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3091,7 +3501,9 @@
       "line": 2729,
       "reason": "candidate-vessel list question needs candidate-origin plus vessel-loss detail surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3106,7 +3518,9 @@
       "line": 1298,
       "reason": "cap-application question needs rule/determination surface over expanded source-record rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3121,7 +3535,9 @@
       "line": 2993,
       "reason": "claim-value question needs financial-value/incident-outcome surface rather than claim/status fiction rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3136,7 +3552,9 @@
       "line": 2779,
       "reason": "corrected-rank-order question needs qualifying-rank plus score-correction surface rather than raw total volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3151,7 +3569,9 @@
       "line": 1273,
       "reason": "correction-notice replacement question needs change-type surface rather than unparsed correction-action text",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3166,7 +3586,9 @@
       "line": 1309,
       "reason": "counterfactual no-cap amount question needs arithmetic/grant amount surface rather than broad memory-ledger context",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3181,7 +3603,9 @@
       "line": 1788,
       "reason": "current-versus-withdrawn claim question needs statement-claim plus supersession/status surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3196,7 +3620,9 @@
       "line": 1329,
       "reason": "date-alone rule question needs threshold plus exception surface rather than broad applicant-date volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3211,7 +3637,9 @@
       "line": 2043,
       "reason": "deadline-filing timeliness question needs filed-event plus calculated-deadline surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3226,7 +3654,9 @@
       "line": 1942,
       "reason": "deed item-count question needs conveyed-item surface rather than broad receipt row volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3241,7 +3671,9 @@
       "line": 867,
       "reason": "density-calculation question needs numeric staff-evaluation surface rather than qualitative source-opinion surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3256,7 +3688,9 @@
       "line": 2021,
       "reason": "dimensional-standards question needs staff-finding plus site-measure surface rather than consolidated compliance status alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3271,7 +3705,9 @@
       "line": 1253,
       "reason": "distinct-student count-change question needs roster-version count summary rather than itemized membership volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3286,7 +3722,9 @@
       "line": 1707,
       "reason": "document-identification question needs document-exhibit surface rather than event/source-type rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3301,7 +3739,9 @@
       "line": 1716,
       "reason": "exhibit-identification question needs exhibit/source-document surface rather than witness/person rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3316,7 +3756,9 @@
       "line": 1562,
       "reason": "focused semantic surface beats archival row-volume for status/score/authority questions",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if structural scoring penalizes broad row-volume well enough to pass the birth rows without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3331,7 +3773,9 @@
       "line": 1752,
       "reason": "headcount elapsed-time question needs elapsed-minutes surface rather than headcount rows alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3346,7 +3790,9 @@
       "line": 1426,
       "reason": "headcount-scan reconciliation question needs paired count/scan evidence rather than generic source-record claims",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3361,7 +3807,9 @@
       "line": 1607,
       "reason": "hearing-held question needs event/open-issue surface rather than scheduled-date presence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3376,7 +3824,9 @@
       "line": 3242,
       "reason": "hypothetical failed-viability question keeps direct baseline threshold/storage support over broader policy-note surfaces",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3391,7 +3841,9 @@
       "line": 3251,
       "reason": "hypothetical failed-viability question needs threshold/action policy surface rather than note surface",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3406,7 +3858,9 @@
       "line": 2607,
       "reason": "lot plant-count question needs direct lot/count surface rather than status or destruction history",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3421,7 +3875,9 @@
       "line": 2625,
       "reason": "lot-3b lab-result question needs lab-result plus lot-status context, not generic lab-result volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3436,7 +3892,9 @@
       "line": 1779,
       "reason": "newsletter-versus-roster authority question needs supersession/roster evidence rather than stale assignment rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3451,7 +3909,9 @@
       "line": 1580,
       "reason": "operative-permit question needs permit issuance/amendment surface rather than source-document status alone",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3466,7 +3926,9 @@
       "line": 1209,
       "reason": "packet-close open-item count needs explicit open-item surface rather than deadline/notice volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3481,7 +3943,9 @@
       "line": 1625,
       "reason": "packet-time measurement question needs direct measurement-value surface rather than row-value volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3496,7 +3960,9 @@
       "line": 1761,
       "reason": "parent-letter determination question needs review-scheduled/letter surface rather than source-document volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3511,7 +3977,9 @@
       "line": 1338,
       "reason": "projection-supersession question needs trigger/actual event surface rather than projection-comparison volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3526,7 +3994,9 @@
       "line": 1598,
       "reason": "remedy-imposition question needs unresolved-issue surface rather than remedy-label presence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3541,7 +4011,9 @@
       "line": 1242,
       "reason": "roster-entry count question needs entry-preserving roster surface rather than distinct-student membership volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3556,7 +4028,9 @@
       "line": 1725,
       "reason": "roster-of-record membership question needs assigned/person roster surface rather than supersession metadata",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "manual_audit",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "low",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3571,7 +4045,9 @@
       "line": 1894,
       "reason": "scoped roster-count question needs source-record roster section surface rather than badge/log volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3586,7 +4062,9 @@
       "line": 1363,
       "reason": "threshold question needs rule threshold/condition surface rather than applicant-attribute volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3601,7 +4079,9 @@
       "line": 1356,
       "reason": "threshold question needs rule-threshold surface rather than applicant-attribute volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3616,7 +4096,9 @@
       "line": 1589,
       "reason": "tree-list/count question needs amendment count/list surface rather than stale protection-status rows",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "helper_or_constraint_substrate",
       "retirement_condition": "Retire if helper/query substrate returns the required quantity directly and selector replay passes without this guard.",
+      "retirement_priority": "high",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3631,7 +4113,9 @@
       "line": 1734,
       "reason": "withdrawn-draft governance question needs source-status/supersession surface rather than document-id presence",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "compile_surface",
       "retirement_condition": "Retire if compile surfaces admit explicit status predicates that make the selector choose correctly without this guard.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3646,7 +4130,9 @@
       "line": 1770,
       "reason": "witness-scan reconciliation question needs direct scan/location surface rather than broad source-record claims",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
@@ -3661,13 +4147,15 @@
       "line": 1990,
       "reason": "zoning-designation question needs parcel-zoning surface rather than general zoning-definition volume",
       "regression_evidence": "not yet audited",
+      "retirement_bucket": "selector_scoring_or_surface_penalty",
       "retirement_condition": "Specify during audit: name the upstream compile, helper, pinboard, or scoring change that would make this guard unnecessary.",
+      "retirement_priority": "medium",
       "score_delta": "unknown",
       "source": "scripts/select_qa_mode_without_oracle.py",
       "transfer_evidence": "not yet audited"
     }
   ],
-  "generated_at": "2026-05-10T06:25:03+00:00",
+  "generated_at": "2026-05-10T08:39:30+00:00",
   "schema_version": "selector_guard_ledger_v1",
   "source": "C:\\prethinker\\scripts\\select_qa_mode_without_oracle.py",
   "summary": {
@@ -3681,6 +4169,18 @@
       "rule_activation_surface": 30,
       "state_custody_ownership": 27,
       "threshold_policy_arithmetic": 47
+    },
+    "retirement_bucket_counts": {
+      "compile_surface": 65,
+      "helper_or_constraint_substrate": 62,
+      "manual_audit": 51,
+      "pinboard_or_source_addressability": 6,
+      "selector_scoring_or_surface_penalty": 60
+    },
+    "retirement_priority_counts": {
+      "high": 68,
+      "low": 51,
+      "medium": 125
     },
     "status_counts": {
       "candidate_guard": 197,

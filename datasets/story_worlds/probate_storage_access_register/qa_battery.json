@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "What court has jurisdiction over the Holloway estate matter?",
+    "reference_answer": "Berwick County Probate Court",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q002",
+    "question": "What is the docket number for this estate matter?",
+    "reference_answer": "P-2026-00347",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q003",
+    "question": "Who serves as executor of the estate?",
+    "reference_answer": "Caroline Sutter",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q004",
+    "question": "Who represents Eliza Yamamoto-Holloway?",
+    "reference_answer": "Lillian Park, Esq. (L. Park)",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "Who is identified as the registrar at Northpoint Regional Museum?",
+    "reference_answer": "Beatrice Caulfield (B. Caulfield)",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q006",
+    "question": "Which section of the register contains the chronology of custody-affecting events?",
+    "reference_answer": "Section I (Chronology of Custody-Affecting Events)",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q007",
+    "question": "Which section sets out the basis of V. Reeder's possession of items?",
+    "reference_answer": "Section D.3 (Reeder-held items), corroborated by H.1 (Reeder's 2026-01-12 correspondence)",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "What is the title of item EX-001 and the year given for it?",
+    "reference_answer": "\"Three Apples in Saucer\" (1987)",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q009",
+    "question": "According to the museum registrar's correspondence, what change did the 2024 amendment to NRM-LL-2020-02 effect?",
+    "reference_answer": "It extended the loan period to 2027-09-30; it did not change the named lender",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q010",
+    "question": "Which section of the register contains Court Order P-26-347-D?",
+    "reference_answer": "Section E (Court Orders Affecting This Register)",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q011",
+    "question": "What is the External ID for item EX-003?",
+    "reference_answer": "NRM-LL-2020-02",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q012",
+    "question": "At which SafeStore Vault box is item EX-010 held?",
+    "reference_answer": "SafeStore Vault, Box V-402 (External ID SSV-V-402-A)",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q013",
+    "question": "What is the Court Order identifier for the order granting L. Park observation access?",
+    "reference_answer": "P-26-347-D",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q014",
+    "question": "What is the Item ID assigned to the laptop \"Holloway-MBP-2022\"?",
+    "reference_answer": "EX-008",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q015",
+    "question": "What is the motion number filed by D. Holloway on 2026-03-22?",
+    "reference_answer": "P-26-347-M-3",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q016",
+    "question": "What is the External ID for the letter collection (EX-009)?",
+    "reference_answer": "NRM-RR-2018-44",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q017",
+    "question": "What is the Court Order ID for the forensic handwriting analysis order?",
+    "reference_answer": "P-26-347-C",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q018",
+    "question": "On what date did Margaret W. Holloway die?",
+    "reference_answer": "2025-11-04",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q019",
+    "question": "On what date were Letters Testamentary issued?",
+    "reference_answer": "2025-12-08",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q020",
+    "question": "On what date was the codicil hearing originally calendared, and to what date was it rescheduled?",
+    "reference_answer": "Originally calendared 2026-04-22; rescheduled to 2026-06-17",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q021",
+    "question": "By what date is the forensic handwriting analyst's report due?",
+    "reference_answer": "2026-06-03",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q022",
+    "question": "According to the chronology, on what date did the decedent depart for Lisbon?",
+    "reference_answer": "2024-10-04",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q023",
+    "question": "What is the interval between the forensic report due date and the rescheduled codicil hearing date?",
+    "reference_answer": "14 days (2026-06-03 to 2026-06-17)",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q024",
+    "question": "How many items are listed in the Section B inventory and custody register?",
+    "reference_answer": "12",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q025",
+    "question": "How many items in the register are held in physical custody by Northpoint Regional Museum?",
+    "reference_answer": "3 (EX-001, EX-003, EX-009)",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q026",
+    "question": "How many items in the register have title status \"Contested per codicil\"?",
+    "reference_answer": "6 (EX-004, EX-005, EX-006, EX-007, EX-008, EX-011)",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q027",
+    "question": "Which items are held in physical custody by V. Reeder?",
+    "reference_answer": "EX-006, EX-007, EX-008",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q028",
+    "question": "How many items in the register are held at SafeStore Vault?",
+    "reference_answer": "4 (EX-004, EX-005, EX-010, EX-012)",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "custody",
+    "id": "q029",
+    "question": "Who has physical custody of EX-003?",
+    "reference_answer": "Northpoint Regional Museum",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "ownership",
+    "id": "q030",
+    "question": "Who claims title to EX-003 by virtue of an in-person gift, and on what asserted date?",
+    "reference_answer": "Daniel Holloway, asserting an in-person gift on 2024-11-19",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q031",
+    "question": "Who authorized L. Park's observation access to EX-004 and EX-010?",
+    "reference_answer": "The Berwick County Probate Court, by Court Order P-26-347-D dated 2026-02-14",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q032",
+    "question": "Over what category of EX-009 access does the executor have no authority to grant or revoke?",
+    "reference_answer": "Reading-room patron access (governed by museum policy MRP-04, not subject to executor revocation)",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "custody",
+    "id": "q033",
+    "question": "For items EX-006, EX-007, and EX-008, which party currently has physical access?",
+    "reference_answer": "Only V. Reeder has physical access; per Section D.3, no other party currently has access",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "Has the Court ruled on the validity of the 2024-09-12 handwritten note as a codicil?",
+    "reference_answer": "No — the forensic analysis is pending (report due 2026-06-03) and the evidentiary hearing has been deferred to 2026-06-17",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q035",
+    "question": "Has the Court ruled on Daniel Holloway's motion for declaratory ruling regarding EX-003?",
+    "reference_answer": "No — Section D.2 states no ruling has issued on the motion for declaratory ruling",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q036",
+    "question": "Does this register reproduce Margaret W. Holloway's last will and testament?",
+    "reference_answer": "No — Section G lists the will (dated 2018-07-22) as referenced but not reproduced",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q037",
+    "question": "As of the compilation date, has the executor directed delivery of EX-006, EX-007, or EX-008 to any party?",
+    "reference_answer": "No — Section D.3 states the executor has not directed delivery, taking the position that the codicil dispute must be resolved first",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q038",
+    "question": "Is the \"private gift\" assertion of D. Holloway regarding EX-003 recorded in this register as a finding of fact?",
+    "reference_answer": "No — Section F states that reproduction does not constitute a finding of fact and that the assertion has not been ruled upon",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q039",
+    "question": "What is the source given for the statement that the museum loan agreements name \"the Estate of Margaret W. Holloway\" as lender?",
+    "reference_answer": "Section H.3, the museum registrar's (B. Caulfield) correspondence dated 2026-04-02, and the loan agreements themselves (referenced but not reproduced)",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q040",
+    "question": "According to Section F, what sources are identified as authoritative for findings on the codicil dispute?",
+    "reference_answer": "The forensic handwriting analyst's report (when filed) and the Court's ultimate rulings, per Section F",
+    "source_id": "q040"
+  }
+]

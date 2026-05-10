@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "reference_answer": "Medivolt Pharma Systems", "source_id": "q001"}
+{"category": "source_address", "id": "q002", "reference_answer": "Section 4 (Patient-Use Exception Memo)", "source_id": "q002"}
+{"category": "lookup", "id": "q003", "reference_answer": "EPA", "source_id": "q003"}
+{"category": "lookup", "id": "q004", "reference_answer": "K. Halberg", "source_id": "q004"}
+{"category": "lookup", "id": "q005", "reference_answer": "Cabinet B-3", "source_id": "q005"}
+{"category": "source_address", "id": "q006", "reference_answer": "Section 7 (Unresolved Item — Firmware Inquiry)", "source_id": "q006"}
+{"category": "lookup", "id": "q007", "reference_answer": "0.7 per 1,000 hours of use", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "reference_answer": "MV-VP-04-A", "source_id": "q008"}
+{"category": "lookup", "id": "q009", "reference_answer": "Intermittent failure of the secondary occlusion sensor under high-viscosity infusates", "source_id": "q009"}
+{"category": "source_address", "id": "q010", "reference_answer": "Section 10 (Glossary)", "source_id": "q010"}
+{"category": "identifier_exact", "id": "q011", "reference_answer": "4501-AA-100158", "source_id": "q011"}
+{"category": "identifier_exact", "id": "q012", "reference_answer": "MP-012", "source_id": "q012"}
+{"category": "identifier_exact", "id": "q013", "reference_answer": "NBFH-PT-3402", "source_id": "q013"}
+{"category": "identifier_exact", "id": "q014", "reference_answer": "MV-2026-04-Rev1", "source_id": "q014"}
+{"category": "identifier_exact", "id": "q015", "reference_answer": "SEAL-NBFH-04-001 through SEAL-NBFH-04-003", "source_id": "q015"}
+{"category": "identifier_exact", "id": "q016", "reference_answer": "MP-002", "source_id": "q016"}
+{"category": "identifier_exact", "id": "q017", "reference_answer": "CVCN-FP-2026-019", "source_id": "q017"}
+{"category": "temporal", "id": "q018", "reference_answer": "2026-04-12", "source_id": "q018"}
+{"category": "temporal", "id": "q019", "reference_answer": "2026-04-16", "source_id": "q019"}
+{"category": "temporal", "id": "q020", "reference_answer": "2026-03-22", "source_id": "q020"}
+{"category": "temporal", "id": "q021", "reference_answer": "2026-05-01 (the MP-009 chelation course exception)", "source_id": "q021"}
+{"category": "temporal_interval", "id": "q022", "reference_answer": "2026-04-14 through 2026-04-15", "source_id": "q022"}
+{"category": "temporal", "id": "q023", "reference_answer": "2026-04-25", "source_id": "q023"}
+{"category": "count", "id": "q024", "reference_answer": "16", "source_id": "q024"}
+{"category": "count", "id": "q025", "reference_answer": "4 (MP-007, MP-010, MP-011, MP-014)", "source_id": "q025"}
+{"category": "composition", "id": "q026", "reference_answer": "NBFH, with 6 devices (MP-001, MP-002, MP-003, MP-009, MP-013, MP-016)", "source_id": "q026"}
+{"category": "composition", "id": "q027", "reference_answer": "2 devices (MP-001 and MP-002, with serials 4501-AA-100127 and 4501-AA-100128, both below the final-scope lower bound of 4501-AA-100136)", "source_id": "q027"}
+{"category": "composition", "id": "q028", "reference_answer": "2 devices (MP-009 and MP-013), both at NBFH", "source_id": "q028"}
+{"category": "authority", "id": "q029", "reference_answer": "The Network Medical Director (Dr. R. Iwasaki)", "source_id": "q029"}
+{"category": "status", "id": "q030", "reference_answer": "Scheduled", "source_id": "q030"}
+{"category": "status", "id": "q031", "reference_answer": "Withdrawn (inventory)", "source_id": "q031"}
+{"category": "authority", "id": "q032", "reference_answer": "The Network Medical Director (Dr. R. Iwasaki) — formal release sign-off at the network level is required", "source_id": "q032"}
+{"category": "custody", "id": "q033", "reference_answer": "D. Rourke (NBFH Site Lead) personally", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "reference_answer": "Whether MP-450 units running firmware 4.2.1 require an additional correction even when the sensor module passes the MV-VP-04-A procedure; the Medivolt engineering determination has not been received as of the compilation date", "source_id": "q034"}
+{"category": "negative_existential", "id": "q035", "reference_answer": "No — Section 5 explicitly states no NBFH devices have been visited by manufacturer technician as of compilation date", "source_id": "q035"}
+{"category": "negative_existential", "id": "q036", "reference_answer": "No — Section 7 explicitly states firmware version is recorded on the device service plate but not duplicated in the inventory table", "source_id": "q036"}
+{"category": "negative_existential", "id": "q037", "reference_answer": "No — the 2026-04-15 quarantine log entry states the formal release from the network medical director has not yet been issued as of compilation", "source_id": "q037"}
+{"category": "source_reliability", "id": "q038", "reference_answer": "No — the determination is named as awaited and absent; only Halberg's intermediate reply confirming it is pending is reproduced", "source_id": "q038"}
+{"category": "provenance", "id": "q039", "reference_answer": "Section 3 — the network inventory table compiled on 2026-04-19 from site-lead postings", "source_id": "q039"}
+{"category": "source_reliability", "id": "q040", "reference_answer": "No — Section 3's preamble and Section 9 explicitly state Status reflects the posting clinic's administrative state, which may lag manufacturer scope; recall scope is determined by serial range per the supersession notice", "source_id": "q040"}

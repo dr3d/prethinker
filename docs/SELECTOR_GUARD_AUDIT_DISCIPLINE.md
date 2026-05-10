@@ -65,6 +65,30 @@ Common answers:
 If a guard has no plausible retirement condition, it may be genuine permanent
 selector doctrine. That should be rare and earned.
 
+## Retirement Buckets
+
+The audit ledger now assigns each guard a retirement bucket and priority. This
+is not a deletion verdict; it is a replay queue.
+
+- `helper_or_constraint_substrate`: arithmetic, count, interval, timestamp,
+  deadline, clock-state, or threshold guards that should be retested after
+  helper/constraint work lands.
+- `pinboard_or_source_addressability`: identifier, source-id, printed label, or
+  provenance guards that should be retested after deterministic source
+  pinboards improve.
+- `compile_surface`: status, role, authority, custody, ownership, possession, or
+  current-state guards that should retire only when the compile admits the
+  direct surface consistently.
+- `selector_scoring_or_surface_penalty`: row-volume and broad-surface guards
+  that may retire if structural scoring learns to penalize tempting but noisy
+  candidate modes.
+- `manual_audit`: guards whose retirement condition is not yet obvious from the
+  reason string alone.
+
+High-priority retirement slices are the guards most likely to be affected by
+current helper, constraint, and pinboard work. They are the first guards to
+replay without after a substrate improvement, not the first guards to delete.
+
 ## Health Signal
 
 The healthy long-term shape is not a permanently growing guard list.

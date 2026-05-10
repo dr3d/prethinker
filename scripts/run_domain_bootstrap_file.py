@@ -530,8 +530,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
-    parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
+    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234"))
     parser.add_argument(
         "--api-key",
         default="",

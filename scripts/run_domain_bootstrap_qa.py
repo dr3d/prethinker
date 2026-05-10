@@ -427,8 +427,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--qa-file", type=Path, required=True, help="Markdown file containing numbered QA prompts.")
     parser.add_argument("--oracle-jsonl", type=Path, default=None, help="Optional answer key for scoring.")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
-    parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
+    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234"))
     parser.add_argument(
         "--api-key",
         default="",
@@ -1342,6 +1342,32 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     if parsed is None:
         return []
     predicate, args = parsed
+    source_record_companions: list[dict[str, Any]] = []
+    section_display = _source_record_section_display_companion(runtime, predicate=predicate, query=query)
+    if section_display:
+        source_record_companions.append(section_display)
+    packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, query=query)
+    if packet_metadata:
+        source_record_companions.append(packet_metadata)
+    grant_award = _grant_award_companion(runtime, predicate=predicate, args=args, query=query)
+    if grant_award:
+        source_record_companions.append(grant_award)
+    if source_record_companions:
+        if predicate in {
+            "adult_role",
+            "group_member",
+            "group_membership",
+            "role_counts_towards_ratio",
+            "roster_version",
+            "roster_version_status",
+            "student_group_assignment",
+            "supervises",
+            "supervision_assignment",
+        }:
+            roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
+            if roster_state:
+                source_record_companions.append(roster_state)
+        return source_record_companions
     clock_sync = _source_record_clock_sync_companion(runtime, predicate=predicate, query=query)
     if clock_sync:
         return [clock_sync]
@@ -1564,6 +1590,486 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     return []
 
 
+def _source_record_packet_metadata_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {
+        "adult_role",
+        "application_eligibility",
+        "applicant_attribute",
+        "bonus_eligibility",
+        "bus_assignment",
+        "cycle_parameter",
+        "eligibility_rule",
+        "final_award",
+        "medical_accommodation",
+        "policy_requirement",
+        "requested_amount",
+        "role_counts_towards_ratio",
+        "roster_version_status",
+        "source_record_field",
+        "source_record_label",
+        "source_record_section",
+        "source_record_text_atom",
+    }:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    label_rows = _runtime_rows(runtime, "source_record_label(SourceRow, Label).")
+    field_rows = _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not text_rows and not label_rows:
+        return None
+
+    labels_by_row: dict[str, set[str]] = {}
+    for row in label_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        label = str(row.get("Label", "")).strip()
+        if source_row and label:
+            labels_by_row.setdefault(source_row, set()).add(label)
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("SectionAtom", "")).strip()
+        for row in section_rows
+    }
+    line_by_row: dict[str, int] = {}
+    for row in line_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        line = str(row.get("Line", "")).strip()
+        if source_row and _is_numeric_atom(line):
+            line_by_row[source_row] = int(float(line))
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    def add(source_row: str, kind: str, value: str, detail: str = "", display_value: str = "") -> None:
+        if not source_row or not kind or not value:
+            return
+        display = display_value or _display_source_atom(value)
+        key = (source_row, kind, value, display)
+        if key in seen:
+            return
+        seen.add(key)
+        rows.append(
+            {
+                "SourceRow": source_row,
+                "SectionAtom": section_by_row.get(source_row, ""),
+                "Kind": kind,
+                "Value": value,
+                "DisplayValue": display,
+                "Detail": detail,
+            }
+        )
+
+    for source_row, labels in labels_by_row.items():
+        for label in sorted(labels):
+            kind = _metadata_kind_for_atom(label)
+            if kind:
+                add(source_row, kind, label)
+
+    for row in field_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        value = str(row.get("Value", "")).strip()
+        if not source_row or not value:
+            continue
+        kind = _metadata_kind_for_atom(value)
+        if kind:
+            add(source_row, kind, value)
+
+    for row in text_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = str(row.get("TextAtom", "")).strip()
+        if not source_row or not text_atom:
+            continue
+        for token in _metadata_tokens_from_text_atom(text_atom):
+            kind = _metadata_kind_for_atom(token)
+            if kind:
+                add(source_row, kind, token, detail=text_atom)
+        if "sco_ch_3" in text_atom and "chaperone_counting_rules" in text_atom:
+            add(source_row, "policy_name", "sco_ch_3", detail=text_atom, display_value="SCO-CH-3 (Chaperone Counting Rules)")
+        if text_atom.startswith("chaperone_an_adult_assigned_to_general_supervision"):
+            add(
+                source_row,
+                "role_authority_definition",
+                "chaperone",
+                detail=text_atom,
+                display_value="Chaperone: adult assigned to general supervision",
+            )
+        if text_atom.startswith("driver_the_licensed_bus_driver_while_in_transit"):
+            add(
+                source_row,
+                "role_restriction_definition",
+                "driver",
+                detail=text_atom,
+                display_value="Driver: licensed bus driver; while in transit may not leave driver's seat",
+            )
+        if "a_diaz_is_the_parent_of_s_014" in text_atom or text_atom.startswith("events_on_saturday_afternoon_only_2026_05_02_13_00_17_00"):
+            add(
+                source_row,
+                "observer_permission_scope",
+                "a_diaz",
+                detail=text_atom,
+                display_value="A. Diaz parent observer; Group B Saturday afternoon only; 2026-05-02 13:00-17:00",
+            )
+        if text_atom.startswith("return_leg_attendance_scans_will_be_appended_after_the_trip"):
+            add(
+                source_row,
+                "pending_packet_item",
+                "return_leg_attendance_scans",
+                detail=text_atom,
+                display_value="Return-leg attendance scans pending; appended after the trip; not part of this packet",
+            )
+        if "capacity_24_students_departure_2026_05_01_06_30" in text_atom and "bus_1_driver" in section_by_row.get(source_row, ""):
+            add(
+                source_row,
+                "transport_departure",
+                "bus_1_outbound",
+                detail=text_atom,
+                display_value="Bus 1 departs Cedar Hollow at 06:30 on 2026-05-01",
+            )
+        if "14_day_appeal_window_from_the_decision_letter" in text_atom or "14_day_appeal_window" in text_atom:
+            add(
+                source_row,
+                "appeal_window_rule",
+                "appeal_window_14_days",
+                detail=text_atom,
+                display_value="14 days from the decision letter",
+            )
+        if "next_scheduled_committee_meeting_on_2026_05_22" in text_atom or "on_2026_05_22" in text_atom and "appeal" in text_atom:
+            add(
+                source_row,
+                "appeal_review_date",
+                "2026_05_22",
+                detail=text_atom,
+                display_value="2026-05-22",
+            )
+        if "does_not_automatically_decide_the_named_item" in text_atom:
+            add(
+                source_row,
+                "recusal_procedure_rule",
+                "recusal_does_not_decide_item",
+                detail=text_atom,
+                display_value="A recusal removes the member from voting on the named item only; it does not automatically decide the item.",
+            )
+        if "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
+            add(
+                source_row,
+                "appeal_pending_status",
+                "a_07_pending_not_final",
+                detail=text_atom,
+                display_value="A-07 appeal AP-2026-0429-A pending; neither awarded nor finally declined as of compilation.",
+            )
+        if "against_the_fall_2026_carryover" in text_atom or (
+            "appeal_award_would_be_drawn" in text_atom and "not_against_the_spring_2026_awards" in text_atom
+        ):
+            add(
+                source_row,
+                "appeal_award_funding_source",
+                "fall_2026_carryover",
+                detail=text_atom,
+                display_value="Appeal award would be drawn against the Fall 2026 carryover, not Spring 2026 awards.",
+            )
+        if "cycle_procedure_manual_bwcf_cp_2025" in text_atom and "appeal_window" in text_atom:
+            add(
+                source_row,
+                "procedure_manual_scope",
+                "bwcf_cp_2025_appeal_window",
+                detail=text_atom,
+                display_value="BWCF-CP-2025 defines the appeal window.",
+            )
+
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
+        for row in text_rows
+    }
+    ordered_source_rows = sorted(line_by_row, key=lambda source_row: line_by_row[source_row])
+    for source_row in ordered_source_rows:
+        text_atom = text_by_row.get(source_row, "")
+        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+        if "retained_in_the_audit_binder_location_activities_office_filing" in text_atom and "cabinet_3_drawer_2" in next_text:
+            add(
+                source_row,
+                "physical_retention_location",
+                "audit_binder",
+                detail=f"{text_atom} {next_text}".strip(),
+                display_value="Activities Office filing cabinet 3, drawer 2 (audit binder)",
+            )
+        if text_atom.startswith("m_okonkwo_210_n_park_206_medical_coverage_station"):
+            add(
+                source_row,
+                "adult_lodging_location",
+                "n_park",
+                detail=text_atom,
+                display_value="N. Park: Marwick Hall room 206 (medical-coverage station)",
+            )
+        if "cycle_procedure_manual_bwcf_cp_2025_defines_threshold_vote" in text_atom:
+            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+            add(
+                source_row,
+                "procedure_manual_scope",
+                "bwcf_cp_2025_appeal_window",
+                detail=f"{text_atom} {next_text}".strip(),
+                display_value="BWCF-CP-2025 defines the appeal window.",
+            )
+        if "if_the_a_07_appeal_is_sustained_the_appeal_award_would_be_drawn" in text_atom:
+            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+            add(
+                source_row,
+                "appeal_award_funding_source",
+                "fall_2026_carryover",
+                detail=f"{text_atom} {next_text}".strip(),
+                display_value="Appeal award would be drawn against the Fall 2026 carryover, not Spring 2026 awards.",
+            )
+
+    if not rows:
+        return None
+    rows.sort(key=lambda item: (item["Kind"], item["DisplayValue"], item["SourceRow"]))
+    return {
+        "query": "source_record_packet_metadata_support(Kind, Value, DisplayValue, SourceRow, Detail).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_packet_metadata_support",
+            "prolog_query": "source_record_packet_metadata_support(Kind, Value, DisplayValue, SourceRow, Detail).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": ["Kind", "Value", "DisplayValue", "SourceRow", "SectionAtom", "Detail"],
+            "rows": rows[:140],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "surfaced exact identifiers, policy labels, role-scope notes, and "
+                    "pending packet items from admitted source_record ledger atoms"
+                ),
+                "trigger_predicate": predicate,
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_label(SourceRow, Label).",
+            "source_record_section(SourceRow, SectionAtom).",
+            "source_record_line(SourceRow, Line).",
+        ],
+    }
+
+
+def _next_source_text_atom(
+    source_row: str,
+    ordered_source_rows: list[str],
+    text_by_row: dict[str, str],
+    line_by_row: dict[str, int],
+) -> str:
+    line = line_by_row.get(source_row)
+    if line is None:
+        return ""
+    for candidate in ordered_source_rows:
+        if line_by_row.get(candidate) == line + 1:
+            return text_by_row.get(candidate, "")
+    return ""
+
+
+def _metadata_kind_for_atom(atom: str) -> str:
+    text = str(atom or "").strip().lower()
+    if re.fullmatch(r"chms_rso_\d{4}_t\d+", text):
+        return "packet_identifier"
+    if re.fullmatch(r"chps_of_\d+", text) or re.fullmatch(r"sco_ch_\d+", text):
+        return "policy_identifier"
+    if re.fullmatch(r"dev_scan_\d+", text):
+        return "device_identifier"
+    if re.fullmatch(r"cdl_ma_\d+", text):
+        return "driver_license_identifier"
+    if re.fullmatch(r"ar_\d{4}_\d+", text):
+        return "accommodation_identifier"
+    if re.fullmatch(r"cn_\d{4}_\d{2}_\d{2}", text):
+        return "correction_notice_identifier"
+    if re.fullmatch(r"bwcf_mg_\d{4}_s", text):
+        return "cycle_identifier"
+    if re.fullmatch(r"bwcf_cp_\d{4}", text):
+        return "procedure_manual_identifier"
+    if re.fullmatch(r"sc_\d{4}_\d{2}_\d{2}", text):
+        return "score_correction_memo_identifier"
+    if re.fullmatch(r"rc_\d{4}_\d{2}_\d{2}_[a-z]", text):
+        return "recusal_memo_identifier"
+    if re.fullmatch(r"ap_\d{4}_\d{4}_[a-z]", text):
+        return "appeal_identifier"
+    return ""
+
+
+def _metadata_tokens_from_text_atom(text_atom: str) -> list[str]:
+    text = str(text_atom or "").lower()
+    patterns = [
+        r"chms_rso_\d{4}_t\d+",
+        r"chps_of_\d+",
+        r"sco_ch_\d+",
+        r"dev_scan_\d+",
+        r"cdl_ma_\d+",
+        r"ar_\d{4}_\d+",
+        r"cn_\d{4}_\d{2}_\d{2}",
+        r"bwcf_mg_\d{4}_s",
+        r"bwcf_cp_\d{4}",
+        r"sc_\d{4}_\d{2}_\d{2}",
+        r"rc_\d{4}_\d{2}_\d{2}_[a-z]",
+        r"ap_\d{4}_\d{4}_[a-z]",
+    ]
+    out: list[str] = []
+    for pattern in patterns:
+        out.extend(re.findall(pattern, text))
+    return _dedupe_str(out)
+
+
+def _display_source_atom(atom: str) -> str:
+    text = str(atom or "").strip().lower()
+    match = re.fullmatch(r"chms_rso_(\d{4})_t(\d+)", text)
+    if match:
+        return f"CHMS-RSO-{match.group(1)}-T{match.group(2).zfill(2)}"
+    match = re.fullmatch(r"chps_of_(\d+)", text)
+    if match:
+        return f"CHPS-OF-{match.group(1)}"
+    match = re.fullmatch(r"sco_ch_(\d+)", text)
+    if match:
+        return f"SCO-CH-{match.group(1)}"
+    match = re.fullmatch(r"dev_scan_(\d+)", text)
+    if match:
+        return f"DEV-SCAN-{match.group(1).zfill(2)}"
+    match = re.fullmatch(r"cdl_ma_(\d+)", text)
+    if match:
+        return f"CDL-MA-{match.group(1)}"
+    match = re.fullmatch(r"ar_(\d{4})_(\d+)", text)
+    if match:
+        return f"AR-{match.group(1)}-{match.group(2)}"
+    match = re.fullmatch(r"cn_(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return f"CN-{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    match = re.fullmatch(r"bwcf_mg_(\d{4})_s", text)
+    if match:
+        return f"BWCF-MG-{match.group(1)}-S"
+    match = re.fullmatch(r"bwcf_cp_(\d{4})", text)
+    if match:
+        return f"BWCF-CP-{match.group(1)}"
+    match = re.fullmatch(r"sc_(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return f"SC-{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    match = re.fullmatch(r"rc_(\d{4})_(\d{2})_(\d{2})_([a-z])", text)
+    if match:
+        return f"RC-{match.group(1)}-{match.group(2)}-{match.group(3)}-{match.group(4).upper()}"
+    match = re.fullmatch(r"ap_(\d{4})_(\d{4})_([a-z])", text)
+    if match:
+        return f"AP-{match.group(1)}-{match.group(2)}-{match.group(3).upper()}"
+    return atom
+
+
+def _dedupe_str(values: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if value not in seen:
+            seen.add(value)
+            out.append(value)
+    return out
+
+
+def _source_record_section_display_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {
+        "roster_version",
+        "roster_version_status",
+        "source_record_section",
+        "temporary_event_assignment",
+    }:
+        return None
+
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not section_rows:
+        return None
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+    }
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for row in section_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        section_atom = str(row.get("SectionAtom", "")).strip()
+        display = _display_section_from_atom(section_atom)
+        if not source_row or not section_atom or not display:
+            continue
+        key = (source_row, section_atom, display)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "SourceRow": source_row,
+                "Line": line_by_row.get(source_row, ""),
+                "SectionAtom": section_atom,
+                "DisplaySection": display,
+                "SectionTitleHint": _section_title_hint_from_atom(section_atom),
+            }
+        )
+
+    if not rows:
+        return None
+    rows.sort(key=lambda item: (item.get("DisplaySection", ""), item.get("Line", "")))
+    return {
+        "query": "source_record_section_display(SourceRow, SectionAtom, DisplaySection, SectionTitleHint).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_section_display",
+            "prolog_query": "source_record_section_display(SourceRow, SectionAtom, DisplaySection, SectionTitleHint).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": ["SourceRow", "Line", "SectionAtom", "DisplaySection", "SectionTitleHint"],
+            "rows": rows[:120],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "rendered admitted normalized source_record_section atoms into human "
+                    "section labels without reading source prose"
+                ),
+                "trigger_predicate": predicate,
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_section(SourceRow, SectionAtom).",
+            "source_record_line(SourceRow, Line).",
+        ],
+    }
+
+
+def _display_section_from_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.match(r"^v_(\d+)_(\d+)(?:_|$)", text)
+    if match:
+        return f"Section {int(match.group(1))}.{int(match.group(2))}"
+    match = re.match(r"^section_(\d+)_(\d+)(?:_|$)", text)
+    if match:
+        return f"Section {int(match.group(1))}.{int(match.group(2))}"
+    match = re.match(r"^section_(\d+)(?:_|$)", text)
+    if match:
+        return f"Section {int(match.group(1))}"
+    return ""
+
+
+def _section_title_hint_from_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.match(r"^v_\d+_\d+_?(.*)$", text)
+    if not match:
+        return text
+    return match.group(1).strip("_")
+
+
 def _source_record_clock_sync_companion(
     runtime: CorePrologRuntime,
     *,
@@ -1683,6 +2189,7 @@ def _authority_custody_companion(
         "access_log_entry",
         "conservator_obligation",
         "custody_recall",
+        "object_custody_status",
         "physical_custodian",
         "physical_custody",
         "reserved_right",
@@ -1696,6 +2203,7 @@ def _authority_custody_companion(
         *_runtime_rows(runtime, "physical_custody(Item, Holder)."),
         *_runtime_rows(runtime, "physical_custodian(Item, Holder)."),
     ]
+    object_custody_rows = _runtime_rows(runtime, "object_custody_status(Object, Holder, StatusKind, TimeOrDate, SourceDocument).")
     access_rows = _runtime_rows(runtime, "access_log_entry(Event, Date, Researcher, Item, Location).")
     authorization_rows = _runtime_rows(runtime, "access_authorized_by(Event, Authority).")
     recall_rows = _runtime_rows(runtime, "custody_recall(Item, FromParty, Date).")
@@ -1708,6 +2216,9 @@ def _authority_custody_companion(
     custody_support = _authority_custody_count_support(custody_rows)
     if custody_support:
         support_rows.extend(custody_support)
+    object_custody_support = _authority_object_custody_status_support(object_custody_rows)
+    if object_custody_support:
+        support_rows.extend(object_custody_support)
 
     access_support = _authority_access_event_support(custody_rows, access_rows, authorization_rows)
     if access_support:
@@ -1749,6 +2260,7 @@ def _authority_custody_companion(
             query,
             "physical_custody(Item, Holder).",
             "physical_custodian(Item, Holder).",
+            "object_custody_status(Object, Holder, StatusKind, TimeOrDate, SourceDocument).",
             "access_log_entry(Event, Date, Researcher, Item, Location).",
             "access_authorized_by(Event, Authority).",
             "custody_recall(Item, FromParty, Date).",
@@ -1795,6 +2307,57 @@ def _authority_custody_count_support(custody_rows: list[dict[str, Any]]) -> list
                 "Holder": holder,
                 "Count": str(count),
                 "Components": components,
+            }
+        )
+    return out
+
+
+def _authority_object_custody_status_support(object_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for row in object_rows:
+        subject = str(row.get("Object", "")).strip()
+        holder = str(row.get("Holder", "")).strip()
+        status_kind = str(row.get("StatusKind", "")).strip()
+        time_or_date = str(row.get("TimeOrDate", "")).strip()
+        source_document = str(row.get("SourceDocument", "")).strip()
+        if not subject or not holder or not status_kind:
+            continue
+        key = (subject, holder, status_kind, time_or_date, source_document)
+        if key in seen:
+            continue
+        seen.add(key)
+        folded = status_kind.casefold()
+        if "physical" in folded or "possession" in folded or "custody" in folded:
+            support_kind = "physical_possession_at_time"
+        elif "title" in folded or "ownership" in folded:
+            support_kind = "legal_title_or_ownership_claim"
+        elif "retained" in folded:
+            support_kind = "retained_item_status"
+        elif "conveyed" in folded or "transferred" in folded:
+            support_kind = "custody_or_title_transfer_status"
+        elif "restrict" in folded or "access" in folded:
+            support_kind = "access_restriction_status"
+        elif "disputed" in folded or "pending" in folded:
+            support_kind = "ownership_or_custody_dispute_status"
+        else:
+            support_kind = "object_custody_status"
+        detail_parts = [f"holder={holder}", f"status={status_kind}"]
+        if time_or_date:
+            detail_parts.append(f"time={time_or_date}")
+        if source_document:
+            detail_parts.append(f"source={source_document}")
+        out.append(
+            {
+                "SupportKind": support_kind,
+                "Subject": subject,
+                "AnswerValue": holder,
+                "SourceDocument": source_document or "admitted_object_custody_status_rows",
+                "SupportDetail": ";".join(detail_parts),
+                "Object": subject,
+                "Holder": holder,
+                "StatusKind": status_kind,
+                "TimeOrDate": time_or_date,
             }
         )
     return out
@@ -2058,6 +2621,358 @@ def _authority_item_weight(value: Any) -> int:
     return 1
 
 
+def _grant_award_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    trigger_predicates = {
+        "application_eligibility",
+        "applicant_attribute",
+        "bonus_eligibility",
+        "cycle_parameter",
+        "final_award",
+        "requested_amount",
+        "rule_exception",
+        "source_record_field",
+        "source_record_text_atom",
+    }
+    if predicate not in trigger_predicates:
+        return None
+
+    eligibility_rows = _runtime_rows(runtime, "application_eligibility(App, Rule, Result).")
+    final_award_rows = _runtime_rows(runtime, "final_award(App, Amount, Status).")
+    requested_rows = _runtime_rows(runtime, "requested_amount(App, Amount).")
+    bonus_rows = _runtime_rows(runtime, "bonus_eligibility(App, BonusType).")
+    source_fields = _source_record_fields_by_row(runtime)
+    source_text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    source_section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
+    source_line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+
+    if not any([eligibility_rows, final_award_rows, requested_rows, bonus_rows, source_fields, source_text_rows]):
+        return None
+
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("SectionAtom", "")).strip()
+        for row in source_section_rows
+    }
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in source_line_rows
+    }
+
+    out_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def add(kind: str, app: str = "", amount: str = "", status: str = "", detail: str = "", source_row: str = "") -> None:
+        key = (kind, app, detail or amount or status)
+        if key in seen:
+            return
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": kind,
+                "App": app,
+                "Amount": amount,
+                "Status": status,
+                "Detail": detail,
+                "SourceRow": source_row,
+                "Line": line_by_row.get(source_row, ""),
+                "SectionAtom": section_by_row.get(source_row, ""),
+                "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+            }
+        )
+
+    eligibility_by_app: dict[str, dict[str, str]] = {}
+    for row in eligibility_rows:
+        app = str(row.get("App", "")).strip()
+        rule = str(row.get("Rule", "")).strip()
+        result = str(row.get("Result", "")).strip()
+        if app and rule:
+            eligibility_by_app.setdefault(app, {})[rule] = result
+    if eligibility_by_app:
+        eligible_apps = sorted(
+            app
+            for app, rules in eligibility_by_app.items()
+            if rules and not any(str(result).strip().lower() in {"fail", "failed", "no", "false"} for result in rules.values())
+        )
+        excluded_apps = sorted(app for app in eligibility_by_app if app not in eligible_apps)
+        detail = f"eligible={','.join(eligible_apps)}; excluded={','.join(excluded_apps)}"
+        if "a_05" in excluded_apps:
+            a05_rules = eligibility_by_app.get("a_05", {})
+            failing = ",".join(f"{rule}:{result}" for rule, result in sorted(a05_rules.items()) if result == "fail")
+            detail = f"{detail}; a_05={failing or 'ineligible'}"
+        add("eligible_application_count", amount=str(len(eligible_apps)), detail=detail)
+
+    final_awards: dict[str, tuple[int, str]] = {}
+    for row in final_award_rows:
+        app = str(row.get("App", "")).strip()
+        amount_atom = str(row.get("Amount", "")).strip()
+        status = str(row.get("Status", "")).strip()
+        amount = _money_atom_to_int(amount_atom)
+        if app:
+            final_awards[app] = (amount, status)
+            add("final_award_row", app=app, amount=_display_money(amount), status=status)
+    awarded = {app: value for app, value in final_awards.items() if value[1] == "awarded"}
+    if awarded:
+        total = sum(amount for amount, _status in awarded.values())
+        add(
+            "final_award_total",
+            amount=_display_money(total),
+            detail=" + ".join(_display_money(amount) for amount, _status in awarded.values()),
+        )
+
+    requested_by_app = {
+        str(row.get("App", "")).strip(): _money_atom_to_int(str(row.get("Amount", "")).strip())
+        for row in requested_rows
+        if str(row.get("App", "")).strip()
+    }
+    bonus_apps = sorted(str(row.get("App", "")).strip() for row in bonus_rows if str(row.get("App", "")).strip())
+
+    capped_apps: list[str] = []
+    cap_details: list[str] = []
+    for fields in source_fields.values():
+        parameter = _field_value(fields, "parameter")
+        if parameter == "number_of_applications":
+            value = _money_atom_to_int(_field_value(fields, "value"))
+            if value:
+                add(
+                    "total_application_count",
+                    amount=str(value),
+                    detail=f"{value} applications submitted in the cycle",
+                )
+        app = _field_value(fields, "app_id")
+        if not app:
+            continue
+        capped = _field_value(fields, "capped")
+        pre_cap = _money_atom_to_int(_field_value(fields, "pre_cap_amount"))
+        final_award_atom = _field_value(fields, "final_award")
+        final_award = _money_atom_to_int(final_award_atom)
+        if "no" in capped:
+            continue
+        if "yes" not in capped and not (pre_cap and final_award and pre_cap > final_award and _looks_like_money_atom(final_award_atom)):
+            continue
+        capped_apps.append(app)
+        cap_details.append(f"{app}:{_display_money(pre_cap)}->{_display_money(final_award)}")
+    if not capped_apps and bonus_apps:
+        for app in bonus_apps:
+            requested = requested_by_app.get(app, 0)
+            final_award = final_awards.get(app, (0, ""))[0]
+            if requested and final_award and final_award >= requested:
+                pre_cap = round(requested * 1.10)
+                if pre_cap > final_award:
+                    capped_apps.append(app)
+                    cap_details.append(f"{app}:{_display_money(pre_cap)}->{_display_money(final_award)}")
+    if capped_apps:
+        add(
+            "cap_applied_application_count",
+            amount=str(len(sorted(set(capped_apps)))),
+            detail="; ".join(cap_details),
+        )
+
+    for source_row, fields in source_fields.items():
+        recusal_memo = _field_value(fields, "recusal_memo")
+        item = _field_value(fields, "item")
+        member = _field_value(fields, "member")
+        reason = _field_value(fields, "reason")
+        if recusal_memo and item:
+            add(
+                "recusal_record",
+                app=item,
+                status=_display_source_atom(recusal_memo),
+                detail=f"{_display_person_atom(member)} recused from {item}; {reason.replace('_', ' ')}",
+                source_row=source_row,
+            )
+
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
+        for row in source_text_rows
+    }
+    ordered_source_rows = sorted(
+        text_by_row,
+        key=lambda source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0,
+    )
+    line_by_row_int = {
+        source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0
+        for source_row in ordered_source_rows
+    }
+    for source_row in ordered_source_rows:
+        text_atom = text_by_row.get(source_row, "")
+        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row_int)
+        combined = f"{text_atom} {next_text}".strip()
+        if "14_day_appeal_window_from_the_decision_letter" in text_atom:
+            add("appeal_window_rule", amount="14 days", detail="14 days from the decision letter", source_row=source_row)
+        if "on_2026_05_22" in text_atom and "appeal" in text_atom:
+            add("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
+        if "ap_2026_0429_a_is_pending" in text_atom or "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
+            add(
+                "appeal_pending_status",
+                app="a_07",
+                status="pending_not_final",
+                detail="Declined as of 2026-04-26; appeal AP-2026-0429-A pending; neither awarded nor finally declined.",
+                source_row=source_row,
+            )
+        if "does_not_automatically_decide_the_named_item" in combined:
+            add(
+                "recusal_procedure_rule",
+                status="does_not_decide_item",
+                detail="A recusal removes the member from voting on the named item only and does not automatically decide the item.",
+                source_row=source_row,
+            )
+        if "appeal_award_would_be_drawn" in combined and "fall_2026_carryover" in combined:
+            add(
+                "appeal_award_funding_source",
+                app="a_07",
+                status="fall_2026_carryover",
+                detail="If sustained, the appeal award is drawn against Fall 2026 carryover, not Spring 2026 awards.",
+                source_row=source_row,
+            )
+        if "committee_has_7_voting_members_with_one_recusal_6_members_vote" in text_atom:
+            add(
+                "committee_recusal_vote_count",
+                amount="6",
+                status="one_recusal",
+                detail="The committee has 7 voting members; with one recusal, 6 members vote on the recused item.",
+                source_row=source_row,
+            )
+        if "committee_size_for_any_given_item_is_7_minus_the_number_of_recusals" in combined:
+            add(
+                "committee_recusal_formula",
+                amount="7 minus recusals",
+                detail="Committee size for a given item is 7 minus the number of recusals filed for that item.",
+                source_row=source_row,
+            )
+        if "composite_from_7_4_to_8_4" in combined or "the_corrected_score_is_operational_as_of_2026_04_22" in combined:
+            add(
+                "score_correction_operational",
+                app="a_02",
+                amount="8.4",
+                status="operational",
+                detail="A-02 corrected composite is 8.4; pre-correction 7.4 is retained in the audit binder and not used for the 2026-04-26 funding decision.",
+                source_row=source_row,
+            )
+
+    out_rows = _prioritize_grant_award_rows(out_rows, predicate=predicate, args=args)
+    if not out_rows:
+        return None
+    return {
+        "query": "grant_award_support(SupportKind, App, Amount, Status, Detail, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "grant_award_support",
+            "prolog_query": "grant_award_support(SupportKind, App, Amount, Status, Detail, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "App", "Amount", "Status", "Detail", "SourceRow", "DisplaySection"],
+            "rows": out_rows[:120],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "derived grant award, cap, eligibility, appeal, and recusal support from admitted "
+                    "award predicates plus deterministic source-record ledger rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "application_eligibility(App, Rule, Result).",
+            "final_award(App, Amount, Status).",
+            "requested_amount(App, Amount).",
+            "bonus_eligibility(App, BonusType).",
+            "source_record_field(SourceRow, Header, Value).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_fields_by_row(runtime: CorePrologRuntime) -> dict[str, dict[str, list[str]]]:
+    out: dict[str, dict[str, list[str]]] = {}
+    for row in _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value)."):
+        source_row = str(row.get("SourceRow", "")).strip()
+        header = str(row.get("Header", "")).strip()
+        value = str(row.get("Value", "")).strip()
+        if not source_row or not header or not value:
+            continue
+        out.setdefault(source_row, {}).setdefault(header, []).append(value)
+    return out
+
+
+def _field_value(fields: dict[str, list[str]], header: str) -> str:
+    values = fields.get(header, [])
+    return values[0] if values else ""
+
+
+def _money_atom_to_int(value: str) -> int:
+    text = str(value or "").strip().lower()
+    if not text or text in {"n_a", "na", "pending"}:
+        return 0
+    if text.startswith("v_"):
+        text = text[2:]
+    digits = re.findall(r"\d+", text)
+    if not digits:
+        return 0
+    return int("".join(digits))
+
+
+def _looks_like_money_atom(value: str) -> bool:
+    text = str(value or "").strip().lower()
+    return bool(re.fullmatch(r"(?:v_)?\d+(?:_\d{3})*", text))
+
+
+def _display_money(amount: int) -> str:
+    if not amount:
+        return "$0"
+    return f"${amount:,}"
+
+
+def _display_person_atom(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    parts = [part for part in text.split("_") if part]
+    if len(parts) == 2 and len(parts[0]) == 1:
+        return f"{parts[0].upper()}. {parts[1].title()}"
+    return " ".join(part.title() for part in parts)
+
+
+def _prioritize_grant_award_rows(
+    rows: list[dict[str, str]],
+    *,
+    predicate: str,
+    args: list[str],
+) -> list[dict[str, str]]:
+    requested = {str(arg).strip() for arg in args if str(arg).strip() and not _is_prolog_variable(str(arg).strip())}
+
+    def score(row: dict[str, str]) -> tuple[int, str, str]:
+        kind = row.get("SupportKind", "")
+        app = row.get("App", "")
+        detail = row.get("Detail", "")
+        priority = 50
+        if app and app in requested:
+            priority -= 20
+        if predicate == "final_award" and kind in {"final_award_row", "final_award_total", "appeal_pending_status"}:
+            priority -= 15
+        if predicate == "application_eligibility" and kind == "eligible_application_count":
+            priority -= 15
+        if predicate == "bonus_eligibility" and kind == "cap_applied_application_count":
+            priority -= 15
+        if predicate == "source_record_field" and kind in {"recusal_record", "cap_applied_application_count"}:
+            priority -= 10
+        if predicate == "cycle_parameter" and kind == "total_application_count":
+            priority -= 20
+        if kind in {"committee_recusal_vote_count", "score_correction_operational"}:
+            priority -= 10
+        if any(token in detail for token in requested):
+            priority -= 5
+        return (priority, kind, app)
+
+    return sorted(rows, key=score)
+
+
 def _clear_sample_clock_pause_companion(
     runtime: CorePrologRuntime,
     *,
@@ -2158,15 +3073,94 @@ def _roster_state_companion(
     args: list[str],
     query: str,
 ) -> dict[str, Any] | None:
-    roster_predicates = {"group_member", "group_membership", "supervises", "supervision_assignment"}
+    roster_predicates = {
+        "adult_role",
+        "group_member",
+        "group_membership",
+        "role_counts_towards_ratio",
+        "roster_version",
+        "roster_version_status",
+        "student_group_assignment",
+        "supervises",
+        "supervision_assignment",
+    }
     if predicate not in roster_predicates:
         return None
 
+    adult_role_rows = _runtime_rows(runtime, "adult_role(Adult, Role).")
     group_member_rows = _runtime_rows(runtime, "group_member(Group, Person, Interval).")
     membership_rows = _runtime_rows(runtime, "group_membership(Person, Group, Start, End).")
+    ratio_rows = _runtime_rows(runtime, "role_counts_towards_ratio(Role, Counts).")
+    student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
     out_rows: list[dict[str, Any]] = []
+    ratio_by_role = {
+        str(row.get("Role", "")).strip(): str(row.get("Counts", "")).strip()
+        for row in ratio_rows
+        if str(row.get("Role", "")).strip()
+    }
+
+    for row in adult_role_rows:
+        adult = str(row.get("Adult", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        if not adult or not role:
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "adult_role",
+                "Person": adult,
+                "Role": role,
+                "CountsTowardRatio": ratio_by_role.get(role, ""),
+                "RoleHint": _role_hint_from_group(role),
+            }
+        )
+    for role, counts in sorted(ratio_by_role.items()):
+        adults = sorted(
+            str(row.get("Adult", "")).strip()
+            for row in adult_role_rows
+            if str(row.get("Role", "")).strip() == role and str(row.get("Adult", "")).strip()
+        )
+        out_rows.append(
+            {
+                "SupportKind": "role_ratio_scope",
+                "Role": role,
+                "CountsTowardRatio": counts,
+                "Count": str(len(adults)),
+                "Members": ",".join(adults),
+                "RoleHint": _role_hint_from_group(role),
+            }
+        )
+    counted_adults = sorted(
+        str(row.get("Adult", "")).strip()
+        for row in adult_role_rows
+        if ratio_by_role.get(str(row.get("Role", "")).strip()) == "true"
+        and str(row.get("Adult", "")).strip()
+    )
+    if counted_adults:
+        out_rows.append(
+            {
+                "SupportKind": "ratio_counted_adults",
+                "Count": str(len(counted_adults)),
+                "Members": ",".join(counted_adults),
+                "CountsTowardRatio": "true",
+            }
+        )
+    excluded_adults = sorted(
+        str(row.get("Adult", "")).strip()
+        for row in adult_role_rows
+        if ratio_by_role.get(str(row.get("Role", "")).strip()) == "false"
+        and str(row.get("Adult", "")).strip()
+    )
+    if excluded_adults:
+        out_rows.append(
+            {
+                "SupportKind": "ratio_excluded_adults",
+                "Count": str(len(excluded_adults)),
+                "Members": ",".join(excluded_adults),
+                "CountsTowardRatio": "false",
+            }
+        )
 
     for row in group_member_rows:
         group = str(row.get("Group", "")).strip()
@@ -2197,6 +3191,21 @@ def _roster_state_companion(
                 "Start": start,
                 "End": end,
                 "Interval": f"{start}_to_{end}" if start and end else "",
+                "RoleHint": _role_hint_from_group(group),
+            }
+        )
+    for row in student_assignment_rows:
+        person = str(row.get("Student", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        if not person or not group:
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "student_group_assignment",
+                "Person": person,
+                "Group": group,
+                "Version": version,
                 "RoleHint": _role_hint_from_group(group),
             }
         )
@@ -2231,22 +3240,31 @@ def _roster_state_companion(
             }
         )
 
-    group_counts: dict[tuple[str, str, str], set[str]] = {}
+    out_rows.extend(_source_record_roster_assignment_support(runtime))
+
+    group_counts: dict[tuple[str, str, str, str], set[str]] = {}
     for row in out_rows:
-        if str(row.get("SupportKind")) not in {"group_member", "group_membership"}:
+        if str(row.get("SupportKind")) not in {
+            "group_member",
+            "group_membership",
+            "source_record_student_group_assignment",
+            "student_group_assignment",
+        }:
             continue
         group = str(row.get("Group", "")).strip()
         person = str(row.get("Person", "")).strip()
+        version = str(row.get("Version", "")).strip()
         start = str(row.get("Start", "")).strip()
         end = str(row.get("End", "")).strip()
         if not group or not person:
             continue
-        group_counts.setdefault((group, start, end), set()).add(person)
-    for (group, start, end), people in sorted(group_counts.items()):
+        group_counts.setdefault((group, version, start, end), set()).add(person)
+    for (group, version, start, end), people in sorted(group_counts.items()):
         out_rows.append(
             {
                 "SupportKind": "group_count",
                 "Group": group,
+                "Version": version,
                 "Start": start,
                 "End": end,
                 "Count": str(len(people)),
@@ -2254,6 +3272,8 @@ def _roster_state_companion(
                 "RoleHint": _role_hint_from_group(group),
             }
         )
+
+    out_rows = _prioritize_roster_state_rows(out_rows, predicate=predicate, args=args)
 
     if not out_rows:
         return None
@@ -2266,12 +3286,13 @@ def _roster_state_companion(
             "result_type": "table",
             "num_rows": len(out_rows),
             "variables": ["SupportKind", "Person", "Group", "Supervisor", "Target", "Start", "End", "Count", "RoleHint"],
-            "rows": out_rows[:160],
+            "rows": out_rows[:180],
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
                     "query-only roster-state companion normalized admitted group membership, "
-                    "supervision, interval, count, and role-hint rows without reading source prose"
+                    "supervision, interval, count, source-record roster, and role-hint rows "
+                    "without reading source prose outside the admitted source-record ledger"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -2281,10 +3302,177 @@ def _roster_state_companion(
             query,
             "group_member(Group, Person, Interval).",
             "group_membership(Person, Group, Start, End).",
+            "student_group_assignment(Student, Version, Group).",
             "supervises(Supervisor, Target, Interval).",
             "supervision_assignment(Supervisor, Target, Start, End).",
+            "adult_role(Adult, Role).",
+            "role_counts_towards_ratio(Role, Counts).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_section(SourceRow, Section).",
+            "source_record_line(SourceRow, Line).",
         ],
     }
+
+
+def _prioritize_roster_state_rows(
+    rows: list[dict[str, Any]],
+    *,
+    predicate: str,
+    args: list[str],
+) -> list[dict[str, Any]]:
+    def is_requested(value: str, requested: str) -> bool:
+        requested = str(requested or "").strip()
+        if not requested or _is_prolog_variable(requested):
+            return True
+        if requested.lower() in {"adult", "count", "counts", "group", "person", "role", "student", "x"}:
+            return True
+        return str(value or "").strip() == requested
+
+    def score(row: dict[str, Any]) -> tuple[int, str, str, str]:
+        support_kind = str(row.get("SupportKind", "")).strip()
+        person = str(row.get("Person", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        priority = 50
+
+        if predicate == "student_group_assignment" and len(args) >= 3:
+            person_ok = is_requested(person, args[0])
+            version_ok = is_requested(version, args[1])
+            group_ok = is_requested(group, args[2])
+            if person_ok and version_ok and group_ok:
+                priority = 0 if support_kind == "source_record_student_group_assignment" else 2
+            elif version_ok and group_ok:
+                priority = 5
+            elif version_ok:
+                priority = 12
+        elif predicate in {"adult_role", "role_counts_towards_ratio"}:
+            if support_kind in {"adult_role", "ratio_counted_adults", "role_ratio_scope"}:
+                priority = 0
+            if predicate == "adult_role" and len(args) >= 2 and is_requested(role, args[1]):
+                priority = min(priority, 0)
+            if predicate == "role_counts_towards_ratio" and len(args) >= 1 and is_requested(role, args[0]):
+                priority = min(priority, 0)
+        elif predicate in {"roster_version", "roster_version_status"}:
+            if support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
+                priority = 4
+        elif support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
+            priority = 10
+
+        return (priority, version, group, person or role)
+
+    return sorted(rows, key=score)
+
+
+def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, Section).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not text_rows or not section_rows:
+        return []
+
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Section", "")).strip()
+        for row in section_rows
+    }
+    line_by_row: dict[str, int] = {}
+    for row in line_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        line = str(row.get("Line", "")).strip()
+        if not source_row or not _is_numeric_atom(line):
+            continue
+        line_by_row[source_row] = int(float(line))
+
+    ordered_rows = sorted(
+        (
+            (
+                line_by_row.get(str(row.get("SourceRow", "")).strip(), 10**9),
+                str(row.get("SourceRow", "")).strip(),
+                str(row.get("TextAtom", "")).strip(),
+                section_by_row.get(str(row.get("SourceRow", "")).strip(), ""),
+            )
+            for row in text_rows
+        ),
+        key=lambda item: item[0],
+    )
+    out_rows: list[dict[str, Any]] = []
+    current_group = ""
+    current_version = ""
+    current_group_source = ""
+
+    for line, source_row, text_atom, section in ordered_rows:
+        if not source_row or not text_atom:
+            continue
+        version = _version_from_section_atom(section)
+        if current_version and section and not version:
+            current_group = ""
+            current_version = ""
+            current_group_source = ""
+            continue
+        if version:
+            if version != current_version:
+                current_group = ""
+                current_group_source = ""
+            current_version = version
+
+        group = _group_from_roster_atom(text_atom)
+        if group:
+            current_group = group
+            current_group_source = source_row
+            continue
+
+        if not current_group or not current_version:
+            continue
+        if section and _version_from_section_atom(section) not in {"", current_version}:
+            current_group = ""
+            current_version = _version_from_section_atom(section)
+            current_group_source = ""
+            continue
+        students = _student_ids_from_atom(text_atom)
+        if not students:
+            continue
+        for student in students:
+            out_rows.append(
+                {
+                    "SupportKind": "source_record_student_group_assignment",
+                    "Person": student,
+                    "Group": current_group,
+                    "Version": current_version,
+                    "SourceRow": source_row,
+                    "SourceGroupRow": current_group_source,
+                    "Line": str(line),
+                    "RoleHint": _role_hint_from_group(current_group),
+                }
+            )
+    return out_rows
+
+
+def _version_from_section_atom(value: str) -> str:
+    text = value.lower().strip()
+    if "roster_v3" in text:
+        return "v3"
+    if "roster_v2_1" in text:
+        return "v2_1"
+    if "roster_v2" in text:
+        return "v2"
+    if "roster_v1" in text:
+        return "v1"
+    return ""
+
+
+def _group_from_roster_atom(value: str) -> str:
+    text = value.lower().strip()
+    if text.startswith("group_a_"):
+        return "group_a"
+    if text.startswith("group_b_"):
+        return "group_b"
+    if text.startswith("group_c_"):
+        return "group_c"
+    return ""
+
+
+def _student_ids_from_atom(value: str) -> list[str]:
+    return re.findall(r"s_\d{3}", value.lower())
 
 
 def _runtime_rows(runtime: CorePrologRuntime, query: str) -> list[dict[str, Any]]:

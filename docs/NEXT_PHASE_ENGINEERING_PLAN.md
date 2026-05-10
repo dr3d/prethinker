@@ -91,8 +91,8 @@ New row-shape candidates from that exhaustion pass:
 | Guard abstraction | Stop raw guard count from becoming harness sprawl. Treat guards as family instances with health metrics. | `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md` reports family budget, largest-family share, and unclassified count. |
 | Temporal helpers | Move deadline, interval, status-at-time, and business/calendar-day questions from lens guessing into deterministic helper substrates. | A helper pack that improves at least two unlike fixtures without selected-row regression. |
 | Arithmetic helpers | Compute counts, totals, differences, thresholds, and rank/order facts from admitted values. | Quantity helper probes on cold-batch misses plus older Oxalis/Meridian-style arithmetic rows. |
-| Constraint propagation | Represent known cells, constrained blanks, derived cells, and dependency trails so updates recompute what follows and what remains open. | One narrow fixture slice where a correction changes a derived answer while the derived answer remains query-only and support-traced. |
-| Roster state | Represent temporary group membership, chaperone/supervisor roles, station assignments, and reassignment intervals. | Lantern-style roster helper with transfer probe against another fixture. |
+| Constraint propagation | Represent known cells, constrained blanks, derived cells, and dependency trails so updates recompute what follows and what remains open. Ordered numeric/date-time domain narrowing is now present in `engine.constraint_propagation`; the next proof should feed it from admitted fixture rows rather than hand-authored specs. | One narrow fixture slice where a correction changes a derived answer while the derived answer remains query-only and support-traced. |
+| Roster state | Represent temporary group membership, chaperone/supervisor roles, station assignments, reassignment intervals, and operational-version roster counts. | `school_activity_roster_reconciliation` moved from `21 / 3 / 16` to `40 / 0 / 0` through roster-state helpers, source-section rendering, wrapped-line ledger refresh, and packet metadata support; no new semantic lens or new LLM compile was needed. |
 | Row-shape transfer | Prove the incoming-six residual row shapes are not prompt-shaped patches. | Unlike fixtures that cold-test source lists, last-confirmed-at, unresolved authority questions, rejected-version state, and date-event anchors. |
 | Provenance transfer | Prove the new evidence/ledger provenance lenses are not one-story inventions. | A second cold or wild fixture where source-artifact provenance rows improve under row gating. |
 | NITRO sidecar | Use Ministral for structured draft packets only where validators can reject bad output. | Validated source digest or QA-draft packet, kept out of compile evidence until POWER/35B consumes it. |
@@ -137,7 +137,18 @@ Unhealthy growth:
    transfer. First transfer control is complete: Tournament, Greenhouse, and
    Festival all stayed at their available upper bounds after the Lantern
    selector repairs. That passes safety for the selector boundaries, but not
-   positive lens transfer for the broad supervision-count registry.
+   positive lens transfer for the broad supervision-count registry. Fresh
+   transfer proof now exists on
+   `school_activity_roster_reconciliation`: a helper-only replay derived v3
+   group membership and ratio-counted adults from admitted source-record and
+   role rows, then a section-display companion rendered normalized source
+   section atoms into human labels. Together they lifted the same cold compile
+   artifact from `21 / 3 / 16` to `30 / 1 / 9`. A deterministic wrapped-line
+   ledger refresh plus packet metadata companion then surfaced exact packet
+   identifiers, policy identifiers, driver/license/device IDs, physical
+   retention location, adult lodging, transport departure, and pending-scan
+   status, bringing the fixture to `40 / 0 / 0`. This confirms the roster
+   frontier was queryability over durable memory, not another LLM reading pass.
 3. Build the smallest helper substrate or vocabulary scaffold that composes
    admitted KB rows only.
 4. Replay against the target fixture and at least one unlike regression fixture.

@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"lookup","reference_answer":"SYS-B is the Quality Inspection Station (QIS)."}
+{"id":"q002","source_id":"q002","category":"identifier_exact","reference_answer":"MPP-L4-INC-2026-0422"}
+{"id":"q003","source_id":"q003","category":"lookup","reference_answer":"S. Aurelio, Plant Engineering Lead."}
+{"id":"q004","source_id":"q004","category":"lookup","reference_answer":"Vendor Sentec; model Sentec RH-220-Plus."}
+{"id":"q005","source_id":"q005","category":"source_address","reference_answer":"Section 4 (Corrected Timeline)."}
+{"id":"q006","source_id":"q006","category":"source_address","reference_answer":"Section 8.2 (Inferences Not Available)."}
+{"id":"q007","source_id":"q007","category":"lookup","reference_answer":"R. Kim attended the operator console during the incident window."}
+{"id":"q008","source_id":"q008","category":"lookup","reference_answer":"Plant procedure QHP-04."}
+{"id":"q009","source_id":"q009","category":"source_address","reference_answer":"Section 9 (Sensor Register Excerpts)."}
+{"id":"q010","source_id":"q010","category":"lookup","reference_answer":"1 minute."}
+{"id":"q011","source_id":"q011","category":"identifier_exact","reference_answer":"B-2026-0422-3"}
+{"id":"q012","source_id":"q012","category":"identifier_exact","reference_answer":"MMS-T-2026-0419-7"}
+{"id":"q013","source_id":"q013","category":"identifier_exact","reference_answer":"LAB-2026-0422-S3"}
+{"id":"q014","source_id":"q014","category":"identifier_exact","reference_answer":"MMS-T-2026-0414-3"}
+{"id":"q015","source_id":"q015","category":"identifier_exact","reference_answer":"HUM-D-04"}
+{"id":"q016","source_id":"q016","category":"identifier_exact","reference_answer":"MPP-COMP-2026-0427"}
+{"id":"q017","source_id":"q017","category":"identifier_exact","reference_answer":"MMS-T-2026-0422-1"}
+{"id":"q018","source_id":"q018","category":"temporal","reference_answer":"2026-02-28 02:00:00 UTC."}
+{"id":"q019","source_id":"q019","category":"temporal","reference_answer":"2026-04-25."}
+{"id":"q020","source_id":"q020","category":"temporal_interval","reference_answer":"2 minutes 12 seconds (corrected wall-clock)."}
+{"id":"q021","source_id":"q021","category":"temporal_interval","reference_answer":"17 hours 45 minutes 52 seconds."}
+{"id":"q022","source_id":"q022","category":"temporal","reference_answer":"2026-04-22 15:11:51 UTC (corrected wall-clock)."}
+{"id":"q023","source_id":"q023","category":"temporal","reference_answer":"2026-07-12."}
+{"id":"q024","source_id":"q024","category":"count","reference_answer":"4 systems (SYS-A, SYS-B, SYS-C, SYS-D)."}
+{"id":"q025","source_id":"q025","category":"count","reference_answer":"14 events (EV-01 through EV-14)."}
+{"id":"q026","source_id":"q026","category":"count","reference_answer":"7 events were recorded by SYS-A."}
+{"id":"q027","source_id":"q027","category":"composition","reference_answer":"SYS-A: 7 events (EV-01, EV-02, EV-03, EV-05, EV-06, EV-09, EV-10); SYS-B: 2 events (EV-08, EV-12); SYS-C: 2 events (EV-13, EV-14); SYS-D: 3 events (EV-04, EV-07, EV-11)."}
+{"id":"q028","source_id":"q028","category":"count","reference_answer":"2 named missing sources: the LAB-2026-0422-S3 dryer-inlet moisture analysis (results not yet returned) and the DRY-DL-04 airflow logs covering 14:25–14:38 on 2026-04-22 (lost to buffer overflow)."}
+{"id":"q029","source_id":"q029","category":"authority","reference_answer":"SYS-C (Maintenance Management System) timestamps are accepted as wall-clock with no drift correction."}
+{"id":"q030","source_id":"q030","category":"status","reference_answer":"Lost (buffer overflow on DRY-DL-04 local datalogger; no recovery)."}
+{"id":"q031","source_id":"q031","category":"authority","reference_answer":"Plant procedure QHP-04."}
+{"id":"q032","source_id":"q032","category":"status","reference_answer":"Sent for analysis on 2026-04-22; results not yet returned as of 2026-04-26 compilation date. Estimated return 2026-04-29."}
+{"id":"q033","source_id":"q033","category":"composition","reference_answer":"R. Kim did not originate EV-08 or EV-12; those originated from QIS-OPT-12 automatic flagging."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"Unresolved. The packet does not resolve causation; HUM-D-04 is not certified to attribute cause and the named missing evidence (LAB-2026-0422-S3 results and DRY-DL-04 airflow logs) is not available."}
+{"id":"q035","source_id":"q035","category":"negative_existential","reference_answer":"No. R. Kim's notes are silent for the 14:50–15:02 interval; the packet states the absence of notes is not affirmative evidence of any specific action."}
+{"id":"q036","source_id":"q036","category":"source_reliability","reference_answer":"No. HUM-D-04's certified scope is humidity measurement only; it is not certified for cause attribution."}
+{"id":"q037","source_id":"q037","category":"unresolved","reference_answer":"No. The packet explicitly states it does not assign root cause; that is the function of a separate RCA (in preparation, not part of this packet)."}
+{"id":"q038","source_id":"q038","category":"source_reliability","reference_answer":"Yes for visual defect classification of pellet output (color uniformity, pellet shape) — within QIS-OPT-12's certified scope. (It is not certified for moisture content estimation.)"}
+{"id":"q039","source_id":"q039","category":"source_reliability","reference_answer":"SYS-D timestamps are at 1-minute resolution; their precision does not support sub-minute reasoning."}
+{"id":"q040","source_id":"q040","category":"provenance","reference_answer":"Both packets cover the same incident. This engineering packet (MPP-L4-INC-2026-0422) uses corrected wall-clock times; the regulatory report (MPP-COMP-2026-0427) uses raw timestamps as recorded by each system. Discrepancies are by design, not contradictions."}

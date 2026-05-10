@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import json
+import os
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -22,6 +23,12 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "story_worlds"
 DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "domain_bootstrap_compile_batch"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.semantic_ir import bootstrap_env_local  # noqa: E402
+
+bootstrap_env_local()
 
 
 @dataclass(frozen=True)
@@ -36,8 +43,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dataset-root", type=Path, default=DEFAULT_DATASET_ROOT)
     parser.add_argument("--out-root", type=Path, default=DEFAULT_OUT_ROOT)
     parser.add_argument("--fixture", action="append", default=[], help="Fixture name. Repeat to include multiple.")
-    parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
+    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234"))
     parser.add_argument("--timeout", type=int, default=900, help="Base per-call LM timeout passed to compile runner.")
     parser.add_argument("--lanes", type=int, default=1, help="Concurrent compile runner processes.")
     parser.add_argument(

@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"lookup","reference_answer":"Berwick County Probate Court"}
+{"id":"q002","source_id":"q002","category":"identifier_exact","reference_answer":"P-2026-00347"}
+{"id":"q003","source_id":"q003","category":"lookup","reference_answer":"Caroline Sutter"}
+{"id":"q004","source_id":"q004","category":"lookup","reference_answer":"Lillian Park, Esq. (L. Park)"}
+{"id":"q005","source_id":"q005","category":"lookup","reference_answer":"Beatrice Caulfield (B. Caulfield)"}
+{"id":"q006","source_id":"q006","category":"source_address","reference_answer":"Section I (Chronology of Custody-Affecting Events)"}
+{"id":"q007","source_id":"q007","category":"source_address","reference_answer":"Section D.3 (Reeder-held items), corroborated by H.1 (Reeder's 2026-01-12 correspondence)"}
+{"id":"q008","source_id":"q008","category":"lookup","reference_answer":"\"Three Apples in Saucer\" (1987)"}
+{"id":"q009","source_id":"q009","category":"lookup","reference_answer":"It extended the loan period to 2027-09-30; it did not change the named lender"}
+{"id":"q010","source_id":"q010","category":"source_address","reference_answer":"Section E (Court Orders Affecting This Register)"}
+{"id":"q011","source_id":"q011","category":"identifier_exact","reference_answer":"NRM-LL-2020-02"}
+{"id":"q012","source_id":"q012","category":"identifier_exact","reference_answer":"SafeStore Vault, Box V-402 (External ID SSV-V-402-A)"}
+{"id":"q013","source_id":"q013","category":"identifier_exact","reference_answer":"P-26-347-D"}
+{"id":"q014","source_id":"q014","category":"identifier_exact","reference_answer":"EX-008"}
+{"id":"q015","source_id":"q015","category":"identifier_exact","reference_answer":"P-26-347-M-3"}
+{"id":"q016","source_id":"q016","category":"identifier_exact","reference_answer":"NRM-RR-2018-44"}
+{"id":"q017","source_id":"q017","category":"identifier_exact","reference_answer":"P-26-347-C"}
+{"id":"q018","source_id":"q018","category":"temporal","reference_answer":"2025-11-04"}
+{"id":"q019","source_id":"q019","category":"temporal","reference_answer":"2025-12-08"}
+{"id":"q020","source_id":"q020","category":"temporal","reference_answer":"Originally calendared 2026-04-22; rescheduled to 2026-06-17"}
+{"id":"q021","source_id":"q021","category":"temporal","reference_answer":"2026-06-03"}
+{"id":"q022","source_id":"q022","category":"temporal","reference_answer":"2024-10-04"}
+{"id":"q023","source_id":"q023","category":"temporal_interval","reference_answer":"14 days (2026-06-03 to 2026-06-17)"}
+{"id":"q024","source_id":"q024","category":"count","reference_answer":"12"}
+{"id":"q025","source_id":"q025","category":"count","reference_answer":"3 (EX-001, EX-003, EX-009)"}
+{"id":"q026","source_id":"q026","category":"count","reference_answer":"6 (EX-004, EX-005, EX-006, EX-007, EX-008, EX-011)"}
+{"id":"q027","source_id":"q027","category":"composition","reference_answer":"EX-006, EX-007, EX-008"}
+{"id":"q028","source_id":"q028","category":"count","reference_answer":"4 (EX-004, EX-005, EX-010, EX-012)"}
+{"id":"q029","source_id":"q029","category":"custody","reference_answer":"Northpoint Regional Museum"}
+{"id":"q030","source_id":"q030","category":"ownership","reference_answer":"Daniel Holloway, asserting an in-person gift on 2024-11-19"}
+{"id":"q031","source_id":"q031","category":"authority","reference_answer":"The Berwick County Probate Court, by Court Order P-26-347-D dated 2026-02-14"}
+{"id":"q032","source_id":"q032","category":"authority","reference_answer":"Reading-room patron access (governed by museum policy MRP-04, not subject to executor revocation)"}
+{"id":"q033","source_id":"q033","category":"custody","reference_answer":"Only V. Reeder has physical access; per Section D.3, no other party currently has access"}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No — the forensic analysis is pending (report due 2026-06-03) and the evidentiary hearing has been deferred to 2026-06-17"}
+{"id":"q035","source_id":"q035","category":"unresolved","reference_answer":"No — Section D.2 states no ruling has issued on the motion for declaratory ruling"}
+{"id":"q036","source_id":"q036","category":"negative_existential","reference_answer":"No — Section G lists the will (dated 2018-07-22) as referenced but not reproduced"}
+{"id":"q037","source_id":"q037","category":"negative_existential","reference_answer":"No — Section D.3 states the executor has not directed delivery, taking the position that the codicil dispute must be resolved first"}
+{"id":"q038","source_id":"q038","category":"source_reliability","reference_answer":"No — Section F states that reproduction does not constitute a finding of fact and that the assertion has not been ruled upon"}
+{"id":"q039","source_id":"q039","category":"provenance","reference_answer":"Section H.3, the museum registrar's (B. Caulfield) correspondence dated 2026-04-02, and the loan agreements themselves (referenced but not reproduced)"}
+{"id":"q040","source_id":"q040","category":"source_reliability","reference_answer":"The forensic handwriting analyst's report (when filed) and the Court's ultimate rulings, per Section F"}

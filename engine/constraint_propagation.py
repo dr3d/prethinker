@@ -5,6 +5,7 @@ Provides two capabilities:
 2. Degree-of-freedom (DoF) propagation via domain constraints.
 """
 
+import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Set
 
@@ -53,6 +54,97 @@ def _apply_bindings(atom: StateAtom, bindings: Dict[str, Any]) -> StateAtom:
         else:
             applied.append(arg)
     return StateAtom(atom.predicate, tuple(applied))
+
+
+def _ordered_key(value: Any) -> tuple[str, tuple[int, ...] | float] | None:
+    """Return a comparable key for numbers and date/time atoms.
+
+    Date atoms use the same conservative shape as the rest of the harness:
+    ``2026_04_28``, ``2026_04_28_08_00``, ISO-ish dashes, optional ``v`` prefix,
+    and optional UTC/Z suffixes. The propagator does not interpret prose dates.
+    """
+
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return ("number", float(value))
+    if not isinstance(value, str):
+        return None
+
+    text = value.strip()
+    if not text:
+        return None
+    try:
+        return ("number", float(text))
+    except ValueError:
+        pass
+
+    normalized = text
+    if normalized.startswith("v_"):
+        normalized = normalized[2:]
+    elif normalized.startswith("v") and re.match(r"^v\d{4}[_-]\d{2}[_-]\d{2}", normalized):
+        normalized = normalized[1:]
+    normalized = re.sub(r"(?:_utc|z)$", "", normalized, flags=re.IGNORECASE)
+    normalized = normalized.replace("T", "_").replace("t", "_")
+    match = re.fullmatch(
+        r"(?P<year>\d{4})[_-](?P<month>\d{2})[_-](?P<day>\d{2})"
+        r"(?:[_-](?P<hour>\d{2})(?:[_:](?P<minute>\d{2})(?:[_:](?P<second>\d{2}))?)?)?",
+        normalized,
+    )
+    if not match:
+        return None
+    parts = [
+        int(match.group("year")),
+        int(match.group("month")),
+        int(match.group("day")),
+        int(match.group("hour") or 0),
+        int(match.group("minute") or 0),
+        int(match.group("second") or 0),
+    ]
+    return ("temporal", tuple(parts))
+
+
+def _ordered_relation_holds(left: Any, right: Any, kind: str) -> bool | None:
+    left_key = _ordered_key(left)
+    right_key = _ordered_key(right)
+    if left_key is None or right_key is None or left_key[0] != right_key[0]:
+        return None
+
+    left_value = left_key[1]
+    right_value = right_key[1]
+    if kind in {"less_than", "before"}:
+        return left_value < right_value
+    if kind in {"less_equal", "before_or_equal", "at_or_before"}:
+        return left_value <= right_value
+    if kind in {"greater_than", "after"}:
+        return left_value > right_value
+    if kind in {"greater_equal", "after_or_equal", "at_or_after"}:
+        return left_value >= right_value
+    return None
+
+
+def _filter_ordered_domain(
+    values: Set[Any],
+    other_values: Set[Any],
+    *,
+    kind: str,
+    is_left: bool,
+) -> Set[Any]:
+    kept: Set[Any] = set()
+    for value in values:
+        for other_value in other_values:
+            left = value if is_left else other_value
+            right = other_value if is_left else value
+            holds = _ordered_relation_holds(left, right, kind)
+            if holds is True:
+                kept.add(value)
+                break
+            if holds is None:
+                # Incomparable values are kept; this propagator narrows only
+                # domains whose values have deterministic numeric/date order.
+                kept.add(value)
+                break
+    return kept
 
 
 @dataclass
@@ -232,6 +324,44 @@ class ConstraintPropagator:
                     before = set(domains[right])
                     domains[right].intersection_update(values)
                     changed |= domains[right] != before
+
+            elif kind in {
+                "less_than",
+                "less_equal",
+                "greater_than",
+                "greater_equal",
+                "before",
+                "before_or_equal",
+                "after",
+                "after_or_equal",
+                "at_or_before",
+                "at_or_after",
+            }:
+                if right and right in domains:
+                    left_before = set(domains[left])
+                    right_before = set(domains[right])
+                    domains[left] = _filter_ordered_domain(
+                        domains[left],
+                        domains[right],
+                        kind=kind,
+                        is_left=True,
+                    )
+                    domains[right] = _filter_ordered_domain(
+                        domains[right],
+                        domains[left],
+                        kind=kind,
+                        is_left=False,
+                    )
+                    changed |= domains[left] != left_before or domains[right] != right_before
+                elif values:
+                    before = set(domains[left])
+                    domains[left] = _filter_ordered_domain(
+                        domains[left],
+                        values,
+                        kind=kind,
+                        is_left=True,
+                    )
+                    changed |= domains[left] != before
 
             if not domains[left]:
                 contradictions.append(f"Domain contradiction: {left} has no feasible values")

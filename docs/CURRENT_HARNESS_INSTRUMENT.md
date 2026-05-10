@@ -128,6 +128,12 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   cells, numeric tokens, bold-label rows, and anchored official prose; on the
   precision batch it raised the seven-candidate selected score to `223 / 8 / 9`
   and the candidate ceiling to `232 / 4 / 4` over `240` rows.
+- Cold acquisition now preserves table cell headers as deterministic source
+  addressability. `source_record_cell/3` already made table cells queryable, but
+  cell position alone loses the printed field name. The ledger now adds
+  `source_record_cell_header/3` and `source_record_field/3` for markdown-table
+  data rows. This is still not semantic truth: it says "this row has a printed
+  `Time` field with value `22:12`," not that an event truly happened then.
 - Temporal helpers are part of the query substrate, not a lens. A 2026-05-10
   repair showed that admitted notice timestamps were present but duration rows
   failed because placeholder repair and relaxed fallback queries lost shared
@@ -142,6 +148,31 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   row-gated nine-candidate temporal selector then reached `40 / 0 / 0` on
   Temporal State Ledger by selecting the duration-helper surface for duration
   rows and the pause-helper surface for the clock-state snapshot row.
+- Constraint propagation is now beginning as its own substrate. The existing
+  `engine.constraint_propagation` runner still treats admitted state as input,
+  not source prose, but it can now narrow numeric and date/time domains with
+  ordered constraints such as `before`, `before_or_equal`, `after`, and
+  `at_or_before`. This is the first small bridge from "known rows" to
+  spreadsheet-like degrees of freedom: a candidate timestamp set can shrink
+  deterministically when a deadline, correction, or interval boundary is known.
+- Roster-state and source-address helpers are now transfer-tested against a fresh fixture. On
+  `school_activity_roster_reconciliation`, the cold OpenRouter compile admitted
+  rich source-record rows but missed operational v3 roster composition. A
+  helper-only replay derived v3 group membership and counted-adult ratio scope
+  from admitted `source_record_text_atom/2`, `source_record_section/2`,
+  `source_record_line/2`, `adult_role/2`, and `role_counts_towards_ratio/2`
+  rows, moving the same compile artifact from `21 / 3 / 16` to `28 / 2 / 10`.
+  The helper resets at version and section boundaries so superseded v2 roster
+  rows do not leak into v3. A follow-on section-display companion renders
+  normalized section atoms such as `v_1_4_roster_v3_2026_04_15` into
+  `Section 1.4`, moving the same artifact again to `30 / 1 / 9`. The remaining
+  pressure was small policy/device/location/permission companions. After a
+  deterministic wrapped-line ledger refresh and packet-metadata companion, the
+  final replay reached `40 / 0 / 0` without a new semantic compile or new lens.
+  Across the fresh transfer batch, this changes the cold/repaired read from
+  `177 / 10 / 53` to `196 / 7 / 37` if only this fixture's helper repair is
+  substituted, with the weakest fixture becoming a solved proof of source
+  addressability.
 
 ## Extraction Rule
 

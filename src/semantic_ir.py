@@ -7,7 +7,33 @@ import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
+
+
+def bootstrap_env_local(path: str | Path | None = None) -> None:
+    """Load repo-local .env.local values when the shell has not provided them."""
+
+    env_path = Path(path) if path else Path(__file__).resolve().parents[1] / ".env.local"
+    if not env_path.exists():
+        return
+    try:
+        lines = env_path.read_text(encoding="utf-8-sig").splitlines()
+    except OSError:
+        return
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if not key or key in os.environ:
+            continue
+        os.environ[key] = value
+
+
+bootstrap_env_local()
 
 
 SCHEMA_CONTRACT: dict[str, Any] = {

@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "Who compiled this cycle packet?", "source_id": "q001"}
+{"category": "temporal", "id": "q002", "question": "On what date did the committee meet to make funding decisions?", "source_id": "q002"}
+{"category": "source_address", "id": "q003", "question": "Which section of the packet contains the awards summary?", "source_id": "q003"}
+{"category": "source_address", "id": "q004", "question": "Which section explains the score correction memo?", "source_id": "q004"}
+{"category": "lookup", "id": "q005", "question": "What is the per-grant cap?", "source_id": "q005"}
+{"category": "lookup", "id": "q006", "question": "What is the total cycle budget?", "source_id": "q006"}
+{"category": "source_address", "id": "q007", "question": "Which section enumerates pending items?", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "question": "What is the funding threshold composite score?", "source_id": "q008"}
+{"category": "lookup", "id": "q009", "question": "Which referenced document defines the appeal window?", "source_id": "q009"}
+{"category": "source_address", "id": "q010", "question": "Which section sets out the per-application award amount computation?", "source_id": "q010"}
+{"category": "identifier_exact", "id": "q011", "question": "What is the cycle ID?", "source_id": "q011"}
+{"category": "identifier_exact", "id": "q012", "question": "What is the score correction memo ID for A-02?", "source_id": "q012"}
+{"category": "identifier_exact", "id": "q013", "question": "What is the recusal memo ID for J. Vasquez?", "source_id": "q013"}
+{"category": "identifier_exact", "id": "q014", "question": "What is the recusal memo ID for M. Kessler?", "source_id": "q014"}
+{"category": "identifier_exact", "id": "q015", "question": "What is the appeal ID filed by the A-07 applicant?", "source_id": "q015"}
+{"category": "identifier_exact", "id": "q016", "question": "What is the cycle procedure manual reference?", "source_id": "q016"}
+{"category": "temporal", "id": "q017", "question": "What date did applications open for this cycle?", "source_id": "q017"}
+{"category": "temporal", "id": "q018", "question": "What date did applications close?", "source_id": "q018"}
+{"category": "temporal", "id": "q019", "question": "What date was the score correction memo (SC) for A-02 issued?", "source_id": "q019"}
+{"category": "temporal_interval", "id": "q020", "question": "What is the appeal window length specified by cycle procedure?", "source_id": "q020"}
+{"category": "temporal", "id": "q021", "question": "On what date was AP-2026-0429-A filed?", "source_id": "q021"}
+{"category": "temporal", "id": "q022", "question": "On what date is the next scheduled committee meeting where the A-07 appeal will be reviewed?", "source_id": "q022"}
+{"category": "count", "id": "q023", "question": "How many applications were submitted in this cycle?", "source_id": "q023"}
+{"category": "count", "id": "q024", "question": "How many applications were eligible (proceeded to scoring)?", "source_id": "q024"}
+{"category": "count", "id": "q025", "question": "How many applications have been awarded as of the compilation date?", "source_id": "q025"}
+{"category": "composition", "id": "q026", "question": "List the application IDs that received the EX-B rural service-area bonus.", "source_id": "q026"}
+{"category": "count", "id": "q027", "question": "How many applications had the per-grant cap applied?", "source_id": "q027"}
+{"category": "derived", "id": "q028", "question": "What is the total awarded amount in this cycle as of the compilation date?", "source_id": "q028"}
+{"category": "authority", "id": "q029", "question": "Per cycle procedure, does a recusal automatically decide the named item?", "source_id": "q029"}
+{"category": "status", "id": "q030", "question": "What is the status of A-05?", "source_id": "q030"}
+{"category": "status", "id": "q031", "question": "What is the status of A-07 as of the compilation date?", "source_id": "q031"}
+{"category": "authority", "id": "q032", "question": "Which committee member is recused from voting on A-04?", "source_id": "q032"}
+{"category": "composition", "id": "q033", "question": "With one recusal filed for a single item, how many members vote on that item?", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "As of the compilation date, has A-07 been finally declined?", "source_id": "q034"}
+{"category": "negative_existential", "id": "q035", "question": "If the A-07 appeal is sustained, will the appeal award be drawn from the Spring 2026 awards listed in Section 10?", "source_id": "q035"}
+{"category": "authority", "id": "q036", "question": "Did the recusal of J. Vasquez determine the outcome of A-04?", "source_id": "q036"}
+{"category": "negative_existential", "id": "q037", "question": "Are reviewer paper score sheets reproduced in this packet?", "source_id": "q037"}
+{"category": "source_reliability", "id": "q038", "question": "Per the packet, which composite for A-02 is operational — the pre-correction (7.4) or the corrected (8.4)?", "source_id": "q038"}
+{"category": "provenance", "id": "q039", "question": "Where are the recusal memo originals filed?", "source_id": "q039"}
+{"category": "provenance", "id": "q040", "question": "What sources does the packet explicitly reference but not reproduce in full?", "source_id": "q040"}

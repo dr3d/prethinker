@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"lookup","reference_answer":"L. Yamada, Grants Administrator."}
+{"id":"q002","source_id":"q002","category":"temporal","reference_answer":"2026-04-26."}
+{"id":"q003","source_id":"q003","category":"source_address","reference_answer":"Section 10 (Awards Summary)."}
+{"id":"q004","source_id":"q004","category":"source_address","reference_answer":"Section 5.1 (Score Correction Memo SC-2026-04-22)."}
+{"id":"q005","source_id":"q005","category":"lookup","reference_answer":"$25,000 per grant."}
+{"id":"q006","source_id":"q006","category":"lookup","reference_answer":"$150,000."}
+{"id":"q007","source_id":"q007","category":"source_address","reference_answer":"Section 9 (Pending Items)."}
+{"id":"q008","source_id":"q008","category":"lookup","reference_answer":"Composite score ≥ 8.0 (out of 10.0)."}
+{"id":"q009","source_id":"q009","category":"lookup","reference_answer":"The cycle procedure manual BWCF-CP-2025."}
+{"id":"q010","source_id":"q010","category":"source_address","reference_answer":"Section 7 (Award Amount Computation)."}
+{"id":"q011","source_id":"q011","category":"identifier_exact","reference_answer":"BWCF-MG-2026-S"}
+{"id":"q012","source_id":"q012","category":"identifier_exact","reference_answer":"SC-2026-04-22"}
+{"id":"q013","source_id":"q013","category":"identifier_exact","reference_answer":"RC-2026-04-20-V"}
+{"id":"q014","source_id":"q014","category":"identifier_exact","reference_answer":"RC-2026-04-20-K"}
+{"id":"q015","source_id":"q015","category":"identifier_exact","reference_answer":"AP-2026-0429-A"}
+{"id":"q016","source_id":"q016","category":"identifier_exact","reference_answer":"BWCF-CP-2025"}
+{"id":"q017","source_id":"q017","category":"temporal","reference_answer":"2026-02-15."}
+{"id":"q018","source_id":"q018","category":"temporal","reference_answer":"2026-04-01."}
+{"id":"q019","source_id":"q019","category":"temporal","reference_answer":"2026-04-22."}
+{"id":"q020","source_id":"q020","category":"temporal_interval","reference_answer":"14 days from the decision letter."}
+{"id":"q021","source_id":"q021","category":"temporal","reference_answer":"2026-04-29."}
+{"id":"q022","source_id":"q022","category":"temporal","reference_answer":"2026-05-22."}
+{"id":"q023","source_id":"q023","category":"count","reference_answer":"7 applications."}
+{"id":"q024","source_id":"q024","category":"count","reference_answer":"6 applications were eligible (A-01, A-02, A-03, A-04, A-06, A-07). A-05 was ineligible per ER-2."}
+{"id":"q025","source_id":"q025","category":"count","reference_answer":"5 applications awarded: A-01, A-02, A-03, A-04, A-06. (A-07 is declined with appeal pending; A-05 was ineligible.)"}
+{"id":"q026","source_id":"q026","category":"composition","reference_answer":"A-02 and A-06 (both with rural % > 50%)."}
+{"id":"q027","source_id":"q027","category":"count","reference_answer":"2 applications had the cap applied: A-02 (pre-cap $26,400 → $25,000) and A-06 (pre-cap $27,500 → $25,000)."}
+{"id":"q028","source_id":"q028","category":"derived","reference_answer":"$107,000 ($20,000 + $25,000 + $15,000 + $22,000 + $25,000)."}
+{"id":"q029","source_id":"q029","category":"authority","reference_answer":"No. Section 6 states a recusal removes the recused member from voting on the named item only and does not automatically decide the named item in any direction."}
+{"id":"q030","source_id":"q030","category":"status","reference_answer":"Ineligible (fails ER-2; primary service area is Newby County, not a priority county). Not scored."}
+{"id":"q031","source_id":"q031","category":"status","reference_answer":"Declined as of the 2026-04-26 decision; appeal AP-2026-0429-A pending; A-07 has neither been awarded nor finally declined as of compilation date."}
+{"id":"q032","source_id":"q032","category":"authority","reference_answer":"J. Vasquez (per recusal memo RC-2026-04-20-V; J. Vasquez serves on the board of Westside Arts Collective)."}
+{"id":"q033","source_id":"q033","category":"composition","reference_answer":"6 members vote on the recused item (committee size 7 minus 1 recusal). The recused member also does not count toward the quorum for that item."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No. A-07 has been declined as a Spring 2026 funding decision but the appeal is pending; A-07 has neither been awarded nor finally declined as of compilation date."}
+{"id":"q035","source_id":"q035","category":"negative_existential","reference_answer":"No. Section 9.2 states that if the appeal is sustained, the appeal award would be drawn against the Fall 2026 carryover, not against the Spring 2026 awards."}
+{"id":"q036","source_id":"q036","category":"authority","reference_answer":"No. The recusal changed the voting body composition only; the vote carried 4-2 with 6 members voting. Section 8 explicitly states the recusal did not determine the outcome."}
+{"id":"q037","source_id":"q037","category":"negative_existential","reference_answer":"No. Reviewer paper score sheets are filed in the audit binder; the packet uses the systems entry as the working copy. Section 11 references but does not reproduce them."}
+{"id":"q038","source_id":"q038","category":"source_reliability","reference_answer":"The corrected composite (8.4) is operational as of 2026-04-22 and is used for the 2026-04-26 funding decision. The pre-correction composite (7.4) is retained in the audit binder but is not operational."}
+{"id":"q039","source_id":"q039","category":"provenance","reference_answer":"With the foundation secretary."}
+{"id":"q040","source_id":"q040","category":"provenance","reference_answer":"Section 11 lists: Briarwood Foundation by-laws; cycle procedure manual BWCF-CP-2025; reviewer score sheets (paper originals in audit binder); decision letters issued separately to each applicant; and the most recent decennial census-designated rural block data."}

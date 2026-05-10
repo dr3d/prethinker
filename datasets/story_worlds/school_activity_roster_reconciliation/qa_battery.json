@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "Who compiled the trip packet?",
+    "reference_answer": "D. Auerbach, Activities Director, Cedar Hollow Middle School.",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q002",
+    "question": "Which section reproduces the v3 operational roster?",
+    "reference_answer": "Section 1.4 (Roster v3).",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q003",
+    "question": "Which policy defines who counts toward the chaperone ratio?",
+    "reference_answer": "Policy SCO-CH-3 (Chaperone Counting Rules).",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q004",
+    "question": "Where are roster v1 and v2 physically retained for audit?",
+    "reference_answer": "Activities Office filing cabinet 3, drawer 2 (audit binder).",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "Who is the lead chaperone?",
+    "reference_answer": "T. Mendez.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q006",
+    "question": "Which section documents the temporary in-day assignment of S-007?",
+    "reference_answer": "Section 6.1 (and the assignment is documented in scheduling note SCH-2026-05-02-A).",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q007",
+    "question": "What is the role of A. Diaz on the trip?",
+    "reference_answer": "Parent observer (parent of S-014); permitted to observe Group B events Saturday afternoon only; does not count toward the chaperone ratio and does not lodge with the group.",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "What is the destination institution of the trip?",
+    "reference_answer": "Marwick University, Regional Science Olympiad Tournament 14.",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q009",
+    "question": "What is the room number assigned to the school nurse?",
+    "reference_answer": "Marwick Hall room 206 (medical-coverage station).",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q010",
+    "question": "Which policy sets the minimum chaperone ratio?",
+    "reference_answer": "Policy CHPS-OF-12 (Off-Site Activity Standards); minimum 1 chaperone per 10 students for grades 7–8 off-site overnight.",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q011",
+    "question": "What is the packet ID?",
+    "reference_answer": "CHMS-RSO-2026-T07",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q012",
+    "question": "What is the correction notice ID issued on 2026-04-15?",
+    "reference_answer": "CN-2026-04-15",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q013",
+    "question": "What is the device ID of the handheld attendance scanner?",
+    "reference_answer": "DEV-SCAN-07",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q014",
+    "question": "What is the accommodation reference for S-024?",
+    "reference_answer": "AR-2026-031",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q015",
+    "question": "What is V. Lee's bus driver license number?",
+    "reference_answer": "CDL-MA-44291",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q016",
+    "question": "What is the accommodation reference for S-031?",
+    "reference_answer": "AR-2026-027",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q017",
+    "question": "On what date was roster v2 issued?",
+    "reference_answer": "2026-04-09.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q018",
+    "question": "On what date was the v2 errata (S-022 duplicate assignment) discovered?",
+    "reference_answer": "2026-04-14 (discovered by team coach P. Rivera).",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q019",
+    "question": "What time does Bus 1 depart Cedar Hollow on 2026-05-01?",
+    "reference_answer": "06:30 on 2026-05-01.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q020",
+    "question": "What is the duration of S-007's temporary Group C presenter-aide assignment?",
+    "reference_answer": "1 hour 30 minutes (11:00–12:30 on 2026-05-02).",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q021",
+    "question": "What is the time window during which A. Diaz is permitted to observe Group B events?",
+    "reference_answer": "2026-05-02 13:00–17:00 (Saturday afternoon, Group B events only).",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q022",
+    "question": "On what date did S-018 withdraw?",
+    "reference_answer": "2026-04-08.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q023",
+    "question": "How many students are in v3 Group A?",
+    "reference_answer": "12 students.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q024",
+    "question": "How many students are in v3 Group C?",
+    "reference_answer": "13 students.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q025",
+    "question": "What is the operational student total for the trip?",
+    "reference_answer": "35 students (per v3, which is operational).",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q026",
+    "question": "List the student IDs in v3 Group B.",
+    "reference_answer": "S-013, S-014, S-015, S-016, S-017, S-020, S-021, S-022, S-023, S-024 (10 students).",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q027",
+    "question": "How many adults are present on the trip across all roles?",
+    "reference_answer": "8 adults: T. Mendez, J. Phelps, K. Rosario, M. Okonkwo, N. Park, V. Lee, R. Esposito, A. Diaz.",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q028",
+    "question": "How many adults count toward the chaperone ratio?",
+    "reference_answer": "4 chaperones count toward ratio: T. Mendez, J. Phelps, K. Rosario, M. Okonkwo. (N. Park as medical staff, V. Lee and R. Esposito as drivers, and A. Diaz as parent observer do not count.)",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q029",
+    "question": "Which roster version is operational for the trip?",
+    "reference_answer": "Roster v3 (issued 2026-04-15) is operational. v1 and v2 are retained for audit only.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q030",
+    "question": "Per SCO-CH-3, which adult role has authority to direct student behavior and conduct headcount?",
+    "reference_answer": "Chaperone (per SCO-CH-3, an adult assigned to general supervision with authority to direct student behavior and conduct headcount).",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q031",
+    "question": "While in transit, may the bus driver be diverted to general supervision?",
+    "reference_answer": "No. Per SCO-CH-3, while in transit the driver may not leave the driver's seat and does not count toward the ratio.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "custody",
+    "id": "q032",
+    "question": "Who is responsible for medical coverage across all three groups?",
+    "reference_answer": "School nurse N. Park, who provides medical coverage across all three groups; medical events escalate to N. Park.",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "status",
+    "id": "q033",
+    "question": "What is the status of the return-leg attendance scans?",
+    "reference_answer": "Pending. Return-leg scans will be appended after the trip and are not part of this packet (Section 8).",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q034",
+    "question": "Does this packet include the tournament results?",
+    "reference_answer": "No. Tournament results will be circulated by the regional organizers approximately 2026-05-04 and are not part of this packet.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q035",
+    "question": "Was roster v2.1 issued?",
+    "reference_answer": "No. v2.1 was drafted on 2026-04-12 but not issued; the v2.1 reassignment of S-019 was rolled into v3.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q036",
+    "question": "According to v3, is S-022 assigned to Group C?",
+    "reference_answer": "No. In v3 the duplicate Group C listing of S-022 is removed; S-022 is correctly assigned to Group B only.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q037",
+    "question": "Does the packet reproduce the school nurse's confidential file on S-018's withdrawal?",
+    "reference_answer": "No. The school nurse's confidential file on S-018 is referenced but not reproduced in this packet.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q038",
+    "question": "Have the attendance scanner timestamps been audited against an external clock for this packet?",
+    "reference_answer": "No. Section 5 states the scanner timestamps are nominally local time and have not been audited against an external clock for this packet.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q039",
+    "question": "Where roster v1 or v2 conflicts with v3, which version governs?",
+    "reference_answer": "v3 governs. Section 9 states this packet supersedes the standalone roster versions where they conflict, and where v1 or v2 lists a student in a group that v3 has changed, v3 is operational.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q040",
+    "question": "What sources does the packet explicitly reference but not reproduce in full?",
+    "reference_answer": "Section 9 lists: the school nurse's confidential file on S-018; CHPS-OF-12 full text; SCO-CH-3 full text; the Marwick University tournament participant agreement; and the bus driver licenses (originals with drivers, copies on file with Transportation Office). Accommodation requests AR-2026-027, AR-2026-029, AR-2026-031 are referenced; originals are filed with the school nurse.",
+    "source_id": "q040"
+  }
+]

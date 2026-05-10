@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"q001","category":"lookup","reference_answer":"T. Marquez, Corporate Security Manager."}
+{"id":"q002","source_id":"q002","category":"lookup","reference_answer":"After-hours access event at Server Room 4-South (4SR), 2026-04-19."}
+{"id":"q003","source_id":"q003","category":"source_address","reference_answer":"Section 7 (Source Reliability Scoping)."}
+{"id":"q004","source_id":"q004","category":"source_address","reference_answer":"Section 9.2 (Inferences Not Available)."}
+{"id":"q005","source_id":"q005","category":"lookup","reference_answer":"Wi-Fi AP association log (Cisco WLC; identifier PING-2026-0419)."}
+{"id":"q006","source_id":"q006","category":"custody","reference_answer":"HR holds the signed original of the witness statement (SRC-04: WS-2026-0420-TRENT)."}
+{"id":"q007","source_id":"q007","category":"custody","reference_answer":"Corporate Security IT (chain-of-custody record COC-2026-04-21-12891)."}
+{"id":"q008","source_id":"q008","category":"identifier_exact","reference_answer":"PRELIM-2026-04-20-A."}
+{"id":"q009","source_id":"q009","category":"source_address","reference_answer":"Section 8.1 (Resolved conflict: lobby entry timestamp)."}
+{"id":"q010","source_id":"q010","category":"lookup","reference_answer":"Helix Engineering Services (contract HC-2025-117)."}
+{"id":"q011","source_id":"q011","category":"identifier_exact","reference_answer":"HIT-IR-2026-0419-A"}
+{"id":"q012","source_id":"q012","category":"identifier_exact","reference_answer":"B-20471"}
+{"id":"q013","source_id":"q013","category":"identifier_exact","reference_answer":"HLV-LAP-12891"}
+{"id":"q014","source_id":"q014","category":"identifier_exact","reference_answer":"COC-2026-04-21-12891"}
+{"id":"q015","source_id":"q015","category":"identifier_exact","reference_answer":"CC-2026-04-22-LOB"}
+{"id":"q016","source_id":"q016","category":"identifier_exact","reference_answer":"FW-CAM-2026-04-19"}
+{"id":"q017","source_id":"q017","category":"temporal","reference_answer":"Approximately 2026-04-19 22:02:14 UTC (within 1 second of the SRC-01 LOBBY-R1 badge read)."}
+{"id":"q018","source_id":"q018","category":"temporal","reference_answer":"2026-04-19 22:14:08 UTC."}
+{"id":"q019","source_id":"q019","category":"temporal_interval","reference_answer":"45 minutes (22:00:00 to 22:45:00 on 2026-04-19)."}
+{"id":"q020","source_id":"q020","category":"temporal","reference_answer":"2026-04-20 09:14 UTC (deactivation ticket BD-2026-04-20-EM, expedited)."}
+{"id":"q021","source_id":"q021","category":"temporal","reference_answer":"Approximately 22:30 (his observation at 4SR-D1); his next rounds pass at approximately 23:00 found the corridor empty."}
+{"id":"q022","source_id":"q022","category":"temporal","reference_answer":"2026-04-14."}
+{"id":"q023","source_id":"q023","category":"count","reference_answer":"6 source records (SRC-01 through SRC-06)."}
+{"id":"q024","source_id":"q024","category":"count","reference_answer":"3 distinct readers: LOBBY-R1, FLR4-EL2, and 4SR-D1. (LOBBY-R1 and FLR4-EL2 are each used twice; 4SR-D1 once.)"}
+{"id":"q025","source_id":"q025","category":"count","reference_answer":"2 witness statements (SRC-04 from R. Trent and SRC-06 from S. Anders)."}
+{"id":"q026","source_id":"q026","category":"composition","reference_answer":"SRC-01 (no photo or biometric); SRC-04 and SRC-06 (no clear face); SRC-05 (does not record device user identity)."}
+{"id":"q027","source_id":"q027","category":"count","reference_answer":"3 scenarios (labelled (a), (b), (c) in Section 8.2)."}
+{"id":"q028","source_id":"q028","category":"count","reference_answer":"2 AP associations: AP-04-S2 at 22:08:31 and AP-LOB-1 at 22:50:14."}
+{"id":"q029","source_id":"q029","category":"source_reliability","reference_answer":"No. Section 2 and Section 7 state SRC-01 records the badge identifier, not the bearer; no photo or biometric is collected."}
+{"id":"q030","source_id":"q030","category":"status","reference_answer":"Not closed as of 2026-04-19; the badge remained active. Closure of BD-2026-04-15-J is a separate process question being reviewed by Corporate Security IT and is not part of this packet."}
+{"id":"q031","source_id":"q031","category":"source_reliability","reference_answer":"Device-to-AP association — i.e., approximate location of the device (within the AP coverage zone) — and the time of association."}
+{"id":"q032","source_id":"q032","category":"source_reliability","reference_answer":"Activity performed on the device (association is not activity), and the identity of the device user."}
+{"id":"q033","source_id":"q033","category":"status","reference_answer":"No. The header explicitly states the packet is an internal investigation packet and is not a finding of misconduct."}
+{"id":"q034","source_id":"q034","category":"unresolved","reference_answer":"No. Section 9.2 states the packet does not assign individual responsibility; that is a function of HR review and (if warranted) law-enforcement referral."}
+{"id":"q035","source_id":"q035","category":"negative_existential","reference_answer":"No. Section 5.2 states the absence of CAM-4S-12 footage during 22:00–22:45 does not establish that no movement occurred; the camera was offline by design."}
+{"id":"q036","source_id":"q036","category":"unresolved","reference_answer":"No. Section 8.2 explicitly preserves the SRC-04 vs SRC-06 clothing-description conflict as unresolved; the available evidence is not sufficient to choose among scenarios (a), (b), or (c)."}
+{"id":"q037","source_id":"q037","category":"negative_existential","reference_answer":"No. CAM-4S-12 was offline for the firmware update FW-CAM-2026-04-19 from 22:00 to 22:45; the 22:14:08 entry was not captured."}
+{"id":"q038","source_id":"q038","category":"source_reliability","reference_answer":"Identity of the bearer. SRC-01 records the badge identifier and the reader identity, but not who physically used the badge (no photo, no biometric)."}
+{"id":"q039","source_id":"q039","category":"supersession","reference_answer":"This packet (HIT-IR-2026-0419-A) governs. PRELIM-2026-04-20-A is superseded but retained for audit."}
+{"id":"q040","source_id":"q040","category":"provenance","reference_answer":"Section 11 lists: full Lenel access control system export; full Cisco WLC AP association log export; CAM-LOB-03 video file (held under chain of custody); CAM-4S-12 maintenance log; J. Holloway's contractor file (HR; HC-2025-117); the DEV-12891 disk image (COC-2026-04-21-12891); the building reference clock REF-NTP-B audit log; and the superseded preliminary memo PRELIM-2026-04-20-A."}

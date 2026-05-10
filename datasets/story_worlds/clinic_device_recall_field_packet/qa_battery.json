@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "What is the manufacturer of the MP-450 device subject to recall MV-2026-04?",
+    "reference_answer": "Medivolt Pharma Systems",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q002",
+    "question": "Which section of the packet contains the patient-use exception memo?",
+    "reference_answer": "Section 4 (Patient-Use Exception Memo)",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q003",
+    "question": "What clinic abbreviation is used for Eastfield Pediatric Associates?",
+    "reference_answer": "EPA",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q004",
+    "question": "Who is the manufacturer's regional liaison named in the recall bulletin?",
+    "reference_answer": "K. Halberg",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "Which storage cabinet at NBFH was sealed for quarantine of in-scope devices?",
+    "reference_answer": "Cabinet B-3",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q006",
+    "question": "In which section of the packet is the firmware inquiry described as unresolved?",
+    "reference_answer": "Section 7 (Unresolved Item — Firmware Inquiry)",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q007",
+    "question": "What was the failure rate of the secondary occlusion sensor as stated in the original recall bulletin?",
+    "reference_answer": "0.7 per 1,000 hours of use",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "What is the procedure code for the manufacturer's in-clinic verification?",
+    "reference_answer": "MV-VP-04-A",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q009",
+    "question": "What was the manufacturer's stated reason for the recall?",
+    "reference_answer": "Intermittent failure of the secondary occlusion sensor under high-viscosity infusates",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q010",
+    "question": "Which section of the packet defines the meaning of \"Active (exception)\"?",
+    "reference_answer": "Section 10 (Glossary)",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q011",
+    "question": "What is the serial number of device MP-009?",
+    "reference_answer": "4501-AA-100158",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q012",
+    "question": "What device ID is assigned to serial 4501-AA-100165?",
+    "reference_answer": "MP-012",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q013",
+    "question": "What patient ID is named in the exception for MP-013?",
+    "reference_answer": "NBFH-PT-3402",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q014",
+    "question": "What is the identifier of the supersession notice issued on 2026-04-16?",
+    "reference_answer": "MV-2026-04-Rev1",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q015",
+    "question": "What seal numbers are recorded for the NBFH Cabinet B-3 quarantine seal?",
+    "reference_answer": "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q016",
+    "question": "What is the device ID assigned to serial 4501-AA-100128?",
+    "reference_answer": "MP-002",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q017",
+    "question": "What is the packet ID for this compilation?",
+    "reference_answer": "CVCN-FP-2026-019",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q018",
+    "question": "On what date was the original recall bulletin MV-2026-04 issued?",
+    "reference_answer": "2026-04-12",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q019",
+    "question": "On what date was the supersession notice issued?",
+    "reference_answer": "2026-04-16",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q020",
+    "question": "According to the inventory table, when was MP-008 last used?",
+    "reference_answer": "2026-03-22",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q021",
+    "question": "What is the latest expiration date among the patient-use exceptions in force?",
+    "reference_answer": "2026-05-01 (the MP-009 chelation course exception)",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q022",
+    "question": "Over what date range did the manufacturer technician conduct the CIM and EPA verification visits?",
+    "reference_answer": "2026-04-14 through 2026-04-15",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q023",
+    "question": "By what date had the manufacturer's regional liaison anticipated a determination on firmware 4.2.1?",
+    "reference_answer": "2026-04-25",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q024",
+    "question": "How many MP-450 devices are listed in the network inventory table?",
+    "reference_answer": "16",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q025",
+    "question": "How many devices in the inventory table have a Repair Verified value of exactly \"Yes\"?",
+    "reference_answer": "4 (MP-007, MP-010, MP-011, MP-014)",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q026",
+    "question": "Which clinic holds the most devices in the inventory table, and how many?",
+    "reference_answer": "NBFH, with 6 devices (MP-001, MP-002, MP-003, MP-009, MP-013, MP-016)",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q027",
+    "question": "How many devices listed in the inventory table fall outside the final recall scope as defined by the supersession notice?",
+    "reference_answer": "2 devices (MP-001 and MP-002, with serials 4501-AA-100127 and 4501-AA-100128, both below the final-scope lower bound of 4501-AA-100136)",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q028",
+    "question": "How many devices are currently held under \"Active (exception)\" status, and at which clinic?",
+    "reference_answer": "2 devices (MP-009 and MP-013), both at NBFH",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q029",
+    "question": "Whose authority is required to issue a patient-use exception?",
+    "reference_answer": "The Network Medical Director (Dr. R. Iwasaki)",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "status",
+    "id": "q030",
+    "question": "What is the current Repair Verified value for MP-012?",
+    "reference_answer": "Scheduled",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "status",
+    "id": "q031",
+    "question": "What is the inventory status of MP-008?",
+    "reference_answer": "Withdrawn (inventory)",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q032",
+    "question": "Whose written authority is required to formally release verified devices from quarantine at the network level?",
+    "reference_answer": "The Network Medical Director (Dr. R. Iwasaki) — formal release sign-off at the network level is required",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "custody",
+    "id": "q033",
+    "question": "Who retains the keys to NBFH Cabinet B-3?",
+    "reference_answer": "D. Rourke (NBFH Site Lead) personally",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "What outstanding question remains regarding firmware 4.2.1?",
+    "reference_answer": "Whether MP-450 units running firmware 4.2.1 require an additional correction even when the sensor module passes the MV-VP-04-A procedure; the Medivolt engineering determination has not been received as of the compilation date",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q035",
+    "question": "As of the compilation date, has any NBFH device been visited by the manufacturer technician for the verification procedure?",
+    "reference_answer": "No — Section 5 explicitly states no NBFH devices have been visited by manufacturer technician as of compilation date",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q036",
+    "question": "Does the inventory table in Section 3 include the firmware version of any device?",
+    "reference_answer": "No — Section 7 explicitly states firmware version is recorded on the device service plate but not duplicated in the inventory table",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q037",
+    "question": "As of the compilation date, has the network medical director issued a formal release for the CIM devices that have completed verification?",
+    "reference_answer": "No — the 2026-04-15 quarantine log entry states the formal release from the network medical director has not yet been issued as of compilation",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q038",
+    "question": "Is the Medivolt engineering determination on firmware 4.2.1 reproduced or summarized in this packet?",
+    "reference_answer": "No — the determination is named as awaited and absent; only Halberg's intermediate reply confirming it is pending is reproduced",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q039",
+    "question": "What is the source within the packet for the statement that MP-001's status is \"Active\"?",
+    "reference_answer": "Section 3 — the network inventory table compiled on 2026-04-19 from site-lead postings",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q040",
+    "question": "Is the Status field in Section 3 a reliable indicator of whether a device falls within the final recall scope?",
+    "reference_answer": "No — Section 3's preamble and Section 9 explicitly state Status reflects the posting clinic's administrative state, which may lag manufacturer scope; recall scope is determined by serial range per the supersession notice",
+    "source_id": "q040"
+  }
+]

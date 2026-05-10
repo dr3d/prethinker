@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "reference_answer": "D. Auerbach, Activities Director, Cedar Hollow Middle School.", "source_id": "q001"}
+{"category": "source_address", "id": "q002", "reference_answer": "Section 1.4 (Roster v3).", "source_id": "q002"}
+{"category": "lookup", "id": "q003", "reference_answer": "Policy SCO-CH-3 (Chaperone Counting Rules).", "source_id": "q003"}
+{"category": "lookup", "id": "q004", "reference_answer": "Activities Office filing cabinet 3, drawer 2 (audit binder).", "source_id": "q004"}
+{"category": "lookup", "id": "q005", "reference_answer": "T. Mendez.", "source_id": "q005"}
+{"category": "source_address", "id": "q006", "reference_answer": "Section 6.1 (and the assignment is documented in scheduling note SCH-2026-05-02-A).", "source_id": "q006"}
+{"category": "lookup", "id": "q007", "reference_answer": "Parent observer (parent of S-014); permitted to observe Group B events Saturday afternoon only; does not count toward the chaperone ratio and does not lodge with the group.", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "reference_answer": "Marwick University, Regional Science Olympiad Tournament 14.", "source_id": "q008"}
+{"category": "lookup", "id": "q009", "reference_answer": "Marwick Hall room 206 (medical-coverage station).", "source_id": "q009"}
+{"category": "lookup", "id": "q010", "reference_answer": "Policy CHPS-OF-12 (Off-Site Activity Standards); minimum 1 chaperone per 10 students for grades 7–8 off-site overnight.", "source_id": "q010"}
+{"category": "identifier_exact", "id": "q011", "reference_answer": "CHMS-RSO-2026-T07", "source_id": "q011"}
+{"category": "identifier_exact", "id": "q012", "reference_answer": "CN-2026-04-15", "source_id": "q012"}
+{"category": "identifier_exact", "id": "q013", "reference_answer": "DEV-SCAN-07", "source_id": "q013"}
+{"category": "identifier_exact", "id": "q014", "reference_answer": "AR-2026-031", "source_id": "q014"}
+{"category": "identifier_exact", "id": "q015", "reference_answer": "CDL-MA-44291", "source_id": "q015"}
+{"category": "identifier_exact", "id": "q016", "reference_answer": "AR-2026-027", "source_id": "q016"}
+{"category": "temporal", "id": "q017", "reference_answer": "2026-04-09.", "source_id": "q017"}
+{"category": "temporal", "id": "q018", "reference_answer": "2026-04-14 (discovered by team coach P. Rivera).", "source_id": "q018"}
+{"category": "temporal", "id": "q019", "reference_answer": "06:30 on 2026-05-01.", "source_id": "q019"}
+{"category": "temporal_interval", "id": "q020", "reference_answer": "1 hour 30 minutes (11:00–12:30 on 2026-05-02).", "source_id": "q020"}
+{"category": "temporal_interval", "id": "q021", "reference_answer": "2026-05-02 13:00–17:00 (Saturday afternoon, Group B events only).", "source_id": "q021"}
+{"category": "temporal", "id": "q022", "reference_answer": "2026-04-08.", "source_id": "q022"}
+{"category": "count", "id": "q023", "reference_answer": "12 students.", "source_id": "q023"}
+{"category": "count", "id": "q024", "reference_answer": "13 students.", "source_id": "q024"}
+{"category": "count", "id": "q025", "reference_answer": "35 students (per v3, which is operational).", "source_id": "q025"}
+{"category": "composition", "id": "q026", "reference_answer": "S-013, S-014, S-015, S-016, S-017, S-020, S-021, S-022, S-023, S-024 (10 students).", "source_id": "q026"}
+{"category": "count", "id": "q027", "reference_answer": "8 adults: T. Mendez, J. Phelps, K. Rosario, M. Okonkwo, N. Park, V. Lee, R. Esposito, A. Diaz.", "source_id": "q027"}
+{"category": "count", "id": "q028", "reference_answer": "4 chaperones count toward ratio: T. Mendez, J. Phelps, K. Rosario, M. Okonkwo. (N. Park as medical staff, V. Lee and R. Esposito as drivers, and A. Diaz as parent observer do not count.)", "source_id": "q028"}
+{"category": "authority", "id": "q029", "reference_answer": "Roster v3 (issued 2026-04-15) is operational. v1 and v2 are retained for audit only.", "source_id": "q029"}
+{"category": "authority", "id": "q030", "reference_answer": "Chaperone (per SCO-CH-3, an adult assigned to general supervision with authority to direct student behavior and conduct headcount).", "source_id": "q030"}
+{"category": "authority", "id": "q031", "reference_answer": "No. Per SCO-CH-3, while in transit the driver may not leave the driver's seat and does not count toward the ratio.", "source_id": "q031"}
+{"category": "custody", "id": "q032", "reference_answer": "School nurse N. Park, who provides medical coverage across all three groups; medical events escalate to N. Park.", "source_id": "q032"}
+{"category": "status", "id": "q033", "reference_answer": "Pending. Return-leg scans will be appended after the trip and are not part of this packet (Section 8).", "source_id": "q033"}
+{"category": "negative_existential", "id": "q034", "reference_answer": "No. Tournament results will be circulated by the regional organizers approximately 2026-05-04 and are not part of this packet.", "source_id": "q034"}
+{"category": "negative_existential", "id": "q035", "reference_answer": "No. v2.1 was drafted on 2026-04-12 but not issued; the v2.1 reassignment of S-019 was rolled into v3.", "source_id": "q035"}
+{"category": "composition", "id": "q036", "reference_answer": "No. In v3 the duplicate Group C listing of S-022 is removed; S-022 is correctly assigned to Group B only.", "source_id": "q036"}
+{"category": "negative_existential", "id": "q037", "reference_answer": "No. The school nurse's confidential file on S-018 is referenced but not reproduced in this packet.", "source_id": "q037"}
+{"category": "source_reliability", "id": "q038", "reference_answer": "No. Section 5 states the scanner timestamps are nominally local time and have not been audited against an external clock for this packet.", "source_id": "q038"}
+{"category": "provenance", "id": "q039", "reference_answer": "v3 governs. Section 9 states this packet supersedes the standalone roster versions where they conflict, and where v1 or v2 lists a student in a group that v3 has changed, v3 is operational.", "source_id": "q039"}
+{"category": "provenance", "id": "q040", "reference_answer": "Section 9 lists: the school nurse's confidential file on S-018; CHPS-OF-12 full text; SCO-CH-3 full text; the Marwick University tournament participant agreement; and the bus driver licenses (originals with drivers, copies on file with Transportation Office). Accommodation requests AR-2026-027, AR-2026-029, AR-2026-031 are referenced; originals are filed with the school nurse.", "source_id": "q040"}

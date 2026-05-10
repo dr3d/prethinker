@@ -74,7 +74,11 @@ def test_selector_guard_ledger_scaffolds_audit_fields() -> None:
     first = ledger["entries"][0]
     assert "audit_status" in first
     assert "transfer_evidence" in first
+    assert "retirement_bucket" in first
+    assert "retirement_priority" in first
     assert "retirement_condition" in first
+    assert ledger["summary"]["retirement_bucket_counts"]
+    assert ledger["summary"]["retirement_priority_counts"]
 
 
 def test_selector_guard_ledger_markdown_renders() -> None:
@@ -83,5 +87,7 @@ def test_selector_guard_ledger_markdown_renders() -> None:
 
     assert "# Selector Guard Ledger" in markdown
     assert "## Audit Policy" in markdown
+    assert "## Retirement Pressure" in markdown
+    assert "## First Retirement Slices" in markdown
     assert "## Ledger Entries" in markdown
     assert "retirement" in markdown.casefold()

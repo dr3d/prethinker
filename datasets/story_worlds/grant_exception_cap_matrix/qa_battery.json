@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q001",
+    "question": "Who compiled this cycle packet?",
+    "reference_answer": "L. Yamada, Grants Administrator.",
+    "source_id": "q001"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q002",
+    "question": "On what date did the committee meet to make funding decisions?",
+    "reference_answer": "2026-04-26.",
+    "source_id": "q002"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q003",
+    "question": "Which section of the packet contains the awards summary?",
+    "reference_answer": "Section 10 (Awards Summary).",
+    "source_id": "q003"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q004",
+    "question": "Which section explains the score correction memo?",
+    "reference_answer": "Section 5.1 (Score Correction Memo SC-2026-04-22).",
+    "source_id": "q004"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q005",
+    "question": "What is the per-grant cap?",
+    "reference_answer": "$25,000 per grant.",
+    "source_id": "q005"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q006",
+    "question": "What is the total cycle budget?",
+    "reference_answer": "$150,000.",
+    "source_id": "q006"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q007",
+    "question": "Which section enumerates pending items?",
+    "reference_answer": "Section 9 (Pending Items).",
+    "source_id": "q007"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q008",
+    "question": "What is the funding threshold composite score?",
+    "reference_answer": "Composite score ≥ 8.0 (out of 10.0).",
+    "source_id": "q008"
+  },
+  {
+    "behavior": "",
+    "category": "lookup",
+    "id": "q009",
+    "question": "Which referenced document defines the appeal window?",
+    "reference_answer": "The cycle procedure manual BWCF-CP-2025.",
+    "source_id": "q009"
+  },
+  {
+    "behavior": "",
+    "category": "source_address",
+    "id": "q010",
+    "question": "Which section sets out the per-application award amount computation?",
+    "reference_answer": "Section 7 (Award Amount Computation).",
+    "source_id": "q010"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q011",
+    "question": "What is the cycle ID?",
+    "reference_answer": "BWCF-MG-2026-S",
+    "source_id": "q011"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q012",
+    "question": "What is the score correction memo ID for A-02?",
+    "reference_answer": "SC-2026-04-22",
+    "source_id": "q012"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q013",
+    "question": "What is the recusal memo ID for J. Vasquez?",
+    "reference_answer": "RC-2026-04-20-V",
+    "source_id": "q013"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q014",
+    "question": "What is the recusal memo ID for M. Kessler?",
+    "reference_answer": "RC-2026-04-20-K",
+    "source_id": "q014"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q015",
+    "question": "What is the appeal ID filed by the A-07 applicant?",
+    "reference_answer": "AP-2026-0429-A",
+    "source_id": "q015"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_exact",
+    "id": "q016",
+    "question": "What is the cycle procedure manual reference?",
+    "reference_answer": "BWCF-CP-2025",
+    "source_id": "q016"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q017",
+    "question": "What date did applications open for this cycle?",
+    "reference_answer": "2026-02-15.",
+    "source_id": "q017"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q018",
+    "question": "What date did applications close?",
+    "reference_answer": "2026-04-01.",
+    "source_id": "q018"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q019",
+    "question": "What date was the score correction memo (SC) for A-02 issued?",
+    "reference_answer": "2026-04-22.",
+    "source_id": "q019"
+  },
+  {
+    "behavior": "",
+    "category": "temporal_interval",
+    "id": "q020",
+    "question": "What is the appeal window length specified by cycle procedure?",
+    "reference_answer": "14 days from the decision letter.",
+    "source_id": "q020"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q021",
+    "question": "On what date was AP-2026-0429-A filed?",
+    "reference_answer": "2026-04-29.",
+    "source_id": "q021"
+  },
+  {
+    "behavior": "",
+    "category": "temporal",
+    "id": "q022",
+    "question": "On what date is the next scheduled committee meeting where the A-07 appeal will be reviewed?",
+    "reference_answer": "2026-05-22.",
+    "source_id": "q022"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q023",
+    "question": "How many applications were submitted in this cycle?",
+    "reference_answer": "7 applications.",
+    "source_id": "q023"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q024",
+    "question": "How many applications were eligible (proceeded to scoring)?",
+    "reference_answer": "6 applications were eligible (A-01, A-02, A-03, A-04, A-06, A-07). A-05 was ineligible per ER-2.",
+    "source_id": "q024"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q025",
+    "question": "How many applications have been awarded as of the compilation date?",
+    "reference_answer": "5 applications awarded: A-01, A-02, A-03, A-04, A-06. (A-07 is declined with appeal pending; A-05 was ineligible.)",
+    "source_id": "q025"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q026",
+    "question": "List the application IDs that received the EX-B rural service-area bonus.",
+    "reference_answer": "A-02 and A-06 (both with rural % > 50%).",
+    "source_id": "q026"
+  },
+  {
+    "behavior": "",
+    "category": "count",
+    "id": "q027",
+    "question": "How many applications had the per-grant cap applied?",
+    "reference_answer": "2 applications had the cap applied: A-02 (pre-cap $26,400 → $25,000) and A-06 (pre-cap $27,500 → $25,000).",
+    "source_id": "q027"
+  },
+  {
+    "behavior": "",
+    "category": "derived",
+    "id": "q028",
+    "question": "What is the total awarded amount in this cycle as of the compilation date?",
+    "reference_answer": "$107,000 ($20,000 + $25,000 + $15,000 + $22,000 + $25,000).",
+    "source_id": "q028"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q029",
+    "question": "Per cycle procedure, does a recusal automatically decide the named item?",
+    "reference_answer": "No. Section 6 states a recusal removes the recused member from voting on the named item only and does not automatically decide the named item in any direction.",
+    "source_id": "q029"
+  },
+  {
+    "behavior": "",
+    "category": "status",
+    "id": "q030",
+    "question": "What is the status of A-05?",
+    "reference_answer": "Ineligible (fails ER-2; primary service area is Newby County, not a priority county). Not scored.",
+    "source_id": "q030"
+  },
+  {
+    "behavior": "",
+    "category": "status",
+    "id": "q031",
+    "question": "What is the status of A-07 as of the compilation date?",
+    "reference_answer": "Declined as of the 2026-04-26 decision; appeal AP-2026-0429-A pending; A-07 has neither been awarded nor finally declined as of compilation date.",
+    "source_id": "q031"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q032",
+    "question": "Which committee member is recused from voting on A-04?",
+    "reference_answer": "J. Vasquez (per recusal memo RC-2026-04-20-V; J. Vasquez serves on the board of Westside Arts Collective).",
+    "source_id": "q032"
+  },
+  {
+    "behavior": "",
+    "category": "composition",
+    "id": "q033",
+    "question": "With one recusal filed for a single item, how many members vote on that item?",
+    "reference_answer": "6 members vote on the recused item (committee size 7 minus 1 recusal). The recused member also does not count toward the quorum for that item.",
+    "source_id": "q033"
+  },
+  {
+    "behavior": "",
+    "category": "unresolved",
+    "id": "q034",
+    "question": "As of the compilation date, has A-07 been finally declined?",
+    "reference_answer": "No. A-07 has been declined as a Spring 2026 funding decision but the appeal is pending; A-07 has neither been awarded nor finally declined as of compilation date.",
+    "source_id": "q034"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q035",
+    "question": "If the A-07 appeal is sustained, will the appeal award be drawn from the Spring 2026 awards listed in Section 10?",
+    "reference_answer": "No. Section 9.2 states that if the appeal is sustained, the appeal award would be drawn against the Fall 2026 carryover, not against the Spring 2026 awards.",
+    "source_id": "q035"
+  },
+  {
+    "behavior": "",
+    "category": "authority",
+    "id": "q036",
+    "question": "Did the recusal of J. Vasquez determine the outcome of A-04?",
+    "reference_answer": "No. The recusal changed the voting body composition only; the vote carried 4-2 with 6 members voting. Section 8 explicitly states the recusal did not determine the outcome.",
+    "source_id": "q036"
+  },
+  {
+    "behavior": "",
+    "category": "negative_existential",
+    "id": "q037",
+    "question": "Are reviewer paper score sheets reproduced in this packet?",
+    "reference_answer": "No. Reviewer paper score sheets are filed in the audit binder; the packet uses the systems entry as the working copy. Section 11 references but does not reproduce them.",
+    "source_id": "q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reliability",
+    "id": "q038",
+    "question": "Per the packet, which composite for A-02 is operational — the pre-correction (7.4) or the corrected (8.4)?",
+    "reference_answer": "The corrected composite (8.4) is operational as of 2026-04-22 and is used for the 2026-04-26 funding decision. The pre-correction composite (7.4) is retained in the audit binder but is not operational.",
+    "source_id": "q038"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q039",
+    "question": "Where are the recusal memo originals filed?",
+    "reference_answer": "With the foundation secretary.",
+    "source_id": "q039"
+  },
+  {
+    "behavior": "",
+    "category": "provenance",
+    "id": "q040",
+    "question": "What sources does the packet explicitly reference but not reproduce in full?",
+    "reference_answer": "Section 11 lists: Briarwood Foundation by-laws; cycle procedure manual BWCF-CP-2025; reviewer score sheets (paper originals in audit binder); decision letters issued separately to each applicant; and the most recent decennial census-designated rural block data.",
+    "source_id": "q040"
+  }
+]

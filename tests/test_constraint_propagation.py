@@ -68,6 +68,43 @@ class ConstraintPropagationTests(unittest.TestCase):
         result = ConstraintPropagator().propagate(problem)
         self.assertEqual(result.domains["task"], {"inspect", "ship"})
 
+    def test_temporal_order_constraints_reduce_date_domains(self) -> None:
+        problem = PropagationProblem(
+            initial_domains={
+                "start": {"2026_04_28", "2026_04_29", "2026_05_01"},
+                "end": {"2026_04_28", "2026_04_30"},
+            },
+            domain_constraints=[
+                DomainConstraintSpec(kind="before_or_equal", left="start", right="end"),
+            ],
+        )
+        result = ConstraintPropagator().propagate(problem)
+        self.assertEqual(result.domains["start"], {"2026_04_28", "2026_04_29"})
+        self.assertEqual(result.domains["end"], {"2026_04_28", "2026_04_30"})
+
+    def test_temporal_value_constraint_reduces_timestamp_domains(self) -> None:
+        problem = PropagationProblem(
+            initial_domains={
+                "sample_failure_time": {
+                    "2026_04_28_03_45",
+                    "2026_04_28_04_45",
+                    "2026_04_29_00_15",
+                }
+            },
+            domain_constraints=[
+                DomainConstraintSpec(
+                    kind="at_or_before",
+                    left="sample_failure_time",
+                    values={"2026_04_28_04_45"},
+                )
+            ],
+        )
+        result = ConstraintPropagator().propagate(problem)
+        self.assertEqual(
+            result.domains["sample_failure_time"],
+            {"2026_04_28_03_45", "2026_04_28_04_45"},
+        )
+
     def test_runner_returns_serializable_shape(self) -> None:
         spec = {
             "initial_states": [{"predicate": "ready", "args": ["line_1"]}],

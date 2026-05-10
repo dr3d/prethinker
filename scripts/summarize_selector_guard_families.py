@@ -462,12 +462,16 @@ def build_guard_ledger(report: dict[str, Any]) -> dict[str, Any]:
                     "score_delta": "unknown",
                     "transfer_evidence": "not yet audited",
                     "regression_evidence": "not yet audited",
+                    "retirement_bucket": _retirement_bucket(reason),
+                    "retirement_priority": _retirement_priority(reason),
                     "retirement_condition": _suggest_retirement_condition(reason),
                 }
             )
 
     status_counts = Counter(entry["audit_status"] for entry in entries)
     family_counts = Counter(entry["family"] for entry in entries)
+    retirement_bucket_counts = Counter(entry["retirement_bucket"] for entry in entries)
+    retirement_priority_counts = Counter(entry["retirement_priority"] for entry in entries)
     return {
         "schema_version": "selector_guard_ledger_v1",
         "generated_at": report.get("generated_at", ""),
@@ -479,6 +483,8 @@ def build_guard_ledger(report: dict[str, Any]) -> dict[str, Any]:
             "unclassified_count": report.get("unclassified_count", 0),
             "status_counts": dict(sorted(status_counts.items())),
             "family_counts": dict(sorted(family_counts.items())),
+            "retirement_bucket_counts": dict(sorted(retirement_bucket_counts.items())),
+            "retirement_priority_counts": dict(sorted(retirement_priority_counts.items())),
         },
         "audit_policy": {
             "transfer_guard": "Promote only after replay evidence shows the guard helps more than one fixture or domain without known regression.",
@@ -499,6 +505,60 @@ def _initial_guard_audit_status(*, reason: str, duplicate_count: int) -> str:
     if any(marker in folded for marker in ("count", "arithmetic", "threshold", "average", "density")):
         return "candidate_guard:helper_pressure"
     return "candidate_guard"
+
+
+def _retirement_bucket(reason: str) -> str:
+    folded = reason.casefold()
+    if any(marker in folded for marker in ("identifier", "document-identifier", "source-provenance", "printed", "source-id")):
+        return "pinboard_or_source_addressability"
+    if any(
+        marker in folded
+        for marker in (
+            "count",
+            "arithmetic",
+            "average",
+            "density",
+            "threshold",
+            "interval",
+            "deadline",
+            "duration",
+            "elapsed",
+            "clock",
+            "timestamp",
+        )
+    ):
+        return "helper_or_constraint_substrate"
+    if any(marker in folded for marker in ("row-volume", "broad", "expanded source-row", "volume")):
+        return "selector_scoring_or_surface_penalty"
+    if any(
+        marker in folded
+        for marker in (
+            "status",
+            "completed",
+            "current",
+            "resolved",
+            "pending",
+            "role",
+            "authority",
+            "custody",
+            "ownership",
+            "possession",
+        )
+    ):
+        return "compile_surface"
+    return "manual_audit"
+
+
+def _retirement_priority(reason: str) -> str:
+    bucket = _retirement_bucket(reason)
+    folded = reason.casefold()
+    if bucket in {"pinboard_or_source_addressability", "helper_or_constraint_substrate"}:
+        return "high"
+    if "row-volume" in folded or "broad" in folded or "volume" in folded:
+        return "medium"
+    if bucket == "compile_surface":
+        return "medium"
+    return "low"
 
 
 def _suggest_retirement_condition(reason: str) -> str:
@@ -666,6 +726,17 @@ def render_guard_ledger_markdown(ledger: dict[str, Any]) -> str:
     summary = ledger.get("summary") if isinstance(ledger.get("summary"), dict) else {}
     status_counts = summary.get("status_counts") if isinstance(summary.get("status_counts"), dict) else {}
     family_counts = summary.get("family_counts") if isinstance(summary.get("family_counts"), dict) else {}
+    retirement_bucket_counts = (
+        summary.get("retirement_bucket_counts")
+        if isinstance(summary.get("retirement_bucket_counts"), dict)
+        else {}
+    )
+    retirement_priority_counts = (
+        summary.get("retirement_priority_counts")
+        if isinstance(summary.get("retirement_priority_counts"), dict)
+        else {}
+    )
+    entries = [entry for entry in ledger.get("entries", []) if isinstance(entry, dict)]
     lines = [
         "# Selector Guard Ledger",
         "",
@@ -692,6 +763,34 @@ def render_guard_ledger_markdown(ledger: dict[str, Any]) -> str:
     lines.extend(["", "## Family Pressure", "", "| Family | Count |", "| --- | ---: |"])
     for family, count in family_counts.items():
         lines.append(f"| `{family}` | {count} |")
+    lines.extend(["", "## Retirement Pressure", "", "| Bucket | Count |", "| --- | ---: |"])
+    for bucket, count in retirement_bucket_counts.items():
+        lines.append(f"| `{bucket}` | {count} |")
+    lines.extend(["", "| Priority | Count |", "| --- | ---: |"])
+    for priority, count in retirement_priority_counts.items():
+        lines.append(f"| `{priority}` | {count} |")
+
+    high_priority = [entry for entry in entries if entry.get("retirement_priority") == "high"]
+    if high_priority:
+        lines.extend(
+            [
+                "",
+                "## First Retirement Slices",
+                "",
+                "These are not automatic deletions. They are the first replay slices to",
+                "try after helper, constraint, or pinboard work lands. A guard retires",
+                "only when replay passes without it.",
+                "",
+                "| Bucket | Family | Reason | Site |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        for entry in high_priority[:24]:
+            reason = _md_cell(str(entry.get("reason", "")))
+            site = f"{entry.get('source', '')}:{entry.get('line', '')}"
+            lines.append(
+                f"| `{entry.get('retirement_bucket', '')}` | `{entry.get('family', '')}` | {reason} | `{site}` |"
+            )
     lines.extend(
         [
             "",
@@ -704,18 +803,18 @@ def render_guard_ledger_markdown(ledger: dict[str, Any]) -> str:
             "",
             "## Ledger Entries",
             "",
-            "| Status | Family | Reason | Site | Retirement Condition |",
-            "| --- | --- | --- | --- | --- |",
+            "| Status | Priority | Bucket | Family | Reason | Site | Retirement Condition |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
         ]
     )
-    for entry in ledger.get("entries", []):
-        if not isinstance(entry, dict):
-            continue
+    for entry in entries:
         reason = _md_cell(str(entry.get("reason", "")))
         retirement = _md_cell(str(entry.get("retirement_condition", "")))
         site = f"{entry.get('source', '')}:{entry.get('line', '')}"
         lines.append(
-            f"| `{entry.get('audit_status', '')}` | `{entry.get('family', '')}` | {reason} | `{site}` | {retirement} |"
+            f"| `{entry.get('audit_status', '')}` | `{entry.get('retirement_priority', '')}` | "
+            f"`{entry.get('retirement_bucket', '')}` | `{entry.get('family', '')}` | {reason} | "
+            f"`{site}` | {retirement} |"
         )
     lines.extend(
         [

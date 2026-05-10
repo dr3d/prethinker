@@ -1,0 +1,2 @@
+{"compile_run": false, "evidence_lane": "fixture_admission", "oracle_supplied": true, "qa_rows": 40, "run_id": "PSAR-000", "source_path": "datasets\\story_worlds\\probate_storage_access_register\\source.md", "starter_profile_supplied": false, "timestamp": "2026-05-10"}
+{"compile_admitted": 109, "compile_run": true, "compile_skipped": 15, "evidence_lane": "openrouter_cold_acquisition_baseline", "exact": 34, "miss": 5, "oracle_supplied": true, "partial": 1, "qa_rows": 40, "run_id": "PSAR-001", "timestamp": "2026-05-10"}

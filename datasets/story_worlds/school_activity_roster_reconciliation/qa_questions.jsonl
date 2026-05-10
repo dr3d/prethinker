@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "Who compiled the trip packet?", "source_id": "q001"}
+{"category": "source_address", "id": "q002", "question": "Which section reproduces the v3 operational roster?", "source_id": "q002"}
+{"category": "lookup", "id": "q003", "question": "Which policy defines who counts toward the chaperone ratio?", "source_id": "q003"}
+{"category": "lookup", "id": "q004", "question": "Where are roster v1 and v2 physically retained for audit?", "source_id": "q004"}
+{"category": "lookup", "id": "q005", "question": "Who is the lead chaperone?", "source_id": "q005"}
+{"category": "source_address", "id": "q006", "question": "Which section documents the temporary in-day assignment of S-007?", "source_id": "q006"}
+{"category": "lookup", "id": "q007", "question": "What is the role of A. Diaz on the trip?", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "question": "What is the destination institution of the trip?", "source_id": "q008"}
+{"category": "lookup", "id": "q009", "question": "What is the room number assigned to the school nurse?", "source_id": "q009"}
+{"category": "lookup", "id": "q010", "question": "Which policy sets the minimum chaperone ratio?", "source_id": "q010"}
+{"category": "identifier_exact", "id": "q011", "question": "What is the packet ID?", "source_id": "q011"}
+{"category": "identifier_exact", "id": "q012", "question": "What is the correction notice ID issued on 2026-04-15?", "source_id": "q012"}
+{"category": "identifier_exact", "id": "q013", "question": "What is the device ID of the handheld attendance scanner?", "source_id": "q013"}
+{"category": "identifier_exact", "id": "q014", "question": "What is the accommodation reference for S-024?", "source_id": "q014"}
+{"category": "identifier_exact", "id": "q015", "question": "What is V. Lee's bus driver license number?", "source_id": "q015"}
+{"category": "identifier_exact", "id": "q016", "question": "What is the accommodation reference for S-031?", "source_id": "q016"}
+{"category": "temporal", "id": "q017", "question": "On what date was roster v2 issued?", "source_id": "q017"}
+{"category": "temporal", "id": "q018", "question": "On what date was the v2 errata (S-022 duplicate assignment) discovered?", "source_id": "q018"}
+{"category": "temporal", "id": "q019", "question": "What time does Bus 1 depart Cedar Hollow on 2026-05-01?", "source_id": "q019"}
+{"category": "temporal_interval", "id": "q020", "question": "What is the duration of S-007's temporary Group C presenter-aide assignment?", "source_id": "q020"}
+{"category": "temporal_interval", "id": "q021", "question": "What is the time window during which A. Diaz is permitted to observe Group B events?", "source_id": "q021"}
+{"category": "temporal", "id": "q022", "question": "On what date did S-018 withdraw?", "source_id": "q022"}
+{"category": "count", "id": "q023", "question": "How many students are in v3 Group A?", "source_id": "q023"}
+{"category": "count", "id": "q024", "question": "How many students are in v3 Group C?", "source_id": "q024"}
+{"category": "count", "id": "q025", "question": "What is the operational student total for the trip?", "source_id": "q025"}
+{"category": "composition", "id": "q026", "question": "List the student IDs in v3 Group B.", "source_id": "q026"}
+{"category": "count", "id": "q027", "question": "How many adults are present on the trip across all roles?", "source_id": "q027"}
+{"category": "count", "id": "q028", "question": "How many adults count toward the chaperone ratio?", "source_id": "q028"}
+{"category": "authority", "id": "q029", "question": "Which roster version is operational for the trip?", "source_id": "q029"}
+{"category": "authority", "id": "q030", "question": "Per SCO-CH-3, which adult role has authority to direct student behavior and conduct headcount?", "source_id": "q030"}
+{"category": "authority", "id": "q031", "question": "While in transit, may the bus driver be diverted to general supervision?", "source_id": "q031"}
+{"category": "custody", "id": "q032", "question": "Who is responsible for medical coverage across all three groups?", "source_id": "q032"}
+{"category": "status", "id": "q033", "question": "What is the status of the return-leg attendance scans?", "source_id": "q033"}
+{"category": "negative_existential", "id": "q034", "question": "Does this packet include the tournament results?", "source_id": "q034"}
+{"category": "negative_existential", "id": "q035", "question": "Was roster v2.1 issued?", "source_id": "q035"}
+{"category": "composition", "id": "q036", "question": "According to v3, is S-022 assigned to Group C?", "source_id": "q036"}
+{"category": "negative_existential", "id": "q037", "question": "Does the packet reproduce the school nurse's confidential file on S-018's withdrawal?", "source_id": "q037"}
+{"category": "source_reliability", "id": "q038", "question": "Have the attendance scanner timestamps been audited against an external clock for this packet?", "source_id": "q038"}
+{"category": "provenance", "id": "q039", "question": "Where roster v1 or v2 conflicts with v3, which version governs?", "source_id": "q039"}
+{"category": "provenance", "id": "q040", "question": "What sources does the packet explicitly reference but not reproduce in full?", "source_id": "q040"}

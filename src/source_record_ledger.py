@@ -18,6 +18,7 @@ class SourceRecordRow:
     exact: str
     label: str
     cells: list[str] | None = None
+    headers: list[str] | None = None
 
 
 HEADING_RE = re.compile(r"^\s{0,3}(#{1,6})\s+(.+?)\s*$")
@@ -46,13 +47,25 @@ def extract_source_record_ledger(
 
     rows: list[SourceRecordRow] = []
     current_section = ""
+    pending_table_header: list[str] | None = None
+    active_table_header: list[str] | None = None
+    continuation_label = ""
+    continuation_line = 0
     for line_no, raw_line in enumerate(source_text.splitlines(), start=1):
         line = raw_line.rstrip()
         if not line.strip():
+            pending_table_header = None
+            active_table_header = None
+            continuation_label = ""
+            continuation_line = 0
             continue
         heading = HEADING_RE.match(line)
         if heading:
             current_section = _clean_text(heading.group(2), max_chars=120)
+            pending_table_header = None
+            active_table_header = None
+            continuation_label = ""
+            continuation_line = 0
             rows.append(
                 SourceRecordRow(
                     row_id=_row_id(line_no),
@@ -66,7 +79,12 @@ def extract_source_record_ledger(
         elif TABLE_RE.match(line):
             cells = [_clean_text(part, max_chars=80) for part in line.strip().strip("|").split("|")]
             if _is_table_separator(cells):
+                if pending_table_header:
+                    active_table_header = pending_table_header
+                pending_table_header = None
                 continue
+            headers = active_table_header if active_table_header and len(active_table_header) == len(cells) else None
+            label = _best_label(line) or _clean_text(cells[0] if cells else "", max_chars=80)
             rows.append(
                 SourceRecordRow(
                     row_id=_row_id(line_no),
@@ -74,12 +92,20 @@ def extract_source_record_ledger(
                     line=line_no,
                     section=current_section,
                     exact=_clean_text(line, max_chars=max_chars_per_row),
-                    label=_best_label(line) or _clean_text(cells[0] if cells else "", max_chars=80),
+                    label=label,
                     cells=cells,
+                    headers=headers,
                 )
             )
+            continuation_label = label
+            continuation_line = line_no
+            if active_table_header is None:
+                pending_table_header = cells
         elif bullet := BULLET_RE.match(line):
+            pending_table_header = None
+            active_table_header = None
             body = bullet.group(1)
+            label = _best_label(line) or _clean_text(body.split(":", 1)[0], max_chars=80)
             rows.append(
                 SourceRecordRow(
                     row_id=_row_id(line_no),
@@ -87,10 +113,15 @@ def extract_source_record_ledger(
                     line=line_no,
                     section=current_section,
                     exact=_clean_text(line, max_chars=max_chars_per_row),
-                    label=_best_label(line) or _clean_text(body.split(":", 1)[0], max_chars=80),
+                    label=label,
                 )
             )
+            continuation_label = label
+            continuation_line = line_no
         elif _best_label(line):
+            pending_table_header = None
+            active_table_header = None
+            label = _best_label(line)
             rows.append(
                 SourceRecordRow(
                     row_id=_row_id(line_no),
@@ -98,10 +129,15 @@ def extract_source_record_ledger(
                     line=line_no,
                     section=current_section,
                     exact=_clean_text(line, max_chars=max_chars_per_row),
-                    label=_best_label(line),
+                    label=label,
                 )
             )
+            continuation_label = label
+            continuation_line = line_no
         elif _has_source_anchor(line):
+            pending_table_header = None
+            active_table_header = None
+            label = _clean_text(line.split(".", 1)[0], max_chars=80)
             rows.append(
                 SourceRecordRow(
                     row_id=_row_id(line_no),
@@ -109,9 +145,25 @@ def extract_source_record_ledger(
                     line=line_no,
                     section=current_section,
                     exact=_clean_text(line, max_chars=max_chars_per_row),
-                    label=_clean_text(line.split(".", 1)[0], max_chars=80),
+                    label=label,
                 )
             )
+            continuation_label = label
+            continuation_line = line_no
+        elif continuation_label and line_no == continuation_line + 1:
+            pending_table_header = None
+            active_table_header = None
+            rows.append(
+                SourceRecordRow(
+                    row_id=_row_id(line_no),
+                    kind="continuation_line",
+                    line=line_no,
+                    section=current_section,
+                    exact=_clean_text(line, max_chars=max_chars_per_row),
+                    label=continuation_label,
+                )
+            )
+            continuation_line = line_no
         if len(rows) >= max_rows:
             return _ledger(rows, truncated=True)
     return _ledger(rows, truncated=False)
@@ -126,8 +178,9 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
     return [
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, and labeled lines so compiler passes can preserve document addressability.",
+        "For markdown tables, it preserves deterministic column headers alongside row cells so table values can be queried as source-record fields without semantic interpretation.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
-        "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, document_identifier, and status-at-row predicates when the profile supports them.",
+        "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, source_record_field, document_identifier, and status-at-row predicates when the profile supports them.",
         "Do not infer ownership, authority, status, causality, or counts from this ledger. It only pins source row addressability and exact row text.",
         "source_record_ledger_v1_payload: " + json.dumps(ledger, ensure_ascii=False, sort_keys=True),
     ]
@@ -183,11 +236,19 @@ def source_record_ledger_facts(
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
         cells = raw.get("cells")
         if isinstance(cells, list):
+            headers = raw.get("headers")
+            header_atoms: list[str] = []
+            if isinstance(headers, list):
+                header_atoms = [_atom(str(header_raw)) for header_raw in headers]
             for index, cell_raw in enumerate(cells, start=1):
                 cell = _atom(str(cell_raw))
                 if not cell:
                     continue
                 facts.append(f"source_record_cell({row_id}, {index}, {cell}).")
+                header_atom = header_atoms[index - 1] if index <= len(header_atoms) else ""
+                if header_atom:
+                    facts.append(f"source_record_cell_header({row_id}, {index}, {header_atom}).")
+                    facts.append(f"source_record_field({row_id}, {header_atom}, {cell}).")
                 cell_key = _text_key(str(cell_raw))
                 if cell_key:
                     facts.append(f"source_record_cell_text_key({row_id}, {index}, {cell_key}).")
@@ -241,11 +302,21 @@ def _best_label(line: str) -> str:
 
 def _has_source_anchor(line: str) -> bool:
     text = str(line or "")
+    if re.search(r"\b(?:location|adult lodging)\s*:", text, flags=re.IGNORECASE):
+        return True
+    if re.search(
+        r"\b(?:appeal|award|cap|carryover|committee|declined|eligib|quorum|recusal|threshold|vote)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
     if re.search(r"\b\d{4}-\d{2}-\d{2}\b", text):
         return True
     if re.search(r"\b\d{1,2}:\d{2}\b", text):
         return True
     if re.search(r"\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred)\b", text, flags=re.IGNORECASE):
+        return True
+    if re.search(r"\b[A-Z]\.\s*[A-Z][A-Za-z]+\b.*\b\d+\b", text):
         return True
     if re.search(r"\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z0-9]+){1,5}\b", text) and re.search(r"\b\d+\b", text):
         return True

@@ -1,0 +1,40 @@
+{"category": "lookup", "id": "q001", "question": "What system is identified as the Quality Inspection Station?", "source_id": "q001"}
+{"category": "identifier_exact", "id": "q002", "question": "What is the packet ID for this engineering review packet?", "source_id": "q002"}
+{"category": "lookup", "id": "q003", "question": "Who compiled the packet?", "source_id": "q003"}
+{"category": "lookup", "id": "q004", "question": "What is the vendor and model number of HUM-D-04?", "source_id": "q004"}
+{"category": "source_address", "id": "q005", "question": "Which section of the packet reproduces the corrected timeline?", "source_id": "q005"}
+{"category": "source_address", "id": "q006", "question": "Which section enumerates inferences that are not available?", "source_id": "q006"}
+{"category": "lookup", "id": "q007", "question": "Who attended the operator console during the incident window?", "source_id": "q007"}
+{"category": "lookup", "id": "q008", "question": "What plant procedure defines the 72-hour active-production-time hold?", "source_id": "q008"}
+{"category": "source_address", "id": "q009", "question": "Which section sets out the certified scope of QIS-OPT-12?", "source_id": "q009"}
+{"category": "lookup", "id": "q010", "question": "What is the timestamp resolution of the operator console (SYS-D)?", "source_id": "q010"}
+{"category": "identifier_exact", "id": "q011", "question": "What is the batch ID flagged off-spec at event EV-08?", "source_id": "q011"}
+{"category": "identifier_exact", "id": "q012", "question": "What is the maintenance ticket associated with the SYS-B NTP sync failure?", "source_id": "q012"}
+{"category": "identifier_exact", "id": "q013", "question": "What is the lab sample ID for the dryer-inlet moisture analysis?", "source_id": "q013"}
+{"category": "identifier_exact", "id": "q014", "question": "What is the maintenance ticket associated with the QIS-OPT-12 calibration window of 2026-04-15?", "source_id": "q014"}
+{"category": "identifier_exact", "id": "q015", "question": "Which sensor reported the EV-03 alarm?", "source_id": "q015"}
+{"category": "identifier_exact", "id": "q016", "question": "What is the packet ID of the regulatory incident report covering the same incident?", "source_id": "q016"}
+{"category": "identifier_exact", "id": "q017", "question": "What is the maintenance ticket associated with the maintenance window opened at EV-13?", "source_id": "q017"}
+{"category": "temporal", "id": "q018", "question": "When was SYS-B's last successful NTP sync (UTC)?", "source_id": "q018"}
+{"category": "temporal", "id": "q019", "question": "On what date was the clock drift audit conducted?", "source_id": "q019"}
+{"category": "temporal_interval", "id": "q020", "question": "What is the corrected wall-clock interval between EV-08 and EV-09?", "source_id": "q020"}
+{"category": "temporal_interval", "id": "q021", "question": "What is the duration of the line-stop interval from EV-10 to EV-14?", "source_id": "q021"}
+{"category": "temporal", "id": "q022", "question": "What is the corrected wall-clock time of EV-08?", "source_id": "q022"}
+{"category": "temporal", "id": "q023", "question": "When is the next scheduled calibration of HUM-D-04?", "source_id": "q023"}
+{"category": "count", "id": "q024", "question": "How many systems are listed in Section 1?", "source_id": "q024"}
+{"category": "count", "id": "q025", "question": "How many events are recorded in the raw event log (Section 3)?", "source_id": "q025"}
+{"category": "count", "id": "q026", "question": "How many of the events in the raw event log were recorded by SYS-A?", "source_id": "q026"}
+{"category": "composition", "id": "q027", "question": "Provide the count of events recorded by each system across the raw event log.", "source_id": "q027"}
+{"category": "count", "id": "q028", "question": "How many sources of evidence does the packet explicitly name as missing for the EV-03 causation question?", "source_id": "q028"}
+{"category": "authority", "id": "q029", "question": "Which system's timestamps are accepted as wall-clock with no drift correction?", "source_id": "q029"}
+{"category": "status", "id": "q030", "question": "What is the status of the DRY-DL-04 data covering 14:25 to 14:38 on 2026-04-22?", "source_id": "q030"}
+{"category": "authority", "id": "q031", "question": "Under what authority does the 72-hour quality hold rule operate?", "source_id": "q031"}
+{"category": "status", "id": "q032", "question": "What is the status of LAB-2026-0422-S3 as of the compilation date?", "source_id": "q032"}
+{"category": "composition", "id": "q033", "question": "According to Section 6, what events did R. Kim *not* originate?", "source_id": "q033"}
+{"category": "unresolved", "id": "q034", "question": "What is the cause of the EV-03 humidity alarm, according to this packet?", "source_id": "q034"}
+{"category": "negative_existential", "id": "q035", "question": "Does the packet establish what R. Kim did between 14:50 and 15:02?", "source_id": "q035"}
+{"category": "source_reliability", "id": "q036", "question": "Is HUM-D-04 certified to identify the cause of an elevated humidity reading?", "source_id": "q036"}
+{"category": "unresolved", "id": "q037", "question": "Does this packet assign root cause for the incident?", "source_id": "q037"}
+{"category": "source_reliability", "id": "q038", "question": "Is QIS-OPT-12 operating within its certified reliability scope when classifying pellets as off-spec (EV-08, EV-12)?", "source_id": "q038"}
+{"category": "source_reliability", "id": "q039", "question": "What precision limitation on SYS-D timestamps constrains inference from operator notes?", "source_id": "q039"}
+{"category": "provenance", "id": "q040", "question": "What is the relationship between this packet and MPP-COMP-2026-0427, and which timestamps does each use?", "source_id": "q040"}

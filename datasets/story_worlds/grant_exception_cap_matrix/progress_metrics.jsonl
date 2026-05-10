@@ -1,0 +1,2 @@
+{"compile_run": false, "evidence_lane": "fixture_admission", "oracle_supplied": true, "qa_rows": 40, "run_id": "GECM-000", "source_path": "datasets\\story_worlds\\grant_exception_cap_matrix\\source.md", "starter_profile_supplied": false, "timestamp": "2026-05-10"}
+{"compile_admitted": 74, "compile_run": true, "compile_skipped": 1, "evidence_lane": "openrouter_cold_acquisition_baseline", "exact": 26, "miss": 11, "oracle_supplied": true, "partial": 3, "qa_rows": 40, "run_id": "GECM-001", "timestamp": "2026-05-10"}

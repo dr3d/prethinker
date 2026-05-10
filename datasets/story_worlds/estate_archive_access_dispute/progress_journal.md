@@ -114,3 +114,32 @@ catalog IDs, receipt IDs, docket IDs, and manuscript identifiers are not
 decoration; they are the address system through which the legal facts are
 retrieved. The lens should stay as a measured candidate for archive-like
 documents.
+
+## EAAD-004 - Authority/Custody Helper Transfer Probe
+
+Date: 2026-05-10
+
+Evidence lane: `authority_custody_helper_transfer`
+
+Artifacts:
+
+- Baseline targeted QA: `tmp/helper_transfer_20260510/estate_source_record_v2_targeted/domain_bootstrap_qa_20260510T082822828819Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Helper targeted QA: `tmp/helper_transfer_20260510/estate_source_record_v2_object_custody_helper/domain_bootstrap_qa_20260510T083159022467Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Transfer note: `tmp/helper_transfer_20260510/authority_custody_helper_transfer_proof_20260510.md`
+
+Results:
+
+- Before helper transfer: `2 exact / 2 partial / 5 miss` on nine targeted rows.
+- After helper transfer: `2 exact / 3 partial / 4 miss` on the same rows.
+- `archive_authority_custody_support/5` fired on `object_custody_status/5`
+  surfaces that were previously invisible to the helper.
+
+Lesson:
+
+The archive authority/custody helper transfers, but only to the boundary of
+admitted state. Estate's source-record V2 compile already contained custody and
+title rows as `object_custody_status/5`; exposing them through the helper moved
+`q040` from miss to partial and improved support on several custody/title rows.
+The remaining misses ask for procedural deferment, exact shelf/vault location,
+probate authority, or pending-reply facts that were not admitted. Helper
+propagation is useful here, but it cannot substitute for missing source surface.

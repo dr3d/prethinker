@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import urllib.error
 import urllib.request
 from collections import Counter
@@ -26,6 +27,13 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from src.semantic_ir import bootstrap_env_local  # noqa: E402
+
+bootstrap_env_local()
+
 VERDICT_SCORE = {"miss": 0, "partial": 1, "exact": 2}
 SCORE_VERDICT = {0: "miss", 1: "partial", 2: "exact"}
 
@@ -74,8 +82,8 @@ def parse_args() -> argparse.Namespace:
             "A mode can merge QA artifacts with +, e.g. baseline=qa.json+failure.json."
         ),
     )
-    parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
-    parser.add_argument("--base-url", default="http://127.0.0.1:1234/v1")
+    parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
+    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234/v1"))
     parser.add_argument(
         "--api-key",
         default="",
