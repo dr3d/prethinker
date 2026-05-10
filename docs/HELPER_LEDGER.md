@@ -110,6 +110,11 @@ table-guidance, and alias surfaces reaches `39 / 1 / 0`, with only q012
 remaining partial. That is strong evidence the answerable memory surface is
 present and the active runtime gap is selector discrimination plus one residual
 distinct-count/composition row.
+The first guarded selector replay over those five surfaces lands at only
+`31 / 3 / 6`, selecting the best available row on `32 / 40`. The added
+table/alias surfaces therefore need row-gating or risk-gating: they are valuable
+when the question is explicitly homeroom/table/printed-label shaped, but should
+not globally displace broader source-record or adult/compliance surfaces.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.

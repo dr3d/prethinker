@@ -406,6 +406,11 @@ A row gate over old V2, focused homeroom, adult/compliance, narrow
 table-guidance, and alias surfaces reaches `39 / 1 / 0`; only q012 remains
 partial. That makes the current roster frontier selector discrimination over
 known memory surfaces, plus one residual distinct-count/composition row.
+The first guarded selector replay over those five surfaces scores only
+`31 / 3 / 6`, with `32 / 40` selected-best rows. That is a warning label for
+new clean memory surfaces: table/alias modes are valuable when the row is
+homeroom/table/printed-label shaped, but unsafe as broad replacements for older
+source-record or adult/compliance surfaces.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

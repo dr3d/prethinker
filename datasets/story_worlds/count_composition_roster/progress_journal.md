@@ -444,3 +444,32 @@ is exactly the architecture-shape finding: memory acquisition is mostly present,
 but runtime row routing is still weaker than the artifact package. The next
 work should be selector discrimination over source-record/table/helper surfaces,
 then a focused q012 count/composition inspection.
+
+## CCR-014 - Alias Selector Gap
+
+Date: 2026-05-10
+
+Evidence lane: `selector_discrimination_probe`
+
+Artifacts:
+
+- guarded selector over old/focused/adult/narrow/alias surfaces:
+  `tmp/transfer_fixtures_20260510/count_roster_alias_selector_20260510/guarded_activation_selector.md`
+- selector gap readout:
+  `tmp/transfer_fixtures_20260510/count_roster_alias_selector_gap_20260510/selector_gap.md`
+
+Results:
+
+- guarded selector over five modes: `31 / 3 / 6`
+- selected-best rows: `32 / 40`
+- perfect row gate over same modes: `39 / 1 / 0`
+- missed-best rows: `8`
+
+Lesson: adding narrow table/alias surfaces raises the ceiling but makes selector
+discrimination harder. The selector chooses weak `narrow_guidance` or
+`alias_full` modes for several simple lookup/policy rows where old V2 or
+adult/compliance surfaces are exact. The next selector change should be a risk
+gate, not a new helper: prefer narrow/alias modes only when the question or
+evidence is explicitly homeroom/table/printed-label shaped; otherwise fall back
+to the broader exact-looking surfaces. This is the first clear case where a new
+clean memory surface should be row-routed, not globally trusted.
