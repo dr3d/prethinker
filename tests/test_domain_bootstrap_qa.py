@@ -366,7 +366,25 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     )
 
     assert companion is not None
-    details = " ".join(str(row.get("Detail", "")) for row in companion["result"]["rows"])
+    rows = companion["result"]["rows"]
+    details = " ".join(str(row.get("Detail", "")) for row in rows)
+    assert any(
+        row.get("SupportKind") == "device_serial_lookup"
+        and row.get("Subject") == "MP-009"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "manufacturer_liaison"
+        and row.get("Value") == "K. Halberg"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "quarantine_seal_range"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
     assert "K. Halberg" in details
     assert "0.7 per 1,000 hours of use" in details
     assert "EPA = Eastfield Pediatric Associates" in details

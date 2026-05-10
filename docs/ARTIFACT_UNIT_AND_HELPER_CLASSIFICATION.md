@@ -121,7 +121,7 @@ This is a working classification, not a final ledger.
 | roster state support | Transfer-proven candidate | Strong transfer evidence, but audit for lingering fixture labels before calling it fully clean. |
 | grant award support | Mixed | Field-driven award/cap arithmetic is legitimate; text-specific appeal/recusal rows need generic rewrite or quarantine. |
 | industrial sensor support | Split, audit ongoing | Field-driven event/timestamp/count rows are labeled `clean-helper`; exact sensor/ticket/prose recognizers are labeled `candidate-helper`. |
-| clinic recall support | Mixed | Field-driven device/serial lookup is legitimate; named-clinic, liaison, cabinet, and seal literals need generic rewrite or quarantine. |
+| clinic recall support | Split, audit ongoing | Device/serial rows from source-record fields are labeled `clean-helper`; named-clinic, liaison, cabinet, seal, authority, and procedure recognizers are labeled `candidate-helper`. |
 | source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows are labeled `clean-helper`; embedded school/grant packet facts are now labeled `candidate-helper` in the emitted rows. |
 
 ## Doctrine

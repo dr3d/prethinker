@@ -3230,12 +3230,19 @@ def _clinic_device_recall_companion(
     }
 
     out_rows: list[dict[str, str]] = []
-    seen: set[tuple[str, str, str, str]] = set()
+    seen: set[tuple[str, str, str, str, str]] = set()
 
-    def add(kind: str, subject: str = "", value: str = "", detail: str = "", source_row: str = "") -> None:
+    def add(
+        kind: str,
+        subject: str = "",
+        value: str = "",
+        detail: str = "",
+        source_row: str = "",
+        helper_class: str = "clean-helper",
+    ) -> None:
         if not kind:
             return
-        key = (kind, subject, value, detail)
+        key = (kind, subject, value, detail, helper_class)
         if key in seen:
             return
         seen.add(key)
@@ -3249,18 +3256,35 @@ def _clinic_device_recall_companion(
                 "Line": line_by_row.get(source_row, ""),
                 "SectionAtom": section_by_row.get(source_row, ""),
                 "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+                "HelperClass": helper_class,
             }
+        )
+
+    def add_candidate(
+        kind: str,
+        subject: str = "",
+        value: str = "",
+        detail: str = "",
+        source_row: str = "",
+    ) -> None:
+        add(
+            kind,
+            subject=subject,
+            value=value,
+            detail=detail,
+            source_row=source_row,
+            helper_class="candidate-helper",
         )
 
     for source_row, text_atom in text_by_row.items():
         if text_atom.startswith("epa_eastfield_pediatric_associates"):
-            add("clinic_abbreviation", "Eastfield Pediatric Associates", "EPA", "EPA = Eastfield Pediatric Associates.", source_row)
+            add_candidate("clinic_abbreviation", "Eastfield Pediatric Associates", "EPA", "EPA = Eastfield Pediatric Associates.", source_row)
         if text_atom.startswith("nbfh_northbridge_family_health"):
-            add("clinic_abbreviation", "Northbridge Family Health", "NBFH", "NBFH = Northbridge Family Health.", source_row)
+            add_candidate("clinic_abbreviation", "Northbridge Family Health", "NBFH", "NBFH = Northbridge Family Health.", source_row)
         if text_atom.startswith("cim_crestmont_internal_medicine"):
-            add("clinic_abbreviation", "Crestmont Internal Medicine", "CIM", "CIM = Crestmont Internal Medicine.", source_row)
+            add_candidate("clinic_abbreviation", "Crestmont Internal Medicine", "CIM", "CIM = Crestmont Internal Medicine.", source_row)
         if "manufacturer_contact_k_halberg_regional_liaison" in text_atom:
-            add(
+            add_candidate(
                 "manufacturer_liaison",
                 "Medivolt Pharma Systems",
                 "K. Halberg",
@@ -3268,7 +3292,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "failure_rate_observed_in_field_returns_0_7_per" in text_atom:
-            add(
+            add_candidate(
                 "recall_failure_rate",
                 "secondary occlusion sensor",
                 "0.7 per 1,000 hours of use",
@@ -3276,7 +3300,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "procedure_mv_vp_04_a" in text_atom or "verification_procedure_mv_vp_04_a" in text_atom:
-            add(
+            add_candidate(
                 "verification_procedure",
                 "manufacturer verification",
                 "MV-VP-04-A",
@@ -3284,7 +3308,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "mp_009" in text_atom and "v_4501_aa_100158" in text_atom:
-            add(
+            add_candidate(
                 "device_serial_lookup",
                 "MP-009",
                 "4501-AA-100158",
@@ -3292,7 +3316,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "halberg_s_reply" in text_atom and "awaiting_determination" in text_atom:
-            add(
+            add_candidate(
                 "pending_determination_correspondence",
                 "firmware 4.2.1",
                 "Halberg reply pending",
@@ -3300,9 +3324,9 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "storage_cabinet_b_3_sealed" in text_atom:
-            add("quarantine_cabinet", "NBFH", "Cabinet B-3", "NBFH quarantine storage cabinet B-3, sealed.", source_row)
+            add_candidate("quarantine_cabinet", "NBFH", "Cabinet B-3", "NBFH quarantine storage cabinet B-3, sealed.", source_row)
         if "seal_numbers_seal_nbfh_04_001" in text_atom:
-            add(
+            add_candidate(
                 "quarantine_seal_range",
                 "Cabinet B-3",
                 "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
@@ -3310,14 +3334,14 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "through_seal_nbfh_04_003" in text_atom and "i_will_retain_the_keys" in text_atom:
-            add(
+            add_candidate(
                 "cabinet_key_retainer",
                 "Cabinet B-3",
                 "D. Rourke",
                 "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
                 source_row,
             )
-            add(
+            add_candidate(
                 "quarantine_seal_range",
                 "Cabinet B-3",
                 "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
@@ -3325,7 +3349,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through" in text_atom:
-            add(
+            add_candidate(
                 "verification_visit_date_range",
                 "CIM/EPA",
                 "2026-04-14 through 2026-04-15",
@@ -3333,7 +3357,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "from_dr_r_iwasaki_network_medical_director" in text_atom:
-            add(
+            add_candidate(
                 "network_medical_director",
                 "Network Medical Director",
                 "Dr. R. Iwasaki",
@@ -3341,7 +3365,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "formal_release_for_verified_devices_at_the_network_level" in text_atom:
-            add(
+            add_candidate(
                 "quarantine_release_authority",
                 "verified devices",
                 "Network Medical Director (Dr. R. Iwasaki)",
@@ -3349,7 +3373,7 @@ def _clinic_device_recall_companion(
                 source_row,
             )
         if "medical_director_s_patient_use_exception_authority" in text_atom:
-            add(
+            add_candidate(
                 "patient_use_exception_authority",
                 "patient-use exception",
                 "Network Medical Director (Dr. R. Iwasaki)",
@@ -3380,13 +3404,23 @@ def _clinic_device_recall_companion(
             "prolog_query": "clinic_recall_support(SupportKind, Subject, Value, Detail, SourceRow).",
             "result_type": "table",
             "num_rows": len(out_rows),
-            "variables": ["SupportKind", "Subject", "Value", "Detail", "SourceRow", "DisplaySection", "Line"],
+            "variables": [
+                "SupportKind",
+                "Subject",
+                "Value",
+                "Detail",
+                "SourceRow",
+                "DisplaySection",
+                "Line",
+                "HelperClass",
+            ],
             "rows": out_rows[:120],
             "reasoning_basis": {
                 "kind": "query-only-companion",
                 "note": (
-                    "derived clinic recall liaison, authority, quarantine custody, cabinet, seal, "
-                    "verification date, and clinic abbreviation support from admitted source-record rows"
+                    "derived clean device/serial support from admitted source-record fields and "
+                    "labeled clinic, liaison, authority, quarantine, seal, and procedure recognizers "
+                    "as candidate-helper rows"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,

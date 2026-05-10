@@ -187,7 +187,10 @@ prose directly and do not mutate the KB. Current active examples include:
 - `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
   identity, failure rates, cabinet/seal/key custody, verification procedure
   support, full device serial displays, pending-determination correspondence,
-  and medical-director authority from admitted source-record rows.
+  and medical-director authority from admitted source-record rows. Its emitted
+  rows carry `HelperClass`: source-record-field device/serial rows are
+  `clean-helper`, while named-clinic, liaison, cabinet/seal/key, procedure, and
+  authority recognizers remain `candidate-helper`.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
   Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are
