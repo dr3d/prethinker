@@ -928,6 +928,26 @@ def test_authority_custody_companion_derives_access_support_from_source_record_c
     assert row["HelperClass"] == "candidate-helper"
 
 
+def test_authority_custody_companion_derives_clean_custody_location_from_source_fields() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_field(src_line_0052, item_id, ex_010).",
+        "source_record_field(src_line_0052, external_id, ssv_v_402_a).",
+        "source_record_field(src_line_0052, custodian_physical, safestore_vault_box_v_402).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(runtime, ["physical_custodian(ex_010, X)."])
+
+    support = [item for item in results if item.get("result", {}).get("predicate") == "archive_authority_custody_support"]
+    assert support
+    row = next(row for row in support[-1]["result"]["rows"] if row.get("SupportKind") == "source_record_custody_location")
+    assert row["Item"] == "ex_010"
+    assert row["Location"] == "safestore_vault_box_v_402"
+    assert row["ExternalId"] == "ssv_v_402_a"
+    assert row["HelperClass"] == "clean-helper"
+
+
 def test_authority_custody_companion_surfaces_recall_and_notice_clauses() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -1480,6 +1500,116 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
+
+
+def test_source_record_packet_metadata_surfaces_generic_document_standing_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0002, anchored_line, 2, section_f_recorded_statements, reproduction_does_not_constitute_a_finding_of_fact).",
+        "source_record_section(src_line_0002, section_f_recorded_statements).",
+        "source_record_line(src_line_0002, 2).",
+        "source_record_text_atom(src_line_0002, reproduction_does_not_constitute_a_finding_of_fact).",
+        "source_record_row(src_line_0003, anchored_line, 3, section_f_recorded_statements, the_forensic_handwriting_analyst_s_report_and_the_court_s).",
+        "source_record_section(src_line_0003, section_f_recorded_statements).",
+        "source_record_line(src_line_0003, 3).",
+        "source_record_text_atom(src_line_0003, the_forensic_handwriting_analyst_s_report_and_the_court_s).",
+        "source_record_row(src_line_0004, continuation_line, 4, section_f_recorded_statements, ultimate_rulings_are_the_authoritative_sources_for_findings).",
+        "source_record_section(src_line_0004, section_f_recorded_statements).",
+        "source_record_line(src_line_0004, 4).",
+        "source_record_text_atom(src_line_0004, ultimate_rulings_are_the_authoritative_sources_for_findings).",
+        "source_record_row(src_line_0007, anchored_line, 7, section_g_compilation_notes, the_following_are_referenced_but_not_reproduced_in_this_register_the).",
+        "source_record_section(src_line_0007, section_g_compilation_notes).",
+        "source_record_line(src_line_0007, 7).",
+        "source_record_text_atom(src_line_0007, the_following_are_referenced_but_not_reproduced_in_this_register_the).",
+        "source_record_row(src_line_0008, continuation_line, 8, section_g_compilation_notes, decedent_s_last_will_and_testament_dated_2018_07_22).",
+        "source_record_section(src_line_0008, section_g_compilation_notes).",
+        "source_record_line(src_line_0008, 8).",
+        "source_record_text_atom(src_line_0008, decedent_s_last_will_and_testament_dated_2018_07_22).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_text_atom(Line, Text)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "recorded_assertion_not_finding"
+        and row.get("Value") == "recorded_assertion"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "authoritative_finding_sources"
+        and row.get("Value") == "forensic_handwriting_report_and_court_rulings"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "unreproduced_reference"
+        and row.get("Value") == "last_will_and_testament"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_generic_probate_register_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0129, anchored_line, 129, d_3_reeder_held_items, the_executor_has_not_yet_directed_delivery_taking_the_position_that_the).",
+        "source_record_section(src_line_0129, d_3_reeder_held_items).",
+        "source_record_line(src_line_0129, 129).",
+        "source_record_text_atom(src_line_0129, the_executor_has_not_yet_directed_delivery_taking_the_position_that_the).",
+        "source_record_row(src_line_0130, continuation_line, 130, d_3_reeder_held_items, codicil_dispute_d_1_must_be_resolved_first_reeder_declines_to).",
+        "source_record_section(src_line_0130, d_3_reeder_held_items).",
+        "source_record_line(src_line_0130, 130).",
+        "source_record_text_atom(src_line_0130, codicil_dispute_d_1_must_be_resolved_first_reeder_declines_to).",
+        "source_record_row(src_line_0228, labeled_line, 228, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, nrm_ll_2020_02).",
+        "source_record_section(src_line_0228, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0228, 228).",
+        "source_record_text_atom(src_line_0228, nrm_ll_2020_02_each_name_the_estate_of_margaret_w_holloway_as).",
+        "source_record_row(src_line_0229, continuation_line, 229, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, lender_the_2024_amendment_to_the_second_agreement_requested_by_ms).",
+        "source_record_section(src_line_0229, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0229, 229).",
+        "source_record_text_atom(src_line_0229, lender_the_2024_amendment_to_the_second_agreement_requested_by_ms).",
+        "source_record_row(src_line_0230, anchored_line, 230, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, holloway_personally_on_2024_09_30_did_not_change_the_named_lender_it).",
+        "source_record_section(src_line_0230, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0230, 230).",
+        "source_record_text_atom(src_line_0230, holloway_personally_on_2024_09_30_did_not_change_the_named_lender_it).",
+        "source_record_row(src_line_0231, continuation_line, 231, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, extended_the_loan_period_to_2027_09_30).",
+        "source_record_section(src_line_0231, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0231, 231).",
+        "source_record_text_atom(src_line_0231, extended_the_loan_period_to_2027_09_30).",
+        "source_record_row(src_line_0236, labeled_line, 236, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, nrm_rr_2018_44).",
+        "source_record_section(src_line_0236, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0236, 236).",
+        "source_record_text_atom(src_line_0236, the_reading_room_access_policy_at_nrm_rr_2018_44_the_letter).",
+        "source_record_row(src_line_0237, continuation_line, 237, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, collection_is_as_you_know_set_by_museum_policy_and_is_not_subject).",
+        "source_record_section(src_line_0237, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0237, 237).",
+        "source_record_text_atom(src_line_0237, collection_is_as_you_know_set_by_museum_policy_and_is_not_subject).",
+        "source_record_row(src_line_0238, continuation_line, 238, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, to_change_by_the_lender).",
+        "source_record_section(src_line_0238, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0238, 238).",
+        "source_record_text_atom(src_line_0238, to_change_by_the_lender).",
+        "source_record_row(src_line_0240, anchored_line, 240, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, beatrice_caulfield_registrar).",
+        "source_record_section(src_line_0240, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0240, 240).",
+        "source_record_text_atom(src_line_0240, beatrice_caulfield_registrar).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["external_id(Item, nrm_ll_2020_02)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(row.get("Kind") == "role_holder" and row.get("DisplayValue") == "Beatrice Caulfield, Registrar" for row in result_rows)
+    assert any(row.get("Kind") == "loan_amendment_effect" and row.get("Value") == "nrm_ll_2020_02" for row in result_rows)
+    assert any(row.get("Kind") == "non_revocable_access_policy" and row.get("Value") == "nrm_rr_2018_44" for row in result_rows)
+    assert any(row.get("Kind") == "no_delivery_direction" and row.get("Value") == "executor_reeder_items" for row in result_rows)
 
 
 def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() -> None:

@@ -131,6 +131,7 @@ FAMILIES: tuple[GuardFamily, ...] = (
             "audit-exception",
             "pending-rather-than-approved",
             "clear-sample clock snapshot",
+            "homeroom-reassignment",
         ),
     ),
     GuardFamily(
@@ -163,6 +164,7 @@ FAMILIES: tuple[GuardFamily, ...] = (
             "authority/source identity",
             "badge-id",
             "authoritative-homeroom",
+            "student-identifier",
             "publication-authority",
             "arbitrator-unresolved-question",
         ),
@@ -330,6 +332,12 @@ FAMILIES: tuple[GuardFamily, ...] = (
             "distinct-student count-change",
             "cap-application",
             "counterfactual no-cap",
+            "distinct-student registrar count",
+            "roster-table count support",
+            "adult-total roster",
+            "qualifying-chaperone count",
+            "ratio-compliance",
+            "compliance_status",
         ),
     ),
 )

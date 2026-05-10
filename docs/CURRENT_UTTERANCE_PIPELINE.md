@@ -40,7 +40,7 @@ Helpers are part of the instrument's epistemic surface, not invisible plumbing.
 Two runs over the same source can have different answerable surfaces if they use
 different lens sets or helper sets. The helper classification and reporting
 discipline live in
-[`ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`](ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md).
+[`ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`](https://github.com/dr3d/prethinker/blob/main/docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md).
 
 ## Architecture In Five Lines
 

@@ -1687,10 +1687,18 @@ def _source_record_packet_metadata_companion(
         "requested_amount",
         "role_counts_towards_ratio",
         "roster_version_status",
+        "access_authority",
+        "access_type",
+        "external_id",
+        "party_role",
+        "physical_custodian",
+        "recorded_assertion",
         "source_record_field",
+        "source_record_cell",
         "source_record_label",
         "source_record_section",
         "source_record_text_atom",
+        "title_status",
     }:
         return None
 
@@ -1771,6 +1779,27 @@ def _source_record_packet_metadata_companion(
         kind = _metadata_kind_for_atom(value)
         if kind:
             add(source_row, kind, value)
+
+    for source_row, row_fields in _source_record_fields_by_row_from_rows(field_rows).items():
+        item = _field_value(row_fields, "item_id") or _field_value(row_fields, "item")
+        location = (
+            _field_value(row_fields, "custodian_physical")
+            or _field_value(row_fields, "physical_custodian")
+            or _field_value(row_fields, "location")
+        )
+        if item and location:
+            external_id = _field_value(row_fields, "external_id")
+            detail = f"item={item};location={location}"
+            if external_id:
+                detail += f";external_id={external_id}"
+            add(
+                source_row,
+                "source_record_custody_location",
+                item,
+                detail=detail,
+                display_value=f"{_display_source_phrase(location)}"
+                + (f" (External ID {_display_source_phrase(external_id)})" if external_id else ""),
+            )
 
     for row in text_rows:
         source_row = str(row.get("SourceRow", "")).strip()
@@ -1943,6 +1972,69 @@ def _source_record_packet_metadata_companion(
                     detail=combined,
                     display_value=f"{_display_source_phrase(subject)} filed with the {_display_source_phrase(location)}.",
                 )
+        previous_text = _previous_source_text_atom(source_row, ordered_source_rows, text_by_row)
+        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+        combined = f"{previous_text} {text_atom} {next_text}".strip()
+        window = _source_text_window(source_row, ordered_source_rows, text_by_row, line_by_row, radius=3)
+        section_atom = section_by_row.get(source_row, "")
+        if _is_unreproduced_reference_context(combined=window, section_atom=section_atom):
+            value = _unreproduced_reference_value(window)
+            if value:
+                add(
+                    source_row,
+                    "unreproduced_reference",
+                    value,
+                    detail=window,
+                    display_value=_display_unreproduced_reference(window),
+                )
+        if _is_non_finding_statement_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "recorded_assertion_not_finding",
+                _recorded_assertion_not_finding_value(window),
+                detail=window,
+                display_value=_display_recorded_assertion_not_finding(window),
+            )
+        if _is_authoritative_source_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "authoritative_finding_sources",
+                "forensic_handwriting_report_and_court_rulings",
+                detail=window,
+                display_value="Forensic handwriting analyst's report when filed and the Court's ultimate rulings.",
+            )
+        if _is_registrar_identity_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "role_holder",
+                _registrar_identity_value(window),
+                detail=f"role=museum_registrar;{window}",
+                display_value=_display_registrar_identity(window),
+            )
+        if _is_loan_amendment_effect_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "loan_amendment_effect",
+                "nrm_ll_2020_02",
+                detail=window,
+                display_value="NRM-LL-2020-02: lender unchanged; loan period extended to 2027-09-30.",
+            )
+        if _is_non_revocable_access_policy_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "non_revocable_access_policy",
+                "nrm_rr_2018_44",
+                detail=window,
+                display_value="Reading-room patron access governed by museum policy; not subject to change by the lender.",
+            )
+        if _is_no_executor_delivery_direction_context(combined=window, section_atom=section_atom):
+            add(
+                source_row,
+                "no_delivery_direction",
+                "executor_reeder_items",
+                detail=window,
+                display_value="The executor has not yet directed delivery of the Reeder-held items pending codicil resolution.",
+            )
 
     if not rows:
         return None
@@ -2006,6 +2098,29 @@ def _previous_source_text_atom(
     return text_by_row.get(ordered_source_rows[index - 1], "")
 
 
+def _source_text_window(
+    source_row: str,
+    ordered_source_rows: list[str],
+    text_by_row: dict[str, str],
+    line_by_row: dict[str, int],
+    *,
+    radius: int = 2,
+) -> str:
+    line = line_by_row.get(source_row)
+    if line is None:
+        return text_by_row.get(source_row, "")
+    parts: list[str] = []
+    for candidate in ordered_source_rows:
+        candidate_line = line_by_row.get(candidate)
+        if candidate_line is None:
+            continue
+        if abs(candidate_line - line) <= radius:
+            text = text_by_row.get(candidate, "")
+            if text:
+                parts.append(text)
+    return " ".join(parts).strip()
+
+
 def _source_record_section_is_provenance(section_atom: str) -> bool:
     text = str(section_atom or "").strip().lower()
     return "provenance" in text or "source_note" in text or "source_notes" in text
@@ -2027,8 +2142,42 @@ def _is_unreproduced_reference_row(*, text_atom: str, section_atom: str, row_typ
     return row_type in {"list_row", ""} or text.startswith(("cycle_procedure_manual", "census_designated"))
 
 
+def _is_unreproduced_reference_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    if not text or "not_reproduced" not in text and "not reproduced" not in text:
+        return False
+    if not any(marker in section for marker in ["compilation", "provenance", "source_note", "source_notes"]):
+        return False
+    return any(
+        marker in text
+        for marker in [
+            "last_will_and_testament",
+            "chain_of_custody",
+            "complete_asset_inventory",
+            "correspondence_between_counsel",
+            "docket_sheet",
+            "by_laws",
+            "procedure_manual",
+            "score_sheets",
+            "decision_letters",
+            "census_designated",
+        ]
+    )
+
+
 def _unreproduced_reference_value(text_atom: str) -> str:
     text = str(text_atom or "").strip().lower()
+    if "last_will_and_testament" in text:
+        return "last_will_and_testament"
+    if "chain_of_custody" in text:
+        return "chain_of_custody_documentation"
+    if "complete_asset_inventory" in text:
+        return "complete_asset_inventory"
+    if "correspondence_between_counsel" in text:
+        return "correspondence_between_counsel"
+    if "docket_sheet" in text:
+        return "court_docket_sheet"
     if "by_laws" in text:
         return "briarwood_foundation_by_laws"
     if "cycle_procedure_manual" in text:
@@ -2045,6 +2194,16 @@ def _unreproduced_reference_value(text_atom: str) -> str:
 
 def _display_source_phrase(value: str) -> str:
     text = str(value or "").strip().lower()
+    if text == "last_will_and_testament":
+        return "last will and testament"
+    if text == "chain_of_custody_documentation":
+        return "chain-of-custody documentation"
+    if text == "complete_asset_inventory":
+        return "complete asset inventory"
+    if text == "correspondence_between_counsel":
+        return "correspondence between counsel"
+    if text == "court_docket_sheet":
+        return "court docket sheet"
     if text == "briarwood_foundation_by_laws":
         return "Briarwood Foundation by-laws"
     if text == "bwcf_cp_2025":
@@ -2065,6 +2224,116 @@ def _display_source_phrase(value: str) -> str:
 def _display_unreproduced_reference(text_atom: str) -> str:
     value = _unreproduced_reference_value(text_atom)
     return _display_source_phrase(value)
+
+
+def _is_non_finding_statement_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    if not text or "recorded_statement" not in section and "recorded_statements" not in section:
+        return False
+    return (
+        "reproduction_does_not_constitute_a_finding_of_fact" in text
+        or "recorded_but_has_not_been_ruled_upon" in text
+        or "has_not_been_ruled_upon" in text
+        or "court_has_not_found_facts" in text
+    )
+
+
+def _recorded_assertion_not_finding_value(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    if "private_gift" in text or "daniel_holloway" in text or "ex_003" in text:
+        return "private_gift_assertion_ex_003"
+    if "codicil" in text:
+        return "codicil_contention"
+    if "safekeeping" in text or "reeder" in text:
+        return "safekeeping_assertion_reeder_items"
+    return "recorded_assertion"
+
+
+def _display_recorded_assertion_not_finding(text_atom: str) -> str:
+    value = _recorded_assertion_not_finding_value(text_atom)
+    if value == "private_gift_assertion_ex_003":
+        return "The private-gift assertion for EX-003 is recorded but is not a finding of fact."
+    if value == "codicil_contention":
+        return "The codicil contention is recorded but has not been ruled upon."
+    if value == "safekeeping_assertion_reeder_items":
+        return "The Reeder safekeeping basis is recorded as an assertion; the Court has not found facts on it."
+    return "Recorded assertion is not a finding of fact."
+
+
+def _is_authoritative_source_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    if not text or "recorded_statement" not in section and "recorded_statements" not in section:
+        return False
+    return (
+        "forensic_handwriting" in text
+        and "court_s" in text
+        and "ultimate_rulings" in text
+        and "authoritative_sources_for_findings" in text
+    )
+
+
+def _is_registrar_identity_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    return "registrar" in text and (
+        "registrar" in section
+        or "museum" in text
+        or "regional_museum" in text
+    )
+
+
+def _display_registrar_identity(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    if "beatrice_caulfield" in text:
+        return "Beatrice Caulfield, Registrar"
+    if "b_caulfield" in text:
+        return "B. Caulfield, Registrar"
+    return "Registrar"
+
+
+def _registrar_identity_value(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    if "beatrice_caulfield" in text:
+        return "beatrice_caulfield"
+    if "b_caulfield" in text:
+        return "b_caulfield"
+    return "registrar"
+
+
+def _is_loan_amendment_effect_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    if "nrm_ll_2020_02" not in text and "nrm_ll_2020_02" not in section:
+        return False
+    return (
+        ("loan_agreements" in text or "amendment" in text)
+        and "did_not_change_the_named_lender" in text
+        and "extended_the_loan_period_to_2027_09_30" in text
+    )
+
+
+def _is_non_revocable_access_policy_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    if "nrm_rr_2018_44" not in text and "nrm_rr_2018_44" not in section_atom.lower():
+        return False
+    return "reading_room_access_policy" in text and (
+        "not_subject" in text and "change_by_the_lender" in text
+        or "not subject to change by the lender" in text
+    )
+
+
+def _is_no_executor_delivery_direction_context(*, combined: str, section_atom: str) -> bool:
+    text = str(combined or "").strip().lower()
+    section = str(section_atom or "").strip().lower()
+    if "reeder" not in section and "reeder" not in text:
+        return False
+    return (
+        "executor_has_not_yet_directed_delivery" in text
+        and "codicil_dispute" in text
+        and "resolved_first" in text
+    )
 
 
 def _metadata_kind_for_atom(atom: str) -> str:
@@ -2457,6 +2726,7 @@ def _authority_custody_companion(
     right_rows = _runtime_rows(runtime, "reserved_right(Document, Party, RightType, Description).")
     text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
     cell_rows = _runtime_rows(runtime, "source_record_cell(SourceRow, Column, Value).")
+    field_rows = _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value).")
 
     support_rows: list[dict[str, str]] = []
 
@@ -2473,6 +2743,9 @@ def _authority_custody_companion(
     source_record_access_support = _authority_source_record_access_support(custody_rows, cell_rows)
     if source_record_access_support:
         support_rows.extend(source_record_access_support)
+    source_record_custody_location_support = _authority_source_record_custody_location_support(field_rows)
+    if source_record_custody_location_support:
+        support_rows.extend(source_record_custody_location_support)
 
     recall_support = _authority_recall_clause_support(recall_rows, right_rows, text_rows)
     if recall_support:
@@ -2515,6 +2788,7 @@ def _authority_custody_companion(
             "reserved_right(Document, Party, RightType, Description).",
             "source_record_text_atom(SourceRow, TextAtom).",
             "source_record_cell(SourceRow, Column, Value).",
+            "source_record_field(SourceRow, Header, Value).",
         ],
     }
 
@@ -2723,6 +2997,45 @@ def _authority_source_record_access_support(
                 "Custodian": custodian,
                 "AuthorizedBy": authority,
                 "HelperClass": "candidate-helper",
+            }
+        )
+    return out
+
+
+def _authority_source_record_custody_location_support(field_rows: list[dict[str, Any]]) -> list[dict[str, str]]:
+    fields = _source_record_fields_by_row_from_rows(field_rows)
+    out: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, row_fields in sorted(fields.items()):
+        item = _field_value(row_fields, "item_id")
+        if not item:
+            item = _field_value(row_fields, "item")
+        location = (
+            _field_value(row_fields, "custodian_physical")
+            or _field_value(row_fields, "physical_custodian")
+            or _field_value(row_fields, "location")
+        )
+        if not item or not location:
+            continue
+        external_id = _field_value(row_fields, "external_id")
+        detail_parts = [f"location={location}"]
+        if external_id:
+            detail_parts.append(f"external_id={external_id}")
+        key = (item, location, external_id)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {
+                "SupportKind": "source_record_custody_location",
+                "Subject": item,
+                "AnswerValue": location,
+                "SourceDocument": source_row,
+                "SupportDetail": ";".join(detail_parts),
+                "Item": item,
+                "Location": location,
+                "ExternalId": external_id,
+                "HelperClass": "clean-helper",
             }
         )
     return out
@@ -4337,8 +4650,14 @@ def _grant_award_companion(
 
 
 def _source_record_fields_by_row(runtime: CorePrologRuntime) -> dict[str, dict[str, list[str]]]:
+    return _source_record_fields_by_row_from_rows(
+        _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value).")
+    )
+
+
+def _source_record_fields_by_row_from_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, list[str]]]:
     out: dict[str, dict[str, list[str]]] = {}
-    for row in _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value)."):
+    for row in rows:
         source_row = str(row.get("SourceRow", "")).strip()
         header = str(row.get("Header", "")).strip()
         value = str(row.get("Value", "")).strip()

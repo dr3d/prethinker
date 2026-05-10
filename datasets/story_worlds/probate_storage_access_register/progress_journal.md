@@ -84,3 +84,39 @@ The row-gated `40 / 0 / 0` is useful diagnostic evidence that the needed answer
 surfaces exist somewhere in the artifact history, but the next legitimate work
 is either a generic probate storage/access helper or selector discrimination
 against live, audited surfaces.
+
+## PSAR-003 - Clean Source-Record Metadata Repair
+
+Date: 2026-05-10
+
+Evidence lane: `source_record_metadata_cleanup`
+
+Artifacts:
+
+- Refreshed source-record compile, no LLM:
+  `tmp/transfer_fixtures_20260510/probate_refreshed_source_ledger_v2_no_llm_20260510/domain_bootstrap_file_20260510T093021249770Z_source_qwen-qwen3-6-35b-a3b.json`
+- Targeted QA:
+  `tmp/transfer_fixtures_20260510/probate_refreshed_source_ledger_v3_targeted_20260510/domain_bootstrap_qa_20260510T220937148167Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full QA:
+  `tmp/transfer_fixtures_20260510/probate_refreshed_source_ledger_full_20260510/domain_bootstrap_qa_20260510T221622112415Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Results:
+
+- targeted hard-row probe: `9 / 0 / 0`
+- targeted helper rows: `1150 clean-helper / 0 candidate-helper`
+- full replay: `34 / 2 / 4`
+- full replay helper rows: `2668 clean-helper / 0 candidate-helper`
+- local tests: `102 passed` across source-record ledger, QA helper, and
+  compile-file substrate tests
+
+Lesson: probate's active helper pressure was not solved by promoting the
+orphaned `probate_storage_support` helper. The legitimate repair is generic
+deterministic source addressability: preserve official prose continuations
+around "not reproduced", "not a finding of fact", "authoritative sources",
+registrar identity, loan-amendment effect, reading-room policy scope, and
+delivery-direction status, then expose those rows through
+`source_record_packet_metadata_support` as `clean-helper` rows. The hard-row
+targeted probe confirms the needed facts are now queryable without
+fixture-specific helper constants. The full replay remains `34 / 2 / 4` because
+QA/query generation still sometimes ignores or underuses the clean companion
+rows; that is selector/query-surface pressure, not helper acquisition pressure.

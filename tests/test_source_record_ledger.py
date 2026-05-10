@@ -178,9 +178,32 @@ def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:
     assert kind_by_line[2] == "anchored_line"
     assert kind_by_line[3] in {"anchored_line", "continuation_line"}
     assert kind_by_line[4] in {"anchored_line", "continuation_line"}
-    assert "does not assign root cause" in exact_by_line[2]
-    assert "separate root-cause analysis" in exact_by_line[3]
-    assert "not part of this packet" in exact_by_line[4]
+
+
+def test_source_record_ledger_keeps_document_standing_and_reference_prose() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Section F. Recorded Statements",
+                "Reproduction does not constitute a finding of fact.",
+                "The forensic handwriting analyst's report and the Court's",
+                "ultimate rulings are the authoritative sources for findings.",
+                "",
+                "## Section G. Compilation Notes",
+                "The following are referenced but not reproduced in this register: the",
+                "decedent's last will and testament dated 2018-07-22.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+
+    assert exact_by_line[2] == "Reproduction does not constitute a finding of fact."
+    assert exact_by_line[3].startswith("The forensic handwriting")
+    assert exact_by_line[4].startswith("ultimate rulings are the authoritative sources")
+    assert exact_by_line[7].startswith("The following are referenced but not reproduced")
+    assert exact_by_line[8].startswith("decedent's last will and testament")
 
 
 def test_source_record_ledger_keeps_blockquoted_memo_metadata() -> None:

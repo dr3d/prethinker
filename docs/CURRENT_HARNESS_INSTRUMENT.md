@@ -203,6 +203,19 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   on a five-row cluster. Row-gating with the prior high-water remains
   `40 / 0 / 0`, so the durable claim is reduced label debt plus a remaining
   candidate-emission cleanup target, not a replacement score.
+- Probate storage/access now provides the clearest helper-governance cleanup
+  example. The orphaned historical `probate_storage_support` artifact remains
+  non-reportable as active architecture, and the older live
+  `archive_authority_custody_support` probate replay was candidate-only and
+  regressed cold. The current repair path refreshes deterministic
+  source-record ledger facts and exposes probate standing/source-addressability
+  rows through clean `source_record_packet_metadata_support`: registrar
+  headings, SafeStore custody-location fields, non-reproduced references,
+  non-finding statements, authoritative-source statements, loan-amendment
+  effect, reading-room access scope, and no-delivery-direction notes. A
+  targeted nine-row hard probe reached `9 / 0 / 0` with only clean-helper rows;
+  the full replay stayed `34 / 2 / 4`, so the remaining pressure is query/route
+  use of clean rows rather than helper acquisition.
 
 Under `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`, these recent
 helper-assisted high-water results are candidate-helper evidence until the

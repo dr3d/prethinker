@@ -322,6 +322,15 @@ def _has_source_anchor(line: str) -> bool:
         flags=re.IGNORECASE,
     ):
         return True
+    if re.search(
+        r"\b(?:referenced\s+but\s+not\s+reproduced|not\s+reproduced|reproduction\s+does\s+not\s+constitute|finding\s+of\s+fact|"
+        r"authoritative\s+sources?|not\s+been\s+ruled\s+upon|has\s+not\s+been\s+ruled|court\s+has\s+not\s+found|"
+        r"forensic\s+handwriting|ultimate\s+rulings|named\s+lender|loan\s+period|registrar|directed\s+delivery|"
+        r"codicil\s+dispute|individual\s+access)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
     if re.search(r"\b\d{4}-\d{2}-\d{2}\b", text):
         return True
     if re.search(r"\b\d{1,2}:\d{2}\b", text):
