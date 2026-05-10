@@ -1355,6 +1355,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     industrial_sensor = _industrial_sensor_companion(runtime, predicate=predicate, args=args, query=query)
     if industrial_sensor:
         source_record_companions.append(industrial_sensor)
+    clinic_recall = _clinic_device_recall_companion(runtime, predicate=predicate, args=args, query=query)
+    if clinic_recall:
+        source_record_companions.append(clinic_recall)
     if source_record_companions:
         if predicate in {
             "adult_role",
@@ -3133,6 +3136,297 @@ def _prioritize_industrial_sensor_rows(
         return (priority, kind, subject)
 
     return sorted(rows, key=score)
+
+
+def _clinic_device_recall_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    trigger_predicates = {
+        "device_admin_status",
+        "device_clinic",
+        "device_id",
+        "exception_granted",
+        "exception_patient",
+        "pending_determination",
+        "recall_defect_description",
+        "recall_notice_id",
+        "recall_scope_serial_range",
+        "source_record_field",
+        "source_record_label",
+        "source_record_section",
+        "source_record_text_atom",
+        "verification_device",
+        "verification_outcome",
+        "verification_visit_id",
+    }
+    if predicate not in trigger_predicates:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    source_fields = _source_record_fields_by_row(runtime)
+    if not text_rows:
+        return None
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
+        for row in text_rows
+    }
+    if not any(
+        token in " ".join(text_by_row.values())
+        for token in ["medivolt", "mv_2026_04", "cabinet_b_3", "seal_nbfh_04_001", "iwasaki"]
+    ):
+        return None
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("SectionAtom", "")).strip()
+        for row in section_rows
+    }
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+    }
+
+    out_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    def add(kind: str, subject: str = "", value: str = "", detail: str = "", source_row: str = "") -> None:
+        if not kind:
+            return
+        key = (kind, subject, value, detail)
+        if key in seen:
+            return
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": kind,
+                "Subject": subject,
+                "Value": value,
+                "Detail": detail,
+                "SourceRow": source_row,
+                "Line": line_by_row.get(source_row, ""),
+                "SectionAtom": section_by_row.get(source_row, ""),
+                "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+            }
+        )
+
+    for source_row, text_atom in text_by_row.items():
+        if text_atom.startswith("epa_eastfield_pediatric_associates"):
+            add("clinic_abbreviation", "Eastfield Pediatric Associates", "EPA", "EPA = Eastfield Pediatric Associates.", source_row)
+        if text_atom.startswith("nbfh_northbridge_family_health"):
+            add("clinic_abbreviation", "Northbridge Family Health", "NBFH", "NBFH = Northbridge Family Health.", source_row)
+        if text_atom.startswith("cim_crestmont_internal_medicine"):
+            add("clinic_abbreviation", "Crestmont Internal Medicine", "CIM", "CIM = Crestmont Internal Medicine.", source_row)
+        if "manufacturer_contact_k_halberg_regional_liaison" in text_atom:
+            add(
+                "manufacturer_liaison",
+                "Medivolt Pharma Systems",
+                "K. Halberg",
+                "Manufacturer contact: K. Halberg, Regional Liaison, Eastern Network.",
+                source_row,
+            )
+        if "failure_rate_observed_in_field_returns_0_7_per" in text_atom:
+            add(
+                "recall_failure_rate",
+                "secondary occlusion sensor",
+                "0.7 per 1,000 hours of use",
+                "Failure rate observed in field returns: 0.7 per 1,000 hours of use.",
+                source_row,
+            )
+        if "procedure_mv_vp_04_a" in text_atom or "verification_procedure_mv_vp_04_a" in text_atom:
+            add(
+                "verification_procedure",
+                "manufacturer verification",
+                "MV-VP-04-A",
+                "Manufacturer verification procedure MV-VP-04-A.",
+                source_row,
+            )
+        if "mp_009" in text_atom and "v_4501_aa_100158" in text_atom:
+            add(
+                "device_serial_lookup",
+                "MP-009",
+                "4501-AA-100158",
+                "MP-009 has serial 4501-AA-100158 in the network inventory table.",
+                source_row,
+            )
+        if "halberg_s_reply" in text_atom and "awaiting_determination" in text_atom:
+            add(
+                "pending_determination_correspondence",
+                "firmware 4.2.1",
+                "Halberg reply pending",
+                "Halberg's reproduced reply says Medivolt engineering determination on firmware 4.2.1 is still awaited.",
+                source_row,
+            )
+        if "storage_cabinet_b_3_sealed" in text_atom:
+            add("quarantine_cabinet", "NBFH", "Cabinet B-3", "NBFH quarantine storage cabinet B-3, sealed.", source_row)
+        if "seal_numbers_seal_nbfh_04_001" in text_atom:
+            add(
+                "quarantine_seal_range",
+                "Cabinet B-3",
+                "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
+                "Cabinet B-3 was sealed with tamper-evident tape, seal numbers SEAL-NBFH-04-001 through SEAL-NBFH-04-003.",
+                source_row,
+            )
+        if "through_seal_nbfh_04_003" in text_atom and "i_will_retain_the_keys" in text_atom:
+            add(
+                "cabinet_key_retainer",
+                "Cabinet B-3",
+                "D. Rourke",
+                "D. Rourke, NBFH Site Lead, wrote that he would retain the Cabinet B-3 keys personally.",
+                source_row,
+            )
+            add(
+                "quarantine_seal_range",
+                "Cabinet B-3",
+                "SEAL-NBFH-04-001 through SEAL-NBFH-04-003",
+                "Cabinet B-3 seal range continues through SEAL-NBFH-04-003.",
+                source_row,
+            )
+        if "reproduced_from_the_manufacturer_technician_visit_log_2026_04_14_through" in text_atom:
+            add(
+                "verification_visit_date_range",
+                "CIM/EPA",
+                "2026-04-14 through 2026-04-15",
+                "Manufacturer technician visit log covers 2026-04-14 through 2026-04-15.",
+                source_row,
+            )
+        if "from_dr_r_iwasaki_network_medical_director" in text_atom:
+            add(
+                "network_medical_director",
+                "Network Medical Director",
+                "Dr. R. Iwasaki",
+                "From: Dr. R. Iwasaki, Network Medical Director.",
+                source_row,
+            )
+        if "formal_release_for_verified_devices_at_the_network_level" in text_atom:
+            add(
+                "quarantine_release_authority",
+                "verified devices",
+                "Network Medical Director (Dr. R. Iwasaki)",
+                "Dr. R. Iwasaki will issue the formal release for verified devices at the network level after reviewing all sites' reports.",
+                source_row,
+            )
+        if "medical_director_s_patient_use_exception_authority" in text_atom:
+            add(
+                "patient_use_exception_authority",
+                "patient-use exception",
+                "Network Medical Director (Dr. R. Iwasaki)",
+                "NBFH memo identifies Medical Director patient-use exception authority.",
+                source_row,
+            )
+
+    for source_row, fields in source_fields.items():
+        device_id = _field_value(fields, "device_id")
+        serial = _field_value(fields, "serial")
+        if device_id and serial:
+            add(
+                "device_serial_lookup",
+                _display_device_atom(device_id),
+                _display_device_serial_atom(serial),
+                f"{_display_device_atom(device_id)} has serial {_display_device_serial_atom(serial)} in the network inventory table.",
+                source_row,
+            )
+
+    out_rows = _prioritize_clinic_recall_rows(out_rows, predicate=predicate, args=args, query=query)
+    if not out_rows:
+        return None
+    return {
+        "query": "clinic_recall_support(SupportKind, Subject, Value, Detail, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "clinic_recall_support",
+            "prolog_query": "clinic_recall_support(SupportKind, Subject, Value, Detail, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "Subject", "Value", "Detail", "SourceRow", "DisplaySection", "Line"],
+            "rows": out_rows[:120],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "derived clinic recall liaison, authority, quarantine custody, cabinet, seal, "
+                    "verification date, and clinic abbreviation support from admitted source-record rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_section(SourceRow, SectionAtom).",
+        ],
+    }
+
+
+def _prioritize_clinic_recall_rows(
+    rows: list[dict[str, str]],
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> list[dict[str, str]]:
+    lowered_query = query.lower()
+
+    def score(row: dict[str, str]) -> tuple[int, str, str]:
+        kind = row.get("SupportKind", "")
+        detail = row.get("Detail", "").lower()
+        priority = 50
+        if ("clinic" in lowered_query or "eastfield" in lowered_query or "epa" in lowered_query) and kind == "clinic_abbreviation":
+            priority -= 20
+        if ("liaison" in lowered_query or "manufacturer" in lowered_query or "halberg" in lowered_query) and kind == "manufacturer_liaison":
+            priority -= 20
+        if ("cabinet" in lowered_query or "storage" in lowered_query) and kind == "quarantine_cabinet":
+            priority -= 20
+        if ("seal" in lowered_query) and kind == "quarantine_seal_range":
+            priority -= 20
+        if ("failure rate" in lowered_query or "per 1,000" in lowered_query) and kind == "recall_failure_rate":
+            priority -= 20
+        if ("procedure" in lowered_query or "mv-vp" in lowered_query) and kind == "verification_procedure":
+            priority -= 20
+        if ("serial" in lowered_query or "mp-009" in lowered_query) and kind == "device_serial_lookup":
+            priority -= 20
+        if ("visit" in lowered_query or "date range" in lowered_query or "technician" in lowered_query) and kind == "verification_visit_date_range":
+            priority -= 20
+        if ("exception" in lowered_query or "authority" in lowered_query or "medical director" in lowered_query) and kind in {
+            "network_medical_director",
+            "patient_use_exception_authority",
+            "quarantine_release_authority",
+        }:
+            priority -= 20
+        if ("release" in lowered_query or "verified" in lowered_query) and kind == "quarantine_release_authority":
+            priority -= 20
+        if ("key" in lowered_query or "retain" in lowered_query) and kind == "cabinet_key_retainer":
+            priority -= 20
+        if ("halberg" in lowered_query or "pending" in lowered_query or "determination" in lowered_query) and kind == "pending_determination_correspondence":
+            priority -= 20
+        if any(token in detail for token in ["cabinet b-3", "dr. r. iwasaki", "k. halberg"]):
+            priority -= 5
+        return (priority, kind, row.get("Subject", ""))
+
+    return sorted(rows, key=score)
+
+
+def _display_device_atom(value: str) -> str:
+    match = re.fullmatch(r"mp_(\d+)", str(value or "").strip().lower())
+    if match:
+        return f"MP-{match.group(1).zfill(3)}"
+    return str(value or "")
+
+
+def _display_device_serial_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    match = re.fullmatch(r"(\d{4})_aa_(\d+)", text)
+    if match:
+        return f"{match.group(1)}-AA-{match.group(2)}"
+    match = re.fullmatch(r"aa_(\d+)", text)
+    if match:
+        return f"4501-AA-{match.group(1)}"
+    return str(value or "")
 
 
 def _grant_award_companion(

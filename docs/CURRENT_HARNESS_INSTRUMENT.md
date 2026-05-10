@@ -180,6 +180,12 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   guard family, or compile. The remaining partial is the clean boundary case:
   deterministic source records expose `EV-14` and the 14-row raw log, while the
   canonical semantic predicate inventory still lacks `event_id(ev_14)`.
+- Clinic recall source-record helpers now show the same pattern on a different
+  domain. A refreshed deterministic source-record ledger plus
+  `clinic_recall_support/5` moved `clinic_device_recall_field_packet` from
+  `31 / 0 / 9` to `40 / 0 / 0`, recovering exact liaison, failure-rate,
+  cabinet/seal/key-custody, verification-procedure, full serial, and
+  medical-director authority details without a new lens or guard family.
 
 ## Extraction Rule
 

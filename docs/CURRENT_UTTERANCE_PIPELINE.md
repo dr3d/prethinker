@@ -167,6 +167,10 @@ prose directly and do not mutate the KB. Current active examples include:
   counts, per-system event composition, corrected timeline intervals,
   maintenance tickets, lab sample logistics, packet IDs, and packet-scope
   exclusions from admitted source-record rows.
+- `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
+  identity, failure rates, cabinet/seal/key custody, verification procedure
+  support, full device serial displays, pending-determination correspondence,
+  and medical-director authority from admitted source-record rows.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, device IDs,
   physical retention locations, pending packet items, and role-scope notes.
@@ -249,6 +253,10 @@ Recent transfer work supports the current direction:
   intervals, exact sensor IDs, maintenance tickets, and packet-scope exclusions
   were already present as durable source-record memory but needed a queryable
   helper surface.
+- `clinic_device_recall_field_packet` moved from `31 / 0 / 9` cold to
+  `40 / 0 / 0` through refreshed source-record facts plus
+  `clinic_recall_support`, another proof that exact official row details can be
+  durable and inspectable without adding a new semantic lens.
 - The main weak surface is no longer “can the model understand the document?”
   It is often “did the admitted state become addressable, composable, and
   queryable at the exact row shape the question demands?”

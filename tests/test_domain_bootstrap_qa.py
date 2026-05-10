@@ -6,6 +6,7 @@ from scripts.run_domain_bootstrap_qa import (
     _assessment_transfer_policy_companion,
     _classification_deferral_effect_companion,
     _conversion_assessment_delta_companion,
+    _clinic_device_recall_companion,
     _industrial_sensor_companion,
     _negative_join_with_previous,
     _placeholder_repaired_query,
@@ -314,6 +315,41 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert "Next calibration due 2026-07-12." in details
     assert "MPP-COMP-2026-0427" in details
     assert "R. Kim did not originate EV-08 or EV-12" in details
+
+
+def test_clinic_recall_companion_derives_official_source_record_support() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    facts = [
+        "source_record_text_atom(src_line_0021, high_viscosity_infusates_failure_rate_observed_in_field_returns_0_7_per).",
+        "source_record_text_atom(src_line_0027, manufacturer_contact_k_halberg_regional_liaison_eastern_network).",
+        "source_record_text_atom(src_line_0075, epa_eastfield_pediatric_associates).",
+        "source_record_text_atom(src_line_0116, procedure_mv_vp_04_a).",
+        "source_record_text_atom(src_line_0196, been_sealed_with_tamper_evident_tape_seal_numbers_seal_nbfh_04_001).",
+        "source_record_text_atom(src_line_0197, through_seal_nbfh_04_003_one_seal_per_shelf_i_will_retain_the_keys).",
+        "source_record_text_atom(src_line_0230, issue_the_formal_release_for_verified_devices_at_the_network_level_once).",
+        "source_record_field(src_line_0063, device_id, mp_009).",
+        "source_record_field(src_line_0063, serial, v_4501_aa_100158).",
+        "source_record_section(src_line_0230, v_8_3_network_medical_director_reply).",
+        "source_record_line(src_line_0230, 230).",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _clinic_device_recall_companion(
+        runtime,
+        predicate="source_record_text_atom",
+        args=[],
+        query="source_record_text_atom(SourceRow, TextAtom).",
+    )
+
+    assert companion is not None
+    details = " ".join(str(row.get("Detail", "")) for row in companion["result"]["rows"])
+    assert "K. Halberg" in details
+    assert "0.7 per 1,000 hours of use" in details
+    assert "EPA = Eastfield Pediatric Associates" in details
+    assert "MV-VP-04-A" in details
+    assert "SEAL-NBFH-04-001 through SEAL-NBFH-04-003" in details
+    assert "MP-009 has serial 4501-AA-100158" in details
 
 
 def test_hoa_conversion_assessment_delta_companion_derives_rate_increase() -> None:

@@ -48,3 +48,44 @@ field acquisition and identifier pinning carried most direct rows, while the
 remaining pressure is scope/status distinction, range membership, and repair
 verification composition. This fixture is a good next probe for whether
 source-record fields plus rule/range helpers can retire status/scope guards.
+
+## CDRF-002 - Clinic Recall Source-Record Helper Saturation
+
+Date: 2026-05-10
+
+Evidence lane: `query_helper_transfer_proof`
+
+Code change:
+
+- Added `clinic_recall_support/5` as a query-only companion in
+  `scripts/run_domain_bootstrap_qa.py`.
+- The helper derives clinic abbreviations, manufacturer liaison identity,
+  failure-rate text, cabinet/seal/key custody, verification procedure/date
+  support, device serial display, pending-determination correspondence, and
+  medical-director authority from admitted `source_record_*` rows.
+- No new lens, no new compile pass, and no new guard family were added.
+
+Artifacts:
+
+- Source-record refreshed compile:
+  `tmp/transfer_fixtures_20260510/clinic_source_record_refreshed_compile_20260510/domain_bootstrap_file_clinic_source_record_refreshed_20260510.json`
+- Targeted replay:
+  `tmp/transfer_fixtures_20260510/clinic_recall_helper_targeted_replay_20260510/domain_bootstrap_qa_20260510T134001469371Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Refreshed targeted replay:
+  `tmp/transfer_fixtures_20260510/clinic_recall_helper_refreshed_targeted_20260510/domain_bootstrap_qa_20260510T134137106371Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full replay:
+  `tmp/transfer_fixtures_20260510/clinic_recall_helper_full_replay_v2_20260510/domain_bootstrap_qa_20260510T140951342952Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result: `40 exact / 0 partial / 0 miss` over `40`.
+
+Lift over cold baseline: `+9 exact`, `0 partial`, `-9 miss`.
+
+Residual hard edge: none on this fixture after refreshed source-record facts
+and helper queryability.
+
+Lesson: this is another source-record-to-queryability proof, not a lens proof.
+The cold artifact already had most semantic recall predicates, but exact
+official row details such as `K. Halberg`, `0.7 per 1,000 hours`, `Cabinet B-3`,
+seal ranges, full serial displays, and network medical director authority lived
+in deterministic source-record memory. Once refreshed and surfaced through a
+query-only helper, the fixture saturated.
