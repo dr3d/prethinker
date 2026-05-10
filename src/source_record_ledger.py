@@ -77,7 +77,7 @@ def extract_source_record_ledger(
                 )
             )
         elif TABLE_RE.match(line):
-            cells = [_clean_text(part, max_chars=80) for part in line.strip().strip("|").split("|")]
+            cells = [_clean_text(part, max_chars=180) for part in line.strip().strip("|").split("|")]
             if _is_table_separator(cells):
                 if pending_table_header:
                     active_table_header = pending_table_header
@@ -179,6 +179,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, and labeled lines so compiler passes can preserve document addressability.",
         "For markdown tables, it preserves deterministic column headers alongside row cells so table values can be queried as source-record fields without semantic interpretation.",
+        "For explicit roster tables with both a grouping column and a member column, it also emits roster_table_member/4 as structural table membership; it does not infer membership from nearby prose.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
         "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, source_record_field, document_identifier, and status-at-row predicates when the profile supports them.",
         "Do not infer ownership, authority, status, causality, or counts from this ledger. It only pins source row addressability and exact row text.",
@@ -252,6 +253,7 @@ def source_record_ledger_facts(
                 cell_key = _text_key(str(cell_raw))
                 if cell_key:
                     facts.append(f"source_record_cell_text_key({row_id}, {index}, {cell_key}).")
+            facts.extend(_roster_table_member_facts(raw, row_id=row_id))
         for token in _numeric_tokens(str(raw.get("exact", ""))):
             facts.append(f"source_record_numeric_token({row_id}, {token}).")
     return _dedupe(facts)
@@ -340,6 +342,84 @@ def _numeric_tokens(text: str) -> list[str]:
         if atom:
             out.append(atom)
     return out
+
+
+def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[str]:
+    """Emit structural membership facts only when a table names the columns.
+
+    This deliberately requires an explicit grouping column such as Homeroom,
+    Group, Team, Cohort, or Bus and an explicit member column such as Students
+    or Student IDs. Nearby prose and section titles may provide a version atom,
+    but they do not create membership by themselves.
+    """
+
+    headers = raw.get("headers")
+    cells = raw.get("cells")
+    if not isinstance(headers, list) or not isinstance(cells, list):
+        return []
+    if len(headers) != len(cells):
+        return []
+
+    member_indexes = [
+        index
+        for index, header in enumerate(headers)
+        if re.search(r"\b(?:student(?:s| ids?)?|members?|participants?)\b", str(header), flags=re.IGNORECASE)
+    ]
+    group_indexes = [
+        index
+        for index, header in enumerate(headers)
+        if re.search(r"\b(?:homeroom|group|team|cohort|bus)\b", str(header), flags=re.IGNORECASE)
+    ]
+    if not member_indexes or not group_indexes:
+        return []
+
+    section = str(raw.get("section", "") or "")
+    version = _version_atom_from_text(section) or _version_atom_from_text(" ".join(str(cell) for cell in cells))
+    if not version:
+        version = "unspecified_version"
+
+    out: list[str] = []
+    for group_index in group_indexes:
+        group = _roster_group_atom(str(cells[group_index]))
+        if not group:
+            continue
+        for member_index in member_indexes:
+            member_header = _atom(str(headers[member_index]))
+            for member in _roster_member_atoms(str(cells[member_index])):
+                out.append(f"roster_table_member({row_id}, {version}, {group}, {member}).")
+                out.append(f"roster_table_member_header({row_id}, {member_header}).")
+                out.append(f"roster_table_scope({row_id}, {group}).")
+                out.append(f"roster_table_version({row_id}, {version}).")
+    return out
+
+
+def _version_atom_from_text(value: str) -> str:
+    text = str(value or "").lower()
+    match = re.search(r"\bv(?P<major>\d+)(?:[._](?P<minor>\d+))?\b", text)
+    if not match:
+        return ""
+    major = int(match.group("major"))
+    minor = match.group("minor")
+    if minor is None:
+        return f"v{major}"
+    return f"v{major}_{int(minor)}"
+
+
+def _roster_group_atom(value: str) -> str:
+    atom = _atom(value)
+    if re.fullmatch(r"v_\d+_[a-z]", atom):
+        return atom.removeprefix("v_")
+    return atom
+
+
+def _roster_member_atoms(value: str) -> list[str]:
+    text = str(value or "")
+    out: list[str] = []
+    for match in re.finditer(r"\bS[-_\s]?(?P<num>\d{3})\b", text, flags=re.IGNORECASE):
+        out.append(f"s_{match.group('num')}")
+    for match in re.finditer(r"\bSTU[-_\s]?(?P<num>\d{4,})\b", text, flags=re.IGNORECASE):
+        out.append(f"stu_{match.group('num')}")
+    return _dedupe(out)
 
 
 def _atom(value: str) -> str:

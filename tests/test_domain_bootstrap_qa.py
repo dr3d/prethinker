@@ -1612,6 +1612,8 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         "source_record_section(src_line_0126, v_6_1_students_by_homeroom_v1_3).",
         "source_record_line(src_line_0126, 126).",
         "source_record_text_atom(src_line_0126, v_7_a_4_stu_1023_park_stu_1041_lin_stu_1058_cohen_stu_1077_bauer).",
+        "roster_table_member(src_line_0126, v1_3, 7_a, stu_1023).",
+        "roster_table_member(src_line_0126, v1_3, 7_a, stu_1041).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -1623,6 +1625,14 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         row.get("SupportKind") == "student_group_assignment"
         and row.get("Person") == "stu_1019"
         and row.get("Group") == "7_c"
+        and row.get("Version") == "v1_3"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "roster_table_student_group_assignment"
+        and row.get("Person") == "stu_1023"
+        and row.get("Group") == "7_a"
         and row.get("Version") == "v1_3"
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
@@ -1641,7 +1651,7 @@ def test_roster_state_support_handles_homeroom_table_and_semantic_rows() -> None
         item for item in focused_rows if item["result"].get("predicate") == "roster_state_support"
     )
     first_row = focused_companion["result"]["rows"][0]
-    assert first_row.get("SupportKind") == "source_record_student_group_assignment"
+    assert first_row.get("SupportKind") == "roster_table_student_group_assignment"
     assert first_row.get("Person") == "stu_1023"
     assert first_row.get("Group") == "7_a"
     assert first_row.get("Version") == "v1_3"

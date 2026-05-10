@@ -179,8 +179,11 @@ prose directly and do not mutate the KB. Current active examples include:
   school-roster source-record student assignment parsing remains
   `candidate-helper`. That parser now handles both fresh transfer rows shaped
   like `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###`, and sibling
-  homeroom-table rows shaped like `v1_0/v1_3`, `7_a`, and `STU-####`; promotion
-  waits on selector-stable sibling replay.
+  homeroom-table rows shaped like `v1_0/v1_3`, `7_a`, and `STU-####`. A new
+  deterministic pre-compile ledger fact, `roster_table_member/4`, now captures
+  explicit grouping/member table rows before the helper runs. The helper may
+  consume those explicit rows as clean structural memory, while section/prose
+  roster parsing stays candidate-helper.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and

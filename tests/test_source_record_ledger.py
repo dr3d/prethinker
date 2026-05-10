@@ -91,6 +91,45 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
 
 
+def test_source_record_ledger_emits_explicit_roster_table_members() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "### 6.1 Students by homeroom (v1.3)",
+                "| Homeroom | Count | Student IDs |",
+                "|---|---|---|",
+                "| 7-A | 4 | STU-1023 Park · STU-1041 Lin · STU-1058 Cohen · STU-1077 Bauer |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1023)." in facts
+    assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1041)." in facts
+    assert "roster_table_member_header(src_line_0004, student_ids)." in facts
+    assert "roster_table_scope(src_line_0004, 7_a)." in facts
+    assert "roster_table_version(src_line_0004, v1_3)." in facts
+
+
+def test_source_record_ledger_does_not_infer_roster_members_without_group_column() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "### 2.1 Bus 1",
+                "| Seat row | Students |",
+                "|---|---|",
+                "| 1-4 | S-001, S-002, S-003, S-004, S-005, S-006 |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_field(src_line_0004, students, s_001_s_002_s_003_s_004_s_005_s_006)." in facts
+    assert not any(fact.startswith("roster_table_member(") for fact in facts)
+
+
 def test_source_record_ledger_keeps_wrapped_official_prose() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

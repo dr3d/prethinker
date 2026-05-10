@@ -378,6 +378,15 @@ from admitted semantic predicates or structured roster table fields. Adult and
 compliance source-record rows stay clean because they are narrow deterministic
 parses over explicit row shapes; group counts inherit the clean/candidate class
 of their member rows.
+A narrow roster-table ledger spike now moves one part of that surface into
+deterministic pre-compile memory. `src/source_record_ledger.py` emits
+`roster_table_member(SourceRow, Version, Group, Student)` only when a markdown
+table explicitly contains both a grouping column such as `Homeroom` or `Group`
+and a member column such as `Student IDs` or `Students`. It emits `89` member
+facts on `count_composition_roster` and `0` on the fresh school transfer
+fixture, whose bus tables require section/prose context. That is a deliberate
+boundary: explicit roster table rows become clean structural memory; inferred
+bus or group membership remains candidate-helper work.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

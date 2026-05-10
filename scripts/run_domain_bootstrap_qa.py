@@ -4411,6 +4411,7 @@ def _roster_state_companion(
     ratio_rows = _runtime_rows(runtime, "role_counts_towards_ratio(Role, Counts).")
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
     student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
+    roster_table_member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Student).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
     out_rows: list[dict[str, Any]] = []
@@ -4551,6 +4552,24 @@ def _roster_state_companion(
                 "HelperClass": "clean-helper",
             }
         )
+    for row in roster_table_member_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        person = str(row.get("Student", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        if not person or not group:
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "roster_table_student_group_assignment",
+                "Person": person,
+                "Group": group,
+                "Version": version,
+                "SourceRow": source_row,
+                "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
+            }
+        )
     for row in supervises_rows:
         supervisor = str(row.get("Supervisor", "")).strip()
         target = str(row.get("Target", "")).strip()
@@ -4594,6 +4613,7 @@ def _roster_state_companion(
         if str(row.get("SupportKind")) not in {
             "group_member",
             "group_membership",
+            "roster_table_student_group_assignment",
             "source_record_student_group_assignment",
             "student_group_assignment",
         }:
@@ -4669,6 +4689,7 @@ def _roster_state_companion(
             "group_member(Group, Person, Interval).",
             "group_membership(Person, Group, Start, End).",
             "student_group_assignment(Student, Version, Group).",
+            "roster_table_member(SourceRow, Version, Group, Student).",
             "supervises(Supervisor, Target, Interval).",
             "supervision_assignment(Supervisor, Target, Start, End).",
             "adult_role(Adult, Role).",
@@ -4718,7 +4739,13 @@ def _prioritize_roster_state_rows(
             version_ok = is_requested(version, args[1])
             group_ok = is_requested(group, args[2])
             if person_ok and version_ok and group_ok:
-                priority = 0 if support_kind == "source_record_student_group_assignment" else 2
+                priority = (
+                    0
+                    if support_kind == "roster_table_student_group_assignment"
+                    else 1
+                    if support_kind == "source_record_student_group_assignment"
+                    else 2
+                )
             elif version_ok and group_ok:
                 priority = 5
             elif version_ok:
@@ -4728,7 +4755,13 @@ def _prioritize_roster_state_rows(
             group_ok = is_requested(group, args[1])
             version_ok = is_requested(version, args[2])
             if person_ok and version_ok and group_ok:
-                priority = 0 if support_kind == "source_record_student_group_assignment" else 2
+                priority = (
+                    0
+                    if support_kind == "roster_table_student_group_assignment"
+                    else 1
+                    if support_kind == "source_record_student_group_assignment"
+                    else 2
+                )
             elif version_ok and group_ok:
                 priority = 5
             elif person_ok or version_ok:
@@ -4755,13 +4788,19 @@ def _prioritize_roster_state_rows(
             if support_kind in {
                 "compliance_status",
                 "group_count",
+                "roster_table_student_group_assignment",
                 "source_record_student_group_assignment",
                 "student_group_assignment",
             }:
                 priority = 4 if version_ok else 20
             if requested_is_wildcard(0):
                 version_priority = -version_priority
-        elif support_kind in {"group_count", "source_record_student_group_assignment", "student_group_assignment"}:
+        elif support_kind in {
+            "group_count",
+            "roster_table_student_group_assignment",
+            "source_record_student_group_assignment",
+            "student_group_assignment",
+        }:
             priority = 10
 
         return (priority, version_priority, group, person or role)

@@ -288,3 +288,45 @@ score did not improve yet. The remaining gap is small and content-sensitive:
 `q028` needs bus-assignment/correction-notice source support rather than
 homeroom rows. Do not add fixture-named guards; next selector work should expose
 version/content hints from helper rows or leave this as selector-training data.
+
+## CCR-010 - Explicit Roster Table Ledger Spike
+
+Date: 2026-05-10
+
+Evidence lane: `deterministic_precompile_ledger_spike`
+
+Artifacts:
+
+- compile with deterministic roster-table facts:
+  `tmp/transfer_fixtures_20260510/count_roster_table_ledger_compile_v2_20260510/`
+- full QA replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_ledger_qa_v2_20260510/`
+- initial no-source compile attempt, retained only as a harness note:
+  `tmp/transfer_fixtures_20260510/count_roster_table_ledger_compile_20260510/`
+  and `tmp/transfer_fixtures_20260510/count_roster_table_ledger_qa_20260510/`
+
+Results:
+
+- deterministic `roster_table_member/4` facts emitted for explicit roster
+  tables in this fixture: `89`
+- deterministic `roster_table_member/4` facts emitted for the fresh school
+  transfer fixture: `0`, because its bus tables do not name a group column
+- focused code tests: `99 passed`
+- fresh compile: `37` admitted semantic facts, `0` skipped, plus `1519`
+  deterministic source-record facts
+- full QA replay: `28 / 3 / 9`
+- zero write proposals
+
+Lesson: this is a clean substrate boundary, not a saturated-score bite. The
+source-record ledger now emits `roster_table_member(SourceRow, Version, Group,
+Student)` only when the table itself has both an explicit grouping column
+(`Homeroom`, `Group`, `Team`, `Cohort`, or `Bus`) and an explicit member column
+(`Students`, `Student IDs`, `Members`, or `Participants`). It does not infer bus
+or group membership from nearby prose or section titles. In the replay, rows
+such as `q014` can query `roster_table_member/4` directly, but broader score did
+not improve because the QA planner still routes many rows to older semantic
+predicates or underspecified relaxed queries. This moves part of roster
+membership from candidate-helper parsing toward deterministic memory, but it is
+not yet a helper-promotion proof. The next work is a row-level comparison of
+clean ledger wins versus older helper/selector wins, then selector guidance if
+the deterministic surface is being missed.
