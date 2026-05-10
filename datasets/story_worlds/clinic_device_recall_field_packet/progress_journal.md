@@ -98,3 +98,31 @@ device/serial lookup logic and fixture-family recognizers for named clinics,
 liaison identity, cabinet/seal labels, and authority prose. The replay should
 be reported as `candidate-helper`, not `clean-helper`, until those recognizers
 are generalized or transfer-proven without fixture constants.
+
+## CDRF-003 - Fresh Labeled Helper Replay
+
+Date: 2026-05-10
+
+Evidence lane: `helper_class_label_refresh`
+
+Artifacts:
+
+- Fresh full replay:
+  `tmp/transfer_fixtures_20260510/clinic_recall_helper_fresh_labeled_full_20260510/domain_bootstrap_qa_20260510T190256900920Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Row gate against prior high-water:
+  `tmp/transfer_fixtures_20260510/clinic_fresh_labeled_row_gate_20260510/row_gate.md`
+- Helper usage audit:
+  `tmp/helper_usage_audit_20260510/helper_usage_audit_latest.md`
+
+Results:
+
+- Fresh labeled replay: `35 / 0 / 4` with `1` unjudged row
+- Helper rows in fresh replay: `2000 clean-helper / 240 candidate-helper / 0 unlabeled`
+- Row-gate with prior high-water: `40 / 0 / 0`
+
+Lesson: the refreshed clinic replay reduces helper-label debt in completed QA
+output but does not replace the prior `40 / 0 / 0` high-water. The no-cache QA
+pass churned on rows `q026` through `q030`, while the earlier replay already
+answered all rows exact. Report the fresh run as helper-provenance evidence,
+not as the current score. The remaining cleanup target is the `240`
+candidate-helper rows, not a new lens.

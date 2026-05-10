@@ -196,7 +196,13 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   `clinic_recall_support/5` moved `clinic_device_recall_field_packet` from
   `31 / 0 / 9` to a candidate-helper replay of `40 / 0 / 0`, recovering exact liaison, failure-rate,
   cabinet/seal/key-custody, verification-procedure, full serial, and
-  medical-director authority details without a new lens or guard family.
+  medical-director authority details without a new lens or guard family. A
+  later fresh no-cache replay over the refreshed artifact emitted `2000`
+  clean-helper and `240` candidate-helper clinic rows in completed QA output,
+  but scored `35 / 0 / 4` with one unjudged row because query generation churned
+  on a five-row cluster. Row-gating with the prior high-water remains
+  `40 / 0 / 0`, so the durable claim is reduced label debt plus a remaining
+  candidate-emission cleanup target, not a replacement score.
 
 Under `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`, these recent
 helper-assisted high-water results are candidate-helper evidence until the
@@ -206,10 +212,12 @@ source-record packet metadata, industrial sensor, clinic recall, and grant
 award helpers have begun that cleanup: emitted rows now label generic
 identifier/event/timestamp, device/serial, award, cap, eligibility, and
 field-recusal extraction as `clean-helper`. The industrial refreshed artifact is
-now clean-labeled end to end; older industrial QA artifacts remain unlabeled
-audit debt. Packet-family, clinic, liaison, seal, authority, appeal, procedure,
-and score-correction recognizers remain candidate or transfer-pending until
-fresh labeled artifacts and sibling proof justify promotion.
+now clean-labeled end to end; clinic has fresh completed QA output with a
+clean-majority but still split helper surface. Older industrial and clinic QA
+artifacts remain unlabeled audit debt. Packet-family, clinic, liaison, seal,
+authority, appeal, procedure, and score-correction recognizers remain candidate
+or transfer-pending until fresh labeled artifacts and sibling proof justify
+promotion.
 
 `scripts/audit_helper_classes.py` can now run this audit artifact-only against
 domain bootstrap compile JSONs. The first six-fixture transfer pass over

@@ -19,7 +19,7 @@ across QA files.
 | --- | ---: | --- | --- | --- | --- | --- |
 | `archive_authority_custody_support` | 2 | yes | split, audit ongoing | transfer: 0 clean / 4 candidate; precision: 1 clean / 11 candidate | Generic object-custody/access/recalled-right joins are clean; older Pellico/Stille/Halberd source-cell and text recognizers remain candidate. | Genericize or retire family-specific count/source-cell recognizers before treating authority saturation as clean-helper evidence. |
 | `clear_sample_clock_pause_support` | 1 | yes | clean-helper | precision: 1 clean / 0 candidate | Joins admitted clear-sample segments, sampler-offline intervals, and rule exceptions. | Seek transfer fixture evidence; no cleanup needed in current code. |
-| `clinic_recall_support` | 1 | yes | split, audit ongoing | transfer cold: 23 clean / 2 candidate; refreshed clinic: 29 clean / 0 candidate | Device/serial field rows plus generic manufacturer-liaison, verification-procedure, explicit clinic abbreviations, cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer identity, and medical-director authority are clean when the needed source-record rows exist. The old transfer artifact leaves key-retainer and authority rows candidate because it lacks blockquoted sender/role text atoms; a refreshed compile after the blockquote ledger repair makes the helper fully clean. | Use refreshed source-record ledgers before claiming clean clinic high-water; stale artifacts should keep sender-dependent rows candidate-labeled. |
+| `clinic_recall_support` | 1 | yes | split, audit ongoing | transfer cold: 23 clean / 2 candidate; refreshed class audit: 29 clean / 0 candidate; fresh QA artifact: 2000 clean / 240 candidate / 0 unlabeled | Device/serial field rows plus generic manufacturer-liaison, verification-procedure, explicit clinic abbreviations, cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer identity, and medical-director authority are mostly clean when the needed source-record rows exist. A fresh no-cache QA replay over the refreshed artifact reduced unlabeled output but still emitted 240 candidate rows and scored `35 / 0 / 4` with one unjudged row; row-gating with the prior `40 / 0 / 0` high-water stays exact. | Keep the prior clinic high-water as candidate-helper score; genericize or retire the remaining candidate emissions before claiming clean-helper saturation. |
 | `grant_award_support` | 1 | yes | clean-helper on transfer batch | transfer: 16 clean / 0 candidate | Award, cap, eligibility, field-recusal, appeal-window, committee-recusal vote-count, score-correction operational status, and appeal-pending status rows are clean over admitted predicates plus generic source-record atoms/sections. | Seek sibling transfer proof before treating the helper as broadly promoted; no current fixture constants remain in emitted rows. |
 | `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | transfer: 40 clean / 2 candidate; refreshed class audit: 33 clean / 0 candidate; fresh QA artifact: 2805 clean / 0 candidate / 0 unlabeled | Event/timestamp/count, computed duration, vendor/model, batch-id, ticket, packet-id, data-loss status, lab-sample status/return, system clock authority, and field-derived rows are clean after source-ledger anchor repair. A fresh no-cache QA replay over the refreshed artifact emitted clean labels end to end but scored only `28 / 2 / 9` with one unjudged row due query-generation churn; row-gating that run with the prior `39 / 1 / 0` high-water reaches `40 / 0 / 0`. | Treat industrial as clean-labeled on its refreshed source artifact but still one-fixture by usage count; seek sibling proof before promotion. |
 | `probate_storage_support` | 1 | no | orphaned artifact helper | not applicable | Historical QA artifacts contain this helper, but no current companion implementation is registered in the repo. | Do not report old probate rows as active architecture; rebuild generically only if probate pressure returns. |
@@ -59,11 +59,13 @@ usage audit now reports those rows as `unlabeled` rather than silently omitting
 them. Treat unlabeled helper rows as audit debt. A fresh industrial replay adds
 `2805` clean `industrial_sensor_support` rows and `1450` clean
 `source_record_packet_metadata_support` rows to completed QA output, but older
-industrial artifacts still dominate the usage count as unlabeled. Current usage
-artifacts still show large unlabeled surfaces for `clinic_recall_support`,
-`grant_award_support`, and `archive_authority_custody_support`; their separate
-class-audit reports remain the authority for clean/candidate split until fresh
-QA artifacts carry class labels end to end.
+industrial artifacts still dominate the usage count as unlabeled. A fresh clinic
+replay adds `2000` clean and `240` candidate `clinic_recall_support` rows to
+completed QA output, reducing but not eliminating clinic label debt. Current
+usage artifacts still show large unlabeled surfaces for `grant_award_support`
+and `archive_authority_custody_support`; their separate class-audit reports
+remain the authority for clean/candidate split until fresh QA artifacts carry
+class labels end to end.
 
 The high-pressure candidate surface is still `roster_state_support`. The roster
 source-record parser is not a one-fixture scar anymore: it finds `108` candidate
