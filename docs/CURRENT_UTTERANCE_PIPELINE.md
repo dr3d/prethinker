@@ -28,6 +28,20 @@ The LLM is still a stenographer and semantic instrument. It reads language,
 proposes structure, and answers against query evidence. It is not the authority
 that decides what the KB believes.
 
+## Evaluated Artifact Unit
+
+For document work, the evaluated artifact is:
+
+```text
+source + lens set + deterministic ledgers + admitted predicates + helper set
+```
+
+Helpers are part of the instrument's epistemic surface, not invisible plumbing.
+Two runs over the same source can have different answerable surfaces if they use
+different lens sets or helper sets. The helper classification and reporting
+discipline live in
+[`ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`](ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md).
+
 ## Architecture In Five Lines
 
 ```text
@@ -188,6 +202,11 @@ prose directly and do not mutate the KB. Current active examples include:
 The key lesson from the May transfer fixtures is that many misses are not new
 semantic lenses. They are cases where the KB already contains the material, but
 the query layer needs a deterministic companion to compose it.
+
+The newer helper audit adds an important constraint: helper-assisted scores must
+name the helper class. Generic helpers and declared lens companions are part of
+the architecture. Fixture-shaped helpers are candidate scars until rewritten
+generically or transfer-proven on fresh sibling fixtures.
 
 ## Selector And Guard Discipline
 
