@@ -2725,6 +2725,8 @@ def _industrial_sensor_companion(
     text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
     section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
     line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    label_rows = _runtime_rows(runtime, "source_record_label(SourceRow, Label).")
+    sensor_rows = _runtime_rows(runtime, "sensor_id(Sensor).")
     if not source_fields and not text_rows:
         return None
 
@@ -2739,6 +2741,17 @@ def _industrial_sensor_companion(
     line_by_row = {
         str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
         for row in line_rows
+    }
+    labels_by_row: dict[str, set[str]] = {}
+    for row in label_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        label = str(row.get("Label", "")).strip()
+        if source_row and label:
+            labels_by_row.setdefault(source_row, set()).add(label)
+    sensor_ids = {
+        str(row.get("Sensor", "")).strip()
+        for row in sensor_rows
+        if str(row.get("Sensor", "")).strip()
     }
     if not any(
         token in " ".join(text_by_row.values())
@@ -2875,6 +2888,21 @@ def _industrial_sensor_companion(
                 corrected_events.get(start_event, {}).get("source_row", ""),
             )
 
+    for source_row, labels in sorted(labels_by_row.items()):
+        section_atom = section_by_row.get(source_row, "")
+        if "sensor_register" not in section_atom:
+            continue
+        for label in sorted(labels):
+            if label not in sensor_ids:
+                continue
+            add(
+                "sensor_register_section",
+                _display_source_atom(label),
+                _display_section_from_atom(section_atom),
+                f"{_display_source_atom(label)} is listed in {_display_section_from_atom(section_atom)}.",
+                source_row,
+            )
+
     for source_row, text_atom in text_by_row.items():
         if "hum_d_04_vendor_sentec_model_sentec_rh_220_plus" in text_atom:
             add_candidate(
@@ -2884,26 +2912,12 @@ def _industrial_sensor_companion(
                 "Vendor Sentec; model Sentec RH-220-Plus.",
                 source_row,
             )
-            add_candidate(
-                "sensor_register_section",
-                "HUM-D-04",
-                "Section 9",
-                "HUM-D-04 is listed in Section 9 (Sensor Register Excerpts).",
-                source_row,
-            )
         if "qis_opt_12_vendor_vexcel_model_v_opticheck_4" in text_atom:
             add_candidate(
                 "sensor_vendor_model",
                 "QIS-OPT-12",
                 "Vexcel V-OptiCheck 4",
                 "Vendor Vexcel; model V-OptiCheck 4.",
-                source_row,
-            )
-            add_candidate(
-                "sensor_register_section",
-                "QIS-OPT-12",
-                "Section 9",
-                "QIS-OPT-12 certified scope is in Section 9 (Sensor Register Excerpts).",
                 source_row,
             )
         if text_atom.startswith("next_calibration_due_2026_07_12"):

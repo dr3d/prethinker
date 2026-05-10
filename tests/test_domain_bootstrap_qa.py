@@ -331,6 +331,9 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_line(src_line_0095, 95).",
         "source_record_section(src_line_0095, section_4_corrected_timeline).",
         "source_record_text_atom(src_line_0160, of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging).",
+        "sensor_id(hum_d_04).",
+        "source_record_label(src_line_0219, hum_d_04).",
+        "source_record_section(src_line_0219, section_9_sensor_register_excerpts).",
         "source_record_text_atom(src_line_0219, hum_d_04_vendor_sentec_model_sentec_rh_220_plus_location).",
         "source_record_text_atom(src_line_0223, next_calibration_due_2026_07_12).",
         "source_record_text_atom(src_line_0255, v_2026_04_25_buffer_overflow_on_dry_dl_04_confirmed_by_maintenance_team_no_recovery).",
@@ -365,6 +368,12 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         row.get("SupportKind") == "sensor_vendor_model"
         and row.get("Subject") == "HUM-D-04"
         and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "sensor_register_section"
+        and row.get("Subject") == "HUM-D-04"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert any(
