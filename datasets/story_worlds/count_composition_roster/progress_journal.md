@@ -221,3 +221,36 @@ from parsed no-query IR to roster helper triggers made the targeted compliance
 set exact. The full run improves to `30 / 2 / 8`, but remaining row churn means
 the next step is row-gating/selector discrimination across complementary
 surfaces.
+
+## CCR-008 - Roster Sibling Row Gate
+
+Date: 2026-05-10
+
+Evidence lane: `artifact_only_row_gate`
+
+Artifacts:
+
+- row-gate report:
+  `tmp/openrouter_precision_20260509/roster_sibling_row_gate_20260510/row_gate.md`
+- row-gate JSON:
+  `tmp/openrouter_precision_20260509/roster_sibling_row_gate_20260510/row_gate.json`
+
+Inputs:
+
+- old source-record V2 QA: `27 / 4 / 9`
+- focused homeroom helper replay: `29 / 2 / 9`
+- adult/compliance fallback replay: `30 / 2 / 8`
+
+Result:
+
+- row-gated ceiling: `36 / 3 / 1`
+- chosen run counts: old V2 `30`, focused homeroom `8`,
+  adult/compliance `2`
+
+Lesson: the helper work exposed complementary surfaces rather than one dominant
+replacement surface. Old V2 still carries many policy/source lookup rows,
+focused homeroom carries current membership/count rows, and adult/compliance
+carries compliance rows. The remaining gap is selector discrimination across
+known surfaces. Do not promote the helper as clean architecture yet; promote the
+pattern that artifact packages must report which helper class and surface won
+each row.

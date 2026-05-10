@@ -341,6 +341,12 @@ chaperones into existing roster helper triggers. With `max_tokens=3000` to avoid
 truncated Semantic IR, the same artifact reached `30 / 2 / 8`; targeted
 compliance rows `q017,q033,q034,q035` were `4 / 0 / 0`. The remaining gap is now
 row selection across complementary query surfaces.
+An artifact-only row gate over old source-record V2, focused homeroom helper,
+and adult/compliance fallback surfaces reaches `36 / 3 / 1` on
+`count_composition_roster`: old V2 wins 30 rows, focused homeroom wins 8, and
+adult/compliance wins 2. This is the clearest current roster result: the memory
+surfaces are complementary and mostly present, but runtime selection is still
+behind available answerability.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
