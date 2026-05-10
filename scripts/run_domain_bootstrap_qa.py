@@ -3020,12 +3020,14 @@ def _industrial_sensor_companion(
                 f"Regulatory incident report packet ID {packet_id}.",
                 source_row,
             )
-        if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:
-            add_candidate(
+        clock_authority_match = re.search(r"(?P<system>sys_[a-z0-9]+)_timestamps_are_accepted_as_wall_clock", text_atom)
+        if clock_authority_match:
+            system = _display_system_atom(clock_authority_match.group("system"))
+            add(
                 "system_clock_authority",
-                "SYS-C",
+                system,
                 "wall-clock; no drift correction",
-                "SYS-C timestamps are accepted as wall-clock with no drift correction.",
+                f"{system} timestamps are accepted as wall-clock with no drift correction.",
                 source_row,
             )
         lab_status_match = re.search(

@@ -269,6 +269,11 @@ Lab-sample status and estimated-return rows were then generalized over
 `lab_YYYY_MMDD_sN` sample identifiers and source-record date atoms, bringing
 `industrial_sensor_support` to 39 clean / 5 candidate and the six-fixture
 transfer audit to 204 `clean-helper` and 143 `candidate-helper` rows.
+System clock authority then moved from a SYS-C literal to the generic
+`<system>_timestamps_are_accepted_as_wall_clock` source-record pattern,
+bringing `industrial_sensor_support` to 40 clean / 4 candidate and the
+six-fixture transfer audit to 205 `clean-helper` and 142 `candidate-helper`
+rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
