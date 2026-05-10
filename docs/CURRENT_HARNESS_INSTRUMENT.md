@@ -231,7 +231,12 @@ observed 9 support helpers across 453 JSON files; 8 appeared on two or fewer
 fixtures and should be treated as transfer-pending or candidate-scar surfaces
 until wider replay evidence proves otherwise. Only
 `source_record_packet_metadata_support` appeared on more than two fixtures in
-that artifact set.
+that artifact set. The audit now also checks whether observed `_support`
+predicates are currently implemented in the registered QA companion source. That
+exposed `probate_storage_support` as an orphaned artifact helper: it appears in
+historical probate QA outputs but has no current repo implementation, so those
+rows should be treated as candidate-helper archaeology rather than promoted
+architecture.
 
 ## Extraction Rule
 

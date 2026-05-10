@@ -123,6 +123,7 @@ This is a working classification, not a final ledger.
 | industrial sensor support | Split, audit ongoing | Field-driven event/timestamp/count rows are labeled `clean-helper`; exact sensor/ticket/prose recognizers are labeled `candidate-helper`. |
 | clinic recall support | Split, audit ongoing | Device/serial rows from source-record fields are labeled `clean-helper`; named-clinic, liaison, cabinet, seal, authority, and procedure recognizers are labeled `candidate-helper`. |
 | source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows are labeled `clean-helper`; embedded school/grant packet facts are now labeled `candidate-helper` in the emitted rows. |
+| probate storage support | Orphaned artifact helper | Appears in historical probate QA artifacts, but no current companion implementation is registered in the repo. Treat those historical rows as candidate-helper archaeology, not active architecture. |
 
 ## Doctrine
 

@@ -47,11 +47,14 @@ def test_helper_usage_audit_flags_low_transfer_helpers(tmp_path) -> None:
         [{"HelperClass": "clean-helper"}],
     )
 
-    payload = audit_roots([tmp_path], rare_threshold=1)
+    payload = audit_roots([tmp_path], rare_threshold=1, implemented_helpers={"shared_support"})
 
     assert payload["helper_count"] == 2
     assert payload["helpers"]["one_fixture_support"]["suspicious_low_transfer"] is True
+    assert payload["helpers"]["one_fixture_support"]["implemented"] is False
+    assert payload["orphaned_artifact_helper_count"] == 1
     assert payload["helpers"]["shared_support"]["suspicious_low_transfer"] is False
+    assert payload["helpers"]["shared_support"]["implemented"] is True
     assert payload["helpers"]["shared_support"]["fixture_count"] == 2
     assert payload["fixtures"]["fixture_a"]["helper_count"] == 1
     assert payload["fixtures"]["fixture_b"]["helpers"] == ["shared_support"]

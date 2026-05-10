@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -68,6 +69,16 @@ def support_predicate_name(item: dict[str, Any]) -> str:
     return ""
 
 
+def implemented_support_predicates(paths: Iterable[Path]) -> set[str]:
+    implemented: set[str] = set()
+    for path in paths:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        implemented.update(re.findall(r"[\"']([a-zA-Z0-9_]+_support)[\"']", text))
+    return implemented
+
+
 def helper_class_counts(result: dict[str, Any]) -> Counter[str]:
     counts: Counter[str] = Counter()
     rows = result.get("rows")
@@ -107,7 +118,12 @@ def audit_file(path: Path) -> tuple[str, dict[str, dict[str, Any]]]:
     return fixture, helpers
 
 
-def audit_roots(roots: list[Path], *, rare_threshold: int) -> dict[str, Any]:
+def audit_roots(
+    roots: list[Path],
+    *,
+    rare_threshold: int,
+    implemented_helpers: set[str] | None = None,
+) -> dict[str, Any]:
     files = iter_json_files(roots)
     helper_fixtures: dict[str, set[str]] = defaultdict(set)
     helper_files: dict[str, set[str]] = defaultdict(set)
@@ -146,6 +162,7 @@ def audit_roots(roots: list[Path], *, rare_threshold: int) -> dict[str, Any]:
             "row_count": helper_rows[helper],
             "helper_class_counts": dict(sorted(helper_classes[helper].items())),
             "suspicious_low_transfer": len(fixtures) <= rare_threshold,
+            "implemented": (helper in implemented_helpers) if implemented_helpers is not None else None,
         }
 
     suspicious = {
@@ -173,6 +190,14 @@ def audit_roots(roots: list[Path], *, rare_threshold: int) -> dict[str, Any]:
         "helpers": helpers_out,
         "fixtures": fixtures_out,
         "suspicious_helpers": suspicious,
+        "orphaned_artifact_helpers": {
+            helper: item
+            for helper, item in helpers_out.items()
+            if item.get("implemented") is False
+        },
+        "orphaned_artifact_helper_count": sum(
+            1 for item in helpers_out.values() if item.get("implemented") is False
+        ),
         "parse_errors": parse_errors[:50],
         "parse_error_count": len(parse_errors),
     }
@@ -186,22 +211,24 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"JSON files scanned: `{payload['json_file_count']}`",
         f"Helpers observed: `{payload['helper_count']}`",
         f"Suspicious low-transfer helpers: `{payload['suspicious_helper_count']}`",
+        f"Orphaned artifact helpers: `{payload.get('orphaned_artifact_helper_count', 0)}`",
         "",
         "## Suspicious Helpers",
         "",
-        "| Helper | Fixtures | Files | Rows | Helper classes | Fixture list |",
-        "| --- | ---: | ---: | ---: | --- | --- |",
+        "| Helper | Fixtures | Files | Rows | Implemented | Helper classes | Fixture list |",
+        "| --- | ---: | ---: | ---: | --- | --- | --- |",
     ]
     for helper, item in sorted(
         payload["suspicious_helpers"].items(),
         key=lambda pair: (pair[1]["fixture_count"], pair[0]),
     ):
         lines.append(
-            "| {helper} | {fixtures} | {files} | {rows} | `{classes}` | {fixture_list} |".format(
+            "| {helper} | {fixtures} | {files} | {rows} | {implemented} | `{classes}` | {fixture_list} |".format(
                 helper=helper,
                 fixtures=item["fixture_count"],
                 files=item["file_count"],
                 rows=item["row_count"],
+                implemented=_display_implemented(item.get("implemented")),
                 classes=item.get("helper_class_counts", {}),
                 fixture_list=", ".join(item.get("fixtures", [])),
             )
@@ -230,21 +257,30 @@ def render_markdown(payload: dict[str, Any]) -> str:
             "",
             "## All Helpers",
             "",
-            "| Helper | Fixtures | Files | Rows | Suspicious |",
-            "| --- | ---: | ---: | ---: | --- |",
+            "| Helper | Fixtures | Files | Rows | Suspicious | Implemented |",
+            "| --- | ---: | ---: | ---: | --- | --- |",
         ]
     )
     for helper, item in sorted(payload["helpers"].items()):
         lines.append(
-            "| {helper} | {fixtures} | {files} | {rows} | {suspicious} |".format(
+            "| {helper} | {fixtures} | {files} | {rows} | {suspicious} | {implemented} |".format(
                 helper=helper,
                 fixtures=item["fixture_count"],
                 files=item["file_count"],
                 rows=item["row_count"],
                 suspicious="yes" if item["suspicious_low_transfer"] else "no",
+                implemented=_display_implemented(item.get("implemented")),
             )
         )
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _display_implemented(value: object) -> str:
+    if value is True:
+        return "yes"
+    if value is False:
+        return "no"
+    return "unknown"
 
 
 def main() -> int:
@@ -253,15 +289,28 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="Output JSON path.")
     parser.add_argument("--markdown", type=Path, help="Optional Markdown output path.")
     parser.add_argument("--rare-threshold", type=int, default=2, help="Flag helpers used on <= this many fixtures.")
+    parser.add_argument(
+        "--registry-source",
+        action="append",
+        type=Path,
+        default=[Path("scripts/run_domain_bootstrap_qa.py")],
+        help="Source file containing currently implemented helper predicate names; repeatable.",
+    )
     args = parser.parse_args()
 
-    payload = audit_roots(args.root, rare_threshold=int(args.rare_threshold))
+    implemented = implemented_support_predicates(args.registry_source)
+    payload = audit_roots(args.root, rare_threshold=int(args.rare_threshold), implemented_helpers=implemented)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     if args.markdown:
         args.markdown.parent.mkdir(parents=True, exist_ok=True)
         args.markdown.write_text(render_markdown(payload), encoding="utf-8")
-    print(json.dumps({k: payload[k] for k in ["json_file_count", "helper_count", "suspicious_helper_count"]}, indent=2))
+    print(
+        json.dumps(
+            {k: payload[k] for k in ["json_file_count", "helper_count", "suspicious_helper_count", "orphaned_artifact_helper_count"]},
+            indent=2,
+        )
+    )
     return 0
 
 
