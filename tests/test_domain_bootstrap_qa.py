@@ -322,6 +322,11 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_field(src_line_0075, event_id, ev_09).",
         "source_record_field(src_line_0075, system, sys_a).",
         "source_record_field(src_line_0075, recorded_time_raw, v_2026_04_22_15_14_50).",
+        "source_record_field(src_line_0074, description, batch_b_2026_0422_3_flagged_off_spec_by_qis_opt_12).",
+        "source_record_field(src_line_0079, event_id, ev_13).",
+        "source_record_field(src_line_0079, system, sys_c).",
+        "source_record_field(src_line_0079, recorded_time_raw, v_2026_04_22_15_30_00).",
+        "source_record_field(src_line_0079, description, maintenance_window_opened_for_sensor_diagnostics_mms_t_2026_0422_1).",
         "source_record_field(src_line_0088, event_id, ev_01).",
         "source_record_field(src_line_0088, wall_clock_time_utc_corrected, v_2026_04_22_14_01_26).",
         "source_record_field(src_line_0095, event_id, ev_08).",
@@ -366,7 +371,7 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     details = " ".join(str(row.get("Detail", "")) for row in rows)
     assert any(
         row.get("SupportKind") == "raw_event_count"
-        and row.get("Value") == "3"
+        and row.get("Value") == "4"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
@@ -402,6 +407,18 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "sensor_calibration_ticket"
         and row.get("Subject") == "QIS-OPT-12"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "event_batch_identifier"
+        and row.get("Subject") == "EV-08"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "event_maintenance_ticket"
+        and row.get("Subject") == "EV-13"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )

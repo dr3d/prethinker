@@ -2872,6 +2872,26 @@ def _industrial_sensor_companion(
             event_row.get("source_row", ""),
         )
 
+    for event_id, event_row in sorted(raw_events.items(), key=lambda item: _event_sort_key(item[0])):
+        description = event_row.get("description", "")
+        source_row = event_row.get("source_row", "")
+        for batch_id in re.findall(r"b_\d{4}_\d{4}_\d+", description):
+            add(
+                "event_batch_identifier",
+                _display_event_id(event_id),
+                _display_source_atom(batch_id),
+                f"{_display_event_id(event_id)} description includes batch {_display_source_atom(batch_id)}.",
+                source_row,
+            )
+        for ticket_id in re.findall(r"mms_t_\d{4}_\d{4}_\d+", description):
+            add(
+                "event_maintenance_ticket",
+                _display_event_id(event_id),
+                _display_source_atom(ticket_id),
+                f"{_display_event_id(event_id)} description includes maintenance ticket {_display_source_atom(ticket_id)}.",
+                source_row,
+            )
+
     for start_event, end_event, support_kind in [
         ("ev_08", "ev_09", "corrected_response_interval"),
         ("ev_10", "ev_14", "line_stop_duration"),
@@ -2983,22 +3003,6 @@ def _industrial_sensor_companion(
                 "regulatory_report",
                 "MPP-COMP-2026-0427",
                 "Regulatory incident report packet ID MPP-COMP-2026-0427.",
-                source_row,
-            )
-        if "ev_08_sys_b" in text_atom and "batch_b_2026_0422_3_flagged_off_spec" in text_atom:
-            add_candidate(
-                "event_batch_identifier",
-                "EV-08",
-                "B-2026-0422-3",
-                "EV-08 flags batch B-2026-0422-3 off-spec by QIS-OPT-12.",
-                source_row,
-            )
-        if "mms_t_2026_0422_1" in text_atom:
-            add_candidate(
-                "event_maintenance_ticket",
-                "EV-13",
-                "MMS-T-2026-0422-1",
-                "EV-13 opened the maintenance window for sensor diagnostics under ticket MMS-T-2026-0422-1.",
                 source_row,
             )
         if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:

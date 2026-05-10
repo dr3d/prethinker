@@ -215,7 +215,9 @@ companion rows: 122 `clean-helper` and 40 `candidate-helper`. A subsequent
 generic parser for `<sensor_id>_vendor_<vendor>_model_<model>` source atoms
 moved sensor vendor/model rows to `clean-helper` and exposed one additional
 sensor model row, bringing the audit to 163 companion rows: 125 `clean-helper`
-and 38 `candidate-helper`.
+and 38 `candidate-helper`. Generic extraction of batch IDs and maintenance
+tickets from raw event descriptions then brought the audit to 164 companion
+rows: 128 `clean-helper` and 36 `candidate-helper`.
 
 ## Extraction Rule
 
