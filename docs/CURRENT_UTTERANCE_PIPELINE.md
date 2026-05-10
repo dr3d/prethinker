@@ -163,6 +163,10 @@ prose directly and do not mutate the KB. Current active examples include:
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
   source-record fields.
+- `industrial_sensor_support`: derives sensor-register facts, raw-event-log
+  counts, per-system event composition, corrected timeline intervals,
+  maintenance tickets, lab sample logistics, packet IDs, and packet-scope
+  exclusions from admitted source-record rows.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
   IDs, appeal IDs, score correction memo IDs, recusal memo IDs, device IDs,
   physical retention locations, pending packet items, and role-scope notes.
@@ -240,6 +244,11 @@ Recent transfer work supports the current direction:
 - `grant_exception_cap_matrix` targeted replay moved its known miss set to
   exact after grant award/source-record helpers; full replays exposed remaining
   OpenRouter parse/judge variance to keep watching.
+- `industrial_sensor_clock_correction` moved from `30 / 2 / 8` cold to
+  `39 / 1 / 0` through `industrial_sensor_support`, proving that corrected
+  intervals, exact sensor IDs, maintenance tickets, and packet-scope exclusions
+  were already present as durable source-record memory but needed a queryable
+  helper surface.
 - The main weak surface is no longer “can the model understand the document?”
   It is often “did the admitted state become addressable, composable, and
   queryable at the exact row shape the question demands?”

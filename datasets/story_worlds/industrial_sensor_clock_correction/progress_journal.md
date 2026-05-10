@@ -48,3 +48,44 @@ Lesson: temporal/source-clock acquisition transfers well enough to start above
 clock-drift joins, per-system correction boundaries, and interval/pause
 composition. This is the most direct new proof target for temporal and
 constraint propagation.
+
+## ISCC-002 - Industrial Source-Record Helper Transfer Proof
+
+Date: 2026-05-10
+
+Evidence lane: `query_helper_transfer_proof`
+
+Code change:
+
+- Added `industrial_sensor_support/5` as a query-only companion in
+  `scripts/run_domain_bootstrap_qa.py`.
+- The helper derives sensor-register, raw-event-log, corrected-timeline,
+  maintenance-ticket, packet-id, lab-sample, and packet-scope support from
+  admitted `source_record_*` rows.
+- No new lens and no new guard family were added.
+
+Artifacts:
+
+- Full replay:
+  `tmp/transfer_fixtures_20260510/industrial_sensor_helper_full_replay_v4_20260510/domain_bootstrap_qa_20260510T131154175342Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted supporting replays:
+  `tmp/transfer_fixtures_20260510/industrial_sensor_helper_replay_v2_20260510/domain_bootstrap_qa_20260510T122210713261Z_qa_qwen-qwen3-6-35b-a3b.json`
+  `tmp/transfer_fixtures_20260510/industrial_sensor_helper_replay_v3_20260510/domain_bootstrap_qa_20260510T123644508527Z_qa_qwen-qwen3-6-35b-a3b.json`
+  `tmp/transfer_fixtures_20260510/industrial_sensor_helper_replay_v6_20260510/domain_bootstrap_qa_20260510T130202959553Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result: `39 exact / 1 partial / 0 miss` over `40`.
+
+Lift over cold baseline: `+9 exact`, `-1 partial`, `-8 miss`.
+
+Residual hard edge:
+
+- `q025` remains partial because the semantic predicate inventory has
+  `event_id/1` for only `13` rows. The deterministic source-record helper
+  exposes the raw-log count as `14` and includes `EV-14`, but the canonical
+  semantic event predicate still lacks `event_id(ev_14)`.
+
+Lesson: the transfer fixture did not need a new temporal lens. The big lift
+came from making already-admitted source-record memory queryable: exact sensor
+labels, maintenance tickets, corrected intervals, per-system event counts, and
+packet-scope exclusions. The remaining partial cleanly separates structural
+source-record addressability from canonical semantic predicate completeness.

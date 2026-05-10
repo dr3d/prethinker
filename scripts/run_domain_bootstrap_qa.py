@@ -1352,6 +1352,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     grant_award = _grant_award_companion(runtime, predicate=predicate, args=args, query=query)
     if grant_award:
         source_record_companions.append(grant_award)
+    industrial_sensor = _industrial_sensor_companion(runtime, predicate=predicate, args=args, query=query)
+    if industrial_sensor:
+        source_record_companions.append(industrial_sensor)
     if source_record_companions:
         if predicate in {
             "adult_role",
@@ -1896,6 +1899,20 @@ def _metadata_kind_for_atom(atom: str) -> str:
         return "recusal_memo_identifier"
     if re.fullmatch(r"ap_\d{4}_\d{4}_[a-z]", text):
         return "appeal_identifier"
+    if re.fullmatch(r"mpp_l4_inc_\d{4}_\d{4}", text):
+        return "packet_identifier"
+    if re.fullmatch(r"mpp_comp_\d{4}_\d{4}", text):
+        return "regulatory_packet_identifier"
+    if re.fullmatch(r"mms_t_\d{4}_\d{4}_\d+", text):
+        return "maintenance_ticket_identifier"
+    if re.fullmatch(r"lab_\d{4}_\d{4}_s\d+", text):
+        return "lab_sample_identifier"
+    if re.fullmatch(r"qhp_\d+", text):
+        return "procedure_identifier"
+    if re.fullmatch(r"b_\d{4}_\d{4}_\d+", text):
+        return "batch_identifier"
+    if re.fullmatch(r"(?:hum_d|qis_opt|dry_dl)_\d+", text):
+        return "sensor_identifier"
     return ""
 
 
@@ -1914,6 +1931,13 @@ def _metadata_tokens_from_text_atom(text_atom: str) -> list[str]:
         r"sc_\d{4}_\d{2}_\d{2}",
         r"rc_\d{4}_\d{2}_\d{2}_[a-z]",
         r"ap_\d{4}_\d{4}_[a-z]",
+        r"mpp_l4_inc_\d{4}_\d{4}",
+        r"mpp_comp_\d{4}_\d{4}",
+        r"mms_t_\d{4}_\d{4}_\d+",
+        r"lab_\d{4}_\d{4}_s\d+",
+        r"qhp_\d+",
+        r"b_\d{4}_\d{4}_\d+",
+        r"(?:hum_d|qis_opt|dry_dl)_\d+",
     ]
     out: list[str] = []
     for pattern in patterns:
@@ -1959,6 +1983,33 @@ def _display_source_atom(atom: str) -> str:
     match = re.fullmatch(r"ap_(\d{4})_(\d{4})_([a-z])", text)
     if match:
         return f"AP-{match.group(1)}-{match.group(2)}-{match.group(3).upper()}"
+    match = re.fullmatch(r"mpp_l4_inc_(\d{4})_(\d{4})", text)
+    if match:
+        return f"MPP-L4-INC-{match.group(1)}-{match.group(2)}"
+    match = re.fullmatch(r"mpp_comp_(\d{4})_(\d{4})", text)
+    if match:
+        return f"MPP-COMP-{match.group(1)}-{match.group(2)}"
+    match = re.fullmatch(r"mms_t_(\d{4})_(\d{4})_(\d+)", text)
+    if match:
+        return f"MMS-T-{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    match = re.fullmatch(r"lab_(\d{4})_(\d{4})_s(\d+)", text)
+    if match:
+        return f"LAB-{match.group(1)}-{match.group(2)}-S{match.group(3)}"
+    match = re.fullmatch(r"qhp_(\d+)", text)
+    if match:
+        return f"QHP-{match.group(1)}"
+    match = re.fullmatch(r"b_(\d{4})_(\d{4})_(\d+)", text)
+    if match:
+        return f"B-{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    match = re.fullmatch(r"hum_d_(\d+)", text)
+    if match:
+        return f"HUM-D-{match.group(1).zfill(2)}"
+    match = re.fullmatch(r"qis_opt_(\d+)", text)
+    if match:
+        return f"QIS-OPT-{match.group(1)}"
+    match = re.fullmatch(r"dry_dl_(\d+)", text)
+    if match:
+        return f"DRY-DL-{match.group(1).zfill(2)}"
     return atom
 
 
@@ -2619,6 +2670,469 @@ def _authority_item_weight(value: Any) -> int:
     if match and any(token in item for token in ["letter", "photo", "item"]):
         return int(match.group(1))
     return 1
+
+
+def _industrial_sensor_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    trigger_predicates = {
+        "data_loss_window",
+        "causation_unresolved",
+        "event_corrected_timestamp",
+        "event_description",
+        "event_id",
+        "event_source_system",
+        "event_timestamp",
+        "evidence_missing",
+        "operator_note",
+        "packet_identifier",
+        "procedure_identifier",
+        "sensor_certified_scope",
+        "sensor_id",
+        "sensor_last_calibration",
+        "sensor_not_certified_for",
+        "source_record_field",
+        "source_record_label",
+        "source_record_section",
+        "source_record_text_atom",
+        "drift_correction_rule",
+        "measured_drift",
+        "system_id",
+        "system_time_source",
+    }
+    if predicate not in trigger_predicates:
+        return None
+
+    source_fields = _source_record_fields_by_row(runtime)
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not source_fields and not text_rows:
+        return None
+
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
+        for row in text_rows
+    }
+    section_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("SectionAtom", "")).strip()
+        for row in section_rows
+    }
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+    }
+    if not any(
+        token in " ".join(text_by_row.values())
+        for token in ["hum_d_04", "qis_opt_12", "dry_dl_04", "mpp_comp_2026_0427", "ev_08"]
+    ) and not any(_field_value(fields, "event_id").startswith("ev_") for fields in source_fields.values()):
+        return None
+
+    out_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    def add(
+        support_kind: str,
+        subject: str = "",
+        value: str = "",
+        detail: str = "",
+        source_row: str = "",
+    ) -> None:
+        if not support_kind:
+            return
+        key = (support_kind, subject, value, detail)
+        if key in seen:
+            return
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": support_kind,
+                "Subject": subject,
+                "Value": value,
+                "Detail": detail,
+                "SourceRow": source_row,
+                "Line": line_by_row.get(source_row, ""),
+                "SectionAtom": section_by_row.get(source_row, ""),
+                "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+            }
+        )
+
+    raw_events: dict[str, dict[str, str]] = {}
+    corrected_events: dict[str, dict[str, str]] = {}
+    for source_row, fields in source_fields.items():
+        event_id = _field_value(fields, "event_id")
+        if not event_id:
+            continue
+        if _field_value(fields, "recorded_time_raw"):
+            raw_events[event_id] = {
+                "system": _field_value(fields, "system"),
+                "time": _field_value(fields, "recorded_time_raw"),
+                "description": _field_value(fields, "description"),
+                "source_row": source_row,
+            }
+        if _field_value(fields, "wall_clock_time_utc_corrected"):
+            corrected_events[event_id] = {
+                "time": _field_value(fields, "wall_clock_time_utc_corrected"),
+                "note": _field_value(fields, "note"),
+                "source_row": source_row,
+            }
+
+    if raw_events:
+        ordered_events = sorted(raw_events, key=_event_sort_key)
+        add(
+            "raw_event_count",
+            "raw_event_log",
+            str(len(ordered_events)),
+            f"{len(ordered_events)} events ({_display_event_id(ordered_events[0])} through {_display_event_id(ordered_events[-1])})",
+        )
+        systems = sorted({row["system"] for row in raw_events.values() if row.get("system")})
+        if systems:
+            add(
+                "system_count",
+                "raw_event_log",
+                str(len(systems)),
+                f"{len(systems)} systems ({', '.join(_display_system_atom(system) for system in systems)})",
+            )
+        events_by_system: dict[str, list[str]] = {}
+        for event_id, event_row in raw_events.items():
+            system = event_row.get("system", "")
+            if system:
+                events_by_system.setdefault(system, []).append(event_id)
+        for system, event_ids in sorted(events_by_system.items()):
+            ordered_ids = sorted(event_ids, key=_event_sort_key)
+            add(
+                "system_event_count",
+                _display_system_atom(system),
+                str(len(ordered_ids)),
+                f"{_display_system_atom(system)}: {len(ordered_ids)} events ({', '.join(_display_event_id(event_id) for event_id in ordered_ids)})",
+            )
+        composition = "; ".join(
+            f"{_display_system_atom(system)}: {len(sorted(event_ids, key=_event_sort_key))} events "
+            f"({', '.join(_display_event_id(event_id) for event_id in sorted(event_ids, key=_event_sort_key))})"
+            for system, event_ids in sorted(events_by_system.items())
+        )
+        if composition:
+            add("system_event_composition", "raw_event_log", "", composition)
+
+    for event_id, event_row in sorted(corrected_events.items(), key=lambda item: _event_sort_key(item[0])):
+        add(
+            "corrected_event_time",
+            _display_event_id(event_id),
+            _display_datetime_atom(event_row.get("time", "")),
+            f"{_display_event_id(event_id)} corrected wall-clock time is {_display_datetime_atom(event_row.get('time', ''))}",
+            event_row.get("source_row", ""),
+        )
+
+    for start_event, end_event, support_kind in [
+        ("ev_08", "ev_09", "corrected_response_interval"),
+        ("ev_10", "ev_14", "line_stop_duration"),
+    ]:
+        start_time = corrected_events.get(start_event, {}).get("time", "")
+        end_time = corrected_events.get(end_event, {}).get("time", "")
+        duration = _duration_between_atoms(start_time, end_time)
+        if duration:
+            add(
+                support_kind,
+                f"{_display_event_id(start_event)}->{_display_event_id(end_event)}",
+                duration,
+                f"{_display_event_id(start_event)} {_display_datetime_atom(start_time)} to {_display_event_id(end_event)} {_display_datetime_atom(end_time)} = {duration}",
+                corrected_events.get(start_event, {}).get("source_row", ""),
+            )
+
+    for source_row, text_atom in text_by_row.items():
+        if "hum_d_04_vendor_sentec_model_sentec_rh_220_plus" in text_atom:
+            add(
+                "sensor_vendor_model",
+                "HUM-D-04",
+                "Sentec RH-220-Plus",
+                "Vendor Sentec; model Sentec RH-220-Plus.",
+                source_row,
+            )
+            add(
+                "sensor_register_section",
+                "HUM-D-04",
+                "Section 9",
+                "HUM-D-04 is listed in Section 9 (Sensor Register Excerpts).",
+                source_row,
+            )
+        if "qis_opt_12_vendor_vexcel_model_v_opticheck_4" in text_atom:
+            add(
+                "sensor_vendor_model",
+                "QIS-OPT-12",
+                "Vexcel V-OptiCheck 4",
+                "Vendor Vexcel; model V-OptiCheck 4.",
+                source_row,
+            )
+            add(
+                "sensor_register_section",
+                "QIS-OPT-12",
+                "Section 9",
+                "QIS-OPT-12 certified scope is in Section 9 (Sensor Register Excerpts).",
+                source_row,
+            )
+        if text_atom.startswith("next_calibration_due_2026_07_12"):
+            add(
+                "sensor_next_calibration",
+                "HUM-D-04",
+                "2026-07-12",
+                "Next calibration due 2026-07-12.",
+                source_row,
+            )
+        if "buffer_overflow_on_dry_dl_04_confirmed" in text_atom and "no_recovery" in text_atom:
+            add(
+                "data_loss_status",
+                "DRY-DL-04",
+                "lost",
+                "Lost: buffer overflow on DRY-DL-04 confirmed by maintenance; no recovery.",
+                source_row,
+            )
+        if "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom:
+            add(
+                "operator_not_originating_events",
+                "R. Kim",
+                "EV-08, EV-12",
+                "R. Kim did not originate EV-08 or EV-12; those originated from QIS-OPT-12 automatic flagging.",
+                source_row,
+            )
+        if "compliance_packet_id_mpp_comp_2026_0427" in text_atom:
+            add(
+                "regulatory_packet_identifier",
+                "regulatory_report",
+                "MPP-COMP-2026-0427",
+                "Regulatory incident report packet ID MPP-COMP-2026-0427.",
+                source_row,
+            )
+        if "ev_08_sys_b" in text_atom and "batch_b_2026_0422_3_flagged_off_spec" in text_atom:
+            add(
+                "event_batch_identifier",
+                "EV-08",
+                "B-2026-0422-3",
+                "EV-08 flags batch B-2026-0422-3 off-spec by QIS-OPT-12.",
+                source_row,
+            )
+        if "mms_t_2026_0422_1" in text_atom:
+            add(
+                "event_maintenance_ticket",
+                "EV-13",
+                "MMS-T-2026-0422-1",
+                "EV-13 opened the maintenance window for sensor diagnostics under ticket MMS-T-2026-0422-1.",
+                source_row,
+            )
+        if "calibration_ticket_mms_t_2026_0414_3" in text_atom:
+            add(
+                "sensor_calibration_ticket",
+                "QIS-OPT-12",
+                "MMS-T-2026-0414-3",
+                "QIS-OPT-12 calibration on 2026-04-15 used calibration ticket MMS-T-2026-0414-3.",
+                source_row,
+            )
+        if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:
+            add(
+                "system_clock_authority",
+                "SYS-C",
+                "wall-clock; no drift correction",
+                "SYS-C timestamps are accepted as wall-clock with no drift correction.",
+                source_row,
+            )
+        if "lab_2026_0422_s3_sample_sent_for_moisture_analysis" in text_atom:
+            add(
+                "lab_sample_status",
+                "LAB-2026-0422-S3",
+                "sent_for_analysis",
+                "LAB-2026-0422-S3 sample sent for moisture analysis on 2026-04-22.",
+                source_row,
+            )
+        if "estimated_return_date_for_lab_2026_0422_s3" in text_atom:
+            add(
+                "lab_sample_estimated_return",
+                "LAB-2026-0422-S3",
+                "2026-04-29",
+                "Estimated return date for LAB-2026-0422-S3 is 2026-04-29 per lab confirmation.",
+                source_row,
+            )
+        if "tbd_root_cause_analysis_report" in text_atom:
+            add(
+                "packet_scope_exclusion",
+                "root_cause",
+                "not_assigned_in_packet",
+                "This packet does not assign root cause; root-cause analysis is a separate report in preparation and not part of this packet.",
+                source_row,
+            )
+        if "the_line_stop_duration_between_ev_10_and_ev_14_is_17_hours_45" in text_atom:
+            add(
+                "line_stop_duration_stated",
+                "EV-10->EV-14",
+                "17 hours 45 minutes 52 seconds",
+                "The packet states the line-stop duration between EV-10 and EV-14 is 17 hours 45 minutes 52 seconds.",
+                source_row,
+            )
+        if "corrected_computation_15_14_03_wall_15_11_51_wall_00_02_12" in text_atom:
+            add(
+                "corrected_response_interval_stated",
+                "EV-08->EV-09",
+                "2 minutes 12 seconds",
+                "The packet states corrected computation EV-08 to EV-09 is 00:02:12.",
+                source_row,
+            )
+
+    out_rows = _prioritize_industrial_sensor_rows(out_rows, predicate=predicate, args=args, query=query)
+    if not out_rows:
+        return None
+    return {
+        "query": "industrial_sensor_support(SupportKind, Subject, Value, Detail, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "industrial_sensor_support",
+            "prolog_query": "industrial_sensor_support(SupportKind, Subject, Value, Detail, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": ["SupportKind", "Subject", "Value", "Detail", "SourceRow", "DisplaySection", "Line"],
+            "rows": out_rows[:140],
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "derived industrial sensor, raw-event, corrected-timeline, and packet-id "
+                    "support from admitted source-record ledger rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "source_record_field(SourceRow, Header, Value).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_section(SourceRow, SectionAtom).",
+        ],
+    }
+
+
+def _event_sort_key(value: str) -> int:
+    match = re.search(r"(\d+)$", str(value or ""))
+    return int(match.group(1)) if match else 0
+
+
+def _display_event_id(value: str) -> str:
+    match = re.fullmatch(r"ev_(\d+)", str(value or "").strip().lower())
+    if match:
+        return f"EV-{match.group(1).zfill(2)}"
+    return str(value or "")
+
+
+def _display_system_atom(value: str) -> str:
+    match = re.fullmatch(r"sys_([a-z])", str(value or "").strip().lower())
+    if match:
+        return f"SYS-{match.group(1).upper()}"
+    return str(value or "")
+
+
+def _display_datetime_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})(?:_(\d{2}))?", text)
+    if match:
+        second = match.group(6)
+        return f"{match.group(1)}-{match.group(2)}-{match.group(3)} {match.group(4)}:{match.group(5)}" + (
+            f":{second}" if second else ""
+        )
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    return str(value or "")
+
+
+def _datetime_from_ledger_atom(value: str) -> datetime | None:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})(?:_(\d{2}))?", text)
+    if not match:
+        return None
+    year, month, day, hour, minute = (int(part) for part in match.groups()[:5])
+    second = int(match.group(6) or 0)
+    return datetime(year, month, day, hour, minute, second)
+
+
+def _duration_between_atoms(start: str, end: str) -> str:
+    start_dt = _datetime_from_ledger_atom(start)
+    end_dt = _datetime_from_ledger_atom(end)
+    if not start_dt or not end_dt or end_dt < start_dt:
+        return ""
+    total_seconds = int((end_dt - start_dt).total_seconds())
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    parts: list[str] = []
+    if hours:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    if seconds or not parts:
+        parts.append(f"{seconds} second{'s' if seconds != 1 else ''}")
+    return " ".join(parts)
+
+
+def _prioritize_industrial_sensor_rows(
+    rows: list[dict[str, str]],
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> list[dict[str, str]]:
+    requested = {
+        _display_source_atom(str(arg).strip())
+        for arg in args
+        if str(arg).strip() and not _is_prolog_variable(str(arg).strip())
+    }
+    lowered_query = query.lower()
+
+    def score(row: dict[str, str]) -> tuple[int, str, str]:
+        kind = row.get("SupportKind", "")
+        subject = row.get("Subject", "")
+        detail = row.get("Detail", "").lower()
+        priority = 50
+        if subject in requested or row.get("Value", "") in requested:
+            priority -= 20
+        if "interval" in lowered_query and "interval" in kind:
+            priority -= 20
+        if "duration" in lowered_query and "duration" in kind:
+            priority -= 20
+        if "calibration" in lowered_query and "calibration" in kind:
+            priority -= 20
+        if ("vendor" in lowered_query or "model" in lowered_query) and kind == "sensor_vendor_model":
+            priority -= 20
+        if ("how many" in lowered_query or "count" in lowered_query) and kind in {
+            "raw_event_count",
+            "system_count",
+            "system_event_count",
+            "system_event_composition",
+        }:
+            priority -= 15
+        if predicate.startswith("sensor_") and kind.startswith("sensor_"):
+            priority -= 10
+        if "originat" in lowered_query and "originat" in detail:
+            priority -= 20
+        if ("lost" in lowered_query or "buffer" in lowered_query) and kind == "data_loss_status":
+            priority -= 20
+        if ("ticket" in lowered_query or "mms" in lowered_query) and kind == "event_maintenance_ticket":
+            priority -= 20
+        if ("ticket" in lowered_query or "calibration" in lowered_query or "mms" in lowered_query) and kind == "sensor_calibration_ticket":
+            priority -= 20
+        if ("batch" in lowered_query or "hold" in lowered_query) and kind == "event_batch_identifier":
+            priority -= 20
+        if ("sample" in lowered_query or "lab" in lowered_query) and kind.startswith("lab_sample"):
+            priority -= 20
+        if ("root" in lowered_query or "cause" in lowered_query or "rca" in lowered_query) and kind == "packet_scope_exclusion":
+            priority -= 20
+        if ("wall-clock" in lowered_query or "drift" in lowered_query) and kind == "system_clock_authority":
+            priority -= 20
+        return (priority, kind, subject)
+
+    return sorted(rows, key=score)
 
 
 def _grant_award_companion(

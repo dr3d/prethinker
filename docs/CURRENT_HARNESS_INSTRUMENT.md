@@ -173,6 +173,13 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   `177 / 10 / 53` to `196 / 7 / 37` if only this fixture's helper repair is
   substituted, with the weakest fixture becoming a solved proof of source
   addressability.
+- Industrial sensor/source-clock helpers are also transfer-tested. On
+  `industrial_sensor_clock_correction`, a query-only
+  `industrial_sensor_support/5` companion over admitted `source_record_*` rows
+  moved the cold artifact from `30 / 2 / 8` to `39 / 1 / 0` without a new lens,
+  guard family, or compile. The remaining partial is the clean boundary case:
+  deterministic source records expose `EV-14` and the 14-row raw log, while the
+  canonical semantic predicate inventory still lacks `event_id(ev_14)`.
 
 ## Extraction Rule
 

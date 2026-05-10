@@ -6,6 +6,7 @@ from scripts.run_domain_bootstrap_qa import (
     _assessment_transfer_policy_companion,
     _classification_deferral_effect_companion,
     _conversion_assessment_delta_companion,
+    _industrial_sensor_companion,
     _negative_join_with_previous,
     _placeholder_repaired_query,
     _relaxed_constant_query,
@@ -267,6 +268,52 @@ def test_hoa_assessment_revenue_companion_uses_current_counts_and_rates() -> Non
     assert companion is not None
     rows = companion["result"]["rows"]
     assert any(row.get("RowKind") == "total" and row.get("TotalRevenue") == "545400" for row in rows)
+
+
+def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    facts = [
+        "source_record_field(src_line_0067, event_id, ev_01).",
+        "source_record_field(src_line_0067, system, sys_a).",
+        "source_record_field(src_line_0067, recorded_time_raw, v_2026_04_22_14_02_13).",
+        "source_record_field(src_line_0074, event_id, ev_08).",
+        "source_record_field(src_line_0074, system, sys_b).",
+        "source_record_field(src_line_0074, recorded_time_raw, v_2026_04_22_15_09_33).",
+        "source_record_field(src_line_0075, event_id, ev_09).",
+        "source_record_field(src_line_0075, system, sys_a).",
+        "source_record_field(src_line_0075, recorded_time_raw, v_2026_04_22_15_14_50).",
+        "source_record_field(src_line_0088, event_id, ev_01).",
+        "source_record_field(src_line_0088, wall_clock_time_utc_corrected, v_2026_04_22_14_01_26).",
+        "source_record_field(src_line_0095, event_id, ev_08).",
+        "source_record_field(src_line_0095, wall_clock_time_utc_corrected, v_2026_04_22_15_11_51).",
+        "source_record_field(src_line_0096, event_id, ev_09).",
+        "source_record_field(src_line_0096, wall_clock_time_utc_corrected, v_2026_04_22_15_14_03).",
+        "source_record_line(src_line_0095, 95).",
+        "source_record_section(src_line_0095, section_4_corrected_timeline).",
+        "source_record_text_atom(src_line_0160, of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging).",
+        "source_record_text_atom(src_line_0219, hum_d_04_vendor_sentec_model_sentec_rh_220_plus_location).",
+        "source_record_text_atom(src_line_0223, next_calibration_due_2026_07_12).",
+        "source_record_text_atom(src_line_0255, v_2026_04_25_buffer_overflow_on_dry_dl_04_confirmed_by_maintenance_team_no_recovery).",
+        "source_record_text_atom(src_line_0264, compliance_packet_id_mpp_comp_2026_0427_the_two_packets_cover_the).",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _industrial_sensor_companion(
+        runtime,
+        predicate="source_record_field",
+        args=[],
+        query="source_record_field(SourceRow, Header, Value).",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    details = " ".join(str(row.get("Detail", "")) for row in rows)
+    assert "2 minutes 12 seconds" in details
+    assert "Vendor Sentec; model Sentec RH-220-Plus." in details
+    assert "Next calibration due 2026-07-12." in details
+    assert "MPP-COMP-2026-0427" in details
+    assert "R. Kim did not originate EV-08 or EV-12" in details
 
 
 def test_hoa_conversion_assessment_delta_companion_derives_rate_increase() -> None:
