@@ -385,6 +385,13 @@ exposed `probate_storage_support` as an orphaned artifact helper: it appears in
 historical probate QA outputs but has no current repo implementation, so those
 rows should be treated as candidate-helper archaeology rather than promoted
 architecture.
+A current probate replay makes the distinction concrete. Without the orphaned
+helper, `probate_storage_access_register` emits only `96` candidate-helper rows
+from `archive_authority_custody_support` and scores `29 / 3 / 8`, below the
+`34 / 1 / 5` cold baseline. The old orphan-assisted replay scored `36 / 0 / 4`,
+and row-gating cold, orphan, and current surfaces reaches `40 / 0 / 0`, but that
+ceiling is diagnostic archaeology until the orphan is rebuilt generically or
+replaced by audited live surfaces.
 `docs/HELPER_LEDGER.md` is the durable rollup of this audit surface: each helper
 gets fixture count, implementation status, class-audit counts, current read, and
 next action.
