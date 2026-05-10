@@ -3870,8 +3870,10 @@ def _grant_award_companion(
         text_atom = text_by_row.get(source_row, "")
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row_int)
         combined = f"{text_atom} {next_text}".strip()
-        if "14_day_appeal_window_from_the_decision_letter" in text_atom:
-            add_candidate("appeal_window_rule", amount="14 days", detail="14 days from the decision letter", source_row=source_row)
+        appeal_window_match = re.search(r"(?P<days>\d+)_day_appeal_window_from_the_decision_letter", text_atom)
+        if appeal_window_match:
+            days = appeal_window_match.group("days")
+            add("appeal_window_rule", amount=f"{days} days", detail=f"{days} days from the decision letter", source_row=source_row)
         if "on_2026_05_22" in text_atom and "appeal" in text_atom:
             add_candidate("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
         if "ap_2026_0429_a_is_pending" in text_atom or "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
@@ -3897,12 +3899,19 @@ def _grant_award_companion(
                 detail="If sustained, the appeal award is drawn against Fall 2026 carryover, not Spring 2026 awards.",
                 source_row=source_row,
             )
-        if "committee_has_7_voting_members_with_one_recusal_6_members_vote" in text_atom:
-            add_candidate(
+        recusal_vote_match = re.search(
+            r"committee_has_(?P<members>\d+)_voting_members_with_(?P<recusals>one|\d+)_recusal_(?P<voters>\d+)_members_vote",
+            text_atom,
+        )
+        if recusal_vote_match:
+            members = recusal_vote_match.group("members")
+            recusals = "1" if recusal_vote_match.group("recusals") == "one" else recusal_vote_match.group("recusals")
+            voters = recusal_vote_match.group("voters")
+            add(
                 "committee_recusal_vote_count",
-                amount="6",
-                status="one_recusal",
-                detail="The committee has 7 voting members; with one recusal, 6 members vote on the recused item.",
+                amount=voters,
+                status=f"{recusals}_recusal",
+                detail=f"The committee has {members} voting members; with {recusals} recusal, {voters} members vote on the recused item.",
                 source_row=source_row,
             )
         if "committee_size_for_any_given_item_is_7_minus_the_number_of_recusals" in combined:

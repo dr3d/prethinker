@@ -1420,7 +1420,13 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
     assert any(
         row.get("SupportKind") == "committee_recusal_vote_count"
         and row.get("Amount") == "6"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "appeal_window_rule"
+        and row.get("Amount") == "14 days"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(

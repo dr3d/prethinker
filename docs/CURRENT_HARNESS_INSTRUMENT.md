@@ -252,6 +252,10 @@ The same audit now covers `clear_sample_clock_pause_support`: 1 row,
 `clean-helper`, zero candidate rows, zero unlabeled rows, confirming that the
 pause-aware clock helper is currently generic temporal substrate over admitted
 segments, offline intervals, and rule exceptions.
+Grant cleanup promoted appeal-window and committee-recusal vote-count support
+to generic source-record extraction, bringing `grant_award_support` to 14 clean
+/ 2 candidate rows and the six-fixture transfer audit to 198 `clean-helper` and
+149 `candidate-helper` rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
