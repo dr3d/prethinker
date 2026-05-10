@@ -98,3 +98,36 @@ event/timestamp/count logic and fixture-family text recognizers for exact
 sensor/ticket/prose rows. The replay is therefore evidence for the helper
 bridge pattern, not yet a clean-helper transfer proof. Promotion requires a
 generic rewrite or sibling-fixture transfer without new fixture constants.
+
+## ISCC-003 - Fresh Labeled Helper Replay
+
+Date: 2026-05-10
+
+Evidence lane: `helper_class_label_refresh`
+
+Artifacts:
+
+- Fresh full replay:
+  `tmp/transfer_fixtures_20260510/industrial_sensor_helper_fresh_labeled_full_20260510/domain_bootstrap_qa_20260510T184909933161Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Row gate against prior high-water:
+  `tmp/transfer_fixtures_20260510/industrial_fresh_labeled_row_gate_20260510/row_gate.md`
+- Helper usage audit:
+  `tmp/helper_usage_audit_20260510/helper_usage_audit_latest.md`
+
+Results:
+
+- Fresh labeled replay: `28 / 2 / 9` with `1` unjudged row
+- Helper rows in fresh replay: `4255 clean-helper / 0 candidate-helper / 0 unlabeled`
+- `industrial_sensor_support`: `2805 clean-helper` rows
+- `source_record_packet_metadata_support`: `1450 clean-helper` rows
+- Row-gate with prior high-water: `40 / 0 / 0`
+- Fresh labeled surface uniquely rescues `q025`; prior high-water carries the
+  other `39` rows.
+
+Lesson: the refreshed source-ledger artifact proves the industrial helper can
+emit clean-labeled rows end to end in completed QA output. The lower fresh score
+is not helper-class dirt; it is no-cache QA/query-generation churn over the same
+memory surface. Report the `39 / 1 / 0` high-water and `40 / 0 / 0` row-gated
+ceiling separately from the fresh labeled `28 / 2 / 9` run. The durable finding
+is clean helper provenance plus complementary row surfaces, not a new promoted
+score.

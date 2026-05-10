@@ -184,6 +184,13 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   boundary case:
   deterministic source records expose `EV-14` and the 14-row raw log, while the
   canonical semantic predicate inventory still lacks `event_id(ev_14)`.
+  A later fresh no-cache replay over the refreshed source-ledger artifact emitted
+  `2805` clean `industrial_sensor_support` rows and `1450` clean
+  `source_record_packet_metadata_support` rows in completed QA output, with no
+  candidate or unlabeled helper rows. That replay scored only `28 / 2 / 9` with
+  one unjudged row because QA/query generation churned, but row-gating it with
+  the prior high-water reaches `40 / 0 / 0`. The durable result is clean helper
+  provenance plus complementary answer surfaces, not a replacement score.
 - Clinic recall source-record helpers now show the same pattern on a different
   domain. A refreshed deterministic source-record ledger plus
   `clinic_recall_support/5` moved `clinic_device_recall_field_packet` from
@@ -198,9 +205,11 @@ or transfer-proven helpers without fixture-shaped constants. The
 source-record packet metadata, industrial sensor, clinic recall, and grant
 award helpers have begun that cleanup: emitted rows now label generic
 identifier/event/timestamp, device/serial, award, cap, eligibility, and
-field-recusal extraction as `clean-helper` and quarantine packet-family,
-sensor/ticket, clinic, liaison, seal, authority, appeal, procedure, and
-score-correction recognizers as `candidate-helper`.
+field-recusal extraction as `clean-helper`. The industrial refreshed artifact is
+now clean-labeled end to end; older industrial QA artifacts remain unlabeled
+audit debt. Packet-family, clinic, liaison, seal, authority, appeal, procedure,
+and score-correction recognizers remain candidate or transfer-pending until
+fresh labeled artifacts and sibling proof justify promotion.
 
 `scripts/audit_helper_classes.py` can now run this audit artifact-only against
 domain bootstrap compile JSONs. The first six-fixture transfer pass over
