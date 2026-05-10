@@ -324,6 +324,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For conflict-of-interest policy questions, query standing-policy rows such as conflict_policy(Policy, Requirement), conflict_policy_includes(Policy, Relationship), acting_rio_requirement(Condition, Authority, Duration), inquiry_minimum_size(Size), investigation_minimum_size(Size), and deadline_requirement(replacement_appointment, Amount, Unit, Anchor) before instance-only rows such as conflict_publication/4 or conflict_recusal/3.",
         "For questions asking what someone thought, misunderstood, believed, disclosed, or explained, query statement_detail/3 before broad witness_statement metadata. witness_statement/4 often names a statement but may not contain enough detail.",
         "For witness count, language-count, or source-language questions, query witness_statement(Speaker, Language, Topic, Role) when available. Use witness_claim/4 only as a fallback content surface; it usually does not preserve source-language metadata.",
+        "For questions explicitly asking how many rows, entries, devices, systems, events, or applications are listed in a table, inventory, raw event log, source section, or list, include a broad source_record_row(SourceRow, table_row, Line, SectionAtom, Label) query when source_record_row/5 exists. This is structural addressability evidence; do not use it for semantic counts that ask for eligible, active, approved, failed, or scoped items unless a table/list wording is present.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
         "For prior-concern or October-2025 notice questions, query prior_complaint/4, prior_complaint_subject/2, prior_complaint_action/2, prior_complaint_disputed/2, unresolved_question/2, unresolved_question_detail/2, unresolved_question_status/2, and unresolved_question_referred/2 before falling back to broad proceeding_event rows.",
         "For committee replacement after conflict questions, query conflict_policy/2 and conflict_policy_includes/2 for the standing rule, conflict_recusal/3 for the actual recusal, inquiry_minimum_size/1 and investigation_minimum_size/1 for thresholds, deadline_requirement(replacement_appointment or equivalent, Amount, Unit, Anchor), and committee_member_replaced/4 for the observed replacement.",
@@ -1241,6 +1242,12 @@ def run_one_question(
     queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
     if not queries:
         queries = _fallback_queries_from_semantic_ir(ir, allowed_predicates=allowed_predicates)
+    queries = _ordered_query_unique(
+        [
+            *queries,
+            *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+        ]
+    )
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
     rules_out = [str(q).strip() for q in clauses.get("rules", []) if str(q).strip()]
     query_results = run_query_plan(runtime, queries)
@@ -1331,6 +1338,54 @@ def _fallback_queries_from_semantic_ir(
         out.append("roster_version(Version).")
 
     return _ordered_query_unique(out)
+
+
+def _source_record_table_count_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Add structural table-row evidence for explicit table/list count questions.
+
+    This is intentionally a routing hint, not an answer helper. It only exposes
+    deterministic source-record table rows so the existing
+    source_record_table_body_count_support companion can decide whether there is
+    usable body-row evidence.
+    """
+
+    text = str(utterance or "").casefold()
+    asks_count = any(
+        marker in text
+        for marker in (
+            "how many",
+            "count of",
+            "number of",
+            "provide the count",
+        )
+    )
+    if not asks_count:
+        return []
+    table_surface = any(
+        marker in text
+        for marker in (
+            "table",
+            "listed",
+            " list",
+            "inventory",
+            "raw event log",
+            "event log",
+            "section",
+            "entries",
+            "rows",
+            "recorded in",
+        )
+    )
+    if not table_surface:
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_row/5" not in signatures or "source_record_field/3" not in signatures:
+        return []
+    return ["source_record_row(SourceRow, table_row, Line, SectionAtom, Label)."]
 
 
 def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:

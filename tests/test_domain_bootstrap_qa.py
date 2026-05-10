@@ -12,6 +12,7 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_join_with_previous,
     _placeholder_repaired_query,
     _relaxed_constant_query,
+    _source_record_table_count_hint_queries,
     _temporal_join_with_previous,
     _vacancy_voting_eligibility_companion,
     cache_key_for_question,
@@ -1771,6 +1772,20 @@ def test_source_record_table_body_count_companion_excludes_header_rows() -> None
             "HelperClass": "clean-helper",
         }
     ]
+
+
+def test_source_record_table_count_hint_routes_explicit_table_count_questions() -> None:
+    inventory = {"signatures": ["source_record_row/5", "source_record_field/3"]}
+
+    assert _source_record_table_count_hint_queries(
+        utterance="How many events are recorded in the raw event log?",
+        kb_inventory=inventory,
+    ) == ["source_record_row(SourceRow, table_row, Line, SectionAtom, Label)."]
+
+    assert _source_record_table_count_hint_queries(
+        utterance="How many applications were eligible?",
+        kb_inventory=inventory,
+    ) == []
 
 
 def test_source_record_packet_metadata_links_access_authority_to_court_order() -> None:
