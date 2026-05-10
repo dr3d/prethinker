@@ -261,6 +261,10 @@ from candidate rows to clean timestamp arithmetic over admitted corrected event
 times. `industrial_sensor_support` is now 35 clean / 9 candidate, and the
 six-fixture transfer audit is 200 `clean-helper` and 147 `candidate-helper`
 rows.
+Packet-id and data-loss status recognizers then moved to generic source-record
+patterns, bringing `industrial_sensor_support` to 37 clean / 7 candidate and
+the six-fixture transfer audit to 202 `clean-helper` and 145
+`candidate-helper` rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

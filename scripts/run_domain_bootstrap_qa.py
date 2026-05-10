@@ -2992,12 +2992,14 @@ def _industrial_sensor_companion(
             break
 
     for source_row, text_atom in text_by_row.items():
-        if "buffer_overflow_on_dry_dl_04_confirmed" in text_atom and "no_recovery" in text_atom:
-            add_candidate(
+        data_loss_match = re.search(r"buffer_overflow_on_(?P<system>dry_dl_\d+)_confirmed.*no_recovery", text_atom)
+        if data_loss_match:
+            system = _display_source_atom(data_loss_match.group("system"))
+            add(
                 "data_loss_status",
-                "DRY-DL-04",
+                system,
                 "lost",
-                "Lost: buffer overflow on DRY-DL-04 confirmed by maintenance; no recovery.",
+                f"Lost: buffer overflow on {system} confirmed by maintenance; no recovery.",
                 source_row,
             )
         if "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom:
@@ -3008,12 +3010,14 @@ def _industrial_sensor_companion(
                 "R. Kim did not originate EV-08 or EV-12; those originated from QIS-OPT-12 automatic flagging.",
                 source_row,
             )
-        if "compliance_packet_id_mpp_comp_2026_0427" in text_atom:
-            add_candidate(
+        packet_match = re.search(r"compliance_packet_id_(?P<packet>mpp_comp_\d{4}_\d{4})", text_atom)
+        if packet_match:
+            packet_id = _display_source_atom(packet_match.group("packet"))
+            add(
                 "regulatory_packet_identifier",
                 "regulatory_report",
-                "MPP-COMP-2026-0427",
-                "Regulatory incident report packet ID MPP-COMP-2026-0427.",
+                packet_id,
+                f"Regulatory incident report packet ID {packet_id}.",
                 source_row,
             )
         if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:

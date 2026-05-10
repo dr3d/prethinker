@@ -401,7 +401,7 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     )
     assert any(
         row.get("SupportKind") == "regulatory_packet_identifier"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert any(
@@ -425,6 +425,12 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "event_maintenance_ticket"
         and row.get("Subject") == "EV-13"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "data_loss_status"
+        and row.get("Subject") == "DRY-DL-04"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
