@@ -201,6 +201,12 @@ field-recusal extraction as `clean-helper` and quarantine packet-family,
 sensor/ticket, clinic, liaison, seal, authority, appeal, procedure, and
 score-correction recognizers as `candidate-helper`.
 
+`scripts/audit_helper_classes.py` can now run this audit artifact-only against
+domain bootstrap compile JSONs. The first six-fixture transfer pass over
+`tmp/transfer_fixtures_20260510/cold_acquisition_compile_lanes6` produced 160
+companion rows with zero unlabeled rows: 116 `clean-helper` and 44
+`candidate-helper`.
+
 ## Extraction Rule
 
 ```text
