@@ -3545,10 +3545,18 @@ def _grant_award_companion(
     }
 
     out_rows: list[dict[str, str]] = []
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str, str, str]] = set()
 
-    def add(kind: str, app: str = "", amount: str = "", status: str = "", detail: str = "", source_row: str = "") -> None:
-        key = (kind, app, detail or amount or status)
+    def add(
+        kind: str,
+        app: str = "",
+        amount: str = "",
+        status: str = "",
+        detail: str = "",
+        source_row: str = "",
+        helper_class: str = "clean-helper",
+    ) -> None:
+        key = (kind, app, detail or amount or status, helper_class)
         if key in seen:
             return
         seen.add(key)
@@ -3563,7 +3571,26 @@ def _grant_award_companion(
                 "Line": line_by_row.get(source_row, ""),
                 "SectionAtom": section_by_row.get(source_row, ""),
                 "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+                "HelperClass": helper_class,
             }
+        )
+
+    def add_candidate(
+        kind: str,
+        app: str = "",
+        amount: str = "",
+        status: str = "",
+        detail: str = "",
+        source_row: str = "",
+    ) -> None:
+        add(
+            kind,
+            app=app,
+            amount=amount,
+            status=status,
+            detail=detail,
+            source_row=source_row,
+            helper_class="candidate-helper",
         )
 
     eligibility_by_app: dict[str, dict[str, str]] = {}
@@ -3684,11 +3711,11 @@ def _grant_award_companion(
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row_int)
         combined = f"{text_atom} {next_text}".strip()
         if "14_day_appeal_window_from_the_decision_letter" in text_atom:
-            add("appeal_window_rule", amount="14 days", detail="14 days from the decision letter", source_row=source_row)
+            add_candidate("appeal_window_rule", amount="14 days", detail="14 days from the decision letter", source_row=source_row)
         if "on_2026_05_22" in text_atom and "appeal" in text_atom:
-            add("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
+            add_candidate("appeal_review_date", app="a_07", amount="2026-05-22", detail="next scheduled committee meeting", source_row=source_row)
         if "ap_2026_0429_a_is_pending" in text_atom or "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
-            add(
+            add_candidate(
                 "appeal_pending_status",
                 app="a_07",
                 status="pending_not_final",
@@ -3696,14 +3723,14 @@ def _grant_award_companion(
                 source_row=source_row,
             )
         if "does_not_automatically_decide_the_named_item" in combined:
-            add(
+            add_candidate(
                 "recusal_procedure_rule",
                 status="does_not_decide_item",
                 detail="A recusal removes the member from voting on the named item only and does not automatically decide the item.",
                 source_row=source_row,
             )
         if "appeal_award_would_be_drawn" in combined and "fall_2026_carryover" in combined:
-            add(
+            add_candidate(
                 "appeal_award_funding_source",
                 app="a_07",
                 status="fall_2026_carryover",
@@ -3711,7 +3738,7 @@ def _grant_award_companion(
                 source_row=source_row,
             )
         if "committee_has_7_voting_members_with_one_recusal_6_members_vote" in text_atom:
-            add(
+            add_candidate(
                 "committee_recusal_vote_count",
                 amount="6",
                 status="one_recusal",
@@ -3719,14 +3746,14 @@ def _grant_award_companion(
                 source_row=source_row,
             )
         if "committee_size_for_any_given_item_is_7_minus_the_number_of_recusals" in combined:
-            add(
+            add_candidate(
                 "committee_recusal_formula",
                 amount="7 minus recusals",
                 detail="Committee size for a given item is 7 minus the number of recusals filed for that item.",
                 source_row=source_row,
             )
         if "composite_from_7_4_to_8_4" in combined or "the_corrected_score_is_operational_as_of_2026_04_22" in combined:
-            add(
+            add_candidate(
                 "score_correction_operational",
                 app="a_02",
                 amount="8.4",
@@ -3746,13 +3773,23 @@ def _grant_award_companion(
             "prolog_query": "grant_award_support(SupportKind, App, Amount, Status, Detail, SourceRow).",
             "result_type": "table",
             "num_rows": len(out_rows),
-            "variables": ["SupportKind", "App", "Amount", "Status", "Detail", "SourceRow", "DisplaySection"],
+            "variables": [
+                "SupportKind",
+                "App",
+                "Amount",
+                "Status",
+                "Detail",
+                "SourceRow",
+                "DisplaySection",
+                "HelperClass",
+            ],
             "rows": out_rows[:120],
             "reasoning_basis": {
                 "kind": "query-only-companion",
                 "note": (
-                    "derived grant award, cap, eligibility, appeal, and recusal support from admitted "
-                    "award predicates plus deterministic source-record ledger rows"
+                    "derived clean grant award, cap, eligibility, and field-driven recusal "
+                    "support from admitted predicates/source-record fields and labeled "
+                    "appeal/procedure text recognizers as candidate-helper rows"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,

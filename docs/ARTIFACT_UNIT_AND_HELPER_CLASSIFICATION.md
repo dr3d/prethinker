@@ -119,7 +119,7 @@ This is a working classification, not a final ledger.
 | temporal and negative join helpers | Clean helper | Query-composition substrate over prior query results. |
 | authority/custody support | Mostly generic helper | General joins over possession, access, title, recall, and source rows; minor older text patterns need review. |
 | roster state support | Transfer-proven candidate | Strong transfer evidence, but audit for lingering fixture labels before calling it fully clean. |
-| grant award support | Mixed | Field-driven award/cap arithmetic is legitimate; text-specific appeal/recusal rows need generic rewrite or quarantine. |
+| grant award support | Split, audit ongoing | Award, cap, eligibility, and field-driven recusal rows are labeled `clean-helper`; appeal/procedure/score-correction text recognizers are labeled `candidate-helper`. |
 | industrial sensor support | Split, audit ongoing | Field-driven event/timestamp/count rows are labeled `clean-helper`; exact sensor/ticket/prose recognizers are labeled `candidate-helper`. |
 | clinic recall support | Split, audit ongoing | Device/serial rows from source-record fields are labeled `clean-helper`; named-clinic, liaison, cabinet, seal, authority, and procedure recognizers are labeled `candidate-helper`. |
 | source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows are labeled `clean-helper`; embedded school/grant packet facts are now labeled `candidate-helper` in the emitted rows. |

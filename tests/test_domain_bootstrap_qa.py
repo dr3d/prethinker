@@ -1249,12 +1249,14 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         row.get("SupportKind") == "eligible_application_count"
         and row.get("Amount") == "2"
         and "a_05=er_2:fail" in row.get("Detail", "")
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("SupportKind") == "cap_applied_application_count"
         and row.get("Amount") == "1"
         and "a_02:$26,400->$25,000" in row.get("Detail", "")
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
@@ -1266,11 +1268,13 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
         row.get("SupportKind") == "recusal_record"
         and row.get("Status") == "RC-2026-04-20-V"
         and "J. Vasquez recused from a_04" in row.get("Detail", "")
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
         row.get("SupportKind") == "appeal_pending_status"
         and row.get("App") == "a_07"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert any(
@@ -1281,12 +1285,14 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
     assert any(
         row.get("SupportKind") == "committee_recusal_vote_count"
         and row.get("Amount") == "6"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
     assert any(
         row.get("SupportKind") == "score_correction_operational"
         and row.get("App") == "a_02"
         and row.get("Amount") == "8.4"
+        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
 

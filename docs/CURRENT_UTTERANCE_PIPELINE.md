@@ -176,7 +176,9 @@ prose directly and do not mutate the KB. Current active examples include:
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and
-  source-record fields.
+  source-record fields. Its emitted rows carry `HelperClass`: award, cap,
+  eligibility, and field-recusal rows are `clean-helper`, while
+  appeal/procedure/score-correction text recognizers remain `candidate-helper`.
 - `industrial_sensor_support`: derives sensor-register facts, raw-event-log
   counts, per-system event composition, corrected timeline intervals,
   maintenance tickets, lab sample logistics, packet IDs, and packet-scope
