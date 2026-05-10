@@ -265,6 +265,10 @@ Packet-id and data-loss status recognizers then moved to generic source-record
 patterns, bringing `industrial_sensor_support` to 37 clean / 7 candidate and
 the six-fixture transfer audit to 202 `clean-helper` and 145
 `candidate-helper` rows.
+Lab-sample status and estimated-return rows were then generalized over
+`lab_YYYY_MMDD_sN` sample identifiers and source-record date atoms, bringing
+`industrial_sensor_support` to 39 clean / 5 candidate and the six-fixture
+transfer audit to 204 `clean-helper` and 143 `candidate-helper` rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

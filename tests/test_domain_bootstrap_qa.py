@@ -354,6 +354,8 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_section(src_line_0223, section_9_sensor_register_excerpts).",
         "source_record_text_atom(src_line_0223, next_calibration_due_2026_07_12).",
         "source_record_text_atom(src_line_0255, v_2026_04_25_buffer_overflow_on_dry_dl_04_confirmed_by_maintenance_team_no_recovery).",
+        "source_record_text_atom(src_line_0252, v_2026_04_22_lab_2026_0422_s3_sample_sent_for_moisture_analysis).",
+        "source_record_text_atom(src_line_0257, v_2026_04_29_estimated_return_date_for_lab_2026_0422_s3_per_lab_confirmation).",
         "source_record_text_atom(src_line_0264, compliance_packet_id_mpp_comp_2026_0427_the_two_packets_cover_the).",
     ]
     for fact in facts:
@@ -431,6 +433,19 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "data_loss_status"
         and row.get("Subject") == "DRY-DL-04"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "lab_sample_status"
+        and row.get("Subject") == "LAB-2026-0422-S3"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "lab_sample_estimated_return"
+        and row.get("Subject") == "LAB-2026-0422-S3"
+        and row.get("Value") == "2026-04-29"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )

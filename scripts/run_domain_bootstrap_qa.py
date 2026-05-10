@@ -3028,20 +3028,34 @@ def _industrial_sensor_companion(
                 "SYS-C timestamps are accepted as wall-clock with no drift correction.",
                 source_row,
             )
-        if "lab_2026_0422_s3_sample_sent_for_moisture_analysis" in text_atom:
-            add_candidate(
+        lab_status_match = re.search(
+            r"(?:^|_)v_(?P<date>\d{4}_\d{2}_\d{2})_(?P<sample>lab_\d{4}_\d{4}_s\d+)_sample_sent_for_(?P<analysis>[a-z0-9_]+)(?:$)",
+            text_atom,
+        )
+        if lab_status_match:
+            sample_id = _display_source_atom(lab_status_match.group("sample"))
+            analysis = lab_status_match.group("analysis").strip("_")
+            analysis_display = analysis.replace("_", " ")
+            sample_date = _display_datetime_atom(lab_status_match.group("date"))
+            add(
                 "lab_sample_status",
-                "LAB-2026-0422-S3",
+                sample_id,
                 "sent_for_analysis",
-                "LAB-2026-0422-S3 sample sent for moisture analysis on 2026-04-22.",
+                f"{sample_id} sample sent for {analysis_display} on {sample_date}.",
                 source_row,
             )
-        if "estimated_return_date_for_lab_2026_0422_s3" in text_atom:
-            add_candidate(
+        lab_return_match = re.search(
+            r"(?:^|_)v_(?P<date>\d{4}_\d{2}_\d{2})_estimated_return_date_for_(?P<sample>lab_\d{4}_\d{4}_s\d+)(?:_|$)",
+            text_atom,
+        )
+        if lab_return_match:
+            sample_id = _display_source_atom(lab_return_match.group("sample"))
+            return_date = _display_datetime_atom(lab_return_match.group("date"))
+            add(
                 "lab_sample_estimated_return",
-                "LAB-2026-0422-S3",
-                "2026-04-29",
-                "Estimated return date for LAB-2026-0422-S3 is 2026-04-29 per lab confirmation.",
+                sample_id,
+                return_date,
+                f"Estimated return date for {sample_id} is {return_date} per source record.",
                 source_row,
             )
         if "tbd_root_cause_analysis_report" in text_atom:

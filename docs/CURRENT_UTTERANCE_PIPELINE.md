@@ -189,8 +189,9 @@ prose directly and do not mutate the KB. Current active examples include:
   maintenance tickets, lab sample logistics, packet IDs, and packet-scope
   exclusions from admitted source-record rows. Its emitted rows carry
   `HelperClass`: field/ledger-derived event, timestamp, computed-duration,
-  packet-id, and data-loss rows are `clean-helper`, while stated-duration and
-  remaining exact prose recognizers remain `candidate-helper`.
+  packet-id, data-loss, and lab-sample logistics rows are `clean-helper`, while
+  stated-duration and remaining exact prose recognizers remain
+  `candidate-helper`.
 - `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
   identity, failure rates, cabinet/seal/key custody, verification procedure
   support, full device serial displays, pending-determination correspondence,
