@@ -208,10 +208,10 @@ produced 160 companion rows with zero unlabeled rows: 116 `clean-helper` and 44
 `candidate-helper`. Normal `domain_bootstrap_qa` JSON and Markdown summaries
 also include `helper_class_summary` when companion rows are present, so this
 provenance can ride with score reports instead of living only in a side audit.
-The first candidate-retirement pass moved industrial sensor-register section
-support from text recognizers to generic source-record label/section joins,
-bringing the six-fixture audit to 162 companion rows: 120 `clean-helper` and 42
-`candidate-helper`.
+The first candidate-retirement passes moved industrial sensor-register section
+support plus calibration due-date/ticket support from text recognizers to
+generic source-record label/section joins, bringing the six-fixture audit to 162
+companion rows: 122 `clean-helper` and 40 `candidate-helper`.
 
 ## Extraction Rule
 

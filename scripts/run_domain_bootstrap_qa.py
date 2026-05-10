@@ -2903,6 +2903,41 @@ def _industrial_sensor_companion(
                 source_row,
             )
 
+    current_sensor_by_section: dict[str, str] = {}
+    ordered_source_rows = sorted(
+        set(text_by_row) | set(labels_by_row) | set(section_by_row),
+        key=lambda source_row: int(float(line_by_row.get(source_row, "0"))) if _is_numeric_atom(line_by_row.get(source_row, "")) else 0,
+    )
+    for source_row in ordered_source_rows:
+        section_atom = section_by_row.get(source_row, "")
+        labels = labels_by_row.get(source_row, set())
+        for label in sorted(labels):
+            if label in sensor_ids:
+                current_sensor_by_section[section_atom] = label
+        current_sensor = current_sensor_by_section.get(section_atom, "")
+        if not current_sensor:
+            continue
+        for label in sorted(labels):
+            due_match = re.fullmatch(r"next_calibration_due_(\d{4}_\d{2}_\d{2})", label)
+            if due_match:
+                due_date = due_match.group(1)
+                add(
+                    "sensor_next_calibration",
+                    _display_source_atom(current_sensor),
+                    _display_datetime_atom(due_date),
+                    f"Next calibration due {_display_datetime_atom(due_date)}.",
+                    source_row,
+                )
+            ticket_match = re.fullmatch(r"mms_t_\d{4}_\d{4}_\d+", label)
+            if ticket_match and "calibration" in section_atom:
+                add(
+                    "sensor_calibration_ticket",
+                    _display_source_atom(current_sensor),
+                    _display_source_atom(label),
+                    f"{_display_source_atom(current_sensor)} calibration used ticket {_display_source_atom(label)}.",
+                    source_row,
+                )
+
     for source_row, text_atom in text_by_row.items():
         if "hum_d_04_vendor_sentec_model_sentec_rh_220_plus" in text_atom:
             add_candidate(
@@ -2918,14 +2953,6 @@ def _industrial_sensor_companion(
                 "QIS-OPT-12",
                 "Vexcel V-OptiCheck 4",
                 "Vendor Vexcel; model V-OptiCheck 4.",
-                source_row,
-            )
-        if text_atom.startswith("next_calibration_due_2026_07_12"):
-            add_candidate(
-                "sensor_next_calibration",
-                "HUM-D-04",
-                "2026-07-12",
-                "Next calibration due 2026-07-12.",
                 source_row,
             )
         if "buffer_overflow_on_dry_dl_04_confirmed" in text_atom and "no_recovery" in text_atom:
@@ -2966,14 +2993,6 @@ def _industrial_sensor_companion(
                 "EV-13",
                 "MMS-T-2026-0422-1",
                 "EV-13 opened the maintenance window for sensor diagnostics under ticket MMS-T-2026-0422-1.",
-                source_row,
-            )
-        if "calibration_ticket_mms_t_2026_0414_3" in text_atom:
-            add_candidate(
-                "sensor_calibration_ticket",
-                "QIS-OPT-12",
-                "MMS-T-2026-0414-3",
-                "QIS-OPT-12 calibration on 2026-04-15 used calibration ticket MMS-T-2026-0414-3.",
                 source_row,
             )
         if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:

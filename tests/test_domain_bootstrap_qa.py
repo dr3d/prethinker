@@ -332,9 +332,21 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_section(src_line_0095, section_4_corrected_timeline).",
         "source_record_text_atom(src_line_0160, of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging).",
         "sensor_id(hum_d_04).",
+        "sensor_id(qis_opt_12).",
+        "source_record_line(src_line_0118, 118).",
+        "source_record_label(src_line_0118, qis_opt_12).",
+        "source_record_section(src_line_0118, v_5_1_qis_opt_12_calibration_2026_04_15).",
+        "source_record_line(src_line_0120, 120).",
+        "source_record_label(src_line_0120, mms_t_2026_0414_3).",
+        "source_record_section(src_line_0120, v_5_1_qis_opt_12_calibration_2026_04_15).",
+        "source_record_text_atom(src_line_0120, calibration_ticket_mms_t_2026_0414_3_the_line_continued_to_operate).",
+        "source_record_line(src_line_0219, 219).",
         "source_record_label(src_line_0219, hum_d_04).",
         "source_record_section(src_line_0219, section_9_sensor_register_excerpts).",
         "source_record_text_atom(src_line_0219, hum_d_04_vendor_sentec_model_sentec_rh_220_plus_location).",
+        "source_record_line(src_line_0223, 223).",
+        "source_record_label(src_line_0223, next_calibration_due_2026_07_12).",
+        "source_record_section(src_line_0223, section_9_sensor_register_excerpts).",
         "source_record_text_atom(src_line_0223, next_calibration_due_2026_07_12).",
         "source_record_text_atom(src_line_0255, v_2026_04_25_buffer_overflow_on_dry_dl_04_confirmed_by_maintenance_team_no_recovery).",
         "source_record_text_atom(src_line_0264, compliance_packet_id_mpp_comp_2026_0427_the_two_packets_cover_the).",
@@ -379,6 +391,18 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "regulatory_packet_identifier"
         and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "sensor_next_calibration"
+        and row.get("Subject") == "HUM-D-04"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "sensor_calibration_ticket"
+        and row.get("Subject") == "QIS-OPT-12"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert "2 minutes 12 seconds" in details
