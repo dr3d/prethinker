@@ -433,6 +433,9 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     runtime = CorePrologRuntime(max_depth=200)
     facts = [
         "source_record_text_atom(src_line_0021, high_viscosity_infusates_failure_rate_observed_in_field_returns_0_7_per).",
+        "source_record_line(src_line_0021, 21).",
+        "source_record_text_atom(src_line_0022, v_1_000_hours_of_use).",
+        "source_record_line(src_line_0022, 22).",
         "source_record_text_atom(src_line_0027, manufacturer_contact_k_halberg_regional_liaison_eastern_network).",
         "source_record_text_atom(src_line_0075, epa_eastfield_pediatric_associates).",
         "source_record_text_atom(src_line_0116, procedure_mv_vp_04_a).",
@@ -466,6 +469,12 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     assert any(
         row.get("SupportKind") == "manufacturer_liaison"
         and row.get("Value") == "K. Halberg"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "recall_failure_rate"
+        and row.get("Value") == "0.7 per 1,000 hours of use"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )

@@ -195,7 +195,8 @@ prose directly and do not mutate the KB. Current active examples include:
   support, full device serial displays, pending-determination correspondence,
   and medical-director authority from admitted source-record rows. Its emitted
   rows carry `HelperClass`: source-record-field device/serial rows plus generic
-  manufacturer-liaison and verification-procedure atoms are `clean-helper`,
+  manufacturer-liaison, verification-procedure, and failure-rate atoms are
+  `clean-helper` when the required source-record continuation rows are present,
   while named-clinic, cabinet/seal/key, and authority recognizers remain
   `candidate-helper`.
 - `source_record_packet_metadata_support`: surfaces exact packet IDs, policy

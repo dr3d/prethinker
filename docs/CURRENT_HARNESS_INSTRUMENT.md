@@ -230,6 +230,12 @@ candidate-helper rows from older family-specific source-cell/text recognizers.
 The first clinic cleanup moved manufacturer-liaison and verification-procedure
 recognizers to generic source-record atom extraction, shifting the six-fixture
 transfer audit to 192 `clean-helper` and 156 `candidate-helper` rows.
+A follow-on clinic failure-rate rewrite uses adjacent source-record continuation
+lines instead of a hard-coded rate string. The old cold transfer artifact does
+not contain that failure-rate source row, so its class counts do not move; the
+refreshed clinic source-record artifact audits at 19 `clean-helper` and 10
+`candidate-helper` rows, confirming the helper is generic where the source
+ledger acquired the needed line.
 The complementary precision-batch audit over `tmp/openrouter_precision_20260509`
 shows `source_record_clock_sync_support` as clean deterministic substrate:
 2 rows, both `clean-helper`, with zero unlabeled rows.

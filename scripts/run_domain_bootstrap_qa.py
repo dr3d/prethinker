@@ -3306,6 +3306,11 @@ def _clinic_device_recall_companion(
         str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
         for row in line_rows
     }
+    text_by_line = {
+        int(line): text_by_row[source_row]
+        for source_row, line in line_by_row.items()
+        if _is_numeric_atom(line) and source_row in text_by_row
+    }
 
     out_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -3371,14 +3376,26 @@ def _clinic_device_recall_companion(
                 f"Manufacturer contact: {liaison_name}, Regional Liaison.",
                 source_row,
             )
-        if "failure_rate_observed_in_field_returns_0_7_per" in text_atom:
-            add_candidate(
-                "recall_failure_rate",
-                "secondary occlusion sensor",
-                "0.7 per 1,000 hours of use",
-                "Failure rate observed in field returns: 0.7 per 1,000 hours of use.",
-                source_row,
-            )
+        if "failure_rate_observed" in text_atom and "_per" in text_atom:
+            line = line_by_row.get(source_row, "")
+            next_text = text_by_line.get(int(line) + 1, "") if _is_numeric_atom(line) else ""
+            rate_value = _clinic_failure_rate_display(text_atom, next_text)
+            if rate_value:
+                add(
+                    "recall_failure_rate",
+                    "secondary occlusion sensor",
+                    rate_value,
+                    f"Failure rate observed in field returns: {rate_value}.",
+                    source_row,
+                )
+            else:
+                add_candidate(
+                    "recall_failure_rate",
+                    "secondary occlusion sensor",
+                    "0.7 per 1,000 hours of use",
+                    "Failure rate observed in field returns: 0.7 per 1,000 hours of use.",
+                    source_row,
+                )
         procedure_match = re.search(r"(?:verification_)?procedure_(?P<procedure>[a-z]+_[a-z]+_\d{2}_[a-z])", text_atom)
         if procedure_match:
             procedure_id = _display_upper_hyphen_atom(procedure_match.group("procedure"))
@@ -3566,6 +3583,18 @@ def _prioritize_clinic_recall_rows(
 
 def _display_upper_hyphen_atom(value: str) -> str:
     return "-".join(part.upper() for part in str(value or "").strip().split("_") if part)
+
+
+def _clinic_failure_rate_display(text_atom: str, next_text_atom: str) -> str:
+    rate_match = re.search(r"_(?P<rate>\d+(?:_\d+)?)_per(?:_|$)", text_atom)
+    if not rate_match:
+        return ""
+    rate = rate_match.group("rate").replace("_", ".")
+    denominator = ""
+    next_match = re.search(r"(?:^|_)v_(?P<denom>\d+(?:_\d+)*)_hours_of_use", next_text_atom)
+    if next_match:
+        denominator = f"{int(next_match.group('denom').replace('_', '')):,} hours of use"
+    return f"{rate} per {denominator}" if denominator else f"{rate} per"
 
 
 def _display_device_atom(value: str) -> str:
