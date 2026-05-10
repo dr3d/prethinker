@@ -205,7 +205,9 @@ score-correction recognizers as `candidate-helper`.
 domain bootstrap compile JSONs. The first six-fixture transfer pass over
 `tmp/transfer_fixtures_20260510/cold_acquisition_compile_lanes6` produced 160
 companion rows with zero unlabeled rows: 116 `clean-helper` and 44
-`candidate-helper`.
+`candidate-helper`. Normal `domain_bootstrap_qa` JSON and Markdown summaries
+also include `helper_class_summary` when companion rows are present, so this
+provenance can ride with score reports instead of living only in a side audit.
 
 ## Extraction Rule
 

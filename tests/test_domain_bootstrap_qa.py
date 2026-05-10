@@ -24,6 +24,7 @@ from scripts.run_domain_bootstrap_qa import (
     run_query_plan,
     score_oracle,
     summarize,
+    summarize_helper_classes,
     write_cached_row,
 )
 from kb_pipeline import CorePrologRuntime
@@ -189,6 +190,44 @@ def test_summarize_counts_reference_judge_verdicts() -> None:
     assert summary["judge_exact"] == 1
     assert summary["judge_partial"] == 1
     assert summary["judge_miss"] == 1
+
+
+def test_summarize_counts_helper_class_rows_by_companion() -> None:
+    rows = [
+        {
+            "ok": True,
+            "query_results": [
+                {
+                    "result": {
+                        "predicate": "industrial_sensor_support",
+                        "rows": [
+                            {"SupportKind": "raw_event_count", "HelperClass": "clean-helper"},
+                            {"SupportKind": "sensor_vendor_model", "HelperClass": "candidate-helper"},
+                        ],
+                    }
+                },
+                {
+                    "result": {
+                        "predicate": "legacy_support",
+                        "rows": [{"SupportKind": "legacy"}],
+                    }
+                },
+            ],
+        }
+    ]
+
+    helper_summary = summarize_helper_classes(rows)
+
+    assert helper_summary["row_count"] == 3
+    assert helper_summary["helper_class_counts"] == {
+        "candidate-helper": 1,
+        "clean-helper": 1,
+        "unlabeled": 1,
+    }
+    assert helper_summary["companion_helper_class_counts"]["industrial_sensor_support"] == {
+        "candidate-helper": 1,
+        "clean-helper": 1,
+    }
 
 
 def test_score_oracle_returns_none_without_answer_key() -> None:

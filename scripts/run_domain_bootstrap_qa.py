@@ -6471,6 +6471,7 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
             continue
         surface = str(failure.get("surface", "")).strip() or "unknown"
         failure_surface_counts[surface] = failure_surface_counts.get(surface, 0) + 1
+    helper_class_summary = summarize_helper_classes(rows)
     return {
         "question_count": len(rows),
         "reference_answer_rows": sum(1 for row in rows if row.get("reference_answer")),
@@ -6484,13 +6485,53 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         "judge_partial": sum(1 for judge in judge_rows if judge.get("verdict") == "partial"),
         "judge_miss": sum(1 for judge in judge_rows if judge.get("verdict") == "miss"),
         "failure_surface_counts": failure_surface_counts,
+        "helper_class_summary": helper_class_summary,
         "runtime_load_error_count": len(load_errors),
         "elapsed_ms": elapsed_ms,
     }
 
 
+def summarize_helper_classes(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    companion_counts: dict[str, Counter[str]] = {}
+    companion_rows: Counter[str] = Counter()
+    total_counts: Counter[str] = Counter()
+    for row in rows:
+        for query_result in row.get("query_results", []) or []:
+            if not isinstance(query_result, dict):
+                continue
+            result = query_result.get("result")
+            if not isinstance(result, dict):
+                continue
+            result_rows = result.get("rows")
+            if not isinstance(result_rows, list):
+                continue
+            classes = [
+                str(result_row.get("HelperClass", "") or "unlabeled")
+                for result_row in result_rows
+                if isinstance(result_row, dict) and (
+                    "HelperClass" in result_row or str(result.get("predicate", "")).endswith("_support")
+                )
+            ]
+            if not classes:
+                continue
+            predicate = str(result.get("predicate", "") or "unknown")
+            companion_counts.setdefault(predicate, Counter()).update(classes)
+            companion_rows[predicate] += len(classes)
+            total_counts.update(classes)
+    return {
+        "row_count": int(sum(total_counts.values())),
+        "helper_class_counts": dict(sorted(total_counts.items())),
+        "companion_row_totals": dict(sorted(companion_rows.items())),
+        "companion_helper_class_counts": {
+            name: dict(sorted(counts.items()))
+            for name, counts in sorted(companion_counts.items())
+        },
+    }
+
+
 def write_summary(record: dict[str, Any], path: Path) -> None:
     summary = record.get("summary", {})
+    helper_summary = summary.get("helper_class_summary", {})
     lines = [
         "# Domain Bootstrap QA Run",
         "",
@@ -6505,11 +6546,36 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
         f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
         f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
+        f"- Helper classes: `{helper_summary.get('helper_class_counts', {})}` rows=`{helper_summary.get('row_count', 0)}`",
         f"- Cache: enabled=`{summary.get('cache_enabled', False)}` hits=`{summary.get('cache_hits', 0)}` misses=`{summary.get('cache_misses', 0)}`",
         "",
+    ]
+    companion_counts = helper_summary.get("companion_helper_class_counts", {})
+    if companion_counts:
+        lines.extend(
+            [
+                "## Helper Classes",
+                "",
+                "| Companion | Rows | clean-helper | candidate-helper | unlabeled |",
+                "| --- | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        row_totals = helper_summary.get("companion_row_totals", {})
+        for companion, counts in sorted(companion_counts.items()):
+            lines.append(
+                "| {companion} | {rows} | {clean} | {candidate} | {unlabeled} |".format(
+                    companion=companion,
+                    rows=row_totals.get(companion, 0),
+                    clean=counts.get("clean-helper", 0),
+                    candidate=counts.get("candidate-helper", 0),
+                    unlabeled=counts.get("unlabeled", 0),
+                )
+            )
+        lines.append("")
+    lines.extend([
         "## Rows",
         "",
-    ]
+    ])
     for row in record.get("rows", []):
         lines.extend(
             [
