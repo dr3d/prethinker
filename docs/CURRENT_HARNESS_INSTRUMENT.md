@@ -416,11 +416,15 @@ derives entry count, distinct normalized member count, duplicate members, and
 group counts directly from `roster_table_member/4`. With that surface included,
 the artifact row gate reaches `40 / 0 / 0`. The fixture is now fully answerable
 from compiled memory; the runtime issue is choosing the right surface per row.
-The guarded selector over the six-mode package remains at `31 / 3 / 6`
-(`31 / 40` selected-best), so the next improvement is mode eligibility/risk
-gating. The table, alias, and count surfaces should be activated for explicit
-homeroom/table/printed-label/distinct-count rows and demoted for ordinary
-lookup, policy, adult-role, or correction-notice rows.
+The first guarded selector over the six-mode package stayed at `31 / 3 / 6`
+(`31 / 40` selected-best), confirming a selector/runtime gap rather than a
+memory gap. A roster surface risk-gate then moved the same package to
+`40 / 0 / 0` with `40 / 40` selected-best rows. The gate activates table,
+alias, count, adult-role, correction, and compliance surfaces by question
+shape: distinct student counts use `roster_table_count_support`; authoritative
+homeroom rows use current member alias/table support; correction-notice rows use
+explicit change surfaces; adult-total rows avoid qualifying-chaperone counts;
+and ratio-compliance rows prefer `compliance_status` over roster table volume.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

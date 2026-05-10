@@ -534,3 +534,35 @@ mode eligibility, not more evidence acquisition. Table/alias/count modes should
 activate on explicit homeroom/table/printed-label/distinct-count questions and
 should be demoted for simple lookup, policy, adult-role, and correction-notice
 rows where old V2 or adult/compliance surfaces are stronger.
+
+## CCR-017 - Roster Selector Risk Gate Saturation
+
+Date: 2026-05-10
+
+Evidence lane: `selector_discrimination_probe`
+
+Artifacts:
+
+- first risk-gate replay:
+  `tmp/transfer_fixtures_20260510/count_roster_selector_risk_gate_20260510/guarded_activation_selector.md`
+- saturated risk-gate replay:
+  `tmp/transfer_fixtures_20260510/count_roster_selector_risk_gate_v2_20260510/guarded_activation_selector.md`
+
+Results:
+
+- previous guarded selector over six modes: `31 / 3 / 6`
+- first risk-gate replay: `38 / 0 / 2`
+- saturated risk-gate replay: `40 / 0 / 0`
+- selected-best rows after v2: `40 / 40`
+- perfect selector ceiling remains: `40 / 0 / 0`
+
+Lesson: the memory package was already complete after
+`roster_table_count_support`; the remaining gap was selector eligibility. The
+new structural gates route roster table, alias, count, adult-role, correction,
+and compliance surfaces by question shape: distinct student counts use
+`roster_table_count_support`, authoritative homeroom questions prefer current
+member alias/table support, correction-notice rows prefer explicit change
+surfaces, adult-total questions avoid qualifying-chaperone counts, and
+ratio-compliance rows prefer `compliance_status` over roster table volume. This
+is not a new lens or helper. It is selector discrimination catching up with
+clean compiled memory.

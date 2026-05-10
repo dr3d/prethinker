@@ -1555,6 +1555,34 @@ def test_authoritative_homeroom_guard_prefers_membership_surface() -> None:
     )
 
 
+def test_authoritative_homeroom_guard_prefers_alias_table_surface() -> None:
+    row = {
+        "id": "q024",
+        "question": "What is the registrar's authoritative homeroom for STU-1063?",
+        "modes": [
+            _mode_with_predicates("old_v2", ["student_in_homeroom", "homeroom_reassigned"], rows=39),
+            _mode_with_predicates(
+                "alias_full",
+                ["homeroom_member_alias_support", "roster_table_member_alias_support"],
+                rows=3,
+            ),
+        ],
+    }
+
+    labels = ["old_v2", "alias_full"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="old_v2",
+    )
+
+    assert override == (
+        "alias_full",
+        "authoritative-homeroom question needs current member alias/table surface before correction-history rows",
+    )
+
+
 def test_authoritative_homeroom_guard_skips_source_record_facts_v2_volume() -> None:
     row = {
         "id": "q024",
@@ -1575,6 +1603,131 @@ def test_authoritative_homeroom_guard_skips_source_record_facts_v2_volume() -> N
     assert override == (
         "entity",
         "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
+    )
+
+
+def test_distinct_student_registrar_count_prefers_count_support() -> None:
+    row = {
+        "id": "q012",
+        "question": "How many distinct students are on the trip per the registrar in v1.0?",
+        "modes": [
+            _mode_with_predicates("alias_full", ["roster_table_member_label"], rows=39),
+            _mode_with_predicates("count_full", ["roster_table_count_support"], rows=1),
+        ],
+    }
+
+    labels = ["alias_full", "count_full"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="alias_full",
+    )
+
+    assert override == (
+        "count_full",
+        "distinct-student registrar count needs roster-table count support rather than member-label enumeration",
+    )
+
+
+def test_student_identifier_guard_prefers_canonical_member_surface() -> None:
+    row = {
+        "id": "q008",
+        "question": "What is the student identifier for Halpern?",
+        "modes": [
+            _mode_with_predicates("alias_full", ["roster_table_member_label"], rows=1),
+            _mode_with_predicates(
+                "count_full",
+                ["roster_table_member_label", "roster_table_member", "roster_table_member_alias_support"],
+                rows=1,
+            ),
+        ],
+    }
+
+    labels = ["alias_full", "count_full"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="alias_full",
+    )
+
+    assert override == (
+        "count_full",
+        "student-identifier question needs label-to-canonical-member surface rather than printed-label surface alone",
+    )
+
+
+def test_roster_bus_assignment_correction_prefers_change_surface() -> None:
+    row = {
+        "id": "q028",
+        "question": "Was the bus assignment of student Garner changed by any correction notice, and if so which?",
+        "modes": [
+            _mode_with_predicates("alias_full", ["roster_table_member", "roster_table_member_label"], rows=4),
+            _mode_with_predicates("narrow_guidance", ["bus_assignee", "change_type"], rows=1),
+        ],
+    }
+
+    labels = ["alias_full", "narrow_guidance"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="alias_full",
+    )
+
+    assert override == (
+        "narrow_guidance",
+        "bus-assignment correction question needs bus-assignment plus change-type surface rather than roster table identity rows",
+    )
+
+
+def test_roster_ratio_compliance_prefers_compliance_status_surface() -> None:
+    row = {
+        "id": "q033",
+        "question": "Under §3.2, was roster v1.0 compliant with the chaperone-to-student ratio?",
+        "modes": [
+            _mode_with_predicates("narrow_guidance", ["roster_table_version", "roster_table_member", "role"], rows=39),
+            _mode_with_predicates("count_full", ["compliance_status"], rows=1),
+        ],
+    }
+
+    labels = ["narrow_guidance", "count_full"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="narrow_guidance",
+    )
+
+    assert override == (
+        "count_full",
+        "ratio-compliance question needs compliance_status surface rather than roster-table version volume",
+    )
+
+
+def test_roster_adult_total_prefers_role_surface_over_chaperone_count() -> None:
+    row = {
+        "id": "q018",
+        "question": "How many adults total are accompanying the trip in v1.3?",
+        "modes": [
+            _mode_with_predicates("focused_homeroom", ["chaperone_added", "roster_state_support"], rows=6),
+            _mode_with_predicates("narrow_guidance", ["role"], rows=5),
+            _mode_with_predicates("alias_full", ["counting_chaperones"], rows=1),
+        ],
+    }
+
+    labels = ["focused_homeroom", "narrow_guidance", "alias_full"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="focused_homeroom",
+    )
+
+    assert override == (
+        "narrow_guidance",
+        "adult-total roster question needs adult role surface rather than qualifying-chaperone count alone",
     )
 
 

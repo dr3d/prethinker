@@ -1250,6 +1250,26 @@ def structural_specialized_answer_surface_override(
                     "roster-entry count question needs entry-preserving roster surface rather than distinct-student membership volume",
                 )
 
+    if "distinct students" in question and "registrar" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "roster_table_count_support" in predicates:
+                return (
+                    label,
+                    "distinct-student registrar count needs roster-table count support rather than member-label enumeration",
+                )
+
+    if "student identifier" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "roster_table_member_label" in predicates and predicates.intersection(
+                {"roster_table_member", "roster_table_member_alias_support", "homeroom_member_alias_support"}
+            ):
+                return (
+                    label,
+                    "student-identifier question needs label-to-canonical-member surface rather than printed-label surface alone",
+                )
+
     if "distinct-student count" in question and "change between roster" in question:
         for _score, label, quality in scored:
             if label == "entity":
@@ -1266,6 +1286,18 @@ def structural_specialized_answer_surface_override(
             if label.startswith("source_record_facts"):
                 continue
             predicates = set(quality.get("predicate_names", []) or [])
+            direct_rows = int(quality.get("direct_rows", 0) or 0)
+            if direct_rows > 0 and predicates.intersection(
+                {"homeroom_member_alias_support", "roster_table_member_alias_support", "roster_table_member_label"}
+            ):
+                return (
+                    label,
+                    "authoritative-homeroom question needs current member alias/table surface before correction-history rows",
+                )
+        for _score, label, quality in scored:
+            if label.startswith("source_record_facts"):
+                continue
+            predicates = set(quality.get("predicate_names", []) or [])
             support_kinds = set(quality.get("support_kinds", []) or [])
             if support_kinds.intersection({"source_record_student_group_assignment", "student_group_assignment"}):
                 return (
@@ -1278,6 +1310,24 @@ def structural_specialized_answer_surface_override(
                     "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
                 )
 
+    if "bus assignment" in question and "correction notice" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if predicates.intersection({"bus_assignee", "bus_assignment"}) and "change_type" in predicates:
+                return (
+                    label,
+                    "bus-assignment correction question needs bus-assignment plus change-type surface rather than roster table identity rows",
+                )
+
+    if "reassigned" in question and "homeroom" in question and "correction notice" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "homeroom_reassigned" in predicates:
+                return (
+                    label,
+                    "homeroom-reassignment correction question needs homeroom_reassigned surface rather than generic change-type rows",
+                )
+
     if "total student count" in question and "homeroom" in question and "reassigned" in question:
         for _score, label, quality in scored:
             support_kinds = set(quality.get("support_kinds", []) or [])
@@ -1285,6 +1335,55 @@ def structural_specialized_answer_surface_override(
                 return (
                     label,
                     "homeroom-reassignment count question needs roster helper membership/count surface",
+                )
+
+    if "adults total" in question and "accompanying" in question:
+        for _score, label, quality in scored:
+            support_kinds = set(quality.get("support_kinds", []) or [])
+            if support_kinds.intersection({"adult_manifest_total", "ratio_counted_adults"}):
+                return (
+                    label,
+                    "adult-total roster question needs adult manifest support rather than qualifying-chaperone count alone",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "role" in predicates:
+                return (
+                    label,
+                    "adult-total roster question needs adult role surface rather than qualifying-chaperone count alone",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if {"chaperone_added", "chaperone_withdrawn"}.issubset(predicates):
+                return (
+                    label,
+                    "adult-total roster question needs chaperone change surface rather than qualifying-chaperone count alone",
+                )
+
+    if "excluded from" in question and "ratio" in question:
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "role_exclusion" in predicates and predicates.intersection({"policy_section", "compliance_rule"}):
+                return (
+                    label,
+                    "ratio-exclusion identity question needs role-exclusion policy surface rather than adult-role count volume",
+                )
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            if "role" in predicates and predicates.intersection({"policy_section", "compliance_rule"}):
+                return (
+                    label,
+                    "ratio-exclusion identity question needs role plus policy surface rather than adult-role count volume",
+                )
+
+    if "compliance status" in question or ("compliant" in question and "ratio" in question):
+        for _score, label, quality in scored:
+            predicates = set(quality.get("predicate_names", []) or [])
+            direct_rows = int(quality.get("direct_rows", 0) or 0)
+            if "compliance_status" in predicates and direct_rows > 0:
+                return (
+                    label,
+                    "ratio-compliance question needs compliance_status surface rather than roster-table version volume",
                 )
 
     if "correction notice" in question and ("withdrew" in question or "withdrawn" in question) and "replaced" in question:

@@ -312,6 +312,10 @@ Recent transfer work supports the current direction:
 - `school_activity_roster_reconciliation` moved from `21 / 3 / 16` to
   a `candidate-helper` replay of `40 / 0 / 0` through deterministic
   roster/source-record helpers, not a new lens.
+- `count_composition_roster` now has a clean six-mode memory package with a
+  `40 / 0 / 0` row-gated ceiling. Adding question-shape selector risk gates
+  moved guarded selection from `31 / 3 / 6` to `40 / 0 / 0`, proving the
+  residual was surface routing rather than missing compiled state.
 - `grant_exception_cap_matrix` targeted replay moved its known miss set to
   exact after grant award/source-record helpers; this is mixed
   `candidate-helper` evidence, and full replays exposed remaining OpenRouter

@@ -119,12 +119,18 @@ The residual q012 count/composition row is now covered by
 `roster_table_count_support`, which derives entry count, distinct normalized
 member count, duplicate members, and group counts from `roster_table_member/4`.
 With that count surface included, the row-gated ceiling reaches `40 / 0 / 0`.
-The active problem is therefore selector/runtime routing across complementary
-surfaces, not missing compiled memory.
-The guarded selector over the six-mode package still scores `31 / 3 / 6`, with
-`31 / 40` selected-best rows. That makes mode eligibility the next cleanup
-target: table/alias/count surfaces should be eligible only for explicit
-homeroom/table/printed-label/distinct-count rows, not broad lookup/policy rows.
+The guarded selector initially stayed at `31 / 3 / 6`, with `31 / 40`
+selected-best rows, proving the active problem was selector/runtime routing
+across complementary surfaces, not missing compiled memory.
+
+A selector risk-gate replay now reaches `40 / 0 / 0` and `40 / 40`
+selected-best over the six-mode package. The gates are question-shape based:
+distinct student counts prefer `roster_table_count_support`; authoritative
+homeroom rows prefer current member alias/table support; correction-notice rows
+prefer explicit change surfaces; adult-total rows avoid qualifying-chaperone
+counts; ratio-compliance rows prefer `compliance_status` over roster table
+volume. This keeps the table/alias/count helpers valuable without letting their
+row volume displace broader surfaces on unrelated policy or lookup rows.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.
