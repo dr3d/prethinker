@@ -473,3 +473,64 @@ gate, not a new helper: prefer narrow/alias modes only when the question or
 evidence is explicitly homeroom/table/printed-label shaped; otherwise fall back
 to the broader exact-looking surfaces. This is the first clear case where a new
 clean memory surface should be row-routed, not globally trusted.
+
+## CCR-015 - Roster Table Distinct Count Companion
+
+Date: 2026-05-10
+
+Evidence lane: `deterministic_count_composition_helper`
+
+Artifacts:
+
+- q012 focused replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_count_q012_20260510/`
+- full count-companion replay:
+  `tmp/transfer_fixtures_20260510/count_roster_table_count_full_20260510/`
+- updated row gate:
+  `tmp/transfer_fixtures_20260510/count_roster_count_row_gate_20260510/row_gate.md`
+
+Results:
+
+- q012 focused replay: exact
+- full count-companion replay: `31 / 2 / 7`
+- row-gated ceiling over old/focused/adult/narrow/alias/count surfaces:
+  `40 / 0 / 0`
+- count-companion helper rows in full replay: `45` clean
+- zero write proposals
+
+Lesson: the final residual row was a pure count/composition problem. The
+deterministic roster table contains `39` v1.0 entries, `38` distinct normalized
+students, and duplicate member `stu_1063`. The new
+`roster_table_count_support` companion exposes entry count, distinct count,
+duplicate members, and group counts from `roster_table_member/4` without reading
+source prose or adding fixture constants. This completes the answerable memory
+surface for the fixture. Runtime remains lower than the ceiling because selector
+discrimination has not learned to route among the complementary surfaces.
+
+## CCR-016 - Perfect Ceiling Selector Probe
+
+Date: 2026-05-10
+
+Evidence lane: `selector_discrimination_probe`
+
+Artifacts:
+
+- guarded selector over six modes:
+  `tmp/transfer_fixtures_20260510/count_roster_count_selector_20260510/guarded_activation_selector.md`
+- selector gap readout:
+  `tmp/transfer_fixtures_20260510/count_roster_count_selector_gap_20260510/selector_gap.md`
+
+Results:
+
+- perfect selector ceiling: `40 / 0 / 0`
+- guarded selector over six modes: `31 / 3 / 6`
+- selected-best rows: `31 / 40`
+- missed-best rows: `9`
+
+Lesson: adding the count surface completes the memory package but does not help
+the current guarded selector. This is the clean separation: compiled memory is
+complete, runtime selection is not. The next selector work should be risk-gated
+mode eligibility, not more evidence acquisition. Table/alias/count modes should
+activate on explicit homeroom/table/printed-label/distinct-count questions and
+should be demoted for simple lookup, policy, adult-role, and correction-notice
+rows where old V2 or adult/compliance surfaces are stronger.

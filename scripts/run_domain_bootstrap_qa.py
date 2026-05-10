@@ -1415,6 +1415,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     roster_table_alias = _roster_table_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
     if roster_table_alias:
         source_record_companions.append(roster_table_alias)
+    roster_table_counts = _roster_table_count_companion(runtime, predicate=predicate, args=args, query=query)
+    if roster_table_counts:
+        source_record_companions.append(roster_table_counts)
     grant_award = _grant_award_companion(runtime, predicate=predicate, args=args, query=query)
     if grant_award:
         source_record_companions.append(grant_award)
@@ -1434,6 +1437,7 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             "roster_version",
             "roster_version_status",
             "student_group_assignment",
+            "student_in_homeroom",
             "supervises",
             "supervision_assignment",
         }:
@@ -4544,6 +4548,92 @@ def _homeroom_member_alias_companion(
         "derived_from_queries": [
             query,
             "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+        ],
+    }
+
+
+def _roster_table_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"roster_table_member", "student_in_homeroom", "homeroom_member"}:
+        return None
+    member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Member).")
+    if not member_rows:
+        return None
+    requested_version = ""
+    if predicate == "roster_table_member" and len(args) >= 2 and not _is_prolog_variable(str(args[1]).strip()):
+        requested_version = str(args[1]).strip()
+    elif predicate in {"student_in_homeroom", "homeroom_member"} and len(args) >= 3 and not _is_prolog_variable(str(args[2]).strip()):
+        requested_version = str(args[2]).strip()
+
+    by_version: dict[str, list[tuple[str, str, str]]] = {}
+    for row in member_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        version = str(row.get("Version", "")).strip()
+        group = str(row.get("Group", "")).strip()
+        member = str(row.get("Member", "")).strip()
+        if not version or not group or not member:
+            continue
+        if requested_version and version != requested_version:
+            continue
+        by_version.setdefault(version, []).append((source_row, group, member))
+    out_rows: list[dict[str, Any]] = []
+    for version, entries in sorted(by_version.items(), key=lambda item: -_roster_version_rank(item[0])):
+        members = [member for _source_row, _group, member in entries]
+        distinct_members = sorted(set(members))
+        duplicate_members = sorted(member for member in set(members) if members.count(member) > 1)
+        group_counts: dict[str, int] = {}
+        for _source_row, group, _member in entries:
+            group_counts[group] = group_counts.get(group, 0) + 1
+        out_rows.append(
+            {
+                "SupportKind": "roster_table_distinct_member_count",
+                "Version": version,
+                "EntryCount": str(len(entries)),
+                "DistinctCount": str(len(distinct_members)),
+                "DuplicateMembers": ",".join(duplicate_members),
+                "GroupCounts": ",".join(f"{group}:{count}" for group, count in sorted(group_counts.items())),
+                "HelperClass": "clean-helper",
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "roster_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
+        "result": {
+            "status": "success",
+            "predicate": "roster_table_count_support",
+            "prolog_query": "roster_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SupportKind",
+                "Version",
+                "EntryCount",
+                "DistinctCount",
+                "DuplicateMembers",
+                "GroupCounts",
+                "HelperClass",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only roster table count companion derives entry count, distinct "
+                    "normalized member count, duplicate members, and group counts from "
+                    "deterministic roster_table_member/4 rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "roster_table_member(SourceRow, Version, Group, Member).",
         ],
     }
 

@@ -411,6 +411,16 @@ The first guarded selector replay over those five surfaces scores only
 new clean memory surfaces: table/alias modes are valuable when the row is
 homeroom/table/printed-label shaped, but unsafe as broad replacements for older
 source-record or adult/compliance surfaces.
+The residual q012 row is now covered by `roster_table_count_support`, which
+derives entry count, distinct normalized member count, duplicate members, and
+group counts directly from `roster_table_member/4`. With that surface included,
+the artifact row gate reaches `40 / 0 / 0`. The fixture is now fully answerable
+from compiled memory; the runtime issue is choosing the right surface per row.
+The guarded selector over the six-mode package remains at `31 / 3 / 6`
+(`31 / 40` selected-best), so the next improvement is mode eligibility/risk
+gating. The table, alias, and count surfaces should be activated for explicit
+homeroom/table/printed-label/distinct-count rows and demoted for ordinary
+lookup, policy, adult-role, or correction-notice rows.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan

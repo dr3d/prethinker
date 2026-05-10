@@ -1787,6 +1787,36 @@ def test_homeroom_member_alias_support_prioritizes_latest_printed_label_row() ->
     assert first_row.get("HelperClass") == "clean-helper"
 
 
+def test_roster_table_count_support_distinguishes_entries_from_distinct_members() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "roster_table_member(src_line_0041, v1_0, 7_a, stu_1019).",
+        "roster_table_member(src_line_0041, v1_0, 7_a, stu_1063).",
+        "roster_table_member(src_line_0042, v1_0, 7_b, stu_1063).",
+        "roster_table_member(src_line_0042, v1_0, 7_b, stu_1085).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["roster_table_member(Row, v1_0, Homeroom, Student)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "roster_table_count_support"
+    )
+    result_rows = companion["result"]["rows"]
+
+    assert result_rows == [
+        {
+            "SupportKind": "roster_table_distinct_member_count",
+            "Version": "v1_0",
+            "EntryCount": "4",
+            "DistinctCount": "3",
+            "DuplicateMembers": "stu_1063",
+            "GroupCounts": "7_a:2,7_b:2",
+            "HelperClass": "clean-helper",
+        }
+    ]
+
+
 def test_fallback_queries_project_roster_compliance_ir() -> None:
     ir = {
         "entities": [

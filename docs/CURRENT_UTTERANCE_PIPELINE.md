@@ -189,6 +189,9 @@ prose directly and do not mutate the KB. Current active examples include:
   counts. Printed member labels are preserved separately with
   `roster_table_member_label/5` and `roster_table_member_alias/2` so exact
   labels such as `STU-1063 Vinokur` survive without becoming duplicate members.
+  `roster_table_count_support` then derives entry counts, distinct normalized
+  member counts, duplicate members, and group counts from those deterministic
+  table rows.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and

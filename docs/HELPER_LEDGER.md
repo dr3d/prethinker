@@ -115,6 +115,16 @@ The first guarded selector replay over those five surfaces lands at only
 table/alias surfaces therefore need row-gating or risk-gating: they are valuable
 when the question is explicitly homeroom/table/printed-label shaped, but should
 not globally displace broader source-record or adult/compliance surfaces.
+The residual q012 count/composition row is now covered by
+`roster_table_count_support`, which derives entry count, distinct normalized
+member count, duplicate members, and group counts from `roster_table_member/4`.
+With that count surface included, the row-gated ceiling reaches `40 / 0 / 0`.
+The active problem is therefore selector/runtime routing across complementary
+surfaces, not missing compiled memory.
+The guarded selector over the six-mode package still scores `31 / 3 / 6`, with
+`31 / 40` selected-best rows. That makes mode eligibility the next cleanup
+target: table/alias/count surfaces should be eligible only for explicit
+homeroom/table/printed-label/distinct-count rows, not broad lookup/policy rows.
 
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.
