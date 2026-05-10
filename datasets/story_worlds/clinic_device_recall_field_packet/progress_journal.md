@@ -49,11 +49,14 @@ remaining pressure is scope/status distinction, range membership, and repair
 verification composition. This fixture is a good next probe for whether
 source-record fields plus rule/range helpers can retire status/scope guards.
 
-## CDRF-002 - Clinic Recall Source-Record Helper Saturation
+## CDRF-002 - Clinic Recall Source-Record Candidate-Helper Replay
 
 Date: 2026-05-10
 
-Evidence lane: `query_helper_transfer_proof`
+Evidence lane: `candidate_helper_replay`
+
+Helper class: `candidate-helper` under
+`docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`.
 
 Code change:
 
@@ -76,16 +79,22 @@ Artifacts:
 - Full replay:
   `tmp/transfer_fixtures_20260510/clinic_recall_helper_full_replay_v2_20260510/domain_bootstrap_qa_20260510T140951342952Z_qa_qwen-qwen3-6-35b-a3b.json`
 
-Result: `40 exact / 0 partial / 0 miss` over `40`.
+Candidate-helper result: `40 exact / 0 partial / 0 miss` over `40`.
 
 Lift over cold baseline: `+9 exact`, `0 partial`, `-9 miss`.
 
-Residual hard edge: none on this fixture after refreshed source-record facts
-and helper queryability.
+Residual hard edge on this fixture after refreshed source-record facts and
+helper queryability: none observed in this replay.
 
 Lesson: this is another source-record-to-queryability proof, not a lens proof.
 The cold artifact already had most semantic recall predicates, but exact
 official row details such as `K. Halberg`, `0.7 per 1,000 hours`, `Cabinet B-3`,
 seal ranges, full serial displays, and network medical director authority lived
 in deterministic source-record memory. Once refreshed and surfaced through a
-query-only helper, the fixture saturated.
+query-only helper, the fixture reached 40/40.
+
+Backtracking note: the helper contains both legitimate field-driven
+device/serial lookup logic and fixture-family recognizers for named clinics,
+liaison identity, cabinet/seal labels, and authority prose. The replay should
+be reported as `candidate-helper`, not `clean-helper`, until those recognizers
+are generalized or transfer-proven without fixture constants.

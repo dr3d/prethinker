@@ -49,11 +49,14 @@ roster versioning, count versus composition, role-scope exclusion, and temporary
 assignment intervals. This is the first repair target for roster-state helper
 transfer and constraint-style composition.
 
-## SARR-002 - Roster-State Helper Transfer
+## SARR-002 - Roster-State Candidate-Helper Replay
 
 Date: 2026-05-10
 
-Evidence lane: `helper_only_replay`
+Evidence lane: `candidate_helper_replay`
+
+Helper class: `candidate-helper` under
+`docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`.
 
 Artifacts:
 
@@ -88,11 +91,14 @@ The next repair target is therefore not another roster lens; it is structural
 source-address rendering and small source-record companions for policy/device/
 location rows.
 
-## SARR-003 - Source-Address Rendering Companion
+## SARR-003 - Source-Address Rendering Helper Replay
 
 Date: 2026-05-10
 
-Evidence lane: `helper_only_replay`
+Evidence lane: `clean_helper_plus_candidate_helper_replay`
+
+Helper class: mixed. `source_record_section_display` is clean-helper substrate;
+the roster-state companion remains candidate-helper pending helper audit.
 
 Artifacts:
 
@@ -126,18 +132,22 @@ This confirms the transfer fixture's original weakness was not a new roster
 semantic lens. The next useful work is cold acquisition/source-address
 companions for official packet metadata and embedded identifiers.
 
-## SARR-004 - Packet Metadata And Wrapped-Line Ledger Refresh
+## SARR-004 - Packet Metadata Candidate-Helper And Wrapped-Line Ledger Refresh
 
 Date: 2026-05-10
 
-Evidence lane: `deterministic_ledger_refresh_plus_helper_replay`
+Evidence lane: `deterministic_ledger_refresh_plus_candidate_helper_replay`
+
+Helper class: `candidate-helper`. The wrapped-line source-record ledger refresh
+is deterministic acquisition work, but the packet metadata companion still
+contains fixture-family literals and is not yet a clean-helper surface.
 
 Artifacts:
 
 - Refreshed compile artifact: `tmp/transfer_fixtures_20260510/school_source_record_refreshed_compile_20260510/domain_bootstrap_file_school_source_record_refreshed_20260510.json`
 - Final full replay QA: `tmp/transfer_fixtures_20260510/school_final_full_replay_20260510/domain_bootstrap_qa_20260510T105505215114Z_qa_qwen-qwen3-6-35b-a3b.json`
 
-Result: `40 exact / 0 partial / 0 miss` over `40`.
+Candidate-helper result: `40 exact / 0 partial / 0 miss` over `40`.
 
 Lift from cold baseline: `+19 exact`, `-3 partial`, `-16 miss`.
 
@@ -159,7 +169,10 @@ What changed:
   appear together, so source-address rows do not suppress roster-state rows.
 
 Architectural lesson: this fixture was initially the weakest fresh transfer
-fixture (`21 / 3 / 16`) and looked like a roster/composition frontier. The final
-repair shows the largest remaining pressure was deterministic source
-addressability and queryability over already available packet structure. This
-is a cold-acquisition/helper-substrate win, not lens growth.
+fixture (`21 / 3 / 16`) and looked like a roster/composition frontier. The
+candidate-helper replay shows the largest remaining pressure was deterministic
+source addressability and queryability over already available packet structure.
+This is a cold-acquisition/helper-substrate win, not lens growth, but the
+helper-assisted saturation should not be reported as clean-helper architecture
+until the packet metadata and roster helpers are audited, generalized, or
+transfer-proven without fixture-shaped constants.

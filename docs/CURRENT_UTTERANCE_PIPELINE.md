@@ -262,20 +262,21 @@ Recent transfer work supports the current direction:
 - Six fresh transfer fixtures cold on OpenRouter scored `177 / 10 / 53`
   over 240 rows, or 73.75% exact.
 - `school_activity_roster_reconciliation` moved from `21 / 3 / 16` to
-  `40 / 0 / 0` through deterministic roster/source-record helpers, not a new
-  lens.
+  a `candidate-helper` replay of `40 / 0 / 0` through deterministic
+  roster/source-record helpers, not a new lens.
 - `grant_exception_cap_matrix` targeted replay moved its known miss set to
-  exact after grant award/source-record helpers; full replays exposed remaining
-  OpenRouter parse/judge variance to keep watching.
+  exact after grant award/source-record helpers; this is mixed
+  `candidate-helper` evidence, and full replays exposed remaining OpenRouter
+  parse/judge variance to keep watching.
 - `industrial_sensor_clock_correction` moved from `30 / 2 / 8` cold to
-  `39 / 1 / 0` through `industrial_sensor_support`, proving that corrected
-  intervals, exact sensor IDs, maintenance tickets, and packet-scope exclusions
-  were already present as durable source-record memory but needed a queryable
-  helper surface.
+  a `candidate-helper` replay of `39 / 1 / 0` through
+  `industrial_sensor_support`, showing that corrected intervals, exact sensor
+  IDs, maintenance tickets, and packet-scope exclusions were already present as
+  durable source-record memory but needed a queryable helper surface.
 - `clinic_device_recall_field_packet` moved from `31 / 0 / 9` cold to
-  `40 / 0 / 0` through refreshed source-record facts plus
-  `clinic_recall_support`, another proof that exact official row details can be
-  durable and inspectable without adding a new semantic lens.
+  a `candidate-helper` replay of `40 / 0 / 0` through refreshed source-record
+  facts plus `clinic_recall_support`, another proof that exact official row
+  details can be durable and inspectable without adding a new semantic lens.
 - The main weak surface is no longer “can the model understand the document?”
   It is often “did the admitted state become addressable, composable, and
   queryable at the exact row shape the question demands?”

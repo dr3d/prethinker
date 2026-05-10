@@ -49,11 +49,15 @@ stable; the misses likely live in exception/cap joins, counterfactual amount
 calculation, and recusal-versus-award procedure. This fixture is a good helper
 and guard-retirement pressure test, not a new lens request.
 
-## GECM-002 - Grant Helper And Source-Record Queryability Repair
+## GECM-002 - Grant Candidate-Helper And Source-Record Queryability Repair
 
 Date: 2026-05-10
 
-Evidence lane: `openrouter_helper_transfer_repair`
+Evidence lane: `openrouter_candidate_helper_repair`
+
+Helper class: mixed. Field-driven award/cap arithmetic is closer to
+clean-helper substrate; exact appeal/recusal/procedural text rows remain
+candidate-helper until generalized or transfer-proven.
 
 Artifacts:
 
@@ -63,7 +67,7 @@ Artifacts:
 - Last-three replay: `tmp/transfer_fixtures_20260510/grant_last3_replay_20260510/domain_bootstrap_qa_20260510T115403755548Z_qa_qwen-qwen3-6-35b-a3b.json`
 - Full replay v2: `tmp/transfer_fixtures_20260510/grant_final_full_replay_v2_20260510/domain_bootstrap_qa_20260510T120546886379Z_qa_qwen-qwen3-6-35b-a3b.json`
 
-Results:
+Candidate-helper results:
 
 - Known-miss targeted replay: `14 exact / 0 partial / 0 miss`.
 - Full replay v1: `37 exact / 0 partial / 3 miss`.
@@ -93,3 +97,9 @@ section addressability. Targeted replay proves the surface is reachable through
 deterministic source addressability plus helper substrate. Full-run variance
 still needs selector/retry hygiene on OpenRouter before claiming a saturated
 production score.
+
+Backtracking note: under the helper classification doctrine, this run is not a
+clean-helper transfer proof. The generic award/cap joins are promising, but the
+source-record metadata surface still contains fixture-family appeal, recusal,
+and procedure recognizers that must be split into generic extraction or kept
+quarantined as candidate-helper evidence.

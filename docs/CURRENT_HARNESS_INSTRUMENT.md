@@ -112,7 +112,7 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
 - Selector improvements can close real score gaps without new compiles. On
   2026-05-10, replaying existing precision-batch artifacts with the latest
   guarded selector and helper surfaces moved the six precision fixtures to a
-  row-gated `240 / 0 / 0` over `240`, equal to the available candidate ceiling.
+  candidate-helper row-gated `240 / 0 / 0` over `240`, equal to the available candidate ceiling.
   Authority/Possession reached `40 / 0 / 0` after a query-only
   archive-authority/custody companion exposed grouped custody counts, access
   authorization from source-record table cells, recall rights, and contractor
@@ -121,7 +121,9 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   companion exposed exact last-successful NTP sync dates from admitted text
   atoms and numeric tokens. Treat that as evidence that this batch is now
   exhausted by helper/queryability over admitted memory, not by new lens or
-  guard-family expansion.
+  guard-family expansion; under the helper classification doctrine, do not
+  report this as clean-helper architecture until the contributing helpers have
+  passed audit or transfer proof without fixture-shaped constants.
 - Deterministic ledger growth is not lens growth. Promote a ledger expansion
   only when it preserves source structure without semantic interpretation and
   improves row-gated replay. The 2026-05-10 source-record ledger V2 added table
@@ -155,7 +157,7 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   `at_or_before`. This is the first small bridge from "known rows" to
   spreadsheet-like degrees of freedom: a candidate timestamp set can shrink
   deterministically when a deadline, correction, or interval boundary is known.
-- Roster-state and source-address helpers are now transfer-tested against a fresh fixture. On
+- Roster-state and source-address helpers are now candidate-tested against a fresh fixture. On
   `school_activity_roster_reconciliation`, the cold OpenRouter compile admitted
   rich source-record rows but missed operational v3 roster composition. A
   helper-only replay derived v3 group membership and counted-adult ratio scope
@@ -168,24 +170,30 @@ python scripts/run_kb_pipeline_clean_harness.py --pack docs/data/frontier_packs/
   `Section 1.4`, moving the same artifact again to `30 / 1 / 9`. The remaining
   pressure was small policy/device/location/permission companions. After a
   deterministic wrapped-line ledger refresh and packet-metadata companion, the
-  final replay reached `40 / 0 / 0` without a new semantic compile or new lens.
+  candidate-helper replay reached `40 / 0 / 0` without a new semantic compile or new lens.
   Across the fresh transfer batch, this changes the cold/repaired read from
   `177 / 10 / 53` to `196 / 7 / 37` if only this fixture's helper repair is
-  substituted, with the weakest fixture becoming a solved proof of source
-  addressability.
-- Industrial sensor/source-clock helpers are also transfer-tested. On
+  substituted, with the weakest fixture becoming a candidate-helper proof of
+  source addressability.
+- Industrial sensor/source-clock helpers are also candidate-tested. On
   `industrial_sensor_clock_correction`, a query-only
   `industrial_sensor_support/5` companion over admitted `source_record_*` rows
-  moved the cold artifact from `30 / 2 / 8` to `39 / 1 / 0` without a new lens,
-  guard family, or compile. The remaining partial is the clean boundary case:
+  moved the cold artifact to a candidate-helper replay of `39 / 1 / 0` without
+  a new lens, guard family, or compile. The remaining partial is the clean
+  boundary case:
   deterministic source records expose `EV-14` and the 14-row raw log, while the
   canonical semantic predicate inventory still lacks `event_id(ev_14)`.
 - Clinic recall source-record helpers now show the same pattern on a different
   domain. A refreshed deterministic source-record ledger plus
   `clinic_recall_support/5` moved `clinic_device_recall_field_packet` from
-  `31 / 0 / 9` to `40 / 0 / 0`, recovering exact liaison, failure-rate,
+  `31 / 0 / 9` to a candidate-helper replay of `40 / 0 / 0`, recovering exact liaison, failure-rate,
   cabinet/seal/key-custody, verification-procedure, full serial, and
   medical-director authority details without a new lens or guard family.
+
+Under `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`, these recent
+helper-assisted high-water results are candidate-helper evidence until the
+mixed helpers are split into clean generic substrate, declared lens companions,
+or transfer-proven helpers without fixture-shaped constants.
 
 ## Extraction Rule
 

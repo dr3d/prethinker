@@ -49,11 +49,14 @@ clock-drift joins, per-system correction boundaries, and interval/pause
 composition. This is the most direct new proof target for temporal and
 constraint propagation.
 
-## ISCC-002 - Industrial Source-Record Helper Transfer Proof
+## ISCC-002 - Industrial Source-Record Candidate-Helper Replay
 
 Date: 2026-05-10
 
-Evidence lane: `query_helper_transfer_proof`
+Evidence lane: `candidate_helper_replay`
+
+Helper class: `candidate-helper` under
+`docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`.
 
 Code change:
 
@@ -73,7 +76,7 @@ Artifacts:
   `tmp/transfer_fixtures_20260510/industrial_sensor_helper_replay_v3_20260510/domain_bootstrap_qa_20260510T123644508527Z_qa_qwen-qwen3-6-35b-a3b.json`
   `tmp/transfer_fixtures_20260510/industrial_sensor_helper_replay_v6_20260510/domain_bootstrap_qa_20260510T130202959553Z_qa_qwen-qwen3-6-35b-a3b.json`
 
-Result: `39 exact / 1 partial / 0 miss` over `40`.
+Candidate-helper result: `39 exact / 1 partial / 0 miss` over `40`.
 
 Lift over cold baseline: `+9 exact`, `-1 partial`, `-8 miss`.
 
@@ -89,3 +92,9 @@ came from making already-admitted source-record memory queryable: exact sensor
 labels, maintenance tickets, corrected intervals, per-system event counts, and
 packet-scope exclusions. The remaining partial cleanly separates structural
 source-record addressability from canonical semantic predicate completeness.
+
+Backtracking note: the helper contains both legitimate field-driven
+event/timestamp/count logic and fixture-family text recognizers for exact
+sensor/ticket/prose rows. The replay is therefore evidence for the helper
+bridge pattern, not yet a clean-helper transfer proof. Promotion requires a
+generic rewrite or sibling-fixture transfer without new fixture constants.
