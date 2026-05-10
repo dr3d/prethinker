@@ -248,6 +248,9 @@ exposed `probate_storage_support` as an orphaned artifact helper: it appears in
 historical probate QA outputs but has no current repo implementation, so those
 rows should be treated as candidate-helper archaeology rather than promoted
 architecture.
+`docs/HELPER_LEDGER.md` is the durable rollup of this audit surface: each helper
+gets fixture count, implementation status, class-audit counts, current read, and
+next action.
 
 ## Extraction Rule
 

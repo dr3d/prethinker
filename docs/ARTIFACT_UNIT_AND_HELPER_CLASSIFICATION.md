@@ -6,6 +6,8 @@ This note fixes a boundary that became visible during the May 2026 transfer
 fixture work: helpers are not invisible plumbing. They are part of the
 instrument's epistemic surface.
 
+The current helper audit lives in `docs/HELPER_LEDGER.md`.
+
 ## Artifact Unit
 
 The evaluated Prethinker artifact is:
