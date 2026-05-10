@@ -116,3 +116,27 @@ def test_source_record_ledger_keeps_wrapped_official_prose() -> None:
     assert kind_by_line[6] == "anchored_line"
     assert kind_by_line[7] == "continuation_line"
     assert "cabinet 3, drawer 2" in exact_by_line[7]
+
+
+def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Section 8 Inferences",
+                "This packet does not assign root cause. Root cause assignment is the",
+                "function of a separate root-cause analysis (RCA), which is in",
+                "preparation but not part of this packet.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+
+    assert kind_by_line[2] == "anchored_line"
+    assert kind_by_line[3] in {"anchored_line", "continuation_line"}
+    assert kind_by_line[4] in {"anchored_line", "continuation_line"}
+    assert "does not assign root cause" in exact_by_line[2]
+    assert "separate root-cause analysis" in exact_by_line[3]
+    assert "not part of this packet" in exact_by_line[4]

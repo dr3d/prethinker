@@ -310,6 +310,12 @@ def _has_source_anchor(line: str) -> bool:
         flags=re.IGNORECASE,
     ):
         return True
+    if re.search(
+        r"\b(?:assign(?:ed)?\s+root\s+cause|root\s+cause\s+assignment|not\s+part\s+of\s+this\s+packet|separate\s+root-cause\s+analysis)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
     if re.search(r"\b\d{4}-\d{2}-\d{2}\b", text):
         return True
     if re.search(r"\b\d{1,2}:\d{2}\b", text):

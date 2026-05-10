@@ -274,6 +274,11 @@ System clock authority then moved from a SYS-C literal to the generic
 bringing `industrial_sensor_support` to 40 clean / 4 candidate and the
 six-fixture transfer audit to 205 `clean-helper` and 142 `candidate-helper`
 rows.
+The remaining industrial root-cause packet-scope row is explicitly left
+`candidate-helper`: the source paragraph says root cause is not assigned in
+this packet, but the current source-record ledger only exposes the weaker
+`tbd_root_cause_analysis_report` table row. That is a source-acquisition gap,
+not a row safe to promote through helper inference.
 
 `scripts/audit_helper_usage.py` adds the complementary transfer-pressure view:
 fixtures per helper and helpers per fixture across QA artifacts. The first scan
