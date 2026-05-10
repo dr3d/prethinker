@@ -120,3 +120,48 @@ targeted probe confirms the needed facts are now queryable without
 fixture-specific helper constants. The full replay remains `34 / 2 / 4` because
 QA/query generation still sometimes ignores or underuses the clean companion
 rows; that is selector/query-surface pressure, not helper acquisition pressure.
+
+## PSAR-004 - Clean Metadata Query Scoping
+
+Date: 2026-05-10
+
+Evidence lane: `query_routing_cleanup`
+
+Artifacts:
+
+- Six-row scoped metadata probe:
+  `tmp/transfer_fixtures_20260510/probate_query_scoped_targeted_v3_20260510/domain_bootstrap_qa_20260510T223502046166Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full scoped replay:
+  `tmp/transfer_fixtures_20260510/probate_query_scoped_full_20260510/domain_bootstrap_qa_20260510T224258709063Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Section-display probe:
+  `tmp/transfer_fixtures_20260510/probate_section_display_targeted_20260510/domain_bootstrap_qa_20260510T224413123247Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Results:
+
+- targeted residual probe: `6 / 0 / 0`
+- targeted helper rows: `115 clean-helper / 0 candidate-helper`
+- full replay: `34 / 2 / 4`
+- full replay helper rows: `1280 clean-helper / 0 candidate-helper`
+- local tests: `885 passed, 2 subtests passed`
+
+Repair:
+
+- `source_record_packet_metadata_support` now receives the triggering query
+  arguments and scopes rows by query surface, so party-role and custody queries
+  are not flooded by unrelated packet metadata.
+- Section-display support now renders letter/roman section atoms such as
+  `section_f_recorded_statements...` and
+  `section_i_chronology...` as `Section F` / `Section I`.
+- Temporal joins now localize provenance-like `Orderid` variables when the
+  actual helper arguments are dates, allowing elapsed-day joins across separate
+  court orders.
+- Clean source-record numeric tokens in asserted-event contexts now expose
+  `asserted_event_date` rows, closing the Daniel Holloway asserted-date gap in
+  targeted replay without resurrecting the orphaned probate helper.
+
+Lesson: the helper acquisition is clean and the residual rows can route
+correctly under a focused probe. The full replay remains unchanged because the
+LLM query planner still sometimes asks a weaker query shape and the answer judge
+will not infer across an auxiliary companion row unless the linkage is obvious.
+This is now query-planner/selector discrimination pressure, not new helper or
+new lens pressure.

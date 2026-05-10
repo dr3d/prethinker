@@ -1406,7 +1406,7 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     section_display = _source_record_section_display_companion(runtime, predicate=predicate, query=query)
     if section_display:
         source_record_companions.append(section_display)
-    packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, query=query)
+    packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, args=args, query=query)
     if packet_metadata:
         source_record_companions.append(packet_metadata)
     homeroom_alias = _homeroom_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
@@ -1671,6 +1671,7 @@ def _source_record_packet_metadata_companion(
     runtime: CorePrologRuntime,
     *,
     predicate: str,
+    args: list[str],
     query: str,
 ) -> dict[str, Any] | None:
     if predicate not in {
@@ -1693,6 +1694,9 @@ def _source_record_packet_metadata_companion(
         "party_role",
         "physical_custodian",
         "recorded_assertion",
+        "contested_by",
+        "motion_filed",
+        "court_order",
         "source_record_field",
         "source_record_cell",
         "source_record_label",
@@ -1708,6 +1712,7 @@ def _source_record_packet_metadata_companion(
     section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
     line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
     source_rows = _runtime_rows(runtime, "source_record_row(SourceRow, RowType, Line, SectionAtom, Label).")
+    numeric_rows = _runtime_rows(runtime, "source_record_numeric_token(SourceRow, NumericToken).")
     if not text_rows and not label_rows:
         return None
 
@@ -1731,6 +1736,12 @@ def _source_record_packet_metadata_companion(
         str(row.get("SourceRow", "")).strip(): str(row.get("RowType", "")).strip()
         for row in source_rows
     }
+    numeric_tokens_by_row: dict[str, list[str]] = {}
+    for row in numeric_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        token = str(row.get("NumericToken", "")).strip()
+        if source_row and token:
+            numeric_tokens_by_row.setdefault(source_row, []).append(token)
 
     rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -2035,10 +2046,37 @@ def _source_record_packet_metadata_companion(
                 detail=window,
                 display_value="The executor has not yet directed delivery of the Reeder-held items pending codicil resolution.",
             )
+        numeric_tokens = numeric_tokens_by_row.get(source_row) or _numeric_tokens_in_window(
+            source_row,
+            ordered_source_rows,
+            numeric_tokens_by_row,
+            line_by_row,
+            radius=1,
+        )
+        for token in numeric_tokens:
+            if _is_asserted_event_date_context(combined=window, token=token):
+                add(
+                    source_row,
+                    "asserted_event_date",
+                    token,
+                    detail=window,
+                    display_value=f"{_display_source_date_atom(token)} asserted event date.",
+                )
+        if _is_unruled_motion_context(combined=window):
+            add(
+                source_row,
+                "motion_status",
+                _unruled_motion_value(window),
+                detail=window,
+                display_value="The Court has not ruled on this motion.",
+            )
 
     if not rows:
         return None
     rows.sort(key=lambda item: (item["Kind"], item["DisplayValue"], item["SourceRow"]))
+    rows = _scope_source_record_packet_metadata_rows(rows, predicate=predicate, args=args, query=query)
+    if not rows:
+        return None
     return {
         "query": "source_record_packet_metadata_support(Kind, Value, DisplayValue, SourceRow, Detail).",
         "result": {
@@ -2065,8 +2103,85 @@ def _source_record_packet_metadata_companion(
             "source_record_label(SourceRow, Label).",
             "source_record_section(SourceRow, SectionAtom).",
             "source_record_line(SourceRow, Line).",
+            "source_record_numeric_token(SourceRow, NumericToken).",
         ],
     }
+
+
+def _scope_source_record_packet_metadata_rows(
+    rows: list[dict[str, str]],
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> list[dict[str, str]]:
+    """Keep source-record metadata companions close to the asked surface.
+
+    The packet metadata companion is intentionally broad: it preserves exact
+    structural facts from source records. Answer routing suffers when a
+    role/custody/date question receives the entire packet inventory, so this
+    predicate-level scoping ranks the relevant clean rows first without
+    interpreting prose or introducing fixture-shaped constants.
+    """
+
+    wanted_by_predicate: dict[str, set[str]] = {
+        "party_role": {"role_holder"},
+        "physical_custodian": {"source_record_custody_location"},
+        "access_authority": {"non_revocable_access_policy", "loan_amendment_effect"},
+        "access_type": {"non_revocable_access_policy", "loan_amendment_effect"},
+        "external_id": {"source_record_custody_location", "loan_amendment_effect", "non_revocable_access_policy"},
+        "recorded_assertion": {
+            "recorded_assertion_not_finding",
+            "asserted_event_date",
+            "authoritative_finding_sources",
+        },
+        "contested_by": {
+            "recorded_assertion_not_finding",
+            "asserted_event_date",
+            "authoritative_finding_sources",
+        },
+        "title_status": {
+            "recorded_assertion_not_finding",
+            "authoritative_finding_sources",
+            "loan_amendment_effect",
+            "no_delivery_direction",
+        },
+        "motion_filed": {"motion_status"},
+        "court_order": {"motion_status"},
+    }
+    wanted = wanted_by_predicate.get(predicate)
+    if predicate.startswith("source_record_"):
+        wanted = None
+    if not wanted:
+        return rows
+
+    arg_tokens = {
+        str(arg).strip().casefold()
+        for arg in args
+        if str(arg).strip() and not _is_prolog_variable(str(arg).strip())
+    }
+
+    def score(row: dict[str, str]) -> tuple[int, str, str]:
+        kind = str(row.get("Kind", ""))
+        haystack = " ".join(
+            str(row.get(key, ""))
+            for key in ("Value", "DisplayValue", "Detail", "SectionAtom")
+        ).casefold()
+        kind_score = 0 if kind in wanted else 1
+        token_score = 0 if not arg_tokens or any(token in haystack for token in arg_tokens) else 1
+        return (kind_score + token_score, kind, str(row.get("SourceRow", "")))
+
+    scoped = sorted(rows, key=score)
+    relevant = [row for row in scoped if str(row.get("Kind", "")) in wanted]
+    if relevant:
+        if predicate in {"party_role", "physical_custodian"}:
+            return relevant
+        # Return relevant rows plus a small tail of context rows. The tail keeps
+        # broad negative/source-status questions from losing neighboring packet
+        # cues while avoiding the old 40+ row flood.
+        context = [row for row in scoped if row not in relevant][:8]
+        return [*relevant, *context]
+    return rows
 
 
 def _next_source_text_atom(
@@ -2119,6 +2234,27 @@ def _source_text_window(
             if text:
                 parts.append(text)
     return " ".join(parts).strip()
+
+
+def _numeric_tokens_in_window(
+    source_row: str,
+    ordered_source_rows: list[str],
+    numeric_tokens_by_row: dict[str, list[str]],
+    line_by_row: dict[str, int],
+    *,
+    radius: int = 2,
+) -> list[str]:
+    line = line_by_row.get(source_row)
+    if line is None:
+        return numeric_tokens_by_row.get(source_row, [])
+    tokens: list[str] = []
+    for candidate in ordered_source_rows:
+        candidate_line = line_by_row.get(candidate)
+        if candidate_line is None:
+            continue
+        if abs(candidate_line - line) <= radius:
+            tokens.extend(numeric_tokens_by_row.get(candidate, []))
+    return _dedupe_str(tokens)
 
 
 def _source_record_section_is_provenance(section_atom: str) -> bool:
@@ -2219,6 +2355,14 @@ def _display_source_phrase(value: str) -> str:
     if text == "recusal_memo_originals":
         return "Recusal memo originals"
     return text.replace("_", " ")
+
+
+def _display_source_date_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.fullmatch(r"v_(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return f"{match.group(1)}-{match.group(2)}-{match.group(3)}"
+    return _display_source_phrase(text)
 
 
 def _display_unreproduced_reference(text_atom: str) -> str:
@@ -2334,6 +2478,32 @@ def _is_no_executor_delivery_direction_context(*, combined: str, section_atom: s
         and "codicil_dispute" in text
         and "resolved_first" in text
     )
+
+
+def _is_asserted_event_date_context(*, combined: str, token: str) -> bool:
+    text = str(combined or "").strip().lower()
+    token_text = str(token or "").strip().lower()
+    if not re.fullmatch(r"v_\d{4}_\d{2}_\d{2}", token_text):
+        return False
+    return ("asserted" in text or "assertion" in text) and any(
+        marker in text for marker in ("gift", "date_asserted", "in_person", "claim")
+    )
+
+
+def _is_unruled_motion_context(*, combined: str) -> bool:
+    text = str(combined or "").strip().lower()
+    return "motion" in text and ("court_has_not_ruled_on_this_motion" in text or "court has not ruled on this motion" in text)
+
+
+def _unruled_motion_value(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    match = re.search(r"(p_\d+_\d+_m_\d+)", text)
+    if match:
+        return match.group(1)
+    match = re.search(r"(motion_\d{4}_\d{2}_\d{2})", text)
+    if match:
+        return match.group(1)
+    return "motion_not_ruled"
 
 
 def _metadata_kind_for_atom(atom: str) -> str:
@@ -2571,6 +2741,12 @@ def _display_section_from_atom(value: str) -> str:
     match = re.match(r"^section_(\d+)(?:_|$)", text)
     if match:
         return f"Section {int(match.group(1))}"
+    match = re.match(r"^section_([ivxlcdm]+)(?:_|$)", text)
+    if match:
+        return f"Section {match.group(1).upper()}"
+    match = re.match(r"^section_([a-z])(?:_|$)", text)
+    if match:
+        return f"Section {match.group(1).upper()}"
     return ""
 
 
@@ -7561,7 +7737,7 @@ def _is_local_temporal_join_variable(variable: str) -> bool:
     if re.fullmatch(r"Relaxed[2-9]\d*", variable):
         return True
     lowered = variable.casefold()
-    return any(marker in lowered for marker in ("event", "source", "provenance", "rowid", "recordid"))
+    return any(marker in lowered for marker in ("event", "source", "provenance", "rowid", "recordid", "orderid"))
 
 
 def _temporal_subset_join(

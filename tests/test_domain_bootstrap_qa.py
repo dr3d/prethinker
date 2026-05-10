@@ -1079,6 +1079,28 @@ def test_temporal_join_recovers_from_overconstrained_date_surface() -> None:
     assert any(str(row.get("Elapseddays")) == "74" for row in joined["result"]["rows"])
 
 
+def test_temporal_join_localizes_order_ids_when_dates_are_the_helper_arguments() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "deadline_requirement(p_26_347_c, 2026_06_03, forensic_handwriting_analysis_report_due).",
+        "hearing_scheduled(p_26_347_e, 2026_06_17, codicil_validity_evidentiary_hearing).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    joined = _temporal_join_with_previous(
+        runtime,
+        previous_queries=[
+            "deadline_requirement(Orderid, Reportduedate, forensic_handwriting_analysis_report_due).",
+            "hearing_scheduled(Orderid, Hearingdate, codicil_validity_evidentiary_hearing).",
+        ],
+        query="elapsed_days(Reportduedate, Hearingdate, Intervaldays).",
+    )
+
+    assert joined is not None
+    assert joined["result"]["status"] == "success"
+    assert any(str(row.get("Intervaldays")) == "14" for row in joined["result"]["rows"])
+
+
 def test_negative_query_join_supports_set_difference() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -1610,6 +1632,129 @@ def test_source_record_packet_metadata_surfaces_generic_probate_register_rows() 
     assert any(row.get("Kind") == "loan_amendment_effect" and row.get("Value") == "nrm_ll_2020_02" for row in result_rows)
     assert any(row.get("Kind") == "non_revocable_access_policy" and row.get("Value") == "nrm_rr_2018_44" for row in result_rows)
     assert any(row.get("Kind") == "no_delivery_direction" and row.get("Value") == "executor_reeder_items" for row in result_rows)
+
+
+def test_source_record_packet_metadata_scopes_rows_by_query_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0100, anchored_line, 100, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, collection_is_as_you_know_set_by_museum_policy_and_is_not_subject).",
+        "source_record_section(src_line_0100, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0100, 100).",
+        "source_record_text_atom(src_line_0100, collection_is_as_you_know_set_by_museum_policy_and_is_not_subject).",
+        "source_record_row(src_line_0101, anchored_line, 101, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02, to_change_by_the_lender_beatrice_caulfield_registrar).",
+        "source_record_section(src_line_0101, h_3_northpoint_regional_museum_b_caulfield_registrar_to_c_sutter_2026_04_02).",
+        "source_record_line(src_line_0101, 101).",
+        "source_record_text_atom(src_line_0101, to_change_by_the_lender_beatrice_caulfield_registrar).",
+        "source_record_row(src_line_0102, anchored_line, 102, section_f_recorded_statements_and_their_standing, record_reproduction_does_not_constitute_a_finding_of_fact_specifically).",
+        "source_record_section(src_line_0102, section_f_recorded_statements_and_their_standing).",
+        "source_record_line(src_line_0102, 102).",
+        "source_record_text_atom(src_line_0102, record_reproduction_does_not_constitute_a_finding_of_fact_specifically).",
+        "source_record_row(src_line_0103, anchored_line, 103, section_f_recorded_statements_and_their_standing, the_private_gift_assertion_of_daniel_holloway_regarding_ex_003_is_recorded_but_has_not_been_ruled_upon).",
+        "source_record_section(src_line_0103, section_f_recorded_statements_and_their_standing).",
+        "source_record_line(src_line_0103, 103).",
+        "source_record_text_atom(src_line_0103, the_private_gift_assertion_of_daniel_holloway_regarding_ex_003_is_recorded_but_has_not_been_ruled_upon).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["party_role(Person, registrar, museum)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert result_rows
+    assert result_rows[0]["Kind"] == "role_holder"
+    assert result_rows[0]["DisplayValue"] == "Beatrice Caulfield, Registrar"
+
+
+def test_source_record_packet_metadata_surfaces_unruled_motion_status() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0138, anchored_line, 138, section_e_court_orders_and_pending_motions, p_26_347_m_3_the_court_has_not_ruled_on_this_motion).",
+        "source_record_section(src_line_0138, section_e_court_orders_and_pending_motions).",
+        "source_record_line(src_line_0138, 138).",
+        "source_record_text_atom(src_line_0138, p_26_347_m_3_the_court_has_not_ruled_on_this_motion).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["court_order(Orderid, Orderdate, Ordercontent)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "motion_status"
+        and row.get("Value") == "p_26_347_m_3"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_asserted_event_dates() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0249, table_row, 249, section_i_chronology_of_custody_affecting_events, v_2024_11_19_date_asserted_by_d_holloway_as_date_of_in_person_gift_of_ex_003).",
+        "source_record_section(src_line_0249, section_i_chronology_of_custody_affecting_events).",
+        "source_record_line(src_line_0249, 249).",
+        "source_record_text_atom(src_line_0249, v_2024_11_19_date_asserted_by_d_holloway_as_date_of_in_person_gift_of_ex_003).",
+        "source_record_numeric_token(src_line_0249, v_2024_11_19).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["contested_by(ex_003, Person, Basis)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "asserted_event_date"
+        and row.get("Value") == "v_2024_11_19"
+        and row.get("DisplayValue") == "2024-11-19 asserted event date."
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_section_display_renders_roman_section_atoms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0242, section_i_chronology_of_custody_affecting_events).",
+        "source_record_line(src_line_0242, 242).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_section(Row, section_i_chronology_of_custody_affecting_events)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_section_display"
+    )
+    assert any(
+        row.get("SectionAtom") == "section_i_chronology_of_custody_affecting_events"
+        and row.get("DisplaySection") == "Section I"
+        for row in companion["result"]["rows"]
+    )
+
+
+def test_source_record_section_display_renders_letter_section_atoms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0160, section_f_recorded_statements_and_their_standing).",
+        "source_record_line(src_line_0160, 160).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_section(Row, section_f_recorded_statements_and_their_standing)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_section_display"
+    )
+    assert any(
+        row.get("SectionAtom") == "section_f_recorded_statements_and_their_standing"
+        and row.get("DisplaySection") == "Section F"
+        for row in companion["result"]["rows"]
+    )
 
 
 def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() -> None:
