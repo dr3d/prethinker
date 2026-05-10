@@ -3361,12 +3361,14 @@ def _clinic_device_recall_companion(
             add_candidate("clinic_abbreviation", "Northbridge Family Health", "NBFH", "NBFH = Northbridge Family Health.", source_row)
         if text_atom.startswith("cim_crestmont_internal_medicine"):
             add_candidate("clinic_abbreviation", "Crestmont Internal Medicine", "CIM", "CIM = Crestmont Internal Medicine.", source_row)
-        if "manufacturer_contact_k_halberg_regional_liaison" in text_atom:
-            add_candidate(
+        liaison_match = re.search(r"manufacturer_contact_(?P<person>[a-z]_[a-z]+)_regional_liaison", text_atom)
+        if liaison_match:
+            liaison_name = _display_person_atom(liaison_match.group("person"))
+            add(
                 "manufacturer_liaison",
                 "Medivolt Pharma Systems",
-                "K. Halberg",
-                "Manufacturer contact: K. Halberg, Regional Liaison, Eastern Network.",
+                liaison_name,
+                f"Manufacturer contact: {liaison_name}, Regional Liaison.",
                 source_row,
             )
         if "failure_rate_observed_in_field_returns_0_7_per" in text_atom:
@@ -3377,12 +3379,14 @@ def _clinic_device_recall_companion(
                 "Failure rate observed in field returns: 0.7 per 1,000 hours of use.",
                 source_row,
             )
-        if "procedure_mv_vp_04_a" in text_atom or "verification_procedure_mv_vp_04_a" in text_atom:
-            add_candidate(
+        procedure_match = re.search(r"(?:verification_)?procedure_(?P<procedure>[a-z]+_[a-z]+_\d{2}_[a-z])", text_atom)
+        if procedure_match:
+            procedure_id = _display_upper_hyphen_atom(procedure_match.group("procedure"))
+            add(
                 "verification_procedure",
                 "manufacturer verification",
-                "MV-VP-04-A",
-                "Manufacturer verification procedure MV-VP-04-A.",
+                procedure_id,
+                f"Manufacturer verification procedure {procedure_id}.",
                 source_row,
             )
         if "mp_009" in text_atom and "v_4501_aa_100158" in text_atom:
@@ -3558,6 +3562,10 @@ def _prioritize_clinic_recall_rows(
         return (priority, kind, row.get("Subject", ""))
 
     return sorted(rows, key=score)
+
+
+def _display_upper_hyphen_atom(value: str) -> str:
+    return "-".join(part.upper() for part in str(value or "").strip().split("_") if part)
 
 
 def _display_device_atom(value: str) -> str:

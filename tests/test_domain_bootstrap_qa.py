@@ -466,7 +466,13 @@ def test_clinic_recall_companion_derives_official_source_record_support() -> Non
     assert any(
         row.get("SupportKind") == "manufacturer_liaison"
         and row.get("Value") == "K. Halberg"
-        and row.get("HelperClass") == "candidate-helper"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "verification_procedure"
+        and row.get("Value") == "MV-VP-04-A"
+        and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
     assert any(
