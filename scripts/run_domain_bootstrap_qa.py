@@ -2747,7 +2747,7 @@ def _industrial_sensor_companion(
         return None
 
     out_rows: list[dict[str, str]] = []
-    seen: set[tuple[str, str, str, str]] = set()
+    seen: set[tuple[str, str, str, str, str]] = set()
 
     def add(
         support_kind: str,
@@ -2755,10 +2755,11 @@ def _industrial_sensor_companion(
         value: str = "",
         detail: str = "",
         source_row: str = "",
+        helper_class: str = "clean-helper",
     ) -> None:
         if not support_kind:
             return
-        key = (support_kind, subject, value, detail)
+        key = (support_kind, subject, value, detail, helper_class)
         if key in seen:
             return
         seen.add(key)
@@ -2772,7 +2773,24 @@ def _industrial_sensor_companion(
                 "Line": line_by_row.get(source_row, ""),
                 "SectionAtom": section_by_row.get(source_row, ""),
                 "DisplaySection": _display_section_from_atom(section_by_row.get(source_row, "")),
+                "HelperClass": helper_class,
             }
+        )
+
+    def add_candidate(
+        support_kind: str,
+        subject: str = "",
+        value: str = "",
+        detail: str = "",
+        source_row: str = "",
+    ) -> None:
+        add(
+            support_kind,
+            subject=subject,
+            value=value,
+            detail=detail,
+            source_row=source_row,
+            helper_class="candidate-helper",
         )
 
     raw_events: dict[str, dict[str, str]] = {}
@@ -2849,7 +2867,7 @@ def _industrial_sensor_companion(
         end_time = corrected_events.get(end_event, {}).get("time", "")
         duration = _duration_between_atoms(start_time, end_time)
         if duration:
-            add(
+            add_candidate(
                 support_kind,
                 f"{_display_event_id(start_event)}->{_display_event_id(end_event)}",
                 duration,
@@ -2859,14 +2877,14 @@ def _industrial_sensor_companion(
 
     for source_row, text_atom in text_by_row.items():
         if "hum_d_04_vendor_sentec_model_sentec_rh_220_plus" in text_atom:
-            add(
+            add_candidate(
                 "sensor_vendor_model",
                 "HUM-D-04",
                 "Sentec RH-220-Plus",
                 "Vendor Sentec; model Sentec RH-220-Plus.",
                 source_row,
             )
-            add(
+            add_candidate(
                 "sensor_register_section",
                 "HUM-D-04",
                 "Section 9",
@@ -2874,14 +2892,14 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "qis_opt_12_vendor_vexcel_model_v_opticheck_4" in text_atom:
-            add(
+            add_candidate(
                 "sensor_vendor_model",
                 "QIS-OPT-12",
                 "Vexcel V-OptiCheck 4",
                 "Vendor Vexcel; model V-OptiCheck 4.",
                 source_row,
             )
-            add(
+            add_candidate(
                 "sensor_register_section",
                 "QIS-OPT-12",
                 "Section 9",
@@ -2889,7 +2907,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if text_atom.startswith("next_calibration_due_2026_07_12"):
-            add(
+            add_candidate(
                 "sensor_next_calibration",
                 "HUM-D-04",
                 "2026-07-12",
@@ -2897,7 +2915,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "buffer_overflow_on_dry_dl_04_confirmed" in text_atom and "no_recovery" in text_atom:
-            add(
+            add_candidate(
                 "data_loss_status",
                 "DRY-DL-04",
                 "lost",
@@ -2905,7 +2923,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom:
-            add(
+            add_candidate(
                 "operator_not_originating_events",
                 "R. Kim",
                 "EV-08, EV-12",
@@ -2913,7 +2931,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "compliance_packet_id_mpp_comp_2026_0427" in text_atom:
-            add(
+            add_candidate(
                 "regulatory_packet_identifier",
                 "regulatory_report",
                 "MPP-COMP-2026-0427",
@@ -2921,7 +2939,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "ev_08_sys_b" in text_atom and "batch_b_2026_0422_3_flagged_off_spec" in text_atom:
-            add(
+            add_candidate(
                 "event_batch_identifier",
                 "EV-08",
                 "B-2026-0422-3",
@@ -2929,7 +2947,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "mms_t_2026_0422_1" in text_atom:
-            add(
+            add_candidate(
                 "event_maintenance_ticket",
                 "EV-13",
                 "MMS-T-2026-0422-1",
@@ -2937,7 +2955,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "calibration_ticket_mms_t_2026_0414_3" in text_atom:
-            add(
+            add_candidate(
                 "sensor_calibration_ticket",
                 "QIS-OPT-12",
                 "MMS-T-2026-0414-3",
@@ -2945,7 +2963,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "sys_c_timestamps_are_accepted_as_wall_clock" in text_atom:
-            add(
+            add_candidate(
                 "system_clock_authority",
                 "SYS-C",
                 "wall-clock; no drift correction",
@@ -2953,7 +2971,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "lab_2026_0422_s3_sample_sent_for_moisture_analysis" in text_atom:
-            add(
+            add_candidate(
                 "lab_sample_status",
                 "LAB-2026-0422-S3",
                 "sent_for_analysis",
@@ -2961,7 +2979,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "estimated_return_date_for_lab_2026_0422_s3" in text_atom:
-            add(
+            add_candidate(
                 "lab_sample_estimated_return",
                 "LAB-2026-0422-S3",
                 "2026-04-29",
@@ -2969,7 +2987,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "tbd_root_cause_analysis_report" in text_atom:
-            add(
+            add_candidate(
                 "packet_scope_exclusion",
                 "root_cause",
                 "not_assigned_in_packet",
@@ -2977,7 +2995,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "the_line_stop_duration_between_ev_10_and_ev_14_is_17_hours_45" in text_atom:
-            add(
+            add_candidate(
                 "line_stop_duration_stated",
                 "EV-10->EV-14",
                 "17 hours 45 minutes 52 seconds",
@@ -2985,7 +3003,7 @@ def _industrial_sensor_companion(
                 source_row,
             )
         if "corrected_computation_15_14_03_wall_15_11_51_wall_00_02_12" in text_atom:
-            add(
+            add_candidate(
                 "corrected_response_interval_stated",
                 "EV-08->EV-09",
                 "2 minutes 12 seconds",
@@ -3004,13 +3022,23 @@ def _industrial_sensor_companion(
             "prolog_query": "industrial_sensor_support(SupportKind, Subject, Value, Detail, SourceRow).",
             "result_type": "table",
             "num_rows": len(out_rows),
-            "variables": ["SupportKind", "Subject", "Value", "Detail", "SourceRow", "DisplaySection", "Line"],
+            "variables": [
+                "SupportKind",
+                "Subject",
+                "Value",
+                "Detail",
+                "SourceRow",
+                "DisplaySection",
+                "Line",
+                "HelperClass",
+            ],
             "rows": out_rows[:140],
             "reasoning_basis": {
                 "kind": "query-only-companion",
                 "note": (
-                    "derived industrial sensor, raw-event, corrected-timeline, and packet-id "
-                    "support from admitted source-record ledger rows"
+                    "derived clean raw-event/corrected-timeline support from admitted "
+                    "source-record ledger rows and labeled fixture-family sensor/ticket "
+                    "recognizers as candidate-helper rows"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,

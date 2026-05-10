@@ -194,9 +194,10 @@ Under `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`, these recent
 helper-assisted high-water results are candidate-helper evidence until the
 mixed helpers are split into clean generic substrate, declared lens companions,
 or transfer-proven helpers without fixture-shaped constants. The
-source-record packet metadata helper has begun that cleanup: emitted metadata
-rows now label generic identifier extraction as `clean-helper` and quarantine
-packet-family facts as `candidate-helper`.
+source-record packet metadata helper and industrial sensor helper have begun
+that cleanup: emitted rows now label generic identifier/event/timestamp
+extraction as `clean-helper` and quarantine packet-family or sensor/ticket
+recognizers as `candidate-helper`.
 
 ## Extraction Rule
 

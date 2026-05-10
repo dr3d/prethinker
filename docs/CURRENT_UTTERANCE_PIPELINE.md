@@ -180,7 +180,10 @@ prose directly and do not mutate the KB. Current active examples include:
 - `industrial_sensor_support`: derives sensor-register facts, raw-event-log
   counts, per-system event composition, corrected timeline intervals,
   maintenance tickets, lab sample logistics, packet IDs, and packet-scope
-  exclusions from admitted source-record rows.
+  exclusions from admitted source-record rows. Its emitted rows carry
+  `HelperClass`: field/ledger-derived event and timestamp rows are
+  `clean-helper`, while exact sensor, ticket, and prose recognizers remain
+  `candidate-helper`.
 - `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
   identity, failure rates, cabinet/seal/key custody, verification procedure
   support, full device serial displays, pending-determination correspondence,

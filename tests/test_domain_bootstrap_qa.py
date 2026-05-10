@@ -310,6 +310,29 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert companion is not None
     rows = companion["result"]["rows"]
     details = " ".join(str(row.get("Detail", "")) for row in rows)
+    assert any(
+        row.get("SupportKind") == "raw_event_count"
+        and row.get("Value") == "3"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "corrected_event_time"
+        and row.get("Subject") == "EV-08"
+        and row.get("HelperClass") == "clean-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "sensor_vendor_model"
+        and row.get("Subject") == "HUM-D-04"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
+    assert any(
+        row.get("SupportKind") == "regulatory_packet_identifier"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in rows
+    )
     assert "2 minutes 12 seconds" in details
     assert "Vendor Sentec; model Sentec RH-220-Plus." in details
     assert "Next calibration due 2026-07-12." in details
