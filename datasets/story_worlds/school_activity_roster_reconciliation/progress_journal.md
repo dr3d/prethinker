@@ -209,3 +209,38 @@ scope, pending return scans, lodging, audit-binder retention, or transport
 departure. Those surfaces remain legitimate memory pressures, but they need
 domain helpers, deterministic ledgers, or explicit candidate reporting outside
 the broad packet-metadata helper.
+
+## SARR-006 - School Packet Notes Domain Migration
+
+Date: 2026-05-11
+
+Evidence lane: `candidate_helper_boundary_repair`
+
+Artifacts:
+
+- QA delta readout:
+  `tmp/transfer_fixtures_20260510/packet_metadata_retirement_qa_delta_20260511.md`
+- targeted judged replay:
+  `tmp/transfer_fixtures_20260510/school_packet_notes_migration_targeted_judged_20260511/`
+- post-migration helper audit:
+  `tmp/transfer_fixtures_20260510/school_packet_notes_migration_cold_audit_20260511.json`
+
+Code change:
+
+- migrated three answer-bearing school packet prose rows into
+  `roster_state_support` as explicitly candidate-labeled rows:
+  `school_packet_policy_title`, `school_packet_retention_location`, and
+  `school_packet_pending_item`
+
+Result:
+
+- targeted replay on `q003`, `q004`, and `q033`: `3 exact / 0 partial / 0 miss`
+- `source_record_packet_metadata_support` remains clean-only in helper audit:
+  `116 clean / 0 candidate / 0 unlabeled` across the cold transfer batch
+
+Lesson:
+
+The retirement was correct: packet metadata should not carry these domain prose
+answers. But the rows are still useful for the school packet. Keeping them in
+`roster_state_support` with `candidate-helper` labels restores answerability
+without blurring the broad source-addressability helper.

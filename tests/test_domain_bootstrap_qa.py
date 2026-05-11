@@ -1503,6 +1503,48 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
     )
 
 
+def test_roster_state_support_holds_school_packet_content_notes_after_metadata_retirement() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_text_atom(src_line_0158, sco_ch_3_chaperone_counting_rules_defines_who_counts_toward_the).",
+        "source_record_text_atom(src_line_0249, return_leg_attendance_scans_will_be_appended_after_the_trip_and).",
+        "source_record_line(src_line_0262, 262).",
+        "source_record_text_atom(src_line_0262, retained_in_the_audit_binder_location_activities_office_filing).",
+        "source_record_line(src_line_0263, 263).",
+        "source_record_text_atom(src_line_0263, cabinet_3_drawer_2_and_are_not_the_operational_document).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["policy_requirement(policy, requirement)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "school_packet_policy_title"
+        and row.get("DisplayValue") == "SCO-CH-3 (Chaperone Counting Rules)"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_pending_item"
+        and row.get("Person") == "return_leg_attendance_scans"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_retention_location"
+        and "cabinet 3, drawer 2" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+
+    metadata = next(item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support")
+    assert not any(
+        row.get("Kind") in {"pending_packet_item", "physical_retention_location", "policy_name"}
+        for row in metadata["result"]["rows"]
+    )
+
+
 def test_source_record_packet_metadata_surfaces_generic_document_standing_rows() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

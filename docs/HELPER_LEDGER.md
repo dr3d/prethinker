@@ -28,7 +28,7 @@ in the detail sections below.
 | `source_record_table_body_count_support` | 3 | yes | transfer-proven clean-helper for explicit body-count intents | 2026-05-10 | 2026-05-10 | Keep narrow; require explicit table/list/log body-count wording. |
 | `item_description_detail_support` | 2 | yes | transfer-shown clean-helper over admitted description predicates | 2026-05-10 | 2026-05-11 | Keep promoted narrowly; do not infer missing descriptions from source text. |
 | `source_record_packet_metadata_support` | 4 | yes | clean structural/addressability helper; content-note branches retired | 2026-05-10 | 2026-05-11 | Keep generic metadata/addressability rows only; move domain prose to domain helpers or leave retired. |
-| `roster_state_support` | 2 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Prefer deterministic roster-table ledgers where available; keep section/prose membership candidate-labeled. |
+| `roster_state_support` | 2 | yes | split, audit ongoing; school packet notes migrated candidate-labeled | 2026-05-10 | 2026-05-11 | Prefer deterministic roster-table ledgers where available; keep section/prose membership and school packet prose candidate-labeled. |
 | `archive_authority_custody_support` | 2 | yes | split, retirement candidate for probate paths | 2026-05-10 | 2026-05-10 | Quarantine old authority/probate paths; prefer packet metadata for probate standing/source/addressability. |
 | `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | 2026-05-10 | 2026-05-10 | Seek sibling proof before promotion. |
 | `clinic_recall_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Genericize or retire remaining candidate rows before clean saturation claims. |
@@ -84,7 +84,11 @@ derive membership from source-record text atoms and section context. The
 deterministic `roster_table_member/4` ledger moves explicit table rows with both
 grouping and member columns out of helper inference. Section/prose-derived
 roster membership remains candidate-helper until a stronger ledger design
-exists.
+exists. After packet-metadata cleanup, three school packet prose rows migrated
+here as candidate-helper rows: `school_packet_policy_title`,
+`school_packet_retention_location`, and `school_packet_pending_item`. Targeted
+school replay recovered `q003`, `q004`, and `q033` while packet metadata stayed
+clean-only.
 
 `archive_authority_custody_support`: generic object-custody/access/recalled
 right joins can be clean on the precision authority artifact, but the probate

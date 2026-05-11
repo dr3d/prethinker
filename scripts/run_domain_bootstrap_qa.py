@@ -1515,9 +1515,11 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     if source_record_companions:
         if predicate in {
             "adult_role",
+            "bus_assignment",
             "group_member",
             "group_membership",
             "homeroom_member",
+            "policy_requirement",
             "role_counts_towards_ratio",
             "roster_version",
             "roster_version_status",
@@ -5621,9 +5623,11 @@ def _roster_state_companion(
 ) -> dict[str, Any] | None:
     roster_predicates = {
         "adult_role",
+        "bus_assignment",
         "group_member",
         "group_membership",
         "homeroom_member",
+        "policy_requirement",
         "role_counts_towards_ratio",
         "roster_version",
         "roster_version_status",
@@ -5848,6 +5852,7 @@ def _roster_state_companion(
     out_rows.extend(_source_record_roster_assignment_support(runtime))
     out_rows.extend(_source_record_roster_adult_support(runtime))
     out_rows.extend(_source_record_roster_compliance_support(runtime))
+    out_rows.extend(_source_record_school_packet_support(runtime))
 
     group_counts: dict[tuple[str, str, str, str], set[str]] = {}
     group_count_classes: dict[tuple[str, str, str, str], set[str]] = {}
@@ -6028,11 +6033,18 @@ def _prioritize_roster_state_rows(
             if predicate == "role_counts_towards_ratio" and len(args) >= 1 and is_requested(role, args[0]):
                 priority = min(priority, 0)
             version_priority = -version_priority
+        elif predicate == "policy_requirement":
+            if support_kind == "school_packet_policy_title":
+                priority = 0
+        elif predicate == "bus_assignment":
+            if support_kind == "school_packet_pending_item":
+                priority = 0
         elif predicate in {"roster_version", "roster_version_status"}:
             version_ok = len(args) < 1 or is_requested(version, args[0])
             if support_kind in {
                 "compliance_status",
                 "group_count",
+                "school_packet_retention_location",
                 "roster_table_student_group_assignment",
                 "source_record_student_group_assignment",
                 "student_group_assignment",
@@ -6308,6 +6320,75 @@ def _source_record_roster_compliance_support(runtime: CorePrologRuntime) -> list
                         "HelperClass": "clean-helper",
                     }
                 )
+    return out_rows
+
+
+def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    if not text_rows:
+        return []
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip().lower()
+        for row in text_rows
+    }
+    line_by_row: dict[str, int] = {}
+    for row in line_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        line = str(row.get("Line", "")).strip()
+        if source_row and _is_numeric_atom(line):
+            line_by_row[source_row] = int(float(line))
+    ordered_source_rows = sorted(text_by_row, key=lambda source_row: line_by_row.get(source_row, 10**9))
+
+    out_rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def add(source_row: str, support_kind: str, value: str, display_value: str, detail: str = "") -> None:
+        if not source_row or not support_kind or not value:
+            return
+        key = (support_kind, value, source_row)
+        if key in seen:
+            return
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": support_kind,
+                "Person": value,
+                "Group": "",
+                "SourceRow": source_row,
+                "DisplayValue": display_value,
+                "Detail": detail,
+                "HelperClass": "candidate-helper",
+            }
+        )
+
+    for source_row in ordered_source_rows:
+        text_atom = text_by_row.get(source_row, "")
+        if "sco_ch_3" in text_atom and "chaperone_counting_rules" in text_atom:
+            add(
+                source_row,
+                "school_packet_policy_title",
+                "sco_ch_3",
+                "SCO-CH-3 (Chaperone Counting Rules)",
+                detail=text_atom,
+            )
+        if text_atom.startswith("return_leg_attendance_scans_will_be_appended_after_the_trip"):
+            add(
+                source_row,
+                "school_packet_pending_item",
+                "return_leg_attendance_scans",
+                "Return-leg attendance scans pending; appended after the trip; not part of this packet",
+                detail=text_atom,
+            )
+        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+        if "retained_in_the_audit_binder_location_activities_office_filing" in text_atom and "cabinet_3_drawer_2" in next_text:
+            add(
+                source_row,
+                "school_packet_retention_location",
+                "audit_binder",
+                "Activities Office filing cabinet 3, drawer 2 (audit binder)",
+                detail=f"{text_atom} {next_text}".strip(),
+            )
     return out_rows
 
 
