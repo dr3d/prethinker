@@ -179,7 +179,7 @@ These distinctions matter because "I don't know," "the source doesn't say," "the
 
 ### Current Score Evidence
 
-The instrument has been calibrated across hostile benchmarks and fresh
+The instrument has been calibrated across hostile fixtures and fresh
 cold-injected story worlds. Two current evidence bands matter:
 
 - Prior surgical fixture batch: **284 / 303 exact (94%)**, with only **3**
@@ -228,10 +228,11 @@ These are as important as the positive ones:
 
 ## Companion Documents
 
-- **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, and uncertainty vocabulary.
+- **[The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)** - plain-language guide to the reader/control lenses and how they differ.
+- **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
 - **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether guard return sites are collapsing into a smaller number of semantic families (currently 7 families, 0 unclassified)
 - **[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md)** - tracks whether remaining failures form multi-fixture work slices (currently 72 targets across 10 fixtures, organized into 9 recommended slices)
-- **[Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)** - the benchmark design methodology, difficulty calibration, and cross-fixture regression protocol
+- **[Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)** - the fixture design methodology, difficulty calibration, and cross-fixture regression protocol
 
 ---
 

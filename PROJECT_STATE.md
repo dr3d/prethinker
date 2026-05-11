@@ -14,10 +14,6 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   by `src/kb_pipeline_clean`, captures canonical structural signatures while
   delegating behavior to the live compiler/runtime path.
 - Harness instrument reference: `docs/CURRENT_HARNESS_INSTRUMENT.md`.
-- Autolab reference: `docs/AUTOLAB.md`; current default is Windows direct mode
-  (`docs/AUTOLAB_WINDOWS_DIRECT.md`), where local or remote Python runs known
-  repo scripts, validators, planners, and artifact drills without the retired
-  WSL/mailbox runner in the middle.
 - Compiled artifact doctrine: `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`.
 - Research prioritization: `docs/ACTIVE_RESEARCH_LANES.md`.
 - UI: `ui_gateway/`, served locally by `python ui_gateway/main.py` using the stdlib `ThreadingHTTPServer`.
@@ -778,25 +774,23 @@ If you have an hour:
 3. `docs/CURRENT_HARNESS_INSTRUMENT.md`
 4. `docs/PUBLIC_DOCS_GUIDE.md`
 5. `docs/EXPLAINER.md`
-6. `docs/FRONTIER_PROGRESS_REPORT.md`
-7. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
+6. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
+7. `docs/FRONTIER_FIXTURE_STRATEGY.md`
 
 Deep dives:
 
 1. `docs/PROJECT_HORIZON.md`
-2. `docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md`
-3. `docs/SEMANTIC_ROUTER_EXPERIMENT.md`
-4. `docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md`
-5. `docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md`
-6. `docs/DOMAIN_PROFILE_CATALOG.md`
-7. `docs/COURTLISTENER_DOMAIN.md`
-8. `docs/SEC_CONTRACTS_DOMAIN.md`
-9. `docs/UMLS_MVP.md`
-10. `docs/MEDICAL_PROFILE.md`
-11. `docs/CONSOLE_TRYBOOK.md`
-12. `docs/PUBLIC_DOCS_GUIDE.md`
-13. `ui_gateway/README.md`
+2. `docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md`
+3. `docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md`
+4. `docs/DOMAIN_PROFILE_CATALOG.md`
+5. `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`
+6. `docs/COURTLISTENER_DOMAIN.md`
+7. `docs/SEC_CONTRACTS_DOMAIN.md`
+8. `docs/UMLS_MVP.md`
+9. `docs/MEDICAL_PROFILE.md`
+10. `docs/PUBLIC_DOCS_GUIDE.md`
+11. `ui_gateway/README.md`
 
 ## What Was Pruned
 
-Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, old direct parser-probe scripts, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.
+Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, old direct parser-probe scripts, retired lab-automation plans, publishing plans, benchmark-project plans, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.

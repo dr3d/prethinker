@@ -18,7 +18,7 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_MD = REPO_ROOT / "docs" / "QUERY_SURFACE_MODE_COMPARISON.md"
+DEFAULT_OUT_MD = REPO_ROOT / "tmp" / "query_surface_mode_comparison.md"
 DEFAULT_OUT_JSON = REPO_ROOT / "tmp" / "query_surface_mode_comparison.json"
 VERDICT_SCORE = {"miss": 0, "partial": 1, "exact": 2}
 SCORE_VERDICT = {0: "miss", 1: "partial", 2: "exact"}

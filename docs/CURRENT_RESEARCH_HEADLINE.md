@@ -110,8 +110,8 @@ to hold.
    conservation, and financial corrections are helper candidates when they
    compose admitted rows instead of interpreting source prose.
 4. **Hunt guard merges and retirements.** Use the duplicate-reason report and
-   near-duplicate review as an Autolab task. A merged guard should lose fixture
-   vocabulary and keep the semantic reason.
+   near-duplicate review as a focused maintenance task. A merged guard should
+   lose fixture vocabulary and keep the semantic reason.
 5. **Keep the lab portable.** The current POWER/NITRO/LM Studio rig is a
    research convenience, not the product. Docs should describe endpoint
    configuration and artifact contracts, not a permanent home-lab dependency.

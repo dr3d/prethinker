@@ -24,19 +24,16 @@ The current POWER/NITRO lab is the research rig, not the product boundary. A
 future hosted lane must prove model-transfer evidence before it replaces the
 local 35B workhorse.
 
-The strategic product direction is edge-class governed memory: governance comes
-from architecture rather than model size. See
-[Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
-for the category frame and the claims that still need measurement.
+The strategic product direction is portable governed memory: governance comes
+from architecture rather than model size, and model-transfer evidence decides
+which runtime lanes are trustworthy.
 
 For the detailed technical contract, see:
 
 - [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-- [Semantic IR Research Direction](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 - [Portability And Model Transfer](https://github.com/dr3d/prethinker/blob/main/docs/PORTABILITY_AND_MODEL_TRANSFER.md)
-- [Edge Governance Positioning](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
 
 ## What Exists Today
 
@@ -56,7 +53,7 @@ Prethinker can make language-to-state mutation more explicit, testable, and
 auditable than a normal freeform chat transcript.
 
 The measured trajectory is broader than a toy demo. The instrument has been
-calibrated against hostile benchmarks across many domain types. A prior
+calibrated against hostile fixtures across many domain types. A prior
 surgical fixture batch covers `9` fixtures and `303` questions, with `284`
 exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, Fenmore and
 Greywell both perfect, and zero unauthorized writes across the checked corpus.

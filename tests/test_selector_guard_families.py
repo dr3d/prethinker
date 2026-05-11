@@ -1,5 +1,6 @@
 from scripts.summarize_selector_guard_families import (
     DEFAULT_SELECTOR,
+    RETIRED_SCAR_GUARDS,
     build_guard_ledger,
     build_report,
     extract_guard_reasons,
@@ -67,9 +68,10 @@ def test_selector_guard_ledger_scaffolds_audit_fields() -> None:
     ledger = build_guard_ledger(report)
 
     assert ledger["schema_version"] == "selector_guard_ledger_v1"
-    assert ledger["summary"]["entry_count"] == report["guard_reason_count"]
+    assert ledger["summary"]["entry_count"] == report["guard_reason_count"] + len(RETIRED_SCAR_GUARDS)
     assert ledger["summary"]["unclassified_count"] == 0
     assert ledger["summary"]["status_counts"]
+    assert ledger["summary"]["status_counts"]["scar_guard"] == len(RETIRED_SCAR_GUARDS)
     assert ledger["entries"]
     first = ledger["entries"][0]
     assert "audit_status" in first

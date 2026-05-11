@@ -113,7 +113,7 @@ This is not truth, but it is essential for replay, comparison, and trust.
 - zombie/struggle evidence;
 - failure-classification summaries.
 
-Diagnostics are not the answer substrate. They may tell Codex or Autolab where
+Diagnostics are not the answer substrate. They may tell Codex or a human where
 the instrument struggled, and they may motivate a new compile pass, but they do
 not become answer truth unless recompiled into admitted `world.pl` or
 `epistemic.pl` rows.

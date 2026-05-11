@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-09
+Last updated: 2026-05-11
 
 This page is the map for public readers. Git history keeps the older research
 trail; these docs should describe the project as it sits now.
@@ -26,21 +26,13 @@ Use the project terms this way:
   question, reference answer, attempt, verdict, and supporting trace.
 - **Selector**: the steering wheel that chooses the best available QA surface
   for a row.
-- **Guard**: the rumble strip that blocks a tempting but wrong surface when it
-  has volume, proximity, or relaxed evidence without the needed precision.
-- **Two-axis frame**: the benchmark distinction between what gets through the
-  door at compile time and what stays in the room under context pressure.
-- **Edge governance positioning**: the strategic category claim that governed,
-  durable memory can be delivered by architecture on edge-class systems rather
-  than by model scale alone.
-- **Assembly recipe**: an Axis 2 experiment object: target fixture, filler
-  fixtures, ordering, position, filler length, question sequence, and
-  meta-recall settings.
+- **Guard**: the check that blocks a tempting but wrong surface when it has
+  volume, proximity, or relaxed evidence without the needed precision.
 - **Pegboard**: the working roster of lenses, helpers, registries, and selector
   modes that can be tested row-by-row against frozen artifacts.
 - **Console**: the live cockpit for watching the process.
-- **Medical/UMLS**: the current bounded domain lane, not a general clinical
-  reasoning claim.
+- **Medical/UMLS**: a bounded domain lane, not a general clinical reasoning
+  claim.
 
 ## Current Front Door
 
@@ -48,22 +40,19 @@ Read these first:
 
 1. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 2. [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
-3. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-4. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-5. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-6. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-7. [docs/SELECTOR_GUARD_FAMILY_ROLLUP.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
-8. [docs/AUTOLAB.md](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB.md)
+3. [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
+4. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+5. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+6. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+7. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+8. [docs/SELECTOR_GUARD_FAMILY_ROLLUP.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
 9. [docs/README.md](https://github.com/dr3d/prethinker/blob/main/docs/README.md)
 10. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
-11. [docs/GENERALIZATION_BASELINE_MATRIX.md](https://github.com/dr3d/prethinker/blob/main/docs/GENERALIZATION_BASELINE_MATRIX.md)
-12. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-13. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-14. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
-15. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
-16. [docs/TWO_AXIS_BENCHMARK_FRAME.md](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md)
-17. [docs/EDGE_GOVERNANCE_POSITIONING.md](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
-18. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+11. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+12. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+13. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+14. [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
+15. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 
 ## Current Research Center
 
@@ -102,42 +91,33 @@ The best current documents for that work are:
 
 - [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+- [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
 - [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 - [docs/SELECTOR_GUARD_FAMILY_ROLLUP.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
-- [docs/AUTOLAB.md](https://github.com/dr3d/prethinker/blob/main/docs/AUTOLAB.md)
 - [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-- [docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CONTEXT_CONTROL_ARCHITECTURE_BRIEF.md)
 - [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
 - [docs/FRONTIER_FIXTURE_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
-- [docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_RESEARCH_DIRECTION_REPORT.md)
-- [docs/EDGE_GOVERNANCE_POSITIONING.md](https://github.com/dr3d/prethinker/blob/main/docs/EDGE_GOVERNANCE_POSITIONING.md)
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [docs/TEMPORAL_GRAPH_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/TEMPORAL_GRAPH_V1.md)
 - [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [docs/COURTLISTENER_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
 - [docs/SEC_CONTRACTS_DOMAIN.md](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
-- [docs/SEMANTIC_ROUTER_EXPERIMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_ROUTER_EXPERIMENT.md)
-- [docs/ROUTER_TRAINING_SEED_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/ROUTER_TRAINING_SEED_AUDIT.md)
 - [docs/DOMAIN_BOOTSTRAPPING_META_MODE.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md)
 - [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
 - [docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md)
 - [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
-- [docs/FRONTIER_DATASET_SURVEY.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_DATASET_SURVEY.md)
-- [docs/TWO_AXIS_BENCHMARK_FRAME.md](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md)
-- [docs/TWO_AXIS_PROBE_DISCIPLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_PROBE_DISCIPLINE.md)
 - [docs/prompts/SEMANTIC_IR_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/prompts/SEMANTIC_IR_V1.md)
 
 Current query/QA instruments:
 
-- [docs/POST_INGESTION_QA_SURFACES.md](https://github.com/dr3d/prethinker/blob/main/docs/POST_INGESTION_QA_SURFACES.md)
-- [docs/QUERY_SURFACE_MODE_COMPARISON.md](https://github.com/dr3d/prethinker/blob/main/docs/QUERY_SURFACE_MODE_COMPARISON.md)
 - [docs/KB_INTERROGATOR.md](https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md)
+- [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 
-Secondary design and pattern notes:
+Secondary design notes:
 
 - [docs/PRETHINKER.md](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md)
 - [ROADMAP.md](https://github.com/dr3d/prethinker/blob/main/ROADMAP.md)
-- [docs/CHAOS_PROVER_PATTERN_NOTES.md](https://github.com/dr3d/prethinker/blob/main/docs/CHAOS_PROVER_PATTERN_NOTES.md)
+- [docs/PROJECT_HORIZON.md](https://github.com/dr3d/prethinker/blob/main/docs/PROJECT_HORIZON.md)
 
 The newest open-domain work is the hint-free profile/bootstrap path: raw text
 goes to an LLM-authored `intake_plan_v1` and `profile_bootstrap_v1` proposal,
@@ -158,16 +138,11 @@ activation can perturb rows that were already good. Perfect-selector reports
 are diagnostic upper bounds, not runtime policies.
 
 The newest guard work is compression pressure. The selector code currently has
-many explicit guard return sites, but they still collapse into `7` semantic
-families with `0` unclassified reasons. Do not read that as a finished
-parameterized design. The current discipline is to discover guards explicitly,
-merge safe duplicates, retire guards made unnecessary by better surfaces, and
-parameterize only after the family structure stops moving.
-
-The newest fixture-methodology work is the frontier fixture strategy: new
-benchmarks should target specific architectural weaknesses, declare their
-evidence lane before scoring, aim for a useful cold baseline difficulty band,
-and trigger cross-fixture replay after general harness changes.
+many explicit guard return sites, but they still collapse into semantic
+families. Do not read that as a finished parameterized design. The current
+discipline is to discover guards explicitly, merge safe duplicates, retire
+guards made unnecessary by better surfaces, and parameterize only after the
+family structure stops moving.
 
 Clarification eagerness is now a named strategy surface, not just a UI behavior:
 Prethinker should ask during ingestion when identity, temporal anchors,
@@ -192,25 +167,21 @@ diagnosis. CourtListener is legal-source intake, not legal advice or outcome
 prediction. SEC/contracts is obligation and filing intake, not investment or
 contract advice.
 
-Older ontology-prospector notes are now Git-history context. The current
-surface is profile packages, UMLS bridge assets, predicate contracts, and the
-domain profile catalog.
-
 ## Demo Surface
 
-- [docs/CONSOLE_TRYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md)
-- [docs/DEMO_PLAYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/DEMO_PLAYBOOK.md)
 - [docs/POLICY_REIMBURSEMENT_DEMO.md](https://github.com/dr3d/prethinker/blob/main/docs/POLICY_REIMBURSEMENT_DEMO.md)
 - [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
+- [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 ## Historical Or Legacy Context
 
 Old generated HTML run reports, ladder/rung pages, dated prompt snapshots,
-pre-mid-April media/results, legacy parser-lane notes, and stale report
-manifests were retired from the forward-facing tree. Git history preserves them.
-The older English-parser lane is useful history, but it should not be mistaken
-for the preferred future architecture centered on router-owned context
-engineering, Semantic IR workspaces, and deterministic admission.
+pre-mid-April media/results, legacy parser-lane notes, stale report manifests,
+lab-automation plans, publishing plans, and benchmark-project plans are retired from
+the forward-facing tree. Git history preserves them. The older English-parser
+lane is useful history, but it should not be mistaken for the preferred future
+architecture centered on router-owned context engineering, Semantic IR
+workspaces, and deterministic admission.
 
 ## Public Link And HTML Policy
 
@@ -226,48 +197,34 @@ public docs pages.
 
 ## Current Evidence Snapshot
 
-Latest local verification:
+Latest local verification and current evidence live in
+[PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
+and the focused docs linked above. Keep this page as a map, not a rolling
+results ledger.
 
-- Frontier fixture progress is summarized in [docs/FRONTIER_PROGRESS_REPORT.md](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_PROGRESS_REPORT.md), with raw journals linked for Iron Harbor, Blackthorn, Kestrel, Anaplan Polaris, Glass Tide, and Clarification Eagerness Trap.
-- Multi-pass semantic compilation is now a named frontier: independent semantic lenses propose backbone, support/source, temporal/status, and rule fragments; the mapper admits each lens independently; deterministic union accumulates only admitted clauses.
-- Clarification eagerness now has a dedicated first fixture at `datasets/clarification_eagerness/clarification_eagerness_trap/`: `20` ingestion CE cases, `20` query CE cases, and `10` baseline QA probes. CET-013 reran the source-context lane after the latest rule-admission work and held `40/40` correct, `0` over-eager, `0` under-eager, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage. The remaining CE nuance is safe-partial richness, not ask/no-ask posture.
-- Focused current helper/selector verification: `153 passed` across
-  `tests/test_domain_bootstrap_file.py`, `tests/test_domain_bootstrap_qa.py`,
-  `tests/test_qa_mode_selector.py`, and `tests/test_selector_guard_families.py`.
-- `active_profile=auto` now uses `semantic_router_v1` as the first-pass context/profile planner. The old Python catalog selector is no longer in the active runtime or research harnesses.
-- `semantic_ir_v1` now includes optional `temporal_graph_v1` proposal diagnostics: event nodes, time anchors, intervals, and temporal edges are visible in traces, but they cannot write durable KB facts unless matching `candidate_operations` pass admission.
-- The new temporal kernel can answer `after/2`, transitive `precedes/2`, `follows/2`, and coarse `concurrent/2` queries from admitted temporal facts. This is deterministic Prolog reasoning over admitted clauses, not model-side temporal answering.
-- Temporal anchor replacement now goes through stored-logic admission: changing `event_on/2`, `interval_start/2`, or `interval_end/2` for the same record requires an explicit retract/correction plan.
-- Low-risk correction projection now ignores unsafe-implication residue that duplicates the stale fact being safely retracted, so explicit temporal corrections can remain `commit` when the safe retract/assert pair is complete.
-- Multilingual router probe: `router_ok=10/10`, `compiler_parsed_ok=10/10` on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
-- Current profile packages supply router/compiler context, predicate contracts, and declarative validators for medical, legal/CourtListener, SEC/contracts, probate, and story-world lanes. The mapper still owns actual admission.
-- Predicate-contract role enforcement blocks obvious argument-shape mismatches, profile validators block domain-specific unsafe admissions declaratively, temporal gates block inverted interval pairs, and duplicate-collapse prevents repeated candidate-operation floods from becoming repeated KB writes.
-- Clause support records connect admitted facts/rules/retracts/queries back to their Semantic IR operation index, predicate, source, and rationale codes; this is a first dependency breadcrumb, not full truth maintenance yet.
-- Epistemic Worlds v1 diagnostics preserve projection-blocked and supported-but-skipped candidates as scoped wrapper clauses such as `world_operation/4` and `world_arg/4`, so traces can remember rejected/quarantined/skipped content without asserting it as global truth.
-- CourtListener legal-source lane: `legal_courtlistener@v0`, `adapters/courtlistener/`, synthetic legal seed fixtures, and ignored live smoke data for claim/finding, citation-not-endorsement, docket-not-holding, role-scope, provenance, and identity-boundary tests.
-- SEC/contracts lane: `sec_contracts@v0`, `adapters/sec_edgar/`, and synthetic contract fixtures for obligation-not-fact, condition-not-event, temporal triggers, party scope, and breach-boundary tests.
-- Semantic IR runtime edge pack: `20/20` decision labels, `0.976` avg score.
-- Semantic IR weak-edge pack: `10/10` decision labels, `1.000` avg score.
-- Cold generalization evidence: the 2026-05-07 sealed story batch reached a cold baseline of `276 exact / 44 partial / 80 miss` across `400` QA rows, then a row-gated selector high-water of `361 exact / 16 partial / 23 miss` (`90.25%`) with zero QA write proposals in the contributing runs.
-- Incoming-6 full-40 evidence: six new 2026-05-08 fixtures moved from a cold
-  baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of
-  `240 / 0 / 0` over `240` rows. Current candidate surfaces include source
-  lists, last-confirmed-at, unresolved authority questions, rejected-version
-  planning state, procedural date-event anchors, source-period/deadline,
-  planning/staff-report, board-recusal conflict, lease financial correction,
-  evidence provenance, and conservation-of-count query support.
-- Selector guard family evidence: `244` guard return sites, `244` unique guard
-  reasons, `7` semantic families, `0` unclassified reasons, and `0` exact
-  duplicate reasons currently queued for merge review.
-- Rule-lens transfer evidence: Sable Creek produced a body-supported public-hearing rule from admitted fact rows, and Avalon retained helper-composed matching-fund rules while the mapper skipped unsupported raw Prolog constructs.
-- Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
-- Anaplan Polaris enterprise-guidance fixture: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss` on a 43-question post-ingestion QA battery, with `0` runtime load errors and `0` QA write proposals.
-- Profile bootstrap closed-loop smoke: a model-proposed starter profile ran generated starter cases through the normal Semantic IR mapper with `8/8` valid workspaces and `7/8` expected-boundary hits.
-- Raw Proclamation hint-free profile-review experiment: useful early run produced `30` candidate predicates, `93` admitted source-compile operations, `4/4` successful planned passes, and first-20 post-ingestion QA at `10 exact / 5 partial / 4 miss / 1 not judged`. Newer source-record/reporter/condition pressure produced a stronger style-aligned compile shape (`18` predicates, `4` repeated structures, `497` admitted operations), and structural query-placeholder/QA planning improvements lifted that first-20 QA pass to `19 exact / 1 miss`. A follow-up status-aware hint-free recompile invented `grievance_status/2` with `source_bound_accusation` and reached `18 exact / 2 miss`, showing both progress on epistemic status and the remaining predicate-surface/query-planning tension.
+Important current signals:
 
-The important qualitative result is that the current system has moved from
-Python-side language rescue toward model-owned context planning plus
-deterministic admission. The remaining hard problems are model-owned
-segmentation, reusable predicate-contract coverage, durable temporal fact
-representation and graph-derived QA, rule admission, broader profile validator
-coverage, and mapper policy for partial/unsafe operations.
+- Multi-pass semantic compilation is the named frontier: independent semantic
+  lenses propose backbone, support/source, temporal/status, and rule fragments;
+  the mapper admits each lens independently; deterministic union accumulates
+  only admitted clauses.
+- Clarification eagerness has a dedicated fixture family for ask/no-ask,
+  safe-partial preservation, blocked-slot coverage, unsafe candidates, and
+  context-write hygiene.
+- `active_profile=auto` uses `semantic_router_v1` as the first-pass
+  context/profile planner. The old Python catalog selector is no longer in the
+  active runtime or research harnesses.
+- `semantic_ir_v1` includes optional `temporal_graph_v1` proposal diagnostics:
+  event nodes, time anchors, intervals, and temporal edges are visible in
+  traces, but they cannot write durable KB facts unless matching
+  `candidate_operations` pass admission.
+- Multilingual router/compiler probes remain the cleanest evidence for the
+  no-Python-language-handling direction.
+- Current profile packages supply router/compiler context, predicate contracts,
+  and declarative validators for medical, legal/CourtListener, SEC/contracts,
+  probate, and story-world lanes. The mapper still owns actual admission.
+
+The remaining hard problems are model-owned segmentation, reusable
+predicate-contract coverage, durable temporal fact representation and
+graph-derived QA, rule admission, broader profile validator coverage, and mapper
+policy for partial/unsafe operations.

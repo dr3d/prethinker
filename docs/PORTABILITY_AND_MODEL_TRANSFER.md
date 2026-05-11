@@ -32,7 +32,7 @@ These parts are meant to work on someone else's computer:
   helper files;
 - deterministic selector guards, validators, scorecards, and comparison tools;
 - the lens roster as a semantic vocabulary, not a hardware assumption;
-- Autolab artifact discipline: run bounded jobs, write structured outputs, then
+- bounded artifact discipline: run scoped jobs, write structured outputs, then
   let Codex or a human interpret the results.
 
 The home lab can be faster and more comfortable, but it should not become the

@@ -11,7 +11,7 @@ two views:
 Read with:
 
 - `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`
-- `docs/EDGE_GOVERNANCE_POSITIONING.md`
+- `docs/SEMANTIC_INSTRUMENT.md`
 
 The usage row counts below come from historical QA artifacts under
 `tmp/transfer_fixtures_20260510` and `tmp/openrouter_precision_20260509`. Treat
@@ -28,11 +28,11 @@ in the detail sections below.
 | `source_record_table_body_count_support` | 3 | yes | transfer-proven clean-helper for explicit body-count intents | 2026-05-10 | 2026-05-10 | Keep narrow; require explicit table/list/log body-count wording. |
 | `item_description_detail_support` | 2 | yes | transfer-shown clean-helper over admitted description predicates | 2026-05-10 | 2026-05-11 | Keep promoted narrowly; do not infer missing descriptions from source text. |
 | `source_record_packet_metadata_support` | 4 | yes | clean structural/addressability helper; content-note branches retired | 2026-05-10 | 2026-05-11 | Keep generic metadata/addressability rows only; move domain prose to domain helpers or leave retired. |
-| `roster_state_support` | 2 | yes | split, audit ongoing; school packet notes migrated candidate-labeled | 2026-05-10 | 2026-05-11 | Prefer deterministic roster-table ledgers where available; keep section/prose membership and school packet prose candidate-labeled. |
-| `archive_authority_custody_support` | 2 | yes | split, retirement candidate for probate paths | 2026-05-10 | 2026-05-10 | Quarantine old authority/probate paths; prefer packet metadata for probate standing/source/addressability. |
+| `roster_state_support` | 2 | yes | split; source-record membership/count rows blocked pending stronger ledger or third fixture | 2026-05-10 | 2026-05-11 | Prefer deterministic roster-table ledgers where available; keep source-record membership, inherited counts, and school packet prose candidate-labeled. |
+| `archive_authority_custody_support` | 2 | yes | split; clean object-custody transfer retained, probate custody counts quarantined | 2026-05-10 | 2026-05-11 | Keep admitted object-custody normalization; prefer packet metadata/access-order joins for probate standing/source/addressability. |
 | `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | 2026-05-10 | 2026-05-10 | Seek sibling proof before promotion. |
-| `clinic_recall_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Genericize or retire remaining candidate rows before clean saturation claims. |
-| `grant_award_support` | 2 | yes | split; clean alias bridge transfer-shown, appeal/procedure rows still candidate | 2026-05-10 | 2026-05-11 | Keep predicate aliases; quarantine source-prose appeal/procedure recognizers until genericized or retired. |
+| `clinic_recall_support` | 1 | yes | split, three candidate rows quarantined on current audit | 2026-05-10 | 2026-05-11 | Keep fallback prose/person authority rows candidate-labeled until source-record acquisition preserves generic sender/person/authority fields. |
+| `grant_award_support` | 2 | yes | split; clean alias bridge transfer-shown, four appeal/recusal prose rows quarantined | 2026-05-10 | 2026-05-11 | Keep predicate aliases; keep appeal funding/date and recusal formula/procedure recognizers candidate until compile/source-record substrate admits the relations directly. |
 | `clear_sample_clock_pause_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
 | `source_record_clock_sync_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
 | `roster_table_count_support` | 1 | yes | clean deterministic roster-table companion, one-fixture | 2026-05-10 | 2026-05-10 | Keep as companion to `roster_table_member/4`; seek sibling tables. |
@@ -95,35 +95,52 @@ and `q038`; `q006` remains an event-to-source linkage problem because
 `temporary_event_assignment/4` lacked explicit section/note provenance. A
 follow-up added `temporary_event_source_link`, joining admitted temporary-event
 rows to source-record scheduling-note rows; targeted q006 replay became exact.
+A 2026-05-11 closeout reran focused helper-class audits against current code.
+`count_composition_roster` emits `59 clean / 90 candidate / 0 unlabeled`
+`roster_state_support` rows; `school_activity_roster_reconciliation` emits
+`61 clean / 119 candidate / 0 unlabeled` roster rows plus `22` clean packet
+metadata rows. The candidate rows are source-record student membership,
+candidate-inherited group counts, and two school packet prose rows. Do not
+relabel them. Promotion requires a third roster fixture, structured
+source-record field/table acquisition with explicit group/member columns, or a
+separately audited deterministic roster-ledger precompile layer.
 
 `archive_authority_custody_support`: generic object-custody/access/recalled
-right joins can be clean on the precision authority artifact, but the probate
-transfer artifact emitted candidate-only helper rows and regressed cold (`29 /
-3 / 8` live helper replay versus `34 / 1 / 5` cold). The active probate repair
-path moved away from this helper and into clean `source_record_packet_metadata`
-rows. Treat old probate/authority branches as retirement candidates unless new
-fixtures prove they still add distinct clean capability.
+right joins can be clean on authority-like artifacts. A current estate transfer
+proof over `object_custody_status/5` emits `10 clean / 0 candidate` rows. The
+probate cold acquisition path emits `12 clean / 4 candidate` authority rows plus
+`44` clean packet-metadata rows; the four candidate rows are grouped
+`physical_custody_count` probate aggregations. The active probate repair path
+moved away from old authority/probate rows and into clean
+`source_record_packet_metadata` plus access/order joins. Keep the clean
+object-custody normalization, but treat probate custody-count branches as
+quarantined unless a fresh unlike fixture proves distinct clean capability.
 
 `clinic_recall_support`: device/serial field rows plus generic
 manufacturer-liaison, verification-procedure, explicit clinic abbreviations,
-cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer
-identity, and medical-director authority are mostly clean when the needed
-source-record rows exist. Fresh QA still emitted candidate rows, so prior
-clinic saturation is candidate-helper evidence until those emissions are
-genericized, retired, or transfer-proven.
+cabinet/seal range, failure-rate atoms, and visit-date ranges are clean when
+the needed source-record rows exist. A current 2026-05-11 rerun emits `25`
+clean rows and `3` candidate rows. The remaining candidates are fallback
+prose/person authority rows: cabinet key-retainer identity, quarantine-release
+authority, and patient-use exception authority. Keep those rows quarantined
+until source-record acquisition preserves generic sender/person/authority
+fields or admitted authority predicates.
 
 `grant_award_support`: award, cap, eligibility, field-recusal, appeal-window,
 committee-recusal vote-count, score-correction operational status, and
-appeal-pending status rows are mostly clean over admitted predicates plus
-generic source-record atoms/sections. A scar cleanup removed hard-coded `a_07`
-and `2026-05-22` assumptions; a later cleanup removed an `a_05` eligibility
-detail branch. The helper now includes a clean admitted-predicate alias bridge
-for older grant/rule vocabularies such as `final_grant_amount/3`,
+appeal-pending status rows are clean over admitted predicates plus generic
+source-record atoms/sections. A scar cleanup removed hard-coded `a_07` and
+`2026-05-22` assumptions; a later cleanup removed an `a_05` eligibility detail
+branch. The helper now includes a clean admitted-predicate alias bridge for
+older grant/rule vocabularies such as `final_grant_amount/3`,
 `grant_calculation/4`, `grant_amount/2`, `application_status/2`,
 `final_status/2`, `determination_status/2`, `eligibility_determination/3`, and
 `bonus_qualification/3`. That bridge gives sibling evidence on
-`rule_activation_exception_matrix` without fixture constants. Source-prose
-appeal/procedure recognizers remain candidate-helper rows.
+`rule_activation_exception_matrix` without fixture constants. A current
+2026-05-11 refreshed audit emits `16` clean rows and `4` candidate rows; the
+candidate rows are appeal funding source, appeal review date, committee recusal
+formula, and recusal procedure rule. Keep those recognizers quarantined until
+compile or deterministic source-record substrate admits the relations directly.
 
 ### Clean But Still One-Fixture
 
