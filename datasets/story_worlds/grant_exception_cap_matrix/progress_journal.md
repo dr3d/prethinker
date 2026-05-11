@@ -269,3 +269,35 @@ constants. This is a clean example of canonical predicate-completeness repair:
 two artifacts can hold equivalent governed state under different predicate
 names, and helpers need narrow declared adapters before the state is fully
 queryable.
+
+## GECM-007 - Packet Metadata Candidate Retirement
+
+Date: 2026-05-11
+
+Evidence lane: `helper_audit_retirement`
+
+Artifacts:
+
+- candidate audit:
+  `tmp/transfer_fixtures_20260510/source_record_packet_metadata_candidate_audit_20260511.md`
+- post-retirement cold audit:
+  `tmp/transfer_fixtures_20260510/packet_metadata_retirement_cold_audit_20260511.json`
+
+Code change:
+
+- retired grant appeal/procedure content-note rows from
+  `source_record_packet_metadata_support`
+
+Result:
+
+- `source_record_packet_metadata_support` on this fixture now emits `16 clean /
+  0 candidate / 0 unlabeled` rows in the cold-transfer helper audit
+
+Lesson:
+
+Packet metadata should preserve structural addressability, identifiers, source
+references, and document-standing rows. Appeal funding, appeal pending status,
+appeal-window interpretation, and recusal-procedure prose are domain facts. If
+they are still needed for answer quality, they should live in
+`grant_award_support` or a separately named prose helper, not in the broad
+packet metadata surface.

@@ -176,3 +176,36 @@ This is a cold-acquisition/helper-substrate win, not lens growth, but the
 helper-assisted saturation should not be reported as clean-helper architecture
 until the packet metadata and roster helpers are audited, generalized, or
 transfer-proven without fixture-shaped constants.
+
+## SARR-005 - Packet Metadata Candidate Retirement
+
+Date: 2026-05-11
+
+Evidence lane: `helper_audit_retirement`
+
+Artifacts:
+
+- candidate audit:
+  `tmp/transfer_fixtures_20260510/source_record_packet_metadata_candidate_audit_20260511.md`
+- post-retirement cold audit:
+  `tmp/transfer_fixtures_20260510/packet_metadata_retirement_cold_audit_20260511.json`
+
+Code change:
+
+- retired school roster/travel content-note rows from
+  `source_record_packet_metadata_support`
+
+Result:
+
+- `source_record_packet_metadata_support` on this fixture now emits `22 clean /
+  0 candidate / 0 unlabeled` rows in the cold-transfer helper audit
+
+Lesson:
+
+The packet metadata helper remains useful for clean identifiers such as policy,
+device, accommodation, correction-notice, driver-license, and packet IDs. It no
+longer carries candidate prose rows for role definitions, observer permission
+scope, pending return scans, lodging, audit-binder retention, or transport
+departure. Those surfaces remain legitimate memory pressures, but they need
+domain helpers, deterministic ledgers, or explicit candidate reporting outside
+the broad packet-metadata helper.

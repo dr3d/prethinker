@@ -27,7 +27,7 @@ in the detail sections below.
 | --- | ---: | --- | --- | --- | --- | --- |
 | `source_record_table_body_count_support` | 3 | yes | transfer-proven clean-helper for explicit body-count intents | 2026-05-10 | 2026-05-10 | Keep narrow; require explicit table/list/log body-count wording. |
 | `item_description_detail_support` | 2 | yes | transfer-shown clean-helper over admitted description predicates | 2026-05-10 | 2026-05-11 | Keep promoted narrowly; do not infer missing descriptions from source text. |
-| `source_record_packet_metadata_support` | 4 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Keep generic metadata/addressability rows; quarantine embedded content notes. |
+| `source_record_packet_metadata_support` | 4 | yes | clean structural/addressability helper; content-note branches retired | 2026-05-10 | 2026-05-11 | Keep generic metadata/addressability rows only; move domain prose to domain helpers or leave retired. |
 | `roster_state_support` | 2 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Prefer deterministic roster-table ledgers where available; keep section/prose membership candidate-labeled. |
 | `archive_authority_custody_support` | 2 | yes | split, retirement candidate for probate paths | 2026-05-10 | 2026-05-10 | Quarantine old authority/probate paths; prefer packet metadata for probate standing/source/addressability. |
 | `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | 2026-05-10 | 2026-05-10 | Seek sibling proof before promotion. |
@@ -71,9 +71,11 @@ non-reproduced references, authoritative-source statements, asserted-event
 dates, unruled-motion status, loan-amendment effects, court-order access joins,
 court-order source-section rows, and non-revocable access-policy rows are clean
 when mechanically derived from admitted predicates or source-record
-atoms/sections/fields/numeric tokens. Older content-note rows such as appeal
-funding source, appeal pending status, observer permission scope, pending packet
-item, role definitions, and transport departure remain candidate debt.
+atoms/sections/fields/numeric tokens. A 2026-05-11 retirement pass removed the
+older candidate content-note rows for grant appeal/procedure prose and school
+roster/travel prose. Fresh cold-transfer helper audit now shows
+`source_record_packet_metadata_support` at `116 clean / 0 candidate / 0
+unlabeled` across the six transfer fixtures.
 
 `roster_state_support`: admitted-predicate joins are clean. Source-record
 adult/compliance rows are clean narrow parses. Source-record student membership
@@ -270,13 +272,14 @@ row volume displace broader surfaces on unrelated policy or lookup rows.
 The next cleanup work should reduce candidate or unlabeled helper rows and seek
 sibling proof for one-fixture helpers rather than create new lenses.
 
-`source_record_packet_metadata_support` now has an explicit cleanup readout at
+`source_record_packet_metadata_support` first had an explicit cleanup readout at
 `tmp/transfer_fixtures_20260510/source_record_packet_metadata_cleanup_20260510/packet_metadata_cleanup.md`.
-The decision is no code change yet: the helper's clean surface is exact
-identifier/addressability metadata, while its candidate surface is embedded
-content notes. Those candidate rows should remain quarantined rather than being
-promoted as metadata. Future cleanup should either move useful content notes
-into domain helpers or retire them if duplicate.
+A follow-up audit at
+`tmp/transfer_fixtures_20260510/source_record_packet_metadata_candidate_audit_20260511.md`
+found candidate content-note rows concentrated in grant appeal/procedure prose
+and school roster/travel prose. Those branches have now been retired from packet
+metadata. The helper's active surface is exact identifier/addressability
+metadata and generic document-standing/source-reference rows.
 
 ## Retirement Candidates
 
@@ -293,8 +296,9 @@ Current candidates:
   branches that still prove distinct clean authority/custody value on sibling
   fixtures.
 - Candidate content-note branches inside `source_record_packet_metadata_support`:
-  retire if they duplicate domain helpers or rewrite into clean generic
-  source-reference/source-section metadata if they represent true addressability.
+  retired 2026-05-11 from the broad packet-metadata helper. If any retired row
+  proves answer-bearing, reintroduce it through a domain helper or a separately
+  named generic prose helper, not through packet metadata.
 - Candidate appeal/procedure branches inside `grant_award_support`: next audit
   decides whether these rewrite into generic source-record section/reference
   substrate or stay quarantined as one-fixture candidate evidence.

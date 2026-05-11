@@ -1862,9 +1862,6 @@ def _source_record_packet_metadata_companion(
             }
         )
 
-    def add_candidate(source_row: str, kind: str, value: str, detail: str = "", display_value: str = "") -> None:
-        add(source_row, kind, value, detail=detail, display_value=display_value, helper_class="candidate-helper")
-
     for source_row, labels in labels_by_row.items():
         for label in sorted(labels):
             kind = _metadata_kind_for_atom(label)
@@ -1976,98 +1973,6 @@ def _source_record_packet_metadata_companion(
             kind = _metadata_kind_for_atom(token)
             if kind:
                 add(source_row, kind, token, detail=text_atom)
-        if "sco_ch_3" in text_atom and "chaperone_counting_rules" in text_atom:
-            add_candidate(source_row, "policy_name", "sco_ch_3", detail=text_atom, display_value="SCO-CH-3 (Chaperone Counting Rules)")
-        if text_atom.startswith("chaperone_an_adult_assigned_to_general_supervision"):
-            add_candidate(
-                source_row,
-                "role_authority_definition",
-                "chaperone",
-                detail=text_atom,
-                display_value="Chaperone: adult assigned to general supervision",
-            )
-        if text_atom.startswith("driver_the_licensed_bus_driver_while_in_transit"):
-            add_candidate(
-                source_row,
-                "role_restriction_definition",
-                "driver",
-                detail=text_atom,
-                display_value="Driver: licensed bus driver; while in transit may not leave driver's seat",
-            )
-        if "a_diaz_is_the_parent_of_s_014" in text_atom or text_atom.startswith("events_on_saturday_afternoon_only_2026_05_02_13_00_17_00"):
-            add_candidate(
-                source_row,
-                "observer_permission_scope",
-                "a_diaz",
-                detail=text_atom,
-                display_value="A. Diaz parent observer; Group B Saturday afternoon only; 2026-05-02 13:00-17:00",
-            )
-        if text_atom.startswith("return_leg_attendance_scans_will_be_appended_after_the_trip"):
-            add_candidate(
-                source_row,
-                "pending_packet_item",
-                "return_leg_attendance_scans",
-                detail=text_atom,
-                display_value="Return-leg attendance scans pending; appended after the trip; not part of this packet",
-            )
-        if "capacity_24_students_departure_2026_05_01_06_30" in text_atom and "bus_1_driver" in section_by_row.get(source_row, ""):
-            add_candidate(
-                source_row,
-                "transport_departure",
-                "bus_1_outbound",
-                detail=text_atom,
-                display_value="Bus 1 departs Cedar Hollow at 06:30 on 2026-05-01",
-            )
-        if "14_day_appeal_window_from_the_decision_letter" in text_atom or "14_day_appeal_window" in text_atom:
-            add_candidate(
-                source_row,
-                "appeal_window_rule",
-                "appeal_window_14_days",
-                detail=text_atom,
-                display_value="14 days from the decision letter",
-            )
-        if "next_scheduled_committee_meeting_on_2026_05_22" in text_atom or "on_2026_05_22" in text_atom and "appeal" in text_atom:
-            add_candidate(
-                source_row,
-                "appeal_review_date",
-                "2026_05_22",
-                detail=text_atom,
-                display_value="2026-05-22",
-            )
-        if "does_not_automatically_decide_the_named_item" in text_atom:
-            add_candidate(
-                source_row,
-                "recusal_procedure_rule",
-                "recusal_does_not_decide_item",
-                detail=text_atom,
-                display_value="A recusal removes the member from voting on the named item only; it does not automatically decide the item.",
-            )
-        if "a_07_has_neither_been_awarded_nor_finally_declined" in text_atom:
-            add_candidate(
-                source_row,
-                "appeal_pending_status",
-                "a_07_pending_not_final",
-                detail=text_atom,
-                display_value="A-07 appeal AP-2026-0429-A pending; neither awarded nor finally declined as of compilation.",
-            )
-        if "against_the_fall_2026_carryover" in text_atom or (
-            "appeal_award_would_be_drawn" in text_atom and "not_against_the_spring_2026_awards" in text_atom
-        ):
-            add_candidate(
-                source_row,
-                "appeal_award_funding_source",
-                "fall_2026_carryover",
-                detail=text_atom,
-                display_value="Appeal award would be drawn against the Fall 2026 carryover, not Spring 2026 awards.",
-            )
-        if "cycle_procedure_manual_bwcf_cp_2025" in text_atom and "appeal_window" in text_atom:
-            add_candidate(
-                source_row,
-                "procedure_manual_scope",
-                "bwcf_cp_2025_appeal_window",
-                detail=text_atom,
-                display_value="BWCF-CP-2025 defines the appeal window.",
-            )
         if _is_unreproduced_reference_row(
             text_atom=text_atom,
             section_atom=section_by_row.get(source_row, ""),
@@ -2089,40 +1994,6 @@ def _source_record_packet_metadata_companion(
     for source_row in ordered_source_rows:
         text_atom = text_by_row.get(source_row, "")
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-        if "retained_in_the_audit_binder_location_activities_office_filing" in text_atom and "cabinet_3_drawer_2" in next_text:
-            add_candidate(
-                source_row,
-                "physical_retention_location",
-                "audit_binder",
-                detail=f"{text_atom} {next_text}".strip(),
-                display_value="Activities Office filing cabinet 3, drawer 2 (audit binder)",
-            )
-        if text_atom.startswith("m_okonkwo_210_n_park_206_medical_coverage_station"):
-            add_candidate(
-                source_row,
-                "adult_lodging_location",
-                "n_park",
-                detail=text_atom,
-                display_value="N. Park: Marwick Hall room 206 (medical-coverage station)",
-            )
-        if "cycle_procedure_manual_bwcf_cp_2025_defines_threshold_vote" in text_atom:
-            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-            add_candidate(
-                source_row,
-                "procedure_manual_scope",
-                "bwcf_cp_2025_appeal_window",
-                detail=f"{text_atom} {next_text}".strip(),
-                display_value="BWCF-CP-2025 defines the appeal window.",
-            )
-        if "if_the_a_07_appeal_is_sustained_the_appeal_award_would_be_drawn" in text_atom:
-            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-            add_candidate(
-                source_row,
-                "appeal_award_funding_source",
-                "fall_2026_carryover",
-                detail=f"{text_atom} {next_text}".strip(),
-                display_value="Appeal award would be drawn against the Fall 2026 carryover, not Spring 2026 awards.",
-            )
         if "originals_are_filed" in text_atom:
             previous_text = _previous_source_text_atom(source_row, ordered_source_rows, text_by_row)
             next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)

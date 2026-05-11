@@ -1398,12 +1398,6 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
         for row in result_rows
     )
     assert any(
-        row.get("Kind") == "policy_name"
-        and row.get("DisplayValue") == "SCO-CH-3 (Chaperone Counting Rules)"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
         row.get("Kind") == "device_identifier"
         and row.get("DisplayValue") == "DEV-SCAN-07"
         for row in result_rows
@@ -1413,31 +1407,17 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
         and row.get("DisplayValue") == "CDL-MA-44291"
         for row in result_rows
     )
-    assert any(
-        row.get("Kind") == "observer_permission_scope"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("Kind") == "pending_packet_item"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("Kind") == "transport_departure"
-        and "06:30" in row.get("DisplayValue", "")
-        for row in result_rows
-    )
-    assert any(
-        row.get("Kind") == "adult_lodging_location"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("Kind") == "physical_retention_location"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
+    retired_candidate_kinds = {
+        "adult_lodging_location",
+        "observer_permission_scope",
+        "pending_packet_item",
+        "physical_retention_location",
+        "policy_name",
+        "role_authority_definition",
+        "role_restriction_definition",
+        "transport_departure",
+    }
+    assert not any(row.get("Kind") in retired_candidate_kinds for row in result_rows)
 
 
 def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rules() -> None:
@@ -1493,18 +1473,15 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
-    assert any(
-        row.get("Kind") == "procedure_manual_scope"
-        and "BWCF-CP-2025" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("Kind") == "appeal_window_rule"
-        and row.get("DisplayValue") == "14 days from the decision letter"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
+    retired_candidate_kinds = {
+        "appeal_award_funding_source",
+        "appeal_pending_status",
+        "appeal_review_date",
+        "appeal_window_rule",
+        "procedure_manual_scope",
+        "recusal_procedure_rule",
+    }
+    assert not any(row.get("Kind") in retired_candidate_kinds for row in result_rows)
     assert any(
         row.get("Kind") == "unreproduced_reference"
         and row.get("Value") == "briarwood_foundation_by_laws"
