@@ -195,3 +195,38 @@ is the durable-memory thesis in miniature: official-document answers often live
 in addressability, not in a new lens. The result is still labeled with helper
 provenance, but the repair itself is generic source-record substrate rather than
 fixture-specific answer injection.
+
+## GECM-005 - Grant Helper Sibling Audit
+
+Date: 2026-05-11
+
+Evidence lane: `helper_transfer_audit`
+
+Artifacts:
+
+- transfer helper audit:
+  `tmp/transfer_fixtures_20260510/grant_award_sibling_audit_transfer_after_cleanup_20260511.json`
+- precision-wide helper audit:
+  `tmp/transfer_fixtures_20260510/grant_award_sibling_audit_precision_all_20260511.json`
+- readout:
+  `tmp/transfer_fixtures_20260510/grant_award_helper_sibling_audit_20260511.md`
+
+Result:
+
+- `grant_award_support` on this fixture: `16 clean / 1 candidate / 0 unlabeled`
+- `grant_award_support` on `rule_activation_exception_matrix`: no trigger in
+  current artifacts
+
+Cleanup:
+
+- Removed a small `a_05` special case from eligibility-count details. Excluded
+  applications and their failing rules are now listed generically.
+
+Lesson:
+
+The helper is cleaner but not transfer-proven. The natural sibling fixture uses
+older predicate vocabulary (`final_grant_amount/3`, `grant_calculation/4`,
+`application_status/2`, `eligibility_determination/3`) while the helper listens
+to the newer transfer contract (`final_award/3`, `application_eligibility/3`,
+`bonus_eligibility/2`). The next clean path is a generic admitted-predicate alias
+bridge, not a new lens and not a fixture-specific shortcut.

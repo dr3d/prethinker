@@ -32,7 +32,7 @@ in the detail sections below.
 | `archive_authority_custody_support` | 2 | yes | split, retirement candidate for probate paths | 2026-05-10 | 2026-05-10 | Quarantine old authority/probate paths; prefer packet metadata for probate standing/source/addressability. |
 | `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | 2026-05-10 | 2026-05-10 | Seek sibling proof before promotion. |
 | `clinic_recall_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Genericize or retire remaining candidate rows before clean saturation claims. |
-| `grant_award_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Run sibling proof against `rule_activation_exception_matrix`. |
+| `grant_award_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-11 | Prototype generic grant predicate alias bridge; current sibling uses older predicate vocabulary. |
 | `clear_sample_clock_pause_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
 | `source_record_clock_sync_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
 | `roster_table_count_support` | 1 | yes | clean deterministic roster-table companion, one-fixture | 2026-05-10 | 2026-05-10 | Keep as companion to `roster_table_member/4`; seek sibling tables. |
@@ -104,9 +104,13 @@ genericized, retired, or transfer-proven.
 committee-recusal vote-count, score-correction operational status, and
 appeal-pending status rows are mostly clean over admitted predicates plus
 generic source-record atoms/sections. A scar cleanup removed hard-coded `a_07`
-and `2026-05-22` assumptions. The helper remains one-fixture by usage count and
-still emits candidate appeal/procedure rows. This is the next sibling-proof
-target.
+and `2026-05-22` assumptions; a later cleanup removed an `a_05` eligibility
+detail branch. The helper remains one-fixture by usage count. The natural
+precision sibling, `rule_activation_exception_matrix`, currently compiles to an
+older predicate vocabulary (`final_grant_amount/3`, `grant_calculation/4`,
+`application_status/2`, `eligibility_determination/3`) and therefore does not
+trigger this helper. The next proof requires a generic predicate alias bridge or
+a fresh sibling compile into the newer contract.
 
 ### Clean But Still One-Fixture
 

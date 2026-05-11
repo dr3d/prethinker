@@ -4917,10 +4917,17 @@ def _grant_award_companion(
         )
         excluded_apps = sorted(app for app in eligibility_by_app if app not in eligible_apps)
         detail = f"eligible={','.join(eligible_apps)}; excluded={','.join(excluded_apps)}"
-        if "a_05" in excluded_apps:
-            a05_rules = eligibility_by_app.get("a_05", {})
-            failing = ",".join(f"{rule}:{result}" for rule, result in sorted(a05_rules.items()) if result == "fail")
-            detail = f"{detail}; a_05={failing or 'ineligible'}"
+        excluded_details: list[str] = []
+        for excluded_app in excluded_apps:
+            app_rules = eligibility_by_app.get(excluded_app, {})
+            failing = ",".join(
+                f"{rule}:{result}"
+                for rule, result in sorted(app_rules.items())
+                if str(result).strip().lower() in {"fail", "failed", "no", "false"}
+            )
+            excluded_details.append(f"{excluded_app}={failing or 'ineligible'}")
+        if excluded_details:
+            detail = f"{detail}; {'; '.join(excluded_details)}"
         add("eligible_application_count", amount=str(len(eligible_apps)), detail=detail)
 
     final_awards: dict[str, tuple[int, str]] = {}
