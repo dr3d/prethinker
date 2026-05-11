@@ -4,6 +4,7 @@ import sys
 from scripts import select_qa_mode_without_oracle
 from scripts.select_qa_mode_without_oracle import (
     call_selector,
+    compile_guard_disable_regex,
     hybrid_selector,
     load_group,
     merge_qa_records,
@@ -788,6 +789,75 @@ def test_raw_timestamp_guard_prefers_raw_timestamp_surface() -> None:
         "entity",
         "raw-timestamp question needs explicit raw_timestamp surface rather than corrected/event-correlation volume",
     )
+
+
+def test_hybrid_guard_disable_regex_skips_matching_specialized_guard() -> None:
+    row = {
+        "id": "q007",
+        "question": "What is the raw (uncorrected) timestamp of BAS-002?",
+        "modes": [
+            _mode_with_predicates("cold", ["recorded_access_event", "clock_drift_applied"], rows=6),
+            _mode_with_predicates("entity", ["raw_timestamp"], rows=2),
+        ],
+    }
+
+    def fallback_selector(*, row: dict, mode_labels: list[str]) -> dict:
+        return {
+            "schema_version": "qa_mode_selector_v1",
+            "selected_mode": "cold",
+            "selection_confidence": 0.5,
+            "evidence_quality_by_mode": [],
+            "rationale": "fallback after disabled guard",
+            "risks": [],
+        }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "entity"],
+        margin=0,
+        min_score=0,
+        fallback_selector=fallback_selector,
+        guard_disable_regex=compile_guard_disable_regex("raw-timestamp question"),
+    )
+
+    assert selected["selected_mode"] == "cold"
+    assert "specialized_guard_reason" not in selected
+    assert selected["disabled_guard_reasons"] == [
+        "raw-timestamp question needs explicit raw_timestamp surface rather than corrected/event-correlation volume"
+    ]
+
+
+def test_hybrid_guard_disable_regex_leaves_nonmatching_specialized_guard_active() -> None:
+    row = {
+        "id": "q007",
+        "question": "What is the raw (uncorrected) timestamp of BAS-002?",
+        "modes": [
+            _mode_with_predicates("cold", ["recorded_access_event", "clock_drift_applied"], rows=6),
+            _mode_with_predicates("entity", ["raw_timestamp"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "entity"],
+        margin=0,
+        min_score=0,
+        fallback_selector=lambda *, row, mode_labels: {},
+        guard_disable_regex=compile_guard_disable_regex("sampler-offline"),
+    )
+
+    assert selected["selected_mode"] == "entity"
+    assert "raw-timestamp question" in selected["specialized_guard_reason"]
+    assert "disabled_guard_reasons" not in selected
+
+
+def test_guard_disable_regex_reports_invalid_pattern() -> None:
+    try:
+        compile_guard_disable_regex("[")
+    except ValueError as exc:
+        assert "invalid --disable-guard-reason-regex" in str(exc)
+    else:  # pragma: no cover - defensive
+        raise AssertionError("invalid guard-disable regex should fail")
 
 
 def test_snapshot_state_guard_prefers_sampler_status_surface() -> None:

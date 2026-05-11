@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -148,6 +149,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--row-limit", type=int, default=0)
     parser.add_argument("--only-ids", default="")
+    parser.add_argument(
+        "--disable-guard-reason-regex",
+        default=os.environ.get("PRETHINKER_DISABLE_GUARD_REASON_REGEX", ""),
+        help=(
+            "Audit-only control: disable selector guard reasons matching this regex. "
+            "Use for retirement replays; disabled reasons are recorded in selection metadata."
+        ),
+    )
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path, required=True)
     return parser.parse_args()
@@ -163,6 +172,11 @@ def main() -> int:
     effective_hybrid_margin = 1.0 if guarded_activation else float(args.hybrid_margin)
     effective_hybrid_min_score = 4.0 if guarded_activation else float(args.hybrid_min_score)
     effective_include_self_check = bool(args.include_self_check) or guarded_activation
+    try:
+        guard_disable_regex = compile_guard_disable_regex(str(args.disable_guard_reason_regex or ""))
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     group = load_group(args.group)
     rows = build_rows(
         group,
@@ -188,6 +202,7 @@ def main() -> int:
                     mode_labels=group["labels"],
                     margin=effective_hybrid_margin,
                     min_score=effective_hybrid_min_score,
+                    guard_disable_regex=guard_disable_regex,
                     fallback_selector=lambda *, row, mode_labels: call_selector(
                         base_url=str(args.base_url),
                         model=str(args.model),
@@ -534,6 +549,22 @@ def _is_openrouter_base_url(base_url: str) -> bool:
     return "openrouter.ai" in str(base_url or "").lower()
 
 
+def compile_guard_disable_regex(pattern: str) -> re.Pattern[str] | None:
+    pattern = str(pattern or "").strip()
+    if not pattern:
+        return None
+    try:
+        return re.compile(pattern)
+    except re.error as exc:
+        raise ValueError(f"invalid --disable-guard-reason-regex {pattern!r}: {exc}") from exc
+
+
+def _guard_reason_disabled(reason: str, guard_disable_regex: re.Pattern[str] | None) -> bool:
+    if guard_disable_regex is None:
+        return False
+    return bool(guard_disable_regex.search(str(reason or "")))
+
+
 def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[str, Any]:
     scored = structural_mode_scores(row=row, mode_labels=mode_labels)
     best_score, selected, _best_quality = scored[0]
@@ -609,6 +640,7 @@ def hybrid_selector(
     margin: float,
     min_score: float,
     fallback_selector: Any,
+    guard_disable_regex: re.Pattern[str] | None = None,
 ) -> dict[str, Any]:
     scored = structural_mode_scores(row=row, mode_labels=mode_labels)
     best_score, structural_choice, best_quality = scored[0]
@@ -648,6 +680,7 @@ def hybrid_selector(
     )
     if operational_trap_reason:
         uncertain_reasons.append(operational_trap_reason)
+    disabled_guard_reasons: list[str] = []
     baseline_guard_reason = structural_baseline_answer_surface_guard_reason(
         row=row,
         scored=scored,
@@ -655,20 +688,23 @@ def hybrid_selector(
         structural_choice=structural_choice,
     )
     if baseline_guard_reason:
-        selection = structural_selector(row=row, mode_labels=mode_labels)
-        selection["selected_mode"] = mode_labels[0] if mode_labels else structural_choice
-        selection["selection_source"] = "hybrid_structural"
-        selection["hybrid_decision"] = "structural_baseline_answer_surface_guard"
-        selection["structural_candidate"] = structural_choice
-        selection["structural_score"] = round(float(best_score), 3)
-        selection["structural_margin"] = round(score_margin, 3)
-        selection["structural_uncertainty_reasons"] = uncertain_reasons
-        selection["baseline_guard_reason"] = baseline_guard_reason
-        selection["rationale"] = baseline_guard_reason
-        selection.setdefault("risks", []).append(
-            "baseline guard overrode a broad or self-check-heavy candidate surface"
-        )
-        return selection
+        if _guard_reason_disabled(baseline_guard_reason, guard_disable_regex):
+            disabled_guard_reasons.append(baseline_guard_reason)
+        else:
+            selection = structural_selector(row=row, mode_labels=mode_labels)
+            selection["selected_mode"] = mode_labels[0] if mode_labels else structural_choice
+            selection["selection_source"] = "hybrid_structural"
+            selection["hybrid_decision"] = "structural_baseline_answer_surface_guard"
+            selection["structural_candidate"] = structural_choice
+            selection["structural_score"] = round(float(best_score), 3)
+            selection["structural_margin"] = round(score_margin, 3)
+            selection["structural_uncertainty_reasons"] = uncertain_reasons
+            selection["baseline_guard_reason"] = baseline_guard_reason
+            selection["rationale"] = baseline_guard_reason
+            selection.setdefault("risks", []).append(
+                "baseline guard overrode a broad or self-check-heavy candidate surface"
+            )
+            return selection
     specialized_override = structural_specialized_answer_surface_override(
         row=row,
         scored=scored,
@@ -677,25 +713,30 @@ def hybrid_selector(
     )
     if specialized_override:
         override_label, override_reason = specialized_override
-        selection = structural_selector(row=row, mode_labels=mode_labels)
-        selection["selected_mode"] = override_label
-        selection["selection_source"] = "hybrid_structural"
-        selection["hybrid_decision"] = "structural_specialized_answer_surface_guard"
-        selection["structural_candidate"] = structural_choice
-        selection["structural_score"] = round(float(best_score), 3)
-        selection["structural_margin"] = round(score_margin, 3)
-        selection["structural_uncertainty_reasons"] = uncertain_reasons
-        selection["specialized_guard_reason"] = override_reason
-        selection["rationale"] = override_reason
-        selection.setdefault("risks", []).append(
-            "specialized answer-surface guard overrode ordinary structural or activation selection"
-        )
-        return selection
+        if _guard_reason_disabled(override_reason, guard_disable_regex):
+            disabled_guard_reasons.append(override_reason)
+        else:
+            selection = structural_selector(row=row, mode_labels=mode_labels)
+            selection["selected_mode"] = override_label
+            selection["selection_source"] = "hybrid_structural"
+            selection["hybrid_decision"] = "structural_specialized_answer_surface_guard"
+            selection["structural_candidate"] = structural_choice
+            selection["structural_score"] = round(float(best_score), 3)
+            selection["structural_margin"] = round(score_margin, 3)
+            selection["structural_uncertainty_reasons"] = uncertain_reasons
+            selection["specialized_guard_reason"] = override_reason
+            selection["rationale"] = override_reason
+            selection.setdefault("risks", []).append(
+                "specialized answer-surface guard overrode ordinary structural or activation selection"
+            )
+            return selection
     if not uncertain_reasons:
         selection = structural_selector(row=row, mode_labels=mode_labels)
         selection["selection_source"] = "hybrid_structural"
-        selection["hybrid_decision"] = "structural_confident"
         selection["structural_candidate"] = structural_choice
+        selection["hybrid_decision"] = "structural_confident"
+        if disabled_guard_reasons:
+            selection["disabled_guard_reasons"] = disabled_guard_reasons
         return selection
 
     try:
@@ -707,6 +748,8 @@ def hybrid_selector(
         selection["hybrid_llm_error"] = str(exc)
         selection["structural_candidate"] = structural_choice
         selection["structural_uncertainty_reasons"] = uncertain_reasons
+        if disabled_guard_reasons:
+            selection["disabled_guard_reasons"] = disabled_guard_reasons
         selection.setdefault("risks", []).append("LLM fallback failed; deterministic structural choice used")
         return selection
     if not isinstance(selection, dict):
@@ -717,6 +760,8 @@ def hybrid_selector(
     selection["structural_score"] = round(float(best_score), 3)
     selection["structural_margin"] = round(score_margin, 3)
     selection["structural_uncertainty_reasons"] = uncertain_reasons
+    if disabled_guard_reasons:
+        selection["disabled_guard_reasons"] = disabled_guard_reasons
     return selection
 
 

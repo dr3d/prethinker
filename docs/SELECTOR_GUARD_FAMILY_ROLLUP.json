@@ -9,253 +9,253 @@
         {
           "family": "entity_role_authority",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "818",
+          "line": "863",
           "reason": "identity question has baseline name/role support and candidate is broad action-heavy"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "969",
+          "line": "1014",
           "reason": "badge-id question with unresolved holder needs identity-status badge surface rather than nearest source-record usage"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "998",
+          "line": "1043",
           "reason": "same-item question needs current item identity/description surface rather than withdrawn-label evidence alone"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1040",
+          "line": "1085",
           "reason": "publication-authority question needs publication holder plus active restriction surface rather than broad access-authority volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1073",
+          "line": "1118",
           "reason": "arbitrator-unresolved-question row needs dispute-scope/topic surface rather than broad dispute-status volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1270",
+          "line": "1315",
           "reason": "student-identifier question needs label-to-canonical-member surface rather than printed-label surface alone"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1295",
+          "line": "1340",
           "reason": "authoritative-homeroom question needs current member alias/table surface before correction-history rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1305",
+          "line": "1350",
           "reason": "authoritative-homeroom question needs focused current roster helper rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1310",
+          "line": "1355",
           "reason": "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1319",
+          "line": "1364",
           "reason": "bus-assignment correction question needs bus-assignment plus change-type surface rather than roster table identity rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1353",
+          "line": "1398",
           "reason": "adult-total roster question needs adult role surface rather than qualifying-chaperone count alone"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1369",
+          "line": "1414",
           "reason": "ratio-exclusion identity question needs role-exclusion policy surface rather than adult-role count volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1376",
+          "line": "1421",
           "reason": "ratio-exclusion identity question needs role plus policy surface rather than adult-role count volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1521",
+          "line": "1566",
           "reason": "applicant identity question needs source-author/actor surface rather than generic event role rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1530",
+          "line": "1575",
           "reason": "school-principal identity question needs source-record authority surface rather than roster row volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1539",
+          "line": "1584",
           "reason": "adult-roster count question needs count-value surface rather than broad role membership rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1557",
+          "line": "1602",
           "reason": "panel-chair identity question needs panel list-member surface rather than generic person-role rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1566",
+          "line": "1611",
           "reason": "authority/source identity question needs the surface carrying the named note actor"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1575",
+          "line": "1620",
           "reason": "authority/source identity question needs the surface carrying the named judicial actor"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1584",
+          "line": "1629",
           "reason": "authority/source identity question needs issue-status authority surface rather than ownership claim rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1756",
+          "line": "1801",
           "reason": "project-PI identity question needs direct role/assignment surface rather than archival row volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1765",
+          "line": "1810",
           "reason": "combined role-identity question needs source/participant surface rather than single-role evidence"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1775",
+          "line": "1820",
           "reason": "school role/driver identity question needs direct role predicate rather than row-value volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1784",
+          "line": "1829",
           "reason": "parent-sample identifier question needs source or row sample-ID surface rather than ambiguous sample-id hierarchy"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1865",
+          "line": "1910",
           "reason": "student-location supervision question needs statement plus event-attribute surface rather than role roster volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2007",
+          "line": "2052",
           "reason": "credential question needs explicit credential-status surface rather than access-log volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2094",
+          "line": "2139",
           "reason": "collector identity question needs direct collector predicate surface rather than broad status/note evidence"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2240",
+          "line": "2285",
           "reason": "station-supervisor question needs explicit station_supervisor surface rather than standing group-supervision rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2278",
+          "line": "2323",
           "reason": "festival-director identity question needs direct person-role surface rather than meeting/ruling volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2289",
+          "line": "2334",
           "reason": "superlative identity question needs explicit age/identity surface rather than broad role membership rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2302",
+          "line": "2347",
           "reason": "official identity question needs role-authority definition surface rather than action volume or title-only rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2340",
+          "line": "2385",
           "reason": "reinstatement question needs focused role-history surface rather than broad current-role or rule evidence"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2379",
+          "line": "2424",
           "reason": "contract-validity question needs explicit acting-authority surface rather than generic rule evidence"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2386",
+          "line": "2431",
           "reason": "contract-validity question needs authority-source surface rather than unrelated ownership or entity rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2537",
+          "line": "2582",
           "reason": "guardianship-validity question needs residence/resumption condition surface rather than bare guardianship status"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2765",
+          "line": "2810",
           "reason": "destruction-supervisor question needs person role plus destruction event surface"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2818",
+          "line": "2863",
           "reason": "recovery-identity question needs direct testimony/recovery surface rather than custody or zone rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2885",
+          "line": "2930",
           "reason": "substitute-scorer identity question needs compact service-role surface rather than certification/result volume"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2995",
+          "line": "3040",
           "reason": "same-name distinction question needs alias plus group-membership surface rather than identity table alone"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3022",
+          "line": "3067",
           "reason": "surveyor-certification lapse question needs direct certification-status surface rather than survey-result role rows"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3156",
+          "line": "3201",
           "reason": "intake-actor question needs explicit item-received-from provenance surface"
         },
         {
           "family": "entity_role_authority",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3165",
+          "line": "3210",
           "reason": "intake-actor question needs handoff/location event surface rather than ledger-entry rows alone"
         }
       ],
@@ -268,343 +268,343 @@
         {
           "family": "operational_record_status",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "836",
+          "line": "881",
           "reason": "status question has direct baseline status/rule support"
         },
         {
           "family": "operational_record_status",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "850",
+          "line": "895",
           "reason": "status question has direct baseline application/status support and candidate is broad or relaxed-heavy"
         },
         {
           "family": "operational_record_status",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "870",
+          "line": "915",
           "reason": "counterfactual or hold/readiness question has direct baseline rule/status support and candidate is broad or relaxed-heavy"
         },
         {
           "family": "operational_record_status",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "882",
+          "line": "927",
           "reason": "response-content question needs compact filed-response surface rather than broad procedural expansion"
         },
         {
           "family": "operational_record_status",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "896",
+          "line": "941",
           "reason": "contract-rescission status question needs request/outcome surface rather than approval vote surface alone"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "926",
+          "line": "971",
           "reason": "raw-timestamp question needs explicit raw_timestamp surface rather than corrected/event-correlation volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "935",
+          "line": "980",
           "reason": "snapshot-state question needs sampler state-plus-cause surface when the snapshot row asks why that state held"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "942",
+          "line": "987",
           "reason": "snapshot-state question needs sampler status surface rather than broad event-description volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "949",
+          "line": "994",
           "reason": "snapshot-state question needs explicit sampler_state surface rather than broad event-description or status volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "958",
+          "line": "1003",
           "reason": "clear-sample clock snapshot question needs segment-plus-elapsed-time helper surface rather than snapshot text alone"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "978",
+          "line": "1023",
           "reason": "corrected-timestamp question needs explicit corrected-timestamp surface rather than rule-description context"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "987",
+          "line": "1032",
           "reason": "corrected-duration question needs paired raw/corrected badge-event surface rather than corrected timestamp volume alone"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1129",
+          "line": "1174",
           "reason": "expected-order question needs explicit expected-order surface rather than open-exception volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1183",
+          "line": "1228",
           "reason": "communications-officer drafting question needs notice-issued plus person-role surface rather than name lookup alone"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1192",
+          "line": "1237",
           "reason": "sampler-offline interval count needs explicit interval surface rather than state-start/end fragments"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1199",
+          "line": "1244",
           "reason": "sampler-offline interval count needs sampler-state transition surface rather than event-log volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1228",
+          "line": "1273",
           "reason": "packet-close audit-exception count needs semantic open-exception surface rather than expanded source-row evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1328",
+          "line": "1373",
           "reason": "homeroom-reassignment correction question needs homeroom_reassigned surface rather than generic change-type rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1337",
+          "line": "1382",
           "reason": "homeroom-reassignment count question needs roster helper membership/count surface"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1442",
+          "line": "1487",
           "reason": "pending-rather-than-approved question needs determination reason and pending-verification surface over raw source rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1469",
+          "line": "1514",
           "reason": "trip-date question needs roster-state schedule surface rather than roster-version/source-record volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1503",
+          "line": "1548",
           "reason": "order-series identifier question needs exact document-identifier surface rather than section/event volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1793",
+          "line": "1838",
           "reason": "erratum report-of-record question needs archival document/version surface rather than generic document-status rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1811",
+          "line": "1856",
           "reason": "review-completion question needs explicit status-at surface rather than broad uncertainty labels"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1919",
+          "line": "1964",
           "reason": "date-event anchor enumeration needs incident-anchor surface rather than source-section volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1928",
+          "line": "1973",
           "reason": "governing-board vote-status question needs explicit pending-determination surface rather than unrelated negative records"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1980",
+          "line": "2025",
           "reason": "timekeeping clock-out question needs timekeeping or assignment interval surface rather than badge-exit event rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1989",
+          "line": "2034",
           "reason": "medication lot-number question needs source-record event attributes rather than self-check paraphrase or row-volume evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2026",
+          "line": "2071",
           "reason": "unresolved policy-deviation question needs review/open-issue status surface rather than archival event volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2046",
+          "line": "2091",
           "reason": "court-determination question needs packet/source status surface rather than broad unresolved labels"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2076",
+          "line": "2121",
           "reason": "resolved-status question needs direct unresolved/disputed-status surface rather than archival evidence volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2103",
+          "line": "2148",
           "reason": "planning-application request question needs application-summary plus unit-mix surface rather than claim/status volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2123",
+          "line": "2168",
           "reason": "prior-proposal disposition question needs proposal-version/procedural-status surface rather than current-application volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2152",
+          "line": "2197",
           "reason": "contract-rescission status question keeps request/outcome surface over approval vote surface alone"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2209",
+          "line": "2254",
           "reason": "appeal-status question needs appeal event plus no-decision/deadline surface rather than bare docket status"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2220",
+          "line": "2265",
           "reason": "temporary-availability question needs attendance plus authority-transfer surface"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2249",
+          "line": "2294",
           "reason": "station-arrival-time question needs event/timestamp surface rather than roster identity rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2258",
+          "line": "2303",
           "reason": "temporary-role question needs roster-state role-hint support rather than bare group membership"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2269",
+          "line": "2314",
           "reason": "completion-report incident list needs trip-outcome plus issue/medical/hazard surfaces"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2546",
+          "line": "2591",
           "reason": "current operational status question needs explicit final-state surface rather than adjacent event/action evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2555",
+          "line": "2600",
           "reason": "public-use extension question needs extension purpose/status surface rather than broad permit lifecycle volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2691",
+          "line": "2736",
           "reason": "unrestricted-active count question needs baseline status, restriction, suspension, and violation surfaces"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2910",
+          "line": "2955",
           "reason": "student-count question needs scoped final-attendance surface rather than broad roster volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2921",
+          "line": "2966",
           "reason": "group-designation suspension question needs event plus interval-membership surface rather than broad fallback rows"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2930",
+          "line": "2975",
           "reason": "temporary-supervisor absence question needs location-change plus supervision/medical-event surface"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2944",
+          "line": "2989",
           "reason": "post-reassignment group-count question needs stable membership/count surface over role-task volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2964",
+          "line": "3009",
           "reason": "temporary-team roster question needs scoped group-formation surface rather than standing roster volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2986",
+          "line": "3031",
           "reason": "no-touch hazard question needs incident/hazard observation surface rather than broad attendance roster"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3184",
+          "line": "3229",
           "reason": "adjusted-expiration question needs explicit current-expiration surface rather than extension-label or original-date evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3225",
+          "line": "3270",
           "reason": "request filing timeliness question needs request/reinstatement threshold evidence rather than completion-window evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3239",
+          "line": "3284",
           "reason": "commit-readiness question needs unresolved process evidence rather than a bare status value"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3273",
+          "line": "3318",
           "reason": "priority question needs explicit priority predicate surface rather than an underlying condition predicate"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3286",
+          "line": "3331",
           "reason": "decision-status question needs explicit decision surface rather than adjacent application/status evidence"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3295",
+          "line": "3340",
           "reason": "board-concern decision question needs event/action concern history rather than bare pending status"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3321",
+          "line": "3366",
           "reason": "deaccession-yet question needs explicit scheduled/not-formally-completed status surface rather than broad lot-history volume"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3384",
+          "line": "3429",
           "reason": "current-constitution eligibility question needs applicant-type plus controlling interpretation surface"
         },
         {
           "family": "operational_record_status",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3405",
+          "line": "3450",
           "reason": "resubmission eligibility question needs proof/rule resolution surface rather than current applicant status surface"
         }
       ],
@@ -617,253 +617,253 @@
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1140",
+          "line": "1185",
           "reason": "memo-establish question needs memo-content plus reliability-scope surface rather than broad investigative context"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1149",
+          "line": "1194",
           "reason": "phone-ping granularity question needs device-ping granularity surface rather than evidence-source summary"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1158",
+          "line": "1203",
           "reason": "evidence-source count question needs source-id catalog surface rather than generic evidence-source rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1165",
+          "line": "1210",
           "reason": "evidence-source count question needs source-id catalog surface rather than unresolved-fact volume"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1174",
+          "line": "1219",
           "reason": "negative-reliability question needs source-reliability scope rather than unresolved-activity status alone"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1738",
+          "line": "1783",
           "reason": "memo-resolution question needs claim plus unresolved-issue surface rather than permit/status fragments"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1802",
+          "line": "1847",
           "reason": "interval behavior-plus-cause question needs system-log event attributes rather than row-value volume"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1944",
+          "line": "1989",
           "reason": "position-source question needs statement/source-author surface rather than generic row-source labels"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1953",
+          "line": "1998",
           "reason": "timestamped message-source question needs direct log-entry surface rather than row-source fallback"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1969",
+          "line": "2014",
           "reason": "printed source-provenance question needs archival row/source labels rather than generic packet identifiers"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2055",
+          "line": "2100",
           "reason": "reply-memo theory question needs archival memo row value rather than generic source-document presence"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2085",
+          "line": "2130",
           "reason": "false-conflict consistency question needs paired intake/photo interpretation surface rather than row ledger fragments"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2632",
+          "line": "2677",
           "reason": "failed-vendor rationale question needs itemized vendor-deficiency surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2639",
+          "line": "2684",
           "reason": "failed-vendor rationale question needs inspection, vendor-status, and violation-detail surfaces together"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2668",
+          "line": "2713",
           "reason": "display-outcome question needs inspection/outcome plus permit-status surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2675",
+          "line": "2720",
           "reason": "display-outcome question needs date-specific permit validity plus incident/inspection surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2684",
+          "line": "2729",
           "reason": "second-violation duration question needs violation-record plus suspension-period surfaces together"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2756",
+          "line": "2801",
           "reason": "status-elevation rationale question needs lab/location/status context rather than bare status-change reason"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2831",
+          "line": "2876",
           "reason": "source-belief question needs claimant testimony surface rather than identification-status summary"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2842",
+          "line": "2887",
           "reason": "alternative-inscription question needs candidate-origin plus inscription/attribute surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2869",
+          "line": "2914",
           "reason": "missing-evidence question needs claimant testimony plus explicit absence/claim surfaces"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2878",
+          "line": "2923",
           "reason": "banner-change rationale question needs banner succession/creation surface rather than protest or score rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2892",
+          "line": "2937",
           "reason": "hold-call rationale question needs event-condition timing surface rather than broad witness/incident volume"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2937",
+          "line": "2982",
           "reason": "yellow-to-blue reassignment question keeps baseline transition surface over partial interval membership rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2955",
+          "line": "3000",
           "reason": "source-specific witness question needs Brigid report/claim surface rather than unresolved-discrepancy summary"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2975",
+          "line": "3020",
           "reason": "day-3 found-object question needs focused event/found-object surface rather than broad hazard summary"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3004",
+          "line": "3049",
           "reason": "conservator-date question needs source-recorded value surface rather than generic discrepancy rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3013",
+          "line": "3058",
           "reason": "display-authority question needs controlling governance/source-authority surface rather than display text rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3040",
+          "line": "3085",
           "reason": "source-claim question needs witness-statement surface rather than finding/provenance summary rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3049",
+          "line": "3094",
           "reason": "permission-request question needs direct witness-statement surface rather than evidence-date volume"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3058",
+          "line": "3103",
           "reason": "survey-commission question needs explicit report-commission provenance surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3074",
+          "line": "3119",
           "reason": "maintenance-evidence question needs receipt/evidence-source surface rather than witness/hearsay rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3086",
+          "line": "3131",
           "reason": "fictional-order question needs plot-outcome surface rather than plot-event summary rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3100",
+          "line": "3145",
           "reason": "boundary-discrepancy cause question needs measurement/marker-shift surface rather than survey-summary rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3138",
+          "line": "3183",
           "reason": "discrepancy-explanation question needs factual-discrepancy/incident-outcome surface rather than fictional event rows"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3174",
+          "line": "3219",
           "reason": "correction-authorship question needs handwriting/expert-attribution surface rather than correction-status volume"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3206",
+          "line": "3251",
           "reason": "evidentiary-status report question needs explicit witness/report surface rather than generic claim-status surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3260",
+          "line": "3305",
           "reason": "cause question has explicit baseline rationale-note support and candidate is broad record/event surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3304",
+          "line": "3349",
           "reason": "not-yet-tested question needs explicit pending test-status surface rather than broad negation over all lots"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3332",
+          "line": "3377",
           "reason": "split rationale question needs explicit source-note rationale plus viability context"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3346",
+          "line": "3391",
           "reason": "split rationale question needs actual split/lot-condition surface rather than generic vault assignment surface"
         },
         {
           "family": "rationale_evidence_contrast",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3357",
+          "line": "3402",
           "reason": "viability-concern question needs explicit source-note contrast plus viability context"
         }
       ],
@@ -876,49 +876,49 @@
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1053",
+          "line": "1098",
           "reason": "personal-letter reading-access question needs semantic access authority plus publication-restriction boundary, not raw source rows alone"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2396",
+          "line": "2441",
           "reason": "universal-scope question needs broad set-enumeration surface rather than narrower report-detail joins"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2405",
+          "line": "2450",
           "reason": "termination-denial question needs rationale plus quantity-threshold support rather than status text alone"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2414",
+          "line": "2459",
           "reason": "lot-affected question needs explicit target-lot exclusion/check surface rather than broad affected-lot listing"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2425",
+          "line": "2470",
           "reason": "counterfactual reclassification deadline question needs classification-bound deadline surface"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2710",
+          "line": "2755",
           "reason": "placed-under-quarantine count needs mistaken-movement surface rather than broad quarantine-scope volume"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2722",
+          "line": "2767",
           "reason": "split-lot never-quarantined count needs quarantine-scope surface rather than broad lot status history"
         },
         {
           "family": "regulatory_access_scope",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2738",
+          "line": "2783",
           "reason": "initial-affected greenhouse question needs greenhouse-status plus exclusion/location surface"
         }
       ],
@@ -931,181 +931,181 @@
         {
           "family": "rule_activation_surface",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "888",
+          "line": "933",
           "reason": "rescission-request eligibility question needs request/validity surface rather than generic vote-rule volume"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1593",
+          "line": "1638",
           "reason": "rule-effect question needs supersession plus status/event surface rather than adjacent rule text"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1602",
+          "line": "1647",
           "reason": "rule-effect question needs direct bylaw-rule surface rather than partial requirement rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1609",
+          "line": "1654",
           "reason": "rule-effect question needs archival rule text rather than partial requirement rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1618",
+          "line": "1663",
           "reason": "rule-effect question needs explicit transfer requirement surface rather than ownership/status rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1625",
+          "line": "1670",
           "reason": "rule-effect question needs archival memo row value rather than ownership/status rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1998",
+          "line": "2043",
           "reason": "override-rule requirement question needs explicit source-record rule requirement surface rather than archival row values"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2187",
+          "line": "2232",
           "reason": "revised-plan monitoring question needs plan/rejection rule surface rather than observation-status rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2198",
+          "line": "2243",
           "reason": "appeal-tolling question needs rule text plus appeal/deadline surface rather than isolated tolling labels"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2434",
+          "line": "2479",
           "reason": "deferment-rationale question needs interpreted decision support rather than rule text alone"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2443",
+          "line": "2488",
           "reason": "component-problem question needs project-category plus rule-condition surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2458",
+          "line": "2503",
           "reason": "counterfactual-recusal outcome question needs both procedure path and eligibility surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2467",
+          "line": "2512",
           "reason": "recusal-rationale question needs recusal rule surface rather than eligibility determination surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2476",
+          "line": "2521",
           "reason": "post-recusal vote question needs recusal/vote/rule surface without misleading quorum-status volume"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2485",
+          "line": "2530",
           "reason": "window-merit question needs explicit rule-condition plus prior-history surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2494",
+          "line": "2539",
           "reason": "window-merit question needs prior-history plus interpretation surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2505",
+          "line": "2550",
           "reason": "amendment-recall question needs recall-authority surface rather than threshold-only legal-opinion rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2514",
+          "line": "2559",
           "reason": "rejection-cause question needs correction/clarification surface rather than derived status alone"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2521",
+          "line": "2566",
           "reason": "hypothetical reserve-status question keeps baseline arithmetic inputs over derived rule status"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2528",
+          "line": "2573",
           "reason": "hypothetical reserve-status question needs baseline arithmetic inputs rather than derived rule status"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2564",
+          "line": "2609",
           "reason": "valid-period extension question needs original validity plus extension-validity surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2573",
+          "line": "2618",
           "reason": "unrenewed-expiry question needs validity plus deadline/requirement surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2580",
+          "line": "2625",
           "reason": "unrenewed-expiry question needs original validity endpoint surface rather than renewed lifecycle rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2589",
+          "line": "2634",
           "reason": "appeal-hearing question needs filed-appeal/hearing-scheduled surface rather than broad status rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2598",
+          "line": "2643",
           "reason": "suspension-trigger question needs explicit violation-record plus permit-suspension surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2607",
+          "line": "2652",
           "reason": "suspension-trigger question needs violation event plus suspension surface, not suspension interval volume alone"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2623",
+          "line": "2668",
           "reason": "failed-reinspection count question needs compact aggregate inspection-result surface rather than lifecycle status volume"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2648",
+          "line": "2693",
           "reason": "permitted-hours question needs explicit operational-hours rule surface"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2659",
+          "line": "2704",
           "reason": "approved-display count question needs approval/validity surface rather than broad current-status rows"
         },
         {
           "family": "rule_activation_surface",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2700",
+          "line": "2745",
           "reason": "permit-action list question needs suspension, restriction, status, and deadline surfaces together"
         }
       ],
@@ -1118,163 +1118,163 @@
         {
           "family": "state_custody_ownership",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "827",
+          "line": "872",
           "reason": "award/result question has baseline awarded support and candidate lacks awarded rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1007",
+          "line": "1052",
           "reason": "near-duplicate bin-code question needs collision-risk plus bin-location surface rather than generic current-label rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1027",
+          "line": "1072",
           "reason": "physical-custody item-count question needs grouped custody count helper rather than raw custodian row count"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1064",
+          "line": "1109",
           "reason": "governing-2024-custody-document question needs exact amendment source-row text with custody/notice clauses"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1084",
+          "line": "1129",
           "reason": "location-plus-publication-pause question needs custody plus publication restriction surface"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1093",
+          "line": "1138",
           "reason": "MOU-scope expansion question needs agreement-clause plus access/addition surface rather than static right-scope volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1102",
+          "line": "1147",
           "reason": "photograph-album interval question needs exact access-log custody surface rather than broad access-event volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1111",
+          "line": "1156",
           "reason": "photograph-album interval question needs access/recall custody surface rather than broad conservation-scope volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1120",
+          "line": "1165",
           "reason": "custody-release question needs custody/status surface rather than scan-record volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1494",
+          "line": "1539",
           "reason": "barcode-supersession question needs scan/correction surface rather than broad current-barcode volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1693",
+          "line": "1738",
           "reason": "tree-amendment measurement question needs archival row-value surface preserving species/DBH/source basis"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2035",
+          "line": "2080",
           "reason": "dated physical-location question needs archival row location plus row-time support rather than synthesized cold self-check"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2311",
+          "line": "2356",
           "reason": "current object-component question needs direct current-state/component surface rather than transition history volume"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2320",
+          "line": "2365",
           "reason": "why-have question needs custody-transfer surface rather than adjacent action or object-property rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2329",
+          "line": "2374",
           "reason": "award placement question needs explicit award-result surface rather than nearby device/person rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2350",
+          "line": "2395",
           "reason": "carry question needs direct possession surface rather than broad title or event evidence"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2361",
+          "line": "2406",
           "reason": "possession-versus-ownership question needs inherit/own/possess distinction surface rather than broad event/rule evidence"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2370",
+          "line": "2415",
           "reason": "legal-title contest question needs claim/default/transfer surface rather than static ownership rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2776",
+          "line": "2821",
           "reason": "provisional-control question needs holder plus pending estate/claim context rather than bare holder row"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2787",
+          "line": "2832",
           "reason": "post-death legal-ownership question needs court/inheritance status surface rather than stale legal-owner interval"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2798",
+          "line": "2843",
           "reason": "current possession/maintenance question needs physical-possessor plus gift/dispute surface"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2809",
+          "line": "2854",
           "reason": "solicitor-advice question needs advice plus adverse-possession caveat surface"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2860",
+          "line": "2905",
           "reason": "insurance-link question needs direct insured-by surface rather than contingent ownership claim rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3031",
+          "line": "3076",
           "reason": "disputed-strip feature question needs object-location surface rather than broad finding/survey rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3126",
+          "line": "3171",
           "reason": "physical inventory count question needs incident/count outcome surface rather than title-name rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3147",
+          "line": "3192",
           "reason": "client-ledger pickup question needs asset-state/location surface rather than broad item provenance rows"
         },
         {
           "family": "state_custody_ownership",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3197",
+          "line": "3242",
           "reason": "correction-entitlement question needs entitlement rule plus extension effect surface rather than correction/admission rows alone"
         }
       ],
@@ -1287,307 +1287,307 @@
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_baseline_answer_surface_guard_reason",
-          "line": "875",
+          "line": "920",
           "reason": "density-calculation question needs numeric staff-evaluation surface rather than qualitative source-opinion surface"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1018",
+          "line": "1063",
           "reason": "active-held count question needs current-label/status plus withdrawn-label filter surface"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1217",
+          "line": "1262",
           "reason": "packet-close open-item count needs explicit open-item surface rather than deadline/notice volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1237",
+          "line": "1282",
           "reason": "application-disposition question needs status/determination surface rather than source-record-facts gap"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1250",
+          "line": "1295",
           "reason": "roster-entry count question needs entry-preserving roster surface rather than distinct-student membership volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1259",
+          "line": "1304",
           "reason": "distinct-student registrar count needs roster-table count support rather than member-label enumeration"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1281",
+          "line": "1326",
           "reason": "distinct-student count-change question needs roster-version count summary rather than itemized membership volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1346",
+          "line": "1391",
           "reason": "adult-total roster question needs adult manifest support rather than qualifying-chaperone count alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1360",
+          "line": "1405",
           "reason": "adult-total roster question needs chaperone change surface rather than qualifying-chaperone count alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1386",
+          "line": "1431",
           "reason": "ratio-compliance question needs compliance_status surface rather than roster-table version volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1395",
+          "line": "1440",
           "reason": "correction-notice replacement question needs change-type surface rather than unparsed correction-action text"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1409",
+          "line": "1454",
           "reason": "application-count question needs canonical application-status surface rather than source-record duplicate rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1420",
+          "line": "1465",
           "reason": "cap-application question needs rule/determination surface over expanded source-record rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1431",
+          "line": "1476",
           "reason": "counterfactual no-cap amount question needs arithmetic/grant amount surface rather than broad memory-ledger context"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1451",
+          "line": "1496",
           "reason": "date-alone rule question needs threshold plus exception surface rather than broad applicant-date volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1460",
+          "line": "1505",
           "reason": "projection-supersession question needs trigger/actual event surface rather than projection-comparison volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1478",
+          "line": "1523",
           "reason": "threshold question needs rule-threshold surface rather than applicant-attribute volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1485",
+          "line": "1530",
           "reason": "threshold question needs rule threshold/condition surface rather than applicant-attribute volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1512",
+          "line": "1557",
           "reason": "application-number identifier question needs exact document-identifier surface rather than score/event volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1548",
+          "line": "1593",
           "reason": "headcount-scan reconciliation question needs paired count/scan evidence rather than generic source-record claims"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1684",
+          "line": "1729",
           "reason": "focused semantic surface beats archival row-volume for status/score/authority questions"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1702",
+          "line": "1747",
           "reason": "operative-permit question needs permit issuance/amendment surface rather than source-document status alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1711",
+          "line": "1756",
           "reason": "tree-list/count question needs amendment count/list surface rather than stale protection-status rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1720",
+          "line": "1765",
           "reason": "remedy-imposition question needs unresolved-issue surface rather than remedy-label presence"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1729",
+          "line": "1774",
           "reason": "hearing-held question needs event/open-issue surface rather than scheduled-date presence"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1747",
+          "line": "1792",
           "reason": "packet-time measurement question needs direct measurement-value surface rather than row-value volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1820",
+          "line": "1865",
           "reason": "active-lot count question needs archival inventory row enumeration rather than contaminant/status volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1829",
+          "line": "1874",
           "reason": "document-identification question needs document-exhibit surface rather than event/source-type rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1838",
+          "line": "1883",
           "reason": "exhibit-identification question needs exhibit/source-document surface rather than witness/person rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1847",
+          "line": "1892",
           "reason": "roster-of-record membership question needs assigned/person roster surface rather than supersession metadata"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1856",
+          "line": "1901",
           "reason": "withdrawn-draft governance question needs source-status/supersession surface rather than document-id presence"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1874",
+          "line": "1919",
           "reason": "headcount elapsed-time question needs elapsed-minutes surface rather than headcount rows alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1883",
+          "line": "1928",
           "reason": "parent-letter determination question needs review-scheduled/letter surface rather than source-document volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1892",
+          "line": "1937",
           "reason": "witness-scan reconciliation question needs direct scan/location surface rather than broad source-record claims"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1901",
+          "line": "1946",
           "reason": "newsletter-versus-roster authority question needs supersession/roster evidence rather than stale assignment rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "1910",
+          "line": "1955",
           "reason": "current-versus-withdrawn claim question needs statement-claim plus supersession/status surface"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2016",
+          "line": "2061",
           "reason": "scoped roster-count question needs source-record roster section surface rather than badge/log volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2064",
+          "line": "2109",
           "reason": "deed item-count question needs conveyed-item surface rather than broad receipt row volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2112",
+          "line": "2157",
           "reason": "zoning-designation question needs parcel-zoning surface rather than general zoning-definition volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2132",
+          "line": "2177",
           "reason": "build-out timeline question needs site-measure plus draft-condition surface rather than permit-expiry status alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2143",
+          "line": "2188",
           "reason": "dimensional-standards question needs staff-finding plus site-measure surface rather than consolidated compliance status alone"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2165",
+          "line": "2210",
           "reason": "deadline-filing timeliness question needs filed-event plus calculated-deadline surface"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2176",
+          "line": "2221",
           "reason": "board-review-period question needs calculated-deadline surface rather than loose deadline values"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2231",
+          "line": "2276",
           "reason": "attendance-count question needs explicit session_attendance_count surface rather than interval roster volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2729",
+          "line": "2774",
           "reason": "lot plant-count question needs direct lot/count surface rather than status or destruction history"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2747",
+          "line": "2792",
           "reason": "lot-3b lab-result question needs lab-result plus lot-status context, not generic lab-result volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2851",
+          "line": "2896",
           "reason": "candidate-vessel list question needs candidate-origin plus vessel-loss detail surface"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "2901",
+          "line": "2946",
           "reason": "corrected-rank-order question needs qualifying-rank plus score-correction surface rather than raw total volume"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3115",
+          "line": "3160",
           "reason": "claim-value question needs financial-value/incident-outcome surface rather than claim/status fiction rows"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3364",
+          "line": "3409",
           "reason": "hypothetical failed-viability question keeps direct baseline threshold/storage support over broader policy-note surfaces"
         },
         {
           "family": "threshold_policy_arithmetic",
           "function": "structural_specialized_answer_surface_override",
-          "line": "3373",
+          "line": "3418",
           "reason": "hypothetical failed-viability question needs threshold/action policy surface rather than note surface"
         }
       ],
@@ -1595,7 +1595,7 @@
     }
   ],
   "family_count": 7,
-  "generated_at": "2026-05-11T02:00:29+00:00",
+  "generated_at": "2026-05-11T02:04:41+00:00",
   "guard_reason_count": 257,
   "health": {
     "family_budget": 8,
