@@ -79,6 +79,23 @@ class TestParser:
         assert term.args[1].name == "g"
         assert [arg.name for arg in term.args[1].args] == ["b", "c"]
 
+    def test_parse_quoted_atom_with_commas_and_parentheses(self):
+        engine = PrologEngine()
+        term = engine.parse_term(
+            "source_record_exact(src_line_0039, '| EX-U-1 | USB thumb drive, 32 GB (ground floor) | Held |')"
+        )
+        assert term.name == "source_record_exact"
+        assert len(term.args) == 2
+        assert term.args[0].name == "src_line_0039"
+        assert term.args[1].name == "| EX-U-1 | USB thumb drive, 32 GB (ground floor) | Held |"
+
+    def test_parse_quoted_atom_with_escaped_apostrophe(self):
+        engine = PrologEngine()
+        term = engine.parse_term("note(src_line_0104, 'behind the bay\\'s mesh door')")
+        assert term.name == "note"
+        assert len(term.args) == 2
+        assert term.args[1].name == "behind the bay's mesh door"
+
     def test_parse_list_with_tail(self):
         engine = PrologEngine()
         term = engine.parse_term("[H|T]")

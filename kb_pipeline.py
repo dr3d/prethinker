@@ -898,7 +898,24 @@ def _split_top_level_args(args_text: str) -> list[str]:
     items: list[str] = []
     current: list[str] = []
     depth = 0
+    in_quote = False
+    escaped = False
     for ch in args_text:
+        if in_quote:
+            current.append(ch)
+            if escaped:
+                escaped = False
+                continue
+            if ch == "\\":
+                escaped = True
+                continue
+            if ch == "'":
+                in_quote = False
+            continue
+        if ch == "'":
+            in_quote = True
+            current.append(ch)
+            continue
         if ch == "(":
             depth += 1
             current.append(ch)
@@ -7819,8 +7836,25 @@ class CorePrologRuntime:
         current: list[str] = []
         paren_depth = 0
         bracket_depth = 0
+        in_quote = False
+        escaped = False
 
         for ch in text:
+            if in_quote:
+                current.append(ch)
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == "'":
+                    in_quote = False
+                continue
+            if ch == "'":
+                in_quote = True
+                current.append(ch)
+                continue
             if ch == "(":
                 paren_depth += 1
                 current.append(ch)

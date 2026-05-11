@@ -91,6 +91,37 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
 
 
+def test_source_record_exact_round_trips_table_text_with_commas() -> None:
+    runtime = CorePrologRuntime()
+    fact = (
+        "source_record_exact(src_line_0039, "
+        "'| EX-U-1 | USB thumb drive, 32 GB | SLIP-7721 | BC-883075 | LK-3 | Held |')."
+    )
+
+    assert runtime.assert_fact(fact).get("status") == "success"
+
+    result = runtime.query_rows("source_record_exact(src_line_0039, Exact).")
+
+    assert result.get("status") == "success"
+    assert result.get("rows") == [
+        {
+            "Exact": "| EX-U-1 | USB thumb drive, 32 GB | SLIP-7721 | BC-883075 | LK-3 | Held |"
+        }
+    ]
+
+
+def test_source_record_exact_round_trips_escaped_apostrophe_text() -> None:
+    runtime = CorePrologRuntime()
+    fact = "source_record_exact(src_line_0104, '- BAY-04-I is behind the bay\\'s mesh door.')."
+
+    assert runtime.assert_fact(fact).get("status") == "success"
+
+    result = runtime.query_rows("source_record_exact(src_line_0104, Exact).")
+
+    assert result.get("status") == "success"
+    assert result.get("rows") == [{"Exact": "- BAY-04-I is behind the bay's mesh door."}]
+
+
 def test_source_record_ledger_emits_explicit_roster_table_members() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

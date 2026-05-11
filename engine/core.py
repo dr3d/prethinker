@@ -198,9 +198,26 @@ class PrologEngine:
             return Term(str(int(s)), is_number=True)
 
         if len(s) >= 2 and s[0] == "'" and s[-1] == "'":
-            return Term(s[1:-1])
+            return Term(self._unescape_quoted_atom(s[1:-1]))
 
         return Term(s)
+
+    def _unescape_quoted_atom(self, text: str) -> str:
+        """Unescape the small quoted-atom surface accepted by this parser."""
+        out: List[str] = []
+        escaped = False
+        for ch in text:
+            if escaped:
+                out.append(ch)
+                escaped = False
+                continue
+            if ch == "\\":
+                escaped = True
+                continue
+            out.append(ch)
+        if escaped:
+            out.append("\\")
+        return "".join(out)
 
     def _parse_list_term(self, s: str) -> Term:
         """Parse bracket list syntax into ./2 terms."""
@@ -232,8 +249,26 @@ class PrologEngine:
         current: List[str] = []
         paren_depth = 0
         bracket_depth = 0
+        in_quote = False
+        escaped = False
 
         for ch in text:
+            if in_quote:
+                current.append(ch)
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == "'":
+                    in_quote = False
+                continue
+
+            if ch == "'":
+                in_quote = True
+                current.append(ch)
+                continue
             if ch == "(":
                 paren_depth += 1
                 current.append(ch)
@@ -266,8 +301,23 @@ class PrologEngine:
     def _is_outer_wrapped_parens(self, text: str, first_open_idx: int) -> bool:
         """True if first '(' is closed by the final ')' in the string."""
         depth = 0
+        in_quote = False
+        escaped = False
         for idx in range(first_open_idx, len(text)):
             ch = text[idx]
+            if in_quote:
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == "'":
+                    in_quote = False
+                continue
+            if ch == "'":
+                in_quote = True
+                continue
             if ch == "(":
                 depth += 1
             elif ch == ")":

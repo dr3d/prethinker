@@ -118,3 +118,29 @@ Results:
 Lesson: exact identifier preservation is now mostly deterministic
 addressability. No new lens is indicated; the last row is selector/query
 surface pressure over available evidence.
+
+## ILT-005 - Exact Source Row Runtime Hygiene
+
+Date: 2026-05-11
+
+Evidence lane: `core_runtime_source_record_exact_hygiene`
+
+Artifacts:
+
+- reproducer compile: `tmp/openrouter_precision_20260509/parallel_compile_source_record_facts_lanes6/identifier_ledger_torture/domain_bootstrap_file_20260509T190934280524Z_source_qwen-qwen3-6-35b-a3b.json`
+- focused QA after repair: `tmp/transfer_fixtures_20260510/identifier_exact_hygiene_probe_20260511/domain_bootstrap_qa_20260511T002353589389Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Results:
+
+- pre-repair smell: `20` runtime load errors on `source_record_exact/2`
+- artifact-only reproducer after repair: `90 / 90` exact source rows loaded and queried
+- focused QA after repair: `4 / 0 / 0`, `runtime_load_error_count = 0`
+- regression tests: `897 passed, 2 subtests passed`
+
+Lesson: the failure was not semantic and did not require a helper. The core
+runtime parser was splitting predicate arguments on commas inside quoted source
+text, so some exact source rows were asserted with the wrong arity or rejected
+as variable-bearing clauses. The parser is now quote-aware for argument
+splitting and outer-parenthesis checks, preserving table rows, comma-bearing
+text, parenthetical source prose, and escaped apostrophes as queryable exact
+source memory.
