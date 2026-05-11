@@ -1,6 +1,6 @@
 # Helper Ledger
 
-Last updated: 2026-05-10
+Last updated: 2026-05-11
 
 This ledger tracks query helpers as first-class epistemic surface. It combines
 two views:
@@ -8,37 +8,144 @@ two views:
 - **fixtures per helper** from `scripts/audit_helper_usage.py`
 - **row-level helper class** from `scripts/audit_helper_classes.py`
 
+Read with:
+
+- `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`
+- `docs/EDGE_GOVERNANCE_POSITIONING.md`
+
 The usage row counts below come from historical QA artifacts under
 `tmp/transfer_fixtures_20260510` and `tmp/openrouter_precision_20260509`. Treat
 them as pressure signals, not unique facts: a helper row can appear many times
 across QA files.
 
-## Ledger
+## Summary Ledger
 
-| Helper | Fixtures | Implemented | Current Class | Class Audit Rows | Current Read | Next Action |
+The compact table is the comparison surface. Longer evidence and caveats live
+in the detail sections below.
+
+| Helper | Fixtures | Implemented | Current Status | Audit Since | Last Changed | Next Action |
 | --- | ---: | --- | --- | --- | --- | --- |
-| `archive_authority_custody_support` | 2 | yes | split, audit ongoing | transfer: 0 clean / 4 candidate; precision: 1 clean / 11 candidate; probate live QA: 96 candidate / 0 clean | Generic object-custody/access/recalled-right joins can be clean on the precision authority artifact, but the probate transfer artifact currently emits candidate-only helper rows and regresses the cold score (`29 / 3 / 8` live helper replay versus `34 / 1 / 5` cold). The latest probate cleanup moved the active transfer repair path away from this helper and into clean `source_record_packet_metadata_support` rows. | Keep the old authority/probate helper split under quarantine for family-specific count/source-cell recognizers; prefer generic source-record packet metadata for probate standing/source/addressability questions. |
-| `clear_sample_clock_pause_support` | 1 | yes | clean-helper | precision: 1 clean / 0 candidate | Joins admitted clear-sample segments, sampler-offline intervals, and rule exceptions. | Seek transfer fixture evidence; no cleanup needed in current code. |
-| `clinic_recall_support` | 1 | yes | split, audit ongoing | transfer cold: 23 clean / 2 candidate; refreshed class audit: 29 clean / 0 candidate; fresh QA artifact: 2000 clean / 240 candidate / 0 unlabeled | Device/serial field rows plus generic manufacturer-liaison, verification-procedure, explicit clinic abbreviations, cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer identity, and medical-director authority are mostly clean when the needed source-record rows exist. A fresh no-cache QA replay over the refreshed artifact reduced unlabeled output but still emitted 240 candidate rows and scored `35 / 0 / 4` with one unjudged row; row-gating with the prior `40 / 0 / 0` high-water stays exact. | Keep the prior clinic high-water as candidate-helper score; genericize or retire the remaining candidate emissions before claiming clean-helper saturation. |
-| `grant_award_support` | 1 | yes | split, audit ongoing | transfer class audit after source-reference repair: 32 clean / 5 candidate; fresh full QA replay: 992 clean / 248 candidate | Award, cap, eligibility, field-recusal, appeal-window, committee-recusal vote-count, score-correction operational status, and appeal-pending status rows are mostly clean over admitted predicates plus generic source-record atoms/sections. A scar cleanup removed hard-coded `a_07` / `2026-05-22` assumptions from appeal review/funding extraction. Generic Section 11 source-reference addressability then moved the grant replay to `40 / 0 / 0` with zero writes, but the helper remains one-fixture and still emits candidate appeal/procedure rows. | Treat grant as candidate-helper evidence until sibling transfer proof; the q039/q040 filing/reference gaps are closed by generic source-record substrate. |
-| `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | transfer: 40 clean / 2 candidate; refreshed class audit: 33 clean / 0 candidate; fresh QA artifact: 2805 clean / 0 candidate / 0 unlabeled | Event/timestamp/count, computed duration, vendor/model, batch-id, ticket, packet-id, data-loss status, lab-sample status/return, system clock authority, and field-derived rows are clean after source-ledger anchor repair. A fresh no-cache QA replay over the refreshed artifact emitted clean labels end to end but scored only `28 / 2 / 9` with one unjudged row due query-generation churn; row-gating that run with the prior `39 / 1 / 0` high-water reaches `40 / 0 / 0`. | Treat industrial as clean-labeled on its refreshed source artifact but still one-fixture by usage count; seek sibling proof before promotion. |
-| `probate_storage_support` | 1 | no | orphaned artifact helper | not applicable | Historical QA artifacts contain this helper and a `36 / 0 / 4` replay, but no current companion implementation is registered in the repo. A current live replay without the orphan scores `29 / 3 / 8`; a row gate across cold, orphan, and current surfaces reaches `40 / 0 / 0` only as historical diagnostic evidence. | Do not report old probate rows as active architecture; rebuild generically only if probate storage/access pressure remains important. |
-| `roster_state_support` | 2 | yes | split, audit ongoing | transfer class audit: 63 clean / 117 candidate; usage audit: 8306 clean / 15660 candidate across completed QA artifacts | Admitted-predicate joins are clean. Source-record adult/compliance rows are clean narrow parses. Source-record student membership rows remain candidate: they transfer across two roster notations, but still derive membership from source-record text atoms and section context. A first deterministic `roster_table_member/4` ledger now captures explicit table rows with both grouping and member columns, moving that narrow surface out of helper inference. Group counts inherit clean/candidate status from their member rows. | Compare clean ledger wins against older helper wins, then add selector/query guidance only where the deterministic surface is missed. Context-derived bus/group membership remains candidate. |
-| `source_record_clock_sync_support` | 1 | yes | clean-helper | precision: 2 clean / 0 candidate; q011 hygiene replay: 3 clean / 0 candidate | Deterministically extracts last-successful clock-sync dates from admitted source-record text/numeric rows. Rows now emit `SupportKind=last_successful_ntp_sync`, and the companion triggers for corrected/raw timestamp queries as well as clock-sync predicates. | Seek transfer fixture evidence; no cleanup needed in current code. |
-| `item_description_detail_support` | 2 | yes | transfer-shown clean-helper over admitted item-description predicates | probate residual probe: 25 clean / 0 candidate; probate full replay: 62 clean / 0 candidate; identifier focused QA probe: 33 clean / 0 candidate with `2 / 2 / 0` score; identifier source-record-facts focused probe after `evidence_item/2` bridge and locker-floor routing: 48 clean / 0 candidate with `4 / 0 / 0` score | Query-only bridge that derives display title and trailing year from admitted descriptive item predicates: `item_description/2` and the equivalent `evidence_item/2` surface. This is a generic semantic-predicate completeness bridge, not a source text recognizer. Sibling proof on identifier-ledger artifacts shows the helper transfers when a canonical descriptive predicate exists. The remaining boundary is predicate availability and plain display normalization: abbreviations/possessives are only lightly formatted, and descriptions that exist only in raw source text are still compile-acquisition or deterministic-ledger pressure. | Keep promoted narrowly over admitted item-description predicates; do not infer missing descriptions from source text. Watch whether future artifacts standardize on `item_description/2`, `evidence_item/2`, or need a declared alias contract. |
-| `source_record_packet_metadata_support` | 3 | yes | split, audit ongoing | transfer class audit after grant reference repair: 171 clean / 26 candidate; probate scoped targeted replay: 115 clean / 0 candidate; probate residual full replay: 1707 clean / 0 candidate; probate refreshed final full replay: 3340 clean / 0 candidate | Generic identifiers, source-reference list rows, filing-location metadata, official-prose standing notes, role-holder headings, custody-location fields, non-reproduced references, authoritative-source statements, asserted-event dates, unruled-motion status, loan-amendment effects, court-order access joins, court-order source-section rows, and non-revocable access-policy rows are clean when derived mechanically from admitted predicates or source-record atoms/sections/fields/numeric tokens. The remaining candidate rows are older content notes such as appeal funding source, appeal pending status, observer permission scope, pending packet item, role definitions, and transport departure. | Keep generic identifiers/source-reference/standing/access metadata; quarantine embedded content notes until moved to domain helpers or retired as duplicates. Probate now reaches clean-helper row-gated `40 / 0 / 0`; remaining single-run misses are planner/parser churn rather than helper acquisition. |
-| `source_record_table_body_count_support` | 3 | yes | transfer-proven clean-helper for explicit table/list body-count intents | probate residual probe: 5 clean / 0 candidate; probate full replay: 10 clean / 0 candidate; sibling artifact audit: clinic 1 row, industrial 5 rows, school 8 rows, grant 7 rows; routed sibling QA: 8 / 0 / 0 with clinic 2 clean helper rows, industrial 10 clean helper rows, and intentional non-routing on school/grant semantic counts | Counts field-bearing `source_record_row(..., table_row, ...)` body rows while excluding header rows whose values are only column names. This is generic deterministic table addressability. Artifact-only transfer probes found plausible table-body counts on four sibling fixtures without false header/body positives, and natural QA routing now reaches it for explicit inventory-table and raw-event-log count questions. School adult-role counts and grant application-status counts correctly stay on semantic/domain helpers. | Keep this helper narrow. Do not use it as a general count helper; future promotion evidence should require explicit table/list/log wording plus clean helper rows and no semantic-count regressions. |
+| `source_record_table_body_count_support` | 3 | yes | transfer-proven clean-helper for explicit body-count intents | 2026-05-10 | 2026-05-10 | Keep narrow; require explicit table/list/log body-count wording. |
+| `item_description_detail_support` | 2 | yes | transfer-shown clean-helper over admitted description predicates | 2026-05-10 | 2026-05-11 | Keep promoted narrowly; do not infer missing descriptions from source text. |
+| `source_record_packet_metadata_support` | 4 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Keep generic metadata/addressability rows; quarantine embedded content notes. |
+| `roster_state_support` | 2 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Prefer deterministic roster-table ledgers where available; keep section/prose membership candidate-labeled. |
+| `archive_authority_custody_support` | 2 | yes | split, retirement candidate for probate paths | 2026-05-10 | 2026-05-10 | Quarantine old authority/probate paths; prefer packet metadata for probate standing/source/addressability. |
+| `industrial_sensor_support` | 1 | yes | clean on refreshed artifact, transfer pending | 2026-05-10 | 2026-05-10 | Seek sibling proof before promotion. |
+| `clinic_recall_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Genericize or retire remaining candidate rows before clean saturation claims. |
+| `grant_award_support` | 1 | yes | split, audit ongoing | 2026-05-10 | 2026-05-10 | Run sibling proof against `rule_activation_exception_matrix`. |
+| `clear_sample_clock_pause_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
+| `source_record_clock_sync_support` | 1 | yes | clean-helper, one-fixture | 2026-05-10 | 2026-05-10 | Seek transfer evidence; no cleanup needed now. |
+| `roster_table_count_support` | 1 | yes | clean deterministic roster-table companion, one-fixture | 2026-05-10 | 2026-05-10 | Keep as companion to `roster_table_member/4`; seek sibling tables. |
+| `roster_table_member_alias_support` | 1 | yes | clean deterministic printed-label companion, one-fixture | 2026-05-10 | 2026-05-10 | Keep as companion to roster table ledger; seek sibling tables. |
+| `homeroom_member_alias_support` | 1 | yes | clean narrow alias companion, one-fixture | 2026-05-10 | 2026-05-10 | Keep narrow; avoid promotion beyond homeroom/table membership. |
+| `probate_storage_support` | 1 | no | orphaned artifact helper | 2026-05-10 | 2026-05-10 | Do not report as active architecture. |
+
+## Helper Details
+
+### Transfer-Proven Or Transfer-Shown Clean Helpers
+
+`source_record_table_body_count_support`: transfer-proven clean-helper for
+explicit table/list/log body-count intents. Audit views: probate residual probe
+`5 clean / 0 candidate`; probate full replay `10 clean / 0 candidate`; sibling
+artifact audit found clinic `1` row, industrial `5`, school `8`, grant `7`;
+routed sibling QA reached `8 / 0 / 0` with clean helper rows and intentional
+non-routing on semantic school/grant counts. It counts field-bearing
+`source_record_row(..., table_row, ...)` body rows while excluding header rows.
+Keep it narrow; do not make it a general count helper.
+
+`item_description_detail_support`: transfer-shown clean-helper over admitted
+description predicates. Audit views: probate residual probe `25 clean / 0
+candidate`; probate full replay `62 clean / 0 candidate`; identifier focused
+probe `33 clean / 0 candidate`; identifier source-record-facts probe after the
+`evidence_item/2` bridge `48 clean / 0 candidate` with `4 / 0 / 0`. It derives
+display titles and trailing years from admitted `item_description/2` or
+equivalent `evidence_item/2` rows. It must not infer descriptions directly from
+source text.
+
+### Split Helpers Under Active Audit
+
+`source_record_packet_metadata_support`: broadest helper by fixture spread.
+Generic identifiers, source-reference list rows, filing-location metadata,
+official-prose standing notes, role-holder headings, custody-location fields,
+non-reproduced references, authoritative-source statements, asserted-event
+dates, unruled-motion status, loan-amendment effects, court-order access joins,
+court-order source-section rows, and non-revocable access-policy rows are clean
+when mechanically derived from admitted predicates or source-record
+atoms/sections/fields/numeric tokens. Older content-note rows such as appeal
+funding source, appeal pending status, observer permission scope, pending packet
+item, role definitions, and transport departure remain candidate debt.
+
+`roster_state_support`: admitted-predicate joins are clean. Source-record
+adult/compliance rows are clean narrow parses. Source-record student membership
+rows remain candidate: they transfer across two roster notations, but still
+derive membership from source-record text atoms and section context. The
+deterministic `roster_table_member/4` ledger moves explicit table rows with both
+grouping and member columns out of helper inference. Section/prose-derived
+roster membership remains candidate-helper until a stronger ledger design
+exists.
+
+`archive_authority_custody_support`: generic object-custody/access/recalled
+right joins can be clean on the precision authority artifact, but the probate
+transfer artifact emitted candidate-only helper rows and regressed cold (`29 /
+3 / 8` live helper replay versus `34 / 1 / 5` cold). The active probate repair
+path moved away from this helper and into clean `source_record_packet_metadata`
+rows. Treat old probate/authority branches as retirement candidates unless new
+fixtures prove they still add distinct clean capability.
+
+`clinic_recall_support`: device/serial field rows plus generic
+manufacturer-liaison, verification-procedure, explicit clinic abbreviations,
+cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer
+identity, and medical-director authority are mostly clean when the needed
+source-record rows exist. Fresh QA still emitted candidate rows, so prior
+clinic saturation is candidate-helper evidence until those emissions are
+genericized, retired, or transfer-proven.
+
+`grant_award_support`: award, cap, eligibility, field-recusal, appeal-window,
+committee-recusal vote-count, score-correction operational status, and
+appeal-pending status rows are mostly clean over admitted predicates plus
+generic source-record atoms/sections. A scar cleanup removed hard-coded `a_07`
+and `2026-05-22` assumptions. The helper remains one-fixture by usage count and
+still emits candidate appeal/procedure rows. This is the next sibling-proof
+target.
+
+### Clean But Still One-Fixture
+
+`industrial_sensor_support`: clean-labeled on refreshed industrial artifacts,
+with field-driven event/timestamp/count, computed duration, vendor/model,
+batch-id, ticket, packet-id, data-loss status, lab-sample status/return, system
+clock authority, and field-derived rows. It still needs sibling proof before
+promotion because fixture fanout is one.
+
+`clear_sample_clock_pause_support`: joins admitted clear-sample segments,
+sampler-offline intervals, and rule exceptions. It is currently clean but only
+shown on `temporal_state_ledger`.
+
+`source_record_clock_sync_support`: deterministically extracts
+last-successful clock-sync dates from admitted source-record text/numeric rows.
+It is clean but currently one-fixture.
+
+`roster_table_count_support`, `roster_table_member_alias_support`, and
+`homeroom_member_alias_support`: clean narrow companions around explicit roster
+table ledgers and printed labels. Their legitimacy comes from their narrow
+contract, not broad fixture spread yet.
+
+### Orphaned Or Retired
+
+`probate_storage_support`: historical QA artifacts contain this helper and a
+`36 / 0 / 4` replay, but no current companion implementation is registered in
+the repo. Do not report old probate rows as active architecture; rebuild
+generically only if probate storage/access pressure remains important.
 
 ## Current Pressure
 
 Latest usage audit:
-`tmp/helper_usage_audit_20260510/helper_usage_audit_after_grant_reference_full.md`
+`tmp/transfer_fixtures_20260510/helper_fixture_fanout_audit_20260511.md`
 
-- QA JSON artifacts scanned: 516
-- Helpers observed in usage audit: 12
-- Suspicious low-transfer helpers, used on two or fewer fixtures: 11
+- QA JSON artifacts scanned: 554
+- Helpers observed in usage audit: 14
+- Suspicious low-transfer helpers, used on two or fewer fixtures: 12
 - Orphaned artifact helpers: 1 (`probate_storage_support`)
-- Helpers with row-level class audit coverage: 8+
+- Helpers with broad fixture fanout: 2
 
 Fixtures per helper is the sharper pressure view right now.
 `source_record_packet_metadata_support` and
@@ -166,9 +273,50 @@ content notes. Those candidate rows should remain quarantined rather than being
 promoted as metadata. Future cleanup should either move useful content notes
 into domain helpers or retire them if duplicate.
 
+## Retirement Candidates
+
+Retirement is an architectural outcome, not a failure. A helper or helper branch
+should retire when better compile acquisition, deterministic ledgers, or cleaner
+generic helpers cover the same answer surface.
+
+Current candidates:
+
+- `probate_storage_support`: already orphaned. Historical rows are archaeology,
+  not active architecture.
+- `archive_authority_custody_support` probate branches: active probate repair
+  moved to clean source-record packet metadata and access/order joins. Keep only
+  branches that still prove distinct clean authority/custody value on sibling
+  fixtures.
+- Candidate content-note branches inside `source_record_packet_metadata_support`:
+  retire if they duplicate domain helpers or rewrite into clean generic
+  source-reference/source-section metadata if they represent true addressability.
+- Candidate appeal/procedure branches inside `grant_award_support`: next audit
+  decides whether these rewrite into generic source-record section/reference
+  substrate or stay quarantined as one-fixture candidate evidence.
+- Source-record student-membership branches inside `roster_state_support`: retire
+  explicit table membership paths as deterministic roster-table ledgers cover
+  them; keep section/prose membership candidate-labeled until a stronger ledger
+  exists.
+
 ## Promotion Rule
 
 A helper is promoted only when it adds a general operation and survives fresh
 transfer without fixture-shaped constants. Candidate helpers may rescue rows,
 but their rows must be reported as `candidate-helper` until rewritten,
 transfer-proven, or retired.
+
+Promotion path:
+
+```text
+candidate scar
+  -> generic rewrite or declared lens companion
+  -> targeted replay on origin fixture
+  -> full replay/no-regression on origin fixture
+  -> sibling transfer replay
+  -> promotion or retirement
+```
+
+Every promoted helper must keep a retirement condition. The healthy long-term
+trajectory is not that helper count grows forever; it is that helper count and
+candidate-helper rows become measurable, then some retire as deterministic
+ledgers and compile acquisition improve.

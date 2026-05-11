@@ -13,6 +13,7 @@ Read with:
 - [Two-Axis Benchmark Frame](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_BENCHMARK_FRAME.md)
 - [Two-Axis Probe Discipline](https://github.com/dr3d/prethinker/blob/main/docs/TWO_AXIS_PROBE_DISCIPLINE.md)
 - [Artifact Unit And Helper Classification](https://github.com/dr3d/prethinker/blob/main/docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md)
+- [Helper Ledger](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_LEDGER.md)
 
 ---
 
@@ -122,6 +123,12 @@ but several of those helpers are currently mixed: their field-driven and
 predicate-driven parts are legitimate, while some text-specific recognizers
 still need generic rewrite or quarantine. This does not weaken the governance
 claim; it makes the reporting discipline honest.
+
+Architectural growth is therefore bidirectional. New deterministic ledger
+primitives and transfer-proven helpers can add capability, while helper audit
+can also retire orphaned or duplicate branches. The stable claim is not that the
+system never grows; it is that growth and shrinkage are visible, labeled, and
+governed.
 
 This implies that as the underlying model shrinks, the architecture's role grows in importance. A 7B model might propose more flawed candidates than a 70B model, but the mapper rejects ungrounded proposals regardless of source. The output is governed either way; the proposal admission rate just decreases.
 
