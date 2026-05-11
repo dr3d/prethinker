@@ -9,6 +9,7 @@ from scripts.run_domain_bootstrap_qa import (
     _clinic_device_recall_companion,
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
+    _location_floor_hint_queries,
     _negative_join_with_previous,
     _placeholder_repaired_query,
     _relaxed_constant_query,
@@ -1734,6 +1735,28 @@ def test_item_description_detail_companion_derives_year_from_description_atom() 
             "Description": "painting_three_apples_in_saucer_1987",
             "DisplayDescription": "Painting Three Apples in Saucer",
             "Year": "1987",
+            "SourcePredicate": "item_description",
+            "HelperClass": "clean-helper",
+        }
+    ]
+
+
+def test_item_description_detail_companion_accepts_evidence_item_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("evidence_item(ex_u_1, usb_thumb_drive_32_gb).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["item_description(Item, Description)."])
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "item_description_detail_support"
+    )
+
+    assert companion["result"]["rows"] == [
+        {
+            "Item": "ex_u_1",
+            "Description": "usb_thumb_drive_32_gb",
+            "DisplayDescription": "Usb Thumb Drive 32 gb",
+            "Year": "",
+            "SourcePredicate": "evidence_item",
             "HelperClass": "clean-helper",
         }
     ]
@@ -1784,6 +1807,20 @@ def test_source_record_table_count_hint_routes_explicit_table_count_questions() 
 
     assert _source_record_table_count_hint_queries(
         utterance="How many applications were eligible?",
+        kb_inventory=inventory,
+    ) == []
+
+
+def test_location_floor_hint_routes_comparative_locker_questions() -> None:
+    inventory = {"signatures": ["located_at/2", "locker_floor/2"]}
+
+    assert _location_floor_hint_queries(
+        utterance="Which two locker codes differ only by a leading zero, and what item is in each?",
+        kb_inventory=inventory,
+    ) == ["located_at(Item, Location).", "locker_floor(Location, Floor)."]
+
+    assert _location_floor_hint_queries(
+        utterance="Which item is stored in LK-3?",
         kb_inventory=inventory,
     ) == []
 

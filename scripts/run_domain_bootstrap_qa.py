@@ -291,6 +291,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For source-owned record predicates such as alleged_violation/4, ledger_entry/3, witness_observation/3, or grievance-like records, use variables for role/content/evidence slots unless the exact atom appears in relevant_clauses. Words like accused, evidence, observer, violation, and reporting_act are slot labels, not evidence values.",
         "For where/location questions, prefer location predicates when they exist; otherwise retrieve method/explanation rows that may contain location-bearing labels instead of querying only object targets.",
         "For institution, ledger, record, or source questions, retrieve both the event text and the container/source slot with a shared record variable: for example grievance_method(Grievance, Method), grievance_explanation(Grievance, Explanation), and grievance_target(Grievance, Institution).",
+        "For locker, bay, shelf, floor, or storage-location questions, query both located_at(Item, Location) and location metadata such as locker_floor(Location, Floor) when those predicates exist. If the question compares similar location codes, do not stop after located_at/2.",
         "For who-reported or reporter questions, query reporter predicates and the content predicates that describe what was reported, such as grievance_reporter(Grievance, Reporter) with grievance_explanation(Grievance, Explanation) or grievance_method(Grievance, Method). Do not rely only on target predicates.",
         "For who-is or what-is identity questions about a named official, officer, warden, inspector, director, authority, or role-holder, retrieve both identity rows and authority/action rows when they exist. Name plus role is often only partial support; include predicates such as ruling_by/3, permission_granted/2, certification_status/3, disqualification_reason/2, director_recommendation/2, official_action/3, or equivalent inventory predicates that expose what the role-holder inspects, certifies, authorizes, recommends, or decides.",
         "When a question phrase may be only part of a longer normalized atom, do not bind the phrase as a lowercase constant. Query the whole slot as a variable and let returned rows expose atoms such as infirmary_ledger_recorded_blue_sneezing.",
@@ -325,6 +326,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions asking what someone thought, misunderstood, believed, disclosed, or explained, query statement_detail/3 before broad witness_statement metadata. witness_statement/4 often names a statement but may not contain enough detail.",
         "For witness count, language-count, or source-language questions, query witness_statement(Speaker, Language, Topic, Role) when available. Use witness_claim/4 only as a fallback content surface; it usually does not preserve source-language metadata.",
         "For questions explicitly asking how many rows, entries, devices, systems, events, or applications are listed in a table, inventory, raw event log, source section, or list, include a broad source_record_row(SourceRow, table_row, Line, SectionAtom, Label) query when source_record_row/5 exists. This is structural addressability evidence; do not use it for semantic counts that ask for eligible, active, approved, failed, or scoped items unless a table/list wording is present.",
+        "For item-description questions, treat evidence_item(Item, Description) as an equivalent descriptive surface to item_description(Item, Description) when both predicates appear in the inventory. Query whichever predicate exists, and prefer broad variables when the question names the item in natural language.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
         "For prior-concern or October-2025 notice questions, query prior_complaint/4, prior_complaint_subject/2, prior_complaint_action/2, prior_complaint_disputed/2, unresolved_question/2, unresolved_question_detail/2, unresolved_question_status/2, and unresolved_question_referred/2 before falling back to broad proceeding_event rows.",
         "For committee replacement after conflict questions, query conflict_policy/2 and conflict_policy_includes/2 for the standing rule, conflict_recusal/3 for the actual recusal, inquiry_minimum_size/1 and investigation_minimum_size/1 for thresholds, deadline_requirement(replacement_appointment or equivalent, Amount, Unit, Anchor), and committee_member_replaced/4 for the observed replacement.",
@@ -1246,6 +1248,7 @@ def run_one_question(
         [
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
         ]
     )
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
@@ -1386,6 +1389,27 @@ def _source_record_table_count_hint_queries(
     if "source_record_row/5" not in signatures or "source_record_field/3" not in signatures:
         return []
     return ["source_record_row(SourceRow, table_row, Line, SectionAtom, Label)."]
+
+
+def _location_floor_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Add location metadata evidence for explicit floor/storage questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in ("locker", "floor", "storage", "location", "bay", "shelf")):
+        return []
+    if not any(marker in text for marker in ("floor", "leading zero", "differ", "differs", "basement", "ground")):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "located_at/2" in signatures:
+        out.append("located_at(Item, Location).")
+    if "locker_floor/2" in signatures:
+        out.append("locker_floor(Location, Floor).")
+    return out
 
 
 def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:
@@ -2251,47 +2275,58 @@ def _item_description_detail_companion(
     args: list[str],
     query: str,
 ) -> dict[str, Any] | None:
-    if predicate != "item_description":
+    if predicate not in {"item_description", "evidence_item"}:
         return None
     item_arg = str(args[0]).strip() if args else ""
     rows: list[dict[str, str]] = []
-    for row in _runtime_rows(runtime, "item_description(Item, Description)."):
-        item = str(row.get("Item", "")).strip()
-        description = str(row.get("Description", "")).strip()
-        if not item or not description:
-            continue
-        if item_arg and not _is_prolog_variable(item_arg) and item != item_arg:
-            continue
-        year = _year_from_atom(description)
-        rows.append(
-            {
-                "Item": item,
-                "Description": description,
-                "DisplayDescription": _display_item_description_atom(description),
-                "Year": year,
-                "HelperClass": "clean-helper",
-            }
-        )
+    seen: set[tuple[str, str]] = set()
+    description_sources = [
+        ("item_description", "item_description(Item, Description)."),
+        ("evidence_item", "evidence_item(Item, Description)."),
+    ]
+    for source_predicate, description_query in description_sources:
+        for row in _runtime_rows(runtime, description_query):
+            item = str(row.get("Item", "")).strip()
+            description = str(row.get("Description", "")).strip()
+            if not item or not description:
+                continue
+            if item_arg and not _is_prolog_variable(item_arg) and item != item_arg:
+                continue
+            key = (item, description)
+            if key in seen:
+                continue
+            seen.add(key)
+            year = _year_from_atom(description)
+            rows.append(
+                {
+                    "Item": item,
+                    "Description": description,
+                    "DisplayDescription": _display_item_description_atom(description),
+                    "Year": year,
+                    "SourcePredicate": source_predicate,
+                    "HelperClass": "clean-helper",
+                }
+            )
     if not rows:
         return None
     return {
-        "query": "item_description_detail_support(Item, Description, DisplayDescription, Year).",
+        "query": "item_description_detail_support(Item, Description, DisplayDescription, Year, SourcePredicate).",
         "result": {
             "status": "success",
             "predicate": "item_description_detail_support",
-            "prolog_query": "item_description_detail_support(Item, Description, DisplayDescription, Year).",
+            "prolog_query": "item_description_detail_support(Item, Description, DisplayDescription, Year, SourcePredicate).",
             "result_type": "table",
             "num_rows": len(rows),
-            "variables": ["Item", "Description", "DisplayDescription", "Year", "HelperClass"],
+            "variables": ["Item", "Description", "DisplayDescription", "Year", "SourcePredicate", "HelperClass"],
             "rows": rows[:80],
             "reasoning_basis": {
                 "kind": "query-only-companion",
-                "note": "derived display title and trailing year from admitted item_description atoms",
+                "note": "derived display title and trailing year from admitted item-description predicates",
                 "trigger_predicate": predicate,
                 "original_query": query,
             },
         },
-        "derived_from_queries": [query, "item_description(Item, Description)."],
+        "derived_from_queries": [query, "item_description(Item, Description).", "evidence_item(Item, Description)."],
     }
 
 
