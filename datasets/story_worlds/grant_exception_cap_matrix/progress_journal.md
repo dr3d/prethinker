@@ -230,3 +230,42 @@ older predicate vocabulary (`final_grant_amount/3`, `grant_calculation/4`,
 to the newer transfer contract (`final_award/3`, `application_eligibility/3`,
 `bonus_eligibility/2`). The next clean path is a generic admitted-predicate alias
 bridge, not a new lens and not a fixture-specific shortcut.
+
+## GECM-006 - Grant Predicate Alias Bridge
+
+Date: 2026-05-11
+
+Evidence lane: `canonical_predicate_completeness`
+
+Artifacts:
+
+- transfer audit:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_transfer_20260511.json`
+- precision sibling cold audit:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_rule_cold_20260511.json`
+- precision-wide audit:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_precision_all_20260511.json`
+- readout:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_audit_20260511.md`
+
+Code change:
+
+- `grant_award_support` now adapts admitted status, amount, eligibility, and
+  bonus predicates from older grant/rule vocabulary into the helper's internal
+  award contract.
+
+Results:
+
+- this transfer fixture remains stable: `16 clean / 1 candidate / 0 unlabeled`
+- `rule_activation_exception_matrix` cold artifact now emits `3 clean / 0
+  candidate / 0 unlabeled`
+- precision-wide audit now sees `26 clean / 0 candidate / 0 unlabeled`
+
+Lesson:
+
+The sibling proof boundary was predicate vocabulary drift, not missing memory.
+The alias bridge is generic over admitted predicates and contains no fixture
+constants. This is a clean example of canonical predicate-completeness repair:
+two artifacts can hold equivalent governed state under different predicate
+names, and helpers need narrow declared adapters before the state is fully
+queryable.

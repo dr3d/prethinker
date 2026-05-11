@@ -4820,10 +4820,18 @@ def _grant_award_companion(
 ) -> dict[str, Any] | None:
     trigger_predicates = {
         "application_eligibility",
+        "application_status",
         "applicant_attribute",
         "bonus_eligibility",
+        "bonus_qualification",
         "cycle_parameter",
+        "determination_status",
+        "eligibility_determination",
+        "final_grant_amount",
+        "final_status",
         "final_award",
+        "grant_amount",
+        "grant_calculation",
         "requested_amount",
         "rule_exception",
         "source_record_field",
@@ -4836,12 +4844,37 @@ def _grant_award_companion(
     final_award_rows = _runtime_rows(runtime, "final_award(App, Amount, Status).")
     requested_rows = _runtime_rows(runtime, "requested_amount(App, Amount).")
     bonus_rows = _runtime_rows(runtime, "bonus_eligibility(App, BonusType).")
+    status_alias_rows = (
+        _runtime_rows(runtime, "application_status(App, Status).")
+        + _runtime_rows(runtime, "final_status(App, Status).")
+        + _runtime_rows(runtime, "determination_status(App, Status).")
+    )
+    final_grant_amount_rows = _runtime_rows(runtime, "final_grant_amount(App, BaseAmount, FinalAmount).")
+    grant_calculation_rows = _runtime_rows(runtime, "grant_calculation(App, CalculationKind, Amount, Detail).")
+    grant_amount_rows = _runtime_rows(runtime, "grant_amount(App, Amount).")
+    eligibility_alias_rows = _runtime_rows(runtime, "eligibility_determination(App, Rule, Result).")
+    bonus_alias_rows = _runtime_rows(runtime, "bonus_qualification(App, BonusType, Percent).")
     source_fields = _source_record_fields_by_row(runtime)
     source_text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
     source_section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, SectionAtom).")
     source_line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
 
-    if not any([eligibility_rows, final_award_rows, requested_rows, bonus_rows, source_fields, source_text_rows]):
+    if not any(
+        [
+            eligibility_rows,
+            final_award_rows,
+            requested_rows,
+            bonus_rows,
+            status_alias_rows,
+            final_grant_amount_rows,
+            grant_calculation_rows,
+            grant_amount_rows,
+            eligibility_alias_rows,
+            bonus_alias_rows,
+            source_fields,
+            source_text_rows,
+        ]
+    ):
         return None
 
     section_by_row = {
@@ -4902,6 +4935,81 @@ def _grant_award_companion(
             helper_class="candidate-helper",
         )
 
+    def normalized_status_for_app(app: str) -> str:
+        for row in status_alias_rows:
+            if str(row.get("App", "")).strip() != app:
+                continue
+            status = str(row.get("Status", "")).strip().lower()
+            if status in {"approved", "awarded"}:
+                return "awarded"
+            if status in {"pending", "pending_determination", "pending_4_3_determination"}:
+                return "pending"
+            if status in {"denied", "declined", "rejected"}:
+                return "denied"
+            if status:
+                return status
+        return ""
+
+    def normalized_eligibility_result(value: str) -> str:
+        result = str(value or "").strip().lower()
+        if result in {"pass", "passed", "satisfied", "waived", "true", "yes", "not_applicable"}:
+            return "pass"
+        if result in {"fail", "failed", "violated", "false", "no", "denied"}:
+            return "fail"
+        if result in {"pending", "unknown", "tbd", "undetermined"}:
+            return "pending"
+        return result
+
+    explicit_final_award_apps = {str(row.get("App", "")).strip() for row in final_award_rows}
+    for row in final_grant_amount_rows:
+        app = str(row.get("App", "")).strip()
+        if not app or app in explicit_final_award_apps:
+            continue
+        final_amount = str(row.get("FinalAmount", "")).strip()
+        status = normalized_status_for_app(app) or ("awarded" if _money_atom_to_int(final_amount) else "")
+        if status:
+            final_award_rows.append({"App": app, "Amount": final_amount, "Status": status})
+            explicit_final_award_apps.add(app)
+    for row in grant_calculation_rows:
+        app = str(row.get("App", "")).strip()
+        calculation_kind = str(row.get("CalculationKind", "")).strip().lower()
+        if not app or app in explicit_final_award_apps or calculation_kind != "total":
+            continue
+        amount = str(row.get("Amount", "")).strip()
+        status = normalized_status_for_app(app) or ("awarded" if _money_atom_to_int(amount) else "")
+        if status:
+            final_award_rows.append({"App": app, "Amount": amount, "Status": status})
+            explicit_final_award_apps.add(app)
+    for row in grant_amount_rows:
+        app = str(row.get("App", "")).strip()
+        if not app or app in explicit_final_award_apps:
+            continue
+        amount = str(row.get("Amount", "")).strip()
+        status = normalized_status_for_app(app) or ("awarded" if _money_atom_to_int(amount) else "")
+        if status:
+            final_award_rows.append({"App": app, "Amount": amount, "Status": status})
+            explicit_final_award_apps.add(app)
+
+    if not bonus_rows and bonus_alias_rows:
+        bonus_rows = [
+            {
+                "App": str(row.get("App", "")).strip(),
+                "BonusType": str(row.get("BonusType", "")).strip(),
+            }
+            for row in bonus_alias_rows
+            if str(row.get("App", "")).strip() and str(row.get("BonusType", "")).strip()
+        ]
+    if not eligibility_rows and eligibility_alias_rows:
+        eligibility_rows = [
+            {
+                "App": str(row.get("App", "")).strip(),
+                "Rule": str(row.get("Rule", "")).strip(),
+                "Result": normalized_eligibility_result(str(row.get("Result", "")).strip()),
+            }
+            for row in eligibility_alias_rows
+            if str(row.get("App", "")).strip() and str(row.get("Rule", "")).strip()
+        ]
+
     eligibility_by_app: dict[str, dict[str, str]] = {}
     for row in eligibility_rows:
         app = str(row.get("App", "")).strip()
@@ -4910,10 +5018,11 @@ def _grant_award_companion(
         if app and rule:
             eligibility_by_app.setdefault(app, {})[rule] = result
     if eligibility_by_app:
+        passing_results = {"pass", "passed", "satisfied", "waived", "true", "yes", "not_applicable"}
         eligible_apps = sorted(
             app
             for app, rules in eligibility_by_app.items()
-            if rules and not any(str(result).strip().lower() in {"fail", "failed", "no", "false"} for result in rules.values())
+            if rules and all(str(result).strip().lower() in passing_results for result in rules.values())
         )
         excluded_apps = sorted(app for app in eligibility_by_app if app not in eligible_apps)
         detail = f"eligible={','.join(eligible_apps)}; excluded={','.join(excluded_apps)}"
@@ -4923,7 +5032,7 @@ def _grant_award_companion(
             failing = ",".join(
                 f"{rule}:{result}"
                 for rule, result in sorted(app_rules.items())
-                if str(result).strip().lower() in {"fail", "failed", "no", "false"}
+                if str(result).strip().lower() not in passing_results
             )
             excluded_details.append(f"{excluded_app}={failing or 'ineligible'}")
         if excluded_details:

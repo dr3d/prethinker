@@ -116,3 +116,32 @@ Results:
 Lesson: source-record V2 is useful as a row-gated candidate, but rule activation
 itself remains handled by existing semantic surfaces. This is not a global
 source-record replacement.
+
+## RAEM-005 - Grant Predicate Alias Bridge Sibling Proof
+
+Date: 2026-05-11
+
+Evidence lane: `canonical_predicate_completeness`
+
+Artifacts:
+
+- sibling audit:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_rule_cold_20260511.json`
+- precision-wide audit:
+  `tmp/transfer_fixtures_20260510/grant_award_alias_bridge_precision_all_20260511.json`
+
+Result:
+
+- cold artifact now emits `3 clean / 0 candidate / 0 unlabeled`
+  `grant_award_support` rows through generic predicate aliases
+- precision-wide audit now emits `26 clean / 0 candidate / 0 unlabeled`
+  `grant_award_support` rows
+
+Lesson:
+
+This fixture already held award/status memory under older predicates such as
+`final_grant_amount/3`, `application_status/2`, and
+`eligibility_determination/3`. The newer grant helper did not trigger until a
+generic alias bridge adapted those admitted predicates. The repair is not a new
+lens and not source-prose extraction; it is canonical predicate-completeness
+work over governed memory.

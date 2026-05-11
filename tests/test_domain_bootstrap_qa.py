@@ -2068,6 +2068,51 @@ def test_grant_award_support_derives_counts_caps_recusals_and_appeal_status() ->
     )
 
 
+def test_grant_award_support_adapts_older_rule_predicate_vocabulary() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "application_status(app_2026_014, approved).",
+        "final_grant_amount(app_2026_014, 25000, 33750).",
+        "bonus_qualification(app_2026_014, hospitality, 25).",
+        "bonus_qualification(app_2026_014, underrepresented_owner, 15).",
+        "determination_status(app_2026_019, pending).",
+        "eligibility_determination(app_2026_019, 2_1, satisfied).",
+        "eligibility_determination(app_2026_019, 2_5, pending).",
+        "final_status(app_2026_027, approved).",
+        "grant_calculation(app_2026_027, total, 33750, base_25_000_35_percent_cap_bonus).",
+        "determination_status(app_2026_038, denied).",
+        "grant_amount(app_2026_038, 0).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["application_status(App, Status)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "grant_award_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "final_award_row"
+        and row.get("App") == "app_2026_014"
+        and row.get("Amount") == "$33,750"
+        and row.get("Status") == "awarded"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "final_award_row"
+        and row.get("App") == "app_2026_027"
+        and row.get("Amount") == "$33,750"
+        and row.get("Status") == "awarded"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "eligible_application_count"
+        and "app_2026_019=2_5:pending" in row.get("Detail", "")
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
 def test_roster_state_support_derives_operational_roster_from_source_record_ledger() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
