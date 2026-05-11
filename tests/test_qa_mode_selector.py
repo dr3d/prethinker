@@ -5361,6 +5361,29 @@ def test_score_selection_labels_llm_source_when_selector_has_no_source() -> None
     assert scored["selected_is_best"] is True
 
 
+def test_score_selection_preserves_disabled_guard_reasons() -> None:
+    row = {
+        "id": "q006b",
+        "question": "Question?",
+        "modes": [
+            {"mode": "plain", "verdict": "miss"},
+            {"mode": "rule", "verdict": "exact"},
+        ],
+    }
+
+    scored = score_selection(
+        row=row,
+        selection={
+            "selected_mode": "rule",
+            "selection_source": "hybrid_llm",
+            "disabled_guard_reasons": ["raw-timestamp guard disabled for replay"],
+        },
+        error="",
+    )
+
+    assert scored["disabled_guard_reasons"] == ["raw-timestamp guard disabled for replay"]
+
+
 def test_merge_qa_records_overlays_later_row_metadata() -> None:
     base = {
         "rows": [

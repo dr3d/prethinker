@@ -3876,6 +3876,7 @@ def score_selection(row: dict[str, Any], selection: dict[str, Any], error: str) 
         "structural_uncertainty_reasons": selection.get("structural_uncertainty_reasons", []),
         "baseline_guard_reason": selection.get("baseline_guard_reason", ""),
         "specialized_guard_reason": selection.get("specialized_guard_reason", ""),
+        "disabled_guard_reasons": selection.get("disabled_guard_reasons", []),
         "hybrid_llm_error": selection.get("hybrid_llm_error", ""),
         "evidence_quality_by_mode": selection.get("evidence_quality_by_mode", []),
         "rationale": selection.get("rationale", ""),
