@@ -323,6 +323,24 @@ def _has_source_anchor(line: str) -> bool:
     ):
         return True
     if re.search(
+        r"\b(?:counts?\s*\([^)]*\)\s*sum\s+to|counts?\s+sum\s+to|sum\s+to\s+\d+)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
+        r"\b(?:timestamp|timestamps|clock|clocks)\b.*\b(?:audit|audited|external|local\s+time|synchroni[sz]ed|sync)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
+        r"\b(?:audit|audited|external|local\s+time|synchroni[sz]ed|sync)\b.*\b(?:timestamp|timestamps|clock|clocks)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
         r"\b(?:referenced\s+but\s+not\s+reproduced|not\s+reproduced|reproduction\s+does\s+not\s+constitute|finding\s+of\s+fact|"
         r"authoritative\s+sources?|not\s+been\s+ruled\s+upon|has\s+not\s+been\s+ruled|court\s+has\s+not\s+found|"
         r"forensic\s+handwriting|ultimate\s+rulings|named\s+lender|loan\s+period|registrar|directed\s+delivery|"

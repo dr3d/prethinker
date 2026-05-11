@@ -352,3 +352,43 @@ candidate prose, and the domain helper migrations restored almost all answer
 surface. The last row is cold-acquisition pressure in the deterministic
 source-record ledger: the line "scanner timestamps are nominally local time and
 have not been audited against an external clock" did not become queryable memory.
+
+## SARR-010 - Scanner Clock Audit Source-Record Acquisition
+
+Date: 2026-05-11
+
+Evidence lane: `deterministic_source_record_acquisition`
+
+Artifacts:
+
+- no-LLM refreshed compile:
+  `tmp/transfer_fixtures_20260510/school_q038_source_record_acquisition_compile_20260511/`
+- targeted judged replay:
+  `tmp/transfer_fixtures_20260510/school_q038_source_record_acquisition_targeted_judged_retry2_20260511/`
+- helper audit:
+  `tmp/transfer_fixtures_20260510/school_q038_source_record_acquisition_helper_audit_20260511.md`
+- readout:
+  `tmp/transfer_fixtures_20260510/school_q038_source_record_acquisition_delta_20260511.md`
+
+Code change:
+
+- added generic deterministic source-record anchors for count-summary prose
+  and clock/timestamp audit prose, so wrapped post-table official sentences
+  like "scanner timestamps are nominally local time and have not been audited
+  against an external clock" become queryable source-record memory
+
+Result:
+
+- `q038`: exact in targeted judged replay
+- packet metadata stayed clean-only:
+  `source_record_packet_metadata_support` emitted `62 clean / 0 candidate` in
+  the targeted replay and `31 clean / 0 candidate` in artifact-only audit
+- local test suite: `900 passed, 2 subtests passed`
+
+Lesson:
+
+The final school row was deterministic memory acquisition pressure, not
+semantic-lens pressure. The answer existed in the source and the helper could
+route it once the ledger preserved the wrapped prose. This is the desired repair
+shape: sharpen the compiled memory substrate instead of adding a fixture-shaped
+helper shortcut.

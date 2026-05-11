@@ -190,6 +190,35 @@ def test_source_record_ledger_keeps_wrapped_official_prose() -> None:
     assert "cabinet 3, drawer 2" in exact_by_line[7]
 
 
+def test_source_record_ledger_keeps_count_summary_and_clock_audit_prose() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Section 5. Attendance Scans",
+                "| Scan time | Location | Student count |",
+                "| --- | --- | --- |",
+                "| 06:18 | North lot | 18 |",
+                "| 06:33 | South lot | 17 |",
+                "",
+                "Bus 1 and Bus 2 outbound counts (18 + 17) sum to 35, matching v3",
+                "roster. The scanner timestamps are nominally local time and have not",
+                "been audited against an external clock for this packet.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+
+    assert kind_by_line[7] == "anchored_line"
+    assert kind_by_line[8] in {"anchored_line", "continuation_line"}
+    assert kind_by_line[9] in {"anchored_line", "continuation_line"}
+    assert "counts (18 + 17) sum to 35" in exact_by_line[7]
+    assert "scanner timestamps are nominally local time" in exact_by_line[8]
+    assert "audited against an external clock" in exact_by_line[9]
+
+
 def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(
