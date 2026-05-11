@@ -1523,10 +1523,12 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             "role_counts_towards_ratio",
             "roster_version",
             "roster_version_status",
+            "source_record_label",
             "student_group_assignment",
             "student_in_homeroom",
             "supervises",
             "supervision_assignment",
+            "temporary_event_assignment",
         }:
             roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
             if roster_state:
@@ -5631,10 +5633,12 @@ def _roster_state_companion(
         "role_counts_towards_ratio",
         "roster_version",
         "roster_version_status",
+        "source_record_label",
         "student_group_assignment",
         "student_in_homeroom",
         "supervises",
         "supervision_assignment",
+        "temporary_event_assignment",
     }
     if predicate not in roster_predicates:
         return None
@@ -6020,6 +6024,11 @@ def _prioritize_roster_state_rows(
                 version_priority = -version_priority
         elif predicate in {"adult_role", "role_counts_towards_ratio"}:
             if support_kind in {
+                "school_packet_adult_lodging",
+                "school_packet_observer_permission_scope",
+            }:
+                priority = 0
+            if support_kind in {
                 "adult_manifest_total",
                 "adult_role",
                 "ratio_counted_adults",
@@ -6037,7 +6046,13 @@ def _prioritize_roster_state_rows(
             if support_kind == "school_packet_policy_title":
                 priority = 0
         elif predicate == "bus_assignment":
-            if support_kind == "school_packet_pending_item":
+            if support_kind in {"school_packet_pending_item", "school_packet_transport_departure"}:
+                priority = 0
+        elif predicate == "temporary_event_assignment":
+            if support_kind == "school_packet_temporary_assignment_source":
+                priority = 0
+        elif predicate == "source_record_label":
+            if support_kind == "school_packet_scanner_clock_audit_status":
                 priority = 0
         elif predicate in {"roster_version", "roster_version_status"}:
             version_ok = len(args) < 1 or is_requested(version, args[0])
@@ -6379,6 +6394,51 @@ def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dic
                 "return_leg_attendance_scans",
                 "Return-leg attendance scans pending; appended after the trip; not part of this packet",
                 detail=text_atom,
+            )
+        if text_atom.startswith("m_okonkwo_210_n_park_206_medical_coverage_station"):
+            add(
+                source_row,
+                "school_packet_adult_lodging",
+                "n_park",
+                "Marwick Hall room 206 (medical-coverage station)",
+                detail=text_atom,
+            )
+        if "capacity_24_students_departure_2026_05_01_06_30" in text_atom:
+            line_no = line_by_row.get(source_row, 0)
+            bus_value = "bus_1_outbound" if line_no and line_no < 112 else "bus_2_outbound"
+            bus_display = "Bus 1" if bus_value == "bus_1_outbound" else "Bus 2"
+            add(
+                source_row,
+                "school_packet_transport_departure",
+                bus_value,
+                f"{bus_display} departs Cedar Hollow at 06:30 on 2026-05-01",
+                detail=text_atom,
+            )
+        if "a_diaz_is_the_parent_of_s_014" in text_atom:
+            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+            add(
+                source_row,
+                "school_packet_observer_permission_scope",
+                "a_diaz",
+                "A. Diaz may observe Group B events only on 2026-05-02 13:00-17:00",
+                detail=f"{text_atom} {next_text}".strip(),
+            )
+        if text_atom == "sch_2026_05_02_a":
+            add(
+                source_row,
+                "school_packet_temporary_assignment_source",
+                "s_007",
+                "S-007 temporary in-day assignment: Section 6.1; scheduling note SCH-2026-05-02-A",
+                detail=text_atom,
+            )
+        if "scanner_timestamps_are_nominally_local_time_and_have_not" in text_atom:
+            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+            add(
+                source_row,
+                "school_packet_scanner_clock_audit_status",
+                "not_audited_external_clock",
+                "Scanner timestamps are nominally local time and have not been audited against an external clock for this packet.",
+                detail=f"{text_atom} {next_text}".strip(),
             )
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
         if "retained_in_the_audit_binder_location_activities_office_filing" in text_atom and "cabinet_3_drawer_2" in next_text:

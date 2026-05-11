@@ -1507,7 +1507,17 @@ def test_roster_state_support_holds_school_packet_content_notes_after_metadata_r
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
         "source_record_text_atom(src_line_0158, sco_ch_3_chaperone_counting_rules_defines_who_counts_toward_the).",
+        "source_record_line(src_line_0104, 104).",
+        "source_record_text_atom(src_line_0104, capacity_24_students_departure_2026_05_01_06_30_from_cedar_hollow).",
+        "source_record_line(src_line_0192, 192).",
+        "source_record_text_atom(src_line_0192, a_diaz_is_the_parent_of_s_014_and_is_permitted_to_observe_group_b).",
+        "source_record_line(src_line_0193, 193).",
+        "source_record_text_atom(src_line_0193, events_on_saturday_afternoon_only_2026_05_02_13_00_17_00_a_diaz).",
+        "source_record_line(src_line_0232, 232).",
+        "source_record_text_atom(src_line_0232, sch_2026_05_02_a).",
         "source_record_text_atom(src_line_0249, return_leg_attendance_scans_will_be_appended_after_the_trip_and).",
+        "source_record_line(src_line_0150, 150).",
+        "source_record_text_atom(src_line_0150, m_okonkwo_210_n_park_206_medical_coverage_station_central_to_all).",
         "source_record_line(src_line_0262, 262).",
         "source_record_text_atom(src_line_0262, retained_in_the_audit_binder_location_activities_office_filing).",
         "source_record_line(src_line_0263, 263).",
@@ -1534,6 +1544,34 @@ def test_roster_state_support_holds_school_packet_content_notes_after_metadata_r
     assert any(
         row.get("SupportKind") == "school_packet_retention_location"
         and "cabinet 3, drawer 2" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_adult_lodging"
+        and row.get("Person") == "n_park"
+        and "room 206" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_transport_departure"
+        and row.get("Person") == "bus_1_outbound"
+        and "06:30" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_observer_permission_scope"
+        and row.get("Person") == "a_diaz"
+        and "13:00-17:00" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "school_packet_temporary_assignment_source"
+        and row.get("Person") == "s_007"
+        and "Section 6.1" in row.get("DisplayValue", "")
         and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )

@@ -244,3 +244,42 @@ The retirement was correct: packet metadata should not carry these domain prose
 answers. But the rows are still useful for the school packet. Keeping them in
 `roster_state_support` with `candidate-helper` labels restores answerability
 without blurring the broad source-addressability helper.
+
+## SARR-007 - School Packet Notes Second Migration
+
+Date: 2026-05-11
+
+Evidence lane: `candidate_helper_boundary_repair`
+
+Artifacts:
+
+- targeted judged replay:
+  `tmp/transfer_fixtures_20260510/school_packet_notes_second_migration_targeted_v2_judged_20260511/`
+- helper audit:
+  `tmp/transfer_fixtures_20260510/school_packet_notes_second_migration_cold_audit_20260511.json`
+- readout:
+  `tmp/transfer_fixtures_20260510/school_packet_notes_second_migration_delta_20260511.md`
+
+Code change:
+
+- added additional candidate-helper rows to `roster_state_support` for:
+  N. Park lodging room, bus departure time, A. Diaz observer interval,
+  S-007 temporary-assignment source note, and scanner clock-audit status
+
+Result:
+
+- targeted replay on `q006`, `q009`, `q019`, `q021`, `q038`:
+  `4 exact / 0 partial / 1 miss`
+- exact: `q009`, `q019`, `q021`, `q038`
+- remaining miss: `q006`
+- `source_record_packet_metadata_support` remains clean-only:
+  `116 clean / 0 candidate / 0 unlabeled` across the cold transfer batch
+
+Lesson:
+
+The domain-helper migration is working and the packet metadata boundary remains
+clean. The remaining `q006` miss is not another prose row; it is an explicit
+event-to-source linkage gap. The system has
+`temporary_event_assignment(s_007, bridge_engineering, 2026_05_02_11_00,
+2026_05_02_12_30)` and a candidate source-note row, but not a governed predicate
+that links the temporary event directly to Section 6.1 / `SCH-2026-05-02-A`.
