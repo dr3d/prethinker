@@ -604,6 +604,7 @@ def structural_selector(*, row: dict[str, Any], mode_labels: list[str]) -> dict[
                 "mode": label,
                 "quality": str(quality.get("quality", "weak")),
                 "reason": str(quality.get("reason", "")),
+                **({"focus_bonus": quality["focus_bonus"]} if "focus_bonus" in quality else {}),
             }
             for _score, label, quality in scored
         ],
@@ -650,21 +651,22 @@ def hybrid_selector(
     direct_rows = int(best_quality.get("direct_rows", 0) or 0)
     parse_error = bool(best_quality.get("parse_error", False))
     warning_count = int(best_quality.get("warning_count", 0) or 0)
+    focused_answer_surface = bool(best_quality.get("focused_answer_surface"))
     uncertain_reasons: list[str] = []
     if best_score < min_score:
         uncertain_reasons.append(f"top structural score {best_score:.3f} below {min_score:.3f}")
-    if score_margin < margin:
+    if score_margin < margin and not focused_answer_surface:
         uncertain_reasons.append(f"score margin {score_margin:.3f} below {margin:.3f}")
-    if quality != "strong":
+    if quality != "strong" and not focused_answer_surface:
         uncertain_reasons.append(f"top evidence quality is {quality}")
-    if direct_rows <= 0:
+    if direct_rows <= 0 and not focused_answer_surface:
         uncertain_reasons.append("top mode has no direct returned rows")
     if parse_error:
         uncertain_reasons.append("top mode has a parse error")
     if warning_count:
         uncertain_reasons.append("top mode has warnings")
     volume_trap_reason = structural_volume_trap_reason(scored)
-    if volume_trap_reason:
+    if volume_trap_reason and not focused_answer_surface:
         uncertain_reasons.append(volume_trap_reason)
     identity_trap_reason = structural_identity_completeness_trap_reason(row=row, scored=scored)
     if identity_trap_reason:
@@ -3481,6 +3483,14 @@ def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> li
         label = str(mode.get("mode", "")).strip()
         evidence = mode.get("query_evidence") if isinstance(mode.get("query_evidence"), dict) else {}
         quality = structural_evidence_quality(evidence)
+        focus_bonus = structural_question_focus_bonus(row=row, quality=quality)
+        if focus_bonus:
+            quality = dict(quality)
+            quality["base_score"] = quality["score"]
+            quality["focus_bonus"] = round(focus_bonus, 3)
+            quality["focused_answer_surface"] = True
+            quality["score"] = round(float(quality["score"]) + focus_bonus, 3)
+            quality["reason"] = f"{quality['reason']}; focus_bonus={focus_bonus:.3f}"
         scored.append((float(quality["score"]), label, quality))
     if not scored:
         selected = mode_labels[0] if mode_labels else ""
@@ -3493,6 +3503,24 @@ def structural_mode_scores(*, row: dict[str, Any], mode_labels: list[str]) -> li
         reverse=True,
     )
     return scored
+
+
+def structural_question_focus_bonus(*, row: dict[str, Any], quality: dict[str, Any]) -> float:
+    """Reward compact answer-bearing surfaces for narrow structural questions."""
+    question = str(row.get("question", "")).casefold()
+    predicates = set(quality.get("predicate_names", []) or [])
+    if not predicates:
+        return 0.0
+    asks_count = any(marker in question for marker in ["how many", "number of", "count of"])
+    asks_interval = any(marker in question for marker in ["interval", "period", "window", "segment"])
+    if asks_count and asks_interval:
+        if any("interval" in predicate for predicate in predicates):
+            return 7.5
+        if predicates.intersection({"sampler_state", "sampler_state_cause"}):
+            return 1.5
+        if predicates.intersection({"state_start", "state_end"}) == {"state_start", "state_end"}:
+            return 0.75
+    return 0.0
 
 
 def structural_volume_trap_reason(scored: list[tuple[float, str, dict[str, Any]]]) -> str:

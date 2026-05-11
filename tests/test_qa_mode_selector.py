@@ -1509,6 +1509,106 @@ def test_sampler_offline_interval_guard_prefers_explicit_interval_surface() -> N
     )
 
 
+def test_structural_selector_prefers_interval_count_surface_over_event_volume() -> None:
+    row = {
+        "id": "q022",
+        "question": "How many distinct sampler-offline intervals occurred at Station S-3 during the event?",
+        "modes": [
+            _mode_with_predicates(
+                "cold",
+                ["event_id", "event_description", "rule_description"],
+                rows=8,
+            ),
+            _mode_with_predicates("parallel", ["sampler_offline_interval"], rows=4, relaxed=True),
+        ],
+    }
+
+    selected = structural_selector(row=row, mode_labels=["cold", "parallel"])
+
+    assert selected["selected_mode"] == "parallel"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.5
+
+
+def test_hybrid_selector_trusts_focused_interval_count_surface_without_model_call() -> None:
+    row = {
+        "id": "q022",
+        "question": "How many distinct sampler-offline intervals occurred at Station S-3 during the event?",
+        "modes": [
+            _mode_with_predicates(
+                "cold",
+                ["event_id", "event_description", "rule_description"],
+                rows=8,
+            ),
+            _mode_with_predicates("parallel", ["sampler_offline_interval"], rows=4, relaxed=True),
+        ],
+    }
+    fallback_calls = 0
+
+    def fallback_selector(**_kwargs):
+        nonlocal fallback_calls
+        fallback_calls += 1
+        return {"selected_mode": "cold"}
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "parallel"],
+        margin=1.0,
+        min_score=3.0,
+        fallback_selector=fallback_selector,
+        guard_disable_regex=compile_guard_disable_regex("sampler-offline interval count"),
+    )
+
+    assert fallback_calls == 0
+    assert selected["selected_mode"] == "parallel"
+    assert selected["hybrid_decision"] == "structural_confident"
+
+
+def test_structural_selector_prefers_state_transition_count_surface_over_event_volume() -> None:
+    row = {
+        "id": "q022",
+        "question": "How many distinct sampler-offline intervals occurred at Station S-3 during the event?",
+        "modes": [
+            _mode_with_predicates(
+                "cold",
+                ["event_id", "event_description", "rule_description"],
+                rows=8,
+            ),
+            {
+                "mode": "entity",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "sampler_state",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 2,
+                            "predicate": "sampler_state_cause",
+                            "was_relaxed_fallback": False,
+                        },
+                        {
+                            "status": "success",
+                            "num_rows": 8,
+                            "predicate": "sampler_state",
+                            "was_relaxed_fallback": True,
+                        },
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = structural_selector(row=row, mode_labels=["cold", "entity"])
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 1.5
+
+
 def test_chronological_event_row_count_guard_prefers_event_id_surface() -> None:
     row = {
         "id": "q025",
