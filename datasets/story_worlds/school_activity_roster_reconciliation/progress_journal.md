@@ -318,3 +318,37 @@ The KB knew S-007 had the temporary Bridge engineering assignment and separately
 preserved `SCH-2026-05-02-A`; it needed a queryable link between the event and
 the scheduling note/section. This may generalize into an event-source ledger if
 more fixtures show the same pattern.
+
+## SARR-009 - Full Replay After Event-Source Link
+
+Date: 2026-05-11
+
+Evidence lane: `full_replay_after_helper_boundary_cleanup`
+
+Artifacts:
+
+- full judged replay:
+  `tmp/transfer_fixtures_20260510/school_event_source_link_full_judged_20260511/`
+- readout:
+  `tmp/transfer_fixtures_20260510/school_event_source_link_full_delta_20260511.md`
+
+Result:
+
+- `39 exact / 0 partial / 1 miss`
+- packet metadata stayed clean-only:
+  `source_record_packet_metadata_support` emitted `1612 clean / 0 candidate`
+- repaired rows remained exact: `q003`, `q004`, `q006`, `q009`, `q019`,
+  `q021`, `q033`
+
+Remaining miss:
+
+- `q038`: Section 5's scanner timestamp audit-status sentence is absent from
+  the refreshed source-record facts, even though it exists in `source.md`
+
+Lesson:
+
+The helper-boundary cleanup succeeded: packet metadata is no longer carrying
+candidate prose, and the domain helper migrations restored almost all answer
+surface. The last row is cold-acquisition pressure in the deterministic
+source-record ledger: the line "scanner timestamps are nominally local time and
+have not been audited against an external clock" did not become queryable memory.
