@@ -5653,6 +5653,7 @@ def _roster_state_companion(
     roster_table_label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
+    temporary_event_rows = _runtime_rows(runtime, "temporary_event_assignment(Person, Event, Start, End).")
     out_rows: list[dict[str, Any]] = []
     ratio_by_role = {
         str(row.get("Role", "")).strip(): str(row.get("Counts", "")).strip()
@@ -5856,6 +5857,7 @@ def _roster_state_companion(
     out_rows.extend(_source_record_roster_assignment_support(runtime))
     out_rows.extend(_source_record_roster_adult_support(runtime))
     out_rows.extend(_source_record_roster_compliance_support(runtime))
+    out_rows.extend(_source_record_temporary_event_source_support(runtime, temporary_event_rows))
     out_rows.extend(_source_record_school_packet_support(runtime))
 
     group_counts: dict[tuple[str, str, str, str], set[str]] = {}
@@ -6049,7 +6051,7 @@ def _prioritize_roster_state_rows(
             if support_kind in {"school_packet_pending_item", "school_packet_transport_departure"}:
                 priority = 0
         elif predicate == "temporary_event_assignment":
-            if support_kind == "school_packet_temporary_assignment_source":
+            if support_kind in {"temporary_event_source_link", "school_packet_temporary_assignment_source"}:
                 priority = 0
         elif predicate == "source_record_label":
             if support_kind == "school_packet_scanner_clock_audit_status":
@@ -6448,6 +6450,70 @@ def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dic
                 "audit_binder",
                 "Activities Office filing cabinet 3, drawer 2 (audit binder)",
                 detail=f"{text_atom} {next_text}".strip(),
+            )
+    return out_rows
+
+
+def _source_record_temporary_event_source_support(
+    runtime: CorePrologRuntime,
+    temporary_event_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    if not temporary_event_rows:
+        return []
+    section_rows = _runtime_rows(runtime, "source_record_section(SourceRow, Section).")
+    label_rows = _runtime_rows(runtime, "source_record_label(SourceRow, Label).")
+    line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
+    source_notes = [
+        {
+            "SourceRow": str(row.get("SourceRow", "")).strip(),
+            "Section": str(row.get("Section", "")).strip(),
+        }
+        for row in section_rows
+        if "temporary" in str(row.get("Section", "")).strip().lower()
+    ]
+    labels_by_row: dict[str, list[str]] = {}
+    for row in label_rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        label = str(row.get("Label", "")).strip()
+        if source_row and label.startswith("sch_"):
+            labels_by_row.setdefault(source_row, []).append(label)
+    line_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("Line", "")).strip()
+        for row in line_rows
+        if str(row.get("SourceRow", "")).strip()
+    }
+    out_rows: list[dict[str, Any]] = []
+    for event_row in temporary_event_rows:
+        person = str(event_row.get("Person", "")).strip()
+        event = str(event_row.get("Event", "")).strip()
+        start = str(event_row.get("Start", "")).strip()
+        end = str(event_row.get("End", "")).strip()
+        if not person or not event:
+            continue
+        for note in source_notes:
+            source_row = note["SourceRow"]
+            labels = labels_by_row.get(source_row) or []
+            if not labels:
+                continue
+            section = note["Section"]
+            note_label = sorted(labels)[0]
+            display_section = _display_section_from_atom(section)
+            out_rows.append(
+                {
+                    "SupportKind": "temporary_event_source_link",
+                    "Person": person,
+                    "Event": event,
+                    "Start": start,
+                    "End": end,
+                    "SourceRow": source_row,
+                    "Line": line_by_row.get(source_row, ""),
+                    "SourceNote": note_label,
+                    "DisplayValue": (
+                        f"{_display_source_atom(person)} temporary event {_display_source_phrase(event)}: "
+                        f"{display_section}; scheduling note {_display_source_atom(note_label)}"
+                    ),
+                    "HelperClass": "candidate-helper",
+                }
             )
     return out_rows
 

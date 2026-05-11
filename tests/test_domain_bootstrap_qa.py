@@ -1514,7 +1514,10 @@ def test_roster_state_support_holds_school_packet_content_notes_after_metadata_r
         "source_record_line(src_line_0193, 193).",
         "source_record_text_atom(src_line_0193, events_on_saturday_afternoon_only_2026_05_02_13_00_17_00_a_diaz).",
         "source_record_line(src_line_0232, 232).",
+        "source_record_section(src_line_0232, v_6_1_temporary_in_day_assignment).",
+        "source_record_label(src_line_0232, sch_2026_05_02_a).",
         "source_record_text_atom(src_line_0232, sch_2026_05_02_a).",
+        "temporary_event_assignment(s_007, bridge_engineering, 2026_05_02_11_00, 2026_05_02_12_30).",
         "source_record_text_atom(src_line_0249, return_leg_attendance_scans_will_be_appended_after_the_trip_and).",
         "source_record_line(src_line_0150, 150).",
         "source_record_text_atom(src_line_0150, m_okonkwo_210_n_park_206_medical_coverage_station_central_to_all).",
@@ -1571,6 +1574,15 @@ def test_roster_state_support_holds_school_packet_content_notes_after_metadata_r
     assert any(
         row.get("SupportKind") == "school_packet_temporary_assignment_source"
         and row.get("Person") == "s_007"
+        and "Section 6.1" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "temporary_event_source_link"
+        and row.get("Person") == "s_007"
+        and row.get("Event") == "bridge_engineering"
+        and row.get("SourceNote") == "sch_2026_05_02_a"
         and "Section 6.1" in row.get("DisplayValue", "")
         and row.get("HelperClass") == "candidate-helper"
         for row in result_rows

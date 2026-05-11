@@ -92,7 +92,9 @@ clean-only. A second 2026-05-11 migration added candidate rows for adult lodging
 bus departure, observer permission scope, temporary-assignment source notes, and
 scanner clock-audit status. Targeted replay recovered `q009`, `q019`, `q021`,
 and `q038`; `q006` remains an event-to-source linkage problem because
-`temporary_event_assignment/4` lacks explicit section/note provenance.
+`temporary_event_assignment/4` lacked explicit section/note provenance. A
+follow-up added `temporary_event_source_link`, joining admitted temporary-event
+rows to source-record scheduling-note rows; targeted q006 replay became exact.
 
 `archive_authority_custody_support`: generic object-custody/access/recalled
 right joins can be clean on the precision authority artifact, but the probate

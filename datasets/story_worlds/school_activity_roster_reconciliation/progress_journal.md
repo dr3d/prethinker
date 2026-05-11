@@ -283,3 +283,38 @@ event-to-source linkage gap. The system has
 `temporary_event_assignment(s_007, bridge_engineering, 2026_05_02_11_00,
 2026_05_02_12_30)` and a candidate source-note row, but not a governed predicate
 that links the temporary event directly to Section 6.1 / `SCH-2026-05-02-A`.
+
+## SARR-008 - Temporary Event Source Link
+
+Date: 2026-05-11
+
+Evidence lane: `event_source_provenance`
+
+Artifacts:
+
+- targeted judged replay:
+  `tmp/transfer_fixtures_20260510/school_q006_event_source_link_targeted_judged_20260511/`
+- helper audit:
+  `tmp/transfer_fixtures_20260510/school_q006_event_source_link_cold_audit_20260511.json`
+- readout:
+  `tmp/transfer_fixtures_20260510/school_q006_event_source_link_delta_20260511.md`
+
+Code change:
+
+- added candidate-helper `temporary_event_source_link` rows to
+  `roster_state_support`, joining admitted `temporary_event_assignment/4` facts
+  to source-record scheduling-note rows in temporary-assignment sections
+
+Result:
+
+- `q006`: exact in targeted judged replay
+- `source_record_packet_metadata_support` remains clean-only:
+  `116 clean / 0 candidate / 0 unlabeled`
+
+Lesson:
+
+The last school packet miss was event provenance, not missing event semantics.
+The KB knew S-007 had the temporary Bridge engineering assignment and separately
+preserved `SCH-2026-05-02-A`; it needed a queryable link between the event and
+the scheduling note/section. This may generalize into an event-source ledger if
+more fixtures show the same pattern.
