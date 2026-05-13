@@ -89,7 +89,8 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-030 | Scoped-status delivery compression attempt. | Focused helper rows dropped `45 -> 36`, but unlike replay shifted exactness `36/1/3 -> 34/5/1`; code change rejected. |
 | BH-031 | Scoped-count precedence repair. | q032 moved partial -> exact by treating clean scoped-count rows as answer-bearing over broader status context. |
 | BH-032 | Corrected-interval duration probe. | Focused corrected-endpoint duration fixture passed `8/0/0`; wide temporal arithmetic miss is density, not a missing axis. |
-| BH-033 | Dense corrected-duration repair. | Dense probe moved `5/1/2 -> 8/0/0`; original wide coordinate improved but remains open due noisy temporal-join row explosion. |
+| BH-033 | Dense corrected-duration repair. | Dense probe moved `5/1/2 -> 8/0/0`; original wide coordinate exposed evidence-plan context loss across bundles. |
+| BH-034 | Cross-bundle evidence-plan temporal context. | Original wide q015 moved miss -> exact with one-row temporal support; no fixture vocabulary added. |
 
 ## Current Evidence
 
@@ -610,11 +611,82 @@ Next pressure:
 - Re-run original wide q015 only after row volume is bounded enough for the
   judge input to stay below provider limits.
 
+### BH-034 - Cross-Bundle Temporal Evidence Context
+
+Before:
+
+- BH-033 made dense corrected-duration probes interior, but original wide q015
+  remained open.
+- Replay after within-bundle execution context still missed and classified as
+  `hybrid_join_gap`.
+- Inspection showed the evidence plan split endpoint binding and elapsed-time
+  arithmetic across separate support bundles. Each bundle ran independently, so
+  temporal synthesis could not see both repaired endpoint constraints when the
+  duration query executed.
+
+Prediction:
+
+- If evidence-plan execution preserves one ordered proof context across all
+  validated support bundles, temporal join synthesis should assemble endpoint
+  source rows, event ids, corrected timestamps, and elapsed minutes in one
+  low-row query.
+- The repair should be about execution context and provenance, not any local
+  badge, room, source-row, or answer vocabulary.
+
+Intervention:
+
+- Changed `run_evidence_bundle_plan_queries()` so it validates templates with
+  their bundle provenance, then runs all valid plan queries through one
+  `run_query_plan()` call.
+- Preserved bundle provenance in `reasoning_basis`; multi-bundle joins now
+  report `source_bundles` instead of pretending they came from a single bundle.
+- Added a focused regression with neutral asset events, source-row endpoint
+  labels, corrected timestamps, and one elapsed-minute calculation.
+
+After:
+
+- Focused regression produces one temporal support row with both endpoint
+  source-row constraints and elapsed minutes bound.
+- Original wide q015 replay moved to `judge_exact: 1`, `miss: 0`, failure
+  surface `not_applicable`.
+- The successful support query returns one row and binds the two endpoint events,
+  corrected timestamps, and `DurationMinutes = 222.567`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- Failed within-bundle replay:
+  `tmp\boundary_corrected_duration_replay_q015_bundle_context_20260513`
+- Successful cross-bundle replay:
+  `tmp\boundary_corrected_duration_replay_q015_cross_bundle_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `135 passed`.
+- q015 replay against existing wide compile artifact:
+  `1 question`, `judge_exact 1`, `judge_miss 0`, `runtime_load_error_count 0`.
+
+Lesson:
+
+- Support bundles are provenance groups, not isolation boundaries. A temporal
+  answer can require endpoint evidence from multiple bundles plus one arithmetic
+  query. The generic execution rule is to validate each bundle separately but
+  preserve a shared ordered proof context for the plan as a whole.
+
+Next pressure:
+
+- Re-scan the remaining hybrid-join coordinates for other cases where support
+  bundles are correct locally but lose resolution because execution context is
+  segmented.
+- Continue trigger audits; this repair moved a boundary coordinate without
+  adding helper triggers, but recent trigger surfaces still need unlike probes.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | temporal join row explosion | Dense corrected-duration probe is interior, but original wide coordinate still produces broad Cartesian support before exact constraints dominate. | Prefer constraint-complete low-row temporal joins over broad successful joins. |
+| 1 | cross-bundle hybrid joins | q015 proved one segmented evidence-plan context gap; other hybrid misses may have the same geometry. | Classify remaining hybrid-join rows for context segmentation vs true missing join logic. |
 | 2 | compile-surface gaps | Full unlike replay still lacks emitted surfaces for source content, sector coverage, and timestamp-gap records. | Classify whether each is missing axis or dense source-addressability. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -624,12 +696,12 @@ Next pressure:
 
 Do this next:
 
-1. Repair temporal join row selection.
-2. Keep source-record sibling repairs and corrected timestamp bindings together
-   when testing smaller temporal joins.
-3. Prefer the lowest-row successful temporal support bundle that still binds
-   the requested start event, end event, and elapsed-time variables.
-4. Replay original wide q015 after row volume is bounded.
+1. Extract the remaining hybrid-join miss list from the wide corpus artifacts.
+2. Classify whether each coordinate is cross-bundle context segmentation,
+   missing join arithmetic, selector overbinding, or judge ambiguity.
+3. Pick the highest-count repeated geometry and build the next focused unlike
+   probe.
+4. Keep q015 as a closed regression, not a tuning target.
 
 ## OpenRouter Rule
 

@@ -11046,6 +11046,8 @@ def run_evidence_bundle_plan_queries(
     seen: set[str] = set()
     results: list[dict[str, Any]] = []
     bundles = evidence_plan.get("support_bundles", []) if isinstance(evidence_plan, dict) else []
+    plan_queries: list[str] = []
+    query_basis: dict[str, dict[str, str]] = {}
     for bundle in bundles:
         if not isinstance(bundle, dict):
             continue
@@ -11099,23 +11101,47 @@ def run_evidence_bundle_plan_queries(
                     }
                 )
                 continue
-            for item in run_query_plan(runtime, [query]):
-                item = dict(item)
-                result = item.get("result", {})
-                if isinstance(result, dict):
-                    result = {
-                        **result,
-                        "reasoning_basis": {
-                            "kind": "evidence-bundle-plan",
-                            "bundle_id": bundle_id,
-                            "purpose": purpose,
-                            "validation": "predicate_and_arity_checked",
-                            "inner_basis": result.get("reasoning_basis", {}),
-                        },
-                    }
-                    item["result"] = result
-                item["derived_from_queries"] = [*item.get("derived_from_queries", []), query]
-                results.append(item)
+            plan_queries.append(query)
+            query_basis[query] = {"bundle_id": bundle_id, "purpose": purpose}
+    if not plan_queries:
+        return results
+    for item in run_query_plan(runtime, plan_queries):
+        item = dict(item)
+        result = item.get("result", {})
+        derived_from = [
+            str(query).strip()
+            for query in item.get("derived_from_queries", [])
+            if str(query).strip()
+        ]
+        if not derived_from:
+            item_query = str(item.get("query", "")).strip()
+            if item_query:
+                derived_from = [item_query]
+        source_bundles: list[dict[str, str]] = []
+        seen_bundle_ids: set[str] = set()
+        for query in derived_from:
+            basis = query_basis.get(query)
+            if not basis:
+                continue
+            basis_key = json.dumps(basis, sort_keys=True)
+            if basis_key in seen_bundle_ids:
+                continue
+            seen_bundle_ids.add(basis_key)
+            source_bundles.append(dict(basis))
+        if isinstance(result, dict):
+            reasoning_basis: dict[str, Any] = {
+                "kind": "evidence-bundle-plan",
+                "validation": "predicate_and_arity_checked",
+                "inner_basis": result.get("reasoning_basis", {}),
+            }
+            if len(source_bundles) == 1:
+                reasoning_basis.update(source_bundles[0])
+            elif source_bundles:
+                reasoning_basis["source_bundles"] = source_bundles
+            result = {**result, "reasoning_basis": reasoning_basis}
+            item["result"] = result
+        item["derived_from_queries"] = derived_from
+        results.append(item)
     return results
 
 

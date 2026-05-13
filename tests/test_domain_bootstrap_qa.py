@@ -269,6 +269,64 @@ def test_evidence_bundle_plan_accepts_conjunctive_source_record_queries() -> Non
     assert results[0]["result"]["rows"][0]["Line"] == "src_1"
 
 
+def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_event(asset_1, ev_start).",
+        "asset_event(asset_1, ev_end).",
+        "corrected_timestamp(ev_start, 2026_01_01_10_00_00).",
+        "corrected_timestamp(ev_end, 2026_01_01_10_02_30).",
+        "source_record_field(src_start, event, ev_start).",
+        "source_record_field(src_start, description, hold_start).",
+        "source_record_field(src_end, event, ev_end).",
+        "source_record_field(src_end, description, hold_end).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={
+            "signatures": [
+                "asset_event/2",
+                "corrected_timestamp/2",
+                "source_record_field/3",
+            ]
+        },
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "timed_interval",
+                    "purpose": "Bind interval endpoint events through source rows before computing elapsed time.",
+                    "query_templates": [
+                        "asset_event(asset_1, StartEvent), "
+                        "source_record_field(StartEvent, description, hold_start), "
+                        "corrected_timestamp(StartEvent, StartTime).",
+                        "asset_event(asset_1, EndEvent), "
+                        "source_record_field(EndEvent, description, hold_end), "
+                        "corrected_timestamp(EndEvent, EndTime).",
+                        "elapsed_minutes(StartTime, EndTime, DurationMinutes).",
+                    ],
+                }
+            ]
+        },
+    )
+
+    temporal = [
+        item
+        for item in results
+        if "elapsed_minutes" in item.get("query", "")
+        and item.get("result", {}).get("status") == "success"
+    ]
+    assert temporal
+    rows = temporal[-1]["result"]["rows"]
+    assert len(rows) == 1
+    assert rows[0]["StartEventJoin1"] == "ev_start"
+    assert rows[0]["EndEventJoin2"] == "ev_end"
+    assert rows[0]["DurationMinutes"] == "2.5"
+    assert "SourceRowForStartEventJoin1" in temporal[-1]["query"]
+    assert "SourceRowForEndEventJoin2" in temporal[-1]["query"]
+
+
 def test_run_query_plan_repairs_source_record_numeric_token_constants() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
