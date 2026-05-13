@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import re
 import sys
 from collections.abc import Iterable, Sequence
@@ -53,6 +54,13 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=5, help="Number of passages to write.")
     parser.add_argument("--offset", type=int, default=0, help="Starting record offset.")
     parser.add_argument(
+        "--sample-strategy",
+        choices=["first", "even", "random"],
+        default="first",
+        help="How to choose passage-level records after grouping.",
+    )
+    parser.add_argument("--seed", type=int, default=13, help="Seed for --sample-strategy random.")
+    parser.add_argument(
         "--out-root",
         type=Path,
         default=DEFAULT_OUT_ROOT,
@@ -73,12 +81,36 @@ def _load_records(args: argparse.Namespace) -> list[dict[str, Any]]:
         raise SystemExit("--offset must be zero or positive")
     if args.local_jsonl:
         records = _coerce_race_records(_load_local_jsonl(args.local_jsonl))
-        return records[args.offset : args.offset + args.limit]
+        return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
 
     load_dataset = _import_huggingface_load_dataset()
     dataset = load_dataset(args.dataset, args.config, split=args.split)
     records = _coerce_race_records(dict(record) for record in dataset)
-    return records[args.offset : args.offset + args.limit]
+    return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
+
+
+def _select_records(
+    records: Sequence[dict[str, Any]],
+    *,
+    limit: int,
+    offset: int,
+    strategy: str,
+    seed: int,
+) -> list[dict[str, Any]]:
+    candidates = list(records[offset:])
+    if strategy == "first" or limit >= len(candidates):
+        return candidates[:limit]
+    if strategy == "even":
+        if limit == 1:
+            return [candidates[0]]
+        last = len(candidates) - 1
+        indexes = [round(position * last / (limit - 1)) for position in range(limit)]
+        return [candidates[index] for index in indexes]
+    if strategy == "random":
+        rng = random.Random(seed)
+        indexes = sorted(rng.sample(range(len(candidates)), limit))
+        return [candidates[index] for index in indexes]
+    raise ValueError(f"unknown sample strategy: {strategy}")
 
 
 def _import_huggingface_load_dataset() -> Any:

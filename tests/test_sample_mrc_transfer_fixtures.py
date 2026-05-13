@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts.sample_mrc_transfer_fixtures import _coerce_race_records, write_race_fixtures
+from scripts.sample_mrc_transfer_fixtures import _coerce_race_records, _select_records, write_race_fixtures
 from scripts.stage_incoming_fixtures import stage_fixture
 
 
@@ -94,3 +94,16 @@ def test_coerce_race_question_rows_groups_by_passage() -> None:
 
     assert record["questions"] == ["First?", "Second?"]
     assert record["answers"] == ["A", "B"]
+
+
+def test_select_records_evenly_spreads_candidates() -> None:
+    records = [{"example_id": f"sample-{index}"} for index in range(10)]
+
+    selected = _select_records(records, limit=4, offset=0, strategy="even", seed=13)
+
+    assert [row["example_id"] for row in selected] == [
+        "sample-0",
+        "sample-3",
+        "sample-6",
+        "sample-9",
+    ]

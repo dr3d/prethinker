@@ -28,6 +28,8 @@ comprehension records into Prethinker incoming fixture shape:
 python scripts/sample_mrc_transfer_fixtures.py --dataset ehovy/race --config high --split validation --limit 5
 ```
 
+Use `--sample-strategy even` for deterministic spread samples across a split.
+
 Output defaults to `tmp/mrc_transfer_samples`. Each sampled passage has:
 
 - `source.md` with passage text and source metadata;
@@ -193,3 +195,99 @@ Next pressure:
   with false-option selection or rule-application over an extracted formula.
 - Keep title/theme generation separate; it may be a deliberate out-of-scope
   answer-rendering class rather than a compiler repair.
+
+### DT-003 - RACE-50 Transfer Measurement
+
+Before:
+
+- DT-002 showed `7 / 2 / 6` over only `15` RACE questions. That was enough to
+  reveal new MRC-shaped boundary classes, but too small for repair decisions.
+- OpenRouter had failed on the compile phase with provider `503`, so local
+  compile remained the reliable source-reading lane.
+
+Prediction:
+
+- A 50-passage spread sample should stabilize whether the small RACE pack's
+  boundary classes recur.
+- The exact rate should move because 15 questions is a very wide confidence
+  interval.
+- Repairs should remain paused until recurrence is visible.
+
+Intervention:
+
+- Added deterministic spread sampling to
+  `scripts/sample_mrc_transfer_fixtures.py`.
+- Generated `25` middle-school and `25` high-school RACE validation passages
+  with `--sample-strategy even`.
+- Staged all `50` fixtures.
+- Compiled locally at two lanes.
+- Retried OpenRouter for QA. A two-fixture smoke passed, then full QA ran at
+  six lanes.
+- Added `scripts/summarize_mrc_transfer_qa.py` to make coordinate summaries
+  repeatable.
+
+After:
+
+- Staging: `50` fixtures staged, `0` failed.
+- Compile: `50` fixtures compiled, `0` runner errors.
+- QA: `177` questions, `97 exact / 8 partial / 68 miss / 4 not judged`.
+- Exact rate: `0.548`.
+- Runtime load errors: `0`.
+- Write proposal rows: `2`.
+- Helper rows: `0`.
+
+Artifacts:
+
+- Samples: `tmp\mrc_transfer_samples_race50_20260513`
+- Staged fixtures: `tmp\mrc_transfer_staged_race50_20260513`
+- Local compile: `tmp\mrc_transfer_compile_race50_local_20260513`
+- OpenRouter QA smoke: `tmp\mrc_transfer_qa_race50_or_smoke_20260513`
+- OpenRouter QA: `tmp\mrc_transfer_qa_race50_or_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_race50_or_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python -m pytest tests/test_sample_mrc_transfer_fixtures.py tests/test_stage_incoming_fixtures.py -q`
+  -> `8 passed`.
+- `python scripts\stage_incoming_fixtures.py --root tmp\mrc_transfer_samples_race50_20260513 --out-root tmp\mrc_transfer_staged_race50_20260513`
+  -> `50` staged, `0` failed.
+- `python scripts\run_domain_bootstrap_qa_batch.py ... --lanes 6 --base-url https://openrouter.ai/api/v1`
+  -> `177` questions, `97 / 8 / 68`, `0` runtime load errors.
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_or_20260513`
+  -> coordinate summary written.
+
+Provisional transfer-coordinate counts:
+
+- `direct_compile_surface_gap`: `23`
+- `implicit_attitude_or_consequence`: `18`
+- `background_role_or_audience_fact`: `14`
+- `false_or_exception_option_selection`: `10`
+- `title_theme_or_summary_answer`: `5`
+- `comparative_or_temporal_resolution`: `4`
+- `hybrid_join_resolution`: `2`
+- `answer_surface_mapping`: `1`
+- `formula_or_rule_application`: `1`
+- `query_surface_resolution`: `1`
+- `unclassified_transfer_coordinate`: `1`
+
+Lesson:
+
+- RACE-50 confirms that the small RACE sample was directionally right but
+  score-noisy: exact rate rose from `0.4667` to `0.548`.
+- The dominant new pressure is not helper volume; helper rows stayed at `0`.
+  The boundary is mostly compile-surface resolution plus MRC-native answer
+  behavior: attitude/consequence inference, role/audience facts,
+  false/exception-option selection, and title/theme mapping.
+- The `2` write-proposal rows are a safety signal. QA remained non-authoritative,
+  but external MRC prompts can still tempt the answerer to propose missing facts.
+
+Next pressure:
+
+- Do not repair from this measurement alone.
+- Manually audit a stratified sample from the top recurring coordinate classes,
+  especially `direct_compile_surface_gap`,
+  `implicit_attitude_or_consequence`, and
+  `false_or_exception_option_selection`.
+- Treat `title_theme_or_summary_answer` as likely answer-rendering/out-of-scope
+  until it proves otherwise.
