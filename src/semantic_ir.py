@@ -1800,6 +1800,7 @@ def _diagnose_candidate_operation(
     source = str(op.get("source", "")).strip().lower()
     polarity = str(op.get("polarity", "positive") or "positive").strip().lower()
     predicate = _predicate_name(op.get("predicate"))
+    raw_args = _operation_raw_arg_texts(op.get("args"))
     args = _operation_args(op.get("args"), entity_names=entity_names, for_query=operation == "query")
     proposition_id = str(op.get("proposition_id") or "").strip()
     proposition = _proposition_by_id(ir).get(proposition_id, {}) if proposition_id else {}
@@ -1854,7 +1855,12 @@ def _diagnose_candidate_operation(
         )
     if not predicate:
         return skip("invalid_predicate_name", codes=["predicate_shape_gate"])
-    grounding_problem = _generic_grounding_problem(predicate, args, operation=operation)
+    grounding_problem = _generic_grounding_problem(
+        predicate,
+        args,
+        raw_args=raw_args,
+        operation=operation,
+    )
     if grounding_problem:
         return skip(
             str(grounding_problem["reason"]),
@@ -3189,17 +3195,19 @@ def _generic_grounding_problem(
     predicate: str,
     args: list[str],
     *,
+    raw_args: list[str] | None = None,
     operation: str,
 ) -> dict[str, Any] | None:
     if not predicate or operation not in {"assert", "rule"}:
         return None
-    if any(arg in UNGROUNDED_ARGUMENT_ATOMS for arg in args):
+    raw_args = raw_args or []
+    if any(_is_ungrounded_argument_atom(arg, _raw_arg_at(raw_args, index)) for index, arg in enumerate(args)):
         return {
             "reason": "ungrounded_argument_atom",
             "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
             "codes": ["grounding_policy", "no_placeholder_commit"],
         }
-    if any(_is_placeholder_atom(arg) for arg in args):
+    if any(_is_placeholder_atom(arg, raw=_raw_arg_at(raw_args, index)) for index, arg in enumerate(args)):
         return {
             "reason": "ungrounded_argument_atom",
             "warning": f"skipped {predicate}/{len(args)} because an argument is an unresolved placeholder",
@@ -3214,10 +3222,47 @@ def _generic_grounding_problem(
     return None
 
 
-def _is_placeholder_atom(arg: str) -> bool:
+def _raw_arg_at(raw_args: list[str], index: int) -> str:
+    return raw_args[index] if index < len(raw_args) else ""
+
+
+def _operation_raw_arg_texts(raw_args: Any) -> list[str]:
+    if not isinstance(raw_args, list):
+        return []
+    return [_raw_arg_text(item) for item in raw_args]
+
+
+def _raw_arg_text(value: Any) -> str:
+    if isinstance(value, dict):
+        for key in ("surface", "normalized", "value", "id", "entity"):
+            if key in value:
+                return _raw_arg_text(value.get(key))
+        return ""
+    return str(value or "").strip()
+
+
+def _is_ungrounded_argument_atom(arg: str, raw: str = "") -> bool:
+    value = str(arg or "").strip().lower()
+    if value not in UNGROUNDED_ARGUMENT_ATOMS:
+        return False
+    if value in {"n_a", "na"} and _raw_arg_is_hyphenated_source_identifier(raw):
+        return False
+    return True
+
+
+def _raw_arg_is_hyphenated_source_identifier(raw: str) -> bool:
+    text = str(raw or "").strip()
+    if not text or "/" in text:
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+", text))
+
+
+def _is_placeholder_atom(arg: str, *, raw: str = "") -> bool:
     value = str(arg or "").strip().lower()
     if not value:
         return True
+    if value in {"n_a", "na"} and _raw_arg_is_hyphenated_source_identifier(raw):
+        return False
     return (
         value.startswith("unknown_")
         or value in {"null", "none", "n_a", "na", "not_provided", "unspecified"}

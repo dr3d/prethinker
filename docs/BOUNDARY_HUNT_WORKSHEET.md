@@ -99,6 +99,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-040 | Dense implicit-difference probe. | Dense multi-review probe exposed `7/1/3`: one compile-surface omission plus review-bound remaining-set join/count gaps. |
 | BH-041 | Review-bound remaining-set support. | Generic query-only support moved complete-contract rows exact while leaving R-A compile omissions exposed; scoped helper rows `22 -> 5`. |
 | BH-042 | Enumerated exclusion prompt probe. | Generic prompt-only compile retry did not recover the omitted first-notice exclusions; boundary remains compile-surface fidelity. |
+| BH-043 | Source identifier vs placeholder collision. | Mapper now distinguishes hyphenated source ids from `N/A` placeholders; dense implicit-difference replay moved to `11/0/0` with zero helper rows. |
 
 ## Current Evidence
 
@@ -1254,22 +1255,97 @@ Next pressure:
   report can preserve enough structured evidence for a targeted retry, without
   reading QA answers or encoding probe vocabulary.
 
+### BH-043 - Source Identifier Placeholder Collision
+
+Before:
+
+- BH-042 showed the source-record layer preserved the omitted exclusion
+  sentence, but the semantic compile admitted neither the first notice's
+  enumerated exclusions nor the first review's notice binding.
+- Skipped-operation diagnostics named unresolved placeholders.
+- Inspection found the real failure shape: the mapper treats normalized
+  `n_a`/`na` as placeholder atoms. A valid hyphenated source identifier such
+  as `N-A` also atomizes to `n_a`, so source-fidelity identifiers could be
+  erased after normalization.
+
+Prediction:
+
+- A raw-aware placeholder gate should admit hyphenated source identifiers while
+  still blocking real `N/A`/`NA` placeholders.
+- If the compile boundary is this mapper collision rather than a missing
+  relation axis, a fresh compile should have zero skipped placeholder rows and
+  the dense implicit-difference probe should move exact without another helper.
+
+Intervention:
+
+- Updated the semantic IR admission gate to pass raw argument text into generic
+  grounding checks.
+- Added a fixture-free distinction:
+  - raw `N-A`-style identifiers may normalize to `n_a` and remain admissible;
+  - raw `N/A`-style placeholders remain blocked.
+- Added a runtime regression that admits `excluded_by(t_02, n_a).` from a
+  hyphenated source identifier while still skipping the slash-form placeholder.
+
+After:
+
+- Focused unit tests passed.
+- Fresh OpenRouter compile:
+  `50` admitted, `0` skipped.
+- The compile preserved the formerly erased source identifier as facts such as
+  `notice_excludes(n_a, t_02)`, `notice_excludes(n_a, t_05)`, and
+  `review_excluded_by(r_a, n_a)`.
+- QA replay moved to `11 exact / 0 partial / 0 miss`.
+- Helper rows: `0`.
+
+Artifacts:
+
+- Code: `src\semantic_ir.py`
+- Test: `tests\test_semantic_ir_runtime.py`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage22_source_identifier_placeholder_20260513`
+- QA:
+  `tmp\boundary_probe_hybrid_qa_stage43_source_identifier_placeholder_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_semantic_ir_runtime.py -q` -> `89 passed`,
+  `2 subtests passed`.
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `140 passed`.
+- OpenRouter replay:
+  `question_count 11`, `judge_exact 11`, `judge_partial 0`, `judge_miss 0`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- Placeholder policy is part of source fidelity. A normalized atom can look
+  ungrounded even when the raw source form is a legitimate identifier. The
+  generic repair is not "allow this notice"; it is "do not collapse
+  hyphenated source ids into slash-form placeholder semantics."
+
+Next pressure:
+
+- Treat dense implicit set difference as interior for this probe shape.
+- Continue trigger audits and unlike-domain probes where helper or mapper
+  trigger conditions may be corpus-shaped even when helper bodies are clean.
+- Keep business-day and wall-clock arithmetic separate until an explicit probe
+  proves they share machinery.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | enumerated exclusion compile fidelity | Prompt-only retry did not recover omitted first-notice facts; source-record text has the sentence but semantic facts are missing. | Inspect skipped placeholder diagnostics and design a retry/mapper signal that stays fixture-free. |
+| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-043 showed admission gates also need raw/source-form audits. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
-| 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
-| 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
+| 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
+| 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |
 | 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
 
 ## Next Work
 
 Do this next:
 
-1. Inspect skipped placeholder diagnostics for enumerated relation rows and
-   design a compile retry/mapper signal that does not use QA answers.
+1. Audit trigger/admission gates for fixture-shaped source-form assumptions,
+   starting with helper triggers added during the recent hunt.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry

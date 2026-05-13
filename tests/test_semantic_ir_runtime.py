@@ -730,6 +730,40 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
 
+    def test_mapper_allows_hyphenated_source_identifier_that_normalizes_like_placeholder(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "excluded_by",
+                    "args": ["T-02", "N-A"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "predicate": "excluded_by",
+                    "args": ["T-03", "N/A"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["excluded_by/2"],
+        )
+        self.assertEqual(parsed["facts"], ["excluded_by(t_02, n_a)."])
+        self.assertTrue(any("unresolved placeholder" in warning for warning in warnings))
+        skipped = [
+            row
+            for row in parsed["admission_diagnostics"]["operations"]
+            if not row["admitted"]
+        ]
+        self.assertEqual(skipped[0]["skip_reason"], "ungrounded_argument_atom")
+
     def test_mapper_skips_placeholder_prefixed_argument_write(self) -> None:
         ir = _ir(
             candidate_operations=[
