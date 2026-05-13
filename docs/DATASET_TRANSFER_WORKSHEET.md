@@ -3841,3 +3841,87 @@ Next pressure:
   is small but real: the Rhine and imperialism rows should now be inside, while
   remaining rows should mostly be generic/category or lexical source-detail
   gaps.
+
+### DT-044 - Full SQuAD-30 Post-Repair Remeasurement
+
+Date: 2026-05-13
+
+Before:
+
+- DT-041 and DT-043 each passed focused unlike probes and targeted SQuAD
+  replays.
+- A full SQuAD-30 rerun was needed to check whether the repairs held under
+  broader QA pressure and whether new variance appeared.
+
+Prediction:
+
+- Rhine should remain inside.
+- Imperialism should improve if `causal_end_state_support` is accepted by the
+  judge under full-run context.
+- The overall score should be interpreted cautiously because QA judge variance
+  can move isolated rows even with the same compile.
+
+Intervention:
+
+- Reran QA over the existing DT-037 SQuAD-30 compile with current QA code,
+  OpenRouter at `6` lanes, and cache disabled.
+- Summarized the run with the transfer-coordinate intake audit.
+
+After:
+
+- Full SQuAD-30 rerun:
+  - Questions: `171`.
+  - Exact / partial / miss / not judged: `156 / 5 / 10 / 0`.
+  - Exact rate: `91.23%`.
+  - Non-exact rows: `15`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- Compared with DT-037 (`160 / 4 / 7`, `93.57%`):
+  - Resolved from old residue: `3`.
+  - New non-exacts: `7`.
+  - Still non-exact: `8`.
+- Important row movements:
+  - Rhine residual row moved inside in both targeted and full replay.
+  - Causal imperialism row moved in one targeted replay, but remained partial
+    in the full rerun and in a follow-up targeted replay despite a clean
+    `causal_end_state_support` row.
+  - Several new non-exacts are judge/query variance or known noisy references,
+    including an answer-surface row where the reference appears to repeat the
+    question subject instead of the designer.
+
+Artifacts:
+
+- Full QA:
+  `tmp\mrc_transfer_qa_squad30_dt043_full_20260513`
+- Summary:
+  `tmp\mrc_transfer_qa_squad30_dt043_full_20260513\transfer_coordinate_summary_with_intake.md`
+- Causal helper-policy targeted replay:
+  `tmp\mrc_transfer_qa_squad30_dt043_imperialism_causal_helper_policy_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt043_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt043_full_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_dt043_full_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_dt043_full_20260513\transfer_coordinate_summary_with_intake.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00027_imperialism --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt043_imperialism_causal_helper_policy_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Focused probe success is necessary but not sufficient. The full SQuAD rerun
+  exposed judge/directness variance around the causal helper, even though the
+  helper row was present and clean.
+- The residual-share repair is stable enough for the current evidence: the
+  Rhine row stayed inside without helper rows.
+- Causal end-state support is architecturally useful, but the judge still has a
+  directness bias for questions phrased as "what ended" when the reference
+  names an upstream cause. Do not hard-code the SQuAD reference preference into
+  architecture; keep this as causal/directness pressure.
+- The current full score is a measurement, not a regression verdict. It should
+  be tracked as a cold QA rerun with variance, while stable focused probes and
+  targeted rows remain the stronger evidence for specific repairs.
+
+Next pressure:
+
+- Do not chase the full-run score row by row. Next useful work is to separate
+  judge/reference noise from durable architecture pressure: answer-surface
+  false-reference rows, directness bias in causal chains, and remaining
+  category/generalization source-detail gaps.

@@ -254,6 +254,7 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "Complementary-relation policy" in source
     assert "Anchor-answer policy" in source
     assert "Causal-chain policy" in source
+    assert "Causal-helper policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source
