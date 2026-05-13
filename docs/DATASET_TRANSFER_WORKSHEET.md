@@ -1121,3 +1121,94 @@ Next pressure:
   numeric-to-label category rendering.
 - Keep semantic-bridge inference in the queue, but do not let it crowd out
   source-surface and answer-rendering repairs that recur across external data.
+
+### DT-012 - Answer-Surface Mapping Probe
+
+Before:
+
+- SQuAD-10 residue suggested answer-surface pressure:
+  acronym expansion, season versus event date, template placeholders,
+  numeric-to-label category rendering, authority joins, and submission recipient
+  binding.
+- The risk was overgeneralizing from SQuAD rows before isolating which of those
+  surfaces were actually outside the set.
+
+Prediction:
+
+- If answer-surface mapping is broadly missing, a focused probe should miss
+  abbreviation expansion, season/date selection, placeholder retrieval,
+  numeric-to-label rendering, and identifier selection.
+- If those pass, the remaining boundary is narrower: role/authority/recipient
+  binding across nearby event and metadata surfaces.
+
+Intervention:
+
+- Added
+  `experiments\boundary_probes\dataset_transfer_stage1\answer_surface_mapping_ladder`.
+- The probe contains `8` open-ended questions over compact registry notes.
+- Ran OpenRouter compile/QA with source-record ledger facts enabled.
+
+After:
+
+- Compile:
+  - Parsed OK.
+  - `16` candidate predicates.
+  - `51` admitted facts.
+  - `0` skipped facts.
+- QA:
+  - `8` questions.
+  - `6 exact / 0 partial / 2 miss`.
+  - Exact rate `0.75`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `0`.
+- Passing surfaces:
+  - Abbreviation expansion.
+  - Season versus event-date selection.
+  - Template placeholder retrieval.
+  - Numeric-to-label scale rendering.
+  - Program-year versus reception-date selection.
+  - Filing identifier versus inspection code selection.
+- Misses:
+  - Classification agent: compile attributed the classification to the recorder
+    rather than preserving the classifier as the authority.
+  - Submission recipient: query/join failed to bind the submitted object to the
+    recipient instead of nearby action performers.
+
+Artifacts:
+
+- Probe fixture:
+  `experiments\boundary_probes\dataset_transfer_stage1\answer_surface_mapping_ladder`
+- Compile:
+  `tmp\boundary_probe_dataset_compile_answer_surface_source_records_20260513`
+- QA:
+  `tmp\boundary_probe_dataset_qa_answer_surface_source_records_20260513`
+- Coordinate summary:
+  `tmp\boundary_probe_dataset_qa_answer_surface_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture answer_surface_mapping_ladder --out-root tmp\boundary_probe_dataset_compile_answer_surface_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture answer_surface_mapping_ladder --compile-root tmp\boundary_probe_dataset_compile_answer_surface_source_records_20260513 --out-root tmp\boundary_probe_dataset_qa_answer_surface_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_dataset_qa_answer_surface_source_records_20260513`
+
+Lesson:
+
+- Most of the apparent answer-surface class is already inside the set when
+  isolated.
+- The live boundary is not generic answer rendering. It is role binding:
+  distinguish the actor who classifies from the registrar who records, and the
+  recipient of a submission from adjacent actors in the event sequence.
+- This aligns with older authority-envelope work but in external-dataset form:
+  the question asks for a role in a relation, and nearby source surfaces contain
+  plausible but wrong roles.
+
+Next pressure:
+
+- Build or sample a role-binding/recipient-binding probe before making a repair.
+- Candidate repair, if proven across unlike probes: reward evidence rows that
+  bind relation, object, and requested role in the same surface; penalize nearby
+  recorder/announcer/performer rows when the question asks classifier,
+  recipient, approver, witness, or owner.
+- Keep abbreviation, placeholder, season/date, scale-label, and identifier
+  surfaces off the repair queue for now because the focused probe passed them.
