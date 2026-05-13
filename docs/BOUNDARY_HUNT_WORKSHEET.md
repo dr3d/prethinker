@@ -103,6 +103,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-044 | Identifier alias trigger audit. | Suffix-form alias support now requires an observed canonical suffix entity, preventing coincidental suffix collisions from becoming alias architecture. |
 | BH-045 | Source-section status trigger audit. | Section-prefix status counts now require a source-record label query surface instead of firing from unrelated `*_status` query names. |
 | BH-046 | Status timeline projection trigger audit. | Broad `*_status` timeline support now requires a status/state-like projection variable, preventing role/date predicates from being treated as state histories. |
+| BH-047 | Scheduled-state negative trigger probe. | Scheduled-state support was confirmed not to fire for ordinary scheduled events outside the event-to-state lexicon. |
 
 ## Current Evidence
 
@@ -1492,11 +1493,59 @@ Next pressure:
   transition probes. Scheduled-state support is already constrained by a small
   event-to-state lexicon, but it still deserves a negative probe.
 
+### BH-047 - Scheduled-State Negative Trigger Probe
+
+Before:
+
+- Scheduled-state support fires from `scheduled_*` predicates when the event
+  type maps to a state such as archived, closed, revoked, suspended,
+  terminated, or active.
+- This looked safer than suffix-only triggering, but it still needed a negative
+  probe because ordinary scheduled events are temporal, not necessarily state
+  transitions.
+
+Prediction:
+
+- A scheduled event with no event-to-state mapping should not emit
+  `status_timeline_summary_support`.
+
+Intervention:
+
+- Added a regression with `scheduled_meeting(Entity, Date)`.
+- No production code change was needed; the existing event-to-state gate
+  already rejected the event.
+
+After:
+
+- `scheduled_archive(Entity, Date)` still emits scheduled-state support.
+- `scheduled_meeting(Entity, Date)` emits no status timeline helper.
+
+Artifacts:
+
+- Test: `tests\test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `144 passed`.
+
+Lesson:
+
+- Not every trigger audit needs a repair. The useful distinction is temporal
+  event vs state transition; the current scheduled-state gate already encodes
+  that distinction through a small state lexicon instead of any `scheduled_*`
+  predicate.
+
+Next pressure:
+
+- Move from trigger tightening to a small source-form transfer probe, especially
+  non-English or non-sectioned source forms where source fidelity may be weak
+  but should not be repaired with English-only fixture vocabulary.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 to BH-046 tightened suffix-alias, section-status, and status-timeline triggers after fixture-free false-positive probes. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
+| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 to BH-047 tightened or confirmed suffix-alias, section-status, status-timeline, and scheduled-state triggers. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |

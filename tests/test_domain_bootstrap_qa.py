@@ -493,6 +493,15 @@ def test_run_query_plan_exposes_scheduled_state_summary_for_scheduled_query() ->
     assert support["result"]["rows"][0]["SupportKind"] == "scheduled_state_transition"
 
 
+def test_scheduled_state_summary_ignores_non_state_scheduled_events() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("scheduled_meeting(credential_a, 2026_03_05).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["scheduled_meeting(credential_a, MeetingDate)."])
+
+    assert not any(item["result"].get("predicate") == "status_timeline_summary_support" for item in rows)
+
+
 def test_run_query_plan_exposes_identifier_alias_count_for_event_surface() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
