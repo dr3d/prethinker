@@ -231,7 +231,7 @@ These are as important as the positive ones:
 - **[The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)** - plain-language guide to the reader/control lenses and how they differ.
 - **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
 - **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether active guard return sites are collapsing into a smaller number of semantic families (currently 4 families, 0 unclassified)
-- **[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md)** - tracks whether remaining failures form multi-fixture work slices (currently 72 targets across 10 fixtures, organized into 9 recommended slices)
+- **[Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)** - active workbench for wide-corpus boundary coordinates and transferable repairs
 - **[Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)** - the fixture design methodology, difficulty calibration, and cross-fixture regression protocol
 
 ---

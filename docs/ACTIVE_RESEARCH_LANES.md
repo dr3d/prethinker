@@ -93,11 +93,11 @@ The immediate CTO job is the boundary hunt described in
 failure geometry, design small probes around one axis at a time, and promote
 only repairs that replay on unlike rows.
 
-Cross-fixture repair growth is now tracked by
-`docs/CROSS_FIXTURE_REPAIR_SLICES.md`: the current planner reads repair-target
-artifacts only and turns `72` unresolved targets across `10` fixtures into `9`
-multi-fixture slices. Use this to pick GPU work that transfers before adding
-another lens or guard.
+The older cross-fixture repair-slice report is archived outside the active tree.
+Current boundary growth is tracked by `docs/BOUNDARY_HUNT_WORKSHEET.md` and
+`docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`: classify not-exact rows by
+fixture-free failure geometry, then use focused probes to decide whether a
+repair transfers before adding another lens or guard.
 
 ## Representative Fixtures
 

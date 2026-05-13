@@ -1,6 +1,6 @@
 # Prethinker Docs
 
-![Semantic Lenses Plain Guide](assets/Semantic%20Lenses-Plain%20Guide.png)
+![Semantic Lenses Plain Guide](assets/semantic-lenses-plain-guide.png)
 
 This directory contains the current public documentation for Prethinker.
 

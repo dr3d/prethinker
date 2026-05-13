@@ -53,7 +53,7 @@ def instrument_manifest() -> dict[str, Any]:
             },
             {
                 "name": "signature_compare",
-                "command": "python docs/refactor_proposals/kb_pipeline_clean/scenario_cli.py --compare <baseline.json> <candidate.json>",
+                "command": "python scripts/run_kb_pipeline_clean_harness.py --compare <baseline.json> <candidate.json>",
                 "reason": "Diffs canonical signatures by structural path for extraction parity.",
                 "reads": ["canonical signature JSON"],
                 "writes": [],
@@ -89,8 +89,7 @@ def instrument_manifest() -> dict[str, Any]:
         "docs": [
             "docs/CURRENT_HARNESS_INSTRUMENT.md",
             "docs/ACTIVE_RESEARCH_LANES.md",
-            "docs/refactor_proposals/kb_pipeline_clean/README.md",
-            "docs/refactor_proposals/kb_pipeline_clean/MIGRATION_MATRIX.md",
+            "PROJECT_STATE.md",
         ],
         "next_extraction_rule": "wrap -> replay -> extract -> compare -> retire",
     }

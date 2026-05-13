@@ -1,6 +1,6 @@
 # Prethinker
 
-![Semantic Lenses Plain Guide](docs/assets/Semantic%20Lenses-Plain%20Guide.png)
+![Semantic Lenses Plain Guide](docs/assets/semantic-lenses-plain-guide.png)
 
 **A governed write layer between natural language and a deterministic knowledge base.**
 

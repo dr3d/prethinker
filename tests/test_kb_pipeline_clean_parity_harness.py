@@ -143,7 +143,7 @@ def test_scenario_cli_can_run_direct_trace_plan() -> None:
     completed = subprocess.run(
         [
             sys.executable,
-            "docs/refactor_proposals/kb_pipeline_clean/scenario_cli.py",
+            "scripts/run_kb_pipeline_clean_harness.py",
             "--trace-plan",
         ],
         check=True,
@@ -174,12 +174,12 @@ def test_daily_driver_cli_prints_instrument_manifest() -> None:
     assert manifest["role"] == "daily_driver_research_instrument"
 
 
-def test_docs_proposal_imports_promoted_harness_surface() -> None:
-    from docs.refactor_proposals.kb_pipeline_clean.parity_harness import canonical_process_result as docs_canonical
-    from docs.refactor_proposals.kb_pipeline_clean.parse_normalization import trace_plan as docs_trace_plan
+def test_daily_driver_imports_promoted_harness_surface() -> None:
+    from src.kb_pipeline_clean import canonical_process_result as promoted_canonical
+    from src.kb_pipeline_clean import trace_plan as promoted_trace_plan
 
-    assert docs_canonical is canonical_process_result
-    assert docs_trace_plan()[0]["normalizer"] == "schema_field_normalizer"
+    assert promoted_canonical is canonical_process_result
+    assert promoted_trace_plan()[0]["normalizer"] == "schema_field_normalizer"
 
 
 def test_daily_driver_replay_process_case_emits_signature_and_comparison() -> None:

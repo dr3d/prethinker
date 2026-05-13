@@ -424,7 +424,6 @@ families. The current rollup has `5` active guard return sites, `5` unique guard
 reasons, `4` families, and `0` unclassified reasons; the companion ledger keeps
 retired/scar history visible.
 
-[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md) is generated
-from repair-target artifacts and tracks whether remaining failures are forming
-multi-fixture semantic work slices. The current report has `72` targets across
-`10` fixtures and recommends `9` multi-fixture slices.
+[Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) is the active
+workbench for not-exact rows that remain after guard compression. The older
+cross-fixture repair-slice report has moved to the external archive.

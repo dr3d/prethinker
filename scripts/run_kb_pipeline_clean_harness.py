@@ -227,6 +227,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--instrument-md", action="store_true", help="Print the harness instrument manifest as Markdown.")
     parser.add_argument("--trace-plan", action="store_true", help="Print the clean normalizer trace plan.")
     parser.add_argument("--audit-normalizers", action="store_true", help="Audit clean normalizer mapping against kb_pipeline.")
+    parser.add_argument("--compare", nargs=2, type=Path, metavar=("BASELINE", "CANDIDATE"), help="Compare two canonical signature JSON files.")
     parser.add_argument("--pack", type=Path, default=None, help="Replay a process_utterance frontier-style pack.")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--out-dir", type=Path, default=ROOT / "tmp" / "runs" / "kb_pipeline_clean_harness")
@@ -266,8 +267,13 @@ def main() -> int:
     if args.audit_normalizers:
         print(json.dumps(normalizer_inventory_audit(), indent=2, sort_keys=True))
         return 0
+    if args.compare:
+        baseline = _load_json(args.compare[0])
+        candidate = _load_json(args.compare[1])
+        print(json.dumps(compare_signatures(baseline, candidate), indent=2, sort_keys=True))
+        return 0
     if args.pack is None:
-        print("No run selected. Use --trace-plan, --audit-normalizers, or --pack.")
+        print("No run selected. Use --trace-plan, --audit-normalizers, --compare, or --pack.")
         return 2
 
     pack = _load_json(args.pack)

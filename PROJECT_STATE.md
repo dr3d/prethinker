@@ -150,14 +150,10 @@ verdict = records what happened
   scorecard shape and names the current top slices as
   `narrative_event_detail_surface` and
   `governance_authority_rationale_surface`.
-- Cross-fixture repair planning is available through
-  `scripts/plan_cross_fixture_repair_slices.py`, with the current report at
-  `docs/CROSS_FIXTURE_REPAIR_SLICES.md`. It merges the older full-40 repair
-  targets and promoted zip-batch targets without source-prose interpretation:
-  `72` targets across `10` fixtures collapse into `9` multi-fixture repair
-  slices. The top repeated themes are rule interpretation/application,
-  object state/custody, rationale/claim uncertainty, and temporal/status
-  deadline repair.
+- The older cross-fixture repair-slice report has moved to the external archive.
+  Current boundary work lives in `docs/BOUNDARY_HUNT_WORKSHEET.md` and
+  `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, which classify not-exact rows by
+  fixture-free boundary geometry before promoting repairs.
 - First action from that planner: a scoped rule-interpretation/application
   source-surface pass over Heronvale and Meridian. Meridian is a strong local
   lift: full-40 moved from `26 exact / 10 partial / 4 miss` in the archived
@@ -593,7 +589,7 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
 - Mapper admission diagnostics now include human-readable `admission_justifications` derived from deterministic gates and rationale codes. Each operation can explain accepted-because and blocked-because reasons such as allowed palette, predicate contract pass, direct source, source-policy block, or missing durable rule clause.
 - A first labeled router training seed lives at `docs/data/router_training/router_training_seed_v1.jsonl` with 164 examples assembled from frontier packs, multilingual probes, and mixed-domain agility cases.
 - `semantic_ir_lava_pack_v5` is retained as historical mixed-domain calibration evidence. It targets truth-maintenance dependency pressure, predicate canonicalization drift, claim/fact/observation promotion, segmentation semantics, multilingual ontology pressure, rule sufficiency, source fidelity, and bootstrap behavior, but it is no longer the active research frontier.
-- `scripts/run_semantic_ir_lava_sweep.py --fast` remains available as an archived stress-pack smoke. Routine active research should prefer current fixture scorecards, cross-fixture repair slices, and compiled KB artifact packages.
+- `scripts/run_semantic_ir_lava_sweep.py --fast` remains available as an archived stress-pack smoke. Routine active research should prefer current fixture scorecards, boundary-hunt coordinates, and compiled KB artifact packages.
 - A new research note, `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, captures the meta-profile idea: when no domain profile exists, a strong model may propose candidate entity types, predicates, contracts, risks, clarification policies, and starter frontier cases. This is review material for creating a profile, not authority for durable writes.
 - A first `profile_bootstrap_v1` harness now exists at `scripts/run_profile_bootstrap.py` with a contracts/compliance seed fixture. It asks the local structured-output model to propose a candidate domain profile, then scores schema validity, generic predicate use, and whether starter frontier cases stay inside the proposed predicate palette and arities.
 - `scripts/run_profile_bootstrap_loop.py` now closes the meta-profile loop: it loads a local profile bootstrap run, projects its candidate predicates/contracts into a temporary Semantic IR profile, runs the generated starter cases through the normal model+mapper path, and scores valid JSON, palette skips, must-not violations, and expected-boundary hits.

@@ -231,10 +231,12 @@ docs:
 - noisy or multilingual phrasing;
 - profile-owned validators that avoid English-specific Python patches.
 
-Those pressures map directly to the concrete work plan in
-[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md),
-where recurring failures are grouped into multi-fixture repair slices rather
-than chased as one-off local accidents.
+Those pressures map directly to the current boundary-hunt method in
+[Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
+and
+[Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md),
+where recurring failures are classified by fixture-free geometry before they
+become repairs.
 
 Those are not distractions from the main project. They are the path to making
 the authority boundary real.
