@@ -1,0 +1,8 @@
+{"category":"counterfactual_arithmetic_join","id":"q001","reference_answer":"146 units.","source_id":"q001"}
+{"category":"counterfactual_arithmetic_join","id":"q002","reference_answer":"C-8 proposed adding 17 standby units.","source_id":"q002"}
+{"category":"counterfactual_arithmetic_join","id":"q003","reference_answer":"No. C-8 remained pending, so the 17 standby units were excluded from the active reserve count.","source_id":"q003"}
+{"category":"counterfactual_arithmetic_join","id":"q004","reference_answer":"163 units: 146 plus 17.","source_id":"q004"}
+{"category":"counterfactual_arithmetic_join","id":"q005","reference_answer":"312 parts.","source_id":"q005"}
+{"category":"counterfactual_arithmetic_join","id":"q006","reference_answer":"V-2 proposed subtracting 24 parts marked for rework.","source_id":"q006"}
+{"category":"counterfactual_arithmetic_join","id":"q007","reference_answer":"No. V-2 was not approved before release, so the 24 parts were not subtracted from the approved release count.","source_id":"q007"}
+{"category":"counterfactual_arithmetic_join","id":"q008","reference_answer":"288 parts: 312 minus 24.","source_id":"q008"}

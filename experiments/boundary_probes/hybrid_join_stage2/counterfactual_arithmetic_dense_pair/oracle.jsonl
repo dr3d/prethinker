@@ -1,0 +1,12 @@
+{"category":"counterfactual_arithmetic_join","id":"q001","reference_answer":"260 credits.","source_id":"q001"}
+{"category":"counterfactual_arithmetic_join","id":"q002","reference_answer":"Adjustment J-10 was already reflected; it removed 9 duplicate credits before the 260-credit allocation was published.","source_id":"q002"}
+{"category":"counterfactual_arithmetic_join","id":"q003","reference_answer":"J-11 proposed adding 18 temporary reserve credits.","source_id":"q003"}
+{"category":"counterfactual_arithmetic_join","id":"q004","reference_answer":"No. J-11 was not adopted, so the 18 reserve credits were excluded from the standing allocation.","source_id":"q004"}
+{"category":"counterfactual_arithmetic_join","id":"q005","reference_answer":"278 credits: the standing allocation of 260 plus the 18 credits proposed by J-11.","source_id":"q005"}
+{"category":"counterfactual_arithmetic_join","id":"q006","reference_answer":"No. J-12 was withdrawn before review and is not part of the live planning comparison.","source_id":"q006"}
+{"category":"counterfactual_arithmetic_join","id":"q007","reference_answer":"74 seats.","source_id":"q007"}
+{"category":"counterfactual_arithmetic_join","id":"q008","reference_answer":"Exception R-4 was already reflected; it removed 6 blocked seats before the official capacity was posted.","source_id":"q008"}
+{"category":"counterfactual_arithmetic_join","id":"q009","reference_answer":"R-5 proposed adding 12 temporary seats.","source_id":"q009"}
+{"category":"counterfactual_arithmetic_join","id":"q010","reference_answer":"No. R-5 failed inspection, so the 12 temporary seats were excluded from the official capacity.","source_id":"q010"}
+{"category":"counterfactual_arithmetic_join","id":"q011","reference_answer":"86 seats: the official capacity of 74 plus the 12 seats proposed by R-5.","source_id":"q011"}
+{"category":"counterfactual_arithmetic_join","id":"q012","reference_answer":"No. R-6 was superseded by R-5 and should not be used for the current hypothetical review.","source_id":"q012"}

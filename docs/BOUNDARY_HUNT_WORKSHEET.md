@@ -83,15 +83,17 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-023 to BH-024 | Scoped semantic filter repair and unlike replay. | Predicate-scoped and source-section-scoped forms transfer; helper delivery still noisy. |
 | BH-025 | Trigger sanity stage 1. | Sectionless scoped counts passed; state-word and non-English source-fidelity risks surfaced. |
 | BH-026 | Trigger sanity stage 2. | Canonical alias probe passed; numeric prose source-fidelity repair moved `14/0/2` to `15/0/1`. |
+| BH-027 | Counterfactual arithmetic stated-outcome probes. | Simple and dense stated-outcome variants passed `20/0/0`; boundary is not basic counterfactual retrieval. |
+| BH-028 | Counterfactual arithmetic unstated-result probe and generic compile repair. | Unstated add/subtract variant exposed `7/0/1`; source-pass contract guidance moved replay to `8/0/0`. |
 
 ## Current Evidence
 
-Trigger sanity stage 2 after the generic source-record repair:
+Counterfactual arithmetic after the source-pass contract repair:
 
 ```text
-questions: 16
-exact / partial / miss: 15 / 0 / 1
-exact rate: 0.9375
+questions: 28
+exact / partial / miss: 28 / 0 / 0
+exact rate: 1.0000
 helper rows: 0
 runtime load errors: 0
 write proposal rows: 0
@@ -101,32 +103,158 @@ Per fixture:
 
 | Probe | Exact | Partial | Miss | Read |
 | --- | ---: | ---: | ---: | --- |
-| `canonical_alias_register` | 8 | 0 | 0 | Canonical alias duplication is not currently a stable boundary in this focused shape. |
-| `multilingual_source_fidelity_card` | 7 | 0 | 1 | Numeric prose source-fidelity improved; remaining miss is hybrid arithmetic. |
+| `counterfactual_arithmetic_pair` | 8 | 0 | 0 | Basic unlike pair passed when the hypothetical outcome was stated. |
+| `counterfactual_arithmetic_dense_pair` | 12 | 0 | 0 | Multiple adjustments and disposition decoys passed when the hypothetical outcome was stated. |
+| `counterfactual_arithmetic_unstated_pair` | 8 | 0 | 0 | Unstated add/subtract outcome passed after generic source-pass contract guidance. |
 
 Generic repair already made:
 
-- `src/source_record_ledger.py` preserves numeric prose rows when they contain a
-  numeric token plus enough prose context.
-- This is source addressability only. It does not infer counts, status,
-  approval, withdrawal, or causality.
-- It does not add source-language word lists.
+- `scripts/run_domain_bootstrap_file.py` now reminds focused source-pass
+  compiles that predicate contract arity is strict.
+- The guidance requires arithmetic/counterfactual language to preserve grounded
+  component rows first: base count or amount, operation type, delta value,
+  target entity, calculation view, and view basis when those predicates exist.
+- It prefers component facts over invented final-result facts when the source
+  gives an arithmetic instruction but does not print the final result.
+- No helper was added, and no fixture ids, row ids, source nouns, or answer
+  strings entered the harness.
 
 Verification:
 
 ```text
-python -m pytest tests\test_source_record_ledger.py -q
-16 passed
-
-python -m py_compile src\source_record_ledger.py
-passed
+OpenRouter compile/QA:
+counterfactual_arithmetic_pair: 8 / 0 / 0
+counterfactual_arithmetic_dense_pair: 12 / 0 / 0
+counterfactual_arithmetic_unstated_pair before repair: 7 / 0 / 1
+counterfactual_arithmetic_unstated_pair after repair: 8 / 0 / 0
 ```
+
+## Recent Journal
+
+### BH-027 - Counterfactual Arithmetic Stated Outcomes
+
+Before:
+
+- Active board priority 1 was `counterfactual_arithmetic_join`.
+- Wide not-exact evidence suggested current totals plus excluded/proposed
+  additions were present but not assembled into hypothetical results.
+
+Prediction:
+
+- If a focused unlike pair with stated hypothetical outcomes failed, the
+  geometry would justify a generic arithmetic/join repair.
+- If it passed, the wide misses were denser than basic stated-outcome retrieval.
+
+Intervention:
+
+- Added `experiments/boundary_probes/hybrid_join_stage2/counterfactual_arithmetic_pair`.
+- Added `experiments/boundary_probes/hybrid_join_stage2/counterfactual_arithmetic_dense_pair`.
+- Ran OpenRouter compile/QA through the existing governed harness.
+
+After:
+
+- Simple pair: `8/0/0`, helper rows `0`.
+- Dense pair: `12/0/0`, helper rows `0`.
+- The dense compile emitted explicit hypothetical outcome surfaces and kept
+  adopted, excluded, withdrawn, superseded, and rejected dispositions separate.
+
+Artifacts:
+
+- `tmp\boundary_probe_hybrid_compile_stage8_20260513`
+- `tmp\boundary_probe_hybrid_qa_stage16_20260513`
+- `tmp\boundary_probe_hybrid_compile_stage9_20260513`
+- `tmp\boundary_probe_hybrid_qa_stage19_20260513`
+
+Verification:
+
+- No runtime load errors.
+- No write proposals.
+- No helper delivery needed.
+
+Lesson:
+
+- Counterfactual arithmetic is inside the set when the source prints the
+  hypothetical outcome or makes it easy for the compiler to emit that outcome.
+  The boundary is not the word "counterfactual"; it is whether the answer
+  requires preserving and assembling component surfaces without a printed final
+  result.
+
+Next pressure:
+
+- Remove the printed final outcome and force component preservation before any
+  helper or arithmetic rule is considered.
+
+### BH-028 - Unstated Result Contract Repair
+
+Before:
+
+- The unstated add/subtract pair compiled with `8` admitted facts and `8`
+  skipped operations.
+- QA was `7/0/1`; the miss was the subtractive hypothetical result.
+- Compile warnings showed wrong-arity and unresolved-placeholder operations:
+  `active_count/1`, `proposed_change/3`, `view_delta/9`, and
+  `hypothetical_result/10`.
+
+Prediction:
+
+- A fixture-free repair should improve component admission, not teach the
+  harness any local identifier or source phrase.
+- If component facts survived with correct arity, the existing planner/judge
+  path could answer without a new helper.
+
+Intervention:
+
+- Updated focused source-pass guidance in `scripts/run_domain_bootstrap_file.py`.
+- Added strict contract-arity guidance.
+- Added arithmetic component guidance: preserve base count or amount, operation
+  type, delta value, target entity, calculation view, and view basis.
+- Added a caution against inventing final-result facts when the source gives
+  an arithmetic instruction but does not print the final value.
+
+After:
+
+- Replay compile admitted `12` facts and skipped `0`.
+- Replay QA was `8/0/0`, helper rows `0`.
+- The compile emitted generic component predicates such as `current_count/3`,
+  `proposed_change/5`, `hypothetical_calculation_defined/3`, and
+  `view_not_printed/1`.
+
+Artifacts:
+
+- Before repair:
+  `tmp\boundary_probe_hybrid_compile_stage10_20260513`,
+  `tmp\boundary_probe_hybrid_qa_stage20_20260513`
+- After repair:
+  `tmp\boundary_probe_hybrid_compile_stage11_20260513`,
+  `tmp\boundary_probe_hybrid_qa_stage21_20260513`
+
+Verification:
+
+- OpenRouter compile/QA after repair: `8/0/0`.
+- No helper rows.
+- No runtime load errors.
+- No write proposals.
+
+Lesson:
+
+- The first real counterfactual-arithmetic gap was not an arithmetic helper
+  absence. It was a compile-resolution issue: the model proposed the right
+  predicate families but violated their arity or filled arguments with
+  unresolved calculation prose. Contract obedience is a boundary-control
+  surface.
+
+Next pressure:
+
+- Replay against the wide not-exact arithmetic coordinates if they are
+  available. If replay holds, move this class from active pressure to extended
+  interior. If wide rows still miss, classify whether they require multi-step
+  arithmetic, unit conversion, policy gating, or query-planner changes.
 
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | `counterfactual_arithmetic_join` | Current total plus excluded/proposed addition count is present, but not assembled as a hypothetical result. | Build an unlike pair before any helper; repair only if the geometry transfers. |
+| 1 | `counterfactual_arithmetic_join` wide replay | Focused probes now pass, including unstated add/subtract after generic compile guidance. | Replay or sample the original not-exact arithmetic coordinates; classify any survivors by density. |
 | 2 | `scoped_status_count_support` delivery volume | Transfer succeeded but helper rows were high in unlike replay. | Compress delivery scope without weakening source-fidelity. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -135,15 +263,19 @@ passed
 
 Do this next:
 
-1. Create a focused unlike pair for counterfactual arithmetic joins.
-2. Run compile/QA on OpenRouter at 6 lanes or fewer.
-3. Classify before repair:
-   - if current total and increment are absent, it is compile-surface;
-   - if present but not assembled, it is hybrid-join;
-   - if the judge misses supported arithmetic, it is answer-surface.
-4. Repair only if the pair shows a reusable geometry.
-5. Journal the result as BH-027 with before, prediction, intervention, after,
-   artifacts, verification, lesson, and next pressure.
+1. Replay or sample the original wide not-exact rows tagged as
+   `counterfactual_arithmetic_join`.
+2. Check whether the source-pass contract repair changes their compile
+   admission before looking at QA.
+3. Classify survivors:
+   - multi-step arithmetic;
+   - unit conversion;
+   - policy/status gating;
+   - planner under-retrieval over clean component rows;
+   - judge-only ambiguity.
+4. Only add a helper if clean component rows exist and repeated unlike misses
+   still require query-time assembly.
+5. Then return to `scoped_status_count_support` delivery volume.
 
 ## OpenRouter Rule
 
