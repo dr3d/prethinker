@@ -17,6 +17,7 @@ from scripts.run_domain_bootstrap_qa import (
     _fallback_queries_from_semantic_ir,
     _location_floor_hint_queries,
     _negative_join_with_previous,
+    _negative_reference_supported_by_results,
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
@@ -259,6 +260,30 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source
     assert "driver_license/2" in source
+
+
+def test_negative_reference_supported_by_negative_query_results() -> None:
+    row = {
+        "query_results": [
+            {
+                "query": "exercises_quality_control(operator, X).",
+                "result": {
+                    "status": "success",
+                    "rows": [{"X": "no_control"}],
+                },
+            },
+            {
+                "query": "source_record_text_atom(src_line_0011, TextAtom).",
+                "result": {
+                    "status": "success",
+                    "rows": [{"TextAtom": "operator_does_not_carry_any_control_over_output_quality"}],
+                },
+            },
+        ]
+    }
+
+    assert _negative_reference_supported_by_results(row=row, reference="not") is True
+    assert _negative_reference_supported_by_results(row=row, reference="picture quality") is False
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:

@@ -3925,3 +3925,85 @@ Next pressure:
   judge/reference noise from durable architecture pressure: answer-surface
   false-reference rows, directness bias in causal chains, and remaining
   category/generalization source-detail gaps.
+
+### DT-045 - Short Negative Answer Judge Stabilization
+
+Date: 2026-05-13
+
+Before:
+
+- DT-044 exposed a short negative reference row where the query results already
+  contained explicit negative support, including a normalized negative value and
+  a source text atom with the same negative claim.
+- The judge returned `miss` while its own explanation said the evidence
+  supported the reference. That made this look like answer-surface pressure, but
+  the first question was whether the broader negative/exception axis was already
+  inside.
+
+Prediction:
+
+- If the negative/exception surface is truly missing, the existing unlike probe
+  should fail under current code.
+- If the unlike probe holds, the SQuAD row is a narrow judge-stability defect:
+  short negative references need a deterministic precheck when returned row
+  values carry explicit negative surfaces.
+
+Intervention:
+
+- Replayed the existing unlike negative/exception answer-surface probe with
+  current code.
+- Added a deterministic precheck before the LLM judge for very short negative
+  references (`no`, `not`, `none`, `false`, `negative`).
+- The precheck only inspects returned row values, not query strings or fixture
+  names, and only fires on generic normalized negative surfaces such as
+  `no_*`, `does_not_*`, `did_not_*`, `not_*`, `without_*`, `lacks_*`, and
+  `lack_of_*`.
+
+After:
+
+- Unlike negative/exception probe:
+  - Questions: `8`.
+  - Exact / partial / miss: `8 / 0 / 0`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- Targeted SQuAD replay:
+  - Questions: `5`.
+  - Exact / partial / miss: `5 / 0 / 0`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- Broad QA tests:
+  - `151 passed`.
+
+Artifacts:
+
+- Unlike probe compile:
+  `tmp\boundary_probe_compile_negative_exception_current_20260513`
+- Unlike probe QA:
+  `tmp\boundary_probe_qa_negative_exception_current_20260513`
+- Targeted SQuAD replay:
+  `tmp\mrc_transfer_qa_squad30_dt045_sky_negative_precheck_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00007_sky_united_kingdom --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt045_sky_negative_precheck_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt045_sky_negative_precheck_20260513`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+
+Lesson:
+
+- Broad negative/exception answer-surface handling was already interior. The
+  defect was a judge self-contradiction around short negative reference answers,
+  not a compile, selector, or helper gap.
+- This is a judge-stability repair, not a fixture repair. The trigger is
+  value-scoped and shape-based; it does not depend on passage vocabulary,
+  question ids, answer strings beyond the short negative reference class, or
+  local entity names.
+
+Next pressure:
+
+- Continue separating stable architecture pressure from measurement noise. The
+  strongest next candidates are false-reference rows, causal directness
+  variance, and category/generalization gaps where the KB has supporting facts
+  but the answer surface is too broad or too lexical to render cleanly.

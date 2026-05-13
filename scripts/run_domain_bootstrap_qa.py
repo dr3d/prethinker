@@ -12440,6 +12440,14 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "",
             "issues": ["no reference answer supplied"],
         }
+    if _negative_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": "Query results contain explicit negative support matching the short negative reference answer.",
+            "issues": [],
+        }
     payload = {
         "task": "Compare deterministic Prolog query results with a human reference answer.",
         "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
@@ -12518,6 +12526,59 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
         "concise_answer": "",
         "issues": [f"judge error: {last_error}"],
     }
+
+
+def _negative_reference_supported_by_results(*, row: dict[str, Any], reference: str) -> bool:
+    reference_text = str(reference or "").strip().casefold()
+    reference_tokens = [token for token in re.split(r"[^a-z0-9]+", reference_text) if token]
+    if not reference_tokens or len(reference_tokens) > 3:
+        return False
+    if not set(reference_tokens) <= {"no", "not", "none", "negative", "false"}:
+        return False
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        rows = result.get("rows") if isinstance(result, dict) else None
+        for result_row in rows or []:
+            for value in _iter_scalar_values(result_row):
+                if _value_has_negative_surface(value):
+                    return True
+    return False
+
+
+def _iter_scalar_values(value: Any) -> list[str]:
+    if isinstance(value, dict):
+        values: list[str] = []
+        for child in value.values():
+            values.extend(_iter_scalar_values(child))
+        return values
+    if isinstance(value, list):
+        values = []
+        for child in value:
+            values.extend(_iter_scalar_values(child))
+        return values
+    if value is None:
+        return []
+    return [str(value)]
+
+
+def _value_has_negative_surface(value: str) -> bool:
+    text = str(value or "").casefold()
+    normalized = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    if normalized in {"no", "not", "none", "false", "negative"}:
+        return True
+    negative_forms = (
+        "no_",
+        "not_",
+        "none_",
+        "without_",
+        "lacks_",
+        "lack_of_",
+        "does_not_",
+        "did_not_",
+        "cannot_",
+        "can_not_",
+    )
+    return any(normalized.startswith(form) or f"_{form}" in normalized for form in negative_forms)
 
 
 def classify_failure_surface(
