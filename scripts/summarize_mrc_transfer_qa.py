@@ -149,9 +149,8 @@ def classify_proposition_type(row: dict[str, Any]) -> str:
     """
     question = _strip_options(str(row.get("utterance") or ""))
     answer = str(row.get("reference_answer") or "")
-    rationale = str((row.get("failure_surface") or {}).get("rationale") or "")
     coordinate = classify_transfer_coordinate(row)
-    text = " ".join([question, answer, rationale]).casefold()
+    text = " ".join([question, answer]).casefold()
 
     if coordinate == "title_theme_or_summary_answer" or _has_any(
         text,
@@ -267,8 +266,10 @@ def _is_categorical_proposition(question: str, answer: str, coordinate: str) -> 
             "described as",
             "best described as",
             "meaning of",
+            "short for",
             "means",
             "stands for",
+            "stand for",
             "category",
             "label",
         ],

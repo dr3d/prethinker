@@ -729,19 +729,19 @@ Movement:
   - `25` improved.
   - `9` regressed.
 - Improved rows by original proposition type:
-  - `inference`: `12`
-  - `factual`: `7`
+  - `factual`: `10`
+  - `inference`: `9`
   - `categorical`: `3`
   - `comparative`: `2`
   - `synthesis`: `1`
 - Regressed rows by new proposition type:
-  - `inference`: `4`
-  - `factual`: `3`
+  - `factual`: `4`
+  - `inference`: `3`
   - `comparative`: `1`
   - `synthesis`: `1`
 - Non-exact proposition-type shift:
-  - `inference`: `22 -> 14`
-  - `factual`: `11 -> 9`
+  - `inference`: `19 -> 12`
+  - `factual`: `14 -> 11`
   - `comparative`: `6 -> 5`
   - `categorical`: `3 -> 0`
   - `synthesis`: `2 -> 2`
@@ -774,7 +774,7 @@ Verification:
 - `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_options_or_20260513`
 - `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_source_records_20260513`
 - `python -m pytest tests\test_summarize_mrc_transfer_qa.py tests\test_sample_mrc_transfer_fixtures.py tests\test_stage_incoming_fixtures.py -q`
-  - `25 passed`
+  - `29 passed`
 
 Lesson:
 
@@ -972,7 +972,7 @@ Verification:
 - `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture semantic_bridge_inference_ladder --compile-root tmp\boundary_probe_dataset_compile_semantic_bridge_source_records_20260513 --out-root tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
 - `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513`
 - `python -m pytest tests\test_summarize_mrc_transfer_qa.py tests\test_sample_mrc_transfer_fixtures.py tests\test_stage_incoming_fixtures.py -q`
-  - `28 passed`
+  - `29 passed`
 
 Manual audit:
 
@@ -1012,3 +1012,112 @@ Next pressure:
   as separate pressures.
 - Do not implement semantic-bridge repair until the same pressure recurs across
   unlike sources without answer-option vocabulary.
+
+### DT-011 - SQuAD-10 Open-Ended Transfer Check
+
+Before:
+
+- DT-010 confirmed that semantic-bridge pressure can appear without
+  multiple-choice answer labels, but the probe was synthetic.
+- The next useful measurement was a small real open-ended external dataset slice
+  using the same source-record default path.
+
+Prediction:
+
+- If Prethinker handles ordinary open-ended extractive QA cleanly, a small
+  SQuAD slice should score higher than the RACE MCQ slice because most questions
+  ask for directly stated spans.
+- Remaining misses should shift away from RACE-style answer-option semantics
+  and toward source-fidelity, acronym/label mapping, authority joins, and
+  numeric/category rendering.
+
+Intervention:
+
+- Sampled `10` SQuAD validation passages with deterministic even spread.
+- Staged the sampled passages through the existing incoming-fixture adapter.
+- Ran six-lane OpenRouter compile/QA with source-record ledger facts enabled.
+- Regenerated the transfer-coordinate summary with the tightened proposition
+  and coordinate taxonomy.
+
+After:
+
+- Sampling/staging:
+  - `10` fixtures sampled.
+  - `10` staged.
+  - `0` staging failures.
+- Compile:
+  - `10 / 10` parsed.
+  - `92` candidate predicates.
+  - `385` admitted facts.
+  - `2` skipped facts.
+- QA:
+  - `71` questions.
+  - `62 exact / 1 partial / 8 miss`.
+  - Exact rate `0.8732`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `20`, pressure label `bounded_helper_surface`.
+- Non-exact proposition types:
+  - `factual`: `6`
+  - `inference`: `1`
+  - `comparative`: `1`
+  - `categorical`: `1`
+- Non-exact coordinates:
+  - `direct_compile_surface_gap`: `4`
+  - `answer_surface_mapping`: `2`
+  - `background_role_or_audience_fact`: `1`
+  - `false_or_exception_option_selection`: `1`
+  - `implicit_attitude_or_consequence`: `1`
+
+Artifacts:
+
+- Sampled fixtures:
+  `tmp\mrc_transfer_samples_squad10_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_squad10_20260513`
+- Compile:
+  `tmp\mrc_transfer_compile_squad10_source_records_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_squad10_source_records_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad10_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\sample_mrc_transfer_fixtures.py --source-format squad --dataset squad --no-config --split validation --limit 10 --sample-strategy even --out-root tmp\mrc_transfer_samples_squad10_20260513`
+- `python scripts\stage_incoming_fixtures.py --root tmp\mrc_transfer_samples_squad10_20260513 --out-root tmp\mrc_transfer_staged_squad10_20260513`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad10_20260513 --out-root tmp\mrc_transfer_compile_squad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad10_20260513 --compile-root tmp\mrc_transfer_compile_squad10_source_records_20260513 --out-root tmp\mrc_transfer_qa_squad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad10_source_records_20260513`
+
+Manual audit:
+
+- The SQuAD slice is much more extractive than RACE:
+  `87.32%` exact versus the corrected RACE source-record replay at `83.05%`.
+- The residue is not dominated by semantic-bridge inference.
+  - Acronym expansion and template placeholder retrieval are source-surface
+    mapping problems.
+  - Counterfactual Roman numeral naming is external rule/format mapping.
+  - Season versus event-date asks for better answer-surface selection.
+  - Authority of a classification asks for a join between content relation and
+    source/authority relation.
+  - One partial row asks for an inferred submission recipient.
+
+Lesson:
+
+- Open-ended QA is not automatically harder than MCQ. The structural variable is
+  still proposition type and answer-surface shape.
+- SQuAD supports the current direction: direct extractive QA is mostly inside
+  the set with source-record facts enabled; remaining pressure is specific and
+  classifiable.
+- The semantic-bridge pressure remains real, but SQuAD-10 shows it is not the
+  dominant open-ended external residue in an extractive dataset.
+
+Next pressure:
+
+- Do not repair from SQuAD-10 yet.
+- The next high-value focused probe is answer-surface mapping:
+  season versus event date, acronym expansion, placeholder/template values, and
+  numeric-to-label category rendering.
+- Keep semantic-bridge inference in the queue, but do not let it crowd out
+  source-surface and answer-rendering repairs that recur across external data.

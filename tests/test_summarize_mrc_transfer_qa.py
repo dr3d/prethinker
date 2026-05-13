@@ -105,6 +105,19 @@ def test_classify_categorical_proposition_type() -> None:
     assert classify_proposition_type(row) == "categorical"
 
 
+def test_short_for_question_is_categorical_not_inference() -> None:
+    row = {
+        "utterance": "What is AFC short for?",
+        "reference_answer": "American Football Conference",
+        "failure_surface": {
+            "surface": "compile_surface_gap",
+            "rationale": "The failure rationale may mention missing inference, but the proposition is an acronym expansion.",
+        },
+    }
+
+    assert classify_proposition_type(row) == "categorical"
+
+
 def test_classify_synthesis_proposition_type() -> None:
     row = {
         "utterance": "What is the best title for this passage?",
