@@ -4065,3 +4065,31 @@ def test_generic_status_query_derives_interval_support_from_transition_anchors()
     assert result_row["EffectiveFrom"] == "2025_09_10"
     assert result_row["EffectiveUntil"] == "2025_09_22"
     assert result_row["ObservedEntity"] == "lot_5b"
+
+
+def test_status_at_query_derives_interval_support_from_transition_anchors() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_status_at(asset_9, 2025_08_28, held).",
+        "asset_status_at(asset_9, 2025_09_10, under_review).",
+        "asset_status_at(asset_9, 2025_09_22, released).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["asset_status_at(asset_9, 2025_09_15, Status)."],
+    )
+    companion = [
+        row
+        for row in rows
+        if row.get("query")
+        == "asset_status_at_interval_support(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+    ]
+
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["Status"] == "under_review"
+    assert result_row["EffectiveFrom"] == "2025_09_10"
+    assert result_row["EffectiveUntil"] == "2025_09_22"
+    assert result_row["ObservedEntity"] == "asset_9"

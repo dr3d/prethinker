@@ -91,6 +91,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-032 | Corrected-interval duration probe. | Focused corrected-endpoint duration fixture passed `8/0/0`; wide temporal arithmetic miss is density, not a missing axis. |
 | BH-033 | Dense corrected-duration repair. | Dense probe moved `5/1/2 -> 8/0/0`; original wide coordinate exposed evidence-plan context loss across bundles. |
 | BH-034 | Cross-bundle evidence-plan temporal context. | Original wide q015 moved miss -> exact with one-row temporal support; no fixture vocabulary added. |
+| BH-035 | Generic `*_status_at` interval support. | Two original wide point-state coordinates moved miss -> exact by recognizing `Entity, Date, Status` transition predicates. |
 
 ## Current Evidence
 
@@ -682,12 +683,82 @@ Next pressure:
 - Continue trigger audits; this repair moved a boundary coordinate without
   adding helper triggers, but recent trigger surfaces still need unlike probes.
 
+### BH-035 - Point-State Predicate Grammar
+
+Before:
+
+- A six-lane replay of stale wide `hybrid_join_gap` rows after BH-034 covered
+  `33` replayable coordinates from `15` fixtures.
+- Result: `12 exact / 6 partial / 15 miss`.
+- Several old hybrid rows moved exact just from cross-bundle context, but two
+  point-state rows reclassified as compile-surface gaps even though their
+  compiled KB had transition anchors before and after the requested date.
+- Existing interval support covered `case_status_at_date(Entity, Date, Status)`
+  and generic `*_status(Entity, Status, Date)`, but not the equally generic
+  `*_status_at(Entity, Date, Status)` grammar.
+
+Prediction:
+
+- Adding `*_status_at` and `*_state_at` support to the existing interval
+  companion should derive interior-date status from admitted transition anchors.
+- The repair should be predicate-shape grammar only: no local entity names,
+  source sections, question ids, or answer strings.
+
+Intervention:
+
+- Extended `_status_at_date_interval_companion()` to recognize
+  `*_status_at(Entity, Date, Status)` and `*_state_at(Entity, Date, Status)`.
+- Reused the existing transition-anchor interval logic and support-row schema:
+  query entity, requested date, status, effective-from, effective-until, observed
+  entity, entity match, support kind.
+- Added a neutral `asset_status_at` regression.
+
+After:
+
+- Focused tests passed.
+- Original wide point-state replay moved two rows to exact:
+  `2 questions`, `judge_exact 2`, `judge_miss 0`.
+- The emitted support rows have one row each and use `SupportKind:
+  transition_anchor`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- Six-lane hybrid replay:
+  `tmp\boundary_hybrid_replay_cross_bundle_20260513`
+- Point-state replay:
+  `tmp\boundary_status_at_replay_greenhouse_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `136 passed`.
+- Point-state replay:
+  `2 exact / 0 partial / 0 miss`, `runtime_load_error_count 0`,
+  `write_proposal_rows 0`.
+
+Lesson:
+
+- Some rows labeled compile-surface gaps are really grammar-resolution gaps:
+  the facts are present, but the query-time interval companion only recognizes
+  one conventional argument order. Predicate-shape transfer is legitimate when
+  the grammar remains fixture-free and reuses existing support semantics.
+
+Next pressure:
+
+- Recompute the replayable hybrid residue after BH-034 and BH-035:
+  old `42` hybrid rows -> `33` replayable rows -> `12` exact by replay,
+  then `2` additional exact by point-state grammar.
+- The remaining repeated geometries look like arithmetic aggregation, set
+  difference/deduplication, interval arithmetic with business-day or time-of-day
+  rules, and source-text numeric fallback. Pick one geometry and probe unlike.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | cross-bundle hybrid joins | q015 proved one segmented evidence-plan context gap; other hybrid misses may have the same geometry. | Classify remaining hybrid-join rows for context segmentation vs true missing join logic. |
-| 2 | compile-surface gaps | Full unlike replay still lacks emitted surfaces for source content, sector coverage, and timestamp-gap records. | Classify whether each is missing axis or dense source-addressability. |
+| 1 | arithmetic aggregation joins | Remaining replayed hybrid rows repeatedly require summing, averaging, applying deltas, or business-day/clock arithmetic over admitted facts. | Build focused unlike probes that separate arithmetic grammar from source-specific quantities. |
+| 2 | set difference and dedupe | Remaining rows include universe-minus-affected sets, duplicate exclusion, union-after-amendment, and grouped-item counts. | Probe generic set subtraction/dedup before adding any helper. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
@@ -696,12 +767,13 @@ Next pressure:
 
 Do this next:
 
-1. Extract the remaining hybrid-join miss list from the wide corpus artifacts.
-2. Classify whether each coordinate is cross-bundle context segmentation,
-   missing join arithmetic, selector overbinding, or judge ambiguity.
-3. Pick the highest-count repeated geometry and build the next focused unlike
-   probe.
-4. Keep q015 as a closed regression, not a tuning target.
+1. Build a small unlike arithmetic-aggregation probe with printed components
+   but no printed final answer.
+2. Keep business-day and wall-clock arithmetic separate until a probe proves
+   they share machinery.
+3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
+   evidence.
+4. Keep q015 and the point-state rows as closed regressions, not tuning targets.
 
 ## OpenRouter Rule
 

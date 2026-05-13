@@ -10728,6 +10728,19 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         entity_key = "QueryCase"
         observed_key = "ObservedCase"
         match_key = "CaseMatch"
+    elif predicate.endswith(("_status_at", "_state_at")):
+        entity_arg = str(args[0]).strip()
+        date_arg = str(args[1]).strip()
+        status_arg = str(args[2]).strip()
+        timeline_query = format_prolog_query(predicate, ["Entity", "Date", "Status"])
+        result_predicate = predicate
+        support_query = (
+            f"{predicate}_interval_support"
+            "(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+        )
+        entity_key = "QueryEntity"
+        observed_key = "ObservedEntity"
+        match_key = "EntityMatch"
     elif predicate.endswith("_status"):
         entity_arg = str(args[0]).strip()
         status_arg = str(args[1]).strip()
