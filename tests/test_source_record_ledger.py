@@ -321,6 +321,39 @@ def test_source_record_ledger_keeps_numeric_prose_without_english_count_words() 
     assert "source_record_numeric_token(src_line_0007, v_11)." in facts
 
 
+def test_source_record_ledger_emits_parenthetical_alias_surfaces() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Passage",
+                "",
+                "The Harbor Review League (HRL) convened the meeting.",
+                "The Maritime Audit Council (MAC) observed but did not vote.",
+                "The event named the parent body as part of the National Football League (NFL).",
+                "N. Park 206 (medical-coverage station) stayed unchanged.",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_parenthetical_alias(src_line_0003, hrl, harbor_review_league)." in facts
+    assert "source_record_alias(src_line_0003, hrl, harbor_review_league)." in facts
+    assert "source_record_alias(src_line_0003, harbor_review_league, hrl)." in facts
+    assert "source_record_parenthetical_alias(src_line_0004, mac, maritime_audit_council)." in facts
+    assert "source_record_parenthetical_alias(src_line_0005, nfl, national_football_league)." in facts
+    assert not any(
+        fact.startswith(("source_record_parenthetical_alias(", "source_record_alias("))
+        and "of_the_national_football_league" in fact
+        for fact in facts
+    )
+    assert not any(
+        fact.startswith(("source_record_parenthetical_alias(", "source_record_alias("))
+        and "medical_coverage_station" in fact
+        for fact in facts
+    )
+
+
 def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

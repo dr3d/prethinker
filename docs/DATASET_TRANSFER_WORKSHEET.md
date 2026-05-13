@@ -2026,3 +2026,441 @@ Next pressure:
 - Next data move should be a cleaner document-grounded corpus, because PrivacyQA
   has now taught the methodology more about intake noise than about remaining
   Prethinker architecture gaps.
+
+### DT-022 - Cross-Dataset Intake Lens
+
+Before:
+
+- DT-021 added the transfer-intake audit after PrivacyQA revealed that external
+  rows can look like compile gaps while actually being question/reference/source
+  alignment noise.
+- The next decision was whether to continue PrivacyQA, return to SQuAD, or look
+  for a new corpus.
+
+Prediction:
+
+- Cleaner open-ended extraction datasets should show low
+  `likely_reference_mismatch`.
+- Datasets whose task is option selection, legal taxonomy classification, or
+  noisy snippet alignment should show more `review` or mismatch pressure.
+
+Intervention:
+
+- Ran the new intake audit across existing transfer sample roots.
+- Re-rendered coordinate summaries with intake overlays for SQuAD, CUAD, MAUD,
+  and PrivacyQA where QA artifacts were available.
+
+After:
+
+- SQuAD-10:
+  - Intake: `65 ok / 6 review / 0 likely_reference_mismatch` over `71`.
+  - QA: `62 exact / 1 partial / 8 miss`, exact `87.32%`.
+  - Coordinates remain real architecture coordinates; no intake overlay changed
+    them.
+- CUAD-10:
+  - Intake: `29 ok / 11 review / 0 likely_reference_mismatch` over `40`.
+  - QA: `28 exact / 2 partial / 10 miss`, exact `70.0%`.
+  - CUAD is ugly but still mostly answer-aligned enough to interpret.
+- MAUD-10:
+  - Intake: `5 ok / 35 review / 0 likely_reference_mismatch` over `40`.
+  - QA: `17 exact / 1 partial / 22 miss`, exact `42.5%`.
+  - The audit agrees with DT-017: MAUD is mostly taxonomy/rubric pressure, not
+    clean extraction pressure.
+- RACE-50 options:
+  - Intake: `0 ok / 158 review / 19 likely_reference_mismatch` over `177`.
+  - This lexical intake audit is not a good fit for option-selection surfaces;
+    MCQ should be audited by option/proposition type, not reference literalness.
+- PrivacyQA-30:
+  - Intake: `7 ok / 19 review / 4 likely_reference_mismatch` over `30`.
+  - Intake overlay moves the four non-exacts to
+    `dataset_answer_alignment_noise`.
+
+Artifacts:
+
+- SQuAD intake:
+  `tmp\mrc_transfer_samples_squad10_20260513\transfer_intake_audit.md`
+- SQuAD coordinate summary with intake:
+  `tmp\mrc_transfer_qa_squad10_source_records_20260513\transfer_coordinate_summary_with_intake.md`
+- CUAD intake:
+  `tmp\mrc_transfer_samples_cuad10_20260513\transfer_intake_audit.md`
+- MAUD intake:
+  `tmp\mrc_transfer_samples_maud10_20260513\transfer_intake_audit.md`
+
+Verification:
+
+- Intake audit ran successfully on SQuAD, RACE, CUAD, MAUD, and PrivacyQA sample
+  roots.
+- Coordinate summaries with intake overlays rendered for SQuAD, CUAD, MAUD, and
+  PrivacyQA.
+
+Lesson:
+
+- The next clean measurement surface is SQuAD, not PrivacyQA. PrivacyQA is
+  useful but noisy; SQuAD gives open-ended, source-grounded extraction with no
+  likely reference/source mismatches in the current sample.
+- The intake audit should be interpreted by dataset format. It is strong for
+  open-ended extraction, useful for legal extraction, and not sufficient for MCQ
+  option-selection tasks.
+
+Next pressure:
+
+- Widen SQuAD with the intake audit in the loop.
+- Use the resulting non-exact coordinates as cleaner boundary evidence than
+  PrivacyQA's noisy residue.
+
+### DT-023 - SQuAD-30 Clean Transfer Measurement
+
+Before:
+
+- DT-022 selected SQuAD as the cleanest next measurement surface because
+  PrivacyQA taught the transfer loop about intake noise, while SQuAD-10 had no
+  likely reference/source mismatches.
+- SQuAD-10 measured `62 exact / 1 partial / 8 miss` over `71`, exact `87.32%`.
+
+Prediction:
+
+- A wider SQuAD slice should stabilize the open-ended extraction score.
+- Because the intake audit should remain clean, SQuAD non-exacts should be
+  treated as architecture coordinates rather than dataset-alignment noise.
+
+Intervention:
+
+- Sampled `30` SQuAD validation passages with deterministic even spread.
+- Staged them into transfer fixtures.
+- Ran the transfer-intake audit before QA.
+- Compiled all fixtures through OpenRouter at `6` lanes with source-record
+  ledger facts enabled.
+- Ran QA through OpenRouter at `6` lanes and summarized coordinates with the
+  intake overlay.
+
+After:
+
+- Intake audit:
+  - Rows: `171`.
+  - `ok`: `163`.
+  - `review`: `8`.
+  - `likely_reference_mismatch`: `0`.
+  - OK rate: `95.32%`.
+- Compile:
+  - Parsed: `30 / 30`.
+  - Transport failures: `0`.
+- QA:
+  - Questions: `171`.
+  - Exact / partial / miss: `134 / 5 / 32`.
+  - Exact rate: `78.36%`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper pressure: `bounded_helper_surface`, `1` row, `0.007` rows/exact.
+- Non-exact proposition types:
+  - `factual`: `33`.
+  - `inference`: `2`.
+  - `categorical`: `1`.
+  - `synthesis`: `1`.
+- Transfer coordinates:
+  - `direct_compile_surface_gap`: `26`.
+  - `query_surface_resolution`: `3`.
+  - `answer_surface_mapping`: `2`.
+  - `background_role_or_audience_fact`: `2`.
+  - `false_or_exception_option_selection`: `1`.
+  - `implicit_attitude_or_consequence`: `1`.
+  - `judge_transport_uncertain`: `1`.
+  - `title_theme_or_summary_answer`: `1`.
+
+Artifacts:
+
+- Samples:
+  `tmp\mrc_transfer_samples_squad30_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_squad30_20260513`
+- Compile artifacts:
+  `tmp\mrc_transfer_compile_squad30_source_records_20260513`
+- QA artifacts:
+  `tmp\mrc_transfer_qa_squad30_source_records_20260513`
+- Intake audit:
+  `tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.md`
+- Coordinate summary with intake:
+  `tmp\mrc_transfer_qa_squad30_source_records_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python scripts\audit_mrc_transfer_intake.py --root tmp\mrc_transfer_samples_squad30_20260513 --out-json tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-md tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.md`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\mrc_transfer_compile_squad30_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_source_records_20260513 --out-root tmp\mrc_transfer_qa_squad30_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_source_records_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_source_records_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_source_records_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- SQuAD-30 is not an intake-quality problem. The row alignment is clean enough
+  that the non-exacts should be treated as real boundary evidence.
+- The dominant gap is value-bearing compile resolution: dense descriptive
+  passages can produce predicates that name a property without binding the
+  answer value. That is different from helper delivery pressure and different
+  from PrivacyQA-style reference noise.
+- The lower SQuAD-30 score does not contradict SQuAD-10. It reveals cluster
+  sensitivity: a single dense event-description passage can contain many
+  questions over the same under-resolved coordinate.
+
+Next pressure:
+
+- Audit the `direct_compile_surface_gap` cluster by shape, not by passage topic.
+- Build a small unlike probe for value-bearing event attributes: event-to-date,
+  event-to-location, event-to-participant, event-to-outcome, and acronym/name
+  expansion. The probe must avoid SQuAD topic vocabulary while testing whether
+  compile can bind extracted values instead of emitting unary marker facts.
+
+### DT-024 - Event Attribute Value Probe Pair
+
+Before:
+
+- SQuAD-30 produced `26` `direct_compile_surface_gap` non-exacts.
+- The largest cluster came from value-bearing event questions where the compile
+  recognized properties such as date, location, participant, outcome, season,
+  alternate label, or acronym context, but did not expose the answer value as a
+  queryable coordinate.
+
+Prediction:
+
+- If value-bearing event attributes are a missing generic axis, an unlike probe
+  should fail even when topic vocabulary is replaced.
+- If the axis is already inside the set, focused probes should pass and the
+  SQuAD cluster should be treated as a denser resolution problem or a
+  run-specific compile variant.
+
+Intervention:
+
+- Added a sectioned unlike probe for event-to-value attributes:
+  `experiments\boundary_probes\dataset_transfer_stage2\event_attribute_value_ladder`.
+- Added a denser paragraph-shaped variant with adjacent participants, score,
+  event date, venue, city, cycle, archival label, acronym expansion, and final
+  appointments:
+  `experiments\boundary_probes\dataset_transfer_stage2\dense_event_attribute_value_ladder`.
+- Compiled and ran QA for both probes through OpenRouter at the normal `6`-lane
+  ceiling.
+
+After:
+
+- Sectioned event-value probe:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `28 / 0`.
+  - QA: `10 exact / 0 partial / 0 miss`.
+  - Helper rows: `0`.
+- Dense event-value probe:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `36 / 2`.
+  - QA: `12 exact / 0 partial / 0 miss`.
+  - Helper rows: `0`.
+
+Artifacts:
+
+- Sectioned compile:
+  `tmp\boundary_probe_compile_event_attribute_value_20260513`
+- Sectioned QA:
+  `tmp\boundary_probe_qa_event_attribute_value_20260513`
+- Dense compile:
+  `tmp\boundary_probe_compile_dense_event_attribute_value_20260513`
+- Dense QA:
+  `tmp\boundary_probe_qa_dense_event_attribute_value_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture event_attribute_value_ladder --out-root tmp\boundary_probe_compile_event_attribute_value_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture event_attribute_value_ladder --compile-root tmp\boundary_probe_compile_event_attribute_value_20260513 --out-root tmp\boundary_probe_qa_event_attribute_value_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_event_attribute_value_ladder --out-root tmp\boundary_probe_compile_dense_event_attribute_value_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_event_attribute_value_ladder --compile-root tmp\boundary_probe_compile_dense_event_attribute_value_20260513 --out-root tmp\boundary_probe_qa_dense_event_attribute_value_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Value-bearing event attributes are not a missing generic axis. Both the
+  sectioned and dense unlike probes are fully inside the set.
+- The SQuAD event cluster should not trigger a repair by itself. Its miss shape
+  now needs a replay and density audit: repeated subject aliases, acronym
+  expansion, title/label handling, and event-outcome relations may be causing a
+  bad compile variant even though the generic machinery can express the
+  coordinate.
+- This is the boundary-hunt discipline working: measurement created a candidate
+  coordinate, the unlike probes tested the generic axis, and the result moved
+  the pressure from missing-axis repair to cluster replay.
+
+Next pressure:
+
+- Recompile and replay only the clustered SQuAD event fixture to check run
+  variance before designing any repair.
+- If replay still emits unary/property-marker facts for answer-bearing event
+  attributes, classify the cluster by density mechanism rather than by source
+  topic.
+
+### DT-025 - SQuAD Event Cluster Replay
+
+Before:
+
+- SQuAD-30's largest apparent boundary was one event-description fixture with
+  `6 exact / 1 partial / 23 miss`.
+- DT-024 showed that generic value-bearing event attributes pass in both
+  sectioned and dense unlike probes, so a repair from the original cluster
+  would have risked chasing a bad compile draw.
+
+Prediction:
+
+- If the cluster represents a stable architecture gap, a replay should continue
+  to miss most value-bearing event questions.
+- If the cluster is compile-run variance, replay should recover the ordinary
+  event values and shrink the residue to a much smaller set.
+
+Intervention:
+
+- Recompiled only the clustered SQuAD event fixture through OpenRouter at `6`
+  lanes with the same source-record ledger settings.
+- Replayed QA for the same `30` questions against the new compile.
+- Summarized the replay with the existing SQuAD intake audit overlay.
+
+After:
+
+- Replay compile:
+  - Parsed: `true`.
+  - Admitted / skipped: `29 / 0`.
+  - The replay compile exposed value-bearing predicates such as `event_date/2`,
+    `event_location/2`, `venue_name/2`, `winner/2`, `score/2`,
+    `conference_of/2`, `anniversary_theme/2`, `naming_override/2`, and
+    `season_of/2`.
+- Replay QA:
+  - Questions: `30`.
+  - Exact / partial / miss: `27 / 0 / 3`.
+  - Exact rate: `90.0%`.
+  - Helper rows: `0`.
+- If this replay replaces the original bad cluster inside SQuAD-30, the adjusted
+  slice becomes approximately:
+  - `155 exact / 4 partial / 12 miss` over `171`.
+  - Exact rate: `90.64%`.
+- Stable replay residue:
+  - Acronym expansion for inline parenthetical conference names: `2`.
+  - Hypothetical/suspended alternate label: `1`.
+
+Artifacts:
+
+- Replay compile:
+  `tmp\mrc_transfer_compile_squad30_event_cluster_replay_20260513`
+- Replay QA:
+  `tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513`
+- Replay coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00000_super_bowl_50 --out-root tmp\mrc_transfer_compile_squad30_event_cluster_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00000_super_bowl_50 --compile-root tmp\mrc_transfer_compile_squad30_event_cluster_replay_20260513 --out-root tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_event_cluster_replay_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- The original SQuAD-30 score was materially distorted by one unstable compile
+  draw. The architecture can express the event-value coordinates; replay moved
+  the cluster from `20%` exact to `90%` exact.
+- Boundary measurements over hosted LLM compiles need replay discipline for
+  large one-fixture clusters. A cluster is not architecture until it survives a
+  second compile.
+- The stable residue is sharper than the original boundary: inline parenthetical
+  acronym expansion and hypothetical/suspended alternate labels.
+
+Next pressure:
+
+- Add an unlike probe for inline acronym expansion and hypothetical alternate
+  labels, because those are the stable residues after replay.
+- Do not repair from the original `23`-miss cluster.
+
+### DT-026 - Inline Parenthetical Alias Repair
+
+Before:
+
+- DT-025 reduced the SQuAD event cluster to one stable alternate-label miss and
+  two acronym-expansion misses.
+- The focused inline-alias probe separated these shapes:
+  - Explicit `stands for` alias: inside.
+  - Hypothetical/ordinary alternate label: inside.
+  - Parenthetical full-name abbreviation such as `Full Name (ABC)`: outside.
+
+Prediction:
+
+- A fixture-free repair should not name any dataset acronym or event.
+- The reusable substrate should expose source-local parenthetical aliases as
+  deterministic source-record surfaces, then let ordinary QA planning query
+  those surfaces.
+
+Intervention:
+
+- Added deterministic source-record alias facts for narrow
+  `Full Name (ABC)` patterns:
+  - `source_record_parenthetical_alias(Row, Abbreviation, Expansion)`.
+  - `source_record_alias(Row, Abbreviation, Expansion)`.
+  - `source_record_alias(Row, Expansion, Abbreviation)`.
+- The trigger is intentionally constrained:
+  - parenthetical token must be short uppercase alphanumeric punctuation;
+  - preceding phrase must contain at least two capitalized words;
+  - abbreviation letters must match the capitalized-word initials;
+  - leading connectors/articles before the expansion are dropped;
+  - lowercase parentheticals such as role notes are ignored.
+- Added tests covering direct parenthetical aliases, a phrase preceded by
+  connector words, and a lowercase non-alias parenthetical.
+
+After:
+
+- Focused inline-alias probe before repair:
+  - QA: `4 exact / 0 partial / 4 miss`.
+- Focused inline-alias probe after repair:
+  - QA: `8 exact / 0 partial / 0 miss`.
+  - Helper rows: `0`.
+- SQuAD event-cluster replay before repair:
+  - QA: `27 exact / 0 partial / 3 miss`.
+- SQuAD event-cluster replay after repair:
+  - QA: `29 exact / 0 partial / 1 miss`.
+  - Helper rows: `0`.
+- If this repaired replay replaces the original unstable cluster inside
+  SQuAD-30, the adjusted slice becomes:
+  - `157 exact / 4 partial / 10 miss` over `171`.
+  - Exact rate: `91.81%`.
+- Remaining SQuAD event-cluster residue:
+  - one general-name question asking for the name of the championship game,
+    where the compiled KB has the instance-specific event but not a class/name
+    relation for the game family.
+
+Artifacts:
+
+- Source-record repair:
+  `src\source_record_ledger.py`
+- Test coverage:
+  `tests\test_source_record_ledger.py`
+- Inline-alias probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\inline_alias_label_ladder`
+- Pre-repair inline-alias QA:
+  `tmp\boundary_probe_qa_inline_alias_label_20260513`
+- Post-repair inline-alias QA:
+  `tmp\boundary_probe_qa_inline_alias_label_repair_20260513`
+- Post-repair SQuAD event-cluster replay:
+  `tmp\mrc_transfer_qa_squad30_event_cluster_alias_repair_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_source_record_ledger.py tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_summarize_mrc_transfer_qa.py -q`
+  - `211 passed`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture inline_alias_label_ladder --out-root tmp\boundary_probe_compile_inline_alias_label_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture inline_alias_label_ladder --compile-root tmp\boundary_probe_compile_inline_alias_label_repair_20260513 --out-root tmp\boundary_probe_qa_inline_alias_label_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00000_super_bowl_50 --out-root tmp\mrc_transfer_compile_squad30_event_cluster_alias_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00000_super_bowl_50 --compile-root tmp\mrc_transfer_compile_squad30_event_cluster_alias_repair_20260513 --out-root tmp\mrc_transfer_qa_squad30_event_cluster_alias_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- This is a real boundary extension, not fixture learning. The repair names a
+  source-shape: uppercase parenthetical abbreviations whose letters match the
+  immediately preceding capitalized phrase.
+- Trigger discipline matters. The repair does not depend on English words such
+  as `stands for`; it uses punctuation, capitalization, and initial alignment.
+  It also refuses lowercase parenthetical notes.
+- The repair belongs in source-record scaffolding rather than a dataset adapter:
+  many external corpora use `Full Name (ABC)` in ordinary prose, and later QA
+  can query the source-local alias without inventing global synonym truth.
+
+Next pressure:
+
+- Decide whether the remaining SQuAD-30 residue is worth a focused probe now
+  or whether to widen SQuAD with replay-on-cluster discipline first.
+- The remaining SQuAD event-cluster miss is a class/name relation, not an alias
+  relation; do not fold it into this repair.

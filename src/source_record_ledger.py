@@ -256,6 +256,7 @@ def source_record_ledger_facts(
             facts.extend(_roster_table_member_facts(raw, row_id=row_id))
         for token in _numeric_tokens(str(raw.get("exact", ""))):
             facts.append(f"source_record_numeric_token({row_id}, {token}).")
+        facts.extend(_parenthetical_alias_facts(str(raw.get("exact", "")), row_id=row_id))
     return _dedupe(facts)
 
 
@@ -373,6 +374,8 @@ def _has_source_anchor(line: str) -> bool:
         return True
     if re.search(r"\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z0-9]+){1,5}\b", text) and re.search(r"\b\d+\b", text):
         return True
+    if re.search(r"\b[A-Z][A-Za-z0-9'&.-]+(?:\s+[A-Z][A-Za-z0-9'&.-]+){1,8}\s*\([A-Z][A-Z0-9&.-]{1,11}\)", text):
+        return True
     return False
 
 
@@ -396,6 +399,57 @@ def _numeric_tokens(text: str) -> list[str]:
         if atom:
             out.append(atom)
     return out
+
+
+def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
+    """Emit source-local alias surfaces for ``Full Name (ABC)`` patterns.
+
+    This is deterministic source scaffolding, not a global synonym claim. The
+    trigger is intentionally narrow: a short uppercase parenthetical token whose
+    letters match the initials of the immediately preceding capitalized phrase.
+    """
+
+    out: list[str] = []
+    for match in re.finditer(r"\((?P<abbr>[A-Z][A-Z0-9&.-]{1,11})\)", str(text or "")):
+        abbr_surface = match.group("abbr").strip()
+        before = str(text or "")[: match.start()].rstrip()
+        expansion_surface = _parenthetical_alias_expansion(before, abbr_surface)
+        if not expansion_surface:
+            continue
+        abbr = _atom(abbr_surface)
+        expansion = _atom(expansion_surface)
+        if not abbr or not expansion or abbr == expansion:
+            continue
+        out.append(f"source_record_parenthetical_alias({row_id}, {abbr}, {expansion}).")
+        out.append(f"source_record_alias({row_id}, {abbr}, {expansion}).")
+        out.append(f"source_record_alias({row_id}, {expansion}, {abbr}).")
+    return out
+
+
+def _parenthetical_alias_expansion(before: str, abbr: str) -> str:
+    tokens = re.findall(r"[A-Za-z][A-Za-z0-9'&.-]*", before)
+    if not tokens:
+        return ""
+    phrase_tokens: list[str] = []
+    for token in reversed(tokens[-10:]):
+        lower = token.casefold()
+        if token[:1].isupper() or lower in {"of", "and", "the", "for"}:
+            phrase_tokens.append(token)
+            continue
+        break
+    phrase_tokens.reverse()
+    while phrase_tokens and not phrase_tokens[0][:1].isupper():
+        phrase_tokens.pop(0)
+    while phrase_tokens and phrase_tokens[0].casefold() in {"the", "a", "an"}:
+        phrase_tokens.pop(0)
+    capitalized = [token for token in phrase_tokens if token[:1].isupper()]
+    if len(capitalized) < 2:
+        return ""
+    initials = "".join(token[0] for token in phrase_tokens if token[:1].isupper()).upper()
+    normalized_abbr = re.sub(r"[^A-Z0-9]", "", abbr.upper())
+    if not normalized_abbr or initials != normalized_abbr:
+        return ""
+    return " ".join(phrase_tokens)
 
 
 def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[str]:
