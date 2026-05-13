@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fixture Trace</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./trace.css?v=artifact-run">
+  </head>
+  <body>
+    <script id="trace-data" type="application/json">
+__TRACE_DATA__
+    </script>
+
+    <main class="trace-shell">
+      <header class="trace-header">
+        <div>
+          <p class="eyebrow">Fixture Trace</p>
+          <h1 id="fixture-title">Fixture Trace</h1>
+          <p id="fixture-lede" class="lede">A specimen viewer for watching one fixture move from source packet to package artifacts to QA replay.</p>
+        </div>
+        <div class="depth-control" aria-label="Reveal depth">
+          <button type="button" data-depth="summary" class="active">Summary</button>
+          <button type="button" data-depth="evidence">Evidence</button>
+          <button type="button" data-depth="raw">Raw</button>
+        </div>
+      </header>
+
+      <section id="status-strip" class="status-strip"></section>
+
+      <div class="trace-grid">
+        <aside class="panel side-panel">
+          <div class="panel-head">
+            <p class="eyebrow">Navigation</p>
+            <h2>Trace Map</h2>
+          </div>
+          <nav id="phase-nav" class="phase-nav"></nav>
+          <section class="rail-card">
+            <h3>Reveal Contract</h3>
+            <p>Every card starts with the claim. Evidence and raw payloads stay collapsed until requested.</p>
+          </section>
+          <section class="rail-card">
+            <h3>Prototype Status</h3>
+            <p>This page is artifact-backed from a newer compile run and QA replay. Fresh live capture can be wired next.</p>
+          </section>
+        </aside>
+
+        <section class="panel main-panel">
+          <section id="source-card" class="trace-card"></section>
+          <section id="phase-list" class="phase-list"></section>
+          <section id="question-list" class="question-list"></section>
+        </section>
+
+        <aside class="panel artifact-panel">
+          <div class="panel-head">
+            <p class="eyebrow">Artifacts</p>
+            <h2>Package View</h2>
+          </div>
+          <div id="artifact-list" class="artifact-list"></div>
+          <section class="rail-card">
+            <h3>Next Wiring</h3>
+            <p>Next step: run the same trace builder against fresh compile and QA artifacts, still without editing the harness core.</p>
+          </section>
+        </aside>
+      </div>
+    </main>
+
+    <script src="./trace.js?v=artifact-run"></script>
+  </body>
+</html>
