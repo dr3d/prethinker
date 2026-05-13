@@ -366,3 +366,120 @@ Next pressure:
 - Do not repair against RACE option-selection yet.
 - Run a SQuAD-50 extractive QA measurement next, using the same source compile
   and QA machinery, then audit its top recurring classes.
+
+### DT-005 - Proposition-Type Reclassification
+
+Before:
+
+- Corrected RACE-50 with inline options improved from `97 / 8 / 68 / 4`
+  to `133 / 4 / 40 / 0` over the same `177` questions.
+- The result showed that selection among known choices is mostly compatible
+  with the existing KB-evaluation machinery.
+- The remaining `44` not-exact rows should not be classified by RACE-specific
+  exam categories or by open-ended-versus-multiple-choice format.
+
+Prediction:
+
+- QA format is an interface. Proposition type is the substrate pressure.
+- The cross-dataset categories should be defined before classification, or
+  the audit will drift toward corpus-specific labels.
+
+Operational taxonomy:
+
+- `factual`: answer is a directly stated event, entity, attribute, value,
+  location, or relation; no comparison, category choice, synthesis, or
+  unstated mental/causal inference is required.
+- `comparative`: answer requires ordering, contrast, arithmetic, duration,
+  count, date, threshold, before/after, more/less, first/last, or another
+  relation among two or more extracted facts.
+- `categorical`: answer selects or maps an extracted fact to a type, role,
+  class, label, meaning, audience, object kind, or option category.
+- `synthesis`: answer condenses multiple facts into a title, theme, main
+  idea, passage purpose, summary, rhetorical point, or best overall
+  description.
+- `inference`: answer depends on an unstated consequence, attitude,
+  motivation, belief, intent, cause, implication, or reader conclusion
+  licensed by evidence.
+
+Intervention:
+
+- Added proposition-type criteria and classifier output to
+  `scripts/summarize_mrc_transfer_qa.py`.
+- Preserved the older transfer-coordinate labels as a secondary view, because
+  those still help locate compile/query/surface failure modes.
+- Added focused unit tests for the five proposition types and boundary cases
+  that should not over-fire: temporal anchors, generic `most`, intended
+  audience, and emotional-state blanks.
+- Regenerated the corrected RACE-50 coordinate summary.
+
+After:
+
+- Corrected RACE-50 remains `133 exact / 4 partial / 40 miss / 0 not judged`.
+- Proposition-type split across the `44` not-exact rows:
+  - `inference`: `22`
+  - `factual`: `11`
+  - `comparative`: `6`
+  - `categorical`: `3`
+  - `synthesis`: `2`
+- Failure surfaces remain mostly compile-side:
+  - `compile_surface_gap`: `38`
+  - `hybrid_join_gap`: `4`
+  - `query_surface_gap`: `2`
+
+Manual stratified audit:
+
+- `inference` is the dominant pressure. It includes emotional state,
+  author/narrator opinion, causal explanation, purpose, knowledge state, and
+  implied consequence. Some of these may be legitimate future compile surfaces,
+  but a repair from RACE alone would risk teaching exam-inference style rather
+  than source-fidelity.
+- `factual` misses are not option-selection problems. They are mostly direct
+  answer-bearing distinctions that the compile did not make queryable, such
+  as a procedural action, a residence attribute, a publication/source genre,
+  or a specific event-state. This is the cleanest candidate family for later
+  transfer probes.
+- `comparative` misses are compact and familiar: duration from a rule, family
+  count, distance, time, commute count, and missing-money arithmetic. These
+  look closest to the boundary-hunt arithmetic/join work, but RACE evidence is
+  not yet enough to unify them with existing temporal/business arithmetic.
+- `categorical` is small but useful: phrase meaning, intended audience, and
+  person role. These are exactly the kind of trigger surfaces that need
+  fixture-free audit before any helper grows.
+- `synthesis` remains likely out of scope for core compile repair unless the
+  source has an explicit title/theme/purpose surface. It should stay separate
+  from fact extraction.
+
+Artifacts:
+
+- Corrected RACE QA:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513`
+- Proposition summary:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513\transfer_coordinate_summary.md`
+- JSON summary:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513\transfer_coordinate_summary.json`
+
+Verification:
+
+- `python -m pytest tests/test_summarize_mrc_transfer_qa.py tests/test_sample_mrc_transfer_fixtures.py tests/test_stage_incoming_fixtures.py -q`
+  -> `24 passed`.
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_options_or_20260513`
+  -> `133 / 4 / 40 / 0`.
+
+Lesson:
+
+- The RACE wrinkle was not multiple choice itself. With options visible,
+  candidate selection mostly works. The remaining boundary is proposition
+  type: inference, factual compile resolution, comparative joins, categorical
+  mapping, and synthesis.
+- This keeps the doctrine clean: do not repair because an option was missed;
+  repair only when a proposition type recurs across unlike sources and can be
+  expressed without dataset vocabulary.
+
+Next pressure:
+
+- Hold SQuAD until this taxonomy is used as a comparison lens.
+- If continuing RACE, probe factual compile-resolution misses first, because
+  they are closest to Prethinker's target and least likely to import exam
+  inference.
+- Keep inference and synthesis as scar categories unless unlike open-ended
+  data shows source-faithful extraction surfaces, not just reader reasoning.

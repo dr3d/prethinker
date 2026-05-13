@@ -5,12 +5,39 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+PROPOSITION_TYPE_CRITERIA: dict[str, str] = {
+    "factual": (
+        "Answer is a directly stated event, entity, attribute, value, location, "
+        "or relation; no comparison, category choice, synthesis, or unstated "
+        "mental/causal inference is required."
+    ),
+    "comparative": (
+        "Answer requires ordering, contrast, arithmetic, duration, count, date, "
+        "threshold, before/after, more/less, first/last, or other relation among "
+        "two or more extracted facts."
+    ),
+    "categorical": (
+        "Answer selects or maps an extracted fact to a type, role, class, label, "
+        "meaning, audience, object kind, or option category."
+    ),
+    "synthesis": (
+        "Answer condenses multiple facts into a title, theme, main idea, passage "
+        "purpose, summary, rhetorical point, or best overall description."
+    ),
+    "inference": (
+        "Answer depends on an unstated consequence, attitude, motivation, belief, "
+        "intent, cause, implication, or reader conclusion licensed by evidence."
+    ),
+}
 
 
 def main() -> int:
@@ -40,6 +67,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
     totals: Counter[str] = Counter()
     by_surface: Counter[str] = Counter()
     by_coordinate: Counter[str] = Counter()
+    by_proposition_type: Counter[str] = Counter()
     by_config: dict[str, Counter[str]] = {"high": Counter(), "middle": Counter()}
 
     for qa_json in sorted(qa_root.glob("*/domain_bootstrap_qa_*.json")):
@@ -55,8 +83,10 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
                 continue
             surface = str((row.get("failure_surface") or {}).get("surface") or "unknown")
             coordinate = classify_transfer_coordinate(row)
+            proposition_type = classify_proposition_type(row)
             by_surface[surface] += 1
             by_coordinate[coordinate] += 1
+            by_proposition_type[proposition_type] += 1
             rows.append(
                 {
                     "fixture": fixture,
@@ -64,6 +94,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
                     "verdict": verdict,
                     "surface": surface,
                     "coordinate": coordinate,
+                    "proposition_type": proposition_type,
                     "question": row.get("utterance"),
                     "reference_answer": row.get("reference_answer"),
                     "rationale": str((row.get("failure_surface") or {}).get("rationale") or "")[:600],
@@ -77,8 +108,9 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
     miss = totals.get("miss", 0)
     not_judged = totals.get("not_judged", 0)
     return {
-        "schema_version": "mrc_transfer_coordinate_summary_v1",
+        "schema_version": "mrc_transfer_coordinate_summary_v2",
         "qa_root": str(qa_root),
+        "proposition_type_criteria": PROPOSITION_TYPE_CRITERIA,
         "totals": {
             "question_count": question_count,
             "exact": exact,
@@ -89,10 +121,147 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
             "exact_rate": round(exact / question_count, 4) if question_count else 0.0,
         },
         "by_config": {key: dict(value) for key, value in by_config.items()},
+        "proposition_type_counts": dict(by_proposition_type),
         "failure_surface_counts": dict(by_surface),
         "transfer_coordinate_counts": dict(by_coordinate),
         "non_exact_rows": rows,
     }
+
+
+def classify_proposition_type(row: dict[str, Any]) -> str:
+    """Classify the proposition being asked, independent of QA format."""
+    question = _strip_options(str(row.get("utterance") or ""))
+    answer = str(row.get("reference_answer") or "")
+    rationale = str((row.get("failure_surface") or {}).get("rationale") or "")
+    coordinate = classify_transfer_coordinate(row)
+    text = " ".join([question, answer, rationale]).casefold()
+
+    if coordinate == "title_theme_or_summary_answer" or _has_any(
+        text,
+        [
+            "best title",
+            "main idea",
+            "mainly about",
+            "theme",
+            "subject of the passage",
+            "passage is about",
+            "purpose of the passage",
+            "why does the author mention",
+            "why did the author mention",
+            "writer wrote this passage",
+            "author wrote this passage",
+            "what can we learn from the passage",
+            "what can you learn from the passage",
+            "best summary",
+        ],
+    ):
+        return "synthesis"
+
+    if _is_comparative_proposition(question, answer, coordinate):
+        return "comparative"
+
+    if _is_categorical_proposition(question, answer, coordinate):
+        return "categorical"
+
+    if coordinate == "implicit_attitude_or_consequence" or _has_any(
+        text,
+        [
+            "state of",
+            "infer",
+            "imply",
+            "suggest",
+            "conclude",
+            "feel",
+            "felt",
+            "thought",
+            "think",
+            "believ",
+            "attitude",
+            "emotion",
+            "consequence",
+            "why",
+            "because",
+            "reason",
+            "motivation",
+            "intent",
+            "likely",
+            "probably",
+            "relief",
+            "touched",
+            "pessimistic",
+            "optimistic",
+            "confident",
+            "disappointed",
+            "anxiety",
+            "anger",
+            "afraid",
+            "happy",
+            "sad",
+        ],
+    ):
+        return "inference"
+
+    return "factual"
+
+
+def _is_comparative_proposition(question: str, answer: str, coordinate: str) -> bool:
+    question_text = question.casefold()
+    text = " ".join([question, answer]).casefold()
+    if coordinate == "formula_or_rule_application":
+        return True
+    if _has_any(
+        text,
+        [
+            "compare",
+            "comparison",
+            "more than",
+            "less than",
+            "no more than",
+            "at least",
+            "at most",
+            "earlier",
+            "later",
+            "older",
+            "younger",
+        ],
+    ):
+        return True
+    if re.search(r"\bwhich\b.*\b(fewest|most|least|largest|smallest)\b", question_text):
+        return True
+    if re.search(r"\b(how many|how much|how long)\b", text):
+        return True
+    if re.search(r"^\s*(when|what time|which day|which year|what year)\b", question_text):
+        return True
+    if re.search(r"\b\d+\b", answer) or re.search(r"\b(one|two|three|four|five|six|seven|eight|nine|ten)\b", answer.casefold()):
+        return True
+    return False
+
+
+def _is_categorical_proposition(question: str, answer: str, coordinate: str) -> bool:
+    question_text = question.casefold()
+    text = " ".join([question, answer]).casefold()
+    if _has_any(
+        text,
+        [
+            "what kind",
+            "what type",
+            "which kind",
+            "which type",
+            "described as",
+            "best described as",
+            "meaning of",
+            "means",
+            "stands for",
+            "category",
+            "label",
+        ],
+    ):
+        return True
+    if _has_any(question_text, ["intended for", "seems to be", "appears to be", "relationship"]):
+        return True
+    if coordinate == "background_role_or_audience_fact" and re.search(r"\b(who|what)\s+(is|are|was|were)\b", question_text):
+        return True
+    return False
 
 
 def classify_transfer_coordinate(row: dict[str, Any]) -> str:
@@ -139,6 +308,11 @@ def _has_any(text: str, needles: list[str]) -> bool:
     return any(needle in text for needle in needles)
 
 
+def _strip_options(question: str) -> str:
+    marker = " Options:"
+    return question.split(marker, 1)[0] if marker in question else question
+
+
 def _render_md(summary: dict[str, Any]) -> str:
     totals = summary.get("totals", {})
     lines = [
@@ -152,9 +326,27 @@ def _render_md(summary: dict[str, Any]) -> str:
         f"- Exact / partial / miss / not judged: `{totals.get('exact', 0)} / {totals.get('partial', 0)} / {totals.get('miss', 0)} / {totals.get('not_judged', 0)}`",
         f"- Exact rate: `{totals.get('exact_rate', 0.0)}`",
         "",
-        "## Transfer Coordinates",
+        "## Proposition Type Criteria",
         "",
     ]
+    for key, value in (summary.get("proposition_type_criteria") or {}).items():
+        lines.append(f"- `{key}`: {value}")
+    lines.extend(
+        [
+            "",
+            "## Proposition Types",
+            "",
+        ]
+    )
+    for key, value in sorted((summary.get("proposition_type_counts") or {}).items(), key=lambda item: (-item[1], item[0])):
+        lines.append(f"- `{key}`: `{value}`")
+    lines.extend(
+        [
+            "",
+            "## Transfer Coordinates",
+            "",
+        ]
+    )
     for key, value in sorted((summary.get("transfer_coordinate_counts") or {}).items(), key=lambda item: (-item[1], item[0])):
         lines.append(f"- `{key}`: `{value}`")
     lines.extend(["", "## Failure Surfaces", ""])
@@ -168,6 +360,7 @@ def _render_md(summary: dict[str, Any]) -> str:
                 "",
                 f"- Verdict: `{row.get('verdict', '')}`",
                 f"- Surface: `{row.get('surface', '')}`",
+                f"- Proposition type: `{row.get('proposition_type', '')}`",
                 f"- Coordinate: `{row.get('coordinate', '')}`",
                 f"- Question: {row.get('question', '')}",
                 f"- Reference: {row.get('reference_answer', '')}",
