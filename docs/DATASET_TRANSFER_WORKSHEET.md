@@ -3746,3 +3746,98 @@ Next pressure:
   families: causal-chain join and generic/category surface preservation. The
   causal-chain join is smaller but more machinery-like; category preservation
   has more rows but may be lexical/source-detail noise.
+
+### DT-043 - Causal End-State Chain Repair
+
+Date: 2026-05-13
+
+Before:
+
+- DT-042 left the SQuAD imperialism residue as the next machinery-like
+  boundary: an upstream event led to an ending event, and the ending event ended
+  a target state.
+- The risk was overgeneralizing causality. Direct end-state questions should
+  answer the immediate ending event; upstream-cause questions should answer the
+  cause that produced the ending event.
+
+Prediction:
+
+- A focused unlike probe should mostly pass if direct and upstream-cause rows
+  are queried correctly.
+- Any failure should distinguish query delivery from judge policy. A judge-only
+  policy cannot help if the upstream causal row is absent from query results.
+
+Intervention:
+
+- Added `causal_chain_end_state_ladder`, an unlike probe with direct ending,
+  upstream cause, trigger, lead-to, and explicit non-cause questions.
+- Initial probe result:
+  - Questions: `10`.
+  - Exact / partial / miss: `9 / 1 / 0`.
+  - Failure surface: `hybrid_join_gap`.
+  - Helper rows: `0`.
+- The partial row had `ended(EndingEvent, State)` and a valid upstream
+  `led_to(Cause, EndingEvent)` chain, but the chain was not consistently
+  delivered to the judge.
+- Added:
+  - query-planning guidance for cause-of-ending questions,
+  - judge policy for causal end-state chains,
+  - `causal_end_state_support`, a query-only clean helper that joins admitted
+    upstream causal rows to admitted end-state rows.
+- Initial SQuAD replay exposed a generic morphology gap: the corpus used
+  `leads_to/2` while the helper recognized `led_to/2`. Added `leads_to/2`
+  support.
+
+After:
+
+- Final unlike probe replay:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `10`.
+  - Helper class: `clean-helper`.
+- SQuAD imperialism replay:
+  - Fixture: `squad_default_validation_00027_imperialism`.
+  - Questions: `4`.
+  - Exact / partial / miss: `4 / 0 / 0`.
+  - Helper rows: `1`.
+  - Helper class: `clean-helper`.
+- Broad QA tests:
+  - `150 passed`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\causal_chain_end_state_ladder`
+- Probe compile:
+  `tmp\boundary_probe_compile_causal_chain_end_state_20260513`
+- Final probe QA:
+  `tmp\boundary_probe_qa_causal_chain_end_state_companion_repair_20260513`
+- SQuAD replay:
+  `tmp\mrc_transfer_qa_squad30_dt043_imperialism_causal_replay2_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture causal_chain_end_state_ladder --out-root tmp\boundary_probe_compile_causal_chain_end_state_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture causal_chain_end_state_ladder --compile-root tmp\boundary_probe_compile_causal_chain_end_state_20260513 --out-root tmp\boundary_probe_qa_causal_chain_end_state_companion_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00027_imperialism --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt043_imperialism_causal_replay2_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+
+Lesson:
+
+- Causal end-state questions require preserving two answer surfaces: the direct
+  ending event and the upstream cause of that ending event. Which one answers
+  depends on the question wording.
+- The repair is query-only and source-faithful. It does not invent causal
+  chains; it only joins admitted `led_to`/`leads_to`, `caused_by`, `triggered`,
+  or `triggered_by` rows to admitted end-state rows.
+- Morphology matters at the architecture level. Supporting both `led_to` and
+  `leads_to` is not fixture vocabulary; it is predicate-family normalization.
+
+Next pressure:
+
+- Remeasure the full SQuAD-30 slice after DT-041 and DT-043. Expected movement
+  is small but real: the Rhine and imperialism rows should now be inside, while
+  remaining rows should mostly be generic/category or lexical source-detail
+  gaps.

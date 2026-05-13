@@ -321,6 +321,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
         "For questions using phrases such as revert to normal, take effect, interval ended, interval began, chronological sequence, or key authorization and notice events, include explicit state-event predicates such as contamination_advisory(triggered, StartTime) and contamination_advisory(lifted, EndTime) when those predicates exist. Interval-duration rows alone do not answer when the interval begins or ends.",
+        "For questions asking what caused, triggered, or led to a state/process ending, include both the direct end-state row and the upstream causal row when available, such as led_to(Cause, EndingEvent), caused_by(EndingEvent, Cause), or triggered(Cause, EndingEvent) paired with ended(EndingEvent, EndedState). Do not stop at ended(EndingEvent, EndedState) when the question asks for the cause of the ending.",
         "For point-in-time status questions such as 'status on DATE', 'status as of DATE', or 'current on DATE', if a *_status(Entity, Status, Date) predicate exists, include a direct date-bound query such as credential_status(Entity, Status, 2026_02_06). The runtime can derive query-only interval support from admitted transition anchors, corrected intervals, and scheduled-state rows; do not only retrieve all status rows with Date as a variable.",
         "For count questions scoped to a named source section, subset, packet part, or identified conflict/item group, do not answer from a global *_status(Entity, Status) predicate alone. Pair the status with the scope surface, such as source_record_section/source_record_label rows or a unary scope predicate, so scoped_status_count_support can return the count for the asked subset.",
         "For omission and set-difference questions such as 'which required X did not receive Y', 'which X was omitted', or 'was Y issued to all required X', emit paired query operations: first the required/scope set with a shared variable, then the absent-side predicate with polarity='negative' and the same variable. Example operations: query residential_zone(Zone) polarity positive; query boil_water_notice(Zone, Time, Issuer) polarity negative. Do not emit the second operation as a positive query when the question asks for missing or omitted rows.",
@@ -2964,6 +2965,109 @@ def _residual_share_entity_key(value: str) -> str:
     return text.removeprefix("recipient_")
 
 
+def _causal_end_state_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    query_tokens = set(_type_taxonomy_tokens(predicate))
+    if not (query_tokens & {"end", "ended", "ends", "ending", "termination", "terminated"}):
+        return None
+
+    arg_texts = [str(item).strip() for item in args]
+    target_states = {
+        arg_texts[1]
+    } if len(arg_texts) >= 2 and arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else set()
+    target_ending_events = {
+        arg_texts[0]
+    } if arg_texts and arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else set()
+
+    facts = _runtime_fact_rows(runtime)
+    ended_rows: list[tuple[str, str, str]] = []
+    upstream_rows: list[tuple[str, str, str, str]] = []
+    for fact in facts:
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        if not fact_predicate or fact_predicate.startswith("source_record_"):
+            continue
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        if len(fact_args) < 2:
+            continue
+        tokens = set(_type_taxonomy_tokens(fact_predicate))
+        if tokens & {"end", "ended", "ends", "ending", "termination", "terminated"}:
+            ended_rows.append((fact_args[0], fact_args[1], fact_predicate))
+        if fact_predicate in {"led_to", "leads_to"} and len(fact_args) >= 2:
+            upstream_rows.append((fact_args[0], fact_args[1], fact_predicate, "cause_to_ending_event"))
+        elif fact_predicate == "caused_by" and len(fact_args) >= 2:
+            upstream_rows.append((fact_args[1], fact_args[0], fact_predicate, "cause_to_ending_event"))
+        elif fact_predicate == "triggered" and len(fact_args) >= 2:
+            upstream_rows.append((fact_args[0], fact_args[1], fact_predicate, "cause_to_ending_event"))
+        elif fact_predicate == "triggered_by" and len(fact_args) >= 2:
+            upstream_rows.append((fact_args[1], fact_args[0], fact_predicate, "cause_to_ending_event"))
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for ending_event, ended_state, end_predicate in ended_rows:
+        if target_states and ended_state not in target_states:
+            continue
+        if target_ending_events and ending_event not in target_ending_events:
+            continue
+        for cause, effect, cause_predicate, chain_kind in upstream_rows:
+            if effect != ending_event:
+                continue
+            key = (cause, ending_event, ended_state, cause_predicate)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "HelperClass": "clean-helper",
+                    "SupportKind": "causal_end_state_chain",
+                    "Cause": cause,
+                    "EndingEvent": ending_event,
+                    "EndedState": ended_state,
+                    "CausePredicate": cause_predicate,
+                    "EndPredicate": end_predicate,
+                    "ChainKind": chain_kind,
+                }
+            )
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "causal_end_state_support",
+        "prolog_query": "causal_end_state_support(Cause, EndingEvent, EndedState, CausePredicate, EndPredicate, SupportKind).",
+        "variables": [
+            "HelperClass",
+            "SupportKind",
+            "Cause",
+            "EndingEvent",
+            "EndedState",
+            "CausePredicate",
+            "EndPredicate",
+            "ChainKind",
+        ],
+        "rows": rows[:24],
+        "num_rows": min(len(rows), 24),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only causal end-state support joined admitted upstream causal rows to admitted "
+                "end-state rows; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [query],
+    }
+
+
 def _identifier_alias_key(value: str) -> str:
     tokens = [token for token in _type_taxonomy_tokens(value) if token]
     if len(tokens) <= 1:
@@ -3015,6 +3119,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     residual_absolute = _residual_absolute_amount_companion(runtime, predicate=predicate, args=args, query=query)
     if residual_absolute:
         source_record_companions.append(residual_absolute)
+    causal_end_state = _causal_end_state_companion(runtime, predicate=predicate, args=args, query=query)
+    if causal_end_state:
+        source_record_companions.append(causal_end_state)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
@@ -12359,6 +12466,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Predicate-relation policy: a returned row's predicate name is part of the answer-bearing surface. For example, has_knowledge_of(Entity, mislabeled_folders) can support 'knowledge of mislabeled folders' even when the returned value atom is only mislabeled_folders; do not require the relation words to be duplicated inside the value atom.",
             "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
             "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",
+            "Causal-chain policy: for questions asking what caused, triggered, led to, or brought about an ending, a chain such as led_to(Cause, EndingEvent) plus ended(EndingEvent, EndedState), caused_by(EndingEvent, Cause) plus ended(EndingEvent, EndedState), or triggered(Cause, EndingEvent) plus ended(EndingEvent, EndedState) can directly support Cause as the answer. Do not downgrade solely because ended/2 returns the immediate ending event when the question asks for the upstream cause.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, clean helper rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped helper row directly matches the reference answer.",

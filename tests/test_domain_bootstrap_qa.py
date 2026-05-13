@@ -253,6 +253,7 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "has_knowledge_of(Entity, mislabeled_folders)" in source
     assert "Complementary-relation policy" in source
     assert "Anchor-answer policy" in source
+    assert "Causal-chain policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source
@@ -733,6 +734,33 @@ def test_run_query_plan_derives_residual_absolute_amount_support() -> None:
             "AllocatedAmount": "30",
             "RemainderRecipient": "field_validation",
             "RemainingAmount": "18",
+        }
+    ]
+
+
+def test_run_query_plan_derives_causal_end_state_support() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "leads_to(safety_recall, closure_order).",
+        "ended(closure_order, pilot_expansion).",
+        "documented(archive_memo, closure_order).",
+        "did_not_cause(archive_memo, closure_order).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["ended(X, pilot_expansion)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "causal_end_state_support")
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SupportKind": "causal_end_state_chain",
+            "Cause": "safety_recall",
+            "EndingEvent": "closure_order",
+            "EndedState": "pilot_expansion",
+            "CausePredicate": "leads_to",
+            "EndPredicate": "ended",
+            "ChainKind": "cause_to_ending_event",
         }
     ]
 
