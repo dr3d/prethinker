@@ -86,6 +86,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-027 | Counterfactual arithmetic stated-outcome probes. | Simple and dense stated-outcome variants passed `20/0/0`; boundary is not basic counterfactual retrieval. |
 | BH-028 | Counterfactual arithmetic unstated-result probe and generic compile repair. | Unstated add/subtract variant exposed `7/0/1`; source-pass contract guidance moved replay to `8/0/0`. |
 | BH-029 | Wide counterfactual increment replay. | Original wide miss `census_reconciliation` q040 replayed exact after recompile; adjacent revenue projection q028 also exact. |
+| BH-030 | Scoped-status delivery compression attempt. | Focused helper rows dropped `45 -> 36`, but unlike replay shifted exactness `36/1/3 -> 34/5/1`; code change rejected. |
 
 ## Current Evidence
 
@@ -316,6 +317,68 @@ Next pressure:
   original wide coordinates with unlike arithmetic survive.
 - Move next to `scoped_status_count_support` delivery volume or to a fresh
   trigger-audit probe if delivery work risks overfitting.
+
+### BH-030 - Scoped-Status Delivery Attempt Rejected
+
+Before:
+
+- Active pressure was `scoped_status_count_support` delivery volume.
+- Focused scoped-semantic probe was exact but carried `45` helper rows.
+- Unlike replay carried `72` helper rows with baseline `36/1/3`.
+
+Prediction:
+
+- Plain scope queries were carrying semantic criterion rows even when the query
+  only asked for scope membership.
+- Gating criterion rows behind a status-term or concrete-status request should
+  reduce helper delivery without affecting source-fidelity rows.
+
+Intervention:
+
+- Locally changed `scoped_status_criterion_count` delivery so term-derived
+  rows required a term/status request.
+- Added a local regression test for the proposed contract.
+- Replayed focused scoped-semantic probe and unlike contradictory-evidence
+  transfer.
+
+After:
+
+- Focused probe stayed `8/0/0`; helper rows dropped `45 -> 36`.
+- Unlike replay helper rows dropped `72 -> 27`.
+- Unlike replay answer shape shifted from `36/1/3` to `34/5/1`.
+- Targeted retry of q028/q032 remained partial.
+- The code change was rejected and backed out.
+
+Artifacts:
+
+- Focused attempt:
+  `tmp\boundary_probe_hybrid_qa_stage22_scoped_delivery_20260513`
+- Unlike attempt:
+  `tmp\boundary_scoped_filter_replay3_qa_20260513`
+- Targeted retry:
+  `tmp\boundary_scoped_filter_retry_q028_q032_20260513`
+
+Verification:
+
+- Local test suite after backing out helper change: `129 passed`.
+- No runtime load errors.
+- No write proposals.
+
+Lesson:
+
+- Delivery compression cannot be judged on helper-row count alone. A smaller
+  helper surface that coincides with weaker unlike replay is not an architectural
+  win, even when the suspected row loss is partly planner or judge variance.
+  The next compression attempt should target query/planner scoping or answer
+  precedence over clean scoped-count rows, not suppress helper rows upstream.
+
+Next pressure:
+
+- Keep scoped-status delivery pressure open.
+- Do not reapply the criterion-row gate without an answer-stability repair.
+- Investigate planner behavior for count questions where a clean
+  `scoped_status_count_support` row is exact but broad primary status rows
+  create answer noise.
 
 ## Active Pressure Board
 

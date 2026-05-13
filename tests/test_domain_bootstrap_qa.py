@@ -1847,8 +1847,12 @@ def test_run_query_plan_derives_scoped_status_counts_from_scope_and_status_rows(
         ],
     )
 
-    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_status_count_support")
-    result_rows = companion["result"]["rows"]
+    result_rows = [
+        row
+        for item in rows
+        if item["result"].get("predicate") == "scoped_status_count_support"
+        for row in item["result"]["rows"]
+    ]
     assert any(
         row.get("SupportKind") == "scoped_status_criterion_count"
         and row.get("ScopePredicate") == "is_segment_4_case"
