@@ -95,6 +95,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-036 | Arithmetic aggregation unstated-result probe. | Simple unlike sum/average aggregation with unprinted finals passed `8/0/0`; no repair justified. |
 | BH-037 | Set-minus member projection support. | Unlike set/dedupe probe exposed `7/1/0`; query-only set difference support moved replay to `8/0/0`. |
 | BH-038 | Duplicate-relation distinct count support. | Wide duplicate coordinate moved partial -> exact with generic unary-list plus `*_duplicate_of` support. |
+| BH-039 | Implicit set-difference probe. | Unlike no-`set_minus` probe passed `8/0/0`; simple universe-minus-exclusion is already interior. |
 
 ## Current Evidence
 
@@ -965,11 +966,80 @@ Next pressure:
 - Next bounded target: unlike probe for universe-minus-affected when no
   `set_minus` fact exists but the universe and affected subsets are admitted.
 
+### BH-039 - Implicit Set Difference Without `set_minus`
+
+Before:
+
+- BH-037 made explicit `set_minus/3` projection interior.
+- BH-038 made explicit duplicate/alias relation distinct counts interior.
+- A wide residue still looked like universe-minus-affected without an admitted
+  set-operation fact.
+
+Prediction:
+
+- If simple universe-minus-exclusion failed without `set_minus/3`, the repair
+  target would be a generic query/evidence pattern over full-population
+  membership plus exclusion relations.
+- If it passed, the wide residue should be treated as density, context binding,
+  or selector overbinding rather than a missing primitive.
+
+Intervention:
+
+- Added `experiments\boundary_probes\hybrid_join_stage2\implicit_set_difference_pair`.
+- The source prints two populations and two excluded subsets, but no derived
+  view, final list, final count, or `set_minus` wording.
+- Compiled with source-record facts and focused pass planning.
+- Ran OpenRouter QA with evidence-bundle planning, execution, context filter,
+  reference judging, and failure-surface classification.
+
+After:
+
+- Compile admitted `54` clauses, `0` skips, and no `set_minus/3`.
+- QA passed `8 exact / 0 partial / 0 miss`.
+- Helper rows: `0`.
+- The decisive query shape was direct population membership plus negated
+  exclusion, for example:
+  `member_of(Container, Item), not(excluded_by(Item, ExclusionSource))`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\implicit_set_difference_pair`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage19_implicit_set_difference_20260513`
+- QA:
+  `tmp\boundary_probe_hybrid_qa_stage39_implicit_set_difference_20260513`
+
+Verification:
+
+- OpenRouter QA:
+  `question_count 8`, `judge_exact 8`, `judge_partial 0`, `judge_miss 0`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- Absence of an explicit set-operation fact is not by itself a missing axis.
+  The current instrument can assemble a simple remaining-set answer from
+  population membership plus exclusion relations. The remaining wide residues
+  should therefore be probed as denser context-binding or selector problems, not
+  as a request for a new fixture-shaped set helper.
+
+Next pressure:
+
+- Separate remaining set/dedupe residue into:
+  - context-bound implicit difference where the exclusion source must be chosen
+    among multiple possible sources;
+  - union/addition after amendment;
+  - grouped/source totals and range counts.
+- Next bounded target: a dense implicit-difference probe with two populations,
+  two exclusion sources, and one question that must bind the correct population
+  to the correct exclusion source without using local nouns.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | implicit set difference | Explicit `set_minus` and explicit duplicate relations are interior; some wide rows have universe and affected subset but no admitted set-operation fact. | Build unlike probe for universe-minus-affected without `set_minus`. |
+| 1 | dense implicit set difference | Simple no-`set_minus` universe-minus-exclusion is interior; the remaining risk is binding the right population to the right exclusion source under density. | Build unlike dense probe with multiple populations and exclusion notices. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -979,14 +1049,15 @@ Next pressure:
 
 Do this next:
 
-1. Build an unlike implicit set-difference probe where the universe and affected
-   subset are admitted but no `set_minus` view is printed.
+1. Build an unlike dense implicit-difference probe with multiple populations and
+   exclusion sources, now that simple no-`set_minus` is interior.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
    evidence.
-4. Keep q015, the point-state rows, plain aggregation, focused set-minus, and
-   duplicate exclusion as closed regressions, not tuning targets.
+4. Keep q015, the point-state rows, plain aggregation, focused set-minus,
+   duplicate exclusion, and simple implicit difference as closed regressions,
+   not tuning targets.
 
 ## OpenRouter Rule
 
