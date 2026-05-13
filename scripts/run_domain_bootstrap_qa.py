@@ -2200,6 +2200,88 @@ def _identifier_alias_count_companion(
     )
 
 
+def _duplicate_exclusion_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) != 1 or not _is_prolog_variable(str(args[0]).strip()):
+        return None
+    entity_var = "Entity"
+    all_query = format_prolog_query(predicate, [entity_var])
+    result = runtime.query_rows(all_query)
+    if result.get("status") != "success":
+        return None
+    raw_entities = sorted(
+        {str(row.get(entity_var, "")).strip() for row in result.get("rows", []) or [] if isinstance(row, dict)}
+    )
+    if len(raw_entities) < 2:
+        return None
+    duplicate_rows = _duplicate_relation_rows(runtime, raw_entities=set(raw_entities))
+    if not duplicate_rows:
+        return None
+    duplicate_entities = {row["duplicate"] for row in duplicate_rows}
+    canonical_entities = sorted(
+        {entity for entity in raw_entities if entity not in duplicate_entities},
+        key=_case_atom_key,
+    )
+    duplicate_groups: dict[str, set[str]] = {}
+    for row in duplicate_rows:
+        duplicate_groups.setdefault(row["canonical"], set()).add(row["duplicate"])
+    rows = [
+        {
+            "HelperClass": "clean-helper",
+            "SourcePredicate": predicate,
+            "RawEntityCount": str(len(raw_entities)),
+            "DistinctEntityCount": str(len(canonical_entities)),
+            "CanonicalEntities": ", ".join(canonical_entities),
+            "DuplicateGroups": "; ".join(
+                f"{canonical}: {', '.join(sorted(duplicates, key=_case_atom_key))}"
+                for canonical, duplicates in sorted(duplicate_groups.items(), key=lambda item: _case_atom_key(item[0]))
+            ),
+            "SupportKind": "duplicate_relation_distinct_count",
+        }
+    ]
+    return _status_timeline_companion_result(
+        predicate="duplicate_exclusion_count_support",
+        query=(
+            "duplicate_exclusion_count_support"
+            "(SourcePredicate, RawEntityCount, DistinctEntityCount, CanonicalEntities, DuplicateGroups, SupportKind)."
+        ),
+        rows=rows,
+        original_query=query,
+        note=(
+            "query-only duplicate exclusion support counted unary entity rows after excluding entities that admitted "
+            "duplicate/alias relations map onto canonical entities; no durable fact was written"
+        ),
+    )
+
+
+def _duplicate_relation_rows(runtime: CorePrologRuntime, *, raw_entities: set[str]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for clause in getattr(runtime.engine, "clauses", []) or []:
+        if getattr(clause, "body", None):
+            continue
+        head = getattr(clause, "head", None)
+        predicate = str(getattr(head, "name", "") or "").strip()
+        term_args = list(getattr(head, "args", []) or [])
+        if len(term_args) != 2 or not predicate:
+            continue
+        lowered = predicate.casefold()
+        if not (
+            lowered in {"alias_of", "duplicate_of", "is_alias_of", "is_duplicate_of"}
+            or lowered.endswith(("_alias_of", "_duplicate_of"))
+        ):
+            continue
+        duplicate = str(term_args[0]).strip()
+        canonical = str(term_args[1]).strip()
+        if duplicate in raw_entities and canonical in raw_entities and duplicate != canonical:
+            rows.append({"predicate": predicate, "duplicate": duplicate, "canonical": canonical})
+    return rows
+
+
 def _set_difference_companion(
     runtime: CorePrologRuntime,
     *,
@@ -2368,6 +2450,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     alias_count = _identifier_alias_count_companion(runtime, predicate=predicate, args=args, query=query)
     if alias_count:
         source_record_companions.append(alias_count)
+    duplicate_exclusion = _duplicate_exclusion_count_companion(runtime, predicate=predicate, args=args, query=query)
+    if duplicate_exclusion:
+        source_record_companions.append(duplicate_exclusion)
     set_difference = _set_difference_companion(runtime, predicate=predicate, args=args, query=query)
     if set_difference:
         source_record_companions.append(set_difference)

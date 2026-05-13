@@ -94,6 +94,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-035 | Generic `*_status_at` interval support. | Two original wide point-state coordinates moved miss -> exact by recognizing `Entity, Date, Status` transition predicates. |
 | BH-036 | Arithmetic aggregation unstated-result probe. | Simple unlike sum/average aggregation with unprinted finals passed `8/0/0`; no repair justified. |
 | BH-037 | Set-minus member projection support. | Unlike set/dedupe probe exposed `7/1/0`; query-only set difference support moved replay to `8/0/0`. |
+| BH-038 | Duplicate-relation distinct count support. | Wide duplicate coordinate moved partial -> exact with generic unary-list plus `*_duplicate_of` support. |
 
 ## Current Evidence
 
@@ -900,11 +901,75 @@ Next pressure:
 - Keep `set_union` separate until an unlike or wide coordinate proves projection
   needs a second generic support surface.
 
+### BH-038 - Duplicate-Relation Distinct Count
+
+Before:
+
+- BH-037 made focused `set_minus` projection interior.
+- Wide set/dedupe replay still left a duplicate-exclusion coordinate partial:
+  the unary entity query returned raw rows including a duplicate row, while an
+  admitted duplicate relation identified which row should collapse.
+
+Prediction:
+
+- A generic support surface should fire only when a unary entity list is paired
+  with an admitted duplicate/alias relation over returned entities.
+- The trigger should be suffix/shape based (`duplicate_of`, `alias_of`,
+  `*_duplicate_of`, `*_alias_of`), not domain or fixture-name based.
+
+Intervention:
+
+- Added query-only `duplicate_exclusion_count_support`.
+- It runs for unary entity surfaces, reads admitted duplicate/alias relations,
+  excludes duplicate entities from the distinct count, and reports canonical
+  entities plus duplicate groups.
+- Added a neutral `record_id/1` + `record_duplicate_of/2` regression.
+
+After:
+
+- Focused tests passed.
+- Full unit file: `139 passed`.
+- Original wide duplicate coordinate replay moved to exact:
+  `1 exact / 0 partial / 0 miss`.
+- Helper rows: `1`, clean-helper `duplicate_exclusion_count_support`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- Wide replay:
+  `tmp\boundary_duplicate_exclusion_replay_fenmore_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `139 passed`.
+- Wide replay:
+  `question_count 1`, `judge_exact 1`, `runtime_load_error_count 0`,
+  `write_proposal_rows 0`.
+
+Lesson:
+
+- Duplicate exclusion is a sibling of alias compression, but it should not rely
+  on suffix-form identifier guessing. When the KB explicitly admits a duplicate
+  relation, use that relation as the authority for the distinct count. The
+  architecture is the relation shape, not the entity vocabulary.
+
+Next pressure:
+
+- Remaining set/dedupe wide residue is not solved by focused `set_minus` or
+  duplicate exclusion:
+  - universe-minus-affected without an admitted set-operation fact;
+  - amended-union selector overbinding;
+  - grouped-item arithmetic over summarized item rows;
+  - source/range count extraction.
+- Next bounded target: unlike probe for universe-minus-affected when no
+  `set_minus` fact exists but the universe and affected subsets are admitted.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | set/dedupe wide replay | Focused `set_minus` projection is interior after generic support. | Replay wide coordinates that require duplicate exclusion, set difference, or grouped counts. |
+| 1 | implicit set difference | Explicit `set_minus` and explicit duplicate relations are interior; some wide rows have universe and affected subset but no admitted set-operation fact. | Build unlike probe for universe-minus-affected without `set_minus`. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -914,14 +979,14 @@ Next pressure:
 
 Do this next:
 
-1. Replay the wide set/dedupe-like coordinates against existing compile
-   artifacts after `set_difference_support`.
+1. Build an unlike implicit set-difference probe where the universe and affected
+   subset are admitted but no `set_minus` view is printed.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
    evidence.
-4. Keep q015, the point-state rows, plain aggregation, and focused set-minus as
-   closed regressions, not tuning targets.
+4. Keep q015, the point-state rows, plain aggregation, focused set-minus, and
+   duplicate exclusion as closed regressions, not tuning targets.
 
 ## OpenRouter Rule
 

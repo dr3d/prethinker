@@ -507,6 +507,33 @@ def test_run_query_plan_exposes_identifier_alias_count_for_event_surface() -> No
     ]
 
 
+def test_run_query_plan_exposes_duplicate_exclusion_count_for_unary_entity_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "record_id(rec_001).",
+        "record_id(rec_002).",
+        "record_id(rec_003).",
+        "record_id(rec_003_copy).",
+        "record_duplicate_of(rec_003_copy, rec_003).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["record_id(Record)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "duplicate_exclusion_count_support")
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SourcePredicate": "record_id",
+            "RawEntityCount": "4",
+            "DistinctEntityCount": "3",
+            "CanonicalEntities": "rec_001, rec_002, rec_003",
+            "DuplicateGroups": "rec_003: rec_003_copy",
+            "SupportKind": "duplicate_relation_distinct_count",
+        }
+    ]
+
+
 def test_summarize_counts_reference_judge_verdicts() -> None:
     rows = [
         {"ok": True, "queries": ["p(X)."], "reference_answer": "A", "reference_judge": {"verdict": "exact"}},
