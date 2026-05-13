@@ -3299,3 +3299,93 @@ Next pressure:
 - The remaining stable SQuAD residues are now mostly direct compile-surface
   gaps and query-surface resolution around named entities or title/display
   surfaces. Audit those before a full SQuAD-30 rerun.
+
+### DT-037 - Full SQuAD-30 Transfer Remeasurement
+
+Date: 2026-05-13
+
+Before:
+
+- DT-032 through DT-036 repaired targeted transfer coordinates with unlike
+  probes and narrow motivating replays.
+- The last comparable full SQuAD-30 run was still the DT-031-era measurement:
+  `152 / 2 / 17` exact / partial / miss across `171` questions, or `88.89%`
+  exact.
+- A full rerun was needed because targeted replays can hide broad compile
+  variance and can overstate transfer if they only move the motivating row.
+
+Prediction:
+
+- The full run should improve if the recent repairs are actually transferable:
+  complementary relation questions, target-anchor questions, and printed
+  temporal-distance questions should no longer dominate the residue.
+- Remaining not-exact rows should mostly be direct compile-surface gaps, not
+  fixture-shaped query-plan or helper-delivery failures.
+- Any new repair should wait until the residue is audited as a coordinate
+  family; the full run is measurement, not permission for patching.
+
+Intervention:
+
+- Recompiled all `30` staged SQuAD fixtures through OpenRouter at `6` lanes
+  with source-record ledger facts enabled.
+- Ran QA across the same `30` fixtures through OpenRouter at `6` lanes with
+  cache disabled.
+- Summarized the result with the transfer-coordinate intake audit.
+
+After:
+
+- Full SQuAD-30 rerun:
+  - Questions: `171`.
+  - Exact / partial / miss / not judged: `160 / 4 / 7 / 0`.
+  - Exact rate: `93.57%`.
+  - Non-exact rows: `11`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- Movement from previous full run:
+  - Exact: `152 -> 160` (`+8`).
+  - Non-exact: `19 -> 11` (`-8`).
+  - Exact rate: `88.89% -> 93.57%`.
+- Current residue by coordinate:
+  - `direct_compile_surface_gap`: `9`.
+  - `hybrid_join_resolution`: `1`.
+  - `implicit_attitude_or_consequence`: `1`.
+- Current residue by failure surface:
+  - `compile_surface_gap`: `10`.
+  - `hybrid_join_gap`: `1`.
+
+Artifacts:
+
+- Compile:
+  `tmp\mrc_transfer_compile_squad30_dt036_full_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_squad30_dt036_full_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_dt036_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt036_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt036_full_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_dt036_full_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_dt036_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- The recent targeted repairs transferred under full rerun pressure. The score
+  moved materially without helper rows, write proposals, or transport errors.
+- SQuAD is no longer primarily exposing the query-surface failures that started
+  this dataset-transfer loop. The remaining boundary is mostly compile
+  resolution: preserving direct answer-bearing distinctions, descriptors,
+  category terms, and small causal joins as queryable surfaces.
+- The residue is now small enough to audit manually before the next repair.
+  Repairing from a single row would risk turning dataset vocabulary into
+  architecture; repairing from a recurring coordinate family is the correct
+  next move.
+
+Next pressure:
+
+- Manually stratify the `11` remaining non-exact rows. The first useful split
+  is likely descriptor preservation, category/generalization preservation,
+  fraction/remaining-share arithmetic, causal-chain join, and external-code
+  inference. Only build a probe for a family that recurs or represents a
+  transferable missing resolution shape.
