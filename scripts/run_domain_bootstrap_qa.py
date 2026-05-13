@@ -325,6 +325,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For count questions scoped to a named source section, subset, packet part, or identified conflict/item group, do not answer from a global *_status(Entity, Status) predicate alone. Pair the status with the scope surface, such as source_record_section/source_record_label rows or a unary scope predicate, so scoped_status_count_support can return the count for the asked subset.",
         "For omission and set-difference questions such as 'which required X did not receive Y', 'which X was omitted', or 'was Y issued to all required X', emit paired query operations: first the required/scope set with a shared variable, then the absent-side predicate with polarity='negative' and the same variable. Example operations: query residential_zone(Zone) polarity positive; query boil_water_notice(Zone, Time, Issuer) polarity negative. Do not emit the second operation as a positive query when the question asks for missing or omitted rows.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
+        "For questions asking which event came before, anchored, triggered, or preceded a move, appointment, assignment, enrollment, or attachment, query the direct anchor/trigger surface such as event_anchor(Anchor, MoveOrAppointmentEvent) or triggered_by(MoveOrAppointmentEvent, Anchor) before asking what happened before that anchor. The anchor event itself often answers the question.",
         "For duration/deadline questions, prefer an existing deadline_met(Phase, StartDate, EndDate, Status) row plus elapsed_days(StartDate, EndDate, Days) when that row represents the asked phase. Do not compute a duration from two start-event rows when the compiled KB has a deadline_met row for the report, completion, or decision being asked about.",
         "For deadline questions asking whether a report or investigation was completed within deadline, query broadly enough to retrieve the relevant deadline_met row, the matching deadline_requirement row, and elapsed_days(StartDate, EndDate, Days). Do not bind the requirement label too narrowly, because compiled KBs may use inquiry_report, inquiry_report_90cd, inquiry_report_delivered, investigation_report, or investigation_report_120cd for the same source concept.",
         "For extension why/rationale questions, query extension_reason(ExtensionEvent, Reason), proceeding_event rows for requested/granted extension, and witness_claim/4 or finding_detail/2 rows that mention the delayed cooperation or documentation reason.",
@@ -1393,6 +1394,11 @@ def run_one_question(
                 kb_inventory=kb_inventory,
                 queries=queries,
             ),
+            *_anchor_relation_hint_queries(
+                utterance=utterance,
+                kb_inventory=kb_inventory,
+                queries=queries,
+            ),
         ]
     )
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
@@ -1547,6 +1553,63 @@ def _complementary_relation_hint_queries(
             break
 
     return _ordered_query_unique(out)[:8]
+
+
+_ANCHOR_EVENT_QUESTION_RE = re.compile(
+    r"\b(?:anchor(?:ed)?|trigger(?:ed)?|came before|come before|preced(?:e|ed|ing)|prior event|following)\b",
+    re.IGNORECASE,
+)
+
+
+def _anchor_relation_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+    queries: list[str],
+) -> list[str]:
+    """Add direct anchor/trigger probes for action-event questions."""
+
+    if not _ANCHOR_EVENT_QUESTION_RE.search(str(utterance or "")):
+        return []
+    action_atoms: set[str] = set()
+    for query in queries:
+        parsed = parse_prolog_query(query)
+        if parsed is None:
+            continue
+        _predicate, args = parsed
+        for arg in args:
+            if arg and not _is_prolog_variable(arg) and not arg.startswith("_"):
+                action_atoms.add(arg)
+    if not action_atoms:
+        return []
+
+    examples = kb_inventory.get("examples", {})
+    if not isinstance(examples, dict):
+        return []
+
+    out: list[str] = []
+    for signature, sample_clauses in examples.items():
+        if not isinstance(sample_clauses, list):
+            continue
+        predicate = str(signature).split("/", 1)[0].strip()
+        lowered_predicate = predicate.casefold()
+        if not predicate or not (("anchor" in lowered_predicate) or ("trigger" in lowered_predicate)):
+            continue
+        for clause in sample_clauses[:16]:
+            parsed_clause = parse_prolog_query(str(clause))
+            if parsed_clause is None:
+                continue
+            clause_predicate, args = parsed_clause
+            if clause_predicate != predicate or len(args) != 2:
+                continue
+            if "trigger" in lowered_predicate and args[0] in action_atoms:
+                out.append(format_prolog_query(predicate, [args[0], "Anchor"]))
+                break
+            if "anchor" in lowered_predicate and args[1] in action_atoms:
+                out.append(format_prolog_query(predicate, ["Anchor", args[1]]))
+                break
+
+    return _ordered_query_unique(out)[:6]
 
 
 def _source_record_table_count_hint_queries(
@@ -12134,6 +12197,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
             "Predicate-relation policy: a returned row's predicate name is part of the answer-bearing surface. For example, has_knowledge_of(Entity, mislabeled_folders) can support 'knowledge of mislabeled folders' even when the returned value atom is only mislabeled_folders; do not require the relation words to be duplicated inside the value atom.",
             "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
+            "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, clean helper rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped helper row directly matches the reference answer.",

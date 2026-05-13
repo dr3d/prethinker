@@ -348,6 +348,8 @@ def test_source_pass_ops_guidance_preserves_explicit_negative_surfaces(monkeypat
     user_message = next(item for item in captured["messages"] if item["role"] == "user")
     assert "Explicit negative-surface preservation rule" in user_message["content"]
     assert "positive assertion on a compatible prohibition/forbidden/exempt/outside-scope/lacks-authority predicate" in user_message["content"]
+    assert "Target-anchor preservation rule" in user_message["content"]
+    assert "Object-vs-actor attachment rule" in user_message["content"]
 
 
 def test_pass_surface_contribution_counts_unique_rows_in_order() -> None:

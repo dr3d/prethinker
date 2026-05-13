@@ -7,6 +7,7 @@ from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
+    _anchor_relation_hint_queries,
     _classification_deferral_effect_companion,
     _complementary_relation_hint_queries,
     _conversion_assessment_delta_companion,
@@ -226,6 +227,23 @@ def test_complementary_relation_hints_query_sibling_subject_surfaces() -> None:
     assert hints == ["has_experience_with(field_team, Complement)."]
 
 
+def test_anchor_relation_hints_query_direct_trigger_surfaces() -> None:
+    kb_inventory = {
+        "examples": {
+            "occurred_before/2": ["occurred_before(archive_migration, fee_reconciliation)."],
+            "triggered_by/2": ["triggered_by(moved_to_permit_queue, archive_migration)."],
+        }
+    }
+
+    hints = _anchor_relation_hint_queries(
+        utterance="What event came before the reviewers moved to the queue?",
+        kb_inventory=kb_inventory,
+        queries=["occurred_before(X, moved_to_permit_queue)."],
+    )
+
+    assert hints == ["triggered_by(moved_to_permit_queue, Anchor)."]
+
+
 def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearing() -> None:
     source = Path("scripts/run_domain_bootstrap_qa.py").read_text(encoding="utf-8")
 
@@ -234,6 +252,7 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "Predicate-relation policy" in source
     assert "has_knowledge_of(Entity, mislabeled_folders)" in source
     assert "Complementary-relation policy" in source
+    assert "Anchor-answer policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source

@@ -3064,3 +3064,93 @@ Next pressure:
   nested clauses, pronoun/role aliases, target lists, and target-vs-event
   ambiguity. The repair, if any, must still preserve target relation and anchor
   relation as separate coordinates without naming corpus vocabulary.
+
+### DT-034 - Dense Target-Anchor Repair
+
+Date: 2026-05-13
+
+Before:
+
+- DT-033 showed that the clean target-anchor coordinate was interior.
+- The remaining question was density: contrastive targets, prior and later
+  anchors, object attachment near actor assignment, and action-event anchor
+  labels in the same source region.
+
+Prediction:
+
+- If the clean pass was hiding density blur, a denser unlike probe should expose
+  several distinct failures rather than one missing axis.
+- Useful repairs should preserve source-fidelity surfaces without teaching the
+  harness any probe vocabulary.
+
+Intervention:
+
+- Added `target_anchor_density_ladder`, a focused density probe.
+- Initial compile/QA result:
+  - Questions: `12`.
+  - Exact / partial / miss: `8 / 1 / 3`.
+  - Helper rows: `0`.
+- Classified four non-exact rows:
+  - exact anchor modifier collapse: a shorter anchor atom lost a source-stated
+    modifier needed by a later query;
+  - object-vs-actor attachment collapse: an object attached to a place was
+    crowded out by the actor's assignment to a unit;
+  - anchor-to-later-event join gap: later-event question needed the exact
+    anchor label to join to ordering rows;
+  - trigger/anchor query gap: QA asked for temporal-before when the direct
+    trigger/anchor row already carried the answer.
+- Added generic compile guidance for target-anchor preservation and
+  object-vs-actor attachment separation.
+- Added generic QA guidance and a deterministic hint for direct
+  anchor/trigger predicates such as `event_anchor(Anchor, ActionEvent)` and
+  `triggered_by(ActionEvent, Anchor)`.
+
+After:
+
+- Recompiled the density probe after compile guidance:
+  - QA result: `11 / 0 / 1`.
+  - The modifier and object/actor attachment gaps moved inside.
+- Replayed QA after anchor/trigger query hints:
+  - QA result: `12 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\target_anchor_density_ladder`
+- Initial compile:
+  `tmp\boundary_probe_compile_target_anchor_density_20260513`
+- Initial QA:
+  `tmp\boundary_probe_qa_target_anchor_density_20260513`
+- Repaired compile:
+  `tmp\boundary_probe_compile_target_anchor_density_repair_20260513`
+- Compile-repair QA:
+  `tmp\boundary_probe_qa_target_anchor_density_repair_20260513`
+- Final anchor-query QA:
+  `tmp\boundary_probe_qa_target_anchor_density_anchor_repair_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_file.py::test_source_pass_ops_guidance_preserves_explicit_negative_surfaces tests\test_domain_bootstrap_qa.py::test_anchor_relation_hints_query_direct_trigger_surfaces tests\test_domain_bootstrap_qa.py::test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearing -q`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture target_anchor_density_ladder --out-root tmp\boundary_probe_compile_target_anchor_density_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture target_anchor_density_ladder --compile-root tmp\boundary_probe_compile_target_anchor_density_repair_20260513 --out-root tmp\boundary_probe_qa_target_anchor_density_anchor_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Target-anchor was not a missing axis; it was a resolution-density boundary.
+  The live set extended when compile preserved exact anchor labels and kept
+  object attachment separate from actor assignment.
+- Trigger/anchor rows are answer surfaces, not mere provenance. When a question
+  asks what came before or anchored an action, the direct anchor row can answer
+  before any broader temporal ordering query is needed.
+- The repair stayed clean: no probe nouns, no answer strings, no helper rows,
+  and no dataset-specific predicates.
+
+Next pressure:
+
+- Replay the SQuAD-30 residue rows that motivated this coordinate before a full
+  corpus rerun. The expected movement is narrow: target-anchor or
+  complementary-query rows should improve, while unrelated direct compile gaps
+  remain measurement coordinates.
