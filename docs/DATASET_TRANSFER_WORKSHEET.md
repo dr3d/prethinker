@@ -483,3 +483,101 @@ Next pressure:
   inference.
 - Keep inference and synthesis as scar categories unless unlike open-ended
   data shows source-faithful extraction surfaces, not just reader reasoning.
+
+### DT-006 - Factual Compile-Resolution Probe
+
+Before:
+
+- DT-005 identified `11` factual not-exact rows in corrected RACE-50.
+- These were the safest next pressure because they looked closest to
+  Prethinker's target: direct answer-bearing facts missing from queryable
+  compile surfaces.
+- The hypothesis was that simple unlike factual surfaces might already be
+  interior, while the RACE misses are denser surface-resolution cases.
+
+Prediction:
+
+- A small open-ended fixture with no multiple-choice interface should pass if
+  the factual misses are mostly RACE density.
+- If it fails, direct factual compile resolution still has a live boundary.
+- Source-record ledger facts should help only if the issue is source-fidelity
+  addressability, not fixture vocabulary.
+
+Intervention:
+
+- Added
+  `experiments\boundary_probes\dataset_transfer_stage1\factual_compile_resolution_ladder`.
+- The probe asks for direct factual surfaces: publication form, small-office
+  attribute, demonstration method, travel pause, post-spill action, listed
+  contaminants, Monday home presence, and counted-group arrival.
+- Ran OpenRouter compile/QA once with the usual compile shape.
+- Re-ran the same probe with generic `source_record_ledger` and
+  `source_record_ledger_facts` enabled.
+
+After:
+
+- Baseline compile/QA:
+  - Compile: parsed, `31` admitted facts, `16` candidate predicates.
+  - QA: `4 exact / 0 partial / 4 miss`.
+  - Misses: publication form, office size, Monday home presence, counted-group
+    arrival.
+- Source-record compile/QA:
+  - Compile: parsed, `56` admitted facts, `13` candidate predicates.
+  - QA: `7 exact / 0 partial / 1 miss`.
+  - No helpers, no write proposals, no runtime load errors.
+
+Artifacts:
+
+- Probe fixture:
+  `experiments\boundary_probes\dataset_transfer_stage1\factual_compile_resolution_ladder`
+- Baseline compile:
+  `tmp\boundary_probe_dataset_compile_stage1_factual_20260513`
+- Baseline QA:
+  `tmp\boundary_probe_dataset_qa_stage1_factual_20260513`
+- Source-record compile:
+  `tmp\boundary_probe_dataset_compile_stage2_factual_source_records_20260513`
+- Source-record QA:
+  `tmp\boundary_probe_dataset_qa_stage2_factual_source_records_20260513`
+
+Verification:
+
+- Baseline OpenRouter QA: `8` questions, `4 / 0 / 4`, `0` write proposals,
+  helper rows `0`.
+- Source-record OpenRouter QA: `8` questions, `7 / 0 / 1`, `0` write
+  proposals, helper rows `0`.
+- The generic fixture intake validator flags this probe because it expects
+  `40`-row story-world fixtures; that check is not applicable to the small
+  boundary-probe folder pattern.
+
+Manual audit:
+
+- The first compile admitted the action and list surfaces but dropped source
+  identity, the simple adjective attribute, the Monday presence roster, and the
+  counted-group arrival surface.
+- Source-record facts recovered three of those four misses without any helper
+  growth or fixture-specific predicate names. This supports the source-fidelity
+  direction: direct factual transfer pressure often needs addressable source
+  surfaces, not new answer logic.
+- The remaining miss is not a pure compile absence. The compile contains
+  `count(trainees_late, 10)` and `arrived_by(trainees_late, ferry_delay)`, but
+  QA planned `performed_action(trainees_late, X, Y)`. That is a query-surface
+  mismatch around event/state verbs, not a reason to add a trainee-specific
+  helper.
+
+Lesson:
+
+- Factual transfer pressure split into two layers:
+  source-fidelity addressability and query predicate selection.
+- Source-record ledger facts are a general substrate, not a RACE repair, and
+  they make unlike factual surfaces much more recoverable.
+- The residual boundary is whether a question like "what did the counted group
+  do" can use admitted state/event predicates such as arrival rows without
+  requiring the compiler to duplicate every state as a performed action.
+
+Next pressure:
+
+- Replay a small slice of RACE factual misses with source-record ledger facts
+  before changing code.
+- Separately audit query planning for event/state answer predicates, using the
+  residual counted-group arrival miss as a coordinate, not as vocabulary to
+  encode.
