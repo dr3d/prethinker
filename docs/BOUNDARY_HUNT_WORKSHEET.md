@@ -104,6 +104,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-045 | Source-section status trigger audit. | Section-prefix status counts now require a source-record label query surface instead of firing from unrelated `*_status` query names. |
 | BH-046 | Status timeline projection trigger audit. | Broad `*_status` timeline support now requires a status/state-like projection variable, preventing role/date predicates from being treated as state histories. |
 | BH-047 | Scheduled-state negative trigger probe. | Scheduled-state support was confirmed not to fire for ordinary scheduled events outside the event-to-state lexicon. |
+| BH-048 | Policy-gated counterfactual total support. | Multilingual source-fidelity card moved `7/0/1 -> 8/0/0` with a query-only gated-delta arithmetic helper scoped to proposal/exclusion surfaces. |
 
 ## Current Evidence
 
@@ -1541,12 +1542,86 @@ Next pressure:
   non-English or non-sectioned source forms where source fidelity may be weak
   but should not be repaired with English-only fixture vocabulary.
 
+### BH-048 - Policy-Gated Counterfactual Total Support
+
+Before:
+
+- The multilingual source-fidelity card had moved from `6/0/2` to `7/0/1`
+  after source-record ledger work.
+- The remaining miss was a hybrid join, not a compile omission:
+  the KB had a grounded final total and a grounded unapproved/excluded numeric
+  delta, but no query-only surface assembled the counterfactual total.
+- This is policy-gated arithmetic, not plain aggregation: the current total is
+  correct as-is, and the delta applies only under a lifted gate.
+
+Prediction:
+
+- A generic helper should expose only the hypothetical arithmetic support:
+  base total plus a positive delta from a pending/proposed/unapproved/excluded/
+  temporary surface.
+- Withdrawn estimates must not be treated as deltas.
+- The helper should fire from gated-delta query surfaces, not from ordinary
+  final-total queries.
+
+Intervention:
+
+- Added `policy_gated_counterfactual_total_support`.
+- The helper:
+  - finds grounded base totals from final/current/base/total count predicates;
+  - finds positive numeric deltas from proposal, pending, unapproved, excluded,
+    temporary, addition, delta, or change predicates;
+  - ignores withdrawn/prior/previous/estimate predicates;
+  - groups duplicate delta values across multiple evidence predicates;
+  - writes no durable facts.
+- Added a regression with final total, unapproved proposal delta, excluded
+  temporary delta, and withdrawn estimate.
+- Tightened delivery after first replay so it fires from gated-delta query
+  surfaces only. Helper rows dropped from `5` to `2`.
+
+After:
+
+- Focused tests passed.
+- Multilingual source-fidelity replay moved to `8 exact / 0 partial / 0 miss`.
+- Helper rows: `2`, both clean
+  `policy_gated_counterfactual_total_support`.
+- Runtime load errors: `0`; write proposal rows: `0`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- QA before scoped trigger:
+  `tmp\boundary_probe_multilingual_qa_stage48_policy_gated_total_20260513`
+- QA after scoped trigger:
+  `tmp\boundary_probe_multilingual_qa_stage49_policy_gated_total_scoped_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `145 passed`.
+- OpenRouter replay:
+  `question_count 8`, `judge_exact 8`, `judge_partial 0`, `judge_miss 0`,
+  `helper rows 2`, `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- Non-English source fidelity was not the failing axis here. The compiler had
+  extracted the needed coordinates from Portuguese source text. The boundary
+  was gated arithmetic: a current total stays authoritative, while a proposed
+  or excluded delta can answer only a counterfactual question. The repair is a
+  support surface for that relation geometry, not a translation or fixture
+  vocabulary patch.
+
+Next pressure:
+
+- Replay or probe another policy-gated arithmetic shape before broadening this
+  helper further. Keep business-day and wall-clock arithmetic separate.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
 | 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 to BH-047 tightened or confirmed suffix-alias, section-status, status-timeline, and scheduled-state triggers. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
-| 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
+| 2 | policy-gated and calendar arithmetic | Policy-gated count addition now has one clean transfer result; business-day and wall-clock arithmetic remain separate from plain aggregation. | Replay/probe another policy-gated arithmetic shape before broadening; keep calendar/clock arithmetic separate. |
 | 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |
 | 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |

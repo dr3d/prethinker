@@ -2309,6 +2309,109 @@ def _duplicate_relation_rows(runtime: CorePrologRuntime, *, raw_entities: set[st
     return rows
 
 
+def _policy_gated_counterfactual_total_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    query_tokens = set(_type_taxonomy_tokens(predicate))
+    trigger_tokens = {
+        "proposal",
+        "proposed",
+        "pending",
+        "unapproved",
+        "excluded",
+        "temporary",
+        "temp",
+    }
+    if not (query_tokens & trigger_tokens):
+        return None
+
+    base_rows: list[tuple[str, int]] = []
+    delta_sources_by_value: dict[int, set[str]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        fact_tokens = set(_type_taxonomy_tokens(fact_predicate))
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        numeric_values = [value for value in (_int_from_atom(arg) for arg in fact_args) if value is not None]
+        if not fact_predicate or not numeric_values:
+            continue
+        if _counterfactual_base_total_predicate(fact_tokens):
+            for value in numeric_values:
+                base_rows.append((fact_predicate, value))
+            continue
+        if _counterfactual_delta_predicate(fact_tokens):
+            for value in numeric_values:
+                if value > 0:
+                    delta_sources_by_value.setdefault(value, set()).add(fact_predicate)
+
+    if not base_rows or not delta_sources_by_value:
+        return None
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, int, int]] = set()
+    for base_predicate, base_value in sorted(base_rows, key=lambda item: (_case_atom_key(item[0]), item[1])):
+        for delta_value, delta_sources in sorted(delta_sources_by_value.items()):
+            key = (base_predicate, base_value, delta_value)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "HelperClass": "clean-helper",
+                    "SupportKind": "policy_gated_counterfactual_total",
+                    "BasePredicate": base_predicate,
+                    "BaseTotal": str(base_value),
+                    "DeltaSources": ",".join(sorted(delta_sources, key=_case_atom_key)),
+                    "DeltaValue": str(delta_value),
+                    "Operation": "add_if_gate_were_lifted",
+                    "CounterfactualTotal": str(base_value + delta_value),
+                }
+            )
+    if not rows:
+        return None
+    return _status_timeline_companion_result(
+        predicate="policy_gated_counterfactual_total_support",
+        query=(
+            "policy_gated_counterfactual_total_support"
+            "(BasePredicate, BaseTotal, DeltaSources, DeltaValue, CounterfactualTotal, SupportKind)."
+        ),
+        rows=rows[:24],
+        original_query=query,
+        note=(
+            "query-only policy-gated arithmetic support added grounded positive deltas that are explicitly "
+            "pending, proposed, unapproved, excluded, or temporary to a grounded base total; no durable fact was written"
+        ),
+    )
+
+
+def _counterfactual_base_total_predicate(tokens: set[str]) -> bool:
+    return bool(tokens & {"final", "current", "base", "total"}) and bool(tokens & {"count", "total"})
+
+
+def _counterfactual_delta_predicate(tokens: set[str]) -> bool:
+    if tokens & {"withdrawn", "estimate", "estimated", "prior", "previous", "earlier"}:
+        return False
+    return bool(
+        tokens
+        & {
+            "proposal",
+            "proposed",
+            "pending",
+            "unapproved",
+            "excluded",
+            "temporary",
+            "temp",
+            "addition",
+            "add",
+            "delta",
+            "change",
+        }
+    )
+
+
 def _set_difference_companion(
     runtime: CorePrologRuntime,
     *,
@@ -2579,6 +2682,14 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     duplicate_exclusion = _duplicate_exclusion_count_companion(runtime, predicate=predicate, args=args, query=query)
     if duplicate_exclusion:
         source_record_companions.append(duplicate_exclusion)
+    policy_gated_total = _policy_gated_counterfactual_total_companion(
+        runtime,
+        predicate=predicate,
+        args=args,
+        query=query,
+    )
+    if policy_gated_total:
+        source_record_companions.append(policy_gated_total)
     set_difference = _set_difference_companion(runtime, predicate=predicate, args=args, query=query)
     if set_difference:
         source_record_companions.append(set_difference)

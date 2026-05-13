@@ -570,6 +570,35 @@ def test_run_query_plan_exposes_duplicate_exclusion_count_for_unary_entity_surfa
     ]
 
 
+def test_run_query_plan_derives_policy_gated_counterfactual_total() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "final_count(8).",
+        "proposal_unapproved(2).",
+        "temporary_record_excluded(2).",
+        "estimate_withdrawn(11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["final_count(BaseTotal).", "proposal_unapproved(Delta)."])
+
+    support = next(
+        item for item in rows if item["result"].get("predicate") == "policy_gated_counterfactual_total_support"
+    )
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SupportKind": "policy_gated_counterfactual_total",
+            "BasePredicate": "final_count",
+            "BaseTotal": "8",
+            "DeltaSources": "proposal_unapproved,temporary_record_excluded",
+            "DeltaValue": "2",
+            "Operation": "add_if_gate_were_lifted",
+            "CounterfactualTotal": "10",
+        }
+    ]
+
+
 def test_run_query_plan_exposes_review_bound_remaining_set_support() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
