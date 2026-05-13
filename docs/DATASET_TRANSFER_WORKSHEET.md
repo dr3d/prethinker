@@ -3154,3 +3154,65 @@ Next pressure:
   corpus rerun. The expected movement is narrow: target-anchor or
   complementary-query rows should improve, while unrelated direct compile gaps
   remain measurement coordinates.
+
+### DT-035 - SQuAD Complementary-Query Replay
+
+Date: 2026-05-13
+
+Before:
+
+- DT-031's full SQuAD-30 run had two duplicate non-exact rows asking what a
+  returning group had "in addition to" a named baseline attribute.
+- DT-032 repaired the unlike complementary-query probe, but replay on the
+  motivating SQuAD coordinate was still needed before claiming transfer.
+
+Prediction:
+
+- The targeted SQuAD fixture should move without helpers if the repair is
+  genuinely about complementary query shape rather than the probe packet.
+- A clean result should not imply the whole SQuAD residue is solved; unrelated
+  direct compile gaps remain separate coordinates.
+
+Intervention:
+
+- Recompiled only the motivating SQuAD fixture with current compile guidance.
+- Ran QA through OpenRouter at `6` lanes with no cache.
+
+After:
+
+- Targeted SQuAD replay:
+  - Fixture: `squad_default_validation_00026_islamism`.
+  - Questions: `6`.
+  - Exact / partial / miss: `6 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- The duplicate complementary-query residue moved inside on replay.
+
+Artifacts:
+
+- Compile:
+  `tmp\mrc_transfer_compile_squad30_dt034_islamism_replay_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_squad30_dt034_islamism_replay_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00026_islamism --out-root tmp\mrc_transfer_compile_squad30_dt034_islamism_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00026_islamism --compile-root tmp\mrc_transfer_compile_squad30_dt034_islamism_replay_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt034_islamism_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- The complementary-query repair transferred back to the motivating SQuAD
+  coordinate. The unlike probe was not an isolated toy success.
+- The result is narrow evidence, not permission to overclaim: the remaining
+  SQuAD residue still includes direct compile gaps and a temporal-distance
+  hybrid join that need their own probes.
+
+Next pressure:
+
+- Mine the remaining stable SQuAD residues by coordinate. The most valuable
+  next probe is the temporal-distance hybrid row: a source prints a relative
+  distance ("three years before") but compile/query surfaces preserve only
+  publication year and before relation, not the numeric distance or comparable
+  endpoint.
