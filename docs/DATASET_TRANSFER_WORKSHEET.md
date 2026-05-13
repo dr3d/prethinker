@@ -581,3 +581,89 @@ Next pressure:
 - Separately audit query planning for event/state answer predicates, using the
   residual counted-group arrival miss as a coordinate, not as vocabulary to
   encode.
+
+### DT-007 - RACE Factual Source-Record Replay
+
+Before:
+
+- DT-006 showed that source-record ledger facts moved an unlike factual probe
+  from `4 / 0 / 4` to `7 / 0 / 1`.
+- That was useful but synthetic. The question was whether the same generic
+  source-fidelity substrate transfers back to real corrected RACE factual
+  misses.
+
+Prediction:
+
+- If source-record facts are the right repair shape, the factual not-exact
+  coordinates should improve without helper rows, write proposals, or
+  RACE-specific logic.
+- If the improvement only appears on the synthetic probe, the factual misses
+  remain unresolved density or dataset-specific pressure.
+
+Intervention:
+
+- Selected the `10` fixtures containing the `11` corrected RACE-50 factual
+  not-exact rows.
+- Recompiled those fixtures on OpenRouter at six lanes with
+  `source_record_ledger` and `source_record_ledger_facts` enabled.
+- Re-ran QA on the full `40` questions in that slice.
+- Compared only the `11` previously non-exact factual coordinates for the
+  transfer claim.
+
+After:
+
+- Slice QA with source records: `40` questions,
+  `32 exact / 1 partial / 7 miss`, exact rate `0.8`.
+- Runtime load errors: `0`.
+- Write proposal rows: `0`.
+- Helper rows: `0`.
+- Targeted factual coordinates:
+  - `11 / 11` improved.
+  - `10` are now exact.
+  - `1` moved from miss to partial.
+  - `0` stayed flat or regressed.
+
+Artifacts:
+
+- Source-record compile replay:
+  `tmp\mrc_transfer_compile_race_factual_source_records_20260513`
+- Source-record QA replay:
+  `tmp\mrc_transfer_qa_race_factual_source_records_20260513`
+- Proposition summary:
+  `tmp\mrc_transfer_qa_race_factual_source_records_20260513\transfer_coordinate_summary.md`
+
+Targeted coordinate movement:
+
+- Other-kids post-incident action: `miss -> exact`.
+- Competitor demonstration method: `miss -> exact`.
+- Ocean pollutant list: `partial -> exact`.
+- Iceberg temporary stop: `miss -> partial`.
+- Residence attribute/location: `miss -> exact`.
+- Monday at-home state: `miss -> exact`.
+- Promised destination: `miss -> exact`.
+- Near-school commute group: `partial -> exact`.
+- Ten-student late-arrival group: `miss -> exact`.
+- 3D-game player action: `miss -> exact`.
+- Passage publication genre: `miss -> exact`.
+
+Lesson:
+
+- This is the first strong transfer result for the dataset-transfer work:
+  source-record facts improved every factual not-exact coordinate sampled from
+  corrected RACE-50.
+- The repair shape stays generic. It does not know RACE, option letters,
+  fixture names, question ids, answer strings, or local story vocabulary. It
+  improves source-fidelity addressability.
+- The remaining non-exacts in the slice are no longer primarily factual
+  compile-resolution misses; they include inference, synthesis, hybrid joins,
+  and answer-surface issues. That supports the proposition-type framing.
+
+Next pressure:
+
+- Do not add a RACE-specific repair.
+- Treat source-record ledger facts as a candidate default for dataset-transfer
+  measurement, then replay a broader corrected RACE slice before claiming a
+  general exact-rate lift.
+- Keep the next architectural audit on query/answer surfaces that consume
+  source-record facts cleanly, so source rows do not become a noisy substitute
+  for actual compiled logic.
