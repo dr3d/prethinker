@@ -75,12 +75,11 @@ verdict = records what happened
   `tests/test_domain_bootstrap_qa.py`, `tests/test_qa_mode_selector.py`, and
   `tests/test_selector_guard_families.py`. The latest full-suite cleanup pass
   is `996 passed, 2 subtests passed`.
-- Current CTO guard-generalization pressure: a fresh six-lane hosted QA5 over
-  the helper-pressure compile set is `30 / 0 / 0` with `0` runtime load errors,
-  `0` write proposals, `191` helper rows, and bounded helper pressure. The new
-  `type_category_support` helper remains suspicious until unlike `_type/1`
-  transfer proves it is category/instance architecture rather than local
-  taxonomy luck.
+- Current CTO boundary-hunt pressure: the wide OpenRouter corpus run produced
+  `1008 / 76 / 134` over `1218` questions with `0` runtime load errors and
+  `0` write proposal rows. Guard compression is archived; the active work is
+  classifying not-exact rows by fixture-free boundary geometry and promoting
+  only repairs that replay on unlike rows.
 - Incoming-6 full-40 high-water: six new 2026-05-08 fixtures moved from a cold
   `186 / 16 / 38` to a diagnostic row-gated `240 / 0 / 0` over `240` rows. The
   result proves every row has a reachable surface, not that one global compiler
@@ -127,11 +126,12 @@ verdict = records what happened
   prefer-baseline target, not a selected miss.
 - Selector guard growth now has a family-level rollup:
   `scripts/summarize_selector_guard_families.py` parses selector guard reasons
-  and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current inventory is
-  `175` guard return sites, `175` unique guard reasons, `7` semantic families,
-  `0` unclassified reasons, and `0` exact duplicate reasons. Use the family
-  count to detect sprawl, but keep watching raw guard pressure; generalize,
-  merge, and retire before parameterizing.
+  and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current active inventory
+  is `5` guard return sites, `5` unique guard reasons, `4` semantic families,
+  `0` unclassified reasons, and `0` exact duplicate reasons. The companion
+  ledger keeps the larger retired/scar history visible. Use the family count to
+  detect sprawl, but keep watching raw guard pressure; generalize, merge, and
+  retire before parameterizing.
 - Broad score-hold check after the rule/selector guard work is clean: the main
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon

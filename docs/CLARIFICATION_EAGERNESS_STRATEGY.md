@@ -334,8 +334,8 @@ CE surface:
   resumed turns: N successful / M attempted
 ```
 
-5. Add CE examples to the console trybook so manual sessions can see the same
-   behavior.
+5. Add CE examples to the console docs/demo surface so manual sessions can see
+   the same behavior.
 6. Cross-apply the overlay pattern to Blackthorn, Kestrel, and Otters.
 
 ## Design Principle

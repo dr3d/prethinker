@@ -26,7 +26,8 @@ Then open:
 http://127.0.0.1:8765
 ```
 
-For a ready-made manual test script, see [CONSOLE_TRYBOOK.md](https://github.com/dr3d/prethinker/blob/main/docs/CONSOLE_TRYBOOK.md).
+For a compact governed-rules walkthrough, see the
+[Policy Reimbursement Demo](https://github.com/dr3d/prethinker/blob/main/docs/POLICY_REIMBURSEMENT_DEMO.md).
 
 Direct file-open also works now:
 

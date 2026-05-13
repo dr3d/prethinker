@@ -40,7 +40,7 @@ Then go deeper:
 - [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 - [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md)
 - [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
-- [Guard Generalization Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/GUARD_GENERALIZATION_WORKSHEET.md)
+- [Guard Generalization Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/GUARD_GENERALIZATION_WORKSHEET.md) - completed compression archive; use the boundary hunt worksheet for active work.
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)

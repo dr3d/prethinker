@@ -121,8 +121,8 @@ Notes from the 2026-05-03 Codex upgrade/preflight:
 - Keep `tmp/` lean. It is scratch only, and should normally be empty except for
   ad hoc local handoffs or active experiments. Fixture handoff folders and bulky
   scratch outputs can be moved to `C:\prethinker_tmp_archive`.
-- Treat `C:\prethinker_tmp_archive` as the lab's cold-storage/RAG shelf. Search
-  it for named artifacts or prior run evidence when needed, but do not bulk-load
-  it into context. If an archived artifact becomes an active research result,
-  summarize the lesson in tracked docs or fixture journals and reference the
-  archive path.
+- Treat `C:\prethinker_tmp_archive` as cold storage, not day-to-day context.
+  Search it only for named artifacts or prior run evidence when needed, and do
+  not bulk-load it into context. If an archived artifact becomes an active
+  research result, summarize the lesson in tracked docs or fixture journals and
+  reference the archive path.

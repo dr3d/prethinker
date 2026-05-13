@@ -116,10 +116,10 @@ A **selector guard** is a named rule that prevents the selector from choosing th
 
 ### Guard Families
 
-The guard return sites continue to cluster into 7 semantic families with 0
-unclassified reasons in the current rollup. The exact count changes as the lab
-discovers, merges, and retires guards; the live accounting is maintained in
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md` and
+The active guard return sites currently cluster into 4 semantic families with
+0 unclassified reasons in the current rollup. The exact count changes as the
+lab discovers, merges, and retires guards; the live accounting is maintained in
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`, with retired/scar history preserved in
 `docs/SELECTOR_GUARD_LEDGER.md`.
 
 | Family | What It Prevents | Example |
@@ -143,7 +143,7 @@ beat generic packet identifiers. A follow-up lexical pinboard added a
 timekeeping guard: when the question asks about clocking out of a timekeeping
 system, assignment/timekeeping evidence beats physical badge-exit rows.
 
-The guard roster is still in discovery mode. Do not parameterize the 7 families
+The guard roster is still in discovery mode. Do not parameterize the active families
 yet. First merge exact or near duplicates, prove the merged guard by replaying
 the rows that created the originals, and retire guards when better compile or
 helper surfaces make them unnecessary. A new guard is healthy when it names a
@@ -184,7 +184,7 @@ cold-injected story worlds. Two current evidence bands matter:
 
 - Prior surgical fixture batch: **284 / 303 exact (94%)**, with only **3**
   misses and zero unauthorized writes. This remains useful historical evidence;
-  newer work is now focused on cold-fixture transfer and guard compression.
+  newer work is now focused on cold-fixture transfer and boundary hunting.
 - 2026-05-07 cold-injected story-world batch: **361 / 400 exact (90.25%)**
   under row-gated selector replay, with **16 partial**, **23 miss**, and zero
   QA write proposals in the contributing runs.
@@ -230,7 +230,7 @@ These are as important as the positive ones:
 
 - **[The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)** - plain-language guide to the reader/control lenses and how they differ.
 - **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
-- **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether guard return sites are collapsing into a smaller number of semantic families (currently 7 families, 0 unclassified)
+- **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether active guard return sites are collapsing into a smaller number of semantic families (currently 4 families, 0 unclassified)
 - **[Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md)** - tracks whether remaining failures form multi-fixture work slices (currently 72 targets across 10 fixtures, organized into 9 recommended slices)
 - **[Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)** - the fixture design methodology, difficulty calibration, and cross-fixture regression protocol
 

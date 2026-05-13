@@ -130,7 +130,7 @@ truth-maintenance dependency depth, and safe partial-operation handling.
 
 - Full pytest suite is green.
 - Public docs and docs hub describe semantic IR as the active research center.
-- The console trybook has at least one semantic-IR-oriented demo that shows:
+- The console docs/demo surface has at least one semantic-IR-oriented walkthrough that shows:
   - claim versus fact
   - clarification rather than bad commit
   - admitted versus skipped operations

@@ -14,10 +14,10 @@ but do not belong on the public docs front door.
 - Curated manifests for archive bundles that are actually present.
 - Legacy notes only when they remain useful after a handoff.
 
-## Publishing Pattern
+## Promotion Pattern
 
 1. Keep docs hub curated (latest/high-signal runs only).
 2. Keep complete large scratch traces in the external archive unless they are
    intentionally promoted.
-3. Push curated artifacts to cloud so the local machine is not the only source
-   of truth.
+3. Promote only curated artifacts that need to be shared; leave bulk scratch
+   traces in Git history or the external archive.

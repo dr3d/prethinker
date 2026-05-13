@@ -61,13 +61,12 @@ names, and row addresses as first-class answer surfaces. Some candidates are
 live helpers. Some are temporary registry scaffolds. Most are row-gated until
 transfer proves them.
 
-The current CTO guard-generalization work is turning helper-pressure guards
-into fixture-free substrate tests. The latest six-lane hosted QA5 over the
-helper-pressure compile set is `30 / 0 / 0` with `0` runtime errors, `0` write
-proposals, and bounded helper pressure. The newest helper,
-`type_category_support`, is intentionally still suspicious: it fixes a
-category/instance count ambiguity, but it must transfer to unlike `_type/1`
-rows before it graduates beyond candidate evidence.
+Guard compression is archived; boundary hunt is active. The latest wide corpus
+run produced `1008 / 76 / 134` over `1218` questions with `0` runtime load
+errors and `0` write proposal rows. The `210` not-exact rows are now boundary
+coordinates: compile-surface gaps, hybrid-join gaps, query-surface gaps,
+answer-surface gaps, and judge-uncertainty cases to be probed without
+fixture-specific repairs.
 
 ## Guard Pressure
 
@@ -77,11 +76,11 @@ noise.
 The current rollup from `scripts/select_qa_mode_without_oracle.py` reports:
 
 ```text
-guard return sites: 175
-unique guard reasons: 175
-semantic families: 7
+guard return sites: 5
+unique guard reasons: 5
+semantic families: 4
 unclassified reasons: 0
-guards per family: 25.0
+guards per family: 1.25
 duplicate guard reasons: 0
 ```
 
@@ -117,11 +116,9 @@ to hold.
    families, status intervals, classification conversions, quantity
    conservation, and financial corrections are helper candidates when they
    compose admitted rows instead of interpreting source prose.
-4. **Run the guard generality review.** Start with the high-priority
-   helper-pressure guards. Rewrite each as a fixture-free semantic mismatch,
-   then decide whether the replacement belongs in helper substrate, selector
-   scoring, compile surface, predicate contracts, source-addressability ledger,
-   or scar/quarantine.
+4. **Run the boundary hunt.** Classify not-exact rows by fixture-free failure
+   geometry, design small probes around one axis at a time, and promote only
+   repairs that replay on unlike rows.
 5. **Keep the lab portable.** The current POWER/NITRO/LM Studio rig is a
    research convenience, not the product. Docs should describe endpoint
    configuration and artifact contracts, not a permanent home-lab dependency.
@@ -140,6 +137,8 @@ to hold.
 ## Read Next
 
 - [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
+- [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
+- [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
 - [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)

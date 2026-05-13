@@ -3,8 +3,9 @@
 Last updated: 2026-05-12
 
 This note is internal research doctrine for future CTO/Codex work. It describes
-how to use fixtures, guard compression, helper pressure, and diagnostics to
-characterize what Prethinker can and cannot currently quantize.
+how to use fixtures, the completed guard-compression archive, helper pressure,
+and diagnostics to characterize what Prethinker can and cannot currently
+quantize.
 
 Here, **quantize** means: preserve answer-bearing source meaning as named,
 queryable, auditable coordinates rather than as opaque prose, fixture-local

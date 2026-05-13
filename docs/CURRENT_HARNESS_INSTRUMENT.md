@@ -524,11 +524,11 @@ first cold run. As soon as the fixture is structurally valid, promote it into
 stay under `tmp/`, but durable scorecard lessons and artifact references should
 be captured in the tracked fixture journal.
 
-`C:\prethinker_tmp_archive` is the lab's cold-storage/RAG shelf for bulky tmp
-evidence worth keeping but not worth carrying in the active tree or model
-context. Search it narrowly when a named prior artifact matters. Do not treat it
-as live guidance; if an archived run becomes an active lesson, summarize that
-lesson in tracked docs or the fixture's journal.
+`C:\prethinker_tmp_archive` is cold storage for bulky tmp evidence worth
+keeping but not worth carrying in the active tree or model context. Search it
+narrowly when a named prior artifact matters. Do not treat it as live guidance;
+if an archived run becomes an active lesson, summarize that lesson in tracked
+docs or the fixture's journal.
 
 The current incoming rule is now exercised on zip-delivered drops and loose
 folders. Two authoring shapes are first-class:

@@ -69,7 +69,7 @@ The instrument currently distinguishes several kinds of moving parts:
 | Pre-compile ledger | Deterministic source-address extraction before LLM compile: line numbers, headings, table rows, fields, labels, IDs, and exact row text. |
 | Helper/companion | Query-only substrate that joins admitted facts and source-record rows into answerable support tables. |
 | Selector | Row-level choice among available candidate artifacts or query surfaces. |
-| Guard | Named selector-time warning that prevents a broad but wrong surface from beating a narrow correct one. Current guard rollup remains 7 families with 0 unclassified. |
+| Guard | Named selector-time warning that prevents a broad but wrong surface from beating a narrow correct one. Current guard rollup has 4 active families with 0 unclassified. |
 | Constraint propagation | Deterministic narrowing of known state and degrees of freedom after admission. |
 
 Lenses propose semantic surfaces. Pre-compile ledgers preserve lexical and

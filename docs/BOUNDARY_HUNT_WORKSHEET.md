@@ -8,7 +8,7 @@ worksheet was preserved verbatim at:
 `C:\prethinker_tmp_archive\boundary_hunt_20260513\BOUNDARY_HUNT_WORKSHEET_FULL_20260513.md`
 
 Use this file for current state, next pressure, and handoff clarity. Use the
-archive copy for RAG/history.
+archive copy only for named historical detail.
 
 ## Doctrine
 
