@@ -87,6 +87,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-028 | Counterfactual arithmetic unstated-result probe and generic compile repair. | Unstated add/subtract variant exposed `7/0/1`; source-pass contract guidance moved replay to `8/0/0`. |
 | BH-029 | Wide counterfactual increment replay. | Original wide miss `census_reconciliation` q040 replayed exact after recompile; adjacent revenue projection q028 also exact. |
 | BH-030 | Scoped-status delivery compression attempt. | Focused helper rows dropped `45 -> 36`, but unlike replay shifted exactness `36/1/3 -> 34/5/1`; code change rejected. |
+| BH-031 | Scoped-count precedence repair. | q032 moved partial -> exact by treating clean scoped-count rows as answer-bearing over broader status context. |
 
 ## Current Evidence
 
@@ -379,6 +380,78 @@ Next pressure:
 - Investigate planner behavior for count questions where a clean
   `scoped_status_count_support` row is exact but broad primary status rows
   create answer noise.
+
+### BH-031 - Scoped-Count Answer Precedence
+
+Before:
+
+- BH-030 showed that suppressing helper rows upstream was too risky.
+- The unlike q032 retry still produced the exact clean scoped-count helper row,
+  but the judge marked the answer partial because a broader global status query
+  returned five rows while the scoped helper returned the requested three.
+
+Prediction:
+
+- The right repair is answer/query precedence, not helper suppression.
+- For a count question scoped to a section, subset, criterion, or identified
+  item group, a clean helper row that binds scope, criterion, count, and members
+  should be answer-bearing. Broader unscoped status rows should remain context.
+
+Intervention:
+
+- Added fixture-free QA guidance in `scripts/run_domain_bootstrap_qa.py`:
+  section/subset-scoped status-count questions should pair status rows with a
+  scope surface so `scoped_status_count_support` can return the asked subset.
+- Added judge policy that clean scoped-count helper rows are answer-bearing
+  when they bind the requested scope, semantic criterion, count, and members.
+- Kept the BH-030 helper-row suppression backed out.
+
+After:
+
+- Targeted q032 replay moved `partial -> exact`.
+- Helper rows stayed bounded at `1` clean `scoped_status_count_support` row.
+- The broader global status query still returned five rows, but no longer
+  overrode the scoped count when the scoped helper directly matched the
+  reference.
+- Focused scoped-ladder replay held at `8/0/0` with `44` clean helper rows.
+- Full unlike replay held the repaired scoped-count coordinate exact and
+  returned `36/3/1`; the remaining non-exacts are separate surfaces:
+  one temporal arithmetic join and three compile-surface gaps.
+
+Artifacts:
+
+- Failed judge-policy-only attempt:
+  `tmp\boundary_scoped_count_judge_policy_q032_20260513`
+- Successful planner/judge precedence attempt:
+  `tmp\boundary_scoped_count_planner_policy_q032_20260513`
+- Focused scoped-ladder acceptance:
+  `tmp\boundary_probe_hybrid_qa_stage23_scoped_precedence_20260513`
+- Full unlike acceptance:
+  `tmp\boundary_scoped_count_full_replay_contradictory_20260513`
+
+Verification:
+
+- q032 targeted OpenRouter replay: `1/0/0`.
+- Focused scoped-ladder OpenRouter replay: `8/0/0`.
+- Full unlike OpenRouter replay: `36/3/1`; q032 exact.
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`: `129 passed`.
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`: passed.
+- No runtime load errors.
+- No write proposals.
+
+Lesson:
+
+- Scoped-count delivery pressure was not primarily "too many helper rows." It
+  was a precedence problem: exact scoped helper rows can be present but weakened
+  by broader context rows unless the answer policy knows the scoped row is the
+  more specific answer surface.
+
+Next pressure:
+
+- Keep this as a precedence repair and leave helper-row suppression alone.
+- Move the next boundary hunt to the remaining non-exacts from the full unlike
+  replay: temporal arithmetic over corrected intervals, and missing emitted
+  surfaces for source content, sector coverage, and timestamp-gap records.
 
 ## Active Pressure Board
 
