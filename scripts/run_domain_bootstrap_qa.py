@@ -288,6 +288,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "Use relevant_clauses as the primary evidence surface for choosing constants and record ids; compiled_predicate_inventory.examples is only a compact index.",
         "Prefer compiled_query_templates when a question asks for a value that appears in an existing predicate slot.",
         "If a desired meaning is split across multiple predicates, emit multiple query operations with shared constants or variables.",
+        "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, treat the named baseline relation as context, not as the answer surface. Query sibling predicates over the same subject whose returned slot can express the additional property, effect, capability, knowledge, authority, role, maintained item, or other complement requested by the question.",
         "Do not invent composite predicates such as who_accused/2 or why_recalled/2 unless that exact predicate exists in the compiled KB inventory.",
         "Copy constants exactly as they appear in relevant_clauses. Do not synthesize alternate name-order atoms, alias atoms, date atoms, or facility atoms from prose. If the question gives only a surname, title, initial, or paraphrase, query with a variable and let the KB return the canonical atom.",
     ],
@@ -1240,6 +1241,7 @@ def build_evidence_bundle_plan(
             "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
             "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
             "For policy or guidance questions, separate requirement, observed fact, preference, avoid-pattern, and rationale rows.",
+            "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, include a query for the named baseline relation only as context; the answer query should target sibling predicates over the same subject that expose the additional relation or property.",
         ],
     }
     messages = [
@@ -1386,6 +1388,11 @@ def run_one_question(
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_complementary_relation_hint_queries(
+                utterance=utterance,
+                kb_inventory=kb_inventory,
+                queries=queries,
+            ),
         ]
     )
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
@@ -1479,6 +1486,67 @@ def _fallback_queries_from_semantic_ir(
         out.append("roster_version(Version).")
 
     return _ordered_query_unique(out)
+
+
+_COMPLEMENTARY_PHRASE_RE = re.compile(
+    r"\b(?:in addition to|besides|along with|apart from|not only\b|what else|additional)\b",
+    re.IGNORECASE,
+)
+
+
+def _complementary_relation_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+    queries: list[str],
+) -> list[str]:
+    """Add sibling relation probes for complementary-question wording.
+
+    This is intentionally shape-based: it uses the planner's grounded subject
+    and the compiled KB inventory, not fixture names, answer strings, or source
+    prose. If a question asks for something "besides" a baseline relation, the
+    baseline predicate is useful context but may not be the answer surface.
+    """
+
+    if not _COMPLEMENTARY_PHRASE_RE.search(str(utterance or "")):
+        return []
+    parsed_queries = [parse_prolog_query(query) for query in queries]
+    grounded_subjects: set[str] = set()
+    queried_predicates: set[str] = set()
+    for parsed in parsed_queries:
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        queried_predicates.add(predicate)
+        if args and not _is_prolog_variable(args[0]) and not args[0].startswith("_"):
+            grounded_subjects.add(args[0])
+    if not grounded_subjects:
+        return []
+
+    examples = kb_inventory.get("examples", {})
+    if not isinstance(examples, dict):
+        return []
+
+    out: list[str] = []
+    for signature, sample_clauses in examples.items():
+        if not isinstance(sample_clauses, list):
+            continue
+        predicate = str(signature).split("/", 1)[0].strip()
+        if not predicate or predicate in queried_predicates or predicate.startswith("source_record_"):
+            continue
+        for clause in sample_clauses[:12]:
+            parsed_clause = parse_prolog_query(str(clause))
+            if parsed_clause is None:
+                continue
+            clause_predicate, args = parsed_clause
+            if clause_predicate != predicate or len(args) < 2 or args[0] not in grounded_subjects:
+                continue
+            variables = ["Complement", "Detail", "Value", "Scope", "Source"]
+            hint_args = [args[0], *variables[: len(args) - 1]]
+            out.append(format_prolog_query(predicate, hint_args))
+            break
+
+    return _ordered_query_unique(out)[:8]
 
 
 def _source_record_table_count_hint_queries(
@@ -12064,6 +12132,8 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Predicate-relation policy: a returned row's predicate name is part of the answer-bearing surface. For example, has_knowledge_of(Entity, mislabeled_folders) can support 'knowledge of mislabeled folders' even when the returned value atom is only mislabeled_folders; do not require the relation words to be duplicated inside the value atom.",
+            "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, clean helper rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped helper row directly matches the reference answer.",

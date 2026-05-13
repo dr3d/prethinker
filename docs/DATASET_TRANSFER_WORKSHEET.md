@@ -2906,3 +2906,93 @@ Next pressure:
   answer-bearing fact but the query plan retrieves an adjacent predicate.
 - Use the duplicate `in addition to` residue as pressure shape only; the probe
   must use unlike vocabulary and no SQuAD entities.
+
+### DT-032 - Adjacent Relation Query-Surface Probe
+
+Date: 2026-05-13
+
+Before:
+
+- DT-031 showed that some apparent compile gaps were really query-surface
+  misses: the compiled KB contained an answer-bearing fact, but the query plan
+  retrieved only a neighboring baseline relation.
+- The pressure shape was complementary phrasing: a question asks for what was
+  present in addition to, besides, along with, apart from, or not only but also
+  a named baseline relation.
+
+Prediction:
+
+- If the boundary is query-surface resolution, an unlike probe should compile
+  the answer facts but miss when QA stops at the baseline relation.
+- A useful repair should not name a dataset, source row, answer string, or local
+  entity. It should retrieve sibling predicates over the same grounded subject
+  when complementary wording asks for the extra relation.
+
+Intervention:
+
+- Added `adjacent_relation_query_surface_ladder`, a small unlike probe for
+  complementary relation retrieval.
+- Initial OpenRouter QA on the existing compile scored `4 / 0 / 4` with zero
+  helper rows. Three misses had the answer-bearing facts already compiled, but
+  QA queried only baseline relations such as possession, return, or assignment.
+- Added a generic query-planning rule and deterministic query hint:
+  complementary questions now add sibling-predicate probes over the same
+  grounded subject from the compiled KB inventory.
+- Added judge guidance that predicate names are answer-bearing relation
+  surfaces and that complementary possession/carry wording may be answered by
+  an abstract sibling predicate rather than the baseline possession predicate.
+
+After:
+
+- Replayed the probe after the query hint and judge policy:
+  - Questions: `8`.
+  - Exact / partial / miss: `7 / 0 / 1`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- The repaired rows used already-admitted facts such as:
+  - `has_influence_on(Subject, Complement)`;
+  - `has_knowledge_of(Subject, Complement)`;
+  - `has_experience_with(Subject, Complement)`.
+- The one remaining miss is not the same query-surface class. It is a
+  compile-surface omission: the source says an actor joined a target group
+  after a prior event, but the compile preserved the prior event as the join
+  target and did not preserve the target group as a queryable coordinate.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\adjacent_relation_query_surface_ladder`
+- Initial QA:
+  `tmp\boundary_probe_qa_adjacent_relation_query_surface_20260513`
+- Prompt-only replay:
+  `tmp\boundary_probe_qa_adjacent_relation_query_surface_repair_20260513`
+- Query-hint replay:
+  `tmp\boundary_probe_qa_adjacent_relation_query_surface_hint_repair_20260513`
+- Final relation-judge replay:
+  `tmp\boundary_probe_qa_adjacent_relation_query_surface_relation_judge_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_post_ingestion_qa_strategy_prefers_compiled_kb_surface tests\test_domain_bootstrap_qa.py::test_complementary_relation_hints_query_sibling_subject_surfaces tests\test_domain_bootstrap_qa.py::test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearing -q`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture adjacent_relation_query_surface_ladder --compile-root tmp\boundary_probe_compile_adjacent_relation_query_surface_20260513 --out-root tmp\boundary_probe_qa_adjacent_relation_query_surface_relation_judge_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Complementary phrasing is a real query-surface boundary: the answer may live
+  on a sibling predicate, while the named baseline relation is only context.
+- The repair is fixture-free because it uses only the question's structural
+  complement marker, the planner's grounded subject, and the compiled predicate
+  inventory. No dataset vocabulary or answer string enters the architecture.
+- Predicate names are part of the answer surface. A row such as
+  `has_knowledge_of(Entity, Value)` can support "knowledge of Value" even if
+  the value atom does not repeat the relation words.
+
+Next pressure:
+
+- Audit the remaining join-target compile omission as a separate coordinate:
+  source phrasing that binds a target group and a prior event in the same verb
+  phrase must preserve the target relation and the temporal qualifier
+  separately.
+- Before repair, build a tiny unlike probe for target-versus-anchor joins:
+  joined/assigned/appointed/attached to target after/before anchor.

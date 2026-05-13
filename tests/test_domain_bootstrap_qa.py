@@ -8,6 +8,7 @@ from scripts.run_domain_bootstrap_qa import (
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
     _classification_deferral_effect_companion,
+    _complementary_relation_hint_queries,
     _conversion_assessment_delta_companion,
     _clinic_device_recall_companion,
     _dedupe_helper_query_results,
@@ -182,6 +183,8 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert strategy["name"] == "post_ingestion_qa_query_strategy_v1"
     assert "compiled_predicate_inventory.signatures" in " ".join(strategy["predicate_surface_policy"])
     assert "relevant_clauses" in " ".join(strategy["predicate_surface_policy"])
+    assert "complementary phrasing" in " ".join(strategy["predicate_surface_policy"])
+    assert "sibling predicates over the same subject" in " ".join(strategy["predicate_surface_policy"])
     assert any("full compiled predicate arity" in item for item in strategy["arity_and_variable_policy"])
     assert any("Do not pre-fill an answer slot" in item for item in strategy["arity_and_variable_policy"])
     assert any("Do not over-constrain descriptive label slots" in item for item in strategy["arity_and_variable_policy"])
@@ -203,11 +206,34 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("prior_complaint/4" in item for item in strategy["epistemic_policy"])
 
 
+def test_complementary_relation_hints_query_sibling_subject_surfaces() -> None:
+    kb_inventory = {
+        "examples": {
+            "carries/2": ["carries(field_team, access_badges)."],
+            "has_experience_with/2": ["has_experience_with(field_team, failed_sequence)."],
+            "source_record_row/5": [
+                "source_record_row(src_line_0001, body, 1, packet, line_label)."
+            ],
+        }
+    }
+
+    hints = _complementary_relation_hint_queries(
+        utterance="What did the field team have besides the badges?",
+        kb_inventory=kb_inventory,
+        queries=["carries(field_team, Item)."],
+    )
+
+    assert hints == ["has_experience_with(field_team, Complement)."]
+
+
 def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearing() -> None:
     source = Path("scripts/run_domain_bootstrap_qa.py").read_text(encoding="utf-8")
 
     assert "Purpose/action atom policy" in source
     assert "fetching_fog_leaves" in source
+    assert "Predicate-relation policy" in source
+    assert "has_knowledge_of(Entity, mislabeled_folders)" in source
+    assert "Complementary-relation policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source
