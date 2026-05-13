@@ -85,14 +85,17 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-026 | Trigger sanity stage 2. | Canonical alias probe passed; numeric prose source-fidelity repair moved `14/0/2` to `15/0/1`. |
 | BH-027 | Counterfactual arithmetic stated-outcome probes. | Simple and dense stated-outcome variants passed `20/0/0`; boundary is not basic counterfactual retrieval. |
 | BH-028 | Counterfactual arithmetic unstated-result probe and generic compile repair. | Unstated add/subtract variant exposed `7/0/1`; source-pass contract guidance moved replay to `8/0/0`. |
+| BH-029 | Wide counterfactual increment replay. | Original wide miss `census_reconciliation` q040 replayed exact after recompile; adjacent revenue projection q028 also exact. |
 
 ## Current Evidence
 
 Counterfactual arithmetic after the source-pass contract repair:
 
 ```text
-questions: 28
-exact / partial / miss: 28 / 0 / 0
+focused synthetic questions: 28
+focused exact / partial / miss: 28 / 0 / 0
+wide replay sample: 2
+wide replay exact / partial / miss: 2 / 0 / 0
 exact rate: 1.0000
 helper rows: 0
 runtime load errors: 0
@@ -106,6 +109,8 @@ Per fixture:
 | `counterfactual_arithmetic_pair` | 8 | 0 | 0 | Basic unlike pair passed when the hypothetical outcome was stated. |
 | `counterfactual_arithmetic_dense_pair` | 12 | 0 | 0 | Multiple adjustments and disposition decoys passed when the hypothetical outcome was stated. |
 | `counterfactual_arithmetic_unstated_pair` | 8 | 0 | 0 | Unstated add/subtract outcome passed after generic source-pass contract guidance. |
+| `census_reconciliation` q040 | 1 | 0 | 0 | Original wide `counterfactual_increment_count` miss replayed exact after recompile. |
+| `census_reconciliation` q028 | 1 | 0 | 0 | Adjacent projection question replayed exact; treated as confidence, not the main coordinate. |
 
 Generic repair already made:
 
@@ -250,32 +255,91 @@ Next pressure:
   interior. If wide rows still miss, classify whether they require multi-step
   arithmetic, unit conversion, policy gating, or query-planner changes.
 
+### BH-029 - Wide Counterfactual Increment Replay
+
+Before:
+
+- The boundary plan had one direct `counterfactual_increment_count` coordinate:
+  `census_reconciliation` q040.
+- In the original wide run, q040 was `miss` with `hybrid_join_gap`.
+- The old query plan retrieved only current total rows and failed rejected
+  `memberchk` evidence-bundle queries for the projected count.
+
+Prediction:
+
+- If BH-028's compile-contract repair transferred, a fresh compile would
+  preserve enough source-fidelity or component surface for q040 to become exact
+  without a fixture-specific helper.
+- If it still missed, the survivor would likely be query-planner under-retrieval
+  over clean source-record rows.
+
+Intervention:
+
+- Recompiled `datasets/story_worlds/census_reconciliation` with the repaired
+  source-pass guidance.
+- Ran q040 only through OpenRouter QA with evidence bundles and reference judge.
+- Also sampled q028, an adjacent projection/revenue question, as a sanity check.
+
+After:
+
+- q040 replayed `1/0/0`.
+- q028 replayed `1/0/0`.
+- Helper rows remained `0`.
+- The recompiled surface still did not need a dedicated projected-total helper:
+  q040 reached the source-record line containing the projected unit count and
+  paired it with current status/current count support.
+
+Artifacts:
+
+- `tmp\boundary_wide_replay_compile_census_contract_20260513`
+- `tmp\boundary_wide_replay_qa_census_contract_q040_20260513`
+- `tmp\boundary_wide_replay_qa_census_contract_q028_20260513`
+
+Verification:
+
+- q040 reference judge: exact.
+- q028 reference judge: exact.
+- No runtime load errors.
+- No write proposals.
+- No helper delivery.
+
+Lesson:
+
+- The first original wide counterfactual increment miss moved inside after the
+  same generic contract/component repair that fixed the synthetic unstated
+  probe. That supports the "compile-resolution, not arithmetic-helper absence"
+  diagnosis for this slice.
+
+Next pressure:
+
+- Mark `counterfactual_arithmetic_join` as extended interior unless more
+  original wide coordinates with unlike arithmetic survive.
+- Move next to `scoped_status_count_support` delivery volume or to a fresh
+  trigger-audit probe if delivery work risks overfitting.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | `counterfactual_arithmetic_join` wide replay | Focused probes now pass, including unstated add/subtract after generic compile guidance. | Replay or sample the original not-exact arithmetic coordinates; classify any survivors by density. |
-| 2 | `scoped_status_count_support` delivery volume | Transfer succeeded but helper rows were high in unlike replay. | Compress delivery scope without weakening source-fidelity. |
-| 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
-| 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
+| 1 | `scoped_status_count_support` delivery volume | Transfer succeeded but helper rows were high in unlike replay. | Compress delivery scope without weakening source-fidelity. |
+| 2 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
+| 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
+| 4 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
 
 ## Next Work
 
 Do this next:
 
-1. Replay or sample the original wide not-exact rows tagged as
-   `counterfactual_arithmetic_join`.
-2. Check whether the source-pass contract repair changes their compile
-   admission before looking at QA.
-3. Classify survivors:
-   - multi-step arithmetic;
-   - unit conversion;
-   - policy/status gating;
-   - planner under-retrieval over clean component rows;
-   - judge-only ambiguity.
-4. Only add a helper if clean component rows exist and repeated unlike misses
-   still require query-time assembly.
-5. Then return to `scoped_status_count_support` delivery volume.
+1. Return to `scoped_status_count_support` delivery volume.
+2. Compare the broad helper rows against the exact question focus:
+   - predicate-scoped rows;
+   - source-section rows;
+   - context-tail rows;
+   - irrelevant clean-helper rows.
+3. Compress delivery scope only if the rule is fixture-free and keeps the
+   source-fidelity rows needed by the transfer probes.
+4. If scoped-status compression starts to smell local, pause and do a fresh
+   trigger-audit probe instead.
 
 ## OpenRouter Rule
 
