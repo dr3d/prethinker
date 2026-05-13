@@ -98,6 +98,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-039 | Implicit set-difference probe. | Unlike no-`set_minus` probe passed `8/0/0`; simple universe-minus-exclusion is already interior. |
 | BH-040 | Dense implicit-difference probe. | Dense multi-review probe exposed `7/1/3`: one compile-surface omission plus review-bound remaining-set join/count gaps. |
 | BH-041 | Review-bound remaining-set support. | Generic query-only support moved complete-contract rows exact while leaving R-A compile omissions exposed; scoped helper rows `22 -> 5`. |
+| BH-042 | Enumerated exclusion prompt probe. | Generic prompt-only compile retry did not recover the omitted first-notice exclusions; boundary remains compile-surface fidelity. |
 
 ## Current Evidence
 
@@ -1193,11 +1194,71 @@ Next pressure:
   candidate operations; never use lowercase placeholder atoms such as `token`,
   `item`, `member`, `notice`, or `set` as fact arguments.
 
+### BH-042 - Enumerated Exclusion Prompt Probe
+
+Before:
+
+- BH-041 left only rows tied to missing first-review compile facts:
+  no admitted exclusion rows for the first notice and no admitted applied-notice
+  binding for the first review.
+- Compile diagnostics showed skipped operations caused by unresolved placeholder
+  arguments in enumerated exclusion/binding rows.
+
+Prediction:
+
+- A generic source-pass prompt rule might be enough: for enumerated relation
+  statements, emit one candidate operation per listed member and never use
+  lowercase placeholders as fact arguments.
+
+Intervention:
+
+- Temporarily added that source-pass prompt guidance.
+- Recompiled the dense implicit-difference probe through OpenRouter:
+  `tmp\boundary_probe_hybrid_compile_stage21_dense_enumerated_grounding_20260513`.
+
+After:
+
+- Compile admitted `101` clauses and skipped `9`.
+- The missing first-notice exclusion facts were still absent:
+  no `excluded_by(t_02, n_a)` and no `excluded_by(t_05, n_a)`.
+- The first review still lacked an applied-notice binding.
+- The recompile also changed the review-binding predicate name for later rows
+  from the previous `review_applies_notice/2` shape to
+  `review_exclusion_notice/2`, so it did not give a clean replay surface for the
+  existing query-side support.
+- The temporary prompt/test edit was not retained.
+
+Artifacts:
+
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage21_dense_enumerated_grounding_20260513`
+
+Verification:
+
+- Focused prompt-contract test passed while the edit was present, but the
+  OpenRouter compile did not recover the target facts. The test and prompt edit
+  were removed before committing because the architecture was not proven.
+
+Lesson:
+
+- The enumerated exclusion boundary is not solved by a single generic prompt
+  sentence. The failure is more specific: source text and source-record facts
+  preserve the omitted sentence, but the semantic compile mapper admits neither
+  the enumerated relation facts nor the first review's binding. This should be
+  treated as compile-surface fidelity work, not query-helper work.
+
+Next pressure:
+
+- Inspect source-pass operation output and mapper admission diagnostics for
+  skipped placeholder rows. Decide whether a mapper-level placeholder rejection
+  report can preserve enough structured evidence for a targeted retry, without
+  reading QA answers or encoding probe vocabulary.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | enumerated exclusion compile fidelity | Review-bound remaining-set support works when component facts exist; first-review rows fail because compile skipped enumerated exclusion/binding facts. | Add generic source-pass guidance for enumerating listed members instead of placeholder args. |
+| 1 | enumerated exclusion compile fidelity | Prompt-only retry did not recover omitted first-notice facts; source-record text has the sentence but semantic facts are missing. | Inspect skipped placeholder diagnostics and design a retry/mapper signal that stays fixture-free. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -1207,8 +1268,8 @@ Next pressure:
 
 Do this next:
 
-1. Repair compile-source fidelity for enumerated exclusion statements, then
-   recompile/replay the dense probe.
+1. Inspect skipped placeholder diagnostics for enumerated relation rows and
+   design a compile retry/mapper signal that does not use QA answers.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
