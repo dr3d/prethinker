@@ -1934,3 +1934,95 @@ Next pressure:
   audited slices over larger noisy PrivacyQA batches.
 - Keep OpenRouter default at `6` lanes for normal batches; use `1`-lane retry
   for provider `429` residues.
+
+### DT-021 - Transfer Intake Alignment Audit
+
+Before:
+
+- PrivacyQA-30's raw non-exacts were automatically labeled
+  `compile_surface_gap`.
+- Manual audit showed those four rows were better explained as noisy
+  question/reference/source alignment: the source snippets did not clearly
+  answer the asked proposition.
+- Without a first-class intake label, benchmark noise would keep masquerading
+  as architecture boundary.
+
+Prediction:
+
+- A lightweight fixture-free audit can catch the obvious alignment failures
+  before coordinate summaries are interpreted.
+- The audit must be conservative. It should separate `likely_reference_mismatch`
+  from softer `review` rows, because lexical overlap is not a semantic judge.
+
+Intervention:
+
+- Added `scripts/audit_mrc_transfer_intake.py`.
+- The audit reads incoming or staged MRC fixtures and compares:
+  - non-generic question terms;
+  - source/reference evidence terms;
+  - whether the reference answer is literal in the source.
+- Added conservative statuses:
+  - `ok`;
+  - `review`;
+  - `likely_reference_mismatch`.
+- Added `--intake-audit` support to
+  `scripts/summarize_mrc_transfer_qa.py`.
+- When a non-exact row is marked `likely_reference_mismatch`, the transfer
+  coordinate summary now reports:
+  - surface: `intake_quality_gap`;
+  - coordinate: `dataset_answer_alignment_noise`.
+
+After:
+
+- PrivacyQA-30 intake audit:
+  - Rows: `30`.
+  - `ok`: `7`.
+  - `review`: `19`.
+  - `likely_reference_mismatch`: `4`.
+- The four likely mismatches are the same four non-exact rows from PrivacyQA-30.
+- PrivacyQA-30 coordinate summary with intake overlay:
+  - Raw score remains `26 exact / 1 partial / 3 miss`.
+  - Non-exact coordinate distribution becomes:
+    - `dataset_answer_alignment_noise`: `4`.
+  - Failure surface distribution becomes:
+    - `intake_quality_gap`: `4`.
+- PrivacyQA-10 intake audit:
+  - Rows: `10`.
+  - `likely_reference_mismatch`: `0`.
+
+Artifacts:
+
+- Audit script:
+  `scripts\audit_mrc_transfer_intake.py`
+- Tests:
+  `tests\test_audit_mrc_transfer_intake.py`
+- PrivacyQA-30 intake audit:
+  `tmp\mrc_transfer_samples_privacyqa30_20260513\transfer_intake_audit_v3.md`
+- PrivacyQA-30 coordinate summary with intake overlay:
+  `tmp\mrc_transfer_qa_privacyqa30_source_records_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python -m pytest tests\test_audit_mrc_transfer_intake.py tests\test_summarize_mrc_transfer_qa.py -q`
+  - `27 passed`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_privacyqa30_source_records_20260513 --intake-audit tmp\mrc_transfer_samples_privacyqa30_20260513\transfer_intake_audit_v3.json --out-json tmp\mrc_transfer_qa_privacyqa30_source_records_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_privacyqa30_source_records_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- Boundary hunting needs an intake-quality layer. Otherwise noisy external
+  datasets produce false architecture coordinates.
+- This is not a privacy-policy repair. The audit asks a reusable question:
+  do the question's content terms appear in the provided evidence/reference
+  surface strongly enough that a downstream miss should be interpreted as
+  architecture?
+- The audit is intentionally not a judge. `review` means "do not over-read this
+  row"; only `likely_reference_mismatch` changes coordinate interpretation.
+
+Next pressure:
+
+- Use the intake overlay for future external dataset transfer summaries.
+- Before adding new transfer datasets, run the intake audit on sampled fixtures
+  and prefer rows with no `likely_reference_mismatch`.
+- Next data move should be a cleaner document-grounded corpus, because PrivacyQA
+  has now taught the methodology more about intake noise than about remaining
+  Prethinker architecture gaps.

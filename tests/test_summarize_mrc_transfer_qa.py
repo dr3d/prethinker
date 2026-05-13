@@ -134,6 +134,48 @@ def test_summarize_uses_latest_qa_artifact_per_fixture(tmp_path) -> None:
     assert summary["totals"]["exact"] == 1
 
 
+def test_summarize_can_mark_intake_alignment_noise(tmp_path) -> None:
+    fixture_dir = tmp_path / "fixture_a"
+    fixture_dir.mkdir()
+    payload = {
+        "rows": [
+            {
+                "id": "q001",
+                "ok": False,
+                "utterance": "Does it collect GPS location?",
+                "reference_answer": "It collects payment data.",
+                "failure_surface": {"surface": "compile_surface_gap", "rationale": "No GPS fact was compiled."},
+                "reference_judge": {"verdict": "miss"},
+            }
+        ]
+    }
+    qa_path = fixture_dir / "domain_bootstrap_qa_20260101T000001000000Z_qa_model.json"
+    qa_path.write_text(json.dumps(payload), encoding="utf-8")
+    audit_path = tmp_path / "transfer_intake_audit.json"
+    audit_path.write_text(
+        json.dumps(
+            {
+                "rows": [
+                    {
+                        "fixture": "fixture_a",
+                        "id": "q001",
+                        "status": "likely_reference_mismatch",
+                        "flags": ["low_question_evidence_overlap"],
+                        "missing_question_terms": ["gps", "location"],
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    summary = summarize_run(tmp_path, intake_audit=audit_path)
+
+    assert summary["failure_surface_counts"] == {"intake_quality_gap": 1}
+    assert summary["transfer_coordinate_counts"] == {"dataset_answer_alignment_noise": 1}
+    assert "alignment noise" in summary["non_exact_rows"][0]["rationale"]
+
+
 def test_proposition_taxonomy_declares_operational_precedence() -> None:
     rules = "\n".join(PROPOSITION_TYPE_OPERATIONAL_RULES)
 

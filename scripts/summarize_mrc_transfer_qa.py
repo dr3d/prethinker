@@ -54,7 +54,8 @@ PROPOSITION_TYPE_OPERATIONAL_RULES: list[str] = [
 def main() -> int:
     args = _parse_args()
     qa_root = _abs(args.qa_root)
-    summary = summarize_run(qa_root)
+    intake_audit = _abs(args.intake_audit) if args.intake_audit else None
+    summary = summarize_run(qa_root, intake_audit=intake_audit)
     out_json = _abs(args.out_json) if args.out_json else qa_root / "transfer_coordinate_summary.json"
     out_md = _abs(args.out_md) if args.out_md else qa_root / "transfer_coordinate_summary.md"
     out_json.write_text(json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -70,16 +71,22 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--qa-root", type=Path, required=True)
     parser.add_argument("--out-json", type=Path)
     parser.add_argument("--out-md", type=Path)
+    parser.add_argument(
+        "--intake-audit",
+        type=Path,
+        help="Optional transfer_intake_audit.json to mark likely reference/source alignment noise.",
+    )
     return parser.parse_args()
 
 
-def summarize_run(qa_root: Path) -> dict[str, Any]:
+def summarize_run(qa_root: Path, *, intake_audit: Path | None = None) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     totals: Counter[str] = Counter()
     by_surface: Counter[str] = Counter()
     by_coordinate: Counter[str] = Counter()
     by_proposition_type: Counter[str] = Counter()
     by_config: dict[str, Counter[str]] = {"high": Counter(), "middle": Counter()}
+    intake_rows = _load_intake_audit(intake_audit)
 
     for qa_json in _latest_qa_jsons(qa_root):
         payload = json.loads(qa_json.read_text(encoding="utf-8"))
@@ -92,8 +99,15 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
                 by_config[config][verdict] += 1
             if verdict == "exact":
                 continue
-            surface = str((row.get("failure_surface") or {}).get("surface") or "unknown")
-            coordinate = classify_transfer_coordinate(row)
+            intake_row = intake_rows.get((fixture, str(row.get("id") or "")))
+            if intake_row and intake_row.get("status") == "likely_reference_mismatch":
+                surface = "intake_quality_gap"
+                coordinate = "dataset_answer_alignment_noise"
+                rationale = _intake_rationale(intake_row)
+            else:
+                surface = str((row.get("failure_surface") or {}).get("surface") or "unknown")
+                coordinate = classify_transfer_coordinate(row)
+                rationale = str((row.get("failure_surface") or {}).get("rationale") or "")[:600]
             proposition_type = classify_proposition_type(row)
             by_surface[surface] += 1
             by_coordinate[coordinate] += 1
@@ -108,7 +122,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
                     "proposition_type": proposition_type,
                     "question": row.get("utterance"),
                     "reference_answer": row.get("reference_answer"),
-                    "rationale": str((row.get("failure_surface") or {}).get("rationale") or "")[:600],
+                    "rationale": rationale,
                     "qa_json": str(qa_json),
                 }
             )
@@ -123,6 +137,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
         "qa_root": str(qa_root),
         "proposition_type_criteria": PROPOSITION_TYPE_CRITERIA,
         "proposition_type_operational_rules": PROPOSITION_TYPE_OPERATIONAL_RULES,
+        "intake_audit": str(intake_audit) if intake_audit else "",
         "totals": {
             "question_count": question_count,
             "exact": exact,
@@ -138,6 +153,28 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
         "transfer_coordinate_counts": dict(by_coordinate),
         "non_exact_rows": rows,
     }
+
+
+def _load_intake_audit(path: Path | None) -> dict[tuple[str, str], dict[str, Any]]:
+    if not path or not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    rows: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in payload.get("rows", []):
+        fixture = str(row.get("fixture") or "")
+        qid = str(row.get("id") or "")
+        if fixture and qid:
+            rows[(fixture, qid)] = row
+    return rows
+
+
+def _intake_rationale(row: dict[str, Any]) -> str:
+    missing = ", ".join(row.get("missing_question_terms") or [])
+    flags = ", ".join(row.get("flags") or [])
+    return (
+        "Transfer intake audit flagged likely reference/source alignment noise"
+        f" (missing question terms: {missing or 'none'}; flags: {flags or 'none'})."
+    )
 
 
 def _latest_qa_jsons(qa_root: Path) -> list[Path]:
@@ -349,6 +386,8 @@ def classify_transfer_coordinate(row: dict[str, Any]) -> str:
         return "hybrid_join_resolution"
     if surface == "answer_surface_gap":
         return "answer_surface_mapping"
+    if surface == "intake_quality_gap":
+        return "dataset_answer_alignment_noise"
     if surface == "compile_surface_gap":
         return "direct_compile_surface_gap"
     return "unclassified_transfer_coordinate"
