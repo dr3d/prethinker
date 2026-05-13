@@ -2806,6 +2806,164 @@ def _review_remaining_set_companion(
     }
 
 
+def _residual_absolute_amount_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    query_tokens = set(_type_taxonomy_tokens(predicate))
+    if not (query_tokens & {"total", "allocated", "allocation", "absolute", "remainder", "residual", "rest"}):
+        return None
+
+    arg_texts = [str(item).strip() for item in args]
+    target_scenarios = {arg_texts[0]} if arg_texts and arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else set()
+    target_recipients: set[str] = set()
+    if query_tokens & {"remainder", "residual", "rest"} and len(arg_texts) >= 2:
+        recipient_arg = arg_texts[1]
+        if recipient_arg and not _is_prolog_variable(recipient_arg):
+            target_recipients.add(_residual_share_entity_key(recipient_arg))
+
+    facts = _runtime_fact_rows(runtime)
+    totals: dict[str, list[tuple[str, int, str]]] = {}
+    absolute_allocations: dict[str, dict[str, dict[str, Any]]] = {}
+    remainder_recipients: dict[str, dict[str, str]] = {}
+
+    for fact in facts:
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        if not fact_predicate or fact_predicate.startswith("source_record_"):
+            continue
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        if len(fact_args) < 2:
+            continue
+        tokens = set(_type_taxonomy_tokens(fact_predicate))
+        scenario = fact_args[0]
+        if not scenario:
+            continue
+        if "total" in tokens and len(fact_args) >= 3:
+            value = _int_from_atom(fact_args[-1])
+            if value is not None:
+                resource = fact_args[1]
+                totals.setdefault(scenario, []).append((resource, value, fact_predicate))
+            continue
+        if tokens & {"remainder", "residual", "rest", "unassigned"}:
+            recipient = fact_args[1]
+            if recipient:
+                key = _residual_share_entity_key(recipient)
+                existing = remainder_recipients.setdefault(scenario, {}).get(key, "")
+                if not existing or existing.startswith("recipient_"):
+                    remainder_recipients[scenario][key] = recipient
+            continue
+        if tokens & {"absolute", "allocated", "allocation", "assigned", "assign", "share"}:
+            value = _int_from_atom(fact_args[-1])
+            if value is not None and len(fact_args) >= 3:
+                recipient = fact_args[1]
+                key = _residual_share_entity_key(recipient)
+                scenario_allocations = absolute_allocations.setdefault(scenario, {})
+                existing = scenario_allocations.get(key)
+                if existing is None:
+                    scenario_allocations[key] = {
+                        "recipient": recipient,
+                        "value": value,
+                        "predicates": {fact_predicate},
+                    }
+                else:
+                    existing.setdefault("predicates", set()).add(fact_predicate)
+                    if str(existing.get("recipient", "")).startswith("recipient_") and not recipient.startswith("recipient_"):
+                        existing["recipient"] = recipient
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, int, str, int]] = set()
+    for scenario, total_rows in sorted(totals.items(), key=lambda item: _case_atom_key(item[0])):
+        if target_scenarios and scenario not in target_scenarios:
+            continue
+        allocations = list(absolute_allocations.get(scenario, {}).values())
+        recipients_by_key = remainder_recipients.get(scenario, {})
+        if target_recipients:
+            recipients = [value for key, value in recipients_by_key.items() if key in target_recipients]
+        else:
+            recipients = list(recipients_by_key.values())
+        if not allocations or not recipients:
+            continue
+        allocated_sum = sum(int(item["value"]) for item in allocations)
+        allocation_sources = sorted(
+            {source for item in allocations for source in item.get("predicates", set())},
+            key=_case_atom_key,
+        )
+        allocated_recipients = sorted({str(item.get("recipient", "")) for item in allocations}, key=_case_atom_key)
+        for resource, total_value, total_source in total_rows:
+            remaining = total_value - allocated_sum
+            if remaining < 0:
+                continue
+            for recipient in sorted(recipients, key=_case_atom_key):
+                key = (scenario, resource, total_value, recipient, remaining)
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "residual_absolute_amount",
+                        "Scenario": scenario,
+                        "Resource": resource,
+                        "TotalPredicate": total_source,
+                        "TotalAmount": str(total_value),
+                        "AllocatedPredicates": ", ".join(allocation_sources),
+                        "AllocatedRecipients": ", ".join(allocated_recipients),
+                        "AllocatedAmount": str(allocated_sum),
+                        "RemainderRecipient": recipient,
+                        "RemainingAmount": str(remaining),
+                    }
+                )
+
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "residual_absolute_amount_support",
+        "prolog_query": (
+            "residual_absolute_amount_support"
+            "(Scenario, Resource, TotalAmount, AllocatedAmount, RemainderRecipient, RemainingAmount, SupportKind)."
+        ),
+        "variables": [
+            "HelperClass",
+            "SupportKind",
+            "Scenario",
+            "Resource",
+            "TotalPredicate",
+            "TotalAmount",
+            "AllocatedPredicates",
+            "AllocatedRecipients",
+            "AllocatedAmount",
+            "RemainderRecipient",
+            "RemainingAmount",
+        ],
+        "rows": rows[:24],
+        "num_rows": min(len(rows), 24),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only residual arithmetic support subtracted admitted absolute allocations from an "
+                "admitted scenario total for the admitted remainder recipient; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [query],
+    }
+
+
+def _residual_share_entity_key(value: str) -> str:
+    text = str(value or "").strip()
+    return text.removeprefix("recipient_")
+
+
 def _identifier_alias_key(value: str) -> str:
     tokens = [token for token in _type_taxonomy_tokens(value) if token]
     if len(tokens) <= 1:
@@ -2854,6 +3012,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     review_remaining_set = _review_remaining_set_companion(runtime, predicate=predicate, args=args, query=query)
     if review_remaining_set:
         source_record_companions.append(review_remaining_set)
+    residual_absolute = _residual_absolute_amount_companion(runtime, predicate=predicate, args=args, query=query)
+    if residual_absolute:
+        source_record_companions.append(residual_absolute)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)

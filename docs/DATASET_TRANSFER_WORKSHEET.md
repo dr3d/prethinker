@@ -3389,3 +3389,360 @@ Next pressure:
   fraction/remaining-share arithmetic, causal-chain join, and external-code
   inference. Only build a probe for a family that recurs or represents a
   transferable missing resolution shape.
+
+### DT-038 - SQuAD Residue Stratification
+
+Date: 2026-05-13
+
+Before:
+
+- DT-037 reduced the full SQuAD-30 residue to `11` non-exact rows.
+- The coordinate summary labelled `9` rows as `direct_compile_surface_gap`, but
+  that class was too broad to choose the next repair responsibly.
+
+Prediction:
+
+- If the remaining rows are mostly unrelated singletons, the correct move is
+  more measurement rather than repair.
+- If several rows share the same fixture-free resolution shape, the next probe
+  should target that shape with unlike source prose and no dataset vocabulary.
+
+Intervention:
+
+- Manually stratified the `11` non-exact rows by the proposition surface the
+  source needed to preserve, ignoring fixture names and question ids.
+
+After:
+
+- Residue classes:
+  - Answer-bearing complement preservation: `4`.
+    Source states a relation or definition with a compact answer complement,
+    but compile preserves adjacent facts while dropping the exact complement.
+    This includes descriptive complements, purpose/use complements, temporal
+    start labels, and reactive-target complements.
+  - Generic name, category, or component-list preservation: `3`.
+    Source states a general name, class, or component set, but compile keeps a
+    narrower instance, adjacent plan, or overly specific member.
+  - External code/world mapping: `1`.
+    The answer requires a conventional mapping not printed as an answer surface.
+  - Scope or authority envelope: `1`.
+    The answer depends on keeping a target/scope envelope distinct from nearby
+    exception or justification prose.
+  - Remaining-share arithmetic: `1`.
+    The answer depends on complement-of-fraction or residual-share reasoning.
+  - Causal-chain join: `1`.
+    The answer depends on chaining cause/lead-to with an ended-state predicate.
+
+Artifacts:
+
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_dt036_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python - <<'PY' ...` manual stratification helper over
+  `tmp\mrc_transfer_qa_squad30_dt036_full_20260513\transfer_coordinate_summary_with_intake.json`
+
+Lesson:
+
+- The next useful probe is not about a dataset format. It is about whether
+  compile treats answer-bearing complements as first-class query surfaces.
+- A complement may be an attribute, purpose, temporal label, reaction target,
+  definition, component list, or category. The repair target must be the
+  generic preservation rule, not any one subject area.
+- The singleton rows should stay on the board. They are valuable coordinates,
+  but they do not yet earn architecture.
+
+Next pressure:
+
+- Build a focused unlike probe for answer-bearing complement preservation. It
+  should contain printed complements but no printed final-answer shortcuts:
+  descriptive definition, use/purpose, temporal start label, reaction/affinity
+  target, and component-list membership. Run it before changing compile logic.
+
+### DT-039 - Answer-Bearing Complement Probe
+
+Date: 2026-05-13
+
+Before:
+
+- DT-038 identified answer-bearing complement preservation as the largest
+  recurring SQuAD residue family.
+- The unknown was whether this was a missing axis or a density boundary: could
+  compile preserve simple descriptive, purpose, temporal, relation-target,
+  component-list, name, and category complements when the source stated them
+  plainly?
+
+Prediction:
+
+- If the probe misses, a generic compile-surface repair is justified.
+- If the probe is exact with no helpers, then the axis is interior and the
+  SQuAD failures are denser variants rather than missing architecture.
+
+Intervention:
+
+- Added `answer_bearing_complement_ladder`, an unlike probe with eight compact
+  complement questions and no SQuAD topics.
+- Compiled and ran QA through OpenRouter at `6` lanes.
+
+After:
+
+- Probe result:
+  - Questions: `8`.
+  - Exact / partial / miss: `8 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\answer_bearing_complement_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_answer_bearing_complement_20260513`
+- QA:
+  `tmp\boundary_probe_qa_answer_bearing_complement_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture answer_bearing_complement_ladder --out-root tmp\boundary_probe_compile_answer_bearing_complement_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture answer_bearing_complement_ladder --compile-root tmp\boundary_probe_compile_answer_bearing_complement_20260513 --out-root tmp\boundary_probe_qa_answer_bearing_complement_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Answer-bearing complements are not a missing axis in the simple case. The
+  architecture can preserve and query descriptive, purpose, temporal,
+  relation-target, list, name, and category complements without helper rows.
+- The SQuAD residue is therefore a density question: adjacent facts,
+  paraphrase, generic-vs-specific naming, and competing envelopes can still
+  blur the complement surface.
+- No compile repair is warranted from the simple probe. The next probe needs
+  density, not a bigger generic instruction.
+
+Next pressure:
+
+- Build a dense complement probe with nearby distractor complements, generic
+  and specific category variants, competing purpose clauses, and adjacent
+  relation targets. If that probe fails, repair the density rule; if it passes,
+  move to the next SQuAD residue family.
+
+### DT-040 - Dense Complement Probe
+
+Date: 2026-05-13
+
+Before:
+
+- DT-039 proved simple answer-bearing complements were inside the set.
+- The remaining possibility was that density, not the axis itself, caused the
+  SQuAD residue: nearby distractor complements, separate names, category
+  variants, adjacent purposes, and exception clauses could blur the answer
+  surface.
+
+Prediction:
+
+- A failure would justify a generic density repair for complement preservation.
+- A clean result would retire this as the next repair target for now and push
+  attention to other residue families.
+
+Intervention:
+
+- Added `dense_answer_bearing_complement_ladder`, an unlike probe with ten
+  complement questions and nearby distractor facts.
+- Compiled and ran QA through OpenRouter at `6` lanes.
+
+After:
+
+- Probe result:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- Compile result:
+  - Parsed OK.
+  - Admitted clauses: `61`.
+  - Skipped clauses: `5`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\dense_answer_bearing_complement_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_dense_answer_bearing_complement_20260513`
+- QA:
+  `tmp\boundary_probe_qa_dense_answer_bearing_complement_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_answer_bearing_complement_ladder --out-root tmp\boundary_probe_compile_dense_answer_bearing_complement_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_answer_bearing_complement_ladder --compile-root tmp\boundary_probe_compile_dense_answer_bearing_complement_20260513 --out-root tmp\boundary_probe_qa_dense_answer_bearing_complement_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Complement preservation is interior under both simple and moderate-density
+  unlike probes. A generic repair here would be premature.
+- The SQuAD rows that looked like complement-preservation failures are more
+  likely narrower lexical/source-detail gaps: broad category recovery,
+  paraphrased descriptor extraction, or source wording that was not represented
+  with enough precision.
+- The boundary-hunt discipline prevented overfitting: a tempting repair target
+  failed to reproduce under unlike probes, so it stays on the board as
+  measurement, not architecture.
+
+Next pressure:
+
+- Move to the next transferable residue family with higher machinery value:
+  remaining-share arithmetic. Build a focused probe for complement-of-fraction
+  and residual-share questions before changing any arithmetic or compile
+  guidance.
+
+### DT-041 - Remaining-Share Arithmetic Repair
+
+Date: 2026-05-13
+
+Before:
+
+- DT-040 left remaining-share arithmetic as the next high-value residue family.
+- The SQuAD motivating row was only one row, so it did not justify a repair by
+  itself. A focused unlike probe was needed first.
+
+Prediction:
+
+- Recipient and printed-fraction residual questions should already be inside
+  if compile preserves `receives_remainder` and explicit shares.
+- Residual absolute amount questions may fail if the system retrieves total and
+  allocated amount but does not derive `total - allocated` as a support row.
+
+Intervention:
+
+- Added `remaining_share_arithmetic_ladder`, a focused unlike probe for:
+  - residual recipient lookup,
+  - printed complementary fractions,
+  - residual absolute amount from total minus allocated amount,
+  - distractor exclusions outside the split.
+- Initial probe result:
+  - Questions: `7`.
+  - Exact / partial / miss: `5 / 0 / 2`.
+  - Failure surface: `hybrid_join_gap` for `2`.
+  - Helper rows: `0`.
+- The two misses both had all needed admitted rows:
+  - total amount,
+  - absolute allocated amount,
+  - remainder recipient.
+  The missing operation was exposing the residual amount as query support.
+- Added `residual_absolute_amount_support`, a query-only clean helper that
+  subtracts admitted absolute allocations from an admitted scenario total for
+  an admitted remainder recipient.
+- Tightened delivery after the first repair replay exposed helper volume:
+  duplicate `recipient_*` rows are normalized before summing, and support rows
+  are scoped to the scenario or remainder recipient present in the query.
+
+After:
+
+- Final scoped probe replay:
+  - Questions: `7`.
+  - Exact / partial / miss: `7 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `3`.
+  - Helper class: `clean-helper`.
+- Broad QA tests:
+  - `149 passed`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\remaining_share_arithmetic_ladder`
+- Initial compile:
+  `tmp\boundary_probe_compile_remaining_share_arithmetic_20260513`
+- Initial QA:
+  `tmp\boundary_probe_qa_remaining_share_arithmetic_20260513`
+- Final QA:
+  `tmp\boundary_probe_qa_remaining_share_arithmetic_residual_scoped_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture remaining_share_arithmetic_ladder --out-root tmp\boundary_probe_compile_remaining_share_arithmetic_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture remaining_share_arithmetic_ladder --compile-root tmp\boundary_probe_compile_remaining_share_arithmetic_20260513 --out-root tmp\boundary_probe_qa_remaining_share_arithmetic_residual_scoped_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+
+Lesson:
+
+- Remaining-share arithmetic splits into two different surfaces:
+  recipient/fraction residuals can be answered from direct admitted rows, while
+  absolute residual amounts need a derived support row.
+- The helper is generic and source-faithful: it only derives from admitted
+  totals, admitted absolute allocations, and admitted remainder recipients. It
+  does not write durable facts and does not infer a remainder recipient.
+- Helper delivery needs the same pressure discipline as compile surfaces. The
+  first working version returned too many rows because duplicate `recipient_*`
+  aliases inflated both arithmetic and delivery. Normalizing those aliases and
+  scoping to query-bound scenario/recipient kept the repair small.
+
+Next pressure:
+
+- Replay the SQuAD Rhine residue to see whether this repair helps the
+  motivating row. If it does not, keep the SQuAD row classified separately as
+  fraction-channel/source-detail pressure rather than broad residual arithmetic.
+
+### DT-042 - Rhine Residual Replay
+
+Date: 2026-05-13
+
+Before:
+
+- DT-041 repaired absolute residual-share arithmetic on an unlike probe.
+- The motivating SQuAD row asked for the channel corresponding to the other
+  third of a river flow, which might or might not share the new helper's
+  absolute-residual machinery.
+
+Prediction:
+
+- If the SQuAD row needed the new helper, replay should move with
+  `residual_absolute_amount_support` or related helper evidence.
+- If it moved without helpers, the row should be reclassified as a query/judge
+  resolution replay rather than evidence for the new absolute-residual helper.
+
+Intervention:
+
+- Replayed the SQuAD Rhine fixture with current QA code against the existing
+  DT-037 full SQuAD compile.
+
+After:
+
+- Targeted replay:
+  - Fixture: `squad_default_validation_00025_rhine`.
+  - Questions: `9`.
+  - Exact / partial / miss: `9 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- The former non-exact row moved inside. The query result contained the answer
+  channel directly via flow-through evidence and contextual fraction evidence.
+
+Artifacts:
+
+- QA:
+  `tmp\mrc_transfer_qa_squad30_dt041_rhine_residual_replay_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00025_rhine --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt041_rhine_residual_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- The unlike residual-share repair is still valid, but the SQuAD Rhine row is
+  not evidence that the helper transferred. It moved without helper rows.
+- The useful claim is narrower and cleaner: absolute residual amount is now
+  covered by a generic helper; fraction-channel recipient questions can already
+  resolve through direct flow/fraction evidence when the query plan retrieves
+  the right rows.
+- This is another case where replay prevents over-attribution. A row can move
+  inside after nearby work without being caused by that work.
+
+Next pressure:
+
+- Commit this slice, then choose between two remaining high-value residue
+  families: causal-chain join and generic/category surface preservation. The
+  causal-chain join is smaller but more machinery-like; category preservation
+  has more rows but may be lexical/source-detail noise.

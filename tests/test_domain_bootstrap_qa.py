@@ -706,6 +706,37 @@ def test_run_query_plan_exposes_review_bound_remaining_set_support() -> None:
     ]
 
 
+def test_run_query_plan_derives_residual_absolute_amount_support() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "scenario_total(sample_plan, sealed_samples, 48).",
+        "allocated_absolute(sample_plan, archive_testing, 30).",
+        "receives_remainder(sample_plan, field_validation).",
+        "scenario_total(other_plan, sealed_samples, 20).",
+        "allocated_absolute(other_plan, archive_testing, 8).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["scenario_total(sample_plan, sealed_samples, Total)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "residual_absolute_amount_support")
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SupportKind": "residual_absolute_amount",
+            "Scenario": "sample_plan",
+            "Resource": "sealed_samples",
+            "TotalPredicate": "scenario_total",
+            "TotalAmount": "48",
+            "AllocatedPredicates": "allocated_absolute",
+            "AllocatedRecipients": "archive_testing",
+            "AllocatedAmount": "30",
+            "RemainderRecipient": "field_validation",
+            "RemainingAmount": "18",
+        }
+    ]
+
+
 def test_summarize_counts_reference_judge_verdicts() -> None:
     rows = [
         {"ok": True, "queries": ["p(X)."], "reference_answer": "A", "reference_judge": {"verdict": "exact"}},
