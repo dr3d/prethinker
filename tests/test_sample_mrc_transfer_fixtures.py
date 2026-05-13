@@ -5,10 +5,12 @@ from pathlib import Path
 
 from scripts.sample_mrc_transfer_fixtures import (
     _coerce_cuad_records,
+    _coerce_maud_records,
     _coerce_race_records,
     _coerce_squad_records,
     _select_records,
     write_cuad_fixtures,
+    write_maud_fixtures,
     write_race_fixtures,
     write_squad_fixtures,
 )
@@ -266,3 +268,81 @@ def test_write_cuad_fixture_can_be_staged(tmp_path: Path) -> None:
     assert 'What contract text relates to "Parties"?' in qa_md
     assert "Alpha LLC and Beta Inc." not in qa_md
     assert oracle[0]["reference_answer"] == "Alpha LLC and Beta Inc."
+
+
+def test_coerce_maud_records_groups_by_contract_and_isolates_answers() -> None:
+    rows = [
+        {
+            "data_type": "main",
+            "contract_name": "contract_1",
+            "text": "At closing, each share converts into the right to receive â€œcashâ€.",
+            "answer": "All Cash",
+            "question": "Type of Consideration-Answer",
+            "subquestion": "<NONE>",
+            "text_type": "Type of Consideration",
+            "id": "3",
+            "category": "General Information",
+        },
+        {
+            "data_type": "main",
+            "contract_name": "contract_1",
+            "text": "The agreement includes a matching right period of four business days.",
+            "answer": "4 business days",
+            "question": "Initial matching rights period (COR)-Answer",
+            "subquestion": "<NONE>",
+            "text_type": "Agreement provides for matching rights in connection with COR",
+            "id": "44",
+            "category": "Fiduciary Duties",
+        },
+    ]
+
+    [record] = _coerce_maud_records(
+        rows,
+        max_questions_per_record=2,
+        max_text_chars=200,
+        max_answer_chars=100,
+        data_type="main",
+    )
+
+    assert record["title"] == "contract_1"
+    assert len(record["questions"]) == 2
+    assert record["answers"] == ["All Cash", "4 business days"]
+    assert '"cash"' in record["context"]
+    assert "All Cash" not in record["context"]
+    assert "four business days" in record["context"]
+
+
+def test_write_maud_fixture_can_be_staged(tmp_path: Path) -> None:
+    record = {
+        "context": "Contract name: contract_1\n\n## Excerpt 1\n\nAt closing, each share converts into cash.",
+        "questions": ["What is the answer for: Type of Consideration-Answer Text type: Type of Consideration"],
+        "answers": ["All Cash"],
+        "question_ids": ["3"],
+        "categories": ["General Information"],
+        "text_types": ["Type of Consideration"],
+        "title": "contract_1",
+        "example_id": "contract_1",
+        "source_span_count": 1,
+    }
+    incoming = tmp_path / "incoming"
+    staged = tmp_path / "staged"
+    [fixture] = write_maud_fixtures(
+        records=[record],
+        out_root=incoming,
+        dataset_name="theatticusproject/maud",
+        config_name="default",
+        split="dev",
+        limit=1,
+    )
+
+    result = stage_fixture(fixture, out_root=staged)
+
+    assert result["qa_rows"] == 1
+    qa_md = (staged / fixture.name / "qa.md").read_text(encoding="utf-8")
+    oracle = [
+        json.loads(line)
+        for line in (staged / fixture.name / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert "Type of Consideration-Answer" in qa_md
+    assert "All Cash" not in qa_md
+    assert oracle[0]["reference_answer"] == "All Cash"

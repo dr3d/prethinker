@@ -1572,3 +1572,123 @@ Next pressure:
   agreement/event date, and effective/start date.
 - If the same query-surface miss reproduces, repair the query planner at the
   generic source-field level and replay CUAD-10 plus SQuAD/RACE smoke.
+
+### DT-017 - MAUD-10 Legal Taxonomy Transfer
+
+Before:
+
+- CUAD-10 landed at `28 / 2 / 10` over `40`, exact `70.0%`.
+- CUAD was useful but ugly: annotation-prompt questions, long clause spans, and
+  OCR-ish legal text made it unclear whether the measured boundary was legal
+  transfer or dataset shape.
+- MAUD looked like a cleaner legal alternative because it ships CSV rows with
+  `text`, `question`, `answer`, `label`, and contract identifiers.
+
+Prediction:
+
+- If CUAD's drop was mostly dataset ugliness, MAUD-10 should recover toward the
+  RACE/SQuAD range.
+- If legal-domain transfer requires external legal taxonomy labels, MAUD should
+  expose a different boundary: category/label mapping rather than extractive QA.
+
+Intervention:
+
+- Added MAUD support to `scripts\sample_mrc_transfer_fixtures.py`.
+- The adapter downloads MAUD CSV splits from HuggingFace, groups rows by
+  contract, writes bounded merger-agreement excerpts, and keeps MAUD labels and
+  reference answers isolated in `oracle.jsonl`.
+- Added small external-text cleanup at intake for common source encoding
+  artifacts.
+- Sampled `10` MAUD dev contracts, `4` rows each.
+- OpenRouter was temporarily unusable for Qwen (`429` plus provider schema
+  errors), so compile/QA ran through local LM Studio on the 5090.
+
+After:
+
+- Sample/stage:
+  - `10` MAUD fixtures.
+  - `40` questions.
+  - Source excerpts range from about `10k` to `18k` chars.
+- Compile:
+  - `10 / 10` parsed.
+  - Candidate predicates `115`.
+  - Compile admitted/skipped `785 / 90`.
+  - One local HTTP `500` cleared on single-fixture retry.
+- QA:
+  - `17 exact / 1 partial / 22 miss` over `40`.
+  - Exact rate `42.5%`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `0`.
+- Residue:
+  - Proposition types: `23` non-exact rows classified as `categorical`.
+  - Transfer coordinates:
+    - `false_or_exception_option_selection`: `8`.
+    - `direct_compile_surface_gap`: `7`.
+    - `background_role_or_audience_fact`: `3`.
+    - `hybrid_join_resolution`: `2`.
+    - `query_surface_resolution`: `2`.
+    - `implicit_attitude_or_consequence`: `1`.
+  - Failure surfaces:
+    - `compile_surface_gap`: `16`.
+    - `hybrid_join_gap`: `5`.
+    - `query_surface_gap`: `2`.
+- Literalness audit:
+  - MAUD dev `main` answered rows: `3471`.
+  - Rows where the reference answer appears literally in the excerpt: `515`
+    (`14.8%`).
+  - Many MAUD answers are external legal taxonomy labels such as consideration
+    type, representation-and-warranty category sets, carveout/dropdown labels,
+    or yes/no legal judgments.
+
+Artifacts:
+
+- Sampled fixtures:
+  `tmp\mrc_transfer_samples_maud10_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_maud10_20260513`
+- Compile:
+  `tmp\mrc_transfer_compile_maud10_source_records_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_maud10_source_records_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_maud10_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python -m pytest tests\test_sample_mrc_transfer_fixtures.py tests\test_summarize_mrc_transfer_qa.py -q`
+- `python scripts\sample_mrc_transfer_fixtures.py --source-format maud --dataset theatticusproject/maud --no-config --split dev --limit 10 --sample-strategy even --max-questions-per-record 4 --maud-max-text-chars 5000 --maud-max-answer-chars 400 --maud-data-type main --out-root tmp\mrc_transfer_samples_maud10_20260513`
+- `python scripts\stage_incoming_fixtures.py --root tmp\mrc_transfer_samples_maud10_20260513 --out-root tmp\mrc_transfer_staged_maud10_20260513`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_maud10_20260513 --out-root tmp\mrc_transfer_compile_maud10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url http://localhost:1234/v1 --lanes 2 --timeout 1200 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_maud10_20260513 --fixture maud_default_dev_00001_contract_15 --out-root tmp\mrc_transfer_compile_maud10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url http://localhost:1234/v1 --lanes 1 --timeout 1200 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_maud10_20260513 --out-root tmp\mrc_transfer_compile_maud10_source_records_20260513 --summarize-existing`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_maud10_20260513 --compile-root tmp\mrc_transfer_compile_maud10_source_records_20260513 --out-root tmp\mrc_transfer_qa_maud10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url http://localhost:1234/v1 --lanes 2 --timeout 600 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_maud10_source_records_20260513`
+
+Lesson:
+
+- MAUD is cleaner as a dataset package but not cleaner as a Prethinker transfer
+  target. It is mostly legal taxonomy classification, not open-ended document
+  QA or extractive answer recovery.
+- CUAD's surface is ugly, but its task is closer to source-grounded extraction.
+  MAUD's surface is cleaner, but its answers often require mapping source text
+  into an external legal annotation scheme that the source does not literally
+  state.
+- The `42.5%` exact rate should not be read as a worse legal-reading score than
+  CUAD. It is evidence that Prethinker does not currently own MAUD's external
+  legal taxonomy.
+- This should not trigger fixture-specific MAUD repairs. A repair would require
+  a generic architecture for task-provided label taxonomies or classification
+  rubrics, not merger-agreement vocabulary.
+
+Next pressure:
+
+- Do not use raw MAUD as the main clean legal QA baseline.
+- Either:
+  - build a MAUD-literal subset where the answer appears in the excerpt, if the
+    goal is legal extractive QA; or
+  - treat MAUD as a separate taxonomy-classification probe, if the goal is
+    label/rubric grounding.
+- For a cleaner open-ended legal/document QA baseline, look next at PrivacyQA or
+  another document-grounded QA set whose answers are naturally expressed in the
+  source rather than annotation labels.

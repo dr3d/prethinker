@@ -9,6 +9,7 @@ without turning dataset vocabulary into substrate.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import random
@@ -47,6 +48,16 @@ def main() -> int:
             limit=args.limit,
             offset=args.offset,
         )
+    elif args.source_format == "maud":
+        written = write_maud_fixtures(
+            records=records,
+            out_root=args.out_root,
+            dataset_name=args.dataset,
+            config_name=config_name,
+            split=args.split,
+            limit=args.limit,
+            offset=args.offset,
+        )
     else:
         written = write_race_fixtures(
             records=records,
@@ -66,13 +77,13 @@ def main() -> int:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sample RACE-, SQuAD-, or CUAD-style machine-reading-comprehension records into "
+            "Sample RACE-, SQuAD-, CUAD-, or MAUD-style machine-reading-comprehension records into "
             "Prethinker incoming fixtures with answers isolated in oracle.jsonl."
         )
     )
     parser.add_argument(
         "--source-format",
-        choices=["race", "squad", "cuad"],
+        choices=["race", "squad", "cuad", "maud"],
         default="race",
         help="Input dataset schema to normalize.",
     )
@@ -101,6 +112,11 @@ def _parse_args() -> argparse.Namespace:
         help="Read RACE-shaped records from local JSONL instead of HuggingFace.",
     )
     parser.add_argument(
+        "--local-csv",
+        type=Path,
+        help="Read MAUD CSV rows from disk instead of HuggingFace.",
+    )
+    parser.add_argument(
         "--local-json",
         type=Path,
         help="Read CUAD SQuAD-style JSON from disk instead of HuggingFace.",
@@ -123,6 +139,23 @@ def _parse_args() -> argparse.Namespace:
         default=800,
         help="Skip CUAD answer spans longer than this unless no shorter answer is available.",
     )
+    parser.add_argument(
+        "--maud-max-text-chars",
+        type=int,
+        default=5000,
+        help="Maximum MAUD excerpt characters per sampled row before bounded trimming.",
+    )
+    parser.add_argument(
+        "--maud-max-answer-chars",
+        type=int,
+        default=400,
+        help="Skip MAUD answer values longer than this unless no shorter answer is available.",
+    )
+    parser.add_argument(
+        "--maud-data-type",
+        default="main",
+        help="MAUD data_type to prefer, or 'any'.",
+    )
     return parser.parse_args()
 
 
@@ -133,6 +166,9 @@ def _load_records(args: argparse.Namespace) -> list[dict[str, Any]]:
         raise SystemExit("--offset must be zero or positive")
     if args.source_format == "cuad":
         records = _load_cuad_records(args)
+        return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
+    if args.source_format == "maud":
+        records = _load_maud_records(args)
         return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
     if args.local_jsonl:
         raw_records = _load_local_jsonl(args.local_jsonl)
@@ -264,7 +300,34 @@ def _load_cuad_records(args: argparse.Namespace) -> list[dict[str, Any]]:
     )
 
 
-def _download_cuad_json(*, dataset_name: str) -> dict[str, Any]:
+def _load_maud_records(args: argparse.Namespace) -> list[dict[str, Any]]:
+    if int(args.max_questions_per_record) < 1:
+        raise SystemExit("--max-questions-per-record must be positive")
+    if int(args.maud_max_text_chars) < 200:
+        raise SystemExit("--maud-max-text-chars must be at least 200")
+    if args.local_csv:
+        rows = _load_local_csv(args.local_csv)
+    else:
+        rows = _download_maud_csv(dataset_name=str(args.dataset), split=str(args.split))
+    return _coerce_maud_records(
+        rows,
+        max_questions_per_record=int(args.max_questions_per_record),
+        max_text_chars=int(args.maud_max_text_chars),
+        max_answer_chars=int(args.maud_max_answer_chars),
+        data_type=str(args.maud_data_type),
+    )
+
+
+def _download_maud_csv(*, dataset_name: str, split: str) -> list[dict[str, Any]]:
+    split_name = split if split in {"train", "dev", "test"} else "dev"
+    path = _hf_download_file(
+        dataset_name=dataset_name,
+        filename=f"MAUD_v1/MAUD_{split_name}.csv",
+    )
+    return _load_local_csv(path)
+
+
+def _hf_download_file(*, dataset_name: str, filename: str) -> Path:
     removed_entries: list[str] = []
     for entry in list(sys.path):
         candidate = Path(entry or os.getcwd()).resolve()
@@ -276,19 +339,23 @@ def _download_cuad_json(*, dataset_name: str) -> dict[str, Any]:
         from huggingface_hub import hf_hub_download  # type: ignore[import-not-found]
     except ImportError as exc:
         raise SystemExit(
-            "huggingface_hub is not installed. Install it or pass --local-json "
-            "pointing at CUAD_v1.json."
+            "huggingface_hub is not installed. Install it or pass a local dataset file."
         ) from exc
     finally:
         for entry in reversed(removed_entries):
             sys.path.insert(0, entry)
 
-    path = hf_hub_download(
-        repo_id=dataset_name,
-        repo_type="dataset",
-        filename="CUAD_v1/CUAD_v1.json",
-    )
-    return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    return Path(hf_hub_download(repo_id=dataset_name, repo_type="dataset", filename=filename))
+
+
+def _download_cuad_json(*, dataset_name: str) -> dict[str, Any]:
+    path = _hf_download_file(dataset_name=dataset_name, filename="CUAD_v1/CUAD_v1.json")
+    return json.loads(path.read_text(encoding="utf-8-sig"))
+
+
+def _load_local_csv(path: Path) -> list[dict[str, Any]]:
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        return [dict(row) for row in csv.DictReader(handle)]
 
 
 def _coerce_cuad_records(
@@ -471,6 +538,151 @@ def _cuad_question_text(question: str) -> str:
     return f'What contract text relates to "{category}"?'
 
 
+def _coerce_maud_records(
+    rows: Iterable[dict[str, Any]],
+    *,
+    max_questions_per_record: int,
+    max_text_chars: int,
+    max_answer_chars: int,
+    data_type: str,
+) -> list[dict[str, Any]]:
+    grouped: dict[str, dict[str, Any]] = {}
+    fallback: dict[str, list[dict[str, Any]]] = {}
+    preferred_type = data_type.casefold().strip()
+    for index, raw_row in enumerate(rows):
+        row = dict(raw_row)
+        if preferred_type != "any" and str(row.get("data_type") or "").casefold() != preferred_type:
+            continue
+        contract_name = str(row.get("contract_name") or f"contract_{index:05d}").strip()
+        text = _clean_external_text(str(row.get("text") or "")).strip()
+        answer = _clean_external_text(str(row.get("answer") or "")).strip()
+        question = _clean_external_text(str(row.get("question") or "")).strip()
+        if not contract_name or not text or not answer or not question:
+            continue
+        if answer == "<NONE>" or len(answer) > max_answer_chars:
+            continue
+        item = {
+            "text": _bounded_maud_text(text, answer=answer, max_text_chars=max_text_chars),
+            "question": _maud_question_text(row),
+            "answer": answer,
+            "question_id": str(row.get("id") or f"{index:05d}"),
+            "text_type": _clean_external_text(str(row.get("text_type") or "")).strip(),
+            "category": _clean_external_text(str(row.get("category") or "")).strip(),
+            "data_type": _clean_external_text(str(row.get("data_type") or "")).strip(),
+        }
+        key = contract_name
+        if key not in grouped:
+            grouped[key] = {
+                "context": "",
+                "questions": [],
+                "answers": [],
+                "question_ids": [],
+                "categories": [],
+                "text_types": [],
+                "title": contract_name,
+                "example_id": contract_name,
+                "source_span_count": 0,
+            }
+            fallback[key] = []
+        target = grouped[key]["questions"]
+        if len(target) < max_questions_per_record and item["text_type"] not in grouped[key]["text_types"]:
+            _append_maud_item(grouped[key], item)
+        else:
+            fallback[key].append(item)
+
+    for key, items in fallback.items():
+        record = grouped[key]
+        for item in items:
+            if len(record["questions"]) >= max_questions_per_record:
+                break
+            _append_maud_item(record, item)
+    for record in grouped.values():
+        record["context"] = _render_maud_context(
+            title=str(record["title"]),
+            excerpts=record.pop("_excerpts", []),
+        )
+    return [record for record in grouped.values() if record["questions"]]
+
+
+def _append_maud_item(record: dict[str, Any], item: dict[str, Any]) -> None:
+    excerpts = record.setdefault("_excerpts", [])
+    excerpts.append(item)
+    record["questions"].append(item["question"])
+    record["answers"].append(item["answer"])
+    record["question_ids"].append(item["question_id"])
+    record["categories"].append(item["category"])
+    record["text_types"].append(item["text_type"])
+    record["source_span_count"] = int(record.get("source_span_count") or 0) + 1
+
+
+def _bounded_maud_text(text: str, *, answer: str, max_text_chars: int) -> str:
+    if len(text) <= max_text_chars:
+        return text
+    answer_index = text.casefold().find(answer.casefold()) if answer else -1
+    if answer_index >= 0:
+        half = max_text_chars // 2
+        start = max(0, answer_index - half)
+        end = min(len(text), start + max_text_chars)
+        start = max(0, end - max_text_chars)
+        return text[start:end].strip()
+    return text[:max_text_chars].strip()
+
+
+def _maud_question_text(row: dict[str, Any]) -> str:
+    question = _clean_external_text(str(row.get("question") or "")).strip()
+    subquestion = _clean_external_text(str(row.get("subquestion") or "")).strip()
+    text_type = _clean_external_text(str(row.get("text_type") or "")).strip()
+    category = _clean_external_text(str(row.get("category") or "")).strip()
+    parts = [f"What is the answer for: {question}"]
+    if subquestion and subquestion != "<NONE>":
+        parts.append(f"Subquestion: {subquestion}")
+    if text_type:
+        parts.append(f"Text type: {text_type}")
+    if category:
+        parts.append(f"Category: {category}")
+    return " ".join(parts)
+
+
+def _render_maud_context(*, title: str, excerpts: Sequence[dict[str, Any]]) -> str:
+    lines = [
+        f"Contract name: {title}",
+        "",
+        "The following are bounded excerpts from merger-agreement source text.",
+        "",
+    ]
+    for index, item in enumerate(excerpts, start=1):
+        lines.extend(
+            [
+                f"## Excerpt {index}",
+                "",
+                f"- Text type: {item.get('text_type') or 'unspecified'}",
+                f"- Category: {item.get('category') or 'unspecified'}",
+                "",
+                str(item.get("text") or "").strip(),
+                "",
+            ]
+        )
+    return "\n".join(lines).strip()
+
+
+def _clean_external_text(value: str) -> str:
+    replacements = {
+        "â€œ": '"',
+        "â€": '"',
+        "â€˜": "'",
+        "â€™": "'",
+        "â€“": "-",
+        "â€”": "-",
+        "â€¦": "...",
+        "Â§": "Section",
+        "Â": "",
+    }
+    cleaned = value
+    for old, new in replacements.items():
+        cleaned = cleaned.replace(old, new)
+    return cleaned
+
+
 def _coerce_squad_records(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Return context-level records from SQuAD-style question rows."""
 
@@ -599,6 +811,43 @@ def write_cuad_fixtures(
         )
         fixture_dir = out_root / fixture_name
         _write_cuad_fixture(
+            record=record,
+            fixture_dir=fixture_dir,
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            fixture_name=fixture_name,
+            source_index=global_index,
+        )
+        written.append(fixture_dir)
+    return written
+
+
+def write_maud_fixtures(
+    *,
+    records: Iterable[dict[str, Any]],
+    out_root: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    limit: int,
+    offset: int = 0,
+) -> list[Path]:
+    out_root.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for local_index, record in enumerate(records):
+        if len(written) >= limit:
+            break
+        global_index = offset + local_index
+        fixture_name = _fixture_name(
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            index=global_index,
+            example_id=str(record.get("title") or record.get("example_id") or ""),
+        )
+        fixture_dir = out_root / fixture_name
+        _write_maud_fixture(
             record=record,
             fixture_dir=fixture_dir,
             dataset_name=dataset_name,
@@ -879,6 +1128,100 @@ def _write_cuad_fixture(
                 "- `source.md` contains bounded answer-neighborhood excerpts, not full contracts.",
                 "- `qa.md` contains extraction questions only.",
                 "- `oracle.jsonl` contains reference contract spans for after-the-fact scoring.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_maud_fixture(
+    *,
+    record: dict[str, Any],
+    fixture_dir: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    fixture_name: str,
+    source_index: int,
+) -> None:
+    context = _required_text(record, "context")
+    questions = _required_sequence(record, "questions")
+    answers = _required_sequence(record, "answers")
+    question_ids = record.get("question_ids") if isinstance(record.get("question_ids"), Sequence) else []
+    categories = record.get("categories") if isinstance(record.get("categories"), Sequence) else []
+    text_types = record.get("text_types") if isinstance(record.get("text_types"), Sequence) else []
+    if len(questions) != len(answers):
+        raise ValueError(f"{fixture_name}: questions/answers length mismatch ({len(questions)}/{len(answers)})")
+
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    title = str(record.get("title") or "untitled_contract")
+    example_id = str(record.get("example_id") or title or source_index)
+    span_count = int(record.get("source_span_count") or 0)
+
+    (fixture_dir / "source.md").write_text(
+        "\n".join(
+            [
+                "# External Merger Agreement QA Excerpts",
+                "",
+                f"- Dataset: `{dataset_name}`",
+                f"- Config: `{config_name}`",
+                f"- Split: `{split}`",
+                f"- Contract: `{title}`",
+                f"- Example id: `{example_id}`",
+                f"- Excerpt count: `{span_count}`",
+                "",
+                "## Agreement Excerpts",
+                "",
+                context.strip(),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    qa_lines = [
+        f"# {fixture_name} QA",
+        "",
+        "Questions only. MAUD labels/reference answers are isolated in `oracle.jsonl`.",
+        "",
+    ]
+    oracle_rows: list[dict[str, Any]] = []
+    for index, question in enumerate(questions, start=1):
+        qid = f"q{index:03d}"
+        answer = str(answers[index - 1]).strip()
+        if not answer:
+            raise ValueError(f"{fixture_name}:{qid}: blank answer")
+        source_qid = str(question_ids[index - 1]).strip() if index - 1 < len(question_ids) else qid
+        category = str(categories[index - 1]).strip() if index - 1 < len(categories) else "maud"
+        text_type = str(text_types[index - 1]).strip() if index - 1 < len(text_types) else ""
+        qa_lines.append(f"{index}. {str(question).strip()}")
+        oracle_rows.append(
+            {
+                "id": qid,
+                "source_id": f"{source_qid}:{qid}",
+                "category": "external_merger_agreement_answer",
+                "reference_answer": answer,
+                "answer": answer,
+                "maud_category": category,
+                "maud_text_type": text_type,
+            }
+        )
+
+    (fixture_dir / "qa.md").write_text("\n".join(qa_lines), encoding="utf-8")
+    (fixture_dir / "oracle.jsonl").write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in oracle_rows) + "\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "fixture_notes.md").write_text(
+        "\n".join(
+            [
+                "# Fixture Notes",
+                "",
+                "- External MAUD legal-domain transfer sample; do not treat MAUD labels as architecture.",
+                "- `source.md` contains bounded merger-agreement excerpts, not full contracts.",
+                "- `qa.md` contains question/field surfaces only.",
+                "- `oracle.jsonl` contains reference labels/answers for after-the-fact scoring.",
                 "",
             ]
         ),
