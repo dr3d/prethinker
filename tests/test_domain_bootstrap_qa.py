@@ -17,6 +17,7 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_join_with_previous,
     _placeholder_repaired_query,
     _relaxed_constant_query,
+    _source_record_field_sibling_repaired_query,
     _source_record_table_count_hint_queries,
     _temporal_join_with_previous,
     _urlopen_json_with_transient_retries,
@@ -316,6 +317,28 @@ def test_run_query_plan_derives_duration_from_compact_same_day_interval_atom() -
     assert support["End"] == "2026_05_02_12_30"
     assert support["DurationMinutes"] == "90"
     assert support["Duration"] == "1 hour 30 minutes"
+
+
+def test_run_query_plan_derives_duration_from_defined_corrected_interval() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "interval_start(preparation_interval, preparation_started).",
+        "interval_end(preparation_interval, preparation_ended).",
+        "corrected_timestamp(preparation_started, record_1, 2026_08_02_06_44_15).",
+        "corrected_timestamp(preparation_ended, record_1, 2026_08_02_07_08_15).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["elapsed_minutes(StartTime, EndTime, DurationMinutes)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "defined_interval_duration_support")
+    support = companion["result"]["rows"][0]
+    assert support["Interval"] == "preparation_interval"
+    assert support["StartEvent"] == "preparation_started"
+    assert support["EndEvent"] == "preparation_ended"
+    assert support["DurationSeconds"] == "1440"
+    assert support["DurationMinutes"] == "24"
+    assert support["Duration"] == "24 minutes"
 
 
 def test_run_query_plan_derives_status_from_corrected_interval() -> None:
@@ -1007,6 +1030,60 @@ def test_placeholder_repair_promotes_lowercase_temporal_helper_slots() -> None:
 
     assert repaired is not None
     assert repaired["query"] == "elapsed_hours(Issuedtimestamp, Liftedtimestamp, Totalhours)."
+
+
+def test_placeholder_repair_promotes_lowercase_event_slots() -> None:
+    repaired = _placeholder_repaired_query("badge_usage(bdg_44217, ingressevent).")
+
+    assert repaired is not None
+    assert repaired["query"] == "badge_usage(bdg_44217, Ingressevent)."
+
+
+def test_source_record_field_repair_joins_sibling_event_field() -> None:
+    repaired = _source_record_field_sibling_repaired_query(
+        "source_record_field(IngressEvent, description, lab_entry)."
+    )
+
+    assert repaired is not None
+    assert repaired["query"] == (
+        "source_record_field(SourceRowForIngressEvent, event, IngressEvent), "
+        "source_record_field(SourceRowForIngressEvent, description, lab_entry)."
+    )
+
+
+def test_source_record_field_repair_works_inside_conjunctive_query() -> None:
+    repaired = _source_record_field_sibling_repaired_query(
+        "badge_usage(bdg_44217, IngressEvent), "
+        "source_record_field(IngressEvent, description, lab_entry), "
+        "corrected_timestamp(IngressEvent, IngressTime)."
+    )
+
+    assert repaired is not None
+    assert repaired["query"] == (
+        "badge_usage(bdg_44217, IngressEvent), "
+        "source_record_field(SourceRowForIngressEvent, event, IngressEvent), "
+        "source_record_field(SourceRowForIngressEvent, description, lab_entry), "
+        "corrected_timestamp(IngressEvent, IngressTime)."
+    )
+
+
+def test_run_query_plan_adds_source_record_sibling_repair_even_when_direct_query_hits_row() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_1, event, event_a).",
+        "source_record_field(src_line_1, description, lab_entry).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_field(Event, description, lab_entry)."])
+
+    repaired = [
+        item
+        for item in rows
+        if "source_record_field(SourceRowForEvent, event, Event)" in item.get("query", "")
+    ]
+    assert repaired
+    assert repaired[0]["result"]["rows"][0]["Event"] == "event_a"
 
 
 def test_run_query_plan_keeps_placeholder_repairs_before_relaxed_temporal_join() -> None:

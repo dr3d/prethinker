@@ -1,0 +1,8 @@
+{"category":"temporal_arithmetic_corrected_interval","id":"q001","reference_answer":"24 minutes.","source_id":"q001"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q002","reference_answer":"2 hours 46 minutes 30 seconds.","source_id":"q002"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q003","reference_answer":"2026-08-02 07:16:30 and 2026-08-02 10:03:00.","source_id":"q003"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q004","reference_answer":"No. Preparation and sealed processing are separate intervals, so the sealed-processing duration must use the corrected sealed-processing start and end timestamps.","source_id":"q004"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q005","reference_answer":"21 minutes 30 seconds.","source_id":"q005"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q006","reference_answer":"2 hours 17 minutes 30 seconds.","source_id":"q006"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q007","reference_answer":"2026-09-11 22:42:30 and 2026-09-12 01:00:00.","source_id":"q007"}
+{"category":"temporal_arithmetic_corrected_interval","id":"q008","reference_answer":"No. Packaging and external custody are separate intervals, so the external-custody duration must use the corrected external-custody start and end timestamps.","source_id":"q008"}

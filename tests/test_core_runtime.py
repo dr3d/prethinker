@@ -97,6 +97,14 @@ class CoreRuntimeTests(unittest.TestCase):
             ],
         )
 
+    def test_temporal_elapsed_minutes_preserves_seconds(self) -> None:
+        query = self.runtime.query_rows(
+            "elapsed_minutes(2026_09_11_22_12_40, 2026_09_11_22_34_10, Minutes)."
+        )
+
+        self.assertEqual(query.get("status"), "success")
+        self.assertEqual(query.get("rows"), [{"Minutes": "21.5"}])
+
     def test_temporal_elapsed_days_virtual_predicate(self) -> None:
         self.assertEqual(
             self.runtime.assert_fact("inspection(pier_7, luis_ferreira, 2026_02_01).").get("status"),

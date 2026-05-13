@@ -895,6 +895,41 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         ]
         self.assertEqual(skipped[0]["skip_reason"], "predicate_contract_role_mismatch")
 
+    def test_mapper_allows_interval_label_as_label_not_temporal_span(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "interval_defined_by",
+                    "args": ["record_1", "preparation", "start_event", "end_event"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["interval_defined_by/4"],
+            predicate_contracts=[
+                {
+                    "signature": "interval_defined_by/4",
+                    "arguments": [
+                        "record_id",
+                        "interval_label",
+                        "start_event_label",
+                        "end_event_label",
+                    ],
+                },
+            ],
+        )
+        self.assertEqual(
+            parsed["facts"],
+            ["interval_defined_by(record_1, preparation, start_event, end_event)."],
+        )
+        self.assertFalse(any("role interval_label" in warning for warning in warnings))
+        self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
+
     def test_mapper_allows_person_as_authority_or_source(self) -> None:
         ir = _ir(
             candidate_operations=[

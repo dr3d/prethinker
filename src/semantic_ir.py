@@ -3037,6 +3037,8 @@ def _contract_role_kind(role: str) -> str:
     value = _atomize(role)
     if not value:
         return ""
+    if "label" in value:
+        return ""
     if "speaker" in value and ("document" in value or "source" in value):
         return "person_or_document"
     if "interval" in value:

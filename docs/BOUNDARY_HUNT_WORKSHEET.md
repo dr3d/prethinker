@@ -88,6 +88,8 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-029 | Wide counterfactual increment replay. | Original wide miss `census_reconciliation` q040 replayed exact after recompile; adjacent revenue projection q028 also exact. |
 | BH-030 | Scoped-status delivery compression attempt. | Focused helper rows dropped `45 -> 36`, but unlike replay shifted exactness `36/1/3 -> 34/5/1`; code change rejected. |
 | BH-031 | Scoped-count precedence repair. | q032 moved partial -> exact by treating clean scoped-count rows as answer-bearing over broader status context. |
+| BH-032 | Corrected-interval duration probe. | Focused corrected-endpoint duration fixture passed `8/0/0`; wide temporal arithmetic miss is density, not a missing axis. |
+| BH-033 | Dense corrected-duration repair. | Dense probe moved `5/1/2 -> 8/0/0`; original wide coordinate improved but remains open due noisy temporal-join row explosion. |
 
 ## Current Evidence
 
@@ -453,29 +455,181 @@ Next pressure:
   replay: temporal arithmetic over corrected intervals, and missing emitted
   surfaces for source content, sector coverage, and timestamp-gap records.
 
+### BH-032 - Corrected-Interval Duration Probe
+
+Before:
+
+- The full unlike replay left one hybrid-join gap for elapsed time between
+  corrected endpoints.
+- The failure surface said the corrected endpoint rows were present, but the
+  answer required temporal arithmetic across them.
+
+Prediction:
+
+- If corrected endpoint duration is a missing architecture axis, a focused
+  probe with two unlike records should miss on elapsed-time questions.
+- If the axis is already inside the set, the focused probe should pass and the
+  wide miss should be treated as a denser binding problem.
+
+Intervention:
+
+- Added `corrected_interval_duration_pair`, a fixture-free probe for raw
+  endpoint timestamps, correction rules, authoritative corrected endpoints, and
+  elapsed-time questions over the corrected endpoints.
+- Compiled and ran QA through OpenRouter.
+
+After:
+
+- Compile admitted `18` rows with `0` skipped rows.
+- QA returned `8/0/0` with `0` helper rows.
+- Duration questions queried both corrected endpoints and an elapsed-time join;
+  the runtime result carried the minute count through the joined endpoint rows.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\corrected_interval_duration_pair`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage12_corrected_duration_20260513`
+- QA:
+  `tmp\boundary_probe_hybrid_qa_stage24_corrected_duration_20260513`
+
+Verification:
+
+- Focused OpenRouter replay: `8/0/0`.
+- No runtime load errors.
+- No write proposals.
+
+Lesson:
+
+- Corrected endpoint duration is already an interior coordinate in simple form.
+  The wide miss should not trigger a broad new duration helper. The next probe
+  should add density around event binding: multiple corrected endpoints, raw
+  endpoints, and adjacent events where the question must select the correct
+  start/end pair before doing temporal arithmetic.
+
+Next pressure:
+
+- Build a dense corrected-duration probe with sibling corrected endpoints and
+  decoy raw intervals.
+- If the dense probe fails, repair event-to-endpoint binding or query planning
+  generically; do not encode source names or event labels.
+
+### BH-033 - Dense Corrected-Duration Repair
+
+Before:
+
+- BH-032 proved simple corrected endpoint duration was interior.
+- Dense corrected-duration probe failed at `5/1/2`.
+- The first dense compile skipped interval rows because `interval_label` was
+  treated as if the label itself had to look like a temporal span.
+- The original wide coordinate remained miss: the KB had corrected endpoint
+  atoms, but the query plan could not bind the specific start/end events before
+  calling temporal arithmetic.
+
+Prediction:
+
+- The repair should be a small set of reusable bridges:
+  label roles are labels, not interval spans;
+  listed timestamped sibling events need full compile coverage;
+  temporal arithmetic must preserve seconds;
+  source-record field queries need row-sibling joins when an event/entity value
+  lives in one field and the requested label lives in another.
+
+Intervention:
+
+- Updated Semantic IR role validation so `*_label` contract roles do not get
+  temporal-span validation merely because they contain the word interval.
+- Added source-compile guidance to preserve every explicitly listed timestamped
+  event in repeated temporal lists, not only the first interval.
+- Added query-only `defined_interval_duration_support` for KBs that expose
+  `interval_start` / `interval_end` plus corrected timestamp rows.
+- Fixed core runtime temporal parsing to preserve seconds and return fractional
+  minute values when elapsed time is not a whole minute.
+- Added QA guidance for duration questions over named state/inside/custody
+  intervals, and for proper `source_record_field(Row, Field, Value)` row
+  semantics.
+- Added source-record sibling-field query repair, including conjunctive-query
+  repair and distinct row variables per event variable.
+
+After:
+
+- Dense compile moved from `12 admitted / 8 skipped` to plan-pass
+  `46 admitted / 0 skipped`.
+- Dense QA moved:
+  - baseline: `5/1/2`;
+  - label-admission only: `3/1/4`;
+  - plan-pass coverage: `7/1/0`;
+  - seconds-preserving runtime: `8/0/0`.
+- Original wide q015 replay moved from `miss` to `partial`, then to
+  `judge_uncertain` after the judge input exceeded provider limits. Manual
+  inspection shows the repaired source-row coordinates for the correct
+  start/end events are now present, but the temporal join still accepts a noisy
+  Cartesian product before the repaired constraints dominate.
+
+Artifacts:
+
+- Simple probe:
+  `experiments\boundary_probes\hybrid_join_stage2\corrected_interval_duration_pair`
+- Dense probe:
+  `experiments\boundary_probes\hybrid_join_stage2\corrected_interval_duration_dense_pair`
+- Dense baseline:
+  `tmp\boundary_probe_hybrid_qa_stage25_corrected_duration_dense_20260513`
+- Dense repaired compile:
+  `tmp\boundary_probe_hybrid_compile_stage16_corrected_duration_dense_planpass_20260513`
+- Dense repaired QA:
+  `tmp\boundary_probe_hybrid_qa_stage29_corrected_duration_dense_seconds_20260513`
+- Original wide replays:
+  `tmp\boundary_corrected_duration_replay_q015_*_20260513`
+
+Verification:
+
+- Simple corrected-duration probe: `8/0/0`.
+- Dense corrected-duration probe after repair: `8/0/0`.
+- Original wide q015: improved but not exact; remaining pressure is temporal
+  join row explosion / judge-overflow, not missing corrected timestamps.
+- Targeted unit tests cover label-role admission, seconds-preserving
+  `elapsed_minutes`, lowercase event placeholder repair, defined interval
+  duration support, and source-record sibling-field repair.
+
+Lesson:
+
+- The dense corrected-duration boundary was not one bug. It was a stack:
+  admission label semantics, compile coverage budget, timestamp precision, and
+  source-record row addressability all had to be fixed before the focused dense
+  coordinate became interior. The original wide coordinate now exposes the next
+  layer: temporal join must prefer the smallest constraint-complete support
+  bundle over a broad successful Cartesian product.
+
+Next pressure:
+
+- Add temporal-join result selection pressure: when a broad temporal join
+  succeeds with high row volume, try constraint-preserving smaller joins that
+  keep source-record sibling repairs and timestamp bindings before accepting the
+  broad result.
+- Re-run original wide q015 only after row volume is bounded enough for the
+  judge input to stay below provider limits.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | `scoped_status_count_support` delivery volume | Transfer succeeded but helper rows were high in unlike replay. | Compress delivery scope without weakening source-fidelity. |
-| 2 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
-| 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
-| 4 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
+| 1 | temporal join row explosion | Dense corrected-duration probe is interior, but original wide coordinate still produces broad Cartesian support before exact constraints dominate. | Prefer constraint-complete low-row temporal joins over broad successful joins. |
+| 2 | compile-surface gaps | Full unlike replay still lacks emitted surfaces for source content, sector coverage, and timestamp-gap records. | Classify whether each is missing axis or dense source-addressability. |
+| 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
+| 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
+| 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
 
 ## Next Work
 
 Do this next:
 
-1. Return to `scoped_status_count_support` delivery volume.
-2. Compare the broad helper rows against the exact question focus:
-   - predicate-scoped rows;
-   - source-section rows;
-   - context-tail rows;
-   - irrelevant clean-helper rows.
-3. Compress delivery scope only if the rule is fixture-free and keeps the
-   source-fidelity rows needed by the transfer probes.
-4. If scoped-status compression starts to smell local, pause and do a fresh
-   trigger-audit probe instead.
+1. Repair temporal join row selection.
+2. Keep source-record sibling repairs and corrected timestamp bindings together
+   when testing smaller temporal joins.
+3. Prefer the lowest-row successful temporal support bundle that still binds
+   the requested start event, end event, and elapsed-time variables.
+4. Replay original wide q015 after row volume is bounded.
 
 ## OpenRouter Rule
 

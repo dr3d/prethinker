@@ -7936,17 +7936,18 @@ class CorePrologRuntime:
             if int(hour) <= 23 and int(minute) <= 59:
                 return datetime(2000, 1, 1, int(hour), int(minute))
         match = re.fullmatch(
-            r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2})(?:[_:]\d{2})?(?:[_-]utc|z)?)?",
+            r"(\d{4})[_-](\d{2})[_-](\d{2})(?:[t_](\d{1,2})[_:](\d{2})(?:[_:](\d{2}))?(?:[_-]utc|z)?)?",
             value,
         )
         if match:
-            year, month, day, hour, minute = match.groups()
+            year, month, day, hour, minute, second = match.groups()
             return datetime(
                 int(year),
                 int(month),
                 int(day),
                 int(hour or 0),
                 int(minute or 0),
+                int(second or 0),
             )
         month_numbers = {
             "jan": 1,
@@ -8013,13 +8014,13 @@ class CorePrologRuntime:
         return Term(value.strftime("%Y_%m_%dt%H_%M"))
 
     @staticmethod
-    def _numeric_value(term: Term) -> int | None:
+    def _numeric_value(term: Term) -> float | None:
         if getattr(term, "is_variable", False) or getattr(term, "args", []):
             return None
         value = str(getattr(term, "name", "") or "").strip()
-        if not re.fullmatch(r"-?\d+", value):
+        if not re.fullmatch(r"-?\d+(?:\.\d+)?", value):
             return None
-        return int(value)
+        return float(value) if "." in value else int(value)
 
     def _resolve_temporal_relation(self, goal: Term, subst: Substitution) -> list[Substitution]:
         if goal.name in {"before", "after"} and len(goal.args) == 2:
@@ -8061,10 +8062,15 @@ class CorePrologRuntime:
             minute_count = self._numeric_value(minutes)
             if start_time is None or end_time is None:
                 return []
-            computed_minutes = int((end_time - start_time).total_seconds() // 60)
+            computed_minutes = (end_time - start_time).total_seconds() / 60
+            computed_term = (
+                str(int(computed_minutes))
+                if computed_minutes.is_integer()
+                else f"{computed_minutes:.3f}".rstrip("0").rstrip(".")
+            )
             if minute_count is not None:
                 return [subst] if minute_count == computed_minutes else []
-            new_subst = self.engine.unify(minutes, Term(str(computed_minutes), is_number=True), subst)
+            new_subst = self.engine.unify(minutes, Term(computed_term, is_number=True), subst)
             return [new_subst] if new_subst else []
         if goal.name == "elapsed_hours" and len(goal.args) == 3:
             start = subst.apply(goal.args[0])

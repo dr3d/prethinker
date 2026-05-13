@@ -90,6 +90,7 @@ GENERIC_QUERY_PLACEHOLDERS = {
     "source_row",
     "sourceid",
     "sourcerow",
+    "start",
     "status",
     "step",
     "subject",
@@ -109,6 +110,7 @@ GENERIC_QUERY_PLACEHOLDERS = {
     "where",
     "who",
     "why",
+    "end",
 }
 
 EVIDENCE_TABLE_PREDICATES = {
@@ -339,6 +341,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions asking what someone thought, misunderstood, believed, disclosed, or explained, query statement_detail/3 before broad witness_statement metadata. witness_statement/4 often names a statement but may not contain enough detail.",
         "For witness count, language-count, or source-language questions, query witness_statement(Speaker, Language, Topic, Role) when available. Use witness_claim/4 only as a fallback content surface; it usually does not preserve source-language metadata.",
         "For questions explicitly asking how many rows, entries, devices, systems, events, or applications are listed in a table, inventory, raw event log, source section, or list, include a broad source_record_row(SourceRow, table_row, Line, SectionAtom, Label) query when source_record_row/5 exists. This is structural addressability evidence; do not use it for semantic counts that ask for eligible, active, approved, failed, or scoped items unless a table/list wording is present.",
+        "For source_record_field(Row, Field, Value) surfaces, the first argument is the source row or line id, not the event/entity id. To retrieve fields about an event/entity value, first bind the row with source_record_field(Row, event, Event) or source_record_field(Row, identifier, Entity), then query sibling fields with the same Row, such as source_record_field(Row, description, Description). Do not query source_record_field(Event, key, Value).",
         "For item-description questions, treat evidence_item(Item, Description) as an equivalent descriptive surface to item_description(Item, Description) when both predicates appear in the inventory. Query whichever predicate exists, and prefer broad variables when the question names the item in natural language.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
         "For prior-concern or October-2025 notice questions, query prior_complaint/4, prior_complaint_subject/2, prior_complaint_action/2, prior_complaint_disputed/2, unresolved_question/2, unresolved_question_detail/2, unresolved_question_status/2, and unresolved_question_referred/2 before falling back to broad proceeding_event rows.",
@@ -365,6 +368,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
         "For temporal helper chains, emit prerequisite helper queries before dependent helper queries: add_hours(StartTime, Hours, ThresholdTime) must appear before elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 for answers that may be less than one whole hour, then convert to hours/minutes in the concise answer.",
         "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal helpers with unbound invented lowercase constants.",
+        "For duration questions asking how long an entity was inside, active, held, processing, in custody, offline, or otherwise in a named interval/state, bind the start-event and end-event timestamp variables first, then call elapsed_minutes(StartTime, EndTime, Minutes). If the KB has event-description or event-type rows for start/end, ingress/egress, opened/closed, began/ended, or entered/exited labels, query those rows with shared event variables before the temporal helper. Never call elapsed_minutes(start, end, duration) with lowercase placeholders.",
         "For within-window or deadline-compliance questions, retrieve three pieces before computing: the start event/time, the target event/time, and the policy deadline/interval. Then call elapsed_minutes/3, elapsed_hours/3, or add_hours/3 with those bound variables. Do not ask a temporal helper with an unbound Starttime if the relevant start event predicate exists in the compiled inventory.",
         "When a question asks elapsed time between a derived threshold moment and a later event, compute the threshold moment with add_hours(StartTime, ThresholdHours, ThresholdTime) before calling elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 over elapsed_hours/3 unless the question explicitly requires whole hours only.",
         "For inspection-current or validity-window questions expressed in days, retrieve the inspection row and authorization row with shared variables, then call elapsed_days(InspectionDate, AuthorizationTime, ElapsedDays). Do not use add_hours/3 with a days-validity value.",
@@ -1036,7 +1040,9 @@ def _looks_like_temporal_slot_placeholder(value: str) -> bool:
     if any(char.isdigit() for char in item):
         return False
     lowered = item.lower()
-    return lowered.endswith(("date", "time", "timestamp", "deadline", "duration", "hours", "minutes")) or "elapsed" in lowered
+    return lowered.endswith(
+        ("date", "time", "timestamp", "deadline", "duration", "hours", "minutes", "event")
+    ) or "elapsed" in lowered
 
 
 def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
@@ -1072,6 +1078,73 @@ def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
         "query": repaired_query,
         "repairs": repairs,
     }
+
+
+def _source_record_field_sibling_repaired_query(query: str) -> dict[str, Any] | None:
+    goals = parse_prolog_query_goals(query)
+    if not goals:
+        return None
+    repaired_goals: list[str] = []
+    repairs: list[dict[str, Any]] = []
+    changed = False
+    for goal_index, (predicate, args) in enumerate(goals, start=1):
+        repair = _source_record_field_sibling_repair_goal(predicate, args, goal_index=goal_index)
+        if repair:
+            repaired_goals.extend(repair["goals"])
+            repairs.append(repair["repair"])
+            changed = True
+        else:
+            repaired_goals.append(format_prolog_query(predicate, args).rstrip("."))
+    if not changed:
+        return None
+    repaired_query = f"{', '.join(repaired_goals)}."
+    return {
+        "query": repaired_query,
+        "repairs": repairs,
+    }
+
+
+def _source_record_field_sibling_repair_goal(
+    predicate: str,
+    args: list[str],
+    *,
+    goal_index: int,
+) -> dict[str, Any] | None:
+    if predicate != "source_record_field" or len(args) != 3:
+        return None
+    row_arg, field_arg, value_arg = [str(arg or "").strip() for arg in args]
+    if not _is_prolog_variable(row_arg):
+        return None
+    if _source_record_field_arg_is_row_like(row_arg):
+        return None
+    if _is_prolog_variable(value_arg):
+        return None
+    if value_arg.lower() in GENERIC_QUERY_PLACEHOLDERS:
+        return None
+    source_row_var = f"SourceRowFor{_variable_name_for_placeholder(row_arg, goal_index)}"
+    if row_arg == source_row_var:
+        source_row_var = f"SourceRecordRow{goal_index}"
+    field_term = field_arg
+    if not field_term or _is_prolog_variable(field_term) or field_term.lower() in {"field", "key", "value"}:
+        field_term = "Field"
+    repaired_goals = [
+        f"source_record_field({source_row_var}, event, {row_arg})",
+        f"source_record_field({source_row_var}, {field_term}, {value_arg})",
+    ]
+    repaired_query = f"{', '.join(repaired_goals)}."
+    return {
+        "goals": repaired_goals,
+        "repair": {
+            "from": format_prolog_query(predicate, args),
+            "to": repaired_query,
+            "reason": "source_record_field first argument is a row id; event/entity ids live in sibling field values",
+        },
+    }
+
+
+def _source_record_field_arg_is_row_like(value: str) -> bool:
+    lowered = str(value or "").casefold()
+    return any(marker in lowered for marker in ("row", "line", "source"))
 
 
 def _source_record_numeric_token_repaired_query(query: str) -> dict[str, Any] | None:
@@ -1538,11 +1611,41 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
                 results.append({"query": query, "result": result})
 
         last_result = results[-1].get("result", {}) if results else {}
+        source_record_repair = _source_record_field_sibling_repaired_query(effective_query)
+        if source_record_repair:
+            repaired_query = str(source_record_repair.get("query", "")).strip()
+            repaired_result = runtime.query_rows(repaired_query)
+            if repaired_result.get("status") == "success":
+                results.append(
+                    {
+                        "query": repaired_query,
+                        "result": {
+                            **repaired_result,
+                            "reasoning_basis": {
+                                "kind": "core-local",
+                                "note": (
+                                    "source-record sibling-field query repair joined the row identifier "
+                                    "through its event field before reading another field on the same row"
+                                ),
+                                "original_query": effective_query,
+                                "repairs": source_record_repair.get("repairs", []),
+                            },
+                        },
+                        "derived_from_queries": [effective_query],
+                    }
+                )
+                effective_query = repaired_query
+                last_result = repaired_result
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             compact_interval = _compact_interval_duration_companion(results=results[:-1], query=effective_query)
             if compact_interval:
                 append_companion(compact_interval)
                 last_result = compact_interval.get("result", {})
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
+            defined_interval = _defined_interval_duration_companion(runtime, query=effective_query)
+            if defined_interval:
+                append_companion(defined_interval)
+                last_result = defined_interval.get("result", {})
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
             if status_interval:
@@ -9875,6 +9978,124 @@ def _compact_interval_duration_companion(
                 "derived_from_queries": [str(item.get("query", "")), query],
             }
     return None
+
+
+def _defined_interval_duration_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate not in {"elapsed_minutes", "elapsed_hours"} or len(args) != 3:
+        return None
+    starts = _runtime_rows(runtime, "interval_start(Interval, StartEvent).")
+    ends = _runtime_rows(runtime, "interval_end(Interval, EndEvent).")
+    if not starts or not ends:
+        return None
+    timestamp_rows: list[dict[str, str]] = []
+    timestamp_kind = ""
+    for timestamp_query, kind in [
+        ("corrected_timestamp(Event, Record, Time).", "corrected_timestamp"),
+        ("event_corrected_timestamp(Event, Record, Time).", "event_corrected_timestamp"),
+        ("has_corrected_timestamp(Event, Time).", "has_corrected_timestamp"),
+    ]:
+        timestamp_rows = _runtime_rows(runtime, timestamp_query)
+        if timestamp_rows:
+            timestamp_kind = kind
+            break
+    if not timestamp_rows:
+        return None
+    timestamp_by_event: dict[str, list[dict[str, str]]] = {}
+    for row in timestamp_rows:
+        event = str(row.get("Event", "")).strip()
+        time = str(row.get("Time", "")).strip()
+        if event and time:
+            timestamp_by_event.setdefault(event, []).append(row)
+    end_by_interval = {
+        str(row.get("Interval", "")).strip(): str(row.get("EndEvent", "")).strip()
+        for row in ends
+    }
+    support_rows: list[dict[str, str]] = []
+    output_arg = str(args[2]).strip()
+    for start_row in starts:
+        interval = str(start_row.get("Interval", "")).strip()
+        start_event = str(start_row.get("StartEvent", "")).strip()
+        end_event = end_by_interval.get(interval, "")
+        if not interval or not start_event or not end_event:
+            continue
+        for start_time_row in timestamp_by_event.get(start_event, []):
+            for end_time_row in timestamp_by_event.get(end_event, []):
+                start_record = str(start_time_row.get("Record", "")).strip()
+                end_record = str(end_time_row.get("Record", "")).strip()
+                if start_record and end_record and start_record != end_record:
+                    continue
+                start = str(start_time_row.get("Time", "")).strip()
+                end = str(end_time_row.get("Time", "")).strip()
+                start_dt = _datetime_from_ledger_atom(start)
+                end_dt = _datetime_from_ledger_atom(end)
+                if not start_dt or not end_dt or end_dt < start_dt:
+                    continue
+                total_seconds = int((end_dt - start_dt).total_seconds())
+                minutes = total_seconds / 60
+                duration_value = (
+                    _format_duration_number(minutes)
+                    if predicate == "elapsed_minutes"
+                    else _format_duration_number(total_seconds / 3600)
+                )
+                support_row = {
+                    "Interval": interval,
+                    "Record": start_record or end_record,
+                    "StartEvent": start_event,
+                    "EndEvent": end_event,
+                    "Start": start,
+                    "End": end,
+                    "DurationSeconds": str(total_seconds),
+                    "DurationMinutes": _format_duration_number(minutes),
+                    "Duration": _duration_between_atoms(start, end),
+                    "TimestampKind": timestamp_kind,
+                }
+                if _is_prolog_variable(output_arg):
+                    support_row[output_arg] = duration_value
+                support_rows.append(support_row)
+    if not support_rows:
+        return None
+    return {
+        "query": (
+            "defined_interval_duration_support(Interval, Record, StartEvent, EndEvent, "
+            "Start, End, DurationSeconds, DurationMinutes, Duration, TimestampKind)."
+        ),
+        "result": {
+            "status": "success",
+            "predicate": "defined_interval_duration_support",
+            "prolog_query": (
+                "defined_interval_duration_support(Interval, Record, StartEvent, EndEvent, "
+                "Start, End, DurationSeconds, DurationMinutes, Duration, TimestampKind)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only duration support joined admitted interval_start/interval_end rows "
+                    "to authoritative timestamp rows; no durable fact was written"
+                ),
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [
+            "interval_start(Interval, StartEvent).",
+            "interval_end(Interval, EndEvent).",
+            f"{timestamp_kind}(Event, Record, Time).",
+            query,
+        ],
+    }
+
+
+def _format_duration_number(value: float) -> str:
+    if value.is_integer():
+        return str(int(value))
+    return f"{value:.3f}".rstrip("0").rstrip(".")
 
 
 def _role_hint_from_group(group: str) -> str:
