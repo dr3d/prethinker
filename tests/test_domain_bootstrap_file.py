@@ -11,6 +11,7 @@ from scripts.run_domain_bootstrap_file import (
     _append_source_record_ledger_facts,
     _call_lmstudio_json_schema,
     _compile_health_summary,
+    _compile_source_pass_ops,
     _compile_source_with_plan_passes,
     _flat_plus_surface_contribution,
     _invalid_profile_retry_context,
@@ -290,6 +291,63 @@ def test_source_pass_ops_wraps_for_normal_mapper() -> None:
     assert ir["candidate_operations"][0]["predicate"] == "person_role"
     assert ir["truth_maintenance"]["support_links"] == []
     assert ir["self_check"]["notes"] == ["compact pass"]
+
+
+def test_source_pass_ops_guidance_preserves_explicit_negative_surfaces(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_call(**kwargs):
+        captured["messages"] = kwargs["messages"]
+        return {
+            "content": json.dumps(
+                {
+                    "schema_version": "source_pass_ops_v1",
+                    "pass_id": "pass_1",
+                    "decision": "commit",
+                    "candidate_operations": [],
+                    "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+                }
+            )
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_call_lmstudio_json_schema", fake_call)
+    args = type(
+        "Args",
+        (),
+        {
+            "base_url": "http://example.invalid/v1",
+            "model": "test-model",
+            "timeout": 30,
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "max_tokens": 4000,
+            "domain_hint": "",
+            "focused_pass_operation_target": 8,
+            "focused_retry_operation_target": 4,
+        },
+    )()
+
+    result = _compile_source_pass_ops(
+        source_text="The review team is not allowed to approve the memo.",
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "is_not_allowed_to_approve/2", "args": ["agent", "document"]}
+            ]
+        },
+        intake_plan={},
+        args=args,
+        pass_id="pass_1",
+        purpose="negative authority",
+        focus="explicit prohibitions",
+        completion="preserve negative surfaces",
+        predicates="is_not_allowed_to_approve/2",
+        coverage_goals="not-allowed role rows",
+    )
+
+    assert result["ok"] is True
+    user_message = next(item for item in captured["messages"] if item["role"] == "user")
+    assert "Explicit negative-surface preservation rule" in user_message["content"]
+    assert "positive assertion on a compatible prohibition/forbidden/exempt/outside-scope/lacks-authority predicate" in user_message["content"]
 
 
 def test_pass_surface_contribution_counts_unique_rows_in_order() -> None:

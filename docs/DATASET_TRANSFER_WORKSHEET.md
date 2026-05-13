@@ -2464,3 +2464,354 @@ Next pressure:
   or whether to widen SQuAD with replay-on-cluster discipline first.
 - The remaining SQuAD event-cluster miss is a class/name relation, not an alias
   relation; do not fold it into this repair.
+
+### DT-027 - Full SQuAD-30 Alias-Repair Remeasurement
+
+Before:
+
+- DT-026 proved the parenthetical-alias repair on an unlike probe and on the
+  unstable SQuAD event cluster replay.
+- The best SQuAD-30 number after DT-026 was still a hand-adjusted estimate:
+  replace the original unstable event cluster with its repaired replay and the
+  slice becomes `157 exact / 4 partial / 10 miss` over `171`.
+- That estimate was useful but not a clean corpus measurement. The corpus
+  needed a fresh full compile and QA pass with the alias substrate enabled.
+
+Prediction:
+
+- The alias repair should hold without helper growth.
+- A full fresh hosted compile should land near the adjusted `90%` band, but not
+  necessarily equal the hand-substituted score because hosted compile variance
+  can move small fixtures and one-fixture clusters.
+- Remaining residue should be treated as coordinates, not as permission for
+  fixture-specific tuning.
+
+Intervention:
+
+- Recompiled all `30` staged SQuAD fixtures through OpenRouter at the normal
+  `6`-lane ceiling with source-record ledger facts enabled.
+- Ran full QA against that compile with no cache.
+- Re-rendered the transfer coordinate summary with the intake audit overlay.
+
+After:
+
+- Full SQuAD-30 alias-repair run:
+  - Questions: `171`.
+  - Exact / partial / miss: `155 / 4 / 12`.
+  - Exact rate: `90.64%`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+  - Helper pressure: `no_helper_rows`.
+- Proposition-type residue:
+  - `factual`: `13`.
+  - `inference`: `2`.
+  - `comparative`: `1`.
+- Coordinate residue:
+  - `direct_compile_surface_gap`: `7`.
+  - `false_or_exception_option_selection`: `3`.
+  - `implicit_attitude_or_consequence`: `2`.
+  - `background_role_or_audience_fact`: `1`.
+  - `comparative_or_temporal_resolution`: `1`.
+  - `hybrid_join_resolution`: `1`.
+  - `query_surface_resolution`: `1`.
+- Failure surfaces:
+  - `compile_surface_gap`: `12`.
+  - `hybrid_join_gap`: `2`.
+  - `answer_surface_gap`: `1`.
+  - `query_surface_gap`: `1`.
+- The full run is slightly below the DT-026 hand-adjusted estimate because the
+  fresh compile moved other small fixtures. That is measurement noise to manage,
+  not a contradiction of the alias repair.
+
+Artifacts:
+
+- Full alias-repair compile:
+  `tmp\mrc_transfer_compile_squad30_alias_repair_full_20260513`
+- Full alias-repair QA:
+  `tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513\transfer_coordinate_summary_with_intake.md`
+- Coordinate summary JSON:
+  `tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513\transfer_coordinate_summary_with_intake.json`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\mrc_transfer_compile_squad30_alias_repair_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_alias_repair_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- SQuAD transfer is now a high-band measurement surface. The clean rerun lands
+  at `90.64%` exact with zero helper rows, which supports the claim that
+  source-record alias scaffolding extended the boundary without creating a new
+  helper dependency.
+- Hosted compile variance is now a first-class measurement fact. The original
+  SQuAD-30 event cluster was a bad draw; the repaired event replay was stronger;
+  the full fresh rerun introduced smaller movement elsewhere. Large local drops
+  should be replayed before any repair is designed.
+- The remaining residue is heterogeneous. It includes direct missing compile
+  coordinates, negative/exception answer surfaces, event-sequence joins,
+  temporal later-state resolution, query plans missing an available fact, and a
+  small amount of dataset/reference ambiguity.
+- The next repair should come from a repeated unlike probe, not from a single
+  SQuAD row or a dataset-specific phrase.
+
+Next pressure:
+
+- Build a residue board that separates:
+  - stable transferable architecture candidates;
+  - replay-needed compile variance;
+  - likely dataset/reference ambiguity.
+- The leading candidate for the next focused probe is negative or exception
+  answer-surface handling, but the `false_or_exception_option_selection` bucket
+  is mixed and must be audited before any repair.
+
+### DT-028 - SQuAD-30 Residue Board
+
+Before:
+
+- DT-027 reduced the SQuAD-30 transfer surface to `16` non-exact rows.
+- The largest named bucket, `direct_compile_surface_gap`, was still too broad
+  to act on. The second bucket, `false_or_exception_option_selection`, mixed
+  real negative-answer behavior with alternate-label and possible
+  dataset/reference ambiguity.
+
+Prediction:
+
+- A manual board should separate repair candidates from noisy measurement
+  residue.
+- The next focused probe should target a recurring proposition shape, not a
+  source topic or answer string.
+
+Intervention:
+
+- Read the full SQuAD-30 alias-repair coordinate summary and grouped each
+  non-exact by actionability.
+
+After:
+
+- Stable transferable architecture candidates:
+  - Negative or exception answer surfaces: explicit no-control evidence,
+    exceptions to an ordinary rule, and possibly false-option/refuting evidence.
+  - Query-surface resolution when the needed fact exists in the KB but the query
+    plan retrieves an adjacent predicate.
+  - Event-sequence ordinal joins where the answer requires binding the first,
+    last, next, or later event in a sequence to an actor or value.
+  - Later-state temporal comparison where an entity has one role during an
+    earlier context and a different role later.
+- Replay-needed compile variance:
+  - City/location hierarchy under an event venue.
+  - Spouse-property date joins.
+  - Reform or process start-date facts.
+  - Property-list completeness.
+  - Institutional target lists.
+  - Role facts that are present in source text but omitted from structured
+    compile.
+- Likely dataset/reference ambiguity or weak single-row evidence:
+  - A metric-system question whose reference answer names a non-metric unit.
+  - A class/name relation that may be answerable by source text but should not
+    be treated as alias repair.
+  - Single inference rows that require social or rhetorical bridging rather than
+    directly stated extraction.
+
+Artifacts:
+
+- SQuAD-30 alias-repair coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_alias_repair_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- Manual pass over all `16` non-exact rows from the DT-027 summary.
+
+Lesson:
+
+- The next useful pressure is not another broad SQuAD score. SQuAD is now high
+  enough that the residue needs small unlike probes.
+- Negative or exception answer surfaces are the cleanest immediate probe target
+  because they recur across external rows and are not specific to any source
+  topic. The probe must distinguish explicit negative evidence from
+  counterfactual labels and bad references.
+- Query-surface misses are also important, but the current evidence is nearly a
+  duplicated row. It should wait until a focused negative/exception probe tells
+  us whether explicit negation is already inside the set.
+
+Next pressure:
+
+- Add an unlike negative/exception answer-surface probe with no SQuAD vocabulary.
+- Run compile and QA first. Do not repair unless the focused probe exposes a
+  stable generic miss.
+
+### DT-029 - Negative and Exception Surface Repair
+
+Before:
+
+- DT-028 selected negative/exception answer surfaces as the next focused probe.
+- The SQuAD residue included explicit no-control evidence and other exception
+  or false-answer surfaces, but the bucket was mixed with alternate labels and
+  likely reference ambiguity.
+
+Prediction:
+
+- If explicit negative surfaces are already inside the set, an unlike probe
+  should pass without repair.
+- If the probe fails, the repair should be phrased at the source-fidelity level:
+  preserve explicit prohibitions, lack of authority, no-control/no-veto,
+  exemptions, and outside-scope statements as queryable source facts when the
+  profile offers a compatible predicate.
+
+Intervention:
+
+- Added a new unlike probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\negative_exception_answer_surface_ladder`.
+- The probe tests:
+  - explicit no-control answer;
+  - lack of veto;
+  - outside-scope exclusion;
+  - exemption from a general rule;
+  - manual rather than automatic routing;
+  - allowed approval role;
+  - explicitly barred approval role;
+  - positive neighboring workflow role.
+- First run:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `19 / 11`.
+  - QA: `6 exact / 0 partial / 2 miss`.
+  - The profile proposed negative predicates, but compile omitted the negative
+    facts.
+- Added source-pass compile guidance:
+  - explicit negative surfaces should be preserved as positive assertions on
+    compatible prohibition/forbidden/exempt/outside-scope/lacks-authority
+    predicates;
+  - do not encode them as general negative-polarity facts;
+  - do not preserve only the adjacent positive permission.
+- Second run:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `23 / 7`.
+  - QA: `6 exact / 1 partial / 1 miss`.
+  - The not-allowed approval role repaired, but the no-veto row still missed
+    because the profile exposed only a positive `has_veto/2` predicate and a
+    note that negation mattered.
+- Added profile-bootstrap and profile-review guidance:
+  - explicit negative surfaces need their own queryable predicate when the
+    source treats them as facts;
+  - do not rely on a positive predicate such as `has_veto/2` plus an admission
+    note that negation is significant.
+- Final run:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `62 / 5`.
+  - QA: `8 exact / 0 partial / 0 miss`.
+  - Helper rows: `0`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\negative_exception_answer_surface_ladder`
+- Initial compile:
+  `tmp\boundary_probe_compile_negative_exception_answer_surface_20260513`
+- Initial QA:
+  `tmp\boundary_probe_qa_negative_exception_answer_surface_20260513`
+- Compile-guidance replay:
+  `tmp\boundary_probe_compile_negative_exception_answer_surface_repair_20260513`
+- Compile-guidance QA:
+  `tmp\boundary_probe_qa_negative_exception_answer_surface_repair_20260513`
+- Profile-guidance replay:
+  `tmp\boundary_probe_compile_negative_exception_answer_surface_profile_repair_20260513`
+- Profile-guidance QA:
+  `tmp\boundary_probe_qa_negative_exception_answer_surface_profile_repair_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_profile_bootstrap.py::ProfileBootstrapTests::test_bootstrap_guidance_preserves_source_records_reporters_and_conditions tests\test_domain_bootstrap_file.py::test_source_pass_ops_guidance_preserves_explicit_negative_surfaces -q`
+  - `2 passed`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture negative_exception_answer_surface_ladder --out-root tmp\boundary_probe_compile_negative_exception_answer_surface_profile_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture negative_exception_answer_surface_ladder --compile-root tmp\boundary_probe_compile_negative_exception_answer_surface_profile_repair_20260513 --out-root tmp\boundary_probe_qa_negative_exception_answer_surface_profile_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Negative surfaces are two-stage architecture. The profile must expose a
+  predicate that can carry the negative relation, and the source-pass compiler
+  must admit the explicitly stated negative relation as a positive fact on that
+  predicate.
+- The old failure was not that the harness needed source-specific words. It was
+  that profile design sometimes represented `no veto` as `has_veto/2` plus a
+  note. That is not queryable under the current safe-negation policy.
+- The repair remains fixture-free: it names structural source surfaces, not
+  specific offices, documents, answer strings, or dataset rows.
+- The final compile admitted many more facts (`62`) than the first run (`19`).
+  That is acceptable for this tiny probe, but broader replay should watch for
+  profile-guidance over-breadth before declaring this repaired across SQuAD.
+
+Next pressure:
+
+- Run focused tests around profile/source-pass guidance.
+- Replay the SQuAD-30 residue row with explicit no-control evidence and, if
+  cheap, the full SQuAD-30 alias-repair corpus to measure transfer. Treat a
+  broader score change as measurement evidence, not permission for new
+  fixture-specific tuning.
+
+### DT-030 - Negative Surface SQuAD Residue Replay
+
+Before:
+
+- DT-029 repaired the unlike negative/exception probe to `8 exact / 0 partial /
+  0 miss`.
+- The repair changed profile design and source-pass compile guidance, so the
+  next question was whether it transferred to the SQuAD residue row that
+  triggered the pressure.
+
+Prediction:
+
+- If the repair is genuinely structural, the SQuAD fixture containing explicit
+  no-control evidence should replay cleanly without helper growth.
+- If it only solved the focused probe, the no-control row should remain an
+  answer-surface or compile-surface miss.
+
+Intervention:
+
+- Recompiled only the SQuAD fixture containing the explicit no-control question
+  through OpenRouter at `6` lanes.
+- Replayed QA for that fixture with no cache.
+
+After:
+
+- SQuAD negative-surface fixture replay:
+  - Compile parsed: `true`.
+  - Admitted / skipped: `20 / 0`.
+  - QA: `5 exact / 0 partial / 0 miss`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+
+Artifacts:
+
+- Replay compile:
+  `tmp\mrc_transfer_compile_squad30_negative_surface_replay_20260513`
+- Replay QA:
+  `tmp\mrc_transfer_qa_squad30_negative_surface_replay_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_profile_bootstrap.py tests\test_domain_bootstrap_file.py::test_source_pass_ops_guidance_preserves_explicit_negative_surfaces -q`
+  - `16 passed`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00007_sky_united_kingdom --out-root tmp\mrc_transfer_compile_squad30_negative_surface_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00007_sky_united_kingdom --compile-root tmp\mrc_transfer_compile_squad30_negative_surface_replay_20260513 --out-root tmp\mrc_transfer_qa_squad30_negative_surface_replay_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- The negative-surface repair transferred to the external row that motivated
+  the probe. That strengthens DT-029 from focused-probe success to at least one
+  unlike external replay success.
+- This does not prove all negative/exception external rows are solved. It proves
+  that explicit no-control evidence should no longer be treated as a SQuAD-only
+  residue.
+- The next broad run should be interpreted carefully because full hosted
+  compiles still move. The repair is real; the exact corpus score may still
+  vary by compile draw.
+
+Next pressure:
+
+- Run a cheap full test suite slice, then commit this boundary step.
+- After commit, run a full SQuAD-30 remeasure if OpenRouter is healthy and use
+  the result as measurement, not as a new repair mandate.
