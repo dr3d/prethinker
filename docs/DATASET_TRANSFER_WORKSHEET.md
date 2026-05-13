@@ -2815,3 +2815,94 @@ Next pressure:
 - Run a cheap full test suite slice, then commit this boundary step.
 - After commit, run a full SQuAD-30 remeasure if OpenRouter is healthy and use
   the result as measurement, not as a new repair mandate.
+
+### DT-031 - Full SQuAD-30 Negative-Surface Remeasurement
+
+Before:
+
+- DT-030 proved the negative-surface repair on the targeted SQuAD residue
+  fixture: `5 exact / 0 partial / 0 miss`.
+- The previous full SQuAD-30 anchor after alias repair was `155 exact / 4
+  partial / 12 miss` over `171`, exact `90.64%`.
+
+Prediction:
+
+- The explicit no-control residue should stay solved in a full run.
+- The full score might not move monotonically because hosted compiles can
+  change other fixture surfaces even when the targeted repair transfers.
+
+Intervention:
+
+- Recompiled the full SQuAD-30 staged set through OpenRouter at `6` lanes with
+  alias and negative-surface repairs active.
+- Ran full QA with no cache.
+- Rendered the standard coordinate summary with the intake audit overlay.
+
+After:
+
+- Full SQuAD-30 negative-surface run:
+  - Questions: `171`.
+  - Exact / partial / miss: `152 / 2 / 17`.
+  - Exact rate: `88.89%`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+  - Helper pressure: `no_helper_rows`.
+- Compared to the previous full alias-repair anchor:
+  - `11` previous non-exacts resolved, including the explicit no-control row,
+    several prior compile gaps, one event-sequence row, and one likely bad
+    reference row.
+  - `5` non-exacts persisted across both full runs.
+  - `14` new or returned non-exacts appeared, concentrated in direct compile
+    gaps plus a few query and hybrid joins.
+- Current residue:
+  - Proposition types: `18 factual`, `1 categorical`.
+  - Coordinates:
+    - `direct_compile_surface_gap`: `14`.
+    - `query_surface_resolution`: `2`.
+    - `comparative_or_temporal_resolution`: `1`.
+    - `false_or_exception_option_selection`: `1`.
+    - `hybrid_join_resolution`: `1`.
+  - Failure surfaces:
+    - `compile_surface_gap`: `15`.
+    - `query_surface_gap`: `2`.
+    - `answer_surface_gap`: `1`.
+    - `hybrid_join_gap`: `1`.
+
+Artifacts:
+
+- Full compile:
+  `tmp\mrc_transfer_compile_squad30_negative_surface_full_20260513`
+- Full QA:
+  `tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\mrc_transfer_compile_squad30_negative_surface_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_negative_surface_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_negative_surface_full_20260513\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- The targeted repair transferred, but the full corpus score dipped because the
+  hosted compile drew different surfaces elsewhere. This confirms the current
+  operating rule: full-corpus remeasurement is necessary, but broad score
+  movement alone is not a repair mandate.
+- SQuAD-30 remains a high-band transfer surface with no helper rows. The more
+  important signal is now stability by coordinate: the no-control row is
+  solved; the persistent pressure is query-surface resolution and a small set of
+  repeated direct compile gaps.
+- The apparent compile-gap count is partly a classifier artifact. Some rows
+  explicitly have the needed fact in the KB but are still summarized as compile
+  gaps because the query plan used an adjacent predicate. These should be
+  audited under query-surface resolution before any compile repair.
+
+Next pressure:
+
+- Do not repair from the full run's new one-off compile gaps yet.
+- Build an unlike query-surface probe for cases where the KB contains the
+  answer-bearing fact but the query plan retrieves an adjacent predicate.
+- Use the duplicate `in addition to` residue as pressure shape only; the probe
+  must use unlike vocabulary and no SQuAD entities.
