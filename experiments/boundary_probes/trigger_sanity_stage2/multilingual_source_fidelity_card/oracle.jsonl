@@ -1,0 +1,8 @@
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q001","reference_answer":"Five affected records are listed in the validated list.","source_id":"q001"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q002","reference_answer":"The explicitly declared final total is 8 affected records.","source_id":"q002"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q003","reference_answer":"Three reserve records are included in the final total but not listed.","source_id":"q003"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q004","reference_answer":"No. The 2 temporary records are not included because the pending proposal was not approved before close.","source_id":"q004"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q005","reference_answer":"The withdrawn earlier estimate was 11 affected records.","source_id":"q005"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q006","reference_answer":"If the pending proposal had been approved, the affected-record total would be 10.","source_id":"q006"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q007","reference_answer":"Use the validated-list count: 5 listed affected records.","source_id":"q007"}
+{"category":"trigger_sanity_multilingual_source_fidelity","id":"q008","reference_answer":"Use the final declared total: 8 affected records.","source_id":"q008"}

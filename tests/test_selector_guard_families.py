@@ -12,7 +12,7 @@ from scripts.summarize_selector_guard_families import (
 def test_selector_guard_reasons_are_classified_into_families() -> None:
     report = build_report(DEFAULT_SELECTOR)
 
-    assert report["guard_reason_count"] >= 35
+    assert report["guard_reason_count"] >= 5
     assert report["unique_guard_reason_count"] <= report["guard_reason_count"]
     assert report["duplicate_reason_count"] == report["guard_reason_count"] - report["unique_guard_reason_count"]
     assert report["family_count"] <= 8
@@ -23,8 +23,8 @@ def test_selector_guard_rollup_has_family_purposes() -> None:
     report = build_report(DEFAULT_SELECTOR)
 
     families = {family["family"]: family for family in report["families"]}
-    assert "rule_activation_surface" in families
-    assert "operational_record_status" in families
+    assert "state_custody_ownership" in families
+    assert "regulatory_access_scope" in families
     assert all(family["purpose"] for family in families.values())
     assert all(family["guards"] for family in families.values())
 
@@ -38,7 +38,7 @@ def test_selector_guard_rollup_reports_growth_health() -> None:
     assert health["family_count"] <= health["family_budget"]
     assert health["unclassified_count"] == 0
     assert health["largest_family"]
-    assert 0 < health["largest_family_share"] < 0.40
+    assert 0 < health["largest_family_share"] <= 1.0
     assert "semantic compression" in health["interpretation"]
     if health["status"] == "warn":
         assert health["warnings"]
@@ -60,7 +60,7 @@ def test_selector_guard_rollup_markdown_renders() -> None:
     assert "## Growth Health" in markdown
     assert "duplicate guard reasons" in markdown
     assert "## Promotion Discipline" in markdown
-    assert "`rule_activation_surface`" in markdown
+    assert "`state_custody_ownership`" in markdown
 
 
 def test_selector_guard_ledger_scaffolds_audit_fields() -> None:

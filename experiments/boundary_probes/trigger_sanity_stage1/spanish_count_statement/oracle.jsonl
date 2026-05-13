@@ -1,0 +1,8 @@
+{"category":"trigger_sanity_non_english_count","id":"q001","reference_answer":"Seven affected files are listed in the active list.","source_id":"q001"}
+{"category":"trigger_sanity_non_english_count","id":"q002","reference_answer":"The explicitly declared total is 10 affected files.","source_id":"q002"}
+{"category":"trigger_sanity_non_english_count","id":"q003","reference_answer":"Three reserve files are included in the declared total but not listed.","source_id":"q003"}
+{"category":"trigger_sanity_non_english_count","id":"q004","reference_answer":"No. The 2 provisional files are not included because the pending addition was not approved before close.","source_id":"q004"}
+{"category":"trigger_sanity_non_english_count","id":"q005","reference_answer":"The withdrawn earlier estimate was 12 affected files.","source_id":"q005"}
+{"category":"trigger_sanity_non_english_count","id":"q006","reference_answer":"If the pending addition had been approved, the affected-file total would be 12.","source_id":"q006"}
+{"category":"trigger_sanity_non_english_count","id":"q007","reference_answer":"Use the active list count: 7 listed affected files.","source_id":"q007"}
+{"category":"trigger_sanity_non_english_count","id":"q008","reference_answer":"Use the declared total: 10 affected files.","source_id":"q008"}

@@ -13,6 +13,7 @@ import concurrent.futures
 import json
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,6 +21,11 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.audit_helper_usage import helper_pressure_metrics  # noqa: E402
+
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "story_worlds"
 DEFAULT_COMPILE_ROOT = REPO_ROOT / "tmp" / "incoming_6_cold_compile_20260508"
 DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "incoming_6_full40_qa_20260508"
@@ -30,7 +36,8 @@ class QaJob:
     fixture: str
     run_json: Path
     qa_file: Path
-    oracle_jsonl: Path
+    oracle_jsonl: Path | None
+    judge_reference_answers: bool
     out_dir: Path
 
 
@@ -53,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--no-evidence-bundle", action="store_true")
     parser.add_argument("--no-classify-failure-surfaces", action="store_true")
+    parser.add_argument("--no-cache", action="store_true", help="Pass through to QA runner for fresh hosted calls.")
+    parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
@@ -79,6 +88,7 @@ def main() -> int:
             timeout=effective_timeout,
             evidence_bundle=not bool(args.no_evidence_bundle),
             classify_failure_surfaces=not bool(args.no_classify_failure_surfaces),
+            cache=not bool(args.no_cache),
         )
         for job in jobs
     ]
@@ -89,15 +99,20 @@ def main() -> int:
 
     out_root.mkdir(parents=True, exist_ok=True)
     results: list[dict[str, Any]] = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
-        future_map = {
-            pool.submit(_run_job, job, command): job
-            for job, command in zip(jobs, commands)
-        }
-        for future in concurrent.futures.as_completed(future_map):
-            result = future.result()
-            results.append(result)
+    if bool(args.summarize_existing):
+        results = [_summarize_existing_job(job) for job in jobs]
+        for result in results:
             print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    else:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
+            future_map = {
+                pool.submit(_run_job, job, command): job
+                for job, command in zip(jobs, commands)
+            }
+            for future in concurrent.futures.as_completed(future_map):
+                result = future.result()
+                results.append(result)
+                print(json.dumps(result, ensure_ascii=False, sort_keys=True))
 
     results.sort(key=lambda item: str(item.get("fixture", "")))
     summary = _summarize(results, lanes=lanes, base_timeout=int(args.timeout), effective_timeout=effective_timeout)
@@ -131,13 +146,15 @@ def _build_job(name: str, *, dataset_root: Path, compile_root: Path, out_root: P
     oracle_jsonl = fixture_root / "oracle.jsonl"
     if not qa_file.exists():
         raise FileNotFoundError(f"Missing QA file: {qa_file}")
-    if not oracle_jsonl.exists():
-        raise FileNotFoundError(f"Missing oracle file: {oracle_jsonl}")
+    has_markdown_answers = _qa_markdown_has_answer_key(qa_file)
+    if not oracle_jsonl.exists() and not has_markdown_answers:
+        raise FileNotFoundError(f"Missing oracle file or markdown answer key: {oracle_jsonl}")
     return QaJob(
         fixture=name,
         run_json=run_jsons[-1],
         qa_file=qa_file,
-        oracle_jsonl=oracle_jsonl,
+        oracle_jsonl=oracle_jsonl if oracle_jsonl.exists() else None,
+        judge_reference_answers=oracle_jsonl.exists() or has_markdown_answers,
         out_dir=out_root / name,
     )
 
@@ -151,6 +168,7 @@ def _build_command(
     timeout: int,
     evidence_bundle: bool,
     classify_failure_surfaces: bool,
+    cache: bool = True,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -159,9 +177,6 @@ def _build_command(
         str(job.run_json),
         "--qa-file",
         str(job.qa_file),
-        "--oracle-jsonl",
-        str(job.oracle_jsonl),
-        "--judge-reference-answers",
         "--limit",
         str(limit),
         "--timeout",
@@ -173,8 +188,14 @@ def _build_command(
         "--out-dir",
         str(job.out_dir),
     ]
+    if job.oracle_jsonl is not None:
+        command.extend(["--oracle-jsonl", str(job.oracle_jsonl)])
+    if job.judge_reference_answers:
+        command.append("--judge-reference-answers")
     if classify_failure_surfaces:
         command.append("--classify-failure-surfaces")
+    if not cache:
+        command.append("--no-cache")
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
     return command
@@ -205,9 +226,43 @@ def _run_job(job: QaJob, command: list[str]) -> dict[str, Any]:
     }
 
 
+def _summarize_existing_job(job: QaJob) -> dict[str, Any]:
+    latest_json = _latest_qa_json(job.out_dir)
+    summary: dict[str, Any] = {}
+    returncode = 0
+    if latest_json is None:
+        returncode = 1
+    else:
+        try:
+            payload = json.loads(latest_json.read_text(encoding="utf-8"))
+            summary = payload.get("summary", {}) if isinstance(payload, dict) else {}
+        except Exception as exc:  # pragma: no cover - operator diagnostic only.
+            returncode = 1
+            summary = {"summary_error": str(exc)}
+    return {
+        "fixture": job.fixture,
+        "returncode": returncode,
+        "started": "",
+        "finished": datetime.now(timezone.utc).isoformat(),
+        "out_dir": str(job.out_dir),
+        "qa_json": str(latest_json) if latest_json else "",
+        "summary": summary,
+        "stdout_tail": "",
+        "stderr_tail": "",
+    }
+
+
 def _latest_qa_json(out_dir: Path) -> Path | None:
     paths = sorted(out_dir.glob("domain_bootstrap_qa_*.json"), key=lambda path: path.stat().st_mtime)
     return paths[-1] if paths else None
+
+
+def _qa_markdown_has_answer_key(path: Path) -> bool:
+    try:
+        text = path.read_text(encoding="utf-8-sig")
+    except OSError:
+        return False
+    return any(line.strip().lower() == "## answers" for line in text.splitlines())
 
 
 def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, effective_timeout: int) -> dict[str, Any]:
@@ -225,6 +280,7 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
             continue
         for key in totals:
             totals[key] += int(summary.get(key, 0) or 0)
+    helper_pressure = _summarize_helper_pressure(results=results, totals=totals)
     exact_rate = (totals["judge_exact"] / totals["question_count"]) if totals["question_count"] else 0.0
     return {
         "generated": datetime.now(timezone.utc).isoformat(),
@@ -232,12 +288,58 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
         "base_timeout": base_timeout,
         "effective_timeout": effective_timeout,
         "totals": {**totals, "exact_rate": round(exact_rate, 4)},
+        "helper_pressure_summary": helper_pressure,
         "results": results,
     }
 
 
+def _summarize_helper_pressure(*, results: list[dict[str, Any]], totals: dict[str, int]) -> dict[str, Any]:
+    helper_class_counts: Counter[str] = Counter()
+    companion_row_totals: Counter[str] = Counter()
+    row_count = 0
+    for result in results:
+        summary = result.get("summary", {})
+        if not isinstance(summary, dict):
+            continue
+        helper_summary = summary.get("helper_class_summary", {})
+        if not isinstance(helper_summary, dict):
+            continue
+        row_count += int(helper_summary.get("row_count", 0) or 0)
+        raw_class_counts = helper_summary.get("helper_class_counts", {})
+        if isinstance(raw_class_counts, dict):
+            for key, value in raw_class_counts.items():
+                helper_class_counts[str(key)] += int(value or 0)
+        raw_companion_totals = helper_summary.get("companion_row_totals", {})
+        if isinstance(raw_companion_totals, dict):
+            for key, value in raw_companion_totals.items():
+                companion_row_totals[str(key)] += int(value or 0)
+    answer_summary = {
+        "question_count": int(totals.get("question_count", 0) or 0),
+        "judge_rows": int(totals.get("judge_exact", 0) or 0)
+        + int(totals.get("judge_partial", 0) or 0)
+        + int(totals.get("judge_miss", 0) or 0),
+        "judge_exact": int(totals.get("judge_exact", 0) or 0),
+        "judge_partial": int(totals.get("judge_partial", 0) or 0),
+        "judge_miss": int(totals.get("judge_miss", 0) or 0),
+    }
+    return dict(
+        {
+            "row_count": row_count,
+            "helper_class_counts": dict(sorted(helper_class_counts.items())),
+            "companion_row_totals": dict(sorted(companion_row_totals.items())),
+            "answer_surface_summary": answer_summary,
+        },
+        **helper_pressure_metrics(
+            row_count=row_count,
+            helper_class_counts=helper_class_counts,
+            answer_summary=answer_summary,
+        ),
+    )
+
+
 def _render_md(summary: dict[str, Any]) -> str:
     totals = summary.get("totals", {})
+    helper_pressure = summary.get("helper_pressure_summary", {})
     lines = [
         "# Domain Bootstrap QA Batch Summary",
         "",
@@ -251,6 +353,7 @@ def _render_md(summary: dict[str, Any]) -> str:
         f"- Exact rate: `{totals.get('exact_rate', 0.0)}`",
         f"- Runtime load errors: `{totals.get('runtime_load_error_count', 0)}`",
         f"- Write proposal rows: `{totals.get('write_proposal_rows', 0)}`",
+        f"- Helper pressure: `{helper_pressure.get('pressure_label', 'unknown')}` rows=`{helper_pressure.get('row_count', 0)}` rows/exact=`{helper_pressure.get('helper_rows_per_exact')}` candidate-share=`{helper_pressure.get('candidate_helper_share', 0.0)}`",
         "",
         "| Fixture | Return | Exact | Partial | Miss | QA JSON |",
         "| --- | ---: | ---: | ---: | ---: | --- |",

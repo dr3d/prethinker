@@ -1,0 +1,8 @@
+{"category":"trigger_sanity_scoped_filter","id":"q001","reference_answer":"Five blue review cards are named: A1, A2, A3, A4, and A5.","source_id":"q001"}
+{"category":"trigger_sanity_scoped_filter","id":"q002","reference_answer":"Blue review cards A1 and A2 are resolvable.","source_id":"q002"}
+{"category":"trigger_sanity_scoped_filter","id":"q003","reference_answer":"Two blue review cards are resolvable.","source_id":"q003"}
+{"category":"trigger_sanity_scoped_filter","id":"q004","reference_answer":"Blue review cards A3 and A4 are still unsettled at close.","source_id":"q004"}
+{"category":"trigger_sanity_scoped_filter","id":"q005","reference_answer":"Two blue review cards are still unsettled at close.","source_id":"q005"}
+{"category":"trigger_sanity_scoped_filter","id":"q006","reference_answer":"No. B1 is resolvable, but it belongs to the green review cards, not the blue review cards.","source_id":"q006"}
+{"category":"trigger_sanity_scoped_filter","id":"q007","reference_answer":"No. B2 is unsettled, but it belongs to the red review cards, not the blue review cards.","source_id":"q007"}
+{"category":"trigger_sanity_scoped_filter","id":"q008","reference_answer":"Blue review card A5 is closed by ruling.","source_id":"q008"}

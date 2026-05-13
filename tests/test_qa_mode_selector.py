@@ -300,7 +300,7 @@ def test_hybrid_selector_calls_model_for_operational_status_competing_lens() -> 
     assert selected["structural_uncertainty_reasons"]
 
 
-def test_specialized_guard_routes_valid_period_to_union_validity_surface() -> None:
+def test_hybrid_selector_routes_valid_period_to_union_validity_surface_without_guard() -> None:
     row = {
         "id": "q_valid_period",
         "question": "What is the valid period for the Ground Use Permit?",
@@ -329,18 +329,27 @@ def test_specialized_guard_routes_valid_period_to_union_validity_surface() -> No
             },
         ],
     }
-    scored = structural_mode_scores(row=row, mode_labels=["baseline", "union"])
-
     override = structural_specialized_answer_surface_override(
         row=row,
-        scored=scored,
+        scored=structural_mode_scores(row=row, mode_labels=["baseline", "union"]),
         mode_labels=["baseline", "union"],
         structural_choice="baseline",
     )
 
-    assert override
-    assert override[0] == "union"
-    assert "valid-period" in override[1]
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "union"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "union"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
 
 
 def test_focus_scoring_routes_reinspection_count_to_compact_aggregate_surface() -> None:
@@ -479,12 +488,21 @@ def test_specialized_guard_keeps_source_belief_on_testimony_surface() -> None:
         structural_choice="union",
     )
 
-    assert override
-    assert override[0] == "baseline"
-    assert "source-belief" in override[1]
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "union"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "baseline"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
-def test_specialized_guard_routes_alternative_inscription_to_union_surface() -> None:
+def test_hybrid_selector_prefers_alternative_inscription_union_surface_without_guard() -> None:
     row = {
         "id": "q_alt_inscription",
         "question": "What alternative vessel names could the inscription represent?",
@@ -512,18 +530,38 @@ def test_specialized_guard_routes_alternative_inscription_to_union_surface() -> 
             },
         ],
     }
-    scored = structural_mode_scores(row=row, mode_labels=["candidate", "union"])
-
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=scored,
         mode_labels=["candidate", "union"],
-        structural_choice="candidate",
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "candidate"},
     )
 
-    assert override
-    assert override[0] == "union"
-    assert "alternative-inscription" in override[1]
+    assert selected["selected_mode"] == "union"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_intake_photo_consistency_surface_without_guard() -> None:
+    row = {
+        "id": "q_false_conflict",
+        "question": "Is the intake receipt consistent with the photo?",
+        "modes": [
+            _mode_with_predicates("ledger_fragments", ["ledger_entry", "row_value"], rows=8),
+            _mode_with_predicates("paired_interpretation", ["records_intake", "shows_location", "asserts"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["ledger_fragments", "paired_interpretation"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "paired_interpretation"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_calls_model_when_relaxed_volume_dominates() -> None:
@@ -897,10 +935,18 @@ def test_snapshot_state_guard_prefers_sampler_status_surface() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "parallel",
-        "snapshot-state question needs sampler status surface rather than broad event-description volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "parallel", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "parallel"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_snapshot_state_guard_prefers_state_plus_cause_when_available() -> None:
@@ -921,10 +967,18 @@ def test_snapshot_state_guard_prefers_state_plus_cause_when_available() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "entity",
-        "snapshot-state question needs sampler state-plus-cause surface when the snapshot row asks why that state held",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "parallel", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_snapshot_state_guard_falls_back_to_sampler_state_surface() -> None:
@@ -944,10 +998,18 @@ def test_snapshot_state_guard_falls_back_to_sampler_state_surface() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "entity",
-        "snapshot-state question needs explicit sampler_state surface rather than broad event-description or status volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_clear_sample_clock_snapshot_focus_prefers_pause_helper_surface() -> None:
@@ -1135,10 +1197,18 @@ def test_badge_id_guard_prefers_unresolved_identity_badge_surface() -> None:
         structural_choice="source_record",
     )
 
-    assert override == (
-        "cold",
-        "badge-id question with unresolved holder needs identity-status badge surface rather than nearest source-record usage",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record", "cold"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "cold"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_corrected_timestamp_focus_prefers_corrected_timestamp_surface() -> None:
@@ -1338,10 +1408,18 @@ def test_same_item_guard_prefers_current_identity_description_surface() -> None:
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "source_record",
-        "same-item question needs current item identity/description surface rather than withdrawn-label evidence alone",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "source_record"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_near_duplicate_bin_code_guard_prefers_collision_location_surface() -> None:
@@ -1361,10 +1439,20 @@ def test_near_duplicate_bin_code_guard_prefers_collision_location_surface() -> N
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "entity",
-        "near-duplicate bin-code question needs collision-risk plus bin-location surface rather than generic current-label rows",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_active_held_count_prefers_current_label_status_filter_surface() -> None:
@@ -1440,13 +1528,21 @@ def test_publication_authority_guard_prefers_publication_restriction_surface() -
         structural_choice="parallel",
     )
 
-    assert override == (
-        "source_record",
-        "publication-authority question needs publication holder plus active restriction surface rather than broad access-authority volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["parallel", "source_record_facts_v2", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
 
+    assert selected["selected_mode"] == "source_record"
+    assert selected["selection_source"] == "hybrid_structural"
 
-def test_personal_letter_reading_access_guard_avoids_raw_source_rows() -> None:
+
+def test_hybrid_selector_prefers_reading_access_restriction_surface_without_guard() -> None:
     row = {
         "id": "q019",
         "question": "As of 2026-04-30, may a researcher read a personal letter at Pellico's reading room?",
@@ -1464,10 +1560,19 @@ def test_personal_letter_reading_access_guard_avoids_raw_source_rows() -> None:
         structural_choice="source_record",
     )
 
-    assert override == (
-        "memory_ledger_combo",
-        "personal-letter reading-access question needs semantic access authority plus publication-restriction boundary, not raw source rows alone",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts_v2", "source_record", "memory_ledger_combo"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "memory_ledger_combo"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_physical_custody_item_count_guard_is_retired() -> None:
@@ -1576,13 +1681,21 @@ def test_arbitrator_unresolved_question_guard_prefers_dispute_scope_surface() ->
         structural_choice="source_record",
     )
 
-    assert override == (
-        "entity",
-        "arbitrator-unresolved-question row needs dispute-scope/topic surface rather than broad dispute-status volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
 
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
 
-def test_notebook_location_pause_guard_prefers_custody_restriction_surface() -> None:
+
+def test_hybrid_selector_prefers_custody_restriction_surface_without_guard() -> None:
     row = {
         "id": "q033",
         "question": "Where is Notebook A located as of 2026-04-30, and is its publication paused?",
@@ -1599,13 +1712,22 @@ def test_notebook_location_pause_guard_prefers_custody_restriction_surface() -> 
         structural_choice="source_record",
     )
 
-    assert override == (
-        "source_record",
-        "location-plus-publication-pause question needs custody plus publication restriction surface",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
 
+    assert selected["selected_mode"] == "source_record"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
-def test_mou_scope_expansion_guard_prefers_agreement_addition_surface() -> None:
+
+def test_hybrid_selector_prefers_agreement_addition_surface_without_guard() -> None:
     row = {
         "id": "q035",
         "question": "Has any item beyond the original Notebook B been added to the Northbridge MOU scope since the MOU effective date?",
@@ -1622,10 +1744,89 @@ def test_mou_scope_expansion_guard_prefers_agreement_addition_surface() -> None:
         structural_choice="source_record",
     )
 
-    assert override == (
-        "parallel",
-        "MOU-scope expansion question needs agreement-clause plus access/addition surface rather than static right-scope volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record", "parallel"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "parallel"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_state_access_relation_surfaces_without_guards() -> None:
+    cases = [
+        (
+            {
+                "id": "q_universal_scope",
+                "question": "Did all distributors acknowledge the notice before the deadline?",
+                "modes": [
+                    _mode_with_predicates("report_details", ["report_submitted", "acknowledgment_received"], rows=3),
+                    _mode_with_predicates(
+                        "set_enumeration",
+                        ["acknowledgment_received", "deadline_met", "deadline_exceeded"],
+                        rows=7,
+                    ),
+                ],
+            },
+            ["report_details", "set_enumeration"],
+            "set_enumeration",
+        ),
+        (
+            {
+                "id": "q_target_affected",
+                "question": "Is Lot 7200-2024-G affected by the recall?",
+                "modes": [
+                    _mode_with_predicates("broad_affected_listing", ["lot_affected"], rows=20, relaxed=True),
+                    _mode_with_predicates("target_check", ["lot_affected", "correction_applied", "unit_count"], rows=2),
+                ],
+            },
+            ["broad_affected_listing", "target_check"],
+            "target_check",
+        ),
+        (
+            {
+                "id": "q_possession_ownership",
+                "question": "Who carries the object after inheriting ownership?",
+                "modes": [
+                    _mode_with_predicates("broad_event_rule", ["event_actor", "rule_text"], rows=8),
+                    _mode_with_predicates("ownership_distinction", ["inherits", "owns", "possesses"], rows=3),
+                ],
+            },
+            ["broad_event_rule", "ownership_distinction"],
+            "ownership_distinction",
+        ),
+        (
+            {
+                "id": "q_legal_title",
+                "question": "Which claimant has the stronger title?",
+                "modes": [
+                    _mode_with_predicates("static_owner_rows", ["legal_owner"], rows=4),
+                    _mode_with_predicates("claim_transfer_rows", ["claimed_by", "transferred_ownership"], rows=3),
+                ],
+            },
+            ["static_owner_rows", "claim_transfer_rows"],
+            "claim_transfer_rows",
+        ),
+    ]
+
+    for row, labels, expected in cases:
+        selected = hybrid_selector(
+            row=row,
+            mode_labels=labels,
+            margin=1.0,
+            min_score=4.0,
+            fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+        )
+
+        assert selected["selected_mode"] == expected
+        assert selected["selection_source"] == "hybrid_structural"
+        assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_photograph_album_interval_guard_is_retired() -> None:
@@ -1741,10 +1942,20 @@ def test_custody_release_guard_prefers_status_surface_over_scan_volume() -> None
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "source_record",
-        "custody-release question needs custody/status surface rather than scan-record volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "memory_ledger_combo", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] in {"memory_ledger_combo", "source_record"}
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_expected_order_guard_prefers_expected_order_surface() -> None:
@@ -1757,17 +1968,16 @@ def test_expected_order_guard_prefers_expected_order_surface() -> None:
         ],
     }
 
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=["source_record", "parallel"]),
         mode_labels=["source_record", "parallel"],
-        structural_choice="source_record",
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "source_record"},
     )
 
-    assert override == (
-        "parallel",
-        "expected-order question needs explicit expected-order surface rather than open-exception volume",
-    )
+    assert selected["selected_mode"] == "parallel"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_phone_ping_granularity_guard_prefers_device_ping_surface() -> None:
@@ -1787,10 +1997,18 @@ def test_phone_ping_granularity_guard_prefers_device_ping_surface() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "entity",
-        "phone-ping granularity question needs device-ping granularity surface rather than evidence-source summary",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def retired_evidence_source_count_unresolved_guard_prefers_source_catalog_surface() -> None:
@@ -1961,10 +2179,18 @@ def test_memo_establish_guard_prefers_memo_reliability_scope_surface() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "entity",
-        "memo-establish question needs memo-content plus reliability-scope surface rather than broad investigative context",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_negative_reliability_guard_prefers_reliability_scope() -> None:
@@ -1984,10 +2210,18 @@ def test_negative_reliability_guard_prefers_reliability_scope() -> None:
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "source_record",
-        "negative-reliability question needs source-reliability scope rather than unresolved-activity status alone",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "source_record"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_communications_officer_guard_prefers_notice_role_surface() -> None:
@@ -2000,17 +2234,16 @@ def test_communications_officer_guard_prefers_notice_role_surface() -> None:
         ],
     }
 
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=["source_record", "memory_ledger_combo"]),
         mode_labels=["source_record", "memory_ledger_combo"],
-        structural_choice="memory_ledger_combo",
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "source_record"},
     )
 
-    assert override == (
-        "memory_ledger_combo",
-        "communications-officer drafting question needs notice-issued plus person-role surface rather than name lookup alone",
-    )
+    assert selected["selected_mode"] == "memory_ledger_combo"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_structural_selector_prefers_interval_count_surface_over_event_volume() -> None:
@@ -2185,6 +2418,75 @@ def test_structural_selector_prefers_roster_entry_preserving_surface() -> None:
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.0
 
 
+def test_hybrid_selector_prefers_scoped_roster_section_surface_without_guard() -> None:
+    row = {
+        "id": "q013",
+        "question": "How many people are in the original roster section, excluding activity-log-only rows?",
+        "modes": [
+            _mode_with_predicates("activity_log", ["badge_log"], rows=45),
+            _mode_with_predicates("source_record_facts", ["assignment_interval", "source_section"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["activity_log", "source_record_facts"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "source_record_facts"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_scoped_roster_count_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_scoped_roster_count_retired_guard",
+        "question": "How many people are in the original roster section, excluding activity-log-only rows?",
+        "modes": [
+            _mode_with_predicates("activity_log", ["badge_log"], rows=45),
+            _mode_with_predicates("source_record_facts", ["assignment_interval", "source_section"], rows=2),
+        ],
+    }
+    labels = ["activity_log", "source_record_facts"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="activity_log",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_section_membership_count_on_unlike_training_roster() -> None:
+    row = {
+        "id": "q_scoped_section_count_unlike",
+        "question": "How many trainees are listed in the roster section, excluding sign-in-only entries?",
+        "modes": [
+            _mode_with_predicates("activity_log", ["badge_log", "check_in_event"], rows=52, relaxed=True),
+            _mode_with_predicates("source_record_facts", ["assignment_interval", "source_section"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["activity_log", "source_record_facts"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "source_record_facts"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
+
+
 def test_structural_selector_prefers_homeroom_reassignment_count_support() -> None:
     row = {
         "id": "q027",
@@ -2220,6 +2522,75 @@ def test_structural_selector_prefers_homeroom_reassignment_count_support() -> No
 
     assert selected["selected_mode"] == "adult_compliance"
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 2.5
+
+
+def test_hybrid_selector_prefers_post_change_membership_count_without_guard() -> None:
+    row = {
+        "id": "q_post_reassignment_count",
+        "question": "How many students were in Green Group after the Day 2 reassignment?",
+        "modes": [
+            _mode_with_predicates("role_tasks", ["person_role", "task_assignment"], rows=31),
+            _mode_with_predicates("membership_change", ["event_occurs", "group_membership"], rows=13),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["role_tasks", "membership_change"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "membership_change"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert not selected.get("specialized_guard_reason")
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
+
+
+def test_post_reassignment_group_count_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_post_reassignment_guard_retired",
+        "question": "How many students were in Green Group after the Day 2 reassignment?",
+        "modes": [
+            _mode_with_predicates("role_tasks", ["person_role", "task_assignment"], rows=31),
+            _mode_with_predicates("membership_change", ["event_occurs", "group_membership"], rows=13),
+        ],
+    }
+    labels = ["role_tasks", "membership_change"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="role_tasks",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_post_change_membership_count_on_unlike_roster() -> None:
+    row = {
+        "id": "q_post_change_membership_count_unlike",
+        "question": "How many trainees were in Cohort B following the afternoon reassignment?",
+        "modes": [
+            _mode_with_predicates("role_tasks", ["person_role", "task_assignment"], rows=26),
+            _mode_with_predicates("membership_change", ["event_occurs", "member_of_group"], rows=6),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["role_tasks", "membership_change"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "membership_change"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
 
 
 def test_chronological_event_row_count_guard_prefers_event_id_surface() -> None:
@@ -2452,10 +2823,18 @@ def test_authoritative_homeroom_guard_prefers_membership_surface() -> None:
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "entity",
-        "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_authoritative_homeroom_guard_prefers_alias_table_surface() -> None:
@@ -2480,10 +2859,18 @@ def test_authoritative_homeroom_guard_prefers_alias_table_surface() -> None:
         structural_choice="old_v2",
     )
 
-    assert override == (
-        "alias_full",
-        "authoritative-homeroom question needs current member alias/table surface before correction-history rows",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=labels,
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "alias_full"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_authoritative_homeroom_guard_skips_source_record_facts_v2_volume() -> None:
@@ -2503,10 +2890,18 @@ def test_authoritative_homeroom_guard_skips_source_record_facts_v2_volume() -> N
         structural_choice="source_record_facts_v2",
     )
 
-    assert override == (
-        "entity",
-        "authoritative-homeroom question needs current roster membership surface rather than correction-action text alone",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts_v2", "entity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_student_identifier_focus_prefers_canonical_member_surface_without_guard() -> None:
@@ -2647,8 +3042,8 @@ def test_erratum_report_of_record_keeps_archival_identifier_surface() -> None:
 
     assert selected["selected_mode"] == "archival_row_ledger_v1"
     assert selected["selection_source"] == "hybrid_structural"
-    assert selected["hybrid_decision"] == "structural_specialized_answer_surface_guard"
-    assert selected["specialized_guard_reason"].startswith("erratum report-of-record")
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_chain_of_custody_personnel_count_keeps_archival_row_surface() -> None:
@@ -2752,10 +3147,18 @@ def test_roster_bus_assignment_correction_prefers_change_surface() -> None:
         structural_choice="alias_full",
     )
 
-    assert override == (
-        "narrow_guidance",
-        "bus-assignment correction question needs bus-assignment plus change-type surface rather than roster table identity rows",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=labels,
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "narrow_guidance"
+    assert selected["selection_source"] == "hybrid_structural"
 
 
 def test_roster_ratio_compliance_prefers_compliance_status_surface() -> None:
@@ -2776,10 +3179,20 @@ def test_roster_ratio_compliance_prefers_compliance_status_surface() -> None:
         structural_choice="narrow_guidance",
     )
 
-    assert override == (
-        "count_full",
-        "ratio-compliance question needs compliance_status surface rather than roster-table version volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=labels,
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "count_full"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_roster_ratio_compliance_skips_relaxed_compliance_status_surface() -> None:
@@ -2820,10 +3233,20 @@ def test_roster_ratio_compliance_skips_relaxed_compliance_status_surface() -> No
         structural_choice="parallel",
     )
 
-    assert override == (
-        "entity",
-        "ratio-compliance question needs compliance_status surface rather than roster-table version volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=labels,
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "entity"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_structural_selector_prefers_chaperone_roster_adult_count_value() -> None:
@@ -2902,6 +3325,120 @@ def test_structural_selector_prefers_adult_total_roster_state_count_support() ->
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 2.5
 
 
+def test_hybrid_selector_prefers_adult_manifest_total_without_guard() -> None:
+    row = {
+        "id": "q_adult_total_general",
+        "question": "How many adults total are accompanying the trip?",
+        "modes": [
+            _mode_with_predicates("qualifying_chaperones", ["qualifying_chaperone_count"], rows=1),
+            {
+                "mode": "adult_manifest",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "roster_state_support",
+                            "sample_rows": [{"SupportKind": "adult_manifest_total"}],
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["qualifying_chaperones", "adult_manifest"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "adult_manifest"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 4.0
+
+
+def test_adult_total_roster_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_adult_total_retired_guard",
+        "question": "How many adults total are accompanying the trip?",
+        "modes": [
+            _mode_with_predicates("qualifying_chaperones", ["qualifying_chaperone_count"], rows=1),
+            {
+                "mode": "adult_manifest",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 1,
+                            "predicate": "roster_state_support",
+                            "sample_rows": [{"SupportKind": "adult_manifest_total"}],
+                            "was_relaxed_fallback": False,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+    labels = ["qualifying_chaperones", "adult_manifest"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="qualifying_chaperones",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_total_count_over_unasked_subset_count() -> None:
+    row = {
+        "id": "q_total_subset_general",
+        "question": "How many total applications were submitted?",
+        "modes": [
+            _mode_with_predicates("approved_subset", ["approved_application_count"], rows=1),
+            _mode_with_predicates("all_applications", ["application_total_count"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["approved_subset", "all_applications"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "all_applications"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_structural_selector_allows_subset_count_when_subset_is_requested() -> None:
+    row = {
+        "id": "q_requested_subset_general",
+        "question": "How many approved applications total were submitted?",
+        "modes": [
+            _mode_with_predicates("approved_subset", ["approved_application_count"], rows=1),
+            _mode_with_predicates("all_applications", ["application_total_count"], rows=1),
+        ],
+    }
+
+    selected = structural_selector(row=row, mode_labels=["approved_subset", "all_applications"])
+
+    assert selected["selected_mode"] == "approved_subset"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
 def test_structural_selector_prefers_ratio_exclusion_role_policy_surface() -> None:
     row = {
         "id": "q031",
@@ -2976,10 +3513,20 @@ def test_correction_notice_replacement_guard_prefers_change_type_surface() -> No
         structural_choice="source_record_facts",
     )
 
-    assert override == (
-        "cold",
-        "correction-notice replacement question needs change-type surface rather than unparsed correction-action text",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_record_facts", "cold"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "cold"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_application_count_prefers_canonical_status_surface() -> None:
@@ -3598,6 +4145,28 @@ def test_date_event_anchors_prefers_log_event_surface_over_incomplete_direct_eve
     assert selected["hybrid_decision"] == "structural_confident"
 
 
+def test_hybrid_selector_prefers_incident_anchor_surface_without_guard() -> None:
+    row = {
+        "id": "q_date_event_anchor_direct",
+        "question": "List the date-event anchors for the incident sequence.",
+        "modes": [
+            _mode_with_predicates("source_sections", ["source_record_section"], rows=9),
+            _mode_with_predicates("incident_anchor", ["incident_anchor"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_sections", "incident_anchor"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "incident_anchor"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
 def test_hybrid_selector_prefers_denial_reason_rule_context() -> None:
     row = {
         "id": "q025",
@@ -3709,10 +4278,20 @@ def test_projection_supersession_guard_prefers_trigger_surface() -> None:
         structural_choice="parallel",
     )
 
-    assert override == (
-        "source_record",
-        "projection-supersession question needs trigger/actual event surface rather than projection-comparison volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["parallel", "source_record"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "source_record"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_trip_date_guard_prefers_roster_state_surface() -> None:
@@ -3725,17 +4304,38 @@ def test_trip_date_guard_prefers_roster_state_surface() -> None:
         ],
     }
 
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=["source_record", "memory_ledger_combo"]),
         mode_labels=["source_record", "memory_ledger_combo"],
-        structural_choice="source_record",
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "source_record"},
     )
 
-    assert override == (
-        "memory_ledger_combo",
-        "trip-date question needs roster-state schedule surface rather than roster-version/source-record volume",
+    assert selected["selected_mode"] == "memory_ledger_combo"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_homeroom_reassignment_surface_without_guard() -> None:
+    row = {
+        "id": "q_homeroom_reassigned",
+        "question": "Which student was reassigned by the homeroom correction notice?",
+        "modes": [
+            _mode_with_predicates("change_text", ["change_type", "correction_action"], rows=8),
+            _mode_with_predicates("reassignment", ["homeroom_reassigned"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["change_text", "reassignment"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "reassignment"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_rule_threshold_guard_prefers_threshold_surface() -> None:
@@ -3787,10 +4387,81 @@ def test_barcode_supersession_guard_prefers_scan_correction_surface() -> None:
         structural_choice="cold",
     )
 
-    assert override == (
-        "parallel",
-        "barcode-supersession question needs scan/correction surface rather than broad current-barcode volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["cold", "parallel"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "parallel"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_direct_state_custody_surfaces_without_guards() -> None:
+    cases = [
+        (
+            "where_as_of",
+            "As of the incident date, where was the artifact physically located?",
+            _mode_with_predicates("broad", ["location_claim", "source_note"], rows=12),
+            _mode_with_predicates("focused", ["row_location", "row_time"], rows=1),
+        ),
+        (
+            "current_component",
+            "What thread is currently in the instrument?",
+            _mode_with_predicates("broad", ["transition_event", "maintenance_note"], rows=12),
+            _mode_with_predicates("focused", ["current_state", "contained_thread"], rows=1),
+        ),
+        (
+            "why_have",
+            "Why does the archive have the item?",
+            _mode_with_predicates("broad", ["object_property", "action_note"], rows=12),
+            _mode_with_predicates("focused", ["custody_transfer", "custody_reason"], rows=1),
+        ),
+        (
+            "carry",
+            "Who carried the object during the inspection?",
+            _mode_with_predicates("broad", ["legal_title_holder", "event_occurs"], rows=12),
+            _mode_with_predicates("focused", ["possesses"], rows=1),
+        ),
+        (
+            "spatial_location",
+            "Which two features were on the disputed strip?",
+            _mode_with_predicates("broad", ["finding_record", "survey_record"], rows=12),
+            _mode_with_predicates("focused", ["object_location", "spatial_relation_to_boundary"], rows=1),
+        ),
+        (
+            "asset_pickup",
+            "Which asset in the client ledger was picked up?",
+            _mode_with_predicates("broad", ["item_provenance", "ledger_entry"], rows=12),
+            _mode_with_predicates("focused", ["asset_location_at", "current_asset_state"], rows=1),
+        ),
+    ]
+
+    for row_id, question, broad_mode, focused_mode in cases:
+        row = {
+            "id": row_id,
+            "question": question,
+            "modes": [broad_mode, focused_mode],
+        }
+
+        selected = hybrid_selector(
+            row=row,
+            mode_labels=["broad", "focused"],
+            margin=1.0,
+            min_score=4.0,
+            fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+        )
+
+        assert selected["selected_mode"] == "focused", row_id
+        assert selected["selection_source"] == "hybrid_structural", row_id
+        assert selected["hybrid_decision"] == "structural_confident", row_id
+        assert selected.get("specialized_guard_reason", "") == "", row_id
 
 
 def test_hybrid_selector_calls_model_for_identity_name_completeness_trap() -> None:
@@ -4077,7 +4748,8 @@ def test_hybrid_selector_keeps_baseline_for_explicit_awarded_support() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "baseline"
-    assert "awarded support" in selected["baseline_guard_reason"]
+    assert selected.get("baseline_guard_reason", "") == ""
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_direct_status_rule_support() -> None:
@@ -4153,7 +4825,8 @@ def test_hybrid_selector_keeps_direct_status_rule_support() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "baseline"
-    assert "status/rule support" in selected["baseline_guard_reason"]
+    assert selected.get("baseline_guard_reason", "") == ""
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
 
 
 def test_hybrid_selector_keeps_baseline_for_application_status_relaxed_candidate() -> None:
@@ -4217,7 +4890,220 @@ def test_hybrid_selector_keeps_baseline_for_application_status_relaxed_candidate
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "baseline"
-    assert "application/status support" in selected["baseline_guard_reason"]
+    assert selected.get("baseline_guard_reason", "") == ""
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
+
+
+def test_hybrid_selector_prefers_compact_operational_status_surfaces_without_guards() -> None:
+    cases = [
+        (
+            "response_content",
+            "What did the filed response include?",
+            [
+                _mode_with_predicates("compact_response", ["event_actor", "event_type", "rule_condition"], rows=1),
+                _mode_with_predicates("broad_procedure", ["event_filed", "event_issued"], rows=15),
+            ],
+            ["compact_response", "broad_procedure"],
+            "compact_response",
+            "response-content question",
+        ),
+        (
+            "contract_rescission",
+            "Was the contract rescinded after the request?",
+            [
+                _mode_with_predicates(
+                    "request_outcome",
+                    ["validity_question_raised", "notification_sent", "event_outcome", "contract_value"],
+                    rows=1,
+                ),
+                _mode_with_predicates("vote_volume", ["meeting_item", "vote_result"], rows=8),
+            ],
+            ["request_outcome", "vote_volume"],
+            "request_outcome",
+            "contract-rescission status",
+        ),
+        (
+            "court_status",
+            "Has the court issued a determination on the disputed questions?",
+            [
+                _mode_with_predicates("broad_unresolved", ["unresolved_issue"], rows=40, relaxed=True),
+                _mode_with_predicates("source_status", ["source_document_status", "negative_record"], rows=2),
+                _mode_with_predicates("archival_status", ["record_row", "row_value"], rows=3),
+            ],
+            ["broad_unresolved", "source_status", "archival_status"],
+            {"source_status", "archival_status"},
+            "court-determination question",
+        ),
+        (
+            "resolved_status",
+            "Has the completed inter vivos gift question been resolved or determined?",
+            [
+                _mode_with_predicates("broad_rows", ["row_value"], rows=40),
+                _mode_with_predicates("status_surface", ["disputed_ownership", "is_unresolved"], rows=2),
+            ],
+            ["broad_rows", "status_surface"],
+            "status_surface",
+            "resolved-status question",
+        ),
+        (
+            "planning_request",
+            "What is the applicant requesting and what is the request type?",
+            [
+                _mode_with_predicates("claim_volume", ["claim_status"], rows=20),
+                _mode_with_predicates("request_summary", ["application_summary", "project_unit_mix"], rows=2),
+            ],
+            ["claim_volume", "request_summary"],
+            "request_summary",
+            "planning-application request",
+        ),
+        (
+            "prior_proposal",
+            "Was the 18-unit proposal denied or rejected?",
+            [
+                _mode_with_predicates("current_status", ["application_status"], rows=20),
+                _mode_with_predicates("proposal_record", ["proposal_version", "staff_finding"], rows=2),
+            ],
+            ["current_status", "proposal_record"],
+            "proposal_record",
+            "prior-proposal disposition",
+        ),
+    ]
+
+    for row_id, question, modes, labels, expected_mode, disabled_guard in cases:
+        selected = hybrid_selector(
+            row={"id": row_id, "question": question, "modes": modes},
+            mode_labels=labels,
+            margin=1.0,
+            min_score=4.0,
+            guard_disable_regex=compile_guard_disable_regex(disabled_guard),
+            fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+        )
+
+        if isinstance(expected_mode, set):
+            assert selected["selected_mode"] in expected_mode
+        else:
+            assert selected["selected_mode"] == expected_mode
+        assert selected["selection_source"] == "hybrid_structural"
+        assert selected["hybrid_decision"] == "structural_confident"
+        assert selected.get("baseline_guard_reason", "") == ""
+        assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_rule_binding_surfaces_without_guards() -> None:
+    cases = [
+        (
+            "rescission",
+            "Could the board request rescission if two members voted against it?",
+            _mode_with_predicates("rule_volume", ["governance_rule", "meeting_item"], rows=8),
+            _mode_with_predicates("request_validity", ["validity_question_raised", "notification_sent", "vote_cast"], rows=1),
+            "request_validity",
+            "rescission-request",
+        ),
+        (
+            "revised_plan",
+            "Why was the revised plan monitoring frequency rejected?",
+            _mode_with_predicates("status_volume", ["observation_status"], rows=15),
+            _mode_with_predicates("rule_event", ["event_reason", "rule_text", "event_issued"], rows=1),
+            "rule_event",
+            "revised-plan",
+        ),
+        (
+            "deferment",
+            "Why was the application deferred?",
+            _mode_with_predicates("rule_text", ["rule_text"], rows=15),
+            _mode_with_predicates(
+                "interpreted_decision",
+                ["vote_result", "recusal_member", "eligibility_determination", "interpretation_text"],
+                rows=1,
+            ),
+            "interpreted_decision",
+            "deferment-rationale",
+        ),
+        (
+            "component_problem",
+            "Which component problem triggers the rule?",
+            _mode_with_predicates("category_rule", ["project_category", "rule_condition"], rows=1),
+            _mode_with_predicates("component_volume", ["component_status"], rows=15),
+            "category_rule",
+            "component-problem",
+        ),
+        (
+            "recusal",
+            "Why did the member recuse?",
+            _mode_with_predicates("eligibility", ["eligibility_determination"], rows=15),
+            _mode_with_predicates("recusal_rule", ["recusal_member", "vote_result", "rule_text"], rows=1),
+            "recusal_rule",
+            "recusal-rationale",
+        ),
+        (
+            "post_recusal",
+            "Why couldn't the recused member vote?",
+            _mode_with_predicates("quorum", ["quorum_status", "vote_result"], rows=15),
+            _mode_with_predicates("recusal_vote", ["recusal_member", "vote_result", "rule_text"], rows=1),
+            "recusal_vote",
+            "post-recusal",
+        ),
+        (
+            "window_merit_condition",
+            "Does the 3-year window argument have merit?",
+            _mode_with_predicates("applicant_volume", ["applicant_id", "prior_grant_history"], rows=15),
+            _mode_with_predicates("history_rule", ["prior_grant_history", "interpretation_text", "rule_condition"], rows=1),
+            "history_rule",
+            "window-merit",
+        ),
+        (
+            "window_merit_interpretation",
+            "Does the three-year window argument have merit?",
+            _mode_with_predicates("applicant_volume", ["applicant_id", "prior_grant_history"], rows=15),
+            _mode_with_predicates(
+                "history_interpretation",
+                ["prior_grant_history", "interpretation_text", "rule_interpreted"],
+                rows=1,
+            ),
+            "history_interpretation",
+            "window-merit",
+        ),
+        (
+            "rejection_cause",
+            "Was the application rejected on the merits because of absences?",
+            _mode_with_predicates("derived_status", ["derived_status"], rows=15),
+            _mode_with_predicates("record_correction", ["correction_to_record", "clarification_of_record"], rows=1),
+            "record_correction",
+            "rejection-cause",
+        ),
+        (
+            "appeal_hearing",
+            "Has the appeal hearing been heard?",
+            _mode_with_predicates("appeal_status", ["appeal_status"], rows=15),
+            _mode_with_predicates("hearing_event", ["appeal_filed", "appeal_hearing_scheduled"], rows=1),
+            "hearing_event",
+            "appeal-hearing",
+        ),
+        (
+            "permitted_hours",
+            "What are the permitted sound hours for amplified sound?",
+            _mode_with_predicates("permit_status", ["permit_status"], rows=15),
+            _mode_with_predicates("hours_rule", ["operational_hours"], rows=1),
+            "hours_rule",
+            "permitted-hours",
+        ),
+    ]
+
+    for row_id, question, broad_mode, focused_mode, expected_mode, disabled_guard in cases:
+        selected = hybrid_selector(
+            row={"id": row_id, "question": question, "modes": [broad_mode, focused_mode]},
+            mode_labels=[broad_mode["mode"], focused_mode["mode"]],
+            margin=1.0,
+            min_score=4.0,
+            guard_disable_regex=compile_guard_disable_regex(disabled_guard),
+            fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+        )
+
+        assert selected["selected_mode"] == expected_mode, row_id
+        assert selected["selection_source"] == "hybrid_structural", row_id
+        assert selected["hybrid_decision"] == "structural_confident", row_id
+        assert selected.get("baseline_guard_reason", "") == "", row_id
+        assert selected.get("specialized_guard_reason", "") == "", row_id
 
 
 def test_hybrid_selector_keeps_baseline_for_counterfactual_rule_status_support() -> None:
@@ -4291,6 +5177,178 @@ def test_hybrid_selector_keeps_baseline_for_counterfactual_rule_status_support()
     assert selected["hybrid_decision"] == "structural_confident"
     assert selected.get("baseline_guard_reason", "") == ""
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_hybrid_selector_keeps_reserve_arithmetic_inputs_without_guard() -> None:
+    row = {
+        "id": "q_reserve_counterfactual",
+        "question": "If the amendment had passed and the emergency spending occurred, what would the reserve status be?",
+        "modes": [
+            _mode_with_predicates(
+                "derived_status",
+                ["derived_status", "rule_status", "status_at"],
+                rows=12,
+            ),
+            _mode_with_predicates(
+                "arithmetic_inputs",
+                ["reserve_balance", "minimum_reserve_policy", "expenditure_authorized"],
+                rows=3,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["derived_status", "arithmetic_inputs"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "arithmetic_inputs"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert not selected.get("specialized_guard_reason")
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_reserve_status_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_reserve_counterfactual_guard_retired",
+        "question": "If the amendment had passed and the emergency spending occurred, what would the reserve status be?",
+        "modes": [
+            _mode_with_predicates(
+                "derived_status",
+                ["derived_status", "rule_status", "status_at"],
+                rows=12,
+            ),
+            _mode_with_predicates(
+                "arithmetic_inputs",
+                ["reserve_balance", "minimum_reserve_policy", "expenditure_authorized"],
+                rows=3,
+            ),
+        ],
+    }
+    labels = ["derived_status", "arithmetic_inputs"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="derived_status",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_arithmetic_inputs_on_unlike_counterfactual_status() -> None:
+    row = {
+        "id": "q_unlike_counterfactual_arithmetic_inputs",
+        "question": "If the facility upgrade were authorized, what would happen to the compliance status?",
+        "modes": [
+            _mode_with_predicates("derived_status", ["derived_status", "status_at"], rows=15),
+            _mode_with_predicates(
+                "arithmetic_inputs",
+                ["reserve_balance", "minimum_reserve_policy", "expenditure_authorized"],
+                rows=4,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["derived_status", "arithmetic_inputs"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "arithmetic_inputs"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_hybrid_selector_prefers_recall_authority_surface_without_guard() -> None:
+    row = {
+        "id": "q_recall_authority",
+        "question": "Could the Council recall BA-2026-08 after the emergency to restore the reserve?",
+        "modes": [
+            _mode_with_predicates("legal_opinion", ["charter_rule", "voting_threshold", "legal_opinion"], rows=9),
+            _mode_with_predicates(
+                "recall_authority",
+                ["charter_rule", "voting_threshold", "reserve_balance", "emergency_declared"],
+                rows=4,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["legal_opinion", "recall_authority"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "recall_authority"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert not selected.get("specialized_guard_reason")
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.5
+
+
+def test_amendment_recall_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_recall_authority_guard_retired",
+        "question": "Could the Council recall BA-2026-08 after the emergency to restore the reserve?",
+        "modes": [
+            _mode_with_predicates("legal_opinion", ["charter_rule", "voting_threshold", "legal_opinion"], rows=9),
+            _mode_with_predicates(
+                "recall_authority",
+                ["charter_rule", "voting_threshold", "reserve_balance", "emergency_declared"],
+                rows=4,
+            ),
+        ],
+    }
+    labels = ["legal_opinion", "recall_authority"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="legal_opinion",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_authority_action_surface_on_unlike_reversal() -> None:
+    row = {
+        "id": "q_unlike_authority_action",
+        "question": "What is required to reverse the access decision after emergency action?",
+        "modes": [
+            _mode_with_predicates("legal_opinion", ["policy_rule", "rule_threshold", "legal_opinion"], rows=11),
+            _mode_with_predicates(
+                "action_authority",
+                ["policy_rule", "rule_threshold", "event_reverses", "governance_decision"],
+                rows=3,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["legal_opinion", "action_authority"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "action_authority"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.5
 
 
 def test_hybrid_selector_keeps_baseline_for_hold_readiness_status_support() -> None:
@@ -4477,6 +5535,146 @@ def test_hybrid_selector_prefers_request_surface_for_filing_timeliness_without_g
     assert "disabled_guard_reasons" not in disabled_selected
 
 
+def test_hybrid_selector_prefers_calculated_deadline_filing_without_guard() -> None:
+    row = {
+        "id": "q_calculated_deadline_filing",
+        "question": "Was the appeal filed before the original deadline?",
+        "modes": [
+            _mode_with_predicates("loose_deadline", ["deadline_value", "event_status"], rows=8),
+            _mode_with_predicates("calculated_deadline", ["event_filed", "deadline_calculated", "rule_text"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["loose_deadline", "calculated_deadline"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "calculated_deadline"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert not selected.get("specialized_guard_reason")
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_board_review_deadline_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_board_review_deadline_guard_retired",
+        "question": "When does the board review period end?",
+        "modes": [
+            _mode_with_predicates("loose_deadline", ["deadline_value"], rows=6),
+            _mode_with_predicates("calculated_deadline", ["event_filed", "deadline_calculated", "rule_text"], rows=2),
+        ],
+    }
+    labels = ["loose_deadline", "calculated_deadline"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="loose_deadline",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_calculated_deadline_on_unlike_review_period() -> None:
+    row = {
+        "id": "q_unlike_calculated_deadline",
+        "question": "When does the equipment review period end after the notice was issued?",
+        "modes": [
+            _mode_with_predicates("loose_deadline", ["deadline_value"], rows=9),
+            _mode_with_predicates("calculated_deadline", ["event_issued", "deadline_calculated", "elapsed_days"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["loose_deadline", "calculated_deadline"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "calculated_deadline"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_hybrid_selector_prefers_appeal_deadline_status_without_guard() -> None:
+    row = {
+        "id": "q_appeal_status_deadline",
+        "question": "What is the docket status of the appeal if no decision was issued by the deadline?",
+        "modes": [
+            _mode_with_predicates("bare_docket_status", ["docket_status", "appeal_status"], rows=12),
+            _mode_with_predicates("appeal_deadline_context", ["event_filed", "deadline_calculated", "no_decision"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["bare_docket_status", "appeal_deadline_context"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "appeal_deadline_context"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert not selected.get("specialized_guard_reason")
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.25
+
+
+def test_appeal_tolling_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_appeal_tolling_guard_retired",
+        "question": "What tolling effect did the appeal have on the penalty clock?",
+        "modes": [
+            _mode_with_predicates("isolated_tolling_label", ["tolling_label"], rows=6),
+            _mode_with_predicates("appeal_rule_context", ["event_filed", "deadline_calculated", "rule_text"], rows=3),
+        ],
+    }
+    labels = ["isolated_tolling_label", "appeal_rule_context"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="isolated_tolling_label",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_appeal_event_deadline_on_unlike_review_status() -> None:
+    row = {
+        "id": "q_unlike_appeal_event_deadline",
+        "question": "Is the permit appeal still pending after the review deadline?",
+        "modes": [
+            _mode_with_predicates("docket_status", ["appeal_status", "docket_status"], rows=10),
+            _mode_with_predicates("appeal_deadline_context", ["appeal_filed", "deadline_calculated", "decision_pending"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["docket_status", "appeal_deadline_context"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "appeal_deadline_context"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.25
+
+
 def test_hybrid_selector_prefers_process_surface_for_commit_readiness() -> None:
     row = {
         "id": "q004m",
@@ -4544,7 +5742,7 @@ def test_hybrid_selector_prefers_process_surface_for_commit_readiness() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "operational_record"
-    assert "unresolved process evidence" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_rationale_note_for_cause_question() -> None:
@@ -4608,7 +5806,89 @@ def test_hybrid_selector_keeps_rationale_note_for_cause_question() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "baseline"
-    assert "rationale-note support" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_memo_resolution_claim_issue_surface_without_guard() -> None:
+    row = {
+        "id": "q004n2",
+        "question": "Does the resolution substantially turn on an unresolved memo claim?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 4, "predicate": "permit_status"},
+                        {"status": "success", "num_rows": 3, "predicate": "document_status"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "rationale_contrast",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "statement_claim"},
+                        {"status": "success", "num_rows": 1, "predicate": "unresolved_issue"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "rationale_contrast"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "rationale_contrast"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_reply_memo_row_value_without_guard() -> None:
+    row = {
+        "id": "q004n3",
+        "question": "What theory did the reply memo use to contest the finding?",
+        "modes": [
+            {
+                "mode": "baseline",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 6, "predicate": "source_document_status"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            {
+                "mode": "archival_row",
+                "query_evidence": {
+                    "executed_results": [
+                        {"status": "success", "num_rows": 1, "predicate": "row_value"},
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["baseline", "archival_row"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "baseline"},
+    )
+
+    assert selected["selected_mode"] == "archival_row"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_explicit_priority_surface() -> None:
@@ -4666,7 +5946,7 @@ def test_hybrid_selector_prefers_explicit_priority_surface() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "operational_record"
-    assert "explicit priority predicate" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_explicit_decision_surface() -> None:
@@ -4736,7 +6016,7 @@ def test_hybrid_selector_prefers_explicit_decision_surface() -> None:
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "operational_record"
-    assert "explicit decision surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_actual_split_surface_for_split_rationale() -> None:
@@ -4812,7 +6092,7 @@ def test_hybrid_selector_prefers_actual_split_surface_for_split_rationale() -> N
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "operational_record"
-    assert "actual split/lot-condition surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_source_note_for_split_rationale_when_available() -> None:
@@ -4866,7 +6146,7 @@ def test_hybrid_selector_prefers_source_note_for_split_rationale_when_available(
     )
 
     assert selected["selected_mode"] == "rationale_contrast"
-    assert "source-note rationale plus viability context" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_direct_collector_surface_for_collector_identity() -> None:
@@ -4908,7 +6188,7 @@ def test_hybrid_selector_prefers_direct_collector_surface_for_collector_identity
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "direct collector predicate surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_source_note_for_viability_concern_contrast() -> None:
@@ -4951,7 +6231,7 @@ def test_hybrid_selector_prefers_source_note_for_viability_concern_contrast() ->
     )
 
     assert selected["selected_mode"] == "rationale_contrast"
-    assert "source-note contrast plus viability context" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_pending_status_for_not_yet_tested_question() -> None:
@@ -4993,7 +6273,7 @@ def test_hybrid_selector_prefers_pending_status_for_not_yet_tested_question() ->
     )
 
     assert selected["selected_mode"] == "rationale_contrast"
-    assert "pending test-status surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_compact_deaccession_status_for_yet_question() -> None:
@@ -5052,7 +6332,7 @@ def test_hybrid_selector_prefers_compact_deaccession_status_for_yet_question() -
     )
 
     assert selected["selected_mode"] == "object_state_custody"
-    assert "scheduled/not-formally-completed status surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_final_state_for_current_operational_status() -> None:
@@ -5105,7 +6385,7 @@ def test_hybrid_selector_prefers_final_state_for_current_operational_status() ->
     )
 
     assert selected["selected_mode"] == "operational_record"
-    assert "explicit final-state surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_current_expiration_for_adjusted_reinstatement_expiration() -> None:
@@ -5167,7 +6447,7 @@ def test_hybrid_selector_prefers_current_expiration_for_adjusted_reinstatement_e
     )
 
     assert selected["selected_mode"] == "temporal_status"
-    assert "explicit current-expiration surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_entitlement_effect_for_correction_entitlement_question() -> None:
@@ -5210,7 +6490,7 @@ def test_hybrid_selector_prefers_entitlement_effect_for_correction_entitlement_q
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "entitlement rule plus extension effect surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_witness_report_surface_for_evidentiary_status() -> None:
@@ -5252,7 +6532,7 @@ def test_hybrid_selector_prefers_witness_report_surface_for_evidentiary_status()
     )
 
     assert selected["selected_mode"] == "rationale_contrast"
-    assert "explicit witness/report surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_event_action_history_for_board_concern_decision() -> None:
@@ -5306,7 +6586,7 @@ def test_hybrid_selector_prefers_event_action_history_for_board_concern_decision
     )
 
     assert selected["selected_mode"] == "rationale_contrast"
-    assert "event/action concern history" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_commit_readiness_not_blocked_by_status_baseline_guard() -> None:
@@ -5349,7 +6629,7 @@ def test_hybrid_selector_commit_readiness_not_blocked_by_status_baseline_guard()
 
     assert selected["selected_mode"] == "operational_record"
     assert selected.get("baseline_guard_reason", "") == ""
-    assert "unresolved process evidence" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_public_event_extension_purpose_surface() -> None:
@@ -5392,7 +6672,7 @@ def test_hybrid_selector_keeps_public_event_extension_purpose_surface() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "public-use extension" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_unrenewed_expiry_endpoint_surface() -> None:
@@ -5434,7 +6714,8 @@ def test_hybrid_selector_prefers_unrenewed_expiry_endpoint_surface() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "unrenewed-expiry" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
 
 
 def test_hybrid_selector_prefers_unrenewed_expiry_deadline_surface_with_guard_disabled() -> None:
@@ -5507,7 +6788,8 @@ def test_hybrid_selector_prefers_violation_record_for_suspension_trigger() -> No
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "violation-record" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
 
 
 def test_hybrid_selector_prefers_violation_event_suspension_surface_with_guard_disabled() -> None:
@@ -5542,6 +6824,59 @@ def test_hybrid_selector_prefers_violation_event_suspension_surface_with_guard_d
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
     assert "specialized_guard_reason" not in selected
+
+
+def test_second_violation_duration_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_second_violation_duration_guard_retired",
+        "question": "How long was the suspension period after the second sound violation?",
+        "modes": [
+            _mode_with_predicates("interval_only", ["suspension_period"], rows=8),
+            _mode_with_predicates(
+                "event_interval",
+                ["permit_suspension", "suspension_period", "violation_record"],
+                rows=3,
+            ),
+        ],
+    }
+    labels = ["interval_only", "event_interval"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="interval_only",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_event_record_duration_on_unlike_interval_row() -> None:
+    row = {
+        "id": "q_unlike_event_duration",
+        "question": "How long was the access restriction period after the badge infraction?",
+        "modes": [
+            _mode_with_predicates("interval_only", ["restriction_period"], rows=10),
+            _mode_with_predicates(
+                "event_interval",
+                ["infraction_record", "restriction_period", "active_interval"],
+                rows=2,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["interval_only", "event_interval"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "event_interval"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.25
 
 
 def test_hybrid_selector_prefers_complete_permit_action_list_with_guard_disabled() -> None:
@@ -5615,7 +6950,9 @@ def test_hybrid_selector_prefers_quarantine_scope_for_split_lot_count() -> None:
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "split-lot never-quarantined" in selected["specialized_guard_reason"]
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_mistaken_movement_quarantine_count_without_guard() -> None:
@@ -5680,12 +7017,56 @@ def test_hybrid_selector_prefers_quarantine_scope_for_never_quarantined_count_wi
         margin=1.0,
         min_score=4.0,
         fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
-        guard_disable_regex=compile_guard_disable_regex("split-lot never-quarantined"),
     )
 
     assert selected["selected_mode"] == "quarantine_scope"
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
+
+
+def test_split_lot_never_quarantined_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_split_lot_retired_guard",
+        "question": "How many Lot 5C plants were never quarantined?",
+        "modes": [
+            _mode_with_predicates("lot_status", ["lot_status", "lot_location", "lab_result"], rows=7),
+            _mode_with_predicates("quarantine_scope", ["lot", "lot_status", "quarantine_scope"], rows=3),
+        ],
+    }
+    labels = ["lot_status", "quarantine_scope"]
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="lot_status",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_scoped_status_count_on_unlike_restriction_row() -> None:
+    row = {
+        "id": "q_scoped_status_count_unlike",
+        "question": "How many Unit 4 devices were never restricted?",
+        "modes": [
+            _mode_with_predicates("status_history", ["device_status", "status_history"], rows=19),
+            _mode_with_predicates("restriction_scope", ["device_status", "restriction_scope"], rows=4),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_history", "restriction_scope"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "restriction_scope"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.0
 
 
 def test_hybrid_selector_prefers_lot5c_status_summary_surface() -> None:
@@ -5737,7 +7118,95 @@ def test_hybrid_selector_prefers_status_elevation_context_surface() -> None:
     assert selected["selected_mode"] == "status_context"
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
-    assert "status-elevation rationale" in selected["disabled_guard_reasons"][0]
+    assert "disabled_guard_reasons" not in selected
+
+
+def test_hybrid_selector_prefers_vendor_deficiency_without_guard() -> None:
+    row = {
+        "id": "q_failed_vendor_rationale",
+        "question": "Why did the service vendor fail the compliance check?",
+        "modes": [
+            _mode_with_predicates("status_summary", ["vendor_status", "inspection_result"], rows=8),
+            _mode_with_predicates("deficiency_detail", ["vendor_deficiency", "inspection_result", "permit_status"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_summary", "deficiency_detail"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "deficiency_detail"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_violation_status_failure_surface_without_guard() -> None:
+    row = {
+        "id": "q_failed_vendor_violation",
+        "question": "Why did the vendor fail inspection?",
+        "modes": [
+            _mode_with_predicates("broad_status", ["vendor_status"], rows=10),
+            _mode_with_predicates("violation_surface", ["inspection_result", "vendor_status", "violation_record"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["broad_status", "violation_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "violation_surface"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_display_outcome_surface_without_guard() -> None:
+    row = {
+        "id": "q_display_outcome",
+        "question": "What happened during the public display?",
+        "modes": [
+            _mode_with_predicates("permit_summary", ["permit_status"], rows=8),
+            _mode_with_predicates("inspection_outcome", ["inspection_conducted", "inspection_result", "permit_status"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["permit_summary", "inspection_outcome"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "inspection_outcome"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_incident_validity_outcome_surface_without_guard() -> None:
+    row = {
+        "id": "q_incident_outcome",
+        "question": "What was the display outcome after the reported incident?",
+        "modes": [
+            _mode_with_predicates("permit_summary", ["permit_validity"], rows=8),
+            _mode_with_predicates("incident_outcome", ["permit_validity", "incident_reported", "inspection_result"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["permit_summary", "incident_outcome"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "incident_outcome"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_termination_rationale_threshold_with_guard_disabled() -> None:
@@ -6140,7 +7609,7 @@ def test_hybrid_selector_prefers_destruction_supervisor_role_surface() -> None:
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "destruction-supervisor" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_provisional_control_with_pending_context() -> None:
@@ -6478,7 +7947,7 @@ def test_hybrid_selector_keeps_recovery_identity_on_testimony_surface() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "recovery-identity" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_source_belief_on_testimony_surface() -> None:
@@ -6520,7 +7989,7 @@ def test_hybrid_selector_keeps_source_belief_on_testimony_surface() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "source-belief" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_candidate_vessel_list_surface() -> None:
@@ -6562,7 +8031,7 @@ def test_hybrid_selector_prefers_candidate_vessel_list_surface() -> None:
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "candidate-vessel list" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_direct_insurance_link_surface() -> None:
@@ -6603,7 +8072,7 @@ def test_hybrid_selector_prefers_direct_insurance_link_surface() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "insurance-link" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_banner_change_creation_surface() -> None:
@@ -6645,7 +8114,29 @@ def test_hybrid_selector_prefers_banner_change_creation_surface() -> None:
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "banner-change rationale" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_missing_evidence_claim_absence_surface_without_guard() -> None:
+    row = {
+        "id": "q_missing_evidence",
+        "question": "What evidence did the claimant not produce?",
+        "modes": [
+            _mode_with_predicates("status_summary", ["claim_status", "finding_record"], rows=8),
+            _mode_with_predicates("claim_absence", ["acknowledged_by", "claim_asserted_by", "asserts_claim"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_summary", "claim_absence"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "claim_absence"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_final_attendance_for_student_count() -> None:
@@ -6752,7 +8243,7 @@ def test_hybrid_selector_prefers_group_formation_for_temporary_team_roster() -> 
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "temporary-team roster" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_hazard_observation_for_no_touch_question() -> None:
@@ -6795,7 +8286,7 @@ def test_hybrid_selector_prefers_hazard_observation_for_no_touch_question() -> N
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "no-touch hazard" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_alias_plus_group_for_same_name_distinction() -> None:
@@ -6836,7 +8327,7 @@ def test_hybrid_selector_keeps_alias_plus_group_for_same_name_distinction() -> N
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "same-name distinction" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_interval_membership_for_group_designation_focus() -> None:
@@ -7118,7 +8609,7 @@ def test_freya_witness_focus_prefers_starfish_claim_surface() -> None:
 
     assert selected["selected_mode"] == "freya_claim"
     assert selected["selection_source"] == "hybrid_structural"
-    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.0
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
 
 
 def test_hybrid_selector_keeps_baseline_for_yellow_to_blue_reassignment_list() -> None:
@@ -7159,7 +8650,10 @@ def test_hybrid_selector_keeps_baseline_for_yellow_to_blue_reassignment_list() -
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "yellow-to-blue" in selected["specialized_guard_reason"]
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert "specialized_guard_reason" not in selected
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.0
 
 
 def test_hybrid_selector_prefers_found_object_event_surface_for_day_three_beach_find() -> None:
@@ -7201,7 +8695,7 @@ def test_hybrid_selector_prefers_found_object_event_surface_for_day_three_beach_
     )
 
     assert selected["selected_mode"] == "interval"
-    assert "day-3 found-object" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_recorded_value_for_conservator_date_detail() -> None:
@@ -7242,7 +8736,7 @@ def test_hybrid_selector_prefers_recorded_value_for_conservator_date_detail() ->
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "conservator-date" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_governance_surface_for_display_authority() -> None:
@@ -7284,7 +8778,7 @@ def test_hybrid_selector_keeps_governance_surface_for_display_authority() -> Non
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "display-authority" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_handoff_surface_for_intake_actor() -> None:
@@ -7327,7 +8821,30 @@ def test_hybrid_selector_keeps_handoff_surface_for_intake_actor() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "intake-actor" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_item_received_from_for_intake_actor() -> None:
+    row = {
+        "id": "q_intake_actor_received_from",
+        "question": "Who brought in the clockwork notebook?",
+        "modes": [
+            _mode_with_predicates("ledger_volume", ["ledger_entry", "entry_has_hand"], rows=8),
+            _mode_with_predicates("received_from", ["item_received_from"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["ledger_volume", "received_from"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "received_from"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_financial_value_surface_for_missing_book_claim() -> None:
@@ -7369,10 +8886,10 @@ def test_hybrid_selector_keeps_financial_value_surface_for_missing_book_claim() 
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "claim-value" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
-def test_hybrid_selector_keeps_inventory_count_surface_over_title_names() -> None:
+def test_hybrid_selector_prefers_inventory_count_surface_over_title_names_without_guard() -> None:
     row = {
         "id": "q014",
         "question": "How many titles were found in the physical count?",
@@ -7409,7 +8926,145 @@ def test_hybrid_selector_keeps_inventory_count_surface_over_title_names() -> Non
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "physical inventory count" in selected["specialized_guard_reason"]
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert "specialized_guard_reason" not in selected
+
+
+def test_hybrid_selector_prefers_inventory_count_surface_without_guard() -> None:
+    row = {
+        "id": "q_inventory_count_general",
+        "question": "How many titles were found in the physical count?",
+        "modes": [
+            _mode_with_predicates("count_outcome", ["incident_outcome"], rows=4),
+            _mode_with_predicates("title_names", ["novel_title"], rows=9),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["count_outcome", "title_names"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "count_outcome"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+
+
+def test_structural_selector_prefers_inventory_outcome_count_over_identity_volume() -> None:
+    row = {
+        "id": "q_inventory_outcome_unlike",
+        "question": "How many devices were missing in the inventory count?",
+        "modes": [
+            _mode_with_predicates("count_outcome", ["incident_outcome"], rows=2),
+            _mode_with_predicates("identity_volume", ["item_title", "asset_name"], rows=14),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["count_outcome", "identity_volume"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "count_outcome"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_physical_inventory_count_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_inventory_count_retired_guard",
+        "question": "How many titles were found in the physical count?",
+        "modes": [
+            _mode_with_predicates("count_outcome", ["incident_outcome"], rows=4),
+            _mode_with_predicates("title_names", ["novel_title"], rows=9),
+        ],
+    }
+    scored = structural_mode_scores(row=row, mode_labels=["count_outcome", "title_names"])
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=scored,
+        mode_labels=["count_outcome", "title_names"],
+        structural_choice="title_names",
+    )
+
+    assert override is None
+
+
+def test_hybrid_selector_prefers_approval_validity_count_without_guard() -> None:
+    row = {
+        "id": "q_approval_validity_count_general",
+        "question": "How many approved displays remain valid?",
+        "modes": [
+            _mode_with_predicates("status_history", ["current_status", "status_at"], rows=18),
+            _mode_with_predicates("approval_validity", ["permit_instance", "permit_type", "permit_validity"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_history", "approval_validity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "approval_validity"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+
+
+def test_structural_selector_prefers_approval_validity_count_on_unlike_row() -> None:
+    row = {
+        "id": "q_approval_validity_count_unlike",
+        "question": "How many approved permits remain valid after inspection?",
+        "modes": [
+            _mode_with_predicates("status_history", ["current_status", "status_at"], rows=25),
+            _mode_with_predicates("approval_validity", ["permit_instance", "permit_type", "permit_validity"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_history", "approval_validity"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "approval_validity"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 5.5
+
+
+def test_approved_fireworks_count_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_approval_validity_count_retired_guard",
+        "question": "How many fireworks displays are approved?",
+        "modes": [
+            _mode_with_predicates("status_history", ["current_status", "status_at"], rows=18),
+            _mode_with_predicates("approval_validity", ["permit_instance", "permit_type", "permit_validity"], rows=2),
+        ],
+    }
+    scored = structural_mode_scores(row=row, mode_labels=["status_history", "approval_validity"])
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=scored,
+        mode_labels=["status_history", "approval_validity"],
+        structural_choice="status_history",
+    )
+
+    assert override is None
 
 
 def test_hybrid_selector_keeps_discrepancy_explanation_surface_over_fiction_events() -> None:
@@ -7451,7 +9106,7 @@ def test_hybrid_selector_keeps_discrepancy_explanation_surface_over_fiction_even
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "discrepancy-explanation" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_surveyor_certification_for_lapse_year() -> None:
@@ -7492,7 +9147,7 @@ def test_hybrid_selector_prefers_surveyor_certification_for_lapse_year() -> None
     )
 
     assert selected["selected_mode"] == "candidate"
-    assert "surveyor-certification" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_receipt_surface_for_maintenance_evidence() -> None:
@@ -7535,7 +9190,117 @@ def test_hybrid_selector_keeps_receipt_surface_for_maintenance_evidence() -> Non
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "maintenance-evidence" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_witness_statement_for_source_claim_without_guard() -> None:
+    row = {
+        "id": "q_source_claim_provenance",
+        "question": "What did the source claim about the 2003 boundary event?",
+        "modes": [
+            _mode_with_predicates("finding_summary", ["finding_record", "provenance_summary"], rows=8),
+            _mode_with_predicates("witness_source", ["witness_statement"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["finding_summary", "witness_source"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "witness_source"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_source_specific_witness_claim_without_guard() -> None:
+    row = {
+        "id": "q_source_specific_witness",
+        "question": "According to the witness, what was the worker reaching for?",
+        "modes": [
+            _mode_with_predicates("unresolved_summary", ["unresolved_issue", "discrepancy_in"], rows=6),
+            _mode_with_predicates("witness_claim", ["witness_report", "incident_claim"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["unresolved_summary", "witness_claim"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "witness_claim"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_witness_statement_for_permission_request_without_guard() -> None:
+    row = {
+        "id": "q_permission_request_provenance",
+        "question": "Who requested permission for the archive access?",
+        "modes": [
+            _mode_with_predicates("date_evidence", ["evidence_date", "document_date"], rows=9),
+            _mode_with_predicates("witness_source", ["witness_statement"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["date_evidence", "witness_source"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "witness_source"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_report_commission_provenance_without_guard() -> None:
+    row = {
+        "id": "q_report_commission_provenance",
+        "question": "Who commissioned the engineering survey report?",
+        "modes": [
+            _mode_with_predicates("report_summary", ["survey_report", "report_status"], rows=7),
+            _mode_with_predicates("commission_source", ["report_commissioned_by"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["report_summary", "commission_source"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "commission_source"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_handwriting_attribution_without_guard() -> None:
+    row = {
+        "id": "q_correction_authorship",
+        "question": "Which expert confirmed who wrote the correction?",
+        "modes": [
+            _mode_with_predicates("correction_status", ["correction_status"], rows=6),
+            _mode_with_predicates("authorship", ["handwriting_attribution", "expert_opinion"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["correction_status", "authorship"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "authorship"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_plot_outcome_for_fictional_coin_order() -> None:
@@ -7577,7 +9342,7 @@ def test_hybrid_selector_keeps_plot_outcome_for_fictional_coin_order() -> None:
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "fictional-order" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_marker_shift_surface_for_boundary_discrepancy_cause() -> None:
@@ -7621,7 +9386,7 @@ def test_hybrid_selector_keeps_marker_shift_surface_for_boundary_discrepancy_cau
     )
 
     assert selected["selected_mode"] == "baseline"
-    assert "boundary-discrepancy" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_policy_threshold_for_failed_viability_hypothetical() -> None:
@@ -7665,7 +9430,9 @@ def test_hybrid_selector_prefers_policy_threshold_for_failed_viability_hypotheti
     )
 
     assert selected["selected_mode"] == "operational_record"
-    assert "threshold/action policy surface" in selected["specialized_guard_reason"]
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_direct_threshold_storage_for_failed_viability_hypothetical() -> None:
@@ -7765,6 +9532,75 @@ def test_hybrid_selector_keeps_failed_viability_threshold_storage_when_guards_di
     assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 8.0
 
 
+def test_hybrid_selector_prefers_threshold_action_policy_without_guard() -> None:
+    row = {
+        "id": "q_threshold_action_birth",
+        "question": "If FB-2026-005 fails viability testing with a 35% germination rate, what would happen?",
+        "modes": [
+            _mode_with_predicates("note_surface", ["note_content", "note_subject"], rows=4),
+            _mode_with_predicates("policy_action", ["policy_condition_threshold", "policy_minimum_storage", "policy_action"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["note_surface", "policy_action"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "policy_action"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_structural_selector_prefers_threshold_action_policy_on_unlike_counterfactual() -> None:
+    row = {
+        "id": "q_threshold_action_unlike",
+        "question": "If the inspection score falls below the policy threshold, what action is required?",
+        "modes": [
+            _mode_with_predicates("note_surface", ["note_content", "note_subject"], rows=6),
+            _mode_with_predicates("policy_action", ["policy_condition_threshold", "policy_action"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["note_surface", "policy_action"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "policy_action"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_failed_viability_threshold_action_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_threshold_action_retired_guard",
+        "question": "If FB-2026-005 fails viability testing with a 35% germination rate, what would happen?",
+        "modes": [
+            _mode_with_predicates("note_surface", ["note_content", "note_subject"], rows=4),
+            _mode_with_predicates("policy_action", ["policy_condition_threshold", "policy_minimum_storage", "policy_action"], rows=3),
+        ],
+    }
+    scored = structural_mode_scores(row=row, mode_labels=["note_surface", "policy_action"])
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=scored,
+        mode_labels=["note_surface", "policy_action"],
+        structural_choice="note_surface",
+    )
+
+    assert override is None
+
+
 def test_hybrid_selector_prefers_density_staff_evaluation_surface_over_broad_claims() -> None:
     row = {
         "id": "q011",
@@ -7806,12 +9642,57 @@ def test_hybrid_selector_prefers_density_staff_evaluation_surface_over_broad_cla
         margin=1.0,
         min_score=4.0,
         fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
-        guard_disable_regex=compile_guard_disable_regex("density-calculation question"),
     )
 
     assert selected["selected_mode"] == "staff_eval"
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_structural_selector_prefers_numeric_density_value_on_unlike_row() -> None:
+    row = {
+        "id": "q_density_measure_unlike",
+        "question": "What density did the inspection sheet calculate?",
+        "modes": [
+            _mode_with_predicates("source_opinions", ["claim_made_by", "source_opinion"], rows=12),
+            _mode_with_predicates("numeric_evaluation", ["density_value", "measurement_value"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["source_opinions", "numeric_evaluation"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "numeric_evaluation"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_density_calculation_phrase_no_longer_has_baseline_guard() -> None:
+    row = {
+        "id": "q_density_retired_guard",
+        "question": "What density does Dr. Holm calculate?",
+        "modes": [
+            _mode_with_predicates("staff_eval", ["staff_evaluation"], rows=1),
+            _mode_with_predicates("source_opinions", ["claim_made_by", "source_opinion"], rows=12),
+        ],
+    }
+    scored = structural_mode_scores(row=row, mode_labels=["staff_eval", "source_opinions"])
+
+    reason = structural_baseline_answer_surface_guard_reason(
+        row=row,
+        scored=scored,
+        mode_labels=["staff_eval", "source_opinions"],
+        structural_choice="source_opinions",
+    )
+
+    assert reason == ""
 
 
 def test_hybrid_selector_prefers_applicant_type_for_current_constitution() -> None:
@@ -7881,7 +9762,7 @@ def test_hybrid_selector_prefers_applicant_type_for_current_constitution() -> No
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "operational_record"
-    assert "applicant-type plus controlling interpretation" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_keeps_rule_proof_surface_for_resubmission_resolution() -> None:
@@ -7957,7 +9838,7 @@ def test_hybrid_selector_keeps_rule_proof_surface_for_resubmission_resolution() 
 
     assert fallback_calls == 0
     assert selected["selected_mode"] == "baseline"
-    assert "proof/rule resolution surface" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_exact_order_series_identifier_surface() -> None:
@@ -8078,7 +9959,7 @@ def test_road_jurisdiction_authority_prefers_archival_layer_value_surface() -> N
 
     assert selected["selected_mode"] == "archival_row_ledger_v1"
     assert selected["selection_source"] == "hybrid_structural"
-    assert selected["specialized_guard_reason"].startswith("road-jurisdiction authority question")
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_fiscal_balance_source_prefers_archival_source_row_surface() -> None:
@@ -8149,7 +10030,7 @@ def test_hybrid_selector_prefers_packet_time_measurement_surface() -> None:
     )
 
     assert selected["selected_mode"] == "source_record"
-    assert "packet-time measurement" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_focused_semantic_surface_over_archival_volume() -> None:
@@ -9017,7 +10898,99 @@ def test_hybrid_selector_prefers_status_at_for_review_completion() -> None:
     )
 
     assert selected["selected_mode"] == "source_record"
-    assert "review-completion" in selected["specialized_guard_reason"]
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_pending_determination_without_guard() -> None:
+    row = {
+        "id": "q_status_pending_determination",
+        "question": "How did the board vote and what is the pending status?",
+        "modes": [
+            _mode_with_predicates("negative_records", ["negative_record"], rows=12),
+            _mode_with_predicates("vote_status", ["pending_determination"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["negative_records", "vote_status"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "vote_status"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_explicit_decision_status_without_guard() -> None:
+    row = {
+        "id": "q_status_decision",
+        "question": "What decision did the panel reach?",
+        "modes": [
+            _mode_with_predicates("adjacent_status", ["application_status", "event_occurred"], rows=10),
+            _mode_with_predicates("decision_surface", ["panel_decision", "decision_reasoning"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["adjacent_status", "decision_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "decision_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_current_expiration_without_guard() -> None:
+    row = {
+        "id": "q_status_adjusted_expiration",
+        "question": "What is the adjusted expiration after reinstatement?",
+        "modes": [
+            _mode_with_predicates("extension_label", ["extension_granted", "valid_to"], rows=8),
+            _mode_with_predicates("current_expiration", ["permit_current_expiration"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["extension_label", "current_expiration"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "current_expiration"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_explicit_priority_without_guard() -> None:
+    row = {
+        "id": "q_status_priority",
+        "question": "What priority was assigned to the review item?",
+        "modes": [
+            _mode_with_predicates("condition_surface", ["underlying_condition"], rows=8),
+            _mode_with_predicates("priority_surface", ["review_priority"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["condition_surface", "priority_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "priority_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_hybrid_selector_prefers_archival_inventory_for_active_lot_count() -> None:
@@ -9287,7 +11260,7 @@ def test_activation_selector_prompt_prioritizes_answer_bearing_support() -> None
     assert "conflicting status" in prompt
 
 
-def test_competition_substitute_scorer_guard_keeps_compact_role_surface() -> None:
+def test_competition_substitute_scorer_phrase_no_longer_has_selector_guard() -> None:
     row = {
         "id": "q016",
         "question": "Who served as substitute scorer for the final?",
@@ -9329,13 +11302,263 @@ def test_competition_substitute_scorer_guard_keeps_compact_role_surface() -> Non
         structural_choice="admin",
     )
 
-    assert override == (
-        "baseline",
-        "substitute-scorer identity question needs compact service-role surface rather than certification/result volume",
+    assert override is None
+
+
+def test_hybrid_selector_prefers_compact_service_role_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_service_identity",
+        "question": "Who served as substitute scorer for the final?",
+        "modes": [
+            _mode_with_predicates("service_role", ["serves_as"], rows=1),
+            _mode_with_predicates("broad_results", ["score_certified_by", "match_result"], rows=12),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["service_role", "broad_results"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
 
+    assert selected["selected_mode"] == "service_role"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
-def test_attendance_count_guard_prefers_explicit_session_count_surface() -> None:
+
+def test_hybrid_selector_prefers_direct_collector_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_collector_identity",
+        "question": "Who collected the intake specimen?",
+        "modes": [
+            _mode_with_predicates("status_notes", ["status_note", "record_status"], rows=18),
+            _mode_with_predicates("collector_surface", ["collector"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_notes", "collector_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "collector_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_direct_role_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_director_identity",
+        "question": "Who is the event director?",
+        "modes": [
+            _mode_with_predicates("meeting_rows", ["meeting_attendance", "ruling_made_by"], rows=10),
+            _mode_with_predicates("role_surface", ["person_role"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["meeting_rows", "role_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "role_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_role_authority_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_authority_identity",
+        "question": "Who is the official authorized to approve the request?",
+        "modes": [
+            _mode_with_predicates("action_volume", ["official_action"], rows=14),
+            _mode_with_predicates("authority_surface", ["person_name", "role_authority"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["action_volume", "authority_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "authority_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_direct_driver_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_driver_identity",
+        "question": "Who drove the transport van?",
+        "modes": [
+            _mode_with_predicates("row_values", ["row_value"], rows=20),
+            _mode_with_predicates("driver_surface", ["driver_of"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["row_values", "driver_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "driver_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_superlative_age_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_superlative_identity",
+        "question": "Who is the youngest registered member?",
+        "modes": [
+            _mode_with_predicates("membership_rows", ["group_member"], rows=24),
+            _mode_with_predicates("age_surface", ["person_age", "person_identity"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["membership_rows", "age_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "age_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_source_authority_for_principal_identity_without_guard() -> None:
+    row = {
+        "id": "q_role_principal_source_authority",
+        "question": "Who is the school principal recorded by the statement of authority?",
+        "modes": [
+            _mode_with_predicates("roster_volume", ["person_role", "group_member"], rows=18),
+            _mode_with_predicates("source_authority", ["source_document_author", "statement_claim"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["roster_volume", "source_authority"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "source_authority"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_statement_event_supervision_without_guard() -> None:
+    row = {
+        "id": "q_role_supervision_statement",
+        "question": "Who supervised the student location according to the incident statement?",
+        "modes": [
+            _mode_with_predicates("role_roster", ["person_role", "group_member"], rows=20),
+            _mode_with_predicates("statement_event", ["statement_claim", "event_attribute"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["role_roster", "statement_event"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "statement_event"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_reinstatement_role_history_without_guard() -> None:
+    row = {
+        "id": "q_role_reinstated",
+        "question": "Who was reinstated after the review?",
+        "modes": [
+            _mode_with_predicates("current_role", ["person_role"], rows=12),
+            _mode_with_predicates("role_history", ["holds_role"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["current_role", "role_history"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "role_history"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_contract_authority_without_guard() -> None:
+    row = {
+        "id": "q_role_contract_authority",
+        "question": "Does the contract remain valid if the acting officer signed it?",
+        "modes": [
+            _mode_with_predicates("entity_rows", ["entity_name", "ownership_status"], rows=16),
+            _mode_with_predicates("authority_surface", ["authority_source", "acting_role_holder"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["entity_rows", "authority_surface"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "authority_surface"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_guardianship_residence_condition_without_guard() -> None:
+    row = {
+        "id": "q_role_guardianship_condition",
+        "question": "Is the guardianship valid after retroactive residence is considered?",
+        "modes": [
+            _mode_with_predicates("status_only", ["guardianship_status"], rows=9),
+            _mode_with_predicates("residence_rule", ["resides_at", "rule_condition"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["status_only", "residence_rule"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "residence_rule"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_attendance_count_phrase_no_longer_has_selector_guard() -> None:
     row = {
         "id": "q010",
         "question": "How many students attended the Day 1 afternoon session?",
@@ -9381,10 +11604,137 @@ def test_attendance_count_guard_prefers_explicit_session_count_surface() -> None
         structural_choice="interval",
     )
 
-    assert override == (
-        "station_registry",
-        "attendance-count question needs explicit session_attendance_count surface rather than interval roster volume",
+    assert override is None
+
+
+def test_hybrid_selector_prefers_explicit_session_count_without_guard() -> None:
+    row = {
+        "id": "q_attendance_count_general",
+        "question": "How many students attended the Day 1 afternoon session?",
+        "modes": [
+            {
+                "mode": "interval",
+                "query_evidence": {
+                    "executed_results": [
+                        {
+                            "status": "success",
+                            "num_rows": 30,
+                            "predicate": "group_member",
+                            "was_relaxed_fallback": True,
+                        }
+                    ],
+                    "warnings": [],
+                    "parse_error": "",
+                },
+            },
+            _mode_with_predicates("station_registry", ["session_attendance_count"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["interval", "station_registry"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "station_registry"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_structural_selector_prefers_session_count_on_unlike_briefing_row() -> None:
+    row = {
+        "id": "q_attendance_count_unlike",
+        "question": "How many people checked into the morning safety briefing?",
+        "modes": [
+            _mode_with_predicates("participant_roster", ["person_role", "group_member"], rows=34, relaxed=True),
+            _mode_with_predicates("briefing_register", ["session_attendance_count"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["participant_roster", "briefing_register"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "briefing_register"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 6.0
+
+
+def test_hybrid_selector_prefers_conveyed_item_count_without_fixture_guard() -> None:
+    row = {
+        "id": "q_conveyed_item_count_general",
+        "question": "How many items did the deed convey?",
+        "modes": [
+            _mode_with_predicates("receipt_volume", ["receipt_row", "source_record_row"], rows=18, relaxed=True),
+            _mode_with_predicates("conveyed_items", ["conveyed_item"], rows=3),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["receipt_volume", "conveyed_items"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "conveyed_items"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+
+
+def test_structural_selector_prefers_conveyed_item_count_on_unlike_row() -> None:
+    row = {
+        "id": "q_conveyed_item_count_unlike",
+        "question": "How many assets did the transfer agreement convey?",
+        "modes": [
+            _mode_with_predicates("receipt_volume", ["receipt_row", "source_record_row"], rows=21, relaxed=True),
+            _mode_with_predicates("transferred_assets", ["conveyed_item", "item_conveyed"], rows=4),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["receipt_volume", "transferred_assets"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "transferred_assets"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 3.5
+
+
+def test_deed_item_count_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_conveyed_item_count_retired_guard",
+        "question": "How many distinct items did the supplementary deed convey?",
+        "modes": [
+            _mode_with_predicates("receipt_volume", ["receipt_row", "source_record_row"], rows=18, relaxed=True),
+            _mode_with_predicates("conveyed_items", ["conveyed_item"], rows=3),
+        ],
+    }
+    scored = structural_mode_scores(row=row, mode_labels=["receipt_volume", "conveyed_items"])
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=scored,
+        mode_labels=["receipt_volume", "conveyed_items"],
+        structural_choice="receipt_volume",
+    )
+
+    assert override is None
 
 
 def test_final_attendance_student_count_guard_is_retired() -> None:
@@ -9472,10 +11822,30 @@ def test_station_supervisor_guard_prefers_explicit_station_surface() -> None:
         structural_choice="interval",
     )
 
-    assert override == (
-        "station_registry",
-        "station-supervisor question needs explicit station_supervisor surface rather than standing group-supervision rows",
+    assert override is None
+
+
+def test_hybrid_selector_prefers_station_supervisor_without_guard() -> None:
+    row = {
+        "id": "q_station_supervisor_unlike",
+        "question": "Who supervised Station C during the evening inspection?",
+        "modes": [
+            _mode_with_predicates("standing_group", ["supervision_assignment"], rows=6),
+            _mode_with_predicates("station_registry", ["station_supervisor"], rows=1),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["standing_group", "station_registry"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "station_registry"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_station_arrival_time_focus_prefers_event_timestamp_surface() -> None:
@@ -9593,6 +11963,55 @@ def test_hybrid_selector_prefers_group_swap_for_yellow_to_blue_with_guard_disabl
     assert "specialized_guard_reason" not in selected
 
 
+def test_yellow_to_blue_phrase_no_longer_has_selector_guard() -> None:
+    row = {
+        "id": "q_yellow_to_blue_guard_retired",
+        "question": "Which Yellow Group students joined Blue Group on Day 2?",
+        "modes": [
+            _mode_with_predicates("interval_membership", ["group_membership"], rows=38),
+            _mode_with_predicates("transition_membership", ["event_occurs", "group_membership"], rows=6),
+        ],
+    }
+    labels = ["interval_membership", "transition_membership"]
+
+    override = structural_specialized_answer_surface_override(
+        row=row,
+        scored=structural_mode_scores(row=row, mode_labels=labels),
+        mode_labels=labels,
+        structural_choice="interval_membership",
+    )
+
+    assert override is None
+
+
+def test_structural_selector_prefers_membership_transition_on_unlike_roster_row() -> None:
+    row = {
+        "id": "q_unlike_membership_transition",
+        "question": "Which training-team members were reassigned to the audit team after the roster update?",
+        "modes": [
+            _mode_with_predicates("interval_membership", ["group_membership"], rows=24),
+            _mode_with_predicates(
+                "transition_membership",
+                ["assignment_change", "group_membership", "roster_state_support"],
+                rows=4,
+            ),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["interval_membership", "transition_membership"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "transition_membership"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected["evidence_quality_by_mode"][0]["focus_bonus"] == 7.0
+
+
 def test_temporary_role_guard_prefers_roster_state_role_hints() -> None:
     row = {
         "id": "q033",
@@ -9622,18 +12041,16 @@ def test_temporary_role_guard_prefers_roster_state_role_hints() -> None:
         ],
     }
 
-    labels = ["station_role", "station_helper"]
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=labels),
-        mode_labels=labels,
-        structural_choice="station_role",
+        mode_labels=["station_role", "station_helper"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "station_role"},
     )
 
-    assert override == (
-        "station_helper",
-        "temporary-role question needs roster-state role-hint support rather than bare group membership",
-    )
+    assert selected["selected_mode"] == "station_helper"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_completion_report_guard_prefers_summary_issue_surfaces() -> None:
@@ -9667,18 +12084,60 @@ def test_completion_report_guard_prefers_summary_issue_surfaces() -> None:
         ],
     }
 
-    labels = ["station_registry", "station_role"]
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=labels),
-        mode_labels=labels,
-        structural_choice="station_registry",
+        mode_labels=["station_registry", "station_role"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "station_registry"},
     )
 
-    assert override == (
-        "station_role",
-        "completion-report incident list needs trip-outcome plus issue/medical/hazard surfaces",
+    assert selected["selected_mode"] == "station_role"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_temporary_availability_authority_surface_without_guard() -> None:
+    row = {
+        "id": "q_temporary_availability",
+        "question": "Was the chair available for the special meeting?",
+        "modes": [
+            _mode_with_predicates("role_list", ["board_member"], rows=9),
+            _mode_with_predicates("attendance_authority", ["meeting_attendance", "authority_transfer"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["role_list", "attendance_authority"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "attendance_authority"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_temporary_supervisor_absence_surface_without_guard() -> None:
+    row = {
+        "id": "q_temporary_supervisor_absence",
+        "question": "What was the supervisor absence status during the drill?",
+        "modes": [
+            _mode_with_predicates("role_roster", ["person_role"], rows=7),
+            _mode_with_predicates("absence_event", ["location_change", "supervises", "medical_event"], rows=2),
+        ],
+    }
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=["role_roster", "absence_event"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+    )
+
+    assert selected["selected_mode"] == "absence_event"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_competition_corrected_rank_guard_prefers_rank_correction_surface() -> None:
@@ -9718,10 +12177,101 @@ def test_competition_corrected_rank_guard_prefers_rank_correction_surface() -> N
         structural_choice="baseline",
     )
 
-    assert override == (
-        "admin",
-        "corrected-rank-order question needs qualifying-rank plus score-correction surface rather than raw total volume",
+    assert override is None
+
+    selected = hybrid_selector(
+        row=row,
+        mode_labels=labels,
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
+
+    assert selected["selected_mode"] == "admin"
+    assert selected["selection_source"] == "hybrid_structural"
+    assert selected["hybrid_decision"] == "structural_confident"
+    assert selected.get("specialized_guard_reason", "") == ""
+
+
+def test_hybrid_selector_prefers_direct_policy_input_surfaces_without_guards() -> None:
+    cases = [
+        (
+            "permit_issued",
+            "Was the permit operative on the event date?",
+            _mode_with_predicates("broad", ["source_document_status"], rows=10),
+            _mode_with_predicates("focused", ["permit_issued", "document_identifier"], rows=1),
+        ),
+        (
+            "remedy_issue",
+            "Was the replacement requirement imposed?",
+            _mode_with_predicates("broad", ["remedy_label"], rows=10),
+            _mode_with_predicates("focused", ["unresolved_issue"], rows=1),
+        ),
+        (
+            "hearing_event",
+            "Has the appeal hearing been held?",
+            _mode_with_predicates("broad", ["scheduled_date"], rows=10),
+            _mode_with_predicates("focused", ["log_event", "unresolved_issue"], rows=1),
+        ),
+        (
+            "roster_record",
+            "Who was on the roster of record?",
+            _mode_with_predicates("broad", ["supersession", "source_document_status"], rows=10),
+            _mode_with_predicates("focused", ["assigned_to", "person_role"], rows=1),
+        ),
+        (
+            "governing_draft",
+            "Does the draft plan govern the action?",
+            _mode_with_predicates("broad", ["document_identifier"], rows=10),
+            _mode_with_predicates("focused", ["source_document_status", "supersession"], rows=1),
+        ),
+        (
+            "parent_letter",
+            "Did the parent letter make a substantive determination?",
+            _mode_with_predicates("broad", ["source_document"], rows=10),
+            _mode_with_predicates("focused", ["parent_letter", "review_scheduled_for"], rows=1),
+        ),
+        (
+            "zoning",
+            "What zoning designation applies to the property?",
+            _mode_with_predicates("broad", ["zoning_definition"], rows=10),
+            _mode_with_predicates("focused", ["parcel_zoning"], rows=1),
+        ),
+        (
+            "buildout",
+            "What build-out timeline applies?",
+            _mode_with_predicates("broad", ["permit_expiry_status"], rows=10),
+            _mode_with_predicates("focused", ["site_measure", "draft_condition"], rows=1),
+        ),
+        (
+            "dimensions",
+            "Which dimensional standards apply?",
+            _mode_with_predicates("broad", ["compliance_status"], rows=10),
+            _mode_with_predicates("focused", ["staff_finding", "site_measure"], rows=1),
+        ),
+        (
+            "lab_status",
+            "What was the lab result for the lot?",
+            _mode_with_predicates("broad", ["lab_result"], rows=10),
+            _mode_with_predicates("focused", ["lab_result", "lot_status"], rows=1),
+        ),
+    ]
+
+    for row_id, question, broad_mode, focused_mode in cases:
+        row = {"id": row_id, "question": question, "modes": [broad_mode, focused_mode]}
+
+        selected = hybrid_selector(
+            row=row,
+            mode_labels=["broad", "focused"],
+            margin=1.0,
+            min_score=4.0,
+            fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
+        )
+
+        assert selected["selected_mode"] == "focused", row_id
+        assert selected["selection_source"] == "hybrid_structural", row_id
+        assert selected["hybrid_decision"] == "structural_confident", row_id
+        assert selected.get("specialized_guard_reason", "") == "", row_id
 
 
 def test_competition_hold_call_guard_prefers_timing_condition_surface() -> None:
@@ -9755,18 +12305,16 @@ def test_competition_hold_call_guard_prefers_timing_condition_surface() -> None:
         ],
     }
 
-    labels = ["baseline", "admin"]
-    override = structural_specialized_answer_surface_override(
+    selected = hybrid_selector(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=labels),
-        mode_labels=labels,
-        structural_choice="admin",
+        mode_labels=["baseline", "admin"],
+        margin=1.0,
+        min_score=4.0,
+        fallback_selector=lambda **_kwargs: {"selected_mode": "admin"},
     )
 
-    assert override == (
-        "baseline",
-        "hold-call rationale question needs event-condition timing surface rather than broad witness/incident volume",
-    )
+    assert selected["selected_mode"] == "baseline"
+    assert selected.get("specialized_guard_reason", "") == ""
 
 
 def test_call_selector_retries_invalid_json(monkeypatch) -> None:

@@ -1,0 +1,8 @@
+{"category":"trigger_sanity_state_words","id":"q001","reference_answer":"Six units are in the active shelf group: D-01 through D-06.","source_id":"q001"}
+{"category":"trigger_sanity_state_words","id":"q002","reference_answer":"Units D-01, D-02, and D-06 are usable active shelf group units.","source_id":"q002"}
+{"category":"trigger_sanity_state_words","id":"q003","reference_answer":"Three active shelf group units are usable.","source_id":"q003"}
+{"category":"trigger_sanity_state_words","id":"q004","reference_answer":"Units D-03 and D-04 are held for inspection.","source_id":"q004"}
+{"category":"trigger_sanity_state_words","id":"q005","reference_answer":"Two active shelf group units are held for inspection.","source_id":"q005"}
+{"category":"trigger_sanity_state_words","id":"q006","reference_answer":"No. Z-01 is usable but is an archive unit, outside the active shelf group.","source_id":"q006"}
+{"category":"trigger_sanity_state_words","id":"q007","reference_answer":"Unit D-05 is retired.","source_id":"q007"}
+{"category":"trigger_sanity_state_words","id":"q008","reference_answer":"There are three available active units: D-01, D-02, and D-06.","source_id":"q008"}
