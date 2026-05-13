@@ -746,15 +746,15 @@ Movement:
   - `categorical`: `3 -> 0`
   - `synthesis`: `2 -> 2`
 - Non-exact coordinate shift:
-  - `implicit_attitude_or_consequence`: `17 -> 7`
-  - `direct_compile_surface_gap`: `12 -> 5`
-  - `background_role_or_audience_fact`: `6 -> 4`
-  - `comparative_or_temporal_resolution`: `5 -> 6`
+  - `implicit_attitude_or_consequence`: `16 -> 9`
+  - `direct_compile_surface_gap`: `14 -> 7`
+  - `background_role_or_audience_fact`: `8 -> 5`
+  - `comparative_or_temporal_resolution`: `2 -> 2`
   - `false_or_exception_option_selection`: `1 -> 3`
-  - `hybrid_join_resolution`: `1 -> 2`
+  - `hybrid_join_resolution`: `0 -> 1`
   - `formula_or_rule_application`: `1 -> 1`
   - `title_theme_or_summary_answer`: `1 -> 1`
-  - `query_surface_resolution`: `0 -> 1`
+  - `query_surface_resolution`: `1 -> 1`
 
 Artifacts:
 
@@ -808,10 +808,13 @@ Next pressure:
 Before:
 
 - DT-008 left `30` non-exact rows after the full source-record replay.
-- The top coordinate labels were:
-  `implicit_attitude_or_consequence` (`7`),
-  `comparative_or_temporal_resolution` (`6`), and
-  `direct_compile_surface_gap` (`5`).
+- The initial top coordinate labels exposed a drift risk: ordinary
+  `before`/`after` wording was being counted as comparative/temporal even when
+  the proposition was emotion, purpose, or direct post-event action.
+- After tightening the coordinate classifier, the top coordinate labels were:
+  `implicit_attitude_or_consequence` (`9`),
+  `direct_compile_surface_gap` (`7`), and
+  `background_role_or_audience_fact` (`5`).
 - Before any repair, those labels needed manual stratification so an automated
   coordinate name would not become architecture by accident.
 
@@ -824,35 +827,45 @@ Prediction:
 
 Intervention:
 
-- Audited every non-exact row in the three largest source-record coordinate
-  groups using the operational proposition taxonomy from DT-008.
+- Audited the source-record residue using the operational proposition taxonomy
+  from DT-008.
 - Treated the automated coordinate as a starting label only; proposition type
   and failure rationale decided whether the row belonged in a repair queue.
+- Tightened `classify_transfer_coordinate()` so emotional, causal, and
+  post-event action questions are not misclassified merely because their wording
+  contains `before` or `after`.
 
 After:
 
 - `implicit_attitude_or_consequence` is coherent enough to track, but not yet
   safe to repair from RACE alone.
-  - All `7` rows are inference propositions with compile-surface gaps.
+  - The source-record replay now has `9` such rows.
+  - All `9` rows are inference propositions; `8` are compile-surface gaps and
+    `1` is a hybrid-join gap around event-specific feeling.
   - The recurring shape is a semantic bridge from evidence to an unstated
     evaluative answer: attitude, purpose, trait, convenience, danger, or
     consequence.
   - This is the highest-value unlike-probe target, but also the highest leakage
     risk because MCQ answer labels can smuggle dataset-specific paraphrase
     mappings into the harness.
-- `comparative_or_temporal_resolution` is not a clean repair class.
-  - It contains a true distance/route join, an event-specific feeling envelope,
-    direct post-event action retrieval, and several inference/causal rows.
-  - The label is useful as a warning that time/order language is present, but it
-    should not drive a generic comparative repair by itself.
-  - Future summaries should be read proposition-first; coordinate second.
+- `comparative_or_temporal_resolution` is now a much cleaner, smaller class.
+  - It contains `2` true comparative join rows: route distance and missing-money
+    arithmetic.
+  - Keep it separate from emotional `before/after` wording and ordinary
+    post-event action retrieval.
 - `direct_compile_surface_gap` splits into at least three pressures.
+  - It has `7` rows after the classifier tightening.
   - Source/publication genre metadata.
   - Generalized action or desire facts that were not compiled as direct
     predicates.
   - Synthesis/proverb/theme mapping.
   - Those should stay separate. A single "direct compile gap" repair would be
     too broad and likely to encode reading-comprehension test habits.
+- `background_role_or_audience_fact` has `5` rows and is mixed.
+  - It includes witness/knowledge binding, purpose-of-mention judgment, family
+    counting, reuse advice, and teacher-cause explanation.
+  - That label is not a repair target yet; it is a queue for finer coordinate
+    splitting.
 
 Artifacts:
 
@@ -863,10 +876,13 @@ Artifacts:
 
 Verification:
 
-- Audited all rows in the top three coordinate groups:
-  - `7 / 7` implicit-attitude rows.
-  - `6 / 6` comparative-or-temporal rows.
-  - `5 / 5` direct-compile rows.
+- Audited all rows in the initial top coordinate groups, then regenerated the
+  summaries after tightening coordinate rules.
+- Current top counts are:
+  - `9` implicit-attitude rows.
+  - `7` direct-compile rows.
+  - `5` background-role/audience rows.
+  - `2` comparative-or-temporal rows.
 - No code repair was made from this audit.
 
 Lesson:
@@ -889,3 +905,110 @@ Next pressure:
   prove they share machinery.
 - Treat source/publication genre metadata as an intake/compiler metadata probe,
   not an inference repair.
+
+### DT-010 - Open-Ended Semantic Bridge Probe
+
+Before:
+
+- RACE residue suggested semantic-bridge pressure, but multiple-choice labels
+  could have been doing hidden work.
+- DT-009 therefore called for an unlike open-ended probe where the source states
+  actions, reactions, risks, purposes, and habits while the questions ask for
+  the licensed attitude, purpose, trait, risk, or consequence.
+
+Prediction:
+
+- If the semantic-bridge boundary is real outside MCQ, the open-ended probe
+  should miss or partially answer emotional-state, purpose, and consequence
+  questions even with source-record facts enabled.
+- Direct factual post-event action should be easier than semantic-bridge
+  inference. If it misses, that is separate source-fidelity/action-detail
+  pressure, not evidence that every inference row needs a semantic mapper.
+
+Intervention:
+
+- Added
+  `experiments\boundary_probes\dataset_transfer_stage1\semantic_bridge_inference_ladder`.
+- The probe contains `8` open-ended questions with isolated oracle answers and
+  no multiple-choice answer labels.
+- Ran OpenRouter compile/QA with source-record ledger facts enabled.
+- Tightened the transfer-coordinate classifier after the probe exposed drift:
+  `before`/`after` wording no longer makes a row comparative unless the row
+  actually asks for order, distance, duration, arithmetic, or timeline assembly.
+
+After:
+
+- Compile:
+  - Parsed OK.
+  - `11` candidate predicates.
+  - `205` admitted facts.
+  - `19` skipped facts.
+- QA:
+  - `8` questions.
+  - `3 exact / 2 partial / 3 miss`.
+  - Exact rate `0.375`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `0`.
+- Non-exact summary after classifier tightening:
+  - Proposition types: `4` inference, `1` factual.
+  - Coordinates: `4` implicit-attitude/consequence, `1` background-role/audience.
+  - Failure surface: `5` compile-surface gaps.
+
+Artifacts:
+
+- Probe fixture:
+  `experiments\boundary_probes\dataset_transfer_stage1\semantic_bridge_inference_ladder`
+- Compile:
+  `tmp\boundary_probe_dataset_compile_semantic_bridge_source_records_20260513`
+- QA:
+  `tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513`
+- Coordinate summary:
+  `tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture semantic_bridge_inference_ladder --out-root tmp\boundary_probe_dataset_compile_semantic_bridge_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture semantic_bridge_inference_ladder --compile-root tmp\boundary_probe_dataset_compile_semantic_bridge_source_records_20260513 --out-root tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_dataset_qa_semantic_bridge_source_records_20260513`
+- `python -m pytest tests\test_summarize_mrc_transfer_qa.py tests\test_sample_mrc_transfer_fixtures.py tests\test_stage_incoming_fixtures.py -q`
+  - `28 passed`
+
+Manual audit:
+
+- Exact rows:
+  - Inventive/repair-minded trait.
+  - Dangerous/unsafe path.
+  - Portable-light consequence.
+- Partial rows:
+  - Clinic covers: physical context retrieved, purpose/user-experience bridge
+    incomplete.
+  - Children cleanup: action retrieved abstractly, but tool/object details were
+    lost.
+- Miss rows:
+  - Relief after all-clear.
+  - Nervousness before speaking.
+  - Coat-check purpose before pickup.
+
+Lesson:
+
+- The semantic-bridge boundary transfers outside multiple-choice. MCQ labels
+  are not the whole explanation.
+- The architecture can already bridge some traits, risks, and consequences, but
+  emotional-state and purpose-from-action surfaces remain thin.
+- This should still not become a generic "map gestures to emotions" table from
+  one probe. The safe next step is a second unlike open-ended probe or a small
+  SQuAD slice classified by the same proposition taxonomy.
+- The coordinate drift caught here validates the user's warning: taxonomy must
+  have operational criteria before classification, and the instrument itself
+  must be audited when a label starts collecting unlike things.
+
+Next pressure:
+
+- Either sample a small SQuAD open-ended slice and classify its non-exacts by
+  proposition type, or build one more focused open-ended semantic-bridge probe
+  with different surface conventions.
+- Keep emotional-state bridge, purpose bridge, and action-detail source fidelity
+  as separate pressures.
+- Do not implement semantic-bridge repair until the same pressure recurs across
+  unlike sources without answer-option vocabulary.

@@ -286,6 +286,7 @@ def classify_transfer_coordinate(row: dict[str, Any]) -> str:
     answer = str(row.get("reference_answer") or "")
     surface = str((row.get("failure_surface") or {}).get("surface") or "")
     rationale = str((row.get("failure_surface") or {}).get("rationale") or "")
+    question_text = _strip_options(question).casefold()
     text = " ".join([question, answer, surface, rationale]).casefold()
 
     if _has_any(text, ["title", "main idea", "mainly about", "best describes", "theme", "subject of the passage"]):
@@ -294,10 +295,18 @@ def classify_transfer_coordinate(row: dict[str, Any]) -> str:
         return "false_or_exception_option_selection"
     if _has_any(text, ["formula", "calculate", "computed", "multiply", "times the", "no more than", "how many minutes", "how long"]):
         return "formula_or_rule_application"
-    if _has_any(text, ["compare", "comparison", "more than", "less than", "earlier", "later", "before", "after", "than men", "than women"]):
-        return "comparative_or_temporal_resolution"
-    if _has_any(text, ["feel", "felt", "thought", "believ", "attitude", "emotion", "infer", "imply", "consequence", "because", "why"]):
+    if _has_any(question_text, ["feel", "felt", "thought", "believ", "attitude", "emotion", "infer", "imply", "consequence"]) or re.search(
+        r"^\s*why\b", question_text
+    ):
         return "implicit_attitude_or_consequence"
+    if _has_any(text, ["feel", "felt", "thought", "believ", "attitude", "emotion", "infer", "imply", "consequence"]):
+        return "implicit_attitude_or_consequence"
+    if re.search(r"^\s*(how far|how many|how much|how long|which came first|what came first)\b", question_text):
+        return "comparative_or_temporal_resolution"
+    if _has_any(text, ["compare", "comparison", "more than", "less than", "earlier", "later", "than men", "than women"]):
+        return "comparative_or_temporal_resolution"
+    if re.search(r"\b(before|after)\b", text) and _has_any(text, ["sequence", "order", "duration", "distance", "route", "timeline"]):
+        return "comparative_or_temporal_resolution"
     if _has_any(text, ["audience", "parent", "writer", "author", "narrator", "relationship", "role", "college", "student", "teacher"]):
         return "background_role_or_audience_fact"
     if surface == "query_surface_gap":

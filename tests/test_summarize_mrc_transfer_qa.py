@@ -27,6 +27,36 @@ def test_classify_formula_coordinate() -> None:
     assert classify_transfer_coordinate(row) == "formula_or_rule_application"
 
 
+def test_classify_how_far_coordinate_as_comparative() -> None:
+    row = {
+        "utterance": "How far was it from the meeting point to the hotel?",
+        "reference_answer": "B. Three miles.",
+        "failure_surface": {"surface": "hybrid_join_gap", "rationale": "The route distance must be assembled."},
+    }
+
+    assert classify_transfer_coordinate(row) == "comparative_or_temporal_resolution"
+
+
+def test_classify_feeling_after_event_coordinate_as_implicit() -> None:
+    row = {
+        "utterance": "How did the captain feel after the all-clear announcement?",
+        "reference_answer": "The captain felt relieved.",
+        "failure_surface": {"surface": "compile_surface_gap", "rationale": "The emotional state is inferred from reaction."},
+    }
+
+    assert classify_transfer_coordinate(row) == "implicit_attitude_or_consequence"
+
+
+def test_post_event_action_is_not_temporal_coordinate_by_default() -> None:
+    row = {
+        "utterance": "What did the volunteers do after the bottle tipped over?",
+        "reference_answer": "They wiped the table.",
+        "failure_surface": {"surface": "compile_surface_gap", "rationale": "The action detail was not compiled."},
+    }
+
+    assert classify_transfer_coordinate(row) == "direct_compile_surface_gap"
+
+
 def test_classify_title_coordinate() -> None:
     row = {
         "utterance": "What is the best title for this passage?",
