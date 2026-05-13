@@ -1212,3 +1212,182 @@ Next pressure:
   recipient, approver, witness, or owner.
 - Keep abbreviation, placeholder, season/date, scale-label, and identifier
   surfaces off the repair queue for now because the focused probe passed them.
+
+### DT-013 - Role-Binding Probe
+
+Before:
+
+- DT-012 narrowed answer-surface pressure to role binding:
+  classifier versus recorder, recipient versus performer, and adjacent authority
+  roles.
+- The question was whether that pressure recurs when isolated across several
+  relation roles, or whether the previous misses were one-off compile variance.
+
+Prediction:
+
+- If role binding is inside the set, the probe should answer each `who`
+  question by selecting the actor, recipient, owner, witness, approver, author,
+  or assignee bound to the asked relation.
+- If it fails, failures should cluster where the compile stores the action or
+  object but drops the role-bearing participant.
+
+Intervention:
+
+- Added
+  `experiments\boundary_probes\dataset_transfer_stage1\role_binding_ladder`.
+- The probe contains `9` open-ended role-binding questions with isolated oracle
+  answers.
+- Ran OpenRouter compile/QA with source-record ledger facts enabled.
+
+After:
+
+- Compile:
+  - Parsed OK.
+  - `21` candidate predicates.
+  - `46` admitted facts.
+  - `0` skipped facts.
+- QA:
+  - `9` questions.
+  - `5 exact / 0 partial / 4 miss`.
+  - Exact rate `0.5556`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `0`.
+- Passing roles:
+  - Approver.
+  - Witness.
+  - Owner.
+  - Author.
+  - Recipient/custodian for delivered packet.
+- Missed roles:
+  - Classifier of a classification.
+  - Recorder of a classification.
+  - Recipient of a submission.
+  - Assignee of an assigned task.
+
+Artifacts:
+
+- Probe fixture:
+  `experiments\boundary_probes\dataset_transfer_stage1\role_binding_ladder`
+- Compile:
+  `tmp\boundary_probe_dataset_compile_role_binding_source_records_20260513`
+- QA:
+  `tmp\boundary_probe_dataset_qa_role_binding_source_records_20260513`
+- Coordinate summary:
+  `tmp\boundary_probe_dataset_qa_role_binding_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture role_binding_ladder --out-root tmp\boundary_probe_dataset_compile_role_binding_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture role_binding_ladder --compile-root tmp\boundary_probe_dataset_compile_role_binding_source_records_20260513 --out-root tmp\boundary_probe_dataset_qa_role_binding_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_dataset_qa_role_binding_source_records_20260513`
+
+Lesson:
+
+- Role binding is a real external-transfer coordinate.
+- The failure pattern is compile-surface, not answer rendering: the compile
+  often preserves that an object was classified, recorded, submitted, or
+  assigned, but drops the role-bearing participant or compresses assignee into
+  assigner.
+- The passing rows are equally useful: approver, witness, owner, author, and
+  delivered-packet recipient are already recoverable when the relation keeps the
+  participant bound.
+
+Next pressure:
+
+- Candidate generic compile repair: when a source sentence contains an action
+  with actor, object, and role-bearing participant, preserve all of them in the
+  same relation surface or in explicitly joinable companion predicates.
+- Target verbs are not fixture vocabulary; they are role-frame families:
+  classify/record, submit/receive, assign/request, approve/recommend,
+  witness/report, own/maintain, write/publish.
+- Re-run the role-binding probe and a small SQuAD residue slice after any repair.
+
+### DT-014 - Role-Frame Compile Guidance Repair
+
+Before:
+
+- DT-013 showed role binding was a real coordinate:
+  role probe `5 / 0 / 4`, with misses on classifier, recorder, submission
+  recipient, and task assignee.
+- SQuAD-10 also carried role/recipient residue, especially submission recipient
+  and consideration/classification authority.
+
+Prediction:
+
+- A generic compile-guidance repair should improve role frames where the source
+  clearly states actor, object, and role-bearing participant.
+- It should not add helpers, write proposals, or fixture-shaped predicates.
+- The likely hardest residue is authority/source language such as "considers"
+  because it can be represented as content relation without the considering
+  agent.
+
+Intervention:
+
+- Added a generic role-frame preservation rule to source compile guidance and
+  focused pass guidance:
+  preserve actor, object, and role-bearing participant for
+  classify/record, submit/receive, assign/request, approve/recommend,
+  witness/report, own/maintain, and write/publish frames when the profile offers
+  compatible predicates or detail surfaces.
+- Recompiled and replayed the role-binding probe.
+- Recompiled and replayed the two SQuAD fixtures containing role/recipient
+  residue.
+
+After:
+
+- Role-binding probe:
+  - Before repair: `9` questions, `5 exact / 0 partial / 4 miss`.
+  - After repair: `9` questions, `7 exact / 0 partial / 2 miss`.
+  - Runtime load errors `0`; write proposal rows `0`; helper rows `0`.
+  - Improved rows: submission recipient and task assignee.
+  - Remaining misses: classifier and recorder for a classification.
+- SQuAD role-residue slice:
+  - Before repair on the same two fixtures: `10` questions,
+    `6 exact / 1 partial / 3 miss`.
+  - After repair: `10` questions, `9 exact / 0 partial / 1 miss`.
+  - Runtime load errors `0`; write proposal rows `0`; helper rows `0`.
+  - Improved rows: connected area, submission recipient, and template
+    placeholder.
+  - Remaining miss: the authority that considers a metropolitan area separate.
+
+Artifacts:
+
+- Code:
+  `scripts\run_domain_bootstrap_file.py`
+- Role probe repair compile:
+  `tmp\boundary_probe_dataset_compile_role_binding_frame_repair_20260513`
+- Role probe repair QA:
+  `tmp\boundary_probe_dataset_qa_role_binding_frame_repair_20260513`
+- SQuAD repair compile:
+  `tmp\mrc_transfer_compile_squad_role_binding_frame_repair_20260513`
+- SQuAD repair QA:
+  `tmp\mrc_transfer_qa_squad_role_binding_frame_repair_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture role_binding_ladder --out-root tmp\boundary_probe_dataset_compile_role_binding_frame_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage1 --fixture role_binding_ladder --compile-root tmp\boundary_probe_dataset_compile_role_binding_frame_repair_20260513 --out-root tmp\boundary_probe_dataset_qa_role_binding_frame_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad10_20260513 --fixture squad_default_validation_00002_southern_california --fixture squad_default_validation_00008_scottish_parliament --out-root tmp\mrc_transfer_compile_squad_role_binding_frame_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 2 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad10_20260513 --fixture squad_default_validation_00002_southern_california --fixture squad_default_validation_00008_scottish_parliament --compile-root tmp\mrc_transfer_compile_squad_role_binding_frame_repair_20260513 --out-root tmp\mrc_transfer_qa_squad_role_binding_frame_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 2 --timeout 420 --no-cache`
+
+Lesson:
+
+- The repair is real but partial. It improves recipient and assignee binding and
+  transfers to SQuAD, without helper growth or fixture vocabulary.
+- The remaining authority/classifier residue is narrower than the original
+  role-binding class. It needs source/authority-agent preservation for
+  classification or consideration statements, not a broad role repair.
+- This is the dataset-transfer phase doing the same discipline as guard
+  compression: classify pressure, isolate it, repair generically, replay on an
+  unlike slice, and keep the residue named.
+
+Next pressure:
+
+- Add a focused authority-agent probe before changing code again:
+  classify/consider/record/source-attribution statements where the asked answer
+  is the authority performing or asserting the relation.
+- Re-run a broader SQuAD-10 or RACE factual/source-record slice only after the
+  authority-agent residue is clarified.
+- Watch for regressions: the role-frame guidance is prompt-level substrate and
+  should be kept only if broader transfer holds.
