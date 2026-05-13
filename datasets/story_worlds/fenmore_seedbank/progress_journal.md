@@ -237,23 +237,24 @@ artifacts. The instrument lesson is pegboard, not bigger bag: conservation
 rationale, operational threshold/status, and deaccession-yet status are
 separate hooks.
 
-## FS-007 - Autolab Heavy-Lane Smoke and Command-Shape Boundary
+## FS-007 - Retired Heavy-Lane Smoke and Command-Shape Boundary
 
 Date: 2026-05-06
 
-Evidence lane: `autolab_heavy_orchestration_smoke`
+Evidence lane: `retired_heavy_orchestration_smoke`
 
-Mode: laptop Autolab cron/poller queued bounded shell jobs while desktop LM
+Mode: a retired laptop cron/poller queued bounded shell jobs while desktop LM
 Studio at `http://192.168.0.150:1234/v1` served the heavy
 `qwen/qwen3.6-35b-a3b` Prethinker compile/QA calls. No harness code was edited
-by the background worker; Codex authored the job packets and reviewed the artifacts.
+by the background worker; Codex authored the job packets and reviewed the
+artifacts. This lane is historical only.
 
 Artifacts:
 
 - Minimal compile/QA smoke:
-  `\\192.168.0.103\c\prethinker\tmp\autolab_mailbox\runs\0014_fenmore_heavy_smoke`
+  archived external heavy-lane run `0014_fenmore_heavy_smoke`
 - Shaped compile/QA smoke:
-  `\\192.168.0.103\c\prethinker\tmp\autolab_mailbox\runs\0016_fenmore_shaped_compile_smoke`
+  archived external heavy-lane run `0016_fenmore_shaped_compile_smoke`
 
 Result:
 
@@ -276,26 +277,26 @@ archived promoted cold baseline for comparison:
 
 Lesson:
 
-Autolab is now a working control plane for desktop-heavy Prethinker jobs, but
-bounded smoke commands are not equivalent to the current best harness. The
+The retired heavy-lane control plane could run desktop-heavy Prethinker jobs,
+but bounded smoke commands are not equivalent to the current best harness. The
 minimal smoke was intentionally underpowered. The shaped smoke still drifted
 into a weaker predicate/profile surface (`accession_id/1`, role-mismatch
 warnings, and only two accession rows in early QA) than the archived promoted
 cold baseline, which had a richer profile and 195 admitted rows.
 
-Treat this as a command-shape boundary marker, not a new Fenmore score. Future
-Autolab heavy jobs should reference the exact promoted run shape when the goal
-is score comparison, and should label exploratory smoke runs as diagnostic
-orchestration artifacts. The semantic signal remains useful: partial repeated
-ledger acquisition is easy to expose with q001-q003, so source-surface work
-should preserve full accession identity/attribute rows before adding narrower
-rationale or status views.
+Treat this as a command-shape boundary marker, not a new Fenmore score. Any
+future heavy-run orchestration should reference the exact promoted run shape
+when the goal is score comparison, and should label exploratory smoke runs as
+diagnostic orchestration artifacts. The semantic signal remains useful: partial
+repeated ledger acquisition is easy to expose with q001-q003, so source-surface
+work should preserve full accession identity/attribute rows before adding
+narrower rationale or status views.
 
-## FS-008 - Autolab Structured Run Reporter
+## FS-008 - Structured Run Reporter
 
 Date: 2026-05-06
 
-Evidence lane: `autolab_artifact_first_run_reporting`
+Evidence lane: `artifact_first_run_reporting`
 
 Mode: structural comparison of existing domain bootstrap compile/QA JSON
 artifacts. The reporter reads admitted counts, skipped counts, candidate
@@ -310,7 +311,8 @@ Artifacts:
 - Unit tests:
   `tests/test_compare_domain_bootstrap_compiles.py`
 - Local comparison output:
-  `tmp/autolab_compile_comparisons/fenmore_autolab_compile_comparison.md`
+  retired scratch comparison output, preserved by Git/history rather than as an
+  active repo path
 
 Result:
 
@@ -319,12 +321,12 @@ promoted cold baseline:
   compile: 195 admitted / 4 skipped / 132 unique facts
   focus rows: accession_id=8, collector=8, initial_condition=8, stored_in_vault=7
 
-0014 minimal Autolab smoke:
+0014 minimal heavy-lane smoke:
   compile: 16 admitted / 0 skipped
   focus rows: has_accession_id=2; accession_id=0, collector=0, initial_condition=0
   first-3 QA: 1 exact / 0 partial / 2 miss
 
-0016 shaped Autolab smoke:
+0016 shaped heavy-lane smoke:
   compile: 94 admitted / 1 skipped / 86 unique facts
   focus rows: accession_id=2, collector=2, initial_condition=2, stored_in_vault=8
   first-5 QA: 2 exact / 1 partial / 2 miss
@@ -332,10 +334,10 @@ promoted cold baseline:
 
 Lesson:
 
-The reporter turns Autolab from "it ran" into "what surface changed?" without
-asking the laptop model to interpret meaning. It confirms that the shaped smoke
-rescued storage/deaccession-adjacent surface while losing six accession,
-collector, and initial-condition rows relative to the promoted baseline. That
-is an artifact-shape diagnosis, not a new score. Future Autolab grader work
-should prefer this kind of structural report and leave harness interpretation
-to Codex.
+The reporter turns a raw run into "what surface changed?" without asking a
+sidecar model to interpret meaning. It confirms that the shaped smoke rescued
+storage/deaccession-adjacent surface while losing six accession, collector, and
+initial-condition rows relative to the promoted baseline. That is an
+artifact-shape diagnosis, not a new score. Future run comparison work should
+prefer this kind of structural report and leave harness interpretation to
+Codex.

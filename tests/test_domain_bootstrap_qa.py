@@ -1,3 +1,6 @@
+import io
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from scripts.run_domain_bootstrap_qa import (
@@ -7,6 +10,7 @@ from scripts.run_domain_bootstrap_qa import (
     _classification_deferral_effect_companion,
     _conversion_assessment_delta_companion,
     _clinic_device_recall_companion,
+    _dedupe_helper_query_results,
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
     _location_floor_hint_queries,
@@ -15,6 +19,7 @@ from scripts.run_domain_bootstrap_qa import (
     _relaxed_constant_query,
     _source_record_table_count_hint_queries,
     _temporal_join_with_previous,
+    _urlopen_json_with_transient_retries,
     _vacancy_voting_eligibility_companion,
     cache_key_for_question,
     clause_signature,
@@ -24,6 +29,7 @@ from scripts.run_domain_bootstrap_qa import (
     parse_markdown_answer_key,
     parse_numbered_markdown_questions,
     read_cached_row,
+    run_evidence_bundle_plan_queries,
     run_query_plan,
     score_oracle,
     summarize,
@@ -81,6 +87,44 @@ def test_reference_answers_are_not_structured_oracle_expectations() -> None:
     row = {"projected_decision": "answer", "queries": [], "query_results": []}
 
     assert score_oracle(row=row, oracle={"reference_answer": "Unknown."}) is None
+
+
+def test_openrouter_transient_http_errors_retry_before_row_failure(monkeypatch) -> None:
+    calls = []
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def read(self) -> bytes:
+            return b'{"ok": true}'
+
+    def fake_urlopen(_req, *, timeout):
+        calls.append(timeout)
+        if len(calls) == 1:
+            raise urllib.error.HTTPError(
+                url="https://openrouter.ai/api/v1/chat/completions",
+                code=503,
+                msg="Service Unavailable",
+                hdrs=None,
+                fp=io.BytesIO(b'{"error":{"message":"No healthy backends"}}'),
+            )
+        return FakeResponse()
+
+    monkeypatch.setattr(urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr("scripts.run_domain_bootstrap_qa.time.sleep", lambda _seconds: None)
+
+    result = _urlopen_json_with_transient_retries(
+        urllib.request.Request("https://openrouter.ai/api/v1/chat/completions"),
+        timeout=7,
+        retry_transient=True,
+    )
+
+    assert result == {"ok": True}
+    assert calls == [7, 7]
 
 
 def test_qa_cache_key_changes_when_question_changes() -> None:
@@ -163,6 +207,10 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
 
     assert "Purpose/action atom policy" in source
     assert "fetching_fog_leaves" in source
+    assert "Identifier-display policy" in source
+    assert "cn_2026_04_15" in source
+    assert "Identifier-metadata policy" in source
+    assert "driver_license/2" in source
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
@@ -178,6 +226,204 @@ def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
     }
 
     assert score_oracle(row=row, oracle=oracle) is True
+
+
+def test_evidence_bundle_plan_accepts_conjunctive_source_record_queries() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_1, list_row, 12, access_log, entry_1405).",
+        "source_record_text_atom(src_1, tilling_entered_room_504_at_14_05_11).",
+        "source_record_numeric_token(src_1, v_14_05_11).",
+        "source_record_numeric_token(src_1, v_504).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={
+            "signatures": [
+                "source_record_row/5",
+                "source_record_text_atom/2",
+                "source_record_numeric_token/2",
+            ]
+        },
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_join",
+                    "purpose": "Join source row addressability with text and numeric tokens.",
+                    "query_templates": [
+                        "source_record_row(Line, list_row, LineNum, Section, TextAtom), "
+                        "source_record_text_atom(Line, SourceText), "
+                        "source_record_numeric_token(Line, v_14_05_11), "
+                        "source_record_numeric_token(Line, v_504)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "predicate_and_arity_checked"
+    assert results[0]["result"]["rows"][0]["Line"] == "src_1"
+
+
+def test_run_query_plan_repairs_source_record_numeric_token_constants() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_1, list_row, 12, source_section, row_label).",
+        "source_record_numeric_token(src_1, v_14_02_51).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        [
+            "source_record_row(Line, Kind, LineNum, Section, Label), "
+            "source_record_numeric_token(Line, '14_02_51')."
+        ],
+    )
+
+    result = rows[0]["result"]
+    assert result["status"] == "success"
+    assert result["rows"][0]["Line"] == "src_1"
+    assert result["reasoning_basis"]["repairs"] == [
+        {"predicate": "source_record_numeric_token", "from": "'14_02_51'", "to": "v_14_02_51"}
+    ]
+
+
+def test_run_query_plan_derives_duration_from_compact_same_day_interval_atom() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert (
+        runtime.assert_fact("temporary_assignment(s_007, group_c, bridge_engineering, 2026_05_02_11_00_12_30).").get(
+            "status"
+        )
+        == "success"
+    )
+
+    rows = run_query_plan(
+        runtime,
+        [
+            "temporary_assignment(s_007, group_c, Assignment, StartEnd).",
+            "elapsed_minutes(StartEnd, EndTime, DurationMinutes).",
+        ],
+    )
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "compact_interval_duration_support")
+    support = companion["result"]["rows"][0]
+    assert support["IntervalAtom"] == "2026_05_02_11_00_12_30"
+    assert support["Start"] == "2026_05_02_11_00"
+    assert support["End"] == "2026_05_02_12_30"
+    assert support["DurationMinutes"] == "90"
+    assert support["Duration"] == "1 hour 30 minutes"
+
+
+def test_run_query_plan_derives_status_from_corrected_interval() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "credential_status(credential_a, active, 2026_01_15).",
+        "credential_status(credential_a, active, 2026_02_11).",
+        "notice_type(suspension_notice, suspension).",
+        "original_interval(suspension_notice, 2026_02_03, 2026_02_10).",
+        "notice_type(correction_notice, correction).",
+        "corrected_interval(correction_notice, 2026_02_05, 2026_02_10).",
+        "active_on(credential_a, 2026_02_04).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["credential_status(credential_a, Status, 2026_02_06)."])
+
+    support = next(
+        item
+        for item in rows
+        if item["result"].get("prolog_query", "").startswith("credential_status_interval_support")
+    )
+    assert support["result"]["rows"][0]["Status"] == "suspended"
+    assert support["result"]["rows"][0]["SupportKind"] == "corrected_or_stated_interval"
+
+    rows = run_query_plan(runtime, ["credential_status(credential_a, Status, 2026_02_04)."])
+
+    support = next(
+        item
+        for item in rows
+        if item["result"].get("prolog_query", "").startswith("credential_status_interval_support")
+    )
+    assert support["result"]["rows"][0]["Status"] == "active"
+    assert support["result"]["rows"][0]["SupportKind"] == "explicit_point_state"
+
+
+def test_run_query_plan_derives_status_from_scheduled_state_after_effective_date() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "credential_status(credential_a, active, 2026_02_11).",
+        "scheduled_archive(credential_a, 2026_03_05).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["credential_status(credential_a, Status, 2026_03_06)."])
+
+    support = next(
+        item
+        for item in rows
+        if item["result"].get("prolog_query", "").startswith("credential_status_interval_support")
+    )
+    assert support["result"]["rows"][0]["Status"] == "archived"
+    assert support["result"]["rows"][0]["SupportKind"] == "scheduled_state_transition"
+
+
+def test_run_query_plan_exposes_status_timeline_summary_for_broad_status_query() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "credential_status(credential_a, pending, 2026_01_05).",
+        "credential_status(credential_a, active, 2026_02_11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["credential_status(credential_a, Status, Date)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "status_timeline_summary_support")
+    assert support["result"]["rows"][0]["HelperClass"] == "clean-helper"
+    assert support["result"]["rows"][0]["CurrentStatus"] == "active"
+    assert support["result"]["rows"][0]["SupportKind"] == "latest_status_transition"
+
+
+def test_run_query_plan_exposes_scheduled_state_summary_for_scheduled_query() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("scheduled_archive(credential_a, 2026_03_05).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["scheduled_archive(credential_a, ArchiveDate)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "status_timeline_summary_support")
+    assert support["result"]["rows"][0]["HelperClass"] == "clean-helper"
+    assert support["result"]["rows"][0]["ScheduledStatus"] == "archived"
+    assert support["result"]["rows"][0]["SupportKind"] == "scheduled_state_transition"
+
+
+def test_run_query_plan_exposes_identifier_alias_count_for_event_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "issue_opened_on(i_01, 2026_06_01).",
+        "issue_opened_on(issue_i_01, 2026_06_01).",
+        "issue_opened_on(i_02, 2026_06_02).",
+        "issue_opened_on(issue_i_02, 2026_06_02).",
+        "issue_opened_on(i_03, 2026_06_03).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["issue_opened_on(Issue, Date)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "identifier_alias_count_support")
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SourcePredicate": "issue_opened_on",
+            "RawEntityCount": "5",
+            "DistinctEntityCount": "3",
+            "CanonicalEntities": "i_01, i_02, i_03",
+            "AliasGroups": "i_01: i_01, issue_i_01; i_02: i_02, issue_i_02",
+            "SupportKind": "identifier_alias_distinct_count",
+        }
+    ]
 
 
 def test_summarize_counts_reference_judge_verdicts() -> None:
@@ -1297,6 +1543,475 @@ def test_run_query_plan_adds_roster_state_support_from_group_membership() -> Non
     )
 
 
+def test_run_query_plan_dedupes_repeated_helper_companion_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "group_membership(arden, red_group, 2025_10_07t09_15, 2025_10_07t16_00).",
+        "group_membership(bettina, red_group, 2025_10_07t09_15, 2025_10_07t16_00).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        [
+            "group_membership(Student, red_group, Start, End).",
+            "group_membership(Person, red_group, From, To).",
+        ],
+    )
+
+    companions = [item for item in rows if item["result"].get("predicate") == "roster_state_support"]
+    assert len(companions) == 1
+    assert companions[0]["result"]["num_rows"] == 3
+
+
+def test_run_query_plan_summarizes_type_categories_without_counting_instances() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "artifact_type(kind_a_primary_review).",
+        "artifact_type(kind_b_field_test).",
+        "artifact_type(kind_c_archive_copy).",
+        "artifact_type(kind_a_2026).",
+        "artifact_type(kind_b_2026).",
+        "artifact_type(kind_c_2026).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["artifact_type(Type)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "type_category_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "type_category_summary"
+        and row.get("CategoryCount") == "3"
+        and row.get("RawValueCount") == "6"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "type_category"
+        and row.get("CategoryKey") == "kind_a"
+        and row.get("Members") == "kind_a_2026,kind_a_primary_review"
+        and row.get("CategoryDisplay") == "A: primary review"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_does_not_summarize_unrelated_type_values() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "artifact_type(primary_review).",
+        "artifact_type(field_test).",
+        "artifact_type(archive_copy).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["artifact_type(Type)."])
+
+    assert not any(item["result"].get("predicate") == "type_category_support" for item in rows)
+
+
+def test_run_query_plan_bundles_lifecycle_period_with_same_entity_exceptions() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "validity_period(item_a_2026, 2026_06_01, 2026_06_10).",
+        "lifecycle_extension(item_a_2026, requester_unit, approver_unit, 2026_06_11).",
+        "lifecycle_status(item_a_operational, active, active_through_2026_06_11_limited_use_only).",
+        "validity_period(item_b_2026, 2026_06_01, 2026_06_10).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["validity_period(item_a_operational, StartDate, EndDate)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "lifecycle_period_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "lifecycle_period_summary"
+        and row.get("RequestedEntity") == "item_a_operational"
+        and row.get("EntityFamilyKey") == "item_a"
+        and row.get("MatchedEntities") == "item_a_2026,item_a_operational"
+        and row.get("StartDate") == "2026_06_01"
+        and row.get("EndDate") == "2026_06_10"
+        and row.get("EffectiveEndDate") == "2026_06_11"
+        and row.get("ContextPredicates") == "lifecycle_extension,lifecycle_status"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "lifecycle_period_context"
+        and row.get("ContextPredicate") == "lifecycle_extension"
+        and row.get("ContextDate") == "2026_06_11"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_bundles_lifecycle_context_query_with_same_entity_period() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "validity_period(item_a_2026, 2026_06_01, 2026_06_10).",
+        "lifecycle_extension(item_a_2026, requester_unit, approver_unit, 2026_06_11).",
+        "lifecycle_status(item_a_operational, active, limited_use_only_on_2026_06_11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["lifecycle_extension(item_a_operational, Requester, Approver, ExtendedTo)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "lifecycle_period_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "lifecycle_period_summary"
+        and row.get("RequestedEntity") == "item_a_operational"
+        and row.get("StartDate") == "2026_06_01"
+        and row.get("EndDate") == "2026_06_10"
+        and row.get("EffectiveEndDate") == "2026_06_11"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "lifecycle_period_context"
+        and row.get("ContextPredicate") == "lifecycle_status"
+        and row.get("ContextArgs") == "active,limited_use_only_on_2026_06_11"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_does_not_bundle_lifecycle_period_without_entity_family_match() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "validity_period(item_b_2026, 2026_06_01, 2026_06_10).",
+        "lifecycle_extension(item_b_2026, requester_unit, approver_unit, 2026_06_11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["validity_period(item_a_operational, StartDate, EndDate)."])
+
+    assert not any(item["result"].get("predicate") == "lifecycle_period_support" for item in rows)
+
+
+def test_run_query_plan_derives_vote_threshold_counterfactual_from_counts_and_source_tokens() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "body_vote(item_42, 2026_06_01, 3, 2, fail).",
+        "voting_threshold(default_action, 4_of_7).",
+        "source_record_label(src_line_001, vote_on_item_42).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, vote_on_item_42_alfa_yes_bravo_yes_casey_yes_delta_no).",
+        "source_record_label(src_line_002, vote_on_item_42).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, echo_no).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["body_vote(item_42, Date, yescount, nocount, outcome)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "vote_threshold_counterfactual_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "vote_threshold_counterfactual"
+        and row.get("VoteId") == "item_42"
+        and row.get("BaselineYes") == "3"
+        and row.get("BaselineNo") == "2"
+        and row.get("ChangedVoter") == "delta"
+        and row.get("CounterfactualYes") == "4"
+        and row.get("CounterfactualNo") == "1"
+        and row.get("CounterfactualOutcome") == "pass"
+        and row.get("CounterfactualYesVoters") == "alfa,bravo,casey,delta"
+        and row.get("CounterfactualNoVoters") == "echo"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_derives_absent_voter_counterfactual_scenarios() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "body_vote(item_42, 2026_06_01, 3, 2, fail).",
+        "voting_threshold(default_action, 4_of_7).",
+        "source_record_section(src_line_001, hearing_section).",
+        "source_record_label(src_line_001, members_absent).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, members_absent_delta_echo).",
+        "source_record_section(src_line_002, hearing_section).",
+        "source_record_label(src_line_002, vote_on_item_42).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, vote_on_item_42_alfa_yes_bravo_yes_casey_yes_fiona_no_gale_no).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["body_vote(item_42, Date, yesvotes, novotes, outcome)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "vote_threshold_counterfactual_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("ChangeAssumption") == "additional_absent_voters_all_yes"
+        and row.get("ChangedVoter") == "delta,echo"
+        and row.get("CounterfactualYes") == "5"
+        and row.get("CounterfactualNo") == "2"
+        and row.get("CounterfactualOutcome") == "pass"
+        for row in result_rows
+    )
+    assert any(
+        row.get("ChangeAssumption") == "additional_absent_voters_one_yes"
+        and row.get("CounterfactualYes") == "4"
+        and row.get("CounterfactualNo") == "3"
+        and row.get("CounterfactualOutcome") == "pass"
+        for row in result_rows
+    )
+    assert any(
+        row.get("ChangeAssumption") == "additional_absent_voters_all_no"
+        and row.get("CounterfactualYes") == "3"
+        and row.get("CounterfactualNo") == "4"
+        and row.get("CounterfactualOutcome") == "fail"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_does_not_derive_vote_counterfactual_without_threshold() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("body_vote(item_42, 2026_06_01, 3, 2, fail).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["body_vote(item_42, Date, YesCount, NoCount, Outcome)."])
+
+    assert not any(item["result"].get("predicate") == "vote_threshold_counterfactual_support" for item in rows)
+
+
+def test_run_query_plan_separates_initial_status_scope_from_later_status_context() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "site_status(site_a, affected).",
+        "site_status(site_b, affected).",
+        "source_record_section(src_line_001, initial_review_june_1).",
+        "source_record_label(src_line_001, initial_review).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, initial_review_site_a_flagged_for_hold).",
+        "source_record_section(src_line_010, expansion_june_3).",
+        "source_record_label(src_line_010, later_expansion).",
+        "source_record_line(src_line_010, 10).",
+        "source_record_text_atom(src_line_010, later_expansion_site_b_added_after_transfer).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["site_status(Entity, affected)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "initial_status_scope_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "initial_status_summary"
+        and row.get("InitialEntities") == "site_a"
+        and row.get("AllStatusEntities") == "site_a,site_b"
+        and row.get("LaterContextEntities") == "site_b"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "initial_status_entity"
+        and row.get("Entity") == "site_a"
+        and row.get("SectionAtom") == "initial_review_june_1"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_does_not_emit_initial_status_scope_without_initial_source_scope() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "site_status(site_a, affected).",
+        "site_status(site_b, affected).",
+        "source_record_label(src_line_001, current_review).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, current_review_site_a_and_site_b_affected).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["site_status(Entity, affected)."])
+
+    assert not any(item["result"].get("predicate") == "initial_status_scope_support" for item in rows)
+
+
+def test_run_query_plan_derives_scoped_status_counts_from_scope_and_status_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "is_segment_4_case(case_c_01).",
+        "is_segment_4_case(case_c_02).",
+        "is_segment_4_case(case_c_03).",
+        "case_status(case_c_01, unresolved, 2026_09_30).",
+        "case_status(case_c_02, resolved_by_authority, 2026_09_30).",
+        "case_status(case_c_03, unresolved, 2026_09_30).",
+        "case_status(case_c_04, unresolved, 2026_09_30).",
+        "defines_status_term(genuinely_unresolved, remains_unresolved_at_packet_close).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        [
+            "is_segment_4_case(Case).",
+            "case_status(Case, Status, 2026_09_30).",
+            "defines_status_term(genuinely_unresolved, Definition).",
+        ],
+    )
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_status_count_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "scoped_status_criterion_count"
+        and row.get("ScopePredicate") == "is_segment_4_case"
+        and row.get("StatusPredicate") == "case_status"
+        and row.get("SemanticCriterion") == "genuinely_unresolved"
+        and row.get("StatusValue") == "unresolved"
+        and row.get("Count") == "2"
+        and row.get("Members") == "case_c_01,case_c_03"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+    assert not any("case_c_04" in row.get("Members", "") for row in result_rows)
+
+
+def test_run_query_plan_does_not_emit_scoped_status_counts_without_scope_predicate() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "case_status(case_c_01, unresolved, 2026_09_30).",
+        "case_status(case_c_02, unresolved, 2026_09_30).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["case_status(Case, unresolved, 2026_09_30)."])
+
+    assert not any(item["result"].get("predicate") == "scoped_status_count_support" for item in rows)
+
+
+def test_run_query_plan_derives_section_status_counts_from_source_record_status_labels() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0106, v_3_1_lobby_ingress_timestamp_disagreement).",
+        "source_record_label(src_line_0106, status_timeline_resolvable).",
+        "source_record_section(src_line_0119, v_3_2_internal_event_timestamps).",
+        "source_record_label(src_line_0119, status_timeline_resolvable_for_ordering_only).",
+        "source_record_section(src_line_0125, v_3_3_identity_question).",
+        "source_record_label(src_line_0125, status_genuinely_unresolved).",
+        "source_record_section(src_line_0140, v_3_4_activity_question).",
+        "source_record_label(src_line_0140, status_genuinely_unresolved).",
+        "source_record_section(src_line_0152, v_3_5_departure_time).",
+        "source_record_label(src_line_0152, status_timeline_resolvable).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_label(SourceRow, status_timeline_resolvable)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_status_count_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "source_section_status_count"
+        and row.get("SemanticCriterion") == "timeline_resolvable"
+        and row.get("Count") == "3"
+        and "v_3_1_lobby_ingress_timestamp_disagreement" in row.get("Members", "")
+        and "v_3_5_departure_time" in row.get("Members", "")
+        for row in result_rows
+    )
+    assert not any(row.get("SemanticCriterion") == "genuinely_unresolved" for row in result_rows)
+
+
+def test_run_query_plan_derives_section_status_counts_for_related_status_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0125, v_3_3_identity_question).",
+        "source_record_label(src_line_0125, status_genuinely_unresolved).",
+        "source_record_section(src_line_0140, v_3_4_activity_question).",
+        "source_record_label(src_line_0140, status_genuinely_unresolved).",
+        "source_record_section(src_line_0152, v_3_5_departure_time).",
+        "source_record_label(src_line_0152, status_timeline_resolvable).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["case_status(Case, unresolved)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_status_count_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "source_section_status_count"
+        and row.get("SemanticCriterion") == "genuinely_unresolved"
+        and row.get("Count") == "2"
+        for row in result_rows
+    )
+    assert not any(row.get("SemanticCriterion") == "timeline_resolvable" for row in result_rows)
+
+
+def test_run_query_plan_does_not_emit_section_status_counts_for_broad_source_label_scan() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0106, v_3_1_lobby_ingress_timestamp_disagreement).",
+        "source_record_label(src_line_0106, status_timeline_resolvable).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_label(SourceRow, Label)."])
+
+    assert not any(item["result"].get("predicate") == "scoped_status_count_support" for item in rows)
+
+
+def test_combined_query_results_dedupe_helper_rows_across_evidence_phase() -> None:
+    duplicate = {
+        "query": "helper(Row).",
+        "result": {
+            "status": "success",
+            "predicate": "roster_state_support",
+            "num_rows": 1,
+            "rows": [{"SupportKind": "adult_role", "Person": "a_diaz", "HelperClass": "clean-helper"}],
+        },
+    }
+
+    filtered = _dedupe_helper_query_results(
+        [
+            duplicate,
+            {
+                **duplicate,
+                "result": {
+                    **duplicate["result"],
+                    "reasoning_basis": {"kind": "evidence-bundle-plan"},
+                },
+            },
+        ]
+    )
+
+    assert len(filtered) == 1
+
+
+def test_roster_state_support_exposes_person_ratio_and_lodging_status() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "adult_role(a_diaz, parent_observer).",
+        "adult_role(n_park, medical_staff).",
+        "ratio_count_status(a_diaz, false).",
+        "ratio_count_status(n_park, false).",
+        "lodging_assignment(n_park, 206, adult).",
+        "group_membership(s_001, group_a, 2026_05_01_09_00, 2026_05_01_10_00).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["adult_role(a_diaz, Role)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "adult_role"
+        and row.get("Person") == "a_diaz"
+        and row.get("CountsTowardRatio") == "false"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "adult_ratio_count_status"
+        and row.get("Person") == "a_diaz"
+        and row.get("CountsTowardRatio") == "false"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "adult_lodging_status"
+        and row.get("Person") == "a_diaz"
+        and row.get("LodgingStatus") == "not_assigned"
+        and row.get("DisplayValue") == "a_diaz does not lodge with the group"
+        for row in result_rows
+    )
+    assert not any(row.get("Person") == "n_park" for row in result_rows)
+    assert not any(row.get("SupportKind") == "group_count" for row in result_rows)
+    assert not any(row.get("SupportKind") == "group_membership" for row in result_rows)
+
+
 def test_run_query_plan_adds_roster_role_hints_from_admitted_group_atoms() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -1321,6 +2036,186 @@ def test_run_query_plan_adds_roster_role_hints_from_admitted_group_atoms() -> No
         and row.get("Person") == "freya"
         and row.get("Group") == "station_b_watch"
         and row.get("RoleHint") == "station_b"
+        for row in result_rows
+    )
+
+
+def test_role_count_query_scopes_by_requested_role_not_person() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "adult_role(a_diaz, parent_observer).",
+        "adult_role(t_mendez, lead_chaperone).",
+        "role_counts_towards_ratio(parent_observer, false).",
+        "role_counts_towards_ratio(lead_chaperone, true).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["role_counts_towards_ratio(parent_observer, Counts)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "role_ratio_scope"
+        and row.get("Role") == "parent_observer"
+        and row.get("CountsTowardRatio") == "false"
+        for row in result_rows
+    )
+    assert not any(row.get("Role") == "lead_chaperone" for row in result_rows)
+
+
+def test_adult_role_query_drops_generic_roster_assignments_when_role_rows_match() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "adult_role(t_mendez, lead_chaperone).",
+        "adult_role(a_diaz, parent_observer).",
+        "student_group_assignment(s_001, v1, group_a).",
+        "source_record_section(src_line_001, roster_v1).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, group_a_1).",
+        "source_record_section(src_line_002, roster_v1).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, s_001_s_002).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["adult_role(X, lead_chaperone)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "adult_role"
+        and row.get("Person") == "t_mendez"
+        and row.get("Role") == "lead_chaperone"
+        for row in result_rows
+    )
+    assert not any(
+        row.get("SupportKind")
+        in {
+            "group_count",
+            "student_group_assignment",
+            "source_record_student_group_assignment",
+        }
+        for row in result_rows
+    )
+
+
+def test_roster_version_query_keeps_version_level_support_not_member_roster_volume() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "roster_version(v1, 2026_04_01, operational).",
+        "student_group_assignment(s_001, v1, group_a).",
+        "student_group_assignment(s_002, v1, group_a).",
+        "source_record_section(src_line_001, roster_v1).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, group_a_2).",
+        "source_record_section(src_line_002, roster_v1).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, s_001_s_002).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["roster_version(v1, Date, Status)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "group_count"
+        and row.get("Group") == "group_a"
+        and row.get("Version") == "v1"
+        and row.get("Count") == "2"
+        for row in result_rows
+    )
+    assert not any(
+        row.get("SupportKind")
+        in {
+            "student_group_assignment",
+            "source_record_student_group_assignment",
+        }
+        for row in result_rows
+    )
+    all_roster_rows = [
+        row
+        for item in rows
+        if item["result"].get("predicate") == "roster_state_support"
+        for row in item["result"].get("rows", [])
+    ]
+    assert not any(
+        row.get("SupportKind")
+        in {
+            "student_group_assignment",
+            "source_record_student_group_assignment",
+        }
+        for row in all_roster_rows
+    )
+
+
+def test_student_assignment_broad_version_scan_prefers_group_counts() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "student_group_assignment(s_001, v3, group_a).",
+        "student_group_assignment(s_002, v3, group_a).",
+        "student_group_assignment(s_003, v2, group_a).",
+        "source_record_section(src_line_001, roster_v3).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, group_a_2).",
+        "source_record_section(src_line_002, roster_v3).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, s_001_s_002).",
+        "source_record_section(src_line_003, roster_v2).",
+        "source_record_line(src_line_003, 3).",
+        "source_record_text_atom(src_line_003, group_a_1).",
+        "source_record_section(src_line_004, roster_v2).",
+        "source_record_line(src_line_004, 4).",
+        "source_record_text_atom(src_line_004, s_003).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["student_group_assignment(Student, Group, roster_v3)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "group_count"
+        and row.get("Group") == "group_a"
+        and row.get("Version") == "v3"
+        and row.get("Count") == "2"
+        for row in result_rows
+    )
+    assert not any(row.get("Version") == "v2" for row in result_rows)
+    assert not any(
+        row.get("SupportKind")
+        in {
+            "student_group_assignment",
+            "source_record_student_group_assignment",
+        }
+        for row in result_rows
+    )
+
+
+def test_student_assignment_swapped_group_version_slots_still_yield_clean_group_counts() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "student_group_assignment(s_001, group_a, roster_v3).",
+        "student_group_assignment(s_002, group_a, roster_v3).",
+        "source_record_section(src_line_001, roster_v3).",
+        "source_record_line(src_line_001, 1).",
+        "source_record_text_atom(src_line_001, group_a_2).",
+        "source_record_section(src_line_002, roster_v3).",
+        "source_record_line(src_line_002, 2).",
+        "source_record_text_atom(src_line_002, s_001_s_002).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["student_group_assignment(Student, Group, roster_v3)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "group_count"
+        and row.get("Group") == "group_a"
+        and row.get("Version") == "v3"
+        and row.get("Count") == "2"
+        and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
 
@@ -1378,7 +2273,7 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
-    rows = run_query_plan(runtime, ["roster_version_status(v1, Status)."])
+    rows = run_query_plan(runtime, ["source_record_text_atom(Line, Text)."])
 
     companion = next(
         item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
@@ -1418,6 +2313,372 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
         "transport_departure",
     }
     assert not any(row.get("Kind") in retired_candidate_kinds for row in result_rows)
+
+
+def test_source_record_packet_metadata_does_not_attach_identifier_inventory_to_unrelated_bound_queries() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "adult_role(person_alpha, lead_role).",
+        "source_record_text_atom(src_line_001, packet_id_demo_2026_a).",
+        "source_record_label(src_line_002, policy_demo_2026_b).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["adult_role(Person, lead_role)."])
+
+    assert not any(
+        item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for item in rows
+    )
+
+
+def test_source_record_packet_metadata_compacts_broad_identifier_inventory() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_text_atom(src_line_001, packet_id_chms_rso_2026_t07).",
+        "source_record_text_atom(src_line_002, packet_id_chms_rso_2026_t07).",
+        "source_record_label(src_line_003, sco_ch_3).",
+        "source_record_text_atom(src_line_004, sco_ch_3_chaperone_counting_rules).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_text_atom(Line, Text)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert sum(1 for row in result_rows if row.get("Kind") == "packet_identifier") == 1
+    assert sum(1 for row in result_rows if row.get("Kind") == "policy_identifier") == 1
+
+
+def test_source_record_packet_metadata_keeps_discovery_notes_anchored_to_source_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_label(src_line_0062, note_v2_errata_discovered_2026_04_14_by_team_coach_p_rivera).",
+        "source_record_text_atom(src_line_0062, note_v2_errata_discovered_2026_04_14_by_team_coach_p_rivera).",
+        "source_record_numeric_token(src_line_0062, v_2026_04_14).",
+        "source_record_text_atom(src_line_0063, unrelated_packet_note).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    broad_rows = run_query_plan(runtime, ["source_record_text_atom(Line, Text)."])
+    assert not any(
+        item["result"].get("predicate") == "source_record_packet_metadata_support"
+        and any(row.get("Kind") == "source_record_discovery_note" for row in item["result"].get("rows", []))
+        for item in broad_rows
+    )
+
+    rows = run_query_plan(runtime, ["source_record_text_atom(src_line_0062, Text)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_discovery_note"
+        and row.get("Value") == "v_2026_04_14"
+        and "discovered on 2026-04-14" in row.get("DisplayValue", "")
+        and "team coach p rivera" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_temporal_source_notes_without_fixture_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0029, labeled_line, 29, scope_expansion, zone_5).",
+        "source_record_section(src_line_0029, scope_expansion).",
+        "source_record_line(src_line_0029, 29).",
+        "source_record_text_atom(src_line_0029, site_manager_m_river_reported_to_auditor_that_batch_7a_units_had_been_temporarily_moved_to_zone_5_on_july_30_for_rework_then_returned_to_zone_3_on_august_2_this_movement_was_not_disclosed_during_the_initial_inspection).",
+        "source_record_row(src_line_0035, list_row, 35, scope_expansion, zone_5).",
+        "source_record_section(src_line_0035, scope_expansion).",
+        "source_record_line(src_line_0035, 35).",
+        "source_record_text_atom(src_line_0035, zone_5_batch_9c_widgets_15_units_not_quarantined_batch_9c_arrived_in_zone_5_on_august_5_after_the_batch_7a_units_were_returned_to_zone_3_no_overlap_exposure).",
+        "event_occurred(evt_movement_1, movement, 2025_07_30).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["event_occurred(Event, movement, Date)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_temporal_event_note"
+        and row.get("Subject") == "batch_7a"
+        and row.get("Action") == "temporarily_moved_and_returned"
+        and row.get("Location") == "zone_5"
+        and row.get("ReturnLocation") == "zone_3"
+        and row.get("ReportedBy") == "site_manager_m_river"
+        and "movement was not disclosed" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "source_record_temporal_relation_note"
+        and row.get("Subject") == "batch_9c"
+        and row.get("RelatedSubject") == "batch_7a"
+        and row.get("Relation") == "after_return"
+        and row.get("TemporalStatus") == "no_overlap_exposure"
+        and "no overlap exposure" in row.get("DisplayValue", "")
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_sample_result_notes_without_fixture_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0055, anchored_line, 55, lab_result, v_3_of_5_samples_from_batch_9c_tested_positive).",
+        "source_record_section(src_line_0055, lab_result).",
+        "source_record_line(src_line_0055, 55).",
+        "source_record_text_atom(src_line_0055, v_3_of_5_samples_from_batch_9c_tested_positive_for_contaminant).",
+        "source_record_text_atom(src_line_0061, the_laboratory_report_ref_lab_2026_0422_confirmed_contaminant_in_4_of_the_6_sampled_units_from_batch_7a_the_other_2_samples_were_negative).",
+        "lab_result(lab_1, batch_9c, positive, 5).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["lab_result(Report, batch_9c, positive, Count)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_sample_result_note"
+        and row.get("Subject") == "batch_9c"
+        and row.get("Result") == "positive"
+        and row.get("Count") == "3"
+        and row.get("Total") == "5"
+        and "3 of 5" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+    assert any(
+        row.get("Kind") == "source_record_sample_result_note"
+        and row.get("Subject") == "batch_7a"
+        and row.get("Count") == "4"
+        and row.get("Total") == "6"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_links_time_token_to_source_section_without_fixture_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "system_log_event(evt_1, 14_02_51, operator_a, withdrawal).",
+        "source_record_row(src_line_0039, list_row, 39, v_4_device_cabinet_log_room_9_excerpt, item_123).",
+        "source_record_section(src_line_0039, v_4_device_cabinet_log_room_9_excerpt).",
+        "source_record_line(src_line_0039, 39).",
+        "source_record_text_atom(src_line_0039, v_14_02_51_operator_a_withdraw_item_123).",
+        "source_record_numeric_token(src_line_0039, v_14_02_51).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["system_log_event(Event, 14_02_51, Actor, Action)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_matching_token_source"
+        and row.get("MatchedToken") == "v_14_02_51"
+        and row.get("SourceName") == "v_4_device_cabinet_log_room_9_excerpt"
+        and row.get("DisplaySourceName") == "device cabinet log room 9 excerpt"
+        and row.get("SourceAddressability") == "bound_query_token"
+        and row.get("HelperClass") == "clean-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_timestamp_authority_without_fixture_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "system_log_event(evt_1, 14_02_51, operator_a, withdrawal).",
+        "source_record_row(src_line_0124, anchored_line, 124, addendum_c_timestamp_correction, event_was_first_recorded).",
+        "source_record_section(src_line_0124, addendum_c_timestamp_correction).",
+        "source_record_line(src_line_0124, 124).",
+        "source_record_text_atom(src_line_0124, the_event_was_first_recorded_in_the_device_nightly_summary_as_14_02_21_after_clock_skew_was_corrected_on_march_12_2026_the_authoritative_timestamp_from_the_central_server_record_is_14_02_51_the_earlier_nightly_summary_value_14_02_21_should_be_considered_superseded).",
+        "source_record_numeric_token(src_line_0124, v_14_02_21).",
+        "source_record_numeric_token(src_line_0124, v_14_02_51).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["system_log_event(Event, Time, Actor, Action)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_timestamp_authority_note"
+        and row.get("PreferredTimestamp") == "v_14_02_51"
+        and row.get("PreferredSource") == "the_central_server_record"
+        and row.get("SupersededTimestamp") == "v_14_02_21"
+        and row.get("SupersededSource") == "nightly_summary"
+        and row.get("AuthorityStatus") == "authoritative_over_superseded"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_surfaces_statement_filing_notes_without_fixture_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "staff_statement(stmt_001, person_alpha, checked_device_status).",
+        "source_record_row(src_line_0012, labeled_line, 12, statements_section, person_alpha_rn_statement_filed_16_02).",
+        "source_record_section(src_line_0012, statements_section).",
+        "source_record_line(src_line_0012, 12).",
+        "source_record_text_atom(src_line_0012, person_alpha_rn_statement_filed_16_02).",
+        "source_record_numeric_token(src_line_0012, v_16_02).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["staff_statement(StatementId, Speaker, Content)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_statement_filing_note"
+        and row.get("Speaker") == "person_alpha"
+        and row.get("FiledTime") == "v_16_02"
+        and row.get("StatementRole") == "rn"
+        and row.get("StatementId") == "stmt_001"
+        and row.get("StatementContent") == "checked_device_status"
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+
+
+def test_broad_source_record_queries_do_not_flood_high_pressure_candidate_notes() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "staff_statement(stmt_001, person_alpha, checked_device_status).",
+        "system_log_event(evt_1, 14_02_51, operator_a, withdrawal).",
+        "source_record_row(src_line_0012, labeled_line, 12, statements_section, person_alpha_rn_statement_filed_16_02).",
+        "source_record_section(src_line_0012, statements_section).",
+        "source_record_text_atom(src_line_0012, person_alpha_rn_statement_filed_16_02).",
+        "source_record_numeric_token(src_line_0012, v_16_02).",
+        "source_record_row(src_line_0030, anchored_line, 30, correction_section, event_was_first_recorded).",
+        "source_record_section(src_line_0030, correction_section).",
+        "source_record_text_atom(src_line_0030, event_was_first_recorded_in_the_device_summary_as_14_02_21_the_authoritative_timestamp_from_the_server_record_is_14_02_51).",
+        "source_record_numeric_token(src_line_0030, v_14_02_21).",
+        "source_record_numeric_token(src_line_0030, v_14_02_51).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_text_atom(Line, Text)."])
+
+    candidate_kinds = {
+        row.get("Kind")
+        for item in rows
+        if item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for row in item["result"].get("rows", [])
+    }
+    assert "source_record_statement_filing_note" not in candidate_kinds
+    assert "source_record_timestamp_authority_note" not in candidate_kinds
+
+
+def test_source_record_packet_metadata_surfaces_routing_order_and_timed_source_notes() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "has_role(person_beta, reviewer, 2026_04_01, day).",
+        "order(ord_1001, clinician_alpha, 2026_04_01_09_00, infusion_protocol).",
+        "telemetry_reading(subject_a, 2026_04_01_10_15_30, rhythm_event, observed).",
+        "source_record_row(src_line_0010, anchored_line, 10, review_section, request_was_routed).",
+        "source_record_section(src_line_0010, review_section).",
+        "source_record_text_atom(src_line_0010, review_request_was_routed_to_person_beta_md_quality_director_for_review).",
+        "source_record_row(src_line_0020, anchored_line, 20, order_section, protocol_order).",
+        "source_record_section(src_line_0020, order_section).",
+        "source_record_text_atom(src_line_0020, infusion_per_protocol_order_ord_1001_entered_by_clinician_alpha_at_09_00).",
+        "source_record_row(src_line_0021, anchored_line, 21, order_section, authority_note).",
+        "source_record_section(src_line_0021, order_section).",
+        "source_record_text_atom(src_line_0021, attending_physician_s_signed_order_is_the_authoritative_directive_resident_verbal_order_at_09_30_was_requiring_attending_co_signature_the_10_45_attending_order_satisfies_that_requirement).",
+        "source_record_row(src_line_0030, list_row, 30, telemetry_monitor_device_x_subject_a_room_12, event_row).",
+        "source_record_section(src_line_0030, telemetry_monitor_device_x_subject_a_room_12).",
+        "source_record_text_atom(src_line_0030, v_10_15_30_rhythm_event_observed).",
+        "source_record_numeric_token(src_line_0030, v_10_15_30).",
+        "source_record_row(src_line_0040, anchored_line, 40, timekeeping_section, clock_out).",
+        "source_record_section(src_line_0040, timekeeping_section).",
+        "source_record_text_atom(src_line_0040, person_gamma_rn_clocked_out_of_the_timekeeping_system_at_11_14).",
+        "source_record_row(src_line_0050, anchored_line, 50, item_event_section, item_event).",
+        "source_record_section(src_line_0050, item_event_section).",
+        "source_record_text_atom(src_line_0050, device_at_bedside_checked_lot_abc_2026_0241_hung_13_44_remaining_count_2).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    role_rows = run_query_plan(runtime, ["has_role(Person, quality_director, 2026_04_01, day)."])
+    broad_role_rows = run_query_plan(runtime, ["has_role(Person, Role, Date, Shift)."])
+    order_rows = run_query_plan(runtime, ["order(OrderId, Prescriber, Time, Detail)."])
+    telemetry_rows = run_query_plan(runtime, ["telemetry_reading(Subject, 2026_04_01_10_15_30, Event, Status)."])
+    clock_rows = run_query_plan(runtime, ["has_role(person_gamma, Role, Date, Shift)."])
+    system_event_rows = run_query_plan(runtime, ["system_event(Event, 2026_04_01_13_44_00, Actor, Action, Detail)."])
+
+    all_metadata = [
+        row
+        for rows in (role_rows, order_rows, telemetry_rows, clock_rows)
+        for item in rows
+        if item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for row in item["result"].get("rows", [])
+    ]
+    system_event_metadata = [
+        row
+        for item in system_event_rows
+        if item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for row in item["result"].get("rows", [])
+    ]
+    broad_role_metadata = [
+        row
+        for item in broad_role_rows
+        if item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for row in item["result"].get("rows", [])
+    ]
+    assert any(
+        row.get("Kind") == "source_record_role_routing_note"
+        and row.get("RoutedTo") == "person_beta"
+        and row.get("Role") == "quality_director"
+        for row in all_metadata
+    )
+    assert not any(row.get("Kind") == "source_record_role_routing_note" for row in broad_role_metadata)
+    assert any(
+        row.get("Kind") == "source_record_order_identifier_note"
+        and row.get("OrderId") == "ord_1001"
+        and row.get("DisplayOrderId") == "ORD-1001"
+        and row.get("OrderScope") == "protocol_order"
+        for row in all_metadata
+    )
+    assert any(
+        row.get("Kind") == "source_record_order_authority_note"
+        and row.get("Requirement") == "attending_co_signature"
+        and row.get("AuthoritativeOrderTime") == "v_10_45"
+        for row in all_metadata
+    )
+    assert any(
+        row.get("Kind") == "source_record_matching_token_source"
+        and row.get("SourceName") == "telemetry_monitor_device_x_subject_a_room_12"
+        and row.get("MatchedToken") == "v_2026_04_01_10_15_30"
+        and row.get("SourceAddressability") == "bound_query_token"
+        and row.get("HelperClass") == "clean-helper"
+        for row in all_metadata
+    )
+    assert any(
+        row.get("Kind") == "source_record_clock_event_note"
+        and row.get("Actor") == "person_gamma"
+        and row.get("EventTime") == "v_11_14"
+        for row in all_metadata
+    )
+    assert any(
+        row.get("Kind") == "source_record_item_event_identifier_note"
+        and row.get("ItemIdentifier") == "abc_2026_0241"
+        and row.get("DisplayItemIdentifier") == "ABC-2026-0241"
+        and row.get("EventAction") == "hung"
+        and row.get("EventTime") == "v_13_44"
+        for row in system_event_metadata
+    )
 
 
 def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rules() -> None:
@@ -1503,7 +2764,7 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
     )
 
 
-def test_roster_state_support_holds_school_packet_content_notes_after_metadata_retirement() -> None:
+def test_roster_state_support_does_not_promote_local_packet_content_notes() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
         "source_record_text_atom(src_line_0158, sco_ch_3_chaperone_counting_rules_defines_who_counts_toward_the).",
@@ -1530,68 +2791,83 @@ def test_roster_state_support_holds_school_packet_content_notes_after_metadata_r
 
     rows = run_query_plan(runtime, ["policy_requirement(policy, requirement)."])
 
+    support_kinds = {
+        str(row.get("SupportKind", ""))
+        for item in rows
+        if item["result"].get("predicate") == "roster_state_support"
+        for row in item["result"].get("rows", [])
+    }
+    assert not any("school_packet" in support_kind for support_kind in support_kinds)
+    assert not {
+        "adult_lodging_location",
+        "device_clock_audit_status",
+        "document_policy_title",
+        "pending_document_item",
+        "scheduled_transport_departure",
+        "source_record_observer_permission_scope",
+        "temporary_assignment_source_record",
+    } & support_kinds
+    assert "document_retention_location" in support_kinds
+    assert "temporary_event_source_link" in support_kinds
+    retention = next(
+        row
+        for item in rows
+        if item["result"].get("predicate") == "roster_state_support"
+        for row in item["result"].get("rows", [])
+        if row.get("SupportKind") == "document_retention_location"
+    )
+    assert retention.get("Person") == "audit_binder"
+    assert retention.get("Location") == "activities_office_filing_cabinet_3_drawer_2"
+    assert "activities office filing cabinet 3, drawer 2" in retention.get("DisplayValue", "")
+
+    assert not any(
+        item["result"].get("predicate") == "source_record_packet_metadata_support"
+        for item in rows
+    )
+
+
+def test_temporary_assignment_query_exposes_source_note_support() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0232, v_6_1_temporary_in_day_assignment).",
+        "source_record_label(src_line_0232, sch_2026_05_02_a).",
+        "source_record_line(src_line_0232, 232).",
+        "temporary_assignment(s_007, group_c, bridge_engineering, 2026_05_02_11_00_12_30).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["temporary_assignment(s_007, Group, Event, StartEnd)."])
+
     companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
     result_rows = companion["result"]["rows"]
-    assert any(
-        row.get("SupportKind") == "school_packet_policy_title"
-        and row.get("DisplayValue") == "SCO-CH-3 (Chaperone Counting Rules)"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_pending_item"
-        and row.get("Person") == "return_leg_attendance_scans"
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_retention_location"
-        and "cabinet 3, drawer 2" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_adult_lodging"
-        and row.get("Person") == "n_park"
-        and "room 206" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_transport_departure"
-        and row.get("Person") == "bus_1_outbound"
-        and "06:30" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_observer_permission_scope"
-        and row.get("Person") == "a_diaz"
-        and "13:00-17:00" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
-    assert any(
-        row.get("SupportKind") == "school_packet_temporary_assignment_source"
-        and row.get("Person") == "s_007"
-        and "Section 6.1" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
-        for row in result_rows
-    )
     assert any(
         row.get("SupportKind") == "temporary_event_source_link"
         and row.get("Person") == "s_007"
         and row.get("Event") == "bridge_engineering"
+        and row.get("Start") == "2026_05_02_11_00"
+        and row.get("End") == "2026_05_02_12_30"
         and row.get("SourceNote") == "sch_2026_05_02_a"
         and "Section 6.1" in row.get("DisplayValue", "")
-        and row.get("HelperClass") == "candidate-helper"
         for row in result_rows
     )
 
-    metadata = next(item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support")
+
+def test_attendance_scan_query_does_not_promote_local_departure_note() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "attendance_scan(scan_001, 2026_05_01_06_31, cedar_hollow_parking_bus_1, 18).",
+        "source_record_line(src_line_0104, 104).",
+        "source_record_text_atom(src_line_0104, capacity_24_students_departure_2026_05_01_06_30_from_cedar_hollow).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["attendance_scan(Scan, Timestamp, cedar_hollow_parking_bus_1, Count)."])
+
     assert not any(
-        row.get("Kind") in {"pending_packet_item", "physical_retention_location", "policy_name"}
-        for row in metadata["result"]["rows"]
+        row.get("SupportKind") == "scheduled_transport_departure"
+        for item in rows
+        if item["result"].get("predicate") == "roster_state_support"
+        for row in item["result"].get("rows", [])
     )
 
 

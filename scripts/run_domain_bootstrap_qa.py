@@ -69,8 +69,12 @@ GENERIC_QUERY_PLACEHOLDERS = {
     "explanation",
     "formula",
     "item",
+    "kind",
     "label",
     "language",
+    "line",
+    "lineid",
+    "linenum",
     "location",
     "method",
     "note",
@@ -80,12 +84,19 @@ GENERIC_QUERY_PLACEHOLDERS = {
     "reason",
     "record",
     "role",
+    "row",
+    "section",
     "source",
+    "source_row",
+    "sourceid",
+    "sourcerow",
     "status",
     "step",
     "subject",
     "supportrole",
     "time",
+    "text",
+    "textatom",
     "type",
     "underwriter",
     "underwriter_amount",
@@ -307,6 +318,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For ambiguity questions, query ambiguity and candidate-identity predicates when present rather than forcing a single identity.",
         "For rule/consequence questions, query stored rules and supporting facts; do not write derived conclusions as durable facts.",
         "For questions using phrases such as revert to normal, take effect, interval ended, interval began, chronological sequence, or key authorization and notice events, include explicit state-event predicates such as contamination_advisory(triggered, StartTime) and contamination_advisory(lifted, EndTime) when those predicates exist. Interval-duration rows alone do not answer when the interval begins or ends.",
+        "For point-in-time status questions such as 'status on DATE', 'status as of DATE', or 'current on DATE', if a *_status(Entity, Status, Date) predicate exists, include a direct date-bound query such as credential_status(Entity, Status, 2026_02_06). The runtime can derive query-only interval support from admitted transition anchors, corrected intervals, and scheduled-state rows; do not only retrieve all status rows with Date as a variable.",
         "For omission and set-difference questions such as 'which required X did not receive Y', 'which X was omitted', or 'was Y issued to all required X', emit paired query operations: first the required/scope set with a shared variable, then the absent-side predicate with polarity='negative' and the same variable. Example operations: query residential_zone(Zone) polarity positive; query boil_water_notice(Zone, Time, Issuer) polarity negative. Do not emit the second operation as a positive query when the question asks for missing or omitted rows.",
         "For policy-condition questions, retrieve both the governing policy rows and the observed event/measurement rows. Threshold, count, interval, and deadline predicates are answer-bearing evidence, not optional decoration.",
         "For duration/deadline questions, prefer an existing deadline_met(Phase, StartDate, EndDate, Status) row plus elapsed_days(StartDate, EndDate, Days) when that row represents the asked phase. Do not compute a duration from two start-event rows when the compiled KB has a deadline_met row for the report, completion, or decision being asked about.",
@@ -964,6 +976,8 @@ def split_top_level_args(text: str) -> list[str]:
 
 def parse_prolog_query(query: str) -> tuple[str, list[str]] | None:
     text = str(query or "").strip()
+    if len(split_top_level_args(text.rstrip(". "))) != 1:
+        return None
     match = re.fullmatch(r"\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.?\s*", text)
     if not match:
         return None
@@ -974,8 +988,25 @@ def parse_prolog_query(query: str) -> tuple[str, list[str]] | None:
     return predicate, args
 
 
+def parse_prolog_query_goals(query: str) -> list[tuple[str, list[str]]] | None:
+    text = str(query or "").strip().rstrip(".")
+    if not text:
+        return None
+    goals: list[tuple[str, list[str]]] = []
+    for part in split_top_level_args(text):
+        parsed = parse_prolog_query(part)
+        if parsed is None:
+            return None
+        goals.append(parsed)
+    return goals or None
+
+
 def format_prolog_query(predicate: str, args: list[str]) -> str:
     return f"{predicate}({', '.join(args)})."
+
+
+def format_prolog_query_goals(goals: list[tuple[str, list[str]]]) -> str:
+    return ", ".join(format_prolog_query(predicate, args).rstrip(".") for predicate, args in goals) + "."
 
 
 def _is_prolog_variable(value: str) -> bool:
@@ -1040,6 +1071,30 @@ def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
         "query": repaired_query,
         "repairs": repairs,
     }
+
+
+def _source_record_numeric_token_repaired_query(query: str) -> dict[str, Any] | None:
+    goals = parse_prolog_query_goals(query)
+    if not goals:
+        return None
+    repaired_goals: list[tuple[str, list[str]]] = []
+    repairs: list[dict[str, str]] = []
+    for predicate, args in goals:
+        new_args = list(args)
+        if predicate == "source_record_numeric_token" and len(args) >= 2:
+            raw_token = str(args[1]).strip()
+            token = raw_token.strip("'\"")
+            if token and not _is_prolog_variable(token) and not token.startswith("v_"):
+                repaired = "v_" + token
+                new_args[1] = repaired
+                repairs.append({"predicate": predicate, "from": raw_token, "to": repaired})
+        repaired_goals.append((predicate, new_args))
+    if not repairs:
+        return None
+    repaired_query = format_prolog_query_goals(repaired_goals)
+    if repaired_query == str(query or "").strip():
+        return None
+    return {"query": repaired_query, "repairs": repairs}
 
 
 def load_oracle(path: Path | None) -> dict[str, dict[str, Any]]:
@@ -1262,6 +1317,7 @@ def run_one_question(
             kb_inventory=kb_inventory,
         )
         query_results = [*query_results, *evidence_plan_query_results]
+    query_results = _dedupe_helper_query_results(query_results)
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -1415,11 +1471,21 @@ def _location_floor_hint_queries(
 def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
+    delivered_helper_rows: set[tuple[str, str]] = set()
+
+    def append_companion(companion: dict[str, Any] | None) -> None:
+        if not companion:
+            return
+        filtered = _dedupe_helper_companion_rows(companion, delivered_helper_rows)
+        if filtered and filtered not in results:
+            results.append(filtered)
+
     for query in queries:
         effective_query = query
-        placeholder_repair = _placeholder_repaired_query(query)
-        if placeholder_repair:
-            repaired_query = str(placeholder_repair.get("query", "")).strip()
+        used_relaxed_fallback = False
+        numeric_token_repair = _source_record_numeric_token_repaired_query(query)
+        if numeric_token_repair:
+            repaired_query = str(numeric_token_repair.get("query", "")).strip()
             repaired_result = runtime.query_rows(repaired_query)
             effective_query = repaired_query
             if repaired_result.get("status") == "success":
@@ -1430,9 +1496,9 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
                             **repaired_result,
                             "reasoning_basis": {
                                 "kind": "core-local",
-                                "note": "placeholder query repair converted generic lowercase slot labels to Prolog variables before execution",
+                                "note": "source-record numeric-token query repair aligned unprefixed token constants to deterministic ledger atoms",
                                 "original_query": query,
-                                "repairs": placeholder_repair.get("repairs", []),
+                                "repairs": numeric_token_repair.get("repairs", []),
                             },
                         },
                         "derived_from_queries": [query],
@@ -1442,30 +1508,59 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
                 result = runtime.query_rows(query)
                 results.append({"query": query, "result": result})
         else:
-            result = runtime.query_rows(query)
-            results.append({"query": query, "result": result})
+            placeholder_repair = _placeholder_repaired_query(query)
+            if placeholder_repair:
+                repaired_query = str(placeholder_repair.get("query", "")).strip()
+                repaired_result = runtime.query_rows(repaired_query)
+                effective_query = repaired_query
+                if repaired_result.get("status") == "success":
+                    results.append(
+                        {
+                            "query": repaired_query,
+                            "result": {
+                                **repaired_result,
+                                "reasoning_basis": {
+                                    "kind": "core-local",
+                                    "note": "placeholder query repair converted generic lowercase slot labels to Prolog variables before execution",
+                                    "original_query": query,
+                                    "repairs": placeholder_repair.get("repairs", []),
+                                },
+                            },
+                            "derived_from_queries": [query],
+                        }
+                    )
+                else:
+                    result = runtime.query_rows(query)
+                    results.append({"query": query, "result": result})
+            else:
+                result = runtime.query_rows(query)
+                results.append({"query": query, "result": result})
 
         last_result = results[-1].get("result", {}) if results else {}
         if isinstance(last_result, dict) and last_result.get("status") != "success":
+            compact_interval = _compact_interval_duration_companion(results=results[:-1], query=effective_query)
+            if compact_interval:
+                append_companion(compact_interval)
+                last_result = compact_interval.get("result", {})
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
             status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
             if status_interval:
-                results.append(status_interval)
+                append_companion(status_interval)
                 last_result = status_interval.get("result", {})
         for domain_companion in _domain_companion_queries(runtime, query=effective_query):
-            if domain_companion not in results:
-                results.append(domain_companion)
+            append_companion(domain_companion)
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
                 results.append(relaxed)
                 effective_query = str(relaxed.get("query", query))
+                used_relaxed_fallback = True
                 last_result = relaxed.get("result", {})
         companion = _evidence_table_companion_query(runtime, query=effective_query)
-        if companion:
-            results.append(companion)
-        for domain_companion in _domain_companion_queries(runtime, query=effective_query):
-            if domain_companion not in results:
-                results.append(domain_companion)
+        append_companion(companion)
+        if not used_relaxed_fallback:
+            for domain_companion in _domain_companion_queries(runtime, query=effective_query):
+                append_companion(domain_companion)
         temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=effective_query)
         if temporal_join:
             results.append(temporal_join)
@@ -1476,12 +1571,562 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
     return results
 
 
+def _dedupe_helper_companion_rows(
+    companion: dict[str, Any],
+    delivered_helper_rows: set[tuple[str, str]],
+) -> dict[str, Any] | None:
+    result = companion.get("result", {}) if isinstance(companion, dict) else {}
+    if not isinstance(result, dict):
+        return companion
+    rows = result.get("rows")
+    if not isinstance(rows, list) or not rows:
+        return companion
+    if not any(isinstance(row, dict) and str(row.get("HelperClass", "")).strip() for row in rows):
+        return companion
+
+    predicate = str(result.get("predicate", "") or "").strip()
+    kept_rows: list[Any] = []
+    skipped = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            kept_rows.append(row)
+            continue
+        key = (predicate, json.dumps(row, ensure_ascii=False, sort_keys=True))
+        if key in delivered_helper_rows:
+            skipped += 1
+            continue
+        delivered_helper_rows.add(key)
+        kept_rows.append(row)
+    if not kept_rows:
+        return None
+    if skipped <= 0:
+        return companion
+
+    filtered_result = dict(result)
+    filtered_result["rows"] = kept_rows
+    filtered_result["num_rows"] = len(kept_rows)
+    reasoning_basis = dict(filtered_result.get("reasoning_basis", {}) or {})
+    reasoning_basis["delivery_filter"] = "query_plan_helper_row_dedupe"
+    reasoning_basis["deduped_helper_rows"] = skipped
+    filtered_result["reasoning_basis"] = reasoning_basis
+    return {**companion, "result": filtered_result}
+
+
+def _dedupe_helper_query_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    delivered_helper_rows: set[tuple[str, str]] = set()
+    out: list[dict[str, Any]] = []
+    for item in results:
+        filtered = _dedupe_helper_companion_rows(item, delivered_helper_rows)
+        if filtered is not None:
+            out.append(filtered)
+    return out
+
+
+def _status_timeline_summary_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) == 2 and predicate.startswith("scheduled_"):
+        entity_arg = str(args[0]).strip()
+        if _is_prolog_variable(entity_arg):
+            return None
+        status = _status_from_event_type(predicate.removeprefix("scheduled_"))
+        if not status:
+            return None
+        result = runtime.query_rows(format_prolog_query(predicate, ["Entity", "EffectiveDate"]))
+        if result.get("status") != "success":
+            return None
+        rows: list[dict[str, str]] = []
+        for row in result.get("rows", []) or []:
+            if not isinstance(row, dict):
+                continue
+            observed_entity = str(row.get("Entity", "")).strip()
+            effective_date = str(row.get("EffectiveDate", "")).strip()
+            if not observed_entity or not effective_date:
+                continue
+            if observed_entity != entity_arg and _case_atom_key(observed_entity) != _case_atom_key(entity_arg):
+                continue
+            rows.append(
+                {
+                    "HelperClass": "clean-helper",
+                    "QueryEntity": entity_arg,
+                    "ScheduledStatus": status,
+                    "AppliesOnOrAfter": effective_date,
+                    "SourcePredicate": predicate,
+                    "SupportKind": "scheduled_state_transition",
+                }
+            )
+        if not rows:
+            return None
+        return _status_timeline_companion_result(
+            predicate="status_timeline_summary_support",
+            query=(
+                "status_timeline_summary_support"
+                "(QueryEntity, ScheduledStatus, AppliesOnOrAfter, SourcePredicate, SupportKind)."
+            ),
+            rows=rows,
+            original_query=query,
+            note=(
+                "query-only scheduled-state support exposed the state implied by admitted scheduled transition rows; "
+                "no durable fact was written"
+            ),
+        )
+
+    if len(args) != 3 or not predicate.endswith("_status"):
+        return None
+    entity_arg = str(args[0]).strip()
+    status_arg = str(args[1]).strip()
+    date_arg = str(args[2]).strip()
+    if _is_prolog_variable(entity_arg) or not (_is_prolog_variable(status_arg) and _is_prolog_variable(date_arg)):
+        return None
+    result = runtime.query_rows(format_prolog_query(predicate, ["Entity", "Status", "Date"]))
+    if result.get("status") != "success":
+        return None
+    rows_for_entity: list[dict[str, Any]] = []
+    for row in result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        observed_entity = str(row.get("Entity", "")).strip()
+        observed_status = str(row.get("Status", "")).strip()
+        observed_date = str(row.get("Date", "")).strip()
+        observed_at = _runtime_temporal_datetime(runtime, observed_date)
+        if not observed_entity or not observed_status or observed_at is None:
+            continue
+        if observed_entity != entity_arg and _case_atom_key(observed_entity) != _case_atom_key(entity_arg):
+            continue
+        rows_for_entity.append(
+            {
+                "observed_entity": observed_entity,
+                "observed_status": observed_status,
+                "observed_date": observed_date,
+                "observed_at": observed_at,
+            }
+        )
+    if not rows_for_entity:
+        return None
+    latest = sorted(rows_for_entity, key=lambda item: item["observed_at"])[-1]
+    return _status_timeline_companion_result(
+        predicate="status_timeline_summary_support",
+        query="status_timeline_summary_support(QueryEntity, CurrentStatus, EffectiveFrom, SourcePredicate, SupportKind).",
+        rows=[
+            {
+                "HelperClass": "clean-helper",
+                "QueryEntity": entity_arg,
+                "CurrentStatus": str(latest["observed_status"]),
+                "EffectiveFrom": str(latest["observed_date"]),
+                "SourcePredicate": predicate,
+                "SupportKind": "latest_status_transition",
+            }
+        ],
+        original_query=query,
+        note=(
+            "query-only status timeline support exposed the latest admitted status transition for broad status queries; "
+            "no durable fact was written"
+        ),
+    )
+
+
+def _status_timeline_companion_result(
+    *,
+    predicate: str,
+    query: str,
+    rows: list[dict[str, str]],
+    original_query: str,
+    note: str,
+) -> dict[str, Any]:
+    return {
+        "query": query,
+        "result": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": predicate,
+            "prolog_query": query,
+            "variables": list(rows[0].keys()) if rows else [],
+            "rows": rows,
+            "num_rows": len(rows),
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": note,
+                "original_query": original_query,
+            },
+        },
+        "derived_from_queries": [original_query],
+    }
+
+
+def _scoped_status_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    facts = _runtime_fact_rows(runtime)
+    if not facts:
+        return None
+
+    unary_scope_rows: dict[str, set[str]] = {}
+    status_rows: dict[str, list[tuple[str, str, str]]] = {}
+    term_definitions: dict[str, str] = {}
+    source_sections: dict[str, str] = {}
+    source_labels: dict[str, str] = {}
+    requested_statuses = _requested_scoped_status_values(predicate=predicate, args=args)
+    for fact in facts:
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        if not fact_predicate or not fact_args:
+            continue
+        if len(fact_args) == 1 and _looks_like_scope_predicate(fact_predicate):
+            unary_scope_rows.setdefault(fact_predicate, set()).add(fact_args[0])
+        if len(fact_args) >= 2 and fact_predicate.endswith("_status"):
+            date = fact_args[2] if len(fact_args) >= 3 else ""
+            status_rows.setdefault(fact_predicate, []).append((fact_args[0], fact_args[1], date))
+        if fact_predicate in {"defines_status_term", "status_term_definition"} and len(fact_args) >= 2:
+            term_definitions[fact_args[0]] = fact_args[1]
+        if fact_predicate == "source_record_section" and len(fact_args) >= 2:
+            source_sections[fact_args[0]] = fact_args[1]
+        if fact_predicate == "source_record_label" and len(fact_args) >= 2:
+            source_labels[fact_args[0]] = fact_args[1]
+
+    if not ((unary_scope_rows and status_rows) or (source_sections and source_labels)):
+        return None
+    if not (
+        predicate in unary_scope_rows
+        or predicate in status_rows
+        or predicate in {"defines_status_term", "status_term_definition"}
+        or (predicate.endswith("_status") and requested_statuses)
+        or (predicate == "source_record_label" and requested_statuses)
+    ):
+        return None
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for scope_predicate, scoped_entities in sorted(unary_scope_rows.items()):
+        if len(scoped_entities) < 2:
+            continue
+        for status_predicate, observed_rows in sorted(status_rows.items()):
+            by_status_date: dict[tuple[str, str], set[str]] = {}
+            for entity, status, date in observed_rows:
+                if entity not in scoped_entities:
+                    continue
+                by_status_date.setdefault((status, date), set()).add(entity)
+            for (status, date), members in sorted(by_status_date.items()):
+                if not members:
+                    continue
+                if not _status_allowed_by_request(status, requested_statuses):
+                    continue
+                key = (scope_predicate, status_predicate, status, date)
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "scoped_status_count",
+                        "ScopePredicate": scope_predicate,
+                        "StatusPredicate": status_predicate,
+                        "SemanticCriterion": status,
+                        "StatusValue": status,
+                        "Date": date,
+                        "Count": str(len(members)),
+                        "Members": ",".join(sorted(members, key=_case_atom_key)),
+                    }
+                )
+
+            for term, definition in sorted(term_definitions.items()):
+                if not _status_allowed_by_request(term, requested_statuses):
+                    continue
+                matching_statuses = [
+                    status
+                    for status, _date in by_status_date
+                    if _status_term_matches_status(term, definition, status)
+                    and _status_allowed_by_request(status, requested_statuses)
+                ]
+                if not matching_statuses:
+                    continue
+                members: set[str] = set()
+                dates: set[str] = set()
+                for status, date in by_status_date:
+                    if status not in matching_statuses:
+                        continue
+                    members.update(by_status_date[(status, date)])
+                    if date:
+                        dates.add(date)
+                if not members:
+                    continue
+                key = (scope_predicate, status_predicate, term, ",".join(sorted(dates)))
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "scoped_status_criterion_count",
+                        "ScopePredicate": scope_predicate,
+                        "StatusPredicate": status_predicate,
+                        "SemanticCriterion": term,
+                        "StatusValue": ",".join(sorted(set(matching_statuses), key=_case_atom_key)),
+                        "Date": ",".join(sorted(dates, key=_date_atom_sort_key_for_strings)),
+                        "Count": str(len(members)),
+                        "Members": ",".join(sorted(members, key=_case_atom_key)),
+                    }
+                )
+
+    section_rows = _section_status_count_rows(
+        source_sections=source_sections,
+        source_labels=source_labels,
+        requested_statuses=requested_statuses,
+    )
+    for row in section_rows:
+        key = (
+            str(row.get("ScopePredicate", "")),
+            str(row.get("StatusPredicate", "")),
+            str(row.get("SemanticCriterion", "")),
+            str(row.get("Members", "")),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(row)
+
+    if not rows:
+        return None
+    return _status_timeline_companion_result(
+        predicate="scoped_status_count_support",
+        query=(
+            "scoped_status_count_support"
+            "(ScopePredicate, StatusPredicate, SemanticCriterion, StatusValue, Date, Count, Members, SupportKind)."
+        ),
+        rows=rows[:80],
+        original_query=query,
+        note=(
+            "query-only scoped status count support joined unary scope predicates to admitted status rows "
+            "and optional status-term definitions; no durable fact was written"
+        ),
+    )
+
+
+def _looks_like_scope_predicate(predicate: str) -> bool:
+    text = str(predicate or "").strip().lower()
+    if text.startswith("source_record_") or text in {"character", "object", "person", "place"}:
+        return False
+    return (
+        text.startswith("is_")
+        or text.endswith(("_case", "_item", "_record", "_entity", "_member"))
+        or "scope" in text
+    )
+
+
+def _requested_scoped_status_values(*, predicate: str, args: tuple[Any, ...]) -> set[str]:
+    requested: set[str] = set()
+    if predicate.endswith("_status") and len(args) >= 2:
+        status_arg = str(args[1]).strip()
+        if status_arg and not _is_prolog_variable(status_arg):
+            requested.add(status_arg)
+    elif predicate in {"defines_status_term", "status_term_definition"} and args:
+        term_arg = str(args[0]).strip()
+        if term_arg and not _is_prolog_variable(term_arg):
+            requested.add(term_arg)
+    elif predicate == "source_record_label" and len(args) >= 2:
+        label_arg = str(args[1]).strip()
+        if label_arg and not _is_prolog_variable(label_arg):
+            status = _status_from_source_record_label(label_arg)
+            if status:
+                requested.add(status)
+    return requested
+
+
+def _status_allowed_by_request(status: str, requested_statuses: set[str]) -> bool:
+    if not requested_statuses:
+        return True
+    for requested in requested_statuses:
+        if status == requested:
+            return True
+        if _status_term_matches_status(status, status, requested):
+            return True
+        if _status_term_matches_status(requested, requested, status):
+            return True
+    return False
+
+
+def _section_status_count_rows(
+    *,
+    source_sections: dict[str, str],
+    source_labels: dict[str, str],
+    requested_statuses: set[str] | None = None,
+) -> list[dict[str, str]]:
+    requested_statuses = requested_statuses or set()
+    by_parent_status: dict[tuple[str, str], set[str]] = {}
+    for source_row, label in source_labels.items():
+        status = _status_from_source_record_label(label)
+        if not _status_allowed_by_request(status, requested_statuses):
+            continue
+        section = source_sections.get(source_row, "")
+        parent = _parent_section_scope(section)
+        if not status or not parent or section == parent:
+            continue
+        by_parent_status.setdefault((parent, status), set()).add(section)
+
+    out: list[dict[str, str]] = []
+    for (parent, status), sections in sorted(by_parent_status.items()):
+        if not sections:
+            continue
+        out.append(
+            {
+                "HelperClass": "clean-helper",
+                "SupportKind": "source_section_status_count",
+                "ScopePredicate": "source_record_section_prefix",
+                "StatusPredicate": "source_record_label_status",
+                "SemanticCriterion": status,
+                "StatusValue": status,
+                "Date": "",
+                "Count": str(len(sections)),
+                "Members": ",".join(sorted(sections, key=_case_atom_key)),
+            }
+        )
+    return out
+
+
+def _status_from_source_record_label(label: str) -> str:
+    text = str(label or "").strip().lower()
+    if not text.startswith("status_"):
+        return ""
+    tokens = _type_taxonomy_tokens(text.removeprefix("status_"))
+    if not tokens:
+        return ""
+    if tokens[:2] == ["timeline", "resolvable"]:
+        return "timeline_resolvable"
+    if tokens[:2] == ["genuinely", "unresolved"]:
+        return "genuinely_unresolved"
+    if tokens[:2] == ["not", "in"] and len(tokens) >= 3 and tokens[2] == "conflict":
+        return "not_in_conflict"
+    return "_".join(tokens[:2]) if len(tokens) >= 2 else tokens[0]
+
+
+def _parent_section_scope(section: str) -> str:
+    tokens = _type_taxonomy_tokens(section)
+    if len(tokens) >= 3 and tokens[0] in {"v", "section"} and tokens[1].isdigit() and tokens[2].isdigit():
+        return "_".join(tokens[:2])
+    if len(tokens) >= 2 and tokens[0] == "section" and tokens[1].isdigit():
+        return "_".join(tokens[:2])
+    return ""
+
+
+def _status_term_matches_status(term: str, definition: str, status: str) -> bool:
+    term_tokens = set(_type_taxonomy_tokens(term))
+    definition_tokens = set(_type_taxonomy_tokens(definition))
+    status_tokens = set(_type_taxonomy_tokens(status))
+    if not status_tokens:
+        return False
+    return bool(status_tokens & term_tokens) or status_tokens.issubset(definition_tokens)
+
+
+def _date_atom_sort_key_for_strings(value: str) -> tuple[int, str]:
+    sort_key = _date_atom_sort_key(value)
+    if sort_key is None:
+        return (1, str(value or ""))
+    return (0, str(sort_key))
+
+
+def _identifier_alias_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) != 2:
+        return None
+    entity_arg = str(args[0]).strip()
+    value_arg = str(args[1]).strip()
+    if not (_is_prolog_variable(entity_arg) and _is_prolog_variable(value_arg)):
+        return None
+    if not predicate.endswith(("_on", "_at", "_in")):
+        return None
+
+    entity_var = "Entity"
+    value_var = "Value"
+    all_query = format_prolog_query(predicate, [entity_var, value_var])
+    result = runtime.query_rows(all_query)
+    if result.get("status") != "success":
+        return None
+
+    raw_entities = sorted(
+        {str(row.get(entity_var, "")).strip() for row in result.get("rows", []) or [] if isinstance(row, dict)}
+    )
+    if len(raw_entities) < 2:
+        return None
+    groups: dict[str, set[str]] = {}
+    for entity in raw_entities:
+        groups.setdefault(_identifier_alias_key(entity), set()).add(entity)
+    alias_groups = {key: values for key, values in groups.items() if len(values) > 1}
+    if not alias_groups:
+        return None
+
+    canonical_entities = sorted(groups, key=_case_atom_key)
+    rows = [
+        {
+            "HelperClass": "clean-helper",
+            "SourcePredicate": predicate,
+            "RawEntityCount": str(len(raw_entities)),
+            "DistinctEntityCount": str(len(canonical_entities)),
+            "CanonicalEntities": ", ".join(canonical_entities),
+            "AliasGroups": "; ".join(
+                f"{key}: {', '.join(sorted(values, key=_case_atom_key))}"
+                for key, values in sorted(alias_groups.items(), key=lambda item: _case_atom_key(item[0]))
+            ),
+            "SupportKind": "identifier_alias_distinct_count",
+        }
+    ]
+    return _status_timeline_companion_result(
+        predicate="identifier_alias_count_support",
+        query=(
+            "identifier_alias_count_support"
+            "(SourcePredicate, RawEntityCount, DistinctEntityCount, CanonicalEntities, AliasGroups, SupportKind)."
+        ),
+        rows=rows,
+        original_query=query,
+        note=(
+            "query-only identifier alias count support collapsed returned entity atoms that share a suffix-form "
+            "identifier; no durable fact was written"
+        ),
+    )
+
+
+def _identifier_alias_key(value: str) -> str:
+    tokens = [token for token in _type_taxonomy_tokens(value) if token]
+    if len(tokens) <= 1:
+        return str(value or "").strip().lower()
+    numeric_positions = [index for index, token in enumerate(tokens) if token.isdigit()]
+    if numeric_positions:
+        start = max(0, numeric_positions[-1] - 1)
+        return "_".join(tokens[start:])
+    return "_".join(tokens[-2:])
+
+
+def _normalize_status_atom(value: str) -> str:
+    text = str(value or "").strip()
+    return text.removeprefix("status_")
+
+
 def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list[dict[str, Any]]:
     parsed = parse_prolog_query(query)
     if parsed is None:
         return []
     predicate, args = parsed
     source_record_companions: list[dict[str, Any]] = []
+    status_timeline = _status_timeline_summary_companion(runtime, predicate=predicate, args=args, query=query)
+    if status_timeline:
+        source_record_companions.append(status_timeline)
+    scoped_status_count = _scoped_status_count_companion(runtime, predicate=predicate, args=args, query=query)
+    if scoped_status_count:
+        source_record_companions.append(scoped_status_count)
+    alias_count = _identifier_alias_count_companion(runtime, predicate=predicate, args=args, query=query)
+    if alias_count:
+        source_record_companions.append(alias_count)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
@@ -1515,6 +2160,7 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     if source_record_companions:
         if predicate in {
             "adult_role",
+            "attendance_scan",
             "bus_assignment",
             "group_member",
             "group_membership",
@@ -1528,6 +2174,7 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             "student_in_homeroom",
             "supervises",
             "supervision_assignment",
+            "temporary_assignment",
             "temporary_event_assignment",
         }:
             roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
@@ -1546,6 +2193,18 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
     if roster_state:
         return [roster_state]
+    initial_status = _initial_status_scope_companion(runtime, predicate=predicate, args=args, query=query)
+    if initial_status:
+        return [initial_status]
+    vote_threshold = _vote_threshold_counterfactual_companion(runtime, predicate=predicate, args=args, query=query)
+    if vote_threshold:
+        return [vote_threshold]
+    lifecycle_period = _lifecycle_period_support_companion(runtime, predicate=predicate, args=args, query=query)
+    if lifecycle_period:
+        return [lifecycle_period]
+    type_taxonomy = _type_taxonomy_summary_companion(runtime, predicate=predicate, args=args, query=query)
+    if type_taxonomy:
+        return [type_taxonomy]
     recall_companions = _recall_domain_companion_queries(runtime, predicate=predicate, args=args, query=query)
     if recall_companions:
         return recall_companions
@@ -1787,6 +2446,22 @@ def _source_record_packet_metadata_companion(
         "contested_by",
         "motion_filed",
         "court_order",
+        "caused_by",
+        "current_status",
+        "event_actor",
+        "event_occurred",
+        "event_target",
+        "lab_result",
+        "lot_attribute",
+        "lot_status",
+        "has_role",
+        "order",
+        "staff_statement",
+        "system_event",
+        "system_log_event",
+        "telemetry_reading",
+        "timestamp_correction",
+        "correction_notice",
         "source_record_field",
         "source_record_cell",
         "source_record_label",
@@ -1806,6 +2481,7 @@ def _source_record_packet_metadata_companion(
     item_description_rows = _runtime_rows(runtime, "item_description(Item, Description).")
     access_authority_rows = _runtime_rows(runtime, "access_authority(Item, Party, SourceId).")
     court_order_rows = _runtime_rows(runtime, "court_order(OrderId, OrderDate, OrderContent).")
+    staff_statement_rows = _runtime_rows(runtime, "staff_statement(StatementId, Speaker, Content).")
     if not text_rows and not label_rows:
         return None
 
@@ -1835,6 +2511,10 @@ def _source_record_packet_metadata_companion(
         token = str(row.get("NumericToken", "")).strip()
         if source_row and token:
             numeric_tokens_by_row.setdefault(source_row, []).append(token)
+    text_by_row = {
+        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
+        for row in text_rows
+    }
 
     rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
@@ -1846,6 +2526,7 @@ def _source_record_packet_metadata_companion(
         detail: str = "",
         display_value: str = "",
         helper_class: str = "clean-helper",
+        extra_fields: dict[str, str] | None = None,
     ) -> None:
         if not source_row or not kind or not value:
             return
@@ -1863,6 +2544,7 @@ def _source_record_packet_metadata_companion(
                 "DisplayValue": display,
                 "Detail": detail,
                 "HelperClass": helper_class,
+                **(extra_fields or {}),
             }
         )
 
@@ -1951,6 +2633,11 @@ def _source_record_packet_metadata_companion(
         for row in court_order_rows
         if str(row.get("OrderId", "")).strip()
     }
+    staff_statement_by_speaker = {
+        str(row.get("Speaker", "")).strip(): row
+        for row in staff_statement_rows
+        if str(row.get("Speaker", "")).strip()
+    }
     for row in access_authority_rows:
         item = str(row.get("Item", "")).strip()
         party = str(row.get("Party", "")).strip()
@@ -1966,6 +2653,32 @@ def _source_record_packet_metadata_companion(
             source_id,
             detail=f"item={item};party={party};order_date={order_date};order_content={order_content}",
             display_value=f"{_display_source_atom(source_id)} dated {_display_source_date_atom(order_date)}",
+        )
+
+    for source_row, token in _source_rows_matching_query_tokens(
+        args=args,
+        numeric_tokens_by_row=numeric_tokens_by_row,
+        text_by_row=text_by_row,
+    ):
+        section_atom = section_by_row.get(source_row, "")
+        if not section_atom:
+            continue
+        section_display = _display_source_record_section_label(section_atom)
+        add(
+            source_row,
+            "source_record_matching_token_source",
+            section_atom,
+            detail=text_by_row.get(source_row, ""),
+            display_value=(
+                f"{section_display} contains source row {source_row} matching "
+                f"{_display_source_date_atom(token)}."
+            ),
+            extra_fields={
+                "MatchedToken": token,
+                "SourceName": section_atom,
+                "DisplaySourceName": section_display,
+                "SourceAddressability": "bound_query_token",
+            },
         )
 
     for row in text_rows:
@@ -1989,11 +2702,110 @@ def _source_record_packet_metadata_companion(
                 detail=text_atom,
                 display_value=_display_unreproduced_reference(text_atom),
             )
+        discovery_note = _source_record_discovery_note(text_atom)
+        if discovery_note:
+            add(
+                source_row,
+                "source_record_discovery_note",
+                discovery_note["date"],
+                detail=text_atom,
+                display_value=discovery_note["display"],
+                helper_class="candidate-helper",
+            )
+        for temporal_note in _source_record_temporal_notes(text_atom):
+            add(
+                source_row,
+                temporal_note["kind"],
+                temporal_note["value"],
+                detail=text_atom,
+                display_value=temporal_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=temporal_note.get("fields", {}),
+            )
+        for sample_note in _source_record_sample_result_notes(text_atom):
+            add(
+                source_row,
+                "source_record_sample_result_note",
+                sample_note["value"],
+                detail=text_atom,
+                display_value=sample_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=sample_note.get("fields", {}),
+            )
+        for authority_note in _source_record_timestamp_authority_notes(text_atom):
+            add(
+                source_row,
+                "source_record_timestamp_authority_note",
+                authority_note["value"],
+                detail=text_atom,
+                display_value=authority_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=authority_note.get("fields", {}),
+            )
+        for filing_note in _source_record_statement_filing_notes(
+            text_atom,
+            staff_statement_by_speaker=staff_statement_by_speaker,
+        ):
+            add(
+                source_row,
+                "source_record_statement_filing_note",
+                filing_note["value"],
+                detail=text_atom,
+                display_value=filing_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=filing_note.get("fields", {}),
+            )
+        for routing_note in _source_record_role_routing_notes(text_atom):
+            add(
+                source_row,
+                "source_record_role_routing_note",
+                routing_note["value"],
+                detail=text_atom,
+                display_value=routing_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=routing_note.get("fields", {}),
+            )
+        for clock_note in _source_record_clock_event_notes(text_atom):
+            add(
+                source_row,
+                "source_record_clock_event_note",
+                clock_note["value"],
+                detail=text_atom,
+                display_value=clock_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=clock_note.get("fields", {}),
+            )
+        for order_note in _source_record_order_identifier_notes(text_atom):
+            add(
+                source_row,
+                "source_record_order_identifier_note",
+                order_note["value"],
+                detail=text_atom,
+                display_value=order_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=order_note.get("fields", {}),
+            )
+        for order_authority_note in _source_record_order_authority_notes(text_atom):
+            add(
+                source_row,
+                "source_record_order_authority_note",
+                order_authority_note["value"],
+                detail=text_atom,
+                display_value=order_authority_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=order_authority_note.get("fields", {}),
+            )
+        for item_event_note in _source_record_item_event_identifier_notes(text_atom):
+            add(
+                source_row,
+                "source_record_item_event_identifier_note",
+                item_event_note["value"],
+                detail=text_atom,
+                display_value=item_event_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=item_event_note.get("fields", {}),
+            )
 
-    text_by_row = {
-        str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip()
-        for row in text_rows
-    }
     ordered_source_rows = sorted(line_by_row, key=lambda source_row: line_by_row[source_row])
     for source_row in ordered_source_rows:
         text_atom = text_by_row.get(source_row, "")
@@ -2125,7 +2937,7 @@ def _source_record_packet_metadata_companion(
             "reasoning_basis": {
                 "kind": "query-only-companion",
                 "note": (
-                    "surfaced clean generic identifier metadata from admitted source_record "
+                    "surfaced clean generic identifier/source-addressability metadata from admitted source_record "
                     "ledger atoms and explicitly labeled fixture-family packet notes as candidate-helper rows"
                 ),
                 "trigger_predicate": predicate,
@@ -2297,6 +3109,11 @@ def _source_record_table_row_is_header(*, label: str, fields: dict[str, list[str
     return bool(field_values) and field_values.issubset(header_names | {label_text})
 
 
+def _is_source_record_metadata_identifier_kind(kind: str) -> bool:
+    text = str(kind or "").strip()
+    return text == "packet_identifier" or text.endswith("_identifier")
+
+
 def _scope_source_record_packet_metadata_rows(
     rows: list[dict[str, str]],
     *,
@@ -2337,38 +3154,180 @@ def _scope_source_record_packet_metadata_rows(
         },
         "motion_filed": {"motion_status"},
         "court_order": {"motion_status", "source_record_order_section"},
+        "caused_by": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "current_status": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "event_actor": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "event_occurred": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "event_target": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "lab_result": {
+            "source_record_matching_token_source",
+            "source_record_sample_result_note",
+            "source_record_temporal_event_note",
+            "source_record_temporal_relation_note",
+        },
+        "lot_attribute": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "lot_status": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "has_role": {"source_record_role_routing_note", "source_record_clock_event_note"},
+        "order": {"source_record_order_identifier_note", "source_record_order_authority_note"},
+        "staff_statement": {"source_record_statement_filing_note"},
+        "system_event": {
+            "source_record_clock_event_note",
+            "source_record_item_event_identifier_note",
+            "source_record_matching_token_source",
+        },
+        "system_log_event": {"source_record_matching_token_source", "source_record_timestamp_authority_note"},
+        "telemetry_reading": {"source_record_matching_token_source"},
+        "timestamp_correction": {"source_record_matching_token_source", "source_record_timestamp_authority_note"},
     }
-    wanted = wanted_by_predicate.get(predicate)
-    if predicate.startswith("source_record_"):
-        wanted = None
-    if not wanted:
-        return rows
-
     arg_tokens = {
         str(arg).strip().casefold()
         for arg in args
         if str(arg).strip() and not _is_prolog_variable(str(arg).strip())
     }
+    no_packet_metadata_predicates = {
+        "policy_requirement",
+    }
+    high_pressure_candidate_kinds = {
+        "source_record_discovery_note",
+        "source_record_sample_result_note",
+        "source_record_temporal_event_note",
+        "source_record_temporal_relation_note",
+        "source_record_matching_token_source",
+        "source_record_clock_event_note",
+        "source_record_order_authority_note",
+        "source_record_order_identifier_note",
+        "source_record_item_event_identifier_note",
+        "source_record_role_routing_note",
+        "source_record_statement_filing_note",
+        "source_record_timestamp_authority_note",
+    }
+
+    def row_haystack(row: dict[str, str]) -> str:
+        return " ".join(
+            str(row.get(key, ""))
+            for key in ("SourceRow", "Value", "DisplayValue", "Detail", "SectionAtom")
+        ).casefold()
+
+    def row_matches_arg_tokens(row: dict[str, str]) -> bool:
+        haystack = row_haystack(row)
+        for token in arg_tokens:
+            if token in haystack:
+                return True
+            normalized = token.removeprefix("v_")
+            event_time = str(row.get("EventTime", "")).casefold().removeprefix("v_")
+            if event_time and (normalized.endswith(event_time) or event_time in normalized):
+                return True
+            identifier = str(row.get("ItemIdentifier", "")).casefold()
+            if identifier and identifier in normalized:
+                return True
+        return False
+
+    def compact_metadata_rows(items: list[dict[str, str]]) -> list[dict[str, str]]:
+        compact: list[dict[str, str]] = []
+        seen_compact: set[tuple[str, str, str, str]] = set()
+        for row in items:
+            kind = str(row.get("Kind", ""))
+            if _is_source_record_metadata_identifier_kind(kind):
+                key = (
+                    kind,
+                    str(row.get("Value", "")),
+                    str(row.get("DisplayValue", "")),
+                    str(row.get("HelperClass", "")),
+                )
+            else:
+                key = (
+                    kind,
+                    str(row.get("Value", "")),
+                    str(row.get("DisplayValue", "")),
+                    str(row.get("SourceRow", "")),
+                )
+            if key in seen_compact:
+                continue
+            seen_compact.add(key)
+            compact.append(row)
+        return compact
+
+    if predicate.startswith("source_record_"):
+        if not arg_tokens:
+            return compact_metadata_rows([
+                row
+                for row in rows
+                if str(row.get("Kind", "")) not in high_pressure_candidate_kinds
+                or (
+                    predicate in {"source_record_label", "source_record_section"}
+                    and str(row.get("Kind", "")) == "source_record_timestamp_authority_note"
+                )
+            ])
+        return compact_metadata_rows([row for row in rows if row_matches_arg_tokens(row)])
+
+    if predicate in no_packet_metadata_predicates:
+        return []
+
+    wanted = wanted_by_predicate.get(predicate)
+    if not wanted:
+        if arg_tokens:
+            return compact_metadata_rows([row for row in rows if row_matches_arg_tokens(row)])
+        return compact_metadata_rows(rows)
 
     def score(row: dict[str, str]) -> tuple[int, str, str]:
         kind = str(row.get("Kind", ""))
-        haystack = " ".join(
-            str(row.get(key, ""))
-            for key in ("Value", "DisplayValue", "Detail", "SectionAtom")
-        ).casefold()
+        haystack = row_haystack(row)
         kind_score = 0 if kind in wanted else 1
         token_score = 0 if not arg_tokens or any(token in haystack for token in arg_tokens) else 1
         return (kind_score + token_score, kind, str(row.get("SourceRow", "")))
 
     scoped = sorted(rows, key=score)
     relevant = [row for row in scoped if str(row.get("Kind", "")) in wanted]
+    if predicate == "has_role":
+        relevant = [row for row in relevant if arg_tokens and any(token in row_haystack(row) for token in arg_tokens)]
+    if predicate == "system_event":
+        relevant = [
+            row
+            for row in relevant
+            if str(row.get("Kind", "")) not in {
+                "source_record_clock_event_note",
+                "source_record_item_event_identifier_note",
+                "source_record_matching_token_source",
+            }
+            or (arg_tokens and row_matches_arg_tokens(row))
+        ]
+    if not relevant and predicate in {
+        "has_role",
+        "order",
+        "staff_statement",
+        "system_event",
+        "system_log_event",
+        "lab_result",
+        "telemetry_reading",
+        "timestamp_correction",
+    }:
+        return []
     if relevant:
-        if predicate in {"party_role", "physical_custodian"}:
+        if predicate in {
+            "has_role",
+            "order",
+            "party_role",
+            "physical_custodian",
+            "staff_statement",
+            "system_event",
+            "system_log_event",
+            "lab_result",
+            "telemetry_reading",
+            "timestamp_correction",
+        }:
             return relevant
         # Return relevant rows plus a small tail of context rows. The tail keeps
         # broad negative/source-status questions from losing neighboring packet
         # cues while avoiding the old 40+ row flood.
-        context = [row for row in scoped if row not in relevant][:8]
+        context = [
+            row
+            for row in scoped
+            if row not in relevant
+            and (
+                str(row.get("Kind", "")) not in high_pressure_candidate_kinds
+                or any(token in row_haystack(row) for token in arg_tokens)
+            )
+        ][:8]
         return [*relevant, *context]
     return rows
 
@@ -2779,6 +3738,678 @@ def _metadata_kind_for_atom(atom: str) -> str:
     return ""
 
 
+def _source_record_discovery_note(text_atom: str) -> dict[str, str] | None:
+    text = str(text_atom or "").strip().lower()
+    match = re.search(
+        r"(?P<subject>[a-z0-9_]+?)_discovered_(?P<date>\d{4}_\d{2}_\d{2})_by_(?P<actor>[a-z0-9_]+)$",
+        text,
+    )
+    if not match:
+        return None
+    subject = match.group("subject")
+    if subject.startswith("note_"):
+        subject = subject.removeprefix("note_")
+    date = match.group("date")
+    actor = match.group("actor")
+    return {
+        "subject": subject,
+        "date": f"v_{date}",
+        "actor": actor,
+        "display": (
+            f"{_display_source_phrase(subject)} discovered on "
+            f"{_display_source_date_atom(date)} by {_display_source_phrase(actor)}."
+        ),
+    }
+
+
+_SOURCE_MONTHS = {
+    "january": "01",
+    "february": "02",
+    "march": "03",
+    "april": "04",
+    "may": "05",
+    "june": "06",
+    "july": "07",
+    "august": "08",
+    "september": "09",
+    "october": "10",
+    "november": "11",
+    "december": "12",
+}
+
+
+def _display_month_day(month: str, day: str) -> str:
+    month_text = str(month or "").strip().lower()
+    day_text = str(day or "").strip()
+    if not month_text or not day_text:
+        return ""
+    return f"{month_text.capitalize()} {int(day_text)}" if day_text.isdigit() else f"{month_text.capitalize()} {day_text}"
+
+
+def _month_day_value(month: str, day: str) -> str:
+    month_text = str(month or "").strip().lower()
+    day_text = str(day or "").strip()
+    month_num = _SOURCE_MONTHS.get(month_text)
+    if not month_num or not day_text.isdigit():
+        return f"{month_text}_{day_text}".strip("_")
+    return f"v_{month_num}_{int(day_text):02d}"
+
+
+def _source_record_temporal_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract reusable temporal source notes from normalized source rows.
+
+    These rows deliberately model only structural source-record cues: subject,
+    temporal action, location, relation, and explicit no-overlap language. The
+    parser avoids project nouns; any normalized source row with the same shape
+    can earn the same candidate support.
+    """
+
+    text = str(text_atom or "").strip().lower()
+    if not text:
+        return []
+
+    out: list[dict[str, Any]] = []
+    reported_by = ""
+    report_match = re.search(r"(?P<reporter>[a-z0-9_]+?)_reported_to_[a-z0-9_]+_that_", text)
+    if report_match:
+        reported_by = report_match.group("reporter")
+
+    moved_match = re.search(
+        r"(?P<subject>[a-z]+_\d+[a-z]?)_(?:plants|units|items|records)_had_been_temporarily_moved_to_"
+        r"(?P<to_location>[a-z]+_\d+[a-z]?)_on_(?P<move_month>[a-z]+)_(?P<move_day>\d{1,2})"
+        r".*?_then_returned_to_(?P<return_location>[a-z]+_\d+[a-z]?)_on_"
+        r"(?P<return_month>[a-z]+)_(?P<return_day>\d{1,2})",
+        text,
+    )
+    if moved_match:
+        subject = moved_match.group("subject")
+        to_location = moved_match.group("to_location")
+        return_location = moved_match.group("return_location")
+        move_month = moved_match.group("move_month")
+        move_day = moved_match.group("move_day")
+        return_month = moved_match.group("return_month")
+        return_day = moved_match.group("return_day")
+        move_date = _month_day_value(move_month, move_day)
+        return_date = _month_day_value(return_month, return_day)
+        reporter_prefix = f"{_display_source_phrase(reported_by)} reported that " if reported_by else ""
+        undisclosed = "undisclosed" if "not_disclosed" in text or "undisclosed" in text else ""
+        out.append(
+            {
+                "kind": "source_record_temporal_event_note",
+                "value": subject,
+                "display": (
+                    f"{reporter_prefix}{_display_source_phrase(subject)} was temporarily moved to "
+                    f"{_display_source_phrase(to_location)} on {_display_month_day(move_month, move_day)} "
+                    f"and returned to {_display_source_phrase(return_location)} on "
+                    f"{_display_month_day(return_month, return_day)}"
+                    f"{'; movement was not disclosed during the initial inspection' if undisclosed else ''}."
+                ),
+                "fields": {
+                    "Subject": subject,
+                    "Action": "temporarily_moved_and_returned",
+                    "Location": to_location,
+                    "ReturnLocation": return_location,
+                    "Date": move_date,
+                    "ReturnDate": return_date,
+                    "ReportedBy": reported_by,
+                    "TemporalStatus": undisclosed,
+                },
+            }
+        )
+
+    arrived_match = re.search(
+        r"(?P<subject>[a-z]+_\d+[a-z]?)_arrived_in_"
+        r"(?P<location>[a-z]+_\d+[a-z]?)_on_(?P<arrive_month>[a-z]+)_(?P<arrive_day>\d{1,2})"
+        r"(?:_after_the_(?P<related_subject>[a-z]+_\d+[a-z]?)_(?:plants|units|items|records)_were_returned_to_"
+        r"(?P<related_location>[a-z]+_\d+[a-z]?))?",
+        text,
+    )
+    if arrived_match:
+        subject = arrived_match.group("subject")
+        location = arrived_match.group("location")
+        arrive_month = arrived_match.group("arrive_month")
+        arrive_day = arrived_match.group("arrive_day")
+        related_subject = arrived_match.group("related_subject") or ""
+        related_location = arrived_match.group("related_location") or ""
+        no_overlap = "no_overlap_exposure" in text or "no_overlap" in text
+        relation = ""
+        if related_subject and related_location:
+            relation = (
+                f" after {_display_source_phrase(related_subject)} returned to "
+                f"{_display_source_phrase(related_location)}"
+            )
+        out.append(
+            {
+                "kind": "source_record_temporal_relation_note" if relation or no_overlap else "source_record_temporal_event_note",
+                "value": subject,
+                "display": (
+                    f"{_display_source_phrase(subject)} arrived in {_display_source_phrase(location)} "
+                    f"on {_display_month_day(arrive_month, arrive_day)}{relation}"
+                    f"{'; no overlap exposure' if no_overlap else ''}."
+                ),
+                "fields": {
+                    "Subject": subject,
+                    "Action": "arrived",
+                    "Location": location,
+                    "Date": _month_day_value(arrive_month, arrive_day),
+                    "RelatedSubject": related_subject,
+                    "RelatedLocation": related_location,
+                    "Relation": "after_return" if relation else "",
+                    "TemporalStatus": "no_overlap_exposure" if no_overlap else "",
+                },
+            }
+        )
+
+    return out
+
+
+def _source_record_sample_result_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract explicit count-of-total sample result notes from source text.
+
+    The row is candidate support because it preserves a normalized source-row
+    statement; it does not reinterpret broader lab-result predicates.
+    """
+
+    text = str(text_atom or "").strip().lower()
+    if not text:
+        return []
+    normalized = re.sub(r"^v_(?=\d)", "", text)
+    out: list[dict[str, Any]] = []
+
+    patterns = [
+        re.compile(
+            r"(?P<count>\d+)_of_(?:the_)?(?P<total>\d+)_(?:sampled_)?"
+            r"(?P<unit>samples|sample|plants|plant|items|item|records|record|units|unit)"
+            r"(?:_from_(?P<subject>[a-z]+_\d+[a-z]?))?.*?(?:tested_)?(?P<result>positive|negative)"
+        ),
+        re.compile(
+            r"(?P<result>confirmed|positive|negative)[a-z0-9_]*?_in_(?P<count>\d+)_of_(?:the_)?"
+            r"(?P<total>\d+)_(?:sampled_)?(?P<unit>samples|sample|plants|plant|items|item|records|record|units|unit)"
+            r"(?:_from_(?P<subject>[a-z]+_\d+[a-z]?))?"
+        ),
+    ]
+    for pattern in patterns:
+        for match in pattern.finditer(normalized):
+            count = match.group("count")
+            total = match.group("total")
+            unit = match.group("unit")
+            subject = match.group("subject") or _subject_near_sample_result(normalized, match.start(), match.end())
+            raw_result = match.group("result")
+            result = "positive" if raw_result == "confirmed" else raw_result
+            if result == "negative" and "_other_" in normalized[match.start() : match.end()]:
+                continue
+            value = subject or f"{count}_of_{total}_{unit}_{result}"
+            display_subject = f"{_display_source_phrase(subject)}: " if subject else ""
+            display = (
+                f"{display_subject}{count} of {total} "
+                f"{_display_source_phrase(unit)} {_display_source_phrase(result)}."
+            )
+            out.append(
+                {
+                    "value": value,
+                    "display": display,
+                    "fields": {
+                        "Subject": subject,
+                        "Result": result,
+                        "Count": count,
+                        "Total": total,
+                        "Unit": unit,
+                    },
+                }
+            )
+    return _dedupe_sample_result_notes(out)
+
+
+def _subject_near_sample_result(text: str, start: int, end: int) -> str:
+    window = str(text or "")[max(0, start - 80) : min(len(str(text or "")), end + 80)]
+    after = re.search(r"(?:from|for)_(?P<subject>[a-z]+_\d+[a-z]?)(?:_|$)", window)
+    if after:
+        return after.group("subject")
+    before_matches = list(re.finditer(r"(?P<subject>[a-z]+_\d+[a-z]?)(?:_|$)", window))
+    return before_matches[-1].group("subject") if before_matches else ""
+
+
+def _dedupe_sample_result_notes(notes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for note in notes:
+        fields = note.get("fields", {}) if isinstance(note, dict) else {}
+        key = (
+            str(fields.get("Subject", "")),
+            str(fields.get("Result", "")),
+            str(fields.get("Count", "")),
+            str(fields.get("Total", "")),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(note)
+    return out
+
+
+def _source_record_timestamp_authority_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract source-stated timestamp authority and supersession notes."""
+
+    text = str(text_atom or "").strip().lower()
+    if not text:
+        return []
+    out: list[dict[str, Any]] = []
+    time_token = r"(?<!\d)\d{1,2}_\d{2}(?:_\d{2})?(?!\d)"
+    authority_match = re.search(
+        r"authoritative_(?:timestamp|time)(?:_from_(?P<preferred_source>[a-z0-9_]+?))?_is_"
+        rf"(?P<preferred_time>{time_token})",
+        text,
+    )
+    if not authority_match:
+        return out
+    preferred_time = f"v_{authority_match.group('preferred_time')}"
+    preferred_source = (authority_match.group("preferred_source") or "").strip("_")
+    superseded_time = _superseded_timestamp_from_timestamp_note(text, preferred_time=preferred_time)
+    superseded_source = _superseded_source_from_timestamp_note(text)
+    source_display = _display_source_phrase(preferred_source) if preferred_source else "authoritative source"
+    display = f"{source_display} is authoritative at {_display_source_date_atom(preferred_time)}"
+    if superseded_time:
+        display += f"; {_display_source_date_atom(superseded_time)} is superseded"
+    if superseded_source:
+        display += f" from {_display_source_phrase(superseded_source)}"
+    display += "."
+    out.append(
+        {
+            "value": preferred_time,
+            "display": display,
+            "fields": {
+                "PreferredTimestamp": preferred_time,
+                "PreferredSource": preferred_source,
+                "SupersededTimestamp": superseded_time,
+                "SupersededSource": superseded_source,
+                "AuthorityStatus": "authoritative_over_superseded" if superseded_time else "authoritative",
+            },
+        }
+    )
+    return out
+
+
+def _source_record_statement_filing_notes(
+    text_atom: str,
+    *,
+    staff_statement_by_speaker: dict[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Extract source-stated statement filing metadata."""
+
+    text = str(text_atom or "").strip().lower()
+    if not text or "statement_filed_" not in text:
+        return []
+    time_token = r"(?<!\d)\d{1,2}_\d{2}(?:_\d{2})?(?!\d)"
+    match = re.search(
+        rf"(?P<speaker>[a-z0-9_]+?)(?:_(?P<role>rn|md|do|pa|np|bsn|rph))?_statement_filed_(?P<filed_time>{time_token})",
+        text,
+    )
+    if not match:
+        return []
+    speaker = match.group("speaker").strip("_")
+    role = (match.group("role") or "").strip("_")
+    filed_time = f"v_{match.group('filed_time')}"
+    statement_row = staff_statement_by_speaker.get(speaker, {})
+    statement_id = str(statement_row.get("StatementId", "")).strip()
+    content = str(statement_row.get("Content", "")).strip()
+    display = f"{_display_source_phrase(speaker)}"
+    if role:
+        display += f", {_display_source_phrase(role).upper()}"
+    display += f" statement filed at {_display_source_date_atom(filed_time)}."
+    fields = {
+        "Speaker": speaker,
+        "FiledTime": filed_time,
+        "StatementRole": role,
+    }
+    if statement_id:
+        fields["StatementId"] = statement_id
+    if content:
+        fields["StatementContent"] = content
+    return [
+        {
+            "value": speaker,
+            "display": display,
+            "fields": fields,
+        }
+    ]
+
+
+def _source_record_role_routing_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract source-stated routing to a named role holder."""
+
+    text = str(text_atom or "").strip().lower()
+    if "routed_to_" not in text:
+        return []
+    out: list[dict[str, Any]] = []
+    match = re.search(
+        r"routed_to_(?P<person>[a-z0-9]+_[a-z0-9]+)(?:_(?:md|rn|do|pa|np|bsn))?_"
+        r"(?P<role>[a-z0-9]+_(?:director|manager|officer|coordinator|secretary|reviewer)|quality_director)"
+        r"(?:_|$)",
+        text,
+    )
+    if not match:
+        return out
+    person = match.group("person").strip("_")
+    role = match.group("role").strip("_")
+    if not person or not role:
+        return out
+    out.append(
+        {
+            "value": person,
+            "display": f"{_display_source_phrase(person)}, {_display_source_phrase(role)}.",
+            "fields": {
+                "RoutedTo": person,
+                "Role": role,
+                "Relation": "routed_to_role_holder",
+            },
+        }
+    )
+    return out
+
+
+def _source_record_order_identifier_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract order identifiers and nearby order scope from source rows."""
+
+    text = str(text_atom or "").strip().lower()
+    if "ord_" not in text:
+        return []
+    out: list[dict[str, Any]] = []
+    for order_id in _dedupe_str(re.findall(r"ord_\d+", text)):
+        scope = "protocol_order" if "protocol_order" in text or "per_protocol_order" in text else "order"
+        display_order_id = _display_order_identifier(order_id)
+        out.append(
+            {
+                "value": order_id,
+                "display": f"{display_order_id} ({_display_source_phrase(scope)}).",
+                "fields": {
+                    "OrderId": order_id,
+                    "DisplayOrderId": display_order_id,
+                    "OrderScope": scope,
+                },
+            }
+        )
+    return out
+
+
+def _display_order_identifier(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.fullmatch(r"ord_(\d+)", text)
+    if match:
+        return f"ORD-{match.group(1)}"
+    return _display_source_atom(text)
+
+
+def _source_record_clock_event_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract source-stated clock/timekeeping events."""
+
+    text = str(text_atom or "").strip().lower()
+    if "clocked_out" not in text and "clock_out" not in text:
+        return []
+    match = re.search(
+        r"(?:clocked_out|clock_out).*?_at_(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)",
+        text,
+    )
+    if not match:
+        return []
+    before_event = text[: match.start()]
+    actor_candidates = [
+        candidate
+        for candidate in re.findall(r"[a-z][a-z0-9]+_[a-z][a-z0-9]+", before_event)
+        if not candidate.startswith(("at_", "v_", "charge_", "quality_", "review_"))
+    ]
+    if not actor_candidates:
+        return []
+    actor = actor_candidates[0].strip("_")
+    time = f"v_{match.group('time')}"
+    return [
+        {
+            "value": time,
+            "display": f"{_display_source_phrase(actor)} clocked out at {_display_source_date_atom(time)}.",
+            "fields": {
+                "Actor": actor,
+                "Event": "clocked_out",
+                "EventTime": time,
+            },
+        }
+    ]
+
+
+def _source_record_order_authority_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract source-stated order authority, supersession, or co-signature notes."""
+
+    text = str(text_atom or "").strip().lower()
+    if "order" not in text or not any(token in text for token in ("authoritative_directive", "co_signature", "superseded")):
+        return []
+    out: list[dict[str, Any]] = []
+    signed_order_match = re.search(r"(?P<time>\d{1,2}_\d{2})_attending_order", text)
+    initial_order_match = re.search(r"verbal_order_at_(?P<time>\d{1,2}_\d{2})", text)
+    requirement = "attending_co_signature" if "attending_co_signature" in text else ""
+    status = "authoritative_directive" if "authoritative_directive" in text else "order_authority"
+    value = f"v_{signed_order_match.group('time')}" if signed_order_match else (requirement or status)
+    display = "Attending signed order is the authoritative directive"
+    if initial_order_match:
+        display += f"; verbal order at {_display_source_date_atom('v_' + initial_order_match.group('time'))}"
+    if requirement:
+        display += f" required {_display_source_phrase(requirement)}"
+    if signed_order_match:
+        display += f" satisfied by attending order at {_display_source_date_atom('v_' + signed_order_match.group('time'))}"
+    display += "."
+    fields = {
+        "AuthorityStatus": status,
+        "Requirement": requirement,
+    }
+    if initial_order_match:
+        fields["InitialOrderTime"] = f"v_{initial_order_match.group('time')}"
+    if signed_order_match:
+        fields["AuthoritativeOrderTime"] = f"v_{signed_order_match.group('time')}"
+    out.append({"value": value, "display": display, "fields": fields})
+    return out
+
+
+def _source_record_item_event_identifier_notes(text_atom: str) -> list[dict[str, Any]]:
+    """Extract item identifiers that are bound to an event/action time in one source row."""
+
+    text = str(text_atom or "").strip().lower()
+    if not text:
+        return []
+    identifier_candidates = _source_item_identifier_candidates(text)
+    if not identifier_candidates:
+        return []
+    event_times = _source_event_times_from_item_row(text)
+    if not event_times:
+        return []
+    action = _source_item_event_action(text)
+    if not action:
+        return []
+
+    out: list[dict[str, Any]] = []
+    for identifier in identifier_candidates:
+        display_identifier = _display_source_identifier_code(identifier)
+        for event_time in event_times:
+            out.append(
+                {
+                    "value": identifier,
+                    "display": (
+                        f"{display_identifier} is linked to "
+                        f"{_display_source_phrase(action)} at {_display_source_date_atom(event_time)}."
+                    ),
+                    "fields": {
+                        "ItemIdentifier": identifier,
+                        "DisplayItemIdentifier": display_identifier,
+                        "EventAction": action,
+                        "EventTime": event_time,
+                    },
+                }
+            )
+    return _dedupe_item_event_identifier_notes(out)
+
+
+def _source_item_identifier_candidates(text: str) -> list[str]:
+    out: list[str] = []
+    for match in re.finditer(r"(?:^|_)lot_(?P<identifier>[a-z][a-z0-9]*(?:_\d+[a-z0-9]*){2,})(?:_|$)", text):
+        out.append(match.group("identifier").strip("_"))
+    for match in re.finditer(r"(?:^|_)(?P<identifier>[a-z]{2,8}_\d{4}_\d{3,6})(?:_|$)", text):
+        out.append(match.group("identifier").strip("_"))
+    return _dedupe_str(out)
+
+
+def _source_event_times_from_item_row(text: str) -> list[str]:
+    times: list[str] = []
+    for pattern in (
+        r"(?:^|_)hung_(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)",
+        r"(?:^|_)hung_by_[a-z0-9_]+?_at_(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)",
+        r"(?:^|_)checked_[a-z0-9_]*?lot_[a-z0-9_]+?_hung_(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)",
+        r"(?:^|_)(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)_[a-z0-9_]*?(?:withdraw|recorded|returned|sealed|spiked|checked)(?:_|$)",
+    ):
+        for match in re.finditer(pattern, text):
+            times.append(f"v_{match.group('time').strip('_')}")
+    return _dedupe_str(times)
+
+
+def _source_item_event_action(text: str) -> str:
+    for action in (
+        "hung",
+        "withdraw",
+        "returned",
+        "sealed",
+        "spiked",
+        "checked",
+        "recorded",
+        "scanned",
+        "issued",
+        "approved",
+        "assigned",
+    ):
+        if re.search(rf"(?:^|_){re.escape(action)}(?:_|$)", text):
+            return action
+    return ""
+
+
+def _display_source_identifier_code(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if re.fullmatch(r"[a-z]{2,8}_\d{4}_\d{3,6}", text):
+        return "-".join(part.upper() if part.isalpha() else part for part in text.split("_"))
+    return _display_source_atom(text)
+
+
+def _dedupe_item_event_identifier_notes(notes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for note in notes:
+        fields = note.get("fields", {})
+        key = (
+            str(fields.get("ItemIdentifier", "")),
+            str(fields.get("EventAction", "")),
+            str(fields.get("EventTime", "")),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(note)
+    return out
+
+
+def _superseded_source_from_timestamp_note(text_atom: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    if "nightly_summary" in text:
+        return "nightly_summary"
+    match = re.search(r"(?:first_recorded_in_the|earlier)_([a-z0-9_]+?)_as_\d", text)
+    return match.group(1).strip("_") if match else ""
+
+
+def _superseded_timestamp_from_timestamp_note(text_atom: str, *, preferred_time: str) -> str:
+    text = str(text_atom or "").strip().lower()
+    time_token = r"(?<!\d)\d{1,2}_\d{2}(?:_\d{2})?(?!\d)"
+    match = re.search(
+        rf"(?:earlier|original|previous|nightly|unit)[a-z0-9_]{{0,80}}?(?P<time>{time_token}).{{0,120}}?superseded",
+        text,
+    )
+    if match:
+        candidate = f"v_{match.group('time')}"
+        if candidate != preferred_time:
+            return candidate
+    first_recorded_match = re.search(rf"first_recorded_in_the_[a-z0-9_]+?_as_(?P<time>{time_token})", text)
+    if first_recorded_match:
+        candidate = f"v_{first_recorded_match.group('time')}"
+        if candidate != preferred_time:
+            return candidate
+    if "superseded" in text:
+        candidate_scope = text.split("superseded", 1)[0]
+    elif "first_recorded_in_the" in text:
+        candidate_scope = text.split("authoritative_", 1)[0]
+    else:
+        return ""
+    for raw_time in reversed(re.findall(time_token, candidate_scope)):
+        candidate = f"v_{raw_time}"
+        if candidate != preferred_time:
+            return candidate
+    return ""
+
+
+def _source_rows_matching_query_tokens(
+    *,
+    args: list[str],
+    numeric_tokens_by_row: dict[str, list[str]],
+    text_by_row: dict[str, str],
+) -> list[tuple[str, str]]:
+    query_tokens = _source_record_query_tokens(args)
+    if not query_tokens:
+        return []
+    out: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for source_row, tokens in numeric_tokens_by_row.items():
+        row_tokens = set(tokens)
+        text_atom = str(text_by_row.get(source_row, "")).strip()
+        for token in query_tokens:
+            if (
+                token in row_tokens
+                or token.removeprefix("v_") in text_atom
+                or any(_source_query_token_matches_row_token(token, row_token) for row_token in row_tokens)
+            ):
+                key = (source_row, token)
+                if key not in seen:
+                    seen.add(key)
+                    out.append(key)
+    return out
+
+
+def _source_record_query_tokens(args: list[str]) -> list[str]:
+    out: list[str] = []
+    for raw in args:
+        value = str(raw or "").strip().strip("'\"")
+        if not value or _is_prolog_variable(value):
+            continue
+        if re.fullmatch(r"(?:v_)?\d+(?:_\d+)+", value):
+            out.append(value if value.startswith("v_") else f"v_{value}")
+    return _dedupe_str(out)
+
+
+def _source_query_token_matches_row_token(query_token: str, row_token: str) -> bool:
+    query = str(query_token or "").strip().removeprefix("v_")
+    row = str(row_token or "").strip().removeprefix("v_")
+    if not query or not row or query == row:
+        return bool(query and row and query == row)
+    # Permit full date-time query constants to match source rows that preserved
+    # only the time suffix, but do not let bare years or dates match broadly.
+    if re.fullmatch(r"\d{1,2}_\d{2}(?:_\d{2})?", row):
+        return query.endswith("_" + row)
+    return False
+
+
+def _display_source_record_section_label(section_atom: str) -> str:
+    display = _display_section_from_atom(section_atom)
+    if display:
+        hint = _section_title_hint_from_atom(section_atom)
+        if hint and hint != str(section_atom or "").strip().lower():
+            return f"{display} {_display_source_phrase(hint)}".strip()
+        return display
+    text = str(section_atom or "").strip().lower()
+    match = re.match(r"^v_\d+_(?P<title>.+)$", text)
+    if match:
+        return _display_source_phrase(match.group("title"))
+    return _display_source_phrase(text)
+
+
 def _metadata_tokens_from_text_atom(text_atom: str) -> list[str]:
     text = str(text_atom or "").lower()
     patterns = [
@@ -2873,6 +4504,15 @@ def _display_source_atom(atom: str) -> str:
     match = re.fullmatch(r"dry_dl_(\d+)", text)
     if match:
         return f"DRY-DL-{match.group(1).zfill(2)}"
+    match = re.fullmatch(r"([a-z])_(\d+)", text)
+    if match:
+        return f"{match.group(1).upper()}-{match.group(2)}"
+    match = re.fullmatch(r"group_([a-z0-9]+)", text)
+    if match:
+        return f"Group {match.group(1).upper()}"
+    match = re.fullmatch(r"([a-z])_([a-z][a-z0-9]*)", text)
+    if match:
+        return f"{match.group(1).upper()}. {match.group(2).capitalize()}"
     return atom
 
 
@@ -5625,7 +7265,6 @@ def _roster_state_companion(
 ) -> dict[str, Any] | None:
     roster_predicates = {
         "adult_role",
-        "bus_assignment",
         "group_member",
         "group_membership",
         "homeroom_member",
@@ -5633,11 +7272,11 @@ def _roster_state_companion(
         "role_counts_towards_ratio",
         "roster_version",
         "roster_version_status",
-        "source_record_label",
         "student_group_assignment",
         "student_in_homeroom",
         "supervises",
         "supervision_assignment",
+        "temporary_assignment",
         "temporary_event_assignment",
     }
     if predicate not in roster_predicates:
@@ -5646,13 +7285,16 @@ def _roster_state_companion(
     adult_role_rows = _runtime_rows(runtime, "adult_role(Adult, Role).")
     group_member_rows = _runtime_rows(runtime, "group_member(Group, Person, Interval).")
     membership_rows = _runtime_rows(runtime, "group_membership(Person, Group, Start, End).")
+    lodging_rows = _runtime_rows(runtime, "lodging_assignment(Person, Room, RoleType).")
     ratio_rows = _runtime_rows(runtime, "role_counts_towards_ratio(Role, Counts).")
+    ratio_count_rows = _runtime_rows(runtime, "ratio_count_status(Person, Counts).")
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
     student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
     roster_table_member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Student).")
     roster_table_label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
+    temporary_assignment_rows = _runtime_rows(runtime, "temporary_assignment(Person, Group, Event, StartEnd).")
     temporary_event_rows = _runtime_rows(runtime, "temporary_event_assignment(Person, Event, Start, End).")
     out_rows: list[dict[str, Any]] = []
     ratio_by_role = {
@@ -5660,6 +7302,19 @@ def _roster_state_companion(
         for row in ratio_rows
         if str(row.get("Role", "")).strip()
     }
+    ratio_by_person = {
+        str(row.get("Person", "")).strip(): str(row.get("Counts", "")).strip()
+        for row in ratio_count_rows
+        if str(row.get("Person", "")).strip()
+    }
+    lodging_by_person: dict[str, list[dict[str, str]]] = {}
+    for row in lodging_rows:
+        person = str(row.get("Person", "")).strip()
+        room = str(row.get("Room", "")).strip()
+        role_type = str(row.get("RoleType", "")).strip()
+        if not person:
+            continue
+        lodging_by_person.setdefault(person, []).append({"Room": room, "RoleType": role_type})
     printed_member_by_key = {
         (
             str(row.get("SourceRow", "")).strip(),
@@ -5680,11 +7335,49 @@ def _roster_state_companion(
                 "SupportKind": "adult_role",
                 "Person": adult,
                 "Role": role,
-                "CountsTowardRatio": ratio_by_role.get(role, ""),
+                "CountsTowardRatio": ratio_by_person.get(adult, ratio_by_role.get(role, "")),
                 "RoleHint": _role_hint_from_group(role),
                 "HelperClass": "clean-helper",
             }
         )
+        if adult in ratio_by_person:
+            out_rows.append(
+                {
+                    "SupportKind": "adult_ratio_count_status",
+                    "Person": adult,
+                    "Role": role,
+                    "CountsTowardRatio": ratio_by_person.get(adult, ""),
+                    "HelperClass": "clean-helper",
+                }
+            )
+        adult_lodging = lodging_by_person.get(adult) or []
+        if adult_lodging:
+            for lodging in adult_lodging:
+                out_rows.append(
+                    {
+                        "SupportKind": "adult_lodging_status",
+                        "Person": adult,
+                        "Role": role,
+                        "Room": lodging.get("Room", ""),
+                        "RoleType": lodging.get("RoleType", ""),
+                        "LodgingStatus": "assigned",
+                        "DisplayValue": f"{adult} lodges with the group in room {lodging.get('Room', '')}".strip(),
+                        "HelperClass": "clean-helper",
+                    }
+                )
+        else:
+            out_rows.append(
+                {
+                    "SupportKind": "adult_lodging_status",
+                    "Person": adult,
+                    "Role": role,
+                    "Room": "",
+                    "RoleType": "",
+                    "LodgingStatus": "not_assigned",
+                    "DisplayValue": f"{adult} does not lodge with the group",
+                    "HelperClass": "clean-helper",
+                }
+            )
     for role, counts in sorted(ratio_by_role.items()):
         adults = sorted(
             str(row.get("Adult", "")).strip()
@@ -5771,8 +7464,10 @@ def _roster_state_companion(
         )
     for row in student_assignment_rows:
         person = str(row.get("Student", "")).strip()
-        version = str(row.get("Version", "")).strip()
-        group = str(row.get("Group", "")).strip()
+        version, group = _normalize_roster_assignment_version_group(
+            str(row.get("Version", "")).strip(),
+            str(row.get("Group", "")).strip(),
+        )
         if not person or not group:
             continue
         out_rows.append(
@@ -5857,8 +7552,13 @@ def _roster_state_companion(
     out_rows.extend(_source_record_roster_assignment_support(runtime))
     out_rows.extend(_source_record_roster_adult_support(runtime))
     out_rows.extend(_source_record_roster_compliance_support(runtime))
-    out_rows.extend(_source_record_temporary_event_source_support(runtime, temporary_event_rows))
-    out_rows.extend(_source_record_school_packet_support(runtime))
+    out_rows.extend(
+        _source_record_temporary_event_source_support(
+            runtime,
+            [*_temporary_assignment_event_rows(temporary_assignment_rows), *temporary_event_rows],
+        )
+    )
+    out_rows.extend(_source_record_document_retention_support(runtime))
 
     group_counts: dict[tuple[str, str, str, str], set[str]] = {}
     group_count_classes: dict[tuple[str, str, str, str], set[str]] = {}
@@ -5883,9 +7583,9 @@ def _roster_state_companion(
         group_count_classes.setdefault(group_key, set()).add(str(row.get("HelperClass", "") or "unlabeled"))
     for (group, version, start, end), people in sorted(group_counts.items()):
         helper_class = (
-            "candidate-helper"
-            if "candidate-helper" in group_count_classes.get((group, version, start, end), set())
-            else "clean-helper"
+            "clean-helper"
+            if "clean-helper" in group_count_classes.get((group, version, start, end), set())
+            else "candidate-helper"
         )
         out_rows.append(
             {
@@ -5980,6 +7680,30 @@ def _prioritize_roster_state_rows(
             or requested.lower() in {"adult", "count", "counts", "group", "homeroom", "person", "role", "student", "version", "x"}
         )
 
+    def requested_is_specific(index: int) -> bool:
+        return not requested_is_wildcard(index)
+
+    def normalized_requested_version(value: str) -> str:
+        text = str(value or "").strip().lower()
+        match = re.fullmatch(r"(?:roster_)?v(?P<major>\d+)(?:_(?P<minor>\d+))?", text)
+        if not match:
+            return str(value or "").strip()
+        version = "v" + match.group("major")
+        if match.group("minor"):
+            version += "_" + match.group("minor")
+        return version
+
+    def version_requested(value: str, requested: str) -> bool:
+        return is_requested(value, normalized_requested_version(requested))
+
+    broad_student_assignment_version_scan = (
+        predicate == "student_group_assignment"
+        and len(args) >= 3
+        and requested_is_wildcard(0)
+        and requested_is_wildcard(1)
+        and normalized_requested_version(args[2]) != str(args[2]).strip()
+    )
+
     def score(row: dict[str, Any]) -> tuple[int, int, str, str]:
         support_kind = str(row.get("SupportKind", "")).strip()
         person = str(row.get("Person", "")).strip()
@@ -5991,10 +7715,18 @@ def _prioritize_roster_state_rows(
         version_priority = _roster_version_rank(version)
 
         if predicate == "student_group_assignment" and len(args) >= 3:
+            version_arg = args[1]
+            group_arg = args[2]
+            version_in_third_slot = requested_is_wildcard(1) and normalized_requested_version(args[2]) != str(args[2]).strip()
+            if version_in_third_slot:
+                version_arg = args[2]
+                group_arg = args[1]
             person_ok = is_requested(person, args[0])
-            version_ok = is_requested(version, args[1])
-            group_ok = is_requested(group, args[2])
-            if person_ok and version_ok and group_ok:
+            version_ok = version_requested(version, version_arg)
+            group_ok = is_requested(group, group_arg)
+            if broad_student_assignment_version_scan and version_ok:
+                priority = 0 if support_kind == "group_count" else 12
+            elif person_ok and version_ok and group_ok:
                 priority = (
                     0
                     if support_kind == "roster_table_student_group_assignment"
@@ -6025,46 +7757,56 @@ def _prioritize_roster_state_rows(
             if requested_is_wildcard(2):
                 version_priority = -version_priority
         elif predicate in {"adult_role", "role_counts_towards_ratio"}:
-            if support_kind in {
-                "school_packet_adult_lodging",
-                "school_packet_observer_permission_scope",
-            }:
-                priority = 0
-            if support_kind in {
+            person_specific = predicate == "adult_role" and requested_is_specific(0)
+            role_specific = requested_is_specific(1) if predicate == "adult_role" else requested_is_specific(0)
+            person_ok = not person_specific or (person and is_requested(person, args[0]))
+            role_arg = args[1] if predicate == "adult_role" and len(args) >= 2 else args[0] if args else ""
+            role_ok = not role_specific or (role and is_requested(role, role_arg))
+            adult_support_kinds = {
                 "adult_manifest_total",
+                "adult_lodging_status",
+                "adult_ratio_count_status",
                 "adult_role",
+                "compliance_flip_count",
+                "compliance_status",
                 "ratio_counted_adults",
                 "ratio_excluded_adults",
                 "role_ratio_scope",
                 "source_record_adult_role",
-            }:
+            }
+            if support_kind in adult_support_kinds and person_ok and role_ok:
                 priority = 0
-            if predicate == "adult_role" and len(args) >= 2 and is_requested(role, args[1]):
+            if predicate == "adult_role" and len(args) >= 2 and person_ok and role and is_requested(role, args[1]):
                 priority = min(priority, 0)
-            if predicate == "role_counts_towards_ratio" and len(args) >= 1 and is_requested(role, args[0]):
+            if (
+                predicate == "adult_role"
+                and person_specific
+                and support_kind in adult_support_kinds
+                and len(args) >= 1
+                and person_ok
+                and is_requested(person, args[0])
+            ):
+                priority = min(priority, -2)
+            if predicate == "role_counts_towards_ratio" and len(args) >= 1 and person_ok and role and is_requested(role, args[0]):
                 priority = min(priority, 0)
             version_priority = -version_priority
+        elif predicate in {"group_member", "group_membership"}:
+            if support_kind in {"group_member", "group_membership"}:
+                priority = 0
+            elif support_kind in {"group_count", "supervision", "supervision_assignment"}:
+                priority = 2
         elif predicate == "policy_requirement":
-            if support_kind == "school_packet_policy_title":
+            if support_kind in {"document_retention_location", "temporary_event_source_link"}:
                 priority = 0
-        elif predicate == "bus_assignment":
-            if support_kind in {"school_packet_pending_item", "school_packet_transport_departure"}:
-                priority = 0
-        elif predicate == "temporary_event_assignment":
-            if support_kind in {"temporary_event_source_link", "school_packet_temporary_assignment_source"}:
-                priority = 0
-        elif predicate == "source_record_label":
-            if support_kind == "school_packet_scanner_clock_audit_status":
+        elif predicate in {"temporary_assignment", "temporary_event_assignment"}:
+            if support_kind == "temporary_event_source_link":
                 priority = 0
         elif predicate in {"roster_version", "roster_version_status"}:
             version_ok = len(args) < 1 or is_requested(version, args[0])
             if support_kind in {
                 "compliance_status",
+                "document_retention_location",
                 "group_count",
-                "school_packet_retention_location",
-                "roster_table_student_group_assignment",
-                "source_record_student_group_assignment",
-                "student_group_assignment",
             }:
                 priority = 4 if version_ok else 20
             if requested_is_wildcard(0):
@@ -6079,7 +7821,18 @@ def _prioritize_roster_state_rows(
 
         return (priority, version_priority, group, person or role)
 
-    return sorted(rows, key=score)
+    scored = [(score(row), index, row) for index, row in enumerate(rows)]
+    scoped = [(row_score, index, row) for (row_score, index, row) in scored if row_score[0] < 50]
+    if scoped:
+        if (
+            predicate in {"role_counts_towards_ratio", "roster_version", "roster_version_status"}
+            or broad_student_assignment_version_scan
+            or (predicate == "adult_role" and (requested_is_specific(0) or requested_is_specific(1)))
+        ):
+            best_priority = min(row_score[0] for row_score, _index, _row in scoped)
+            scoped = [(row_score, index, row) for row_score, index, row in scoped if row_score[0] == best_priority]
+        return [row for _, _, row in sorted(scoped, key=lambda item: (item[0], item[1]))]
+    return [row for _, _, row in sorted(scored, key=lambda item: (item[0], item[1]))]
 
 
 def _roster_version_rank(version: str) -> int:
@@ -6090,6 +7843,29 @@ def _roster_version_rank(version: str) -> int:
     major = int(match.group("major"))
     minor = int(match.group("minor") or 0)
     return major * 100 + minor
+
+
+def _normalized_roster_version_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    match = re.fullmatch(r"(?:roster_)?v(?P<major>\d+)(?:_(?P<minor>\d+))?", text)
+    if not match:
+        return ""
+    version = "v" + match.group("major")
+    if match.group("minor"):
+        version += "_" + match.group("minor")
+    return version
+
+
+def _normalize_roster_assignment_version_group(version_slot: str, group_slot: str) -> tuple[str, str]:
+    version = str(version_slot or "").strip()
+    group = str(group_slot or "").strip()
+    normalized_version = _normalized_roster_version_atom(version)
+    if normalized_version:
+        return normalized_version, group
+    normalized_group = _normalized_roster_version_atom(group)
+    if normalized_group:
+        return normalized_group, version
+    return version, group
 
 
 def _source_record_roster_assignment_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
@@ -6340,7 +8116,27 @@ def _source_record_roster_compliance_support(runtime: CorePrologRuntime) -> list
     return out_rows
 
 
-def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+def _temporary_assignment_event_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out_rows: list[dict[str, Any]] = []
+    for row in rows:
+        person = str(row.get("Person", "")).strip()
+        event = str(row.get("Event", "")).strip()
+        interval = str(row.get("StartEnd", "")).strip()
+        start, end = _compact_datetime_interval_bounds(interval) or ("", "")
+        if not person or not event:
+            continue
+        out_rows.append(
+            {
+                "Person": person,
+                "Event": event,
+                "Start": start,
+                "End": end,
+            }
+        )
+    return out_rows
+
+
+def _source_record_document_retention_support(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
     text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
     line_rows = _runtime_rows(runtime, "source_record_line(SourceRow, Line).")
     if not text_rows:
@@ -6348,6 +8144,7 @@ def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dic
     text_by_row = {
         str(row.get("SourceRow", "")).strip(): str(row.get("TextAtom", "")).strip().lower()
         for row in text_rows
+        if str(row.get("SourceRow", "")).strip()
     }
     line_by_row: dict[str, int] = {}
     for row in line_rows:
@@ -6356,101 +8153,47 @@ def _source_record_school_packet_support(runtime: CorePrologRuntime) -> list[dic
         if source_row and _is_numeric_atom(line):
             line_by_row[source_row] = int(float(line))
     ordered_source_rows = sorted(text_by_row, key=lambda source_row: line_by_row.get(source_row, 10**9))
-
     out_rows: list[dict[str, Any]] = []
     seen: set[tuple[str, str, str]] = set()
-
-    def add(source_row: str, support_kind: str, value: str, display_value: str, detail: str = "") -> None:
-        if not source_row or not support_kind or not value:
-            return
-        key = (support_kind, value, source_row)
+    for source_row in ordered_source_rows:
+        text_atom = text_by_row.get(source_row, "")
+        retention_match = re.search(
+            r"retained_in_the_(?P<document>[a-z0-9_]+?)_location_(?P<location>[a-z0-9_]+)",
+            text_atom,
+        )
+        if not retention_match:
+            continue
+        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
+        combined = f"{text_atom} {next_text}".strip()
+        storage_match = re.search(r"cabinet_(?P<cabinet>\d+)_drawer_(?P<drawer>\d+)", combined)
+        if not storage_match:
+            continue
+        document = retention_match.group("document")
+        location = retention_match.group("location")
+        value = f"{location}_cabinet_{storage_match.group('cabinet')}_drawer_{storage_match.group('drawer')}"
+        key = (source_row, document, value)
         if key in seen:
-            return
+            continue
         seen.add(key)
+        display_location = (
+            f"{_display_source_phrase(location)} cabinet {storage_match.group('cabinet')}, "
+            f"drawer {storage_match.group('drawer')}"
+        )
         out_rows.append(
             {
-                "SupportKind": support_kind,
-                "Person": value,
+                "SupportKind": "document_retention_location",
+                "Person": document,
                 "Group": "",
+                "Location": value,
                 "SourceRow": source_row,
-                "DisplayValue": display_value,
-                "Detail": detail,
+                "Line": str(line_by_row.get(source_row, "")),
+                "DisplayValue": (
+                    f"{display_location} ({_display_source_phrase(document)}; retained for audit)"
+                ),
+                "Detail": combined,
                 "HelperClass": "candidate-helper",
             }
         )
-
-    for source_row in ordered_source_rows:
-        text_atom = text_by_row.get(source_row, "")
-        if "sco_ch_3" in text_atom and "chaperone_counting_rules" in text_atom:
-            add(
-                source_row,
-                "school_packet_policy_title",
-                "sco_ch_3",
-                "SCO-CH-3 (Chaperone Counting Rules)",
-                detail=text_atom,
-            )
-        if text_atom.startswith("return_leg_attendance_scans_will_be_appended_after_the_trip"):
-            add(
-                source_row,
-                "school_packet_pending_item",
-                "return_leg_attendance_scans",
-                "Return-leg attendance scans pending; appended after the trip; not part of this packet",
-                detail=text_atom,
-            )
-        if text_atom.startswith("m_okonkwo_210_n_park_206_medical_coverage_station"):
-            add(
-                source_row,
-                "school_packet_adult_lodging",
-                "n_park",
-                "Marwick Hall room 206 (medical-coverage station)",
-                detail=text_atom,
-            )
-        if "capacity_24_students_departure_2026_05_01_06_30" in text_atom:
-            line_no = line_by_row.get(source_row, 0)
-            bus_value = "bus_1_outbound" if line_no and line_no < 112 else "bus_2_outbound"
-            bus_display = "Bus 1" if bus_value == "bus_1_outbound" else "Bus 2"
-            add(
-                source_row,
-                "school_packet_transport_departure",
-                bus_value,
-                f"{bus_display} departs Cedar Hollow at 06:30 on 2026-05-01",
-                detail=text_atom,
-            )
-        if "a_diaz_is_the_parent_of_s_014" in text_atom:
-            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-            add(
-                source_row,
-                "school_packet_observer_permission_scope",
-                "a_diaz",
-                "A. Diaz may observe Group B events only on 2026-05-02 13:00-17:00",
-                detail=f"{text_atom} {next_text}".strip(),
-            )
-        if text_atom == "sch_2026_05_02_a":
-            add(
-                source_row,
-                "school_packet_temporary_assignment_source",
-                "s_007",
-                "S-007 temporary in-day assignment: Section 6.1; scheduling note SCH-2026-05-02-A",
-                detail=text_atom,
-            )
-        if "scanner_timestamps_are_nominally_local_time_and_have_not" in text_atom:
-            next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-            add(
-                source_row,
-                "school_packet_scanner_clock_audit_status",
-                "not_audited_external_clock",
-                "Scanner timestamps are nominally local time and have not been audited against an external clock for this packet.",
-                detail=f"{text_atom} {next_text}".strip(),
-            )
-        next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
-        if "retained_in_the_audit_binder_location_activities_office_filing" in text_atom and "cabinet_3_drawer_2" in next_text:
-            add(
-                source_row,
-                "school_packet_retention_location",
-                "audit_binder",
-                "Activities Office filing cabinet 3, drawer 2 (audit binder)",
-                detail=f"{text_atom} {next_text}".strip(),
-            )
     return out_rows
 
 
@@ -6579,6 +8322,875 @@ def _runtime_rows(runtime: CorePrologRuntime, query: str) -> list[dict[str, Any]
         return []
     rows = result.get("rows", [])
     return rows if isinstance(rows, list) else []
+
+
+def _runtime_fact_rows(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    engine = getattr(runtime, "engine", None)
+    clauses = getattr(engine, "clauses", []) if engine is not None else []
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for clause in clauses or []:
+        if getattr(clause, "body", None):
+            continue
+        text = str(clause).strip()
+        if not text:
+            continue
+        if not text.endswith("."):
+            text = f"{text}."
+        if text in seen or ":-" in text:
+            continue
+        parsed = parse_prolog_query(text)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        seen.add(text)
+        out.append({"predicate": predicate, "args": args, "clause": text})
+    return out
+
+
+_TYPE_INSTANCE_SUFFIXES = {
+    "active",
+    "amended",
+    "archived",
+    "current",
+    "dated",
+    "draft",
+    "expired",
+    "final",
+    "instance",
+    "issued",
+    "prior",
+    "proposed",
+    "revised",
+    "version",
+}
+
+
+def _type_taxonomy_tokens(value: str) -> list[str]:
+    return [token for token in re.split(r"_+", str(value or "").strip().lower()) if token]
+
+
+def _looks_like_type_instance_suffix(token: str) -> bool:
+    text = str(token or "").strip().lower()
+    return (
+        text in _TYPE_INSTANCE_SUFFIXES
+        or bool(re.fullmatch(r"(?:19|20)\d{2}", text))
+        or bool(re.fullmatch(r"v\d+(?:\d+)?", text))
+        or bool(re.fullmatch(r"\d{4}(?:\d{2}){1,2}", text))
+    )
+
+
+def _looks_like_category_code_token(token: str) -> bool:
+    text = str(token or "").strip().lower()
+    return bool(re.fullmatch(r"[a-z]\d{0,2}|\d{1,3}", text))
+
+
+def _type_category_key(value: str, all_values: set[str]) -> str:
+    tokens = _type_taxonomy_tokens(value)
+    if not tokens:
+        return ""
+    for index, token in enumerate(tokens):
+        if index > 0 and _looks_like_type_instance_suffix(token):
+            return "_".join(tokens[:index])
+    if len(tokens) >= 3 and _looks_like_category_code_token(tokens[1]):
+        prefix = "_".join(tokens[:2])
+        siblings = [item for item in all_values if item == prefix or item.startswith(f"{prefix}_")]
+        if len(siblings) > 1:
+            return prefix
+    return "_".join(tokens)
+
+
+def _type_category_display(key: str, members: list[str]) -> str:
+    key_tokens = _type_taxonomy_tokens(key)
+    representative = ""
+    for member in sorted(members, key=lambda item: (-len(_type_taxonomy_tokens(item)), item)):
+        member_tokens = _type_taxonomy_tokens(member)
+        suffix = member_tokens[len(key_tokens) :] if member_tokens[: len(key_tokens)] == key_tokens else []
+        if suffix and not all(_looks_like_type_instance_suffix(token) for token in suffix):
+            representative = member
+            break
+    if not representative:
+        representative = key
+
+    member_tokens = _type_taxonomy_tokens(representative)
+    suffix_tokens = member_tokens[len(key_tokens) :] if member_tokens[: len(key_tokens)] == key_tokens else []
+    label_tokens = [token for token in suffix_tokens if not _looks_like_type_instance_suffix(token)] or key_tokens
+    label = _display_source_phrase("_".join(label_tokens))
+    if len(key_tokens) >= 2 and _looks_like_category_code_token(key_tokens[1]):
+        return f"{key_tokens[1].upper()}: {label}"
+    return label
+
+
+_LIFECYCLE_PERIOD_TOKENS = {"period", "validity", "valid", "effective", "window", "interval"}
+_LIFECYCLE_CONTEXT_TOKENS = {
+    "amendment",
+    "exception",
+    "exemption",
+    "expiration",
+    "expiry",
+    "extension",
+    "renewal",
+    "restriction",
+    "scope",
+    "status",
+    "suspension",
+}
+
+
+def _predicate_tokens(value: str) -> set[str]:
+    return set(_type_taxonomy_tokens(value))
+
+
+def _lifecycle_entity_family_key(value: str, all_values: set[str]) -> str:
+    normalized = "_".join(_type_taxonomy_tokens(value))
+    if not normalized:
+        return ""
+    category = _type_category_key(normalized, all_values)
+    if category and category != normalized:
+        return category
+    tokens = _type_taxonomy_tokens(normalized)
+    for length in range(len(tokens) - 1, 1, -1):
+        prefix = "_".join(tokens[:length])
+        if any(item != normalized and item.startswith(f"{prefix}_") for item in all_values):
+            return prefix
+    return category or normalized
+
+
+def _date_like_atoms(values: list[str]) -> list[str]:
+    dated: list[str] = []
+    for value in values:
+        text = str(value or "").strip()
+        if _date_atom_sort_key(text) is not None:
+            dated.append(text)
+    return dated
+
+
+_INITIAL_SCOPE_MARKERS = {
+    "baseline",
+    "first",
+    "initial",
+    "initially",
+    "opening",
+    "original",
+    "originally",
+}
+
+
+def _source_rows_for_scope(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    facts = _runtime_fact_rows(runtime)
+    texts: dict[str, str] = {}
+    labels: dict[str, str] = {}
+    sections: dict[str, str] = {}
+    lines: dict[str, int] = {}
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip().lower() for item in fact.get("args", [])]
+        if len(args) < 2:
+            continue
+        if predicate == "source_record_text_atom":
+            texts[args[0]] = args[1]
+        elif predicate == "source_record_label":
+            labels[args[0]] = args[1]
+        elif predicate == "source_record_section":
+            sections[args[0]] = args[1]
+        elif predicate == "source_record_line":
+            line_no = _int_from_atom(args[1])
+            if line_no is not None:
+                lines[args[0]] = line_no
+    rows: list[dict[str, Any]] = []
+    for source_row, text in texts.items():
+        rows.append(
+            {
+                "SourceRow": source_row,
+                "TextAtom": text,
+                "Label": labels.get(source_row, ""),
+                "SectionAtom": sections.get(source_row, ""),
+                "Line": lines.get(source_row, 0),
+            }
+        )
+    return sorted(rows, key=lambda row: (int(row.get("Line", 0)), str(row.get("SourceRow", ""))))
+
+
+def _text_mentions_atom(text: str, atom: str) -> bool:
+    atom_tokens = _type_taxonomy_tokens(atom)
+    if not atom_tokens:
+        return False
+    combined = str(text or "").lower()
+    if "_".join(atom_tokens) in combined:
+        return True
+    tokens = set(_type_taxonomy_tokens(combined))
+    return len(atom_tokens) == 1 and atom_tokens[0] in tokens
+
+
+def _is_initial_scope_row(row: dict[str, Any]) -> bool:
+    combined = "_".join(
+        str(row.get(slot, "")).strip().lower()
+        for slot in ("SectionAtom", "Label")
+        if str(row.get(slot, "")).strip()
+    )
+    return bool(set(_type_taxonomy_tokens(combined)) & _INITIAL_SCOPE_MARKERS)
+
+
+def _initial_status_scope_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) != 2 or not predicate.endswith("_status"):
+        return None
+    entity_arg = str(args[0]).strip()
+    status_arg = str(args[1]).strip()
+    if not _is_prolog_variable(entity_arg) or not status_arg or _is_prolog_variable(status_arg):
+        return None
+
+    status_query = format_prolog_query(predicate, ["Entity", status_arg])
+    status_rows = _runtime_rows(runtime, status_query)
+    entities = sorted(
+        {str(row.get("Entity", "")).strip().lower() for row in status_rows if str(row.get("Entity", "")).strip()}
+    )
+    if len(entities) < 2:
+        return None
+
+    source_rows = _source_rows_for_scope(runtime)
+    if not source_rows:
+        return None
+
+    mentions: dict[str, list[dict[str, Any]]] = {}
+    for entity in entities:
+        for source_row in source_rows:
+            combined = f"{source_row.get('SectionAtom', '')}_{source_row.get('Label', '')}_{source_row.get('TextAtom', '')}"
+            if _text_mentions_atom(combined, entity):
+                mentions.setdefault(entity, []).append(source_row)
+
+    initial_rows: list[dict[str, str]] = []
+    context_rows: list[dict[str, str]] = []
+    for entity in entities:
+        entity_mentions = mentions.get(entity, [])
+        initial_mentions = [row for row in entity_mentions if _is_initial_scope_row(row)]
+        if initial_mentions:
+            first = sorted(initial_mentions, key=lambda row: int(row.get("Line", 0)))[0]
+            initial_rows.append(
+                {
+                    "SupportKind": "initial_status_entity",
+                    "StatusPredicate": predicate,
+                    "Status": status_arg,
+                    "Entity": entity,
+                    "InitialEntity": entity,
+                    "SourceRow": str(first.get("SourceRow", "")),
+                    "SourceLine": str(first.get("Line", "")),
+                    "SectionAtom": str(first.get("SectionAtom", "")),
+                    "Label": str(first.get("Label", "")),
+                    "HelperClass": "clean-helper",
+                }
+            )
+        elif entity_mentions:
+            first = sorted(entity_mentions, key=lambda row: int(row.get("Line", 0)))[0]
+            context_rows.append(
+                {
+                    "SupportKind": "later_status_context",
+                    "StatusPredicate": predicate,
+                    "Status": status_arg,
+                    "Entity": entity,
+                    "InitialEntity": "",
+                    "SourceRow": str(first.get("SourceRow", "")),
+                    "SourceLine": str(first.get("Line", "")),
+                    "SectionAtom": str(first.get("SectionAtom", "")),
+                    "Label": str(first.get("Label", "")),
+                    "HelperClass": "clean-helper",
+                }
+            )
+
+    if not initial_rows:
+        return None
+    initial_entities = ",".join(row["Entity"] for row in initial_rows)
+    summary = {
+        "SupportKind": "initial_status_summary",
+        "StatusPredicate": predicate,
+        "Status": status_arg,
+        "Entity": "",
+        "InitialEntity": initial_entities,
+        "InitialEntities": initial_entities,
+        "AllStatusEntities": ",".join(entities),
+        "LaterContextEntities": ",".join(row["Entity"] for row in context_rows),
+        "HelperClass": "clean-helper",
+    }
+    out_rows = [summary, *initial_rows, *context_rows[:12]]
+    return {
+        "query": "initial_status_scope_support(StatusPredicate, Status, InitialEntity).",
+        "result": {
+            "status": "success",
+            "predicate": "initial_status_scope_support",
+            "prolog_query": "initial_status_scope_support(StatusPredicate, Status, InitialEntity).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SupportKind",
+                "StatusPredicate",
+                "Status",
+                "Entity",
+                "InitialEntity",
+                "InitialEntities",
+                "AllStatusEntities",
+                "LaterContextEntities",
+                "SourceRow",
+                "SourceLine",
+                "SectionAtom",
+                "Label",
+                "HelperClass",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only initial status companion separates status entities mentioned in initial/original "
+                    "source scope from later status-context entities"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, status_query, "source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _threshold_required_count(value: str, total_count: int | None = None) -> int | None:
+    text = str(value or "").strip().lower()
+    numeric = _int_from_atom(text)
+    if numeric is not None:
+        return numeric
+    match = re.search(r"(\d+)_of_(\d+)", text)
+    if match:
+        return int(match.group(1))
+    if "majority" in text and total_count is not None:
+        return total_count // 2 + 1
+    return None
+
+
+def _source_vote_token_groups(runtime: CorePrologRuntime) -> dict[str, dict[str, list[str]]]:
+    facts = _runtime_fact_rows(runtime)
+    labels: dict[str, str] = {}
+    lines: dict[str, int] = {}
+    texts: dict[str, str] = {}
+    sections: dict[str, str] = {}
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip().lower() for item in fact.get("args", [])]
+        if predicate == "source_record_label" and len(args) >= 2:
+            labels[args[0]] = args[1]
+        elif predicate == "source_record_line" and len(args) >= 2:
+            line_no = _int_from_atom(args[1])
+            if line_no is not None:
+                lines[args[0]] = line_no
+        elif predicate == "source_record_text_atom" and len(args) >= 2:
+            texts[args[0]] = args[1]
+        elif predicate == "source_record_section" and len(args) >= 2:
+            sections[args[0]] = args[1]
+
+    absent_by_section: dict[str, list[str]] = {}
+    present_by_section: dict[str, list[str]] = {}
+    for source_row, text in texts.items():
+        section = sections.get(source_row, "")
+        if not section:
+            continue
+        tokens = [token for token in text.split("_") if token]
+        if "members" in tokens and "absent" in tokens:
+            start = tokens.index("absent") + 1
+            absent_by_section[section] = [token for token in tokens[start:] if not _is_numeric_atom(token)]
+        elif "members" in tokens and "present" in tokens:
+            start = tokens.index("present") + 1
+            names = [token for token in tokens[start:] if not _is_numeric_atom(token) and token not in {"all", "sponsor"}]
+            present_by_section.setdefault(section, []).extend(name for name in names if name not in present_by_section[section])
+
+    grouped: dict[str, list[tuple[int, str, str]]] = {}
+    for source_row, label in labels.items():
+        if "vote" not in label or source_row not in texts:
+            continue
+        grouped.setdefault(label, []).append((lines.get(source_row, 0), texts[source_row], sections.get(source_row, "")))
+
+    out: dict[str, dict[str, list[str]]] = {}
+    for label, parts in grouped.items():
+        ordered = sorted(parts)
+        combined = "_".join(text for _, text, _ in ordered)
+        section = next((section for _, _, section in ordered if section), "")
+        tokens = [token for token in combined.split("_") if token]
+        yes: list[str] = []
+        no: list[str] = []
+        for index, token in enumerate(tokens[:-1]):
+            decision = tokens[index + 1]
+            if decision == "yes" and token not in yes:
+                yes.append(token)
+            elif decision == "no" and token not in no:
+                no.append(token)
+        if yes or no:
+            out[label] = {
+                "yes": yes,
+                "no": no,
+                "absent": absent_by_section.get(section, []),
+                "present": present_by_section.get(section, []),
+            }
+    return out
+
+
+def _vote_action_type(runtime: CorePrologRuntime, vote_id: str) -> str:
+    vote_norm = str(vote_id or "").strip().lower()
+    if not vote_norm:
+        return ""
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip().lower()
+        args = [str(item).strip().lower() for item in fact.get("args", [])]
+        if not args or args[0] != vote_norm:
+            continue
+        if predicate.endswith("_introduced"):
+            return predicate[: -len("_introduced")]
+        if predicate.endswith("_proposal"):
+            return predicate[: -len("_proposal")]
+    return ""
+
+
+def _vote_threshold_counterfactual_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    predicate_tokens = _predicate_tokens(predicate)
+    if "vote" not in predicate_tokens and "voting" not in predicate_tokens:
+        return None
+
+    facts = _runtime_fact_rows(runtime)
+    requested_vote = str(args[0]).strip().lower() if args and not _is_prolog_variable(str(args[0]).strip()) else ""
+    vote_rows: list[dict[str, Any]] = []
+    for fact in facts:
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        fact_tokens = _predicate_tokens(fact_predicate)
+        fact_args = [str(item).strip().lower() for item in fact.get("args", [])]
+        if "vote" not in fact_tokens or len(fact_args) < 5:
+            continue
+        yes_count = _int_from_atom(fact_args[2])
+        no_count = _int_from_atom(fact_args[3])
+        if yes_count is None or no_count is None:
+            continue
+        if requested_vote and fact_args[0] != requested_vote:
+            continue
+        vote_rows.append(
+            {
+                "predicate": fact_predicate,
+                "vote_id": fact_args[0],
+                "date": fact_args[1],
+                "yes": yes_count,
+                "no": no_count,
+                "outcome": fact_args[4],
+                "clause": str(fact.get("clause", "")),
+            }
+        )
+    if not vote_rows:
+        return None
+
+    threshold_rows: list[dict[str, Any]] = []
+    for fact in facts:
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        fact_tokens = _predicate_tokens(fact_predicate)
+        fact_args = [str(item).strip().lower() for item in fact.get("args", [])]
+        if "threshold" not in fact_tokens or "voting" not in fact_tokens or len(fact_args) < 2:
+            continue
+        threshold_rows.append({"action": fact_args[0], "threshold": fact_args[1], "predicate": fact_predicate})
+    if not threshold_rows:
+        return None
+
+    source_votes = _source_vote_token_groups(runtime)
+    out_rows: list[dict[str, str]] = []
+    for vote in vote_rows:
+        total = int(vote["yes"]) + int(vote["no"])
+        action_type = _vote_action_type(runtime, str(vote["vote_id"]))
+        matching_thresholds = [
+            row for row in threshold_rows if action_type and str(row.get("action", "")) == action_type
+        ] or threshold_rows
+        matching_thresholds = sorted(
+            matching_thresholds,
+            key=lambda row: (
+                0 if action_type and str(row.get("action", "")) == action_type else 1,
+                str(row.get("action", "")),
+                str(row.get("threshold", "")),
+            ),
+        )
+        vote_source = next(
+            (value for label, value in source_votes.items() if str(vote["vote_id"]) in label),
+            {"yes": [], "no": []},
+        )
+        no_voters = list(vote_source.get("no", []))
+        changed_voters = no_voters or ["one_no_vote"]
+        for threshold in matching_thresholds[:2]:
+            required = _threshold_required_count(str(threshold.get("threshold", "")), total)
+            if required is None:
+                continue
+            for changed_voter in changed_voters:
+                yes_after = int(vote["yes"]) + 1
+                no_after = max(0, int(vote["no"]) - 1)
+                yes_voters_after = list(vote_source.get("yes", []))
+                no_voters_after = list(no_voters)
+                if changed_voter != "one_no_vote":
+                    if changed_voter not in yes_voters_after:
+                        yes_voters_after.append(changed_voter)
+                    no_voters_after = [item for item in no_voters_after if item != changed_voter]
+                out_rows.append(
+                    {
+                        "SupportKind": "vote_threshold_counterfactual",
+                        "VotePredicate": str(vote["predicate"]),
+                        "VoteId": str(vote["vote_id"]),
+                        "VoteDate": str(vote["date"]),
+                        "ActionType": action_type or str(threshold.get("action", "")),
+                        "Threshold": str(threshold.get("threshold", "")),
+                        "RequiredYes": str(required),
+                        "BaselineYes": str(vote["yes"]),
+                        "BaselineNo": str(vote["no"]),
+                        "BaselineOutcome": str(vote["outcome"]),
+                        "ChangedVoter": changed_voter,
+                        "ChangeAssumption": "one_no_vote_switches_to_yes",
+                        "CounterfactualYes": str(yes_after),
+                        "CounterfactualNo": str(no_after),
+                        "CounterfactualOutcome": "pass" if yes_after >= required else "fail",
+                        "BaselineYesVoters": ",".join(vote_source.get("yes", [])),
+                        "BaselineNoVoters": ",".join(no_voters),
+                        "CounterfactualYesVoters": ",".join(yes_voters_after),
+                        "CounterfactualNoVoters": ",".join(no_voters_after),
+                        "HelperClass": "clean-helper",
+                    }
+                )
+            absent_voters = [item for item in vote_source.get("absent", []) if item]
+            if absent_voters:
+                scenarios = [
+                    ("additional_absent_voters_all_yes", absent_voters, []),
+                    ("additional_absent_voters_one_yes", ["one_of:" + ",".join(absent_voters)], []),
+                    ("additional_absent_voters_all_no", [], absent_voters),
+                ]
+                for assumption, assumed_yes, assumed_no in scenarios:
+                    yes_added = len(absent_voters) if assumption.endswith("all_yes") else 1 if assumption.endswith("one_yes") else 0
+                    no_added = len(absent_voters) if assumption.endswith("all_no") else 0 if assumption.endswith("all_yes") else len(absent_voters) - 1
+                    yes_after = int(vote["yes"]) + yes_added
+                    no_after = int(vote["no"]) + no_added
+                    out_rows.append(
+                        {
+                            "SupportKind": "vote_threshold_counterfactual",
+                            "VotePredicate": str(vote["predicate"]),
+                            "VoteId": str(vote["vote_id"]),
+                            "VoteDate": str(vote["date"]),
+                            "ActionType": action_type or str(threshold.get("action", "")),
+                            "Threshold": str(threshold.get("threshold", "")),
+                            "RequiredYes": str(required),
+                            "BaselineYes": str(vote["yes"]),
+                            "BaselineNo": str(vote["no"]),
+                            "BaselineOutcome": str(vote["outcome"]),
+                            "ChangedVoter": ",".join(absent_voters),
+                            "ChangeAssumption": assumption,
+                            "CounterfactualYes": str(yes_after),
+                            "CounterfactualNo": str(no_after),
+                            "CounterfactualOutcome": "pass" if yes_after >= required else "fail",
+                            "BaselineYesVoters": ",".join(vote_source.get("yes", [])),
+                            "BaselineNoVoters": ",".join(no_voters),
+                            "CounterfactualYesVoters": ",".join([*vote_source.get("yes", []), *assumed_yes]),
+                            "CounterfactualNoVoters": ",".join([*no_voters, *assumed_no]),
+                            "HelperClass": "clean-helper",
+                        }
+                    )
+    if not out_rows:
+        return None
+
+    return {
+        "query": "vote_threshold_counterfactual_support(VoteId, ChangedVoter, CounterfactualYes, CounterfactualNo, CounterfactualOutcome).",
+        "result": {
+            "status": "success",
+            "predicate": "vote_threshold_counterfactual_support",
+            "prolog_query": (
+                "vote_threshold_counterfactual_support"
+                "(VoteId, ChangedVoter, CounterfactualYes, CounterfactualNo, CounterfactualOutcome)."
+            ),
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SupportKind",
+                "VotePredicate",
+                "VoteId",
+                "VoteDate",
+                "ActionType",
+                "Threshold",
+                "RequiredYes",
+                "BaselineYes",
+                "BaselineNo",
+                "BaselineOutcome",
+                "ChangedVoter",
+                "ChangeAssumption",
+                "CounterfactualYes",
+                "CounterfactualNo",
+                "CounterfactualOutcome",
+                "BaselineYesVoters",
+                "BaselineNoVoters",
+                "CounterfactualYesVoters",
+                "CounterfactualNoVoters",
+                "HelperClass",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only vote threshold companion derives one no-to-yes counterfactual outcomes "
+                    "from admitted vote counts, voting thresholds, and optional source vote-token rows"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, "admitted vote count facts", "admitted voting threshold facts"],
+    }
+
+
+def _lifecycle_period_support_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) < 3:
+        return None
+    requested_entity = str(args[0]).strip()
+    if not requested_entity or _is_prolog_variable(requested_entity):
+        return None
+
+    predicate_tokens = _predicate_tokens(predicate)
+    if not (predicate_tokens & (_LIFECYCLE_PERIOD_TOKENS | _LIFECYCLE_CONTEXT_TOKENS)):
+        return None
+
+    facts = _runtime_fact_rows(runtime)
+    if not facts:
+        return None
+    all_entities = {
+        str(fact.get("args", [""])[0]).strip().lower()
+        for fact in facts
+        if len(fact.get("args", [])) >= 1 and str(fact.get("args", [""])[0]).strip()
+    }
+    requested_key = _lifecycle_entity_family_key(requested_entity, all_entities)
+    if not requested_key:
+        return None
+
+    period_rows: list[dict[str, Any]] = []
+    context_rows: list[dict[str, Any]] = []
+    matched_entities: set[str] = {requested_entity}
+    for fact in facts:
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        if len(fact_args) < 2:
+            continue
+        entity = fact_args[0]
+        if _lifecycle_entity_family_key(entity, all_entities) != requested_key:
+            continue
+        fact_predicate = str(fact.get("predicate", "")).strip()
+        fact_tokens = _predicate_tokens(fact_predicate)
+        matched_entities.add(entity)
+        if len(fact_args) >= 3 and bool(fact_tokens & _LIFECYCLE_PERIOD_TOKENS):
+            period_rows.append(fact)
+        elif fact_tokens & _LIFECYCLE_CONTEXT_TOKENS:
+            context_rows.append(fact)
+
+    if not period_rows or (len(matched_entities) <= 1 and not context_rows):
+        return None
+
+    def period_sort_key(fact: dict[str, Any]) -> tuple[tuple[int, int, int], str]:
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        dates = _date_like_atoms(fact_args[1:])
+        key = _date_atom_sort_key(dates[-1]) if dates else None
+        return (key or (0, 0, 0), str(fact.get("clause", "")))
+
+    selected_period = sorted(period_rows, key=period_sort_key)[-1]
+    selected_args = [str(item).strip() for item in selected_period.get("args", [])]
+    period_dates = _date_like_atoms(selected_args[1:])
+    start_date = period_dates[0] if period_dates else (selected_args[1] if len(selected_args) > 1 else "")
+    end_date = period_dates[-1] if period_dates else (selected_args[2] if len(selected_args) > 2 else "")
+
+    context_dates: list[str] = []
+    for fact in context_rows:
+        context_dates.extend(_date_like_atoms([str(item).strip() for item in fact.get("args", [])[1:]]))
+    effective_dates = [value for value in [end_date, *context_dates] if _date_atom_sort_key(value) is not None]
+    effective_end = sorted(effective_dates, key=lambda value: _date_atom_sort_key(value) or (0, 0, 0))[-1] if effective_dates else end_date
+
+    context_predicates = sorted({str(fact.get("predicate", "")).strip() for fact in context_rows if fact.get("predicate")})
+    period_predicate = str(selected_period.get("predicate", "")).strip()
+    matched_display = ",".join(sorted(matched_entities))
+    out_rows: list[dict[str, str]] = [
+        {
+            "SupportKind": "lifecycle_period_summary",
+            "RequestedEntity": requested_entity,
+            "EntityFamilyKey": requested_key,
+            "MatchedEntities": matched_display,
+            "PeriodPredicate": period_predicate,
+            "StartDate": start_date,
+            "EndDate": end_date,
+            "EffectiveEndDate": effective_end,
+            "StartDateDisplay": _display_source_date_atom(start_date),
+            "EndDateDisplay": _display_source_date_atom(end_date),
+            "EffectiveEndDateDisplay": _display_source_date_atom(effective_end),
+            "ContextPredicates": ",".join(context_predicates),
+            "PeriodClause": str(selected_period.get("clause", "")),
+            "HelperClass": "clean-helper",
+        }
+    ]
+    for fact in sorted(context_rows, key=lambda item: str(item.get("clause", "")))[:12]:
+        fact_args = [str(item).strip() for item in fact.get("args", [])]
+        context_dates = _date_like_atoms(fact_args[1:])
+        out_rows.append(
+            {
+                "SupportKind": "lifecycle_period_context",
+                "RequestedEntity": requested_entity,
+                "EntityFamilyKey": requested_key,
+                "ContextPredicate": str(fact.get("predicate", "")).strip(),
+                "ContextEntity": fact_args[0] if fact_args else "",
+                "ContextArgs": ",".join(fact_args[1:]),
+                "ContextDate": context_dates[-1] if context_dates else "",
+                "ContextDateDisplay": _display_source_date_atom(context_dates[-1]) if context_dates else "",
+                "ContextClause": str(fact.get("clause", "")),
+                "HelperClass": "clean-helper",
+            }
+        )
+
+    return {
+        "query": "lifecycle_period_support(RequestedEntity, StartDate, EndDate, EffectiveEndDate).",
+        "result": {
+            "status": "success",
+            "predicate": "lifecycle_period_support",
+            "prolog_query": "lifecycle_period_support(RequestedEntity, StartDate, EndDate, EffectiveEndDate).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SupportKind",
+                "RequestedEntity",
+                "EntityFamilyKey",
+                "MatchedEntities",
+                "PeriodPredicate",
+                "StartDate",
+                "EndDate",
+                "EffectiveEndDate",
+                "StartDateDisplay",
+                "EndDateDisplay",
+                "EffectiveEndDateDisplay",
+                "ContextPredicates",
+                "ContextPredicate",
+                "ContextEntity",
+                "ContextArgs",
+                "ContextDate",
+                "ContextDateDisplay",
+                "PeriodClause",
+                "ContextClause",
+                "HelperClass",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only lifecycle period companion bundles admitted period rows with same-entity "
+                    "exception/status/extension facts via structural entity-family keys when the query asks "
+                    "for either the base interval or a lifecycle context row"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, "admitted runtime lifecycle facts sharing a structural entity-family key"],
+    }
+
+
+def _type_taxonomy_summary_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) != 1 or not predicate.endswith("_type"):
+        return None
+    variable = str(args[0]).strip()
+    if not _is_prolog_variable(variable):
+        return None
+
+    companion_query = format_prolog_query(predicate, ["Value"])
+    rows = _runtime_rows(runtime, companion_query)
+    raw_values = sorted({str(row.get("Value", "")).strip().lower() for row in rows if str(row.get("Value", "")).strip()})
+    if len(raw_values) < 2:
+        return None
+
+    all_values = set(raw_values)
+    groups: dict[str, list[str]] = {}
+    for value in raw_values:
+        key = _type_category_key(value, all_values)
+        if key:
+            groups.setdefault(key, []).append(value)
+    groups = {key: sorted(values) for key, values in groups.items() if values}
+    if len(groups) >= len(raw_values) or not any(len(values) > 1 for values in groups.values()):
+        return None
+
+    category_displays = {key: _type_category_display(key, values) for key, values in groups.items()}
+    category_keys = sorted(groups)
+    out_rows: list[dict[str, str]] = [
+        {
+            "SupportKind": "type_category_summary",
+            "TypePredicate": predicate,
+            "CategoryCount": str(len(category_keys)),
+            "RawValueCount": str(len(raw_values)),
+            "CategoryKeys": ",".join(category_keys),
+            "CategoryDisplays": "; ".join(category_displays[key] for key in category_keys),
+            "RawValues": ",".join(raw_values),
+            "HelperClass": "clean-helper",
+        }
+    ]
+    for key in category_keys:
+        values = groups[key]
+        out_rows.append(
+            {
+                "SupportKind": "type_category",
+                "TypePredicate": predicate,
+                "CategoryKey": key,
+                "CategoryCount": str(len(category_keys)),
+                "RawValueCount": str(len(values)),
+                "CategoryDisplay": category_displays[key],
+                "Members": ",".join(values),
+                "HelperClass": "clean-helper",
+            }
+        )
+
+    return {
+        "query": "type_category_support(TypePredicate, SupportKind, CategoryKey, CategoryCount).",
+        "result": {
+            "status": "success",
+            "predicate": "type_category_support",
+            "prolog_query": "type_category_support(TypePredicate, SupportKind, CategoryKey, CategoryCount).",
+            "result_type": "table",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SupportKind",
+                "TypePredicate",
+                "CategoryKey",
+                "CategoryCount",
+                "RawValueCount",
+                "CategoryDisplay",
+                "CategoryDisplays",
+                "CategoryKeys",
+                "Members",
+                "RawValues",
+                "HelperClass",
+            ],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only type taxonomy companion collapses raw unary *_type instance variants "
+                    "into stable category keys when sibling atoms expose a reusable coded category prefix"
+                ),
+                "original_query": query,
+                "trigger_predicate": predicate,
+            },
+        },
+        "derived_from_queries": [query, companion_query],
+    }
 
 
 def _classification_conversion_effect_companion(
@@ -7176,6 +9788,92 @@ def _split_interval_atom(value: str) -> tuple[str, str]:
         return text, text
     start, end = text.split("_to_", 1)
     return start, end
+
+
+def _compact_datetime_interval_bounds(value: str) -> tuple[str, str] | None:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    match = re.fullmatch(
+        r"(?P<date>\d{4}_\d{2}_\d{2})_(?P<start_hour>\d{2})_(?P<start_minute>\d{2})_(?P<end_hour>\d{2})_(?P<end_minute>\d{2})",
+        text,
+    )
+    if not match:
+        return None
+    date = match.group("date")
+    start = f"{date}_{match.group('start_hour')}_{match.group('start_minute')}"
+    end = f"{date}_{match.group('end_hour')}_{match.group('end_minute')}"
+    return start, end
+
+
+def _compact_interval_duration_companion(
+    *,
+    results: list[dict[str, Any]],
+    query: str,
+) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate not in {"elapsed_minutes", "elapsed_hours"} or len(args) != 3:
+        return None
+    interval_arg = str(args[0]).strip()
+    if not _is_prolog_variable(interval_arg):
+        return None
+    for item in reversed(results):
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            interval_value = str(row.get(interval_arg, "")).strip()
+            bounds = _compact_datetime_interval_bounds(interval_value)
+            if not bounds:
+                continue
+            start, end = bounds
+            start_dt = _datetime_from_ledger_atom(start)
+            end_dt = _datetime_from_ledger_atom(end)
+            if not start_dt or not end_dt or end_dt < start_dt:
+                continue
+            minutes = int((end_dt - start_dt).total_seconds() // 60)
+            duration_value = str(minutes if predicate == "elapsed_minutes" else round(minutes / 60, 3))
+            duration_display = _duration_between_atoms(start, end)
+            support_row = {
+                "IntervalAtom": interval_value,
+                "Start": start,
+                "End": end,
+                "DurationMinutes": str(minutes),
+                "Duration": duration_display,
+            }
+            output_arg = str(args[2]).strip()
+            if _is_prolog_variable(output_arg):
+                support_row[output_arg] = duration_value
+            return {
+                "query": "compact_interval_duration_support(IntervalAtom, Start, End, DurationMinutes, Duration).",
+                "result": {
+                    "status": "success",
+                    "predicate": "compact_interval_duration_support",
+                    "prolog_query": "compact_interval_duration_support(IntervalAtom, Start, End, DurationMinutes, Duration).",
+                    "result_type": "table",
+                    "num_rows": 1,
+                    "variables": list(support_row.keys()),
+                    "rows": [support_row],
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": (
+                            "query-only duration support split a compact same-day interval atom into "
+                            "start and end timestamps; no durable fact was written"
+                        ),
+                        "original_query": query,
+                    },
+                },
+                "derived_from_queries": [str(item.get("query", "")), query],
+            }
+    return None
 
 
 def _role_hint_from_group(group: str) -> str:
@@ -7864,6 +10562,10 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
     if not anchors:
         return None
     anchors.sort(key=lambda item: item["observed_at"])
+    point_anchor = _explicit_status_on_anchor(runtime, entity_arg=entity_arg, date_arg=date_arg, requested_at=requested_at)
+    interval_anchor = _status_interval_anchor(runtime, entity_arg=entity_arg, requested_at=requested_at)
+    scheduled_anchor = _scheduled_status_anchor(runtime, entity_arg=entity_arg, requested_at=requested_at)
+
     previous_anchor: dict[str, Any] | None = None
     next_anchor: dict[str, Any] | None = None
     for anchor in anchors:
@@ -7874,20 +10576,33 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         break
     if previous_anchor is None:
         return None
+    selected_anchor = previous_anchor
+    support_kind = "transition_anchor"
+    if interval_anchor and interval_anchor["observed_at"] <= requested_at:
+        selected_anchor = interval_anchor
+        support_kind = "corrected_or_stated_interval"
+    if scheduled_anchor and scheduled_anchor["observed_at"] <= requested_at:
+        if scheduled_anchor["observed_at"] >= selected_anchor["observed_at"]:
+            selected_anchor = scheduled_anchor
+            support_kind = "scheduled_state_transition"
+    if point_anchor:
+        selected_anchor = point_anchor
+        support_kind = "explicit_point_state"
 
     requested_status = "" if _is_prolog_variable(status_arg) else status_arg
     status_matches = ""
     if requested_status:
-        status_matches = "true" if requested_status == previous_anchor["observed_status"] else "false"
+        status_matches = "true" if requested_status == selected_anchor["observed_status"] else "false"
 
     row: dict[str, str] = {
         entity_key: entity_arg,
         "RequestedDate": date_arg,
-        "Status": previous_anchor["observed_status"],
-        "EffectiveFrom": previous_anchor["observed_date"],
-        "EffectiveUntil": str(next_anchor["observed_date"]) if next_anchor else "",
-        observed_key: previous_anchor["observed_entity"],
-        match_key: previous_anchor["entity_match"],
+        "Status": selected_anchor["observed_status"],
+        "EffectiveFrom": selected_anchor["observed_date"],
+        "EffectiveUntil": str(selected_anchor.get("effective_until") or (next_anchor["observed_date"] if next_anchor else "")),
+        observed_key: selected_anchor["observed_entity"],
+        match_key: selected_anchor["entity_match"],
+        "SupportKind": support_kind,
     }
     if requested_status:
         row["RequestedStatus"] = requested_status
@@ -7903,7 +10618,10 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         "num_rows": 1,
         "reasoning_basis": {
             "kind": "core-local",
-            "note": f"query-only interval support derived status at an interior date from admitted {predicate}/3 transition anchors; no durable fact was written",
+            "note": (
+                f"query-only interval support derived status at an interior date from admitted {predicate}/3 "
+                "transition anchors, corrected/stated intervals, or scheduled-state rows; no durable fact was written"
+            ),
             "original_query": query,
         },
     }
@@ -7912,6 +10630,175 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         "result": result,
         "derived_from_queries": [query, timeline_query],
     }
+
+
+def _scheduled_status_anchor(
+    runtime: CorePrologRuntime,
+    *,
+    entity_arg: str,
+    requested_at: datetime,
+) -> dict[str, Any] | None:
+    rows: list[dict[str, Any]] = []
+    for predicate in (
+        "scheduled_archive",
+        "scheduled_status",
+        "scheduled_state",
+        "scheduled_revocation",
+        "scheduled_suspension",
+        "scheduled_reinstatement",
+        "scheduled_closure",
+        "scheduled_termination",
+    ):
+        result = runtime.query_rows(format_prolog_query(predicate, ["Entity", "EffectiveDate"]))
+        if result.get("status") != "success":
+            continue
+        status = _status_from_event_type(predicate.removeprefix("scheduled_"))
+        for row in result.get("rows", []) or []:
+            if not isinstance(row, dict):
+                continue
+            observed_entity = str(row.get("Entity", "")).strip()
+            effective_date = str(row.get("EffectiveDate", "")).strip()
+            if not observed_entity or not effective_date:
+                continue
+            if observed_entity != entity_arg and _case_atom_key(observed_entity) != _case_atom_key(entity_arg):
+                continue
+            if predicate in {"scheduled_status", "scheduled_state"}:
+                status = str(row.get("Status", "") or row.get("State", "") or status).strip()
+            observed_at = _runtime_temporal_datetime(runtime, effective_date)
+            if observed_at is None or observed_at > requested_at or not status:
+                continue
+            rows.append(
+                {
+                    "observed_entity": observed_entity,
+                    "observed_date": effective_date,
+                    "observed_status": status,
+                    "observed_at": observed_at,
+                    "entity_match": "exact" if observed_entity == entity_arg else "canonical_atom",
+                }
+            )
+    return sorted(rows, key=lambda item: item["observed_at"])[-1] if rows else None
+
+
+def _explicit_status_on_anchor(
+    runtime: CorePrologRuntime,
+    *,
+    entity_arg: str,
+    date_arg: str,
+    requested_at: datetime,
+) -> dict[str, Any] | None:
+    for predicate in ("active_on", "inactive_on", "suspended_on", "archived_on", "revoked_on", "closed_on"):
+        result = runtime.query_rows(format_prolog_query(predicate, [entity_arg, date_arg]))
+        if result.get("status") != "success":
+            continue
+        status = _status_from_event_type(predicate.removesuffix("_on"))
+        if not status:
+            continue
+        return {
+            "observed_entity": entity_arg,
+            "observed_date": date_arg,
+            "observed_status": status,
+            "observed_at": requested_at,
+            "effective_until": date_arg,
+            "entity_match": "exact",
+        }
+    return None
+
+
+def _status_interval_anchor(
+    runtime: CorePrologRuntime,
+    *,
+    entity_arg: str,
+    requested_at: datetime,
+) -> dict[str, Any] | None:
+    intervals: list[dict[str, str]] = []
+    for predicate in ("corrected_interval", "status_interval", "state_interval", "original_interval"):
+        result = runtime.query_rows(format_prolog_query(predicate, ["Notice", "StartDate", "EndDate"]))
+        if result.get("status") != "success":
+            continue
+        for row in result.get("rows", []) or []:
+            if not isinstance(row, dict):
+                continue
+            notice = str(row.get("Notice", "")).strip()
+            start = str(row.get("StartDate", "")).strip()
+            end = str(row.get("EndDate", "")).strip()
+            if notice and start and end:
+                intervals.append({"predicate": predicate, "notice": notice, "start": start, "end": end})
+    if not intervals:
+        return None
+
+    notice_statuses = _notice_statuses(runtime)
+    fallback_status = _unique_status_from_intervals(intervals, notice_statuses)
+    anchors: list[dict[str, Any]] = []
+    for interval in intervals:
+        start_at = _runtime_temporal_datetime(runtime, interval["start"])
+        end_at = _runtime_temporal_datetime(runtime, interval["end"])
+        if start_at is None or end_at is None or not (start_at <= requested_at <= end_at):
+            continue
+        status = notice_statuses.get(interval["notice"], "")
+        if not status and interval["predicate"] == "corrected_interval":
+            status = fallback_status
+        if not status:
+            continue
+        anchors.append(
+            {
+                "observed_entity": entity_arg,
+                "observed_date": interval["start"],
+                "observed_status": status,
+                "observed_at": start_at,
+                "effective_until": interval["end"],
+                "entity_match": "exact",
+            }
+        )
+    return sorted(anchors, key=lambda item: item["observed_at"])[-1] if anchors else None
+
+
+def _notice_statuses(runtime: CorePrologRuntime) -> dict[str, str]:
+    result = runtime.query_rows("notice_type(Notice, NoticeType).")
+    if result.get("status") != "success":
+        return {}
+    out: dict[str, str] = {}
+    for row in result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        notice = str(row.get("Notice", "")).strip()
+        status = _status_from_event_type(str(row.get("NoticeType", "")).strip())
+        if notice and status:
+            out[notice] = status
+    return out
+
+
+def _unique_status_from_intervals(intervals: list[dict[str, str]], notice_statuses: dict[str, str]) -> str:
+    statuses = {
+        status
+        for interval in intervals
+        if interval.get("predicate") == "original_interval"
+        if (status := notice_statuses.get(interval.get("notice", ""), ""))
+    }
+    return next(iter(statuses)) if len(statuses) == 1 else ""
+
+
+def _status_from_event_type(value: str) -> str:
+    normalized = str(value or "").strip().lower()
+    return {
+        "archive": "archived",
+        "archival": "archived",
+        "archived": "archived",
+        "closure": "closed",
+        "closing": "closed",
+        "revocation": "revoked",
+        "revoke": "revoked",
+        "revoked": "revoked",
+        "suspension": "suspended",
+        "suspend": "suspended",
+        "suspended": "suspended",
+        "termination": "terminated",
+        "terminate": "terminated",
+        "terminated": "terminated",
+        "reinstatement": "active",
+        "reinstate": "active",
+        "approval": "active",
+        "activation": "active",
+    }.get(normalized, normalized if normalized.endswith(("ed", "ive")) else "")
 
 
 def _ordered_query_unique(queries: list[str]) -> list[str]:
@@ -7947,14 +10834,14 @@ def run_evidence_bundle_plan_queries(
             if not query or query in seen:
                 continue
             seen.add(query)
-            parsed = parse_prolog_query(query)
-            if parsed is None:
+            parsed_goals = parse_prolog_query_goals(query)
+            if parsed_goals is None:
                 results.append(
                     {
                         "query": query,
                         "result": {
                             "status": "error",
-                            "message": "evidence-bundle query template was not a single predicate query",
+                            "message": "evidence-bundle query template was not a Prolog predicate or conjunction",
                             "reasoning_basis": {
                                 "kind": "evidence-bundle-plan",
                                 "bundle_id": bundle_id,
@@ -7966,20 +10853,24 @@ def run_evidence_bundle_plan_queries(
                     }
                 )
                 continue
-            predicate, args = parsed
-            signature = f"{predicate}/{len(args)}"
-            if signature not in signatures:
+            query_signatures = [f"{predicate}/{len(args)}" for predicate, args in parsed_goals]
+            missing_signatures = [signature for signature in query_signatures if signature not in signatures]
+            if missing_signatures:
                 results.append(
                     {
                         "query": query,
                         "result": {
                             "status": "error",
-                            "message": f"evidence-bundle query signature not in compiled inventory: {signature}",
+                            "message": (
+                                "evidence-bundle query signature not in compiled inventory: "
+                                + ", ".join(missing_signatures)
+                            ),
                             "reasoning_basis": {
                                 "kind": "evidence-bundle-plan",
                                 "bundle_id": bundle_id,
                                 "purpose": purpose,
                                 "validation": "rejected",
+                                "query_signatures": query_signatures,
                             },
                         },
                         "derived_from_queries": [],
@@ -8420,6 +11311,8 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
+            "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
@@ -8607,14 +11500,11 @@ def call_lmstudio_json_schema(
         headers=_chat_headers(config.api_key),
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(req, timeout=int(config.timeout)) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(str(exc)) from exc
+    raw = _urlopen_json_with_transient_retries(
+        req,
+        timeout=int(config.timeout),
+        retry_transient=_is_openrouter_base_url(config.base_url),
+    )
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     first = choices[0] if choices and isinstance(choices[0], dict) else {}
     message = first.get("message", {}) if isinstance(first, dict) else {}
@@ -8623,6 +11513,38 @@ def call_lmstudio_json_schema(
     if not isinstance(parsed, dict):
         raise RuntimeError("structured judge returned non-object JSON")
     return parsed
+
+
+TRANSIENT_HTTP_STATUS_CODES = {408, 409, 425, 429, 500, 502, 503, 504}
+
+
+def _urlopen_json_with_transient_retries(
+    req: urllib.request.Request,
+    *,
+    timeout: int,
+    retry_transient: bool,
+    max_attempts: int = 3,
+) -> dict[str, Any]:
+    attempts = max(1, int(max_attempts))
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(req, timeout=int(timeout)) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+            if not isinstance(raw, dict):
+                raise RuntimeError("model endpoint returned non-object JSON")
+            return raw
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            if retry_transient and exc.code in TRANSIENT_HTTP_STATUS_CODES and attempt + 1 < attempts:
+                time.sleep(min(2.0, 0.35 * (2**attempt)))
+                continue
+            raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            if retry_transient and attempt + 1 < attempts:
+                time.sleep(min(2.0, 0.35 * (2**attempt)))
+                continue
+            raise RuntimeError(str(exc)) from exc
+    raise RuntimeError("model endpoint failed after transient retries")
 
 
 def _chat_headers(api_key: str = "") -> dict[str, str]:

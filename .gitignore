@@ -12,6 +12,7 @@ __pycache__/
 *.pyo
 *.pyd
 codex-state.json
+.playwright-mcp/
 kb_runs/
 kb_runs_published/
 kb_store/

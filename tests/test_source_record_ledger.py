@@ -53,6 +53,21 @@ def test_source_record_ledger_context_is_guidance_not_truth() -> None:
     assert "Exhibit C-1" in context
 
 
+def test_source_record_ledger_preserves_long_statement_tail_clauses() -> None:
+    long_statement = (
+        '"At about 13:55 I returned from break. '
+        + "I checked the cabinet and reviewed the pump line. " * 10
+        + 'I did not respond to the 14:37 alarm at bedside because I was in Room 502."'
+    )
+
+    ledger = extract_source_record_ledger("## Statements\n" + long_statement)
+
+    exact_rows = [row["exact"] for row in ledger["rows"] if row["kind"] == "anchored_line"]
+    assert exact_rows
+    assert "14:37 alarm at bedside" in exact_rows[0]
+    assert "Room 502" in exact_rows[0]
+
+
 def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     ledger = extract_source_record_ledger("## Section 2\n| Source | Time |\n| --- | --- |\n| BAS-002 | 22:12 |\n- Exhibit C-1 records a row.")
 
@@ -186,7 +201,7 @@ def test_source_record_ledger_keeps_wrapped_official_prose() -> None:
     assert kind_by_line[3] in {"anchored_line", "continuation_line"}
     assert "N. Park 206" in exact_by_line[3]
     assert kind_by_line[6] == "anchored_line"
-    assert kind_by_line[7] == "continuation_line"
+    assert kind_by_line[7] in {"anchored_line", "continuation_line"}
     assert "cabinet 3, drawer 2" in exact_by_line[7]
 
 
@@ -217,6 +232,93 @@ def test_source_record_ledger_keeps_count_summary_and_clock_audit_prose() -> Non
     assert "counts (18 + 17) sum to 35" in exact_by_line[7]
     assert "scanner timestamps are nominally local time" in exact_by_line[8]
     assert "audited against an external clock" in exact_by_line[9]
+
+
+def test_source_record_ledger_keeps_standalone_sample_result_prose() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Lab Result",
+                "",
+                "3 of 5 samples from Batch 9C tested positive for contaminant.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+    facts = source_record_ledger_facts(ledger)
+
+    assert kind_by_line[3] == "anchored_line"
+    assert exact_by_line[3].startswith("3 of 5 samples from Batch 9C")
+    assert "source_record_numeric_token(src_line_0003, v_3)." in facts
+    assert "source_record_numeric_token(src_line_0003, v_5)." in facts
+    assert any(fact.startswith("source_record_text_atom(src_line_0003, v_3_of_5_samples") for fact in facts)
+
+
+def test_source_record_ledger_keeps_explicit_count_statement_lines() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Compact Count Statement",
+                "",
+                "Affected items, stated total: 14.",
+                "The statement includes 3 reserve items not listed individually.",
+                "A pending addendum proposed adding 2 provisional items.",
+                "An analyst withdrew an estimate of 15 items.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+    facts = source_record_ledger_facts(ledger)
+
+    assert kind_by_line[3] == "anchored_line"
+    assert kind_by_line[4] in {"anchored_line", "continuation_line"}
+    assert kind_by_line[5] in {"anchored_line", "continuation_line"}
+    assert kind_by_line[6] in {"anchored_line", "continuation_line"}
+    assert exact_by_line[3] == "Affected items, stated total: 14."
+    assert "source_record_numeric_token(src_line_0003, v_14)." in facts
+    assert "source_record_numeric_token(src_line_0004, v_3)." in facts
+    assert "source_record_numeric_token(src_line_0005, v_2)." in facts
+    assert "source_record_numeric_token(src_line_0006, v_15)." in facts
+
+
+def test_source_record_ledger_keeps_numeric_prose_without_english_count_words() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Proposta pendente",
+                "",
+                "Uma proposta pendente queria adicionar 2 registros temporarios. A proposta nao",
+                "foi aprovada antes do fechamento; portanto esses 2 registros temporarios nao",
+                "fazem parte do total final.",
+                "",
+                "Uma estimativa anterior indicou 11 registros afetados. Essa estimativa foi",
+                "retirada antes do fechamento.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+    facts = source_record_ledger_facts(ledger)
+
+    assert kind_by_line[3] == "anchored_line"
+    assert kind_by_line[4] in {"anchored_line", "continuation_line"}
+    assert kind_by_line[5] == "continuation_line"
+    assert kind_by_line[7] == "anchored_line"
+    assert kind_by_line[8] == "continuation_line"
+    assert exact_by_line[3].startswith("Uma proposta pendente queria adicionar 2")
+    assert exact_by_line[4].startswith("foi aprovada antes do fechamento")
+    assert exact_by_line[7].startswith("Uma estimativa anterior indicou 11")
+    assert "source_record_numeric_token(src_line_0003, v_2)." in facts
+    assert "source_record_numeric_token(src_line_0004, v_2)." in facts
+    assert "source_record_numeric_token(src_line_0007, v_11)." in facts
 
 
 def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:

@@ -330,11 +330,12 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 8, 2026:
+As of May 12, 2026:
 
 ### Internal Health
 
-- focused helper/selector verification is green at `135 passed`; rerun the
+- full local cleanup verification is green at `996 passed, 2 subtests passed`
+- focused helper/selector verification is green at `428 passed`; rerun the
   full suite before updating any full-suite headline
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
@@ -342,7 +343,7 @@ As of May 8, 2026:
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
 
-### Benchmark Evidence
+### Fixture Evidence
 
 - the prior surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
 - the newest cold-injected story-world batch spans `10` fixtures and `400` questions; row-gated selector replay is now `361 exact / 16 partial / 23 miss` (`90.25%`), including Nested Puppet Court at `40/40` and Clockmakers at `39/40` with zero misses

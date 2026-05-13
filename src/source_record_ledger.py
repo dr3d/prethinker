@@ -36,7 +36,7 @@ def extract_source_record_ledger(
     source_text: str,
     *,
     max_rows: int = 220,
-    max_chars_per_row: int = 360,
+    max_chars_per_row: int = 1200,
 ) -> dict[str, object]:
     """Extract source row addressability without interpreting source meaning.
 
@@ -329,6 +329,20 @@ def _has_source_anchor(line: str) -> bool:
     ):
         return True
     if re.search(
+        r"\b(?:count|counts|total|amount|number|estimate|estimated|stated|listed|included|excluded|reserve|provisional)\b",
+        text,
+        flags=re.IGNORECASE,
+    ) and re.search(r"\b\d+\b", text):
+        return True
+    if _has_numeric_prose_anchor(text):
+        return True
+    if re.search(
+        r"\b\d+\s+of\s+(?:the\s+)?\d+\s+(?:sampled\s+)?(?:samples?|plants|items|records|units)\b.*\b(?:tested|positive|negative|confirmed)\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        return True
+    if re.search(
         r"\b(?:timestamp|timestamps|clock|clocks)\b.*\b(?:audit|audited|external|local\s+time|synchroni[sz]ed|sync)\b",
         text,
         flags=re.IGNORECASE,
@@ -360,6 +374,19 @@ def _has_source_anchor(line: str) -> bool:
     if re.search(r"\b[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z0-9]+){1,5}\b", text) and re.search(r"\b\d+\b", text):
         return True
     return False
+
+
+def _has_numeric_prose_anchor(text: str) -> bool:
+    """Preserve numeric prose without assuming English count vocabulary."""
+
+    if not re.search(r"\b\d+\b", text):
+        return False
+    alpha_words = re.findall(r"\b[A-Za-z]{2,}\b", text)
+    if len(alpha_words) < 4:
+        return False
+    if len("".join(alpha_words)) < 18:
+        return False
+    return True
 
 
 def _numeric_tokens(text: str) -> list[str]:

@@ -116,6 +116,7 @@ This is a working classification, not a final ledger.
 | Helper Surface | Current Status | Notes |
 | --- | --- | --- |
 | `source_record_section_display` | Clean helper | Renders admitted section atoms; no fixture answer knowledge. |
+| `source_record_matching_token_source` | Clean helper | Links a bound query token to admitted `source_record_numeric_token/2` and section rows so exact source sections remain addressable without parsing fixture prose. |
 | `source_record_clock_sync_support` | Clean helper | Deterministically extracts last-successful clock-sync dates from admitted source-record text/numeric rows. |
 | `clear_sample_clock_pause_support` | Clean helper | Joins admitted segments and offline intervals. |
 | temporal and negative join helpers | Clean helper | Query-composition substrate over prior query results. |
@@ -124,7 +125,7 @@ This is a working classification, not a final ledger.
 | grant award support | Clean helper on transfer batch | Award, cap, eligibility, field-driven recusal, appeal-window, committee-recusal vote-count, score-correction operational status, and appeal-pending status rows are labeled `clean-helper` on the current transfer batch; sibling transfer proof is still pending. |
 | industrial sensor support | Split, audit ongoing | Field-driven event/timestamp/count, computed-duration, packet-id, data-loss, lab-sample logistics, and system clock-authority rows are labeled `clean-helper`; root-cause refusal and operator-origin rows become `clean-helper` when refreshed source-record artifacts preserve the necessary prose. Stated-duration exact-prose recognizers were retired as duplicate/overclaiming scar rows. |
 | clinic recall support | Split, audit ongoing | Device/serial rows plus generic manufacturer-liaison, verification-procedure, explicit clinic abbreviations, cabinet/seal range, failure-rate atoms, visit-date ranges, key-retainer identity, and named medical-director authority are labeled `clean-helper` when acquired by refreshed source-record ledgers; stale artifacts keep sender-dependent rows candidate-labeled. |
-| source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows are labeled `clean-helper`; embedded school/grant packet facts are now labeled `candidate-helper` in the emitted rows. |
+| source-record packet metadata | Split, audit ongoing | Generic identifier/metadata rows and bound-token source-addressability rows are labeled `clean-helper`; embedded school/grant packet facts and prose-derived source notes remain `candidate-helper` in the emitted rows. |
 | probate storage support | Orphaned artifact helper | Appears in historical probate QA artifacts, but no current companion implementation is registered in the repo. Treat those historical rows as candidate-helper archaeology, not active architecture. |
 
 ## Doctrine

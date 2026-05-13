@@ -420,7 +420,7 @@ Companion inventory:
 [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md) is generated
 from `scripts/select_qa_mode_without_oracle.py` and tracks whether many
 individual selector guards are collapsing into a small number of semantic
-families. The current rollup has `244` guard return sites, `244` unique guard
+families. The current rollup has `175` guard return sites, `175` unique guard
 reasons, `7` families, and `0` unclassified reasons.
 
 [Cross-Fixture Repair Slices](https://github.com/dr3d/prethinker/blob/main/docs/CROSS_FIXTURE_REPAIR_SLICES.md) is generated

@@ -11,6 +11,9 @@ from pathlib import Path
 from typing import Any
 
 
+TRANSIENT_HTTP_STATUS_CODES = {408, 409, 425, 429, 500, 502, 503, 504}
+
+
 def bootstrap_env_local(path: str | Path | None = None) -> None:
     """Load repo-local .env.local values when the shell has not provided them."""
 
@@ -1002,14 +1005,11 @@ def _call_ollama_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dic
         method="POST",
     )
     started = time.perf_counter()
-    try:
-        with urllib.request.urlopen(req, timeout=int(config.timeout)) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(str(exc)) from exc
+    raw = _urlopen_json_with_transient_retries(
+        req,
+        timeout=int(config.timeout),
+        retry_transient=_is_openrouter_base_url(config.base_url),
+    )
 
     message = raw.get("message", {}) if isinstance(raw, dict) else {}
     content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
@@ -1062,14 +1062,11 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
         method="POST",
     )
     started = time.perf_counter()
-    try:
-        with urllib.request.urlopen(req, timeout=int(config.timeout)) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
-    except urllib.error.URLError as exc:
-        raise RuntimeError(str(exc)) from exc
+    raw = _urlopen_json_with_transient_retries(
+        req,
+        timeout=int(config.timeout),
+        retry_transient=_is_openrouter_base_url(config.base_url),
+    )
 
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     first = choices[0] if choices and isinstance(choices[0], dict) else {}
@@ -1092,6 +1089,35 @@ def _chat_headers(api_key: str = "") -> dict[str, str]:
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
+
+
+def _urlopen_json_with_transient_retries(
+    req: urllib.request.Request,
+    *,
+    timeout: int,
+    retry_transient: bool,
+    max_attempts: int = 3,
+) -> dict[str, Any]:
+    attempts = max(1, int(max_attempts))
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(req, timeout=int(timeout)) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+            if not isinstance(raw, dict):
+                raise RuntimeError("model endpoint returned non-object JSON")
+            return raw
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            if retry_transient and exc.code in TRANSIENT_HTTP_STATUS_CODES and attempt + 1 < attempts:
+                time.sleep(min(2.0, 0.35 * (2**attempt)))
+                continue
+            raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            if retry_transient and attempt + 1 < attempts:
+                time.sleep(min(2.0, 0.35 * (2**attempt)))
+                continue
+            raise RuntimeError(str(exc)) from exc
+    raise RuntimeError("model endpoint failed after transient retries")
 
 
 def _is_openrouter_base_url(base_url: str) -> bool:
