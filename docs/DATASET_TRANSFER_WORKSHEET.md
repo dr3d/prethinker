@@ -802,3 +802,90 @@ Next pressure:
   pressure to recur in unlike open-ended data or focused probes.
 - Use source-record facts as the default for the next dataset-transfer
   measurement unless a run is specifically testing compile-only behavior.
+
+### DT-009 - Source-Record Residue Manual Audit
+
+Before:
+
+- DT-008 left `30` non-exact rows after the full source-record replay.
+- The top coordinate labels were:
+  `implicit_attitude_or_consequence` (`7`),
+  `comparative_or_temporal_resolution` (`6`), and
+  `direct_compile_surface_gap` (`5`).
+- Before any repair, those labels needed manual stratification so an automated
+  coordinate name would not become architecture by accident.
+
+Prediction:
+
+- If a top coordinate class is coherent, it should describe one transferable
+  repair pressure without relying on RACE passage vocabulary.
+- If a class is mixed, the correct next move is better measurement or focused
+  probes, not a broad helper/scoring change.
+
+Intervention:
+
+- Audited every non-exact row in the three largest source-record coordinate
+  groups using the operational proposition taxonomy from DT-008.
+- Treated the automated coordinate as a starting label only; proposition type
+  and failure rationale decided whether the row belonged in a repair queue.
+
+After:
+
+- `implicit_attitude_or_consequence` is coherent enough to track, but not yet
+  safe to repair from RACE alone.
+  - All `7` rows are inference propositions with compile-surface gaps.
+  - The recurring shape is a semantic bridge from evidence to an unstated
+    evaluative answer: attitude, purpose, trait, convenience, danger, or
+    consequence.
+  - This is the highest-value unlike-probe target, but also the highest leakage
+    risk because MCQ answer labels can smuggle dataset-specific paraphrase
+    mappings into the harness.
+- `comparative_or_temporal_resolution` is not a clean repair class.
+  - It contains a true distance/route join, an event-specific feeling envelope,
+    direct post-event action retrieval, and several inference/causal rows.
+  - The label is useful as a warning that time/order language is present, but it
+    should not drive a generic comparative repair by itself.
+  - Future summaries should be read proposition-first; coordinate second.
+- `direct_compile_surface_gap` splits into at least three pressures.
+  - Source/publication genre metadata.
+  - Generalized action or desire facts that were not compiled as direct
+    predicates.
+  - Synthesis/proverb/theme mapping.
+  - Those should stay separate. A single "direct compile gap" repair would be
+    too broad and likely to encode reading-comprehension test habits.
+
+Artifacts:
+
+- Source-record coordinate summary:
+  `tmp\mrc_transfer_qa_race50_source_records_20260513\transfer_coordinate_summary.md`
+- Manual audit source rows came from:
+  `tmp\mrc_transfer_qa_race50_source_records_20260513\transfer_coordinate_summary.json`
+
+Verification:
+
+- Audited all rows in the top three coordinate groups:
+  - `7 / 7` implicit-attitude rows.
+  - `6 / 6` comparative-or-temporal rows.
+  - `5 / 5` direct-compile rows.
+- No code repair was made from this audit.
+
+Lesson:
+
+- The proposition taxonomy did its job: it prevented the coordinate labels from
+  becoming repair instructions.
+- The remaining RACE residue is not primarily an MCQ interface problem. It is a
+  proposition-pressure problem: semantic bridges, temporal/event joins, source
+  metadata, and synthesis.
+- The next defensible test is not "patch RACE." It is to create or sample unlike
+  open-ended probes for the same proposition pressures and see which recur.
+
+Next pressure:
+
+- Build a small unlike open-ended probe for semantic-bridge inference:
+  evidence states an action, reaction, risk, purpose, or trait; the question
+  asks for the licensed consequence or attitude without multiple-choice labels.
+- Keep route/distance joins as a separate probe. Do not mix them with
+  wall-clock, business-day, or ordinary before/after event ordering until they
+  prove they share machinery.
+- Treat source/publication genre metadata as an intake/compiler metadata probe,
+  not an inference repair.
