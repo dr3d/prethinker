@@ -667,3 +667,138 @@ Next pressure:
 - Keep the next architectural audit on query/answer surfaces that consume
   source-record facts cleanly, so source rows do not become a noisy substitute
   for actual compiled logic.
+
+### DT-008 - Full RACE-50 Source-Record Replay
+
+Before:
+
+- DT-007 showed a targeted `10`-fixture factual slice improved when compiled
+  with source-record ledger facts.
+- That result was promising but could still be slice-shaped. The next question
+  was whether source-record facts improve the full corrected RACE-50 transfer
+  measurement without helper growth, write proposals, or dataset-specific
+  predicates.
+- The proposition-type taxonomy needed an explicit operational contract before
+  using it for cross-dataset comparison.
+
+Prediction:
+
+- If source-record facts are general source-fidelity substrate, the full run
+  should lift exact rate and reduce factual/direct compile-surface misses while
+  preserving zero helper pressure.
+- Some regressions are expected because the compile is LLM-produced and the
+  source-record surface can change query planning; improvements must therefore
+  be judged by aggregate movement and proposition type, not a single row.
+- Inference and synthesis should remain boundary pressure rather than immediate
+  repair targets.
+
+Intervention:
+
+- Recompiled the full corrected RACE-50 fixture set on OpenRouter at six lanes
+  with `source_record_ledger` and `source_record_ledger_facts` enabled.
+- Re-ran QA on the resulting compile artifacts.
+- Updated `scripts\summarize_mrc_transfer_qa.py` so every MRC transfer summary
+  carries explicit proposition-type criteria and precedence-ordered operational
+  rules:
+  synthesis, comparative, categorical, inference, factual.
+- Regenerated transfer-coordinate summaries for both the corrected baseline and
+  the source-record replay.
+
+After:
+
+- Baseline corrected RACE-50 QA:
+  - `177` questions.
+  - `133 exact / 4 partial / 40 miss`.
+  - Exact rate `0.7514`.
+  - Helper rows `0`; write proposal rows `0`; runtime load errors `0`.
+- Full source-record RACE-50 QA:
+  - `177` questions.
+  - `147 exact / 5 partial / 25 miss`.
+  - Exact rate `0.8305`.
+  - Helper rows `0`; write proposal rows `0`; runtime load errors `0`.
+- Full source-record compile:
+  - `50 / 50` parsed.
+  - `560` candidate predicates.
+  - `2581` admitted facts.
+  - `171` skipped facts.
+
+Movement:
+
+- Row-level movement across `177` questions:
+  - `143` unchanged.
+  - `25` improved.
+  - `9` regressed.
+- Improved rows by original proposition type:
+  - `inference`: `12`
+  - `factual`: `7`
+  - `categorical`: `3`
+  - `comparative`: `2`
+  - `synthesis`: `1`
+- Regressed rows by new proposition type:
+  - `inference`: `4`
+  - `factual`: `3`
+  - `comparative`: `1`
+  - `synthesis`: `1`
+- Non-exact proposition-type shift:
+  - `inference`: `22 -> 14`
+  - `factual`: `11 -> 9`
+  - `comparative`: `6 -> 5`
+  - `categorical`: `3 -> 0`
+  - `synthesis`: `2 -> 2`
+- Non-exact coordinate shift:
+  - `implicit_attitude_or_consequence`: `17 -> 7`
+  - `direct_compile_surface_gap`: `12 -> 5`
+  - `background_role_or_audience_fact`: `6 -> 4`
+  - `comparative_or_temporal_resolution`: `5 -> 6`
+  - `false_or_exception_option_selection`: `1 -> 3`
+  - `hybrid_join_resolution`: `1 -> 2`
+  - `formula_or_rule_application`: `1 -> 1`
+  - `title_theme_or_summary_answer`: `1 -> 1`
+  - `query_surface_resolution`: `0 -> 1`
+
+Artifacts:
+
+- Baseline corrected QA:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513`
+- Baseline corrected coordinate summary:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513\transfer_coordinate_summary.md`
+- Source-record compile:
+  `tmp\mrc_transfer_compile_race50_source_records_20260513`
+- Source-record QA:
+  `tmp\mrc_transfer_qa_race50_source_records_20260513`
+- Source-record coordinate summary:
+  `tmp\mrc_transfer_qa_race50_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_options_or_20260513`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_source_records_20260513`
+- `python -m pytest tests\test_summarize_mrc_transfer_qa.py tests\test_sample_mrc_transfer_fixtures.py tests\test_stage_incoming_fixtures.py -q`
+  - `25 passed`
+
+Lesson:
+
+- Source-record facts are now supported by both a synthetic unlike factual
+  probe and a full RACE-50 replay. The effect is not small:
+  `75.14% -> 83.05%` exact with no helper rows.
+- The improvement is not limited to direct factual questions. Addressable
+  source facts also helped inference and categorical rows because the answer
+  layer could retrieve the evidence needed to evaluate options.
+- This does not mean raw source rows should become the architecture's answer
+  substitute. The regressions show that source-fidelity surfaces can perturb
+  query planning and judgment. The clean direction is to make source records a
+  measured dataset-transfer default while auditing the query/answer layer that
+  consumes them.
+- The taxonomy now has operational criteria before classification. Cross-dataset
+  comparisons should report proposition type, not just MCQ versus open-ended
+  format.
+
+Next pressure:
+
+- Manually audit the top remaining source-record non-exact classes:
+  `implicit_attitude_or_consequence`, `comparative_or_temporal_resolution`, and
+  `direct_compile_surface_gap`.
+- Do not repair from RACE alone. A candidate repair needs the same proposition
+  pressure to recur in unlike open-ended data or focused probes.
+- Use source-record facts as the default for the next dataset-transfer
+  measurement unless a run is specifically testing compile-only behavior.

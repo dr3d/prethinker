@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from scripts.summarize_mrc_transfer_qa import classify_proposition_type, classify_transfer_coordinate
+from scripts.summarize_mrc_transfer_qa import (
+    PROPOSITION_TYPE_OPERATIONAL_RULES,
+    classify_proposition_type,
+    classify_transfer_coordinate,
+)
 
 
 def test_classify_false_option_coordinate() -> None:
@@ -31,6 +35,14 @@ def test_classify_title_coordinate() -> None:
     }
 
     assert classify_transfer_coordinate(row) == "title_theme_or_summary_answer"
+
+
+def test_proposition_taxonomy_declares_operational_precedence() -> None:
+    rules = "\n".join(PROPOSITION_TYPE_OPERATIONAL_RULES)
+
+    assert "Apply precedence" in rules
+    assert "synthesis, comparative, categorical, inference, factual" in rules
+    assert "Remove multiple-choice options" in rules
 
 
 def test_classify_factual_proposition_type() -> None:

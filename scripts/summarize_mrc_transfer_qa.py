@@ -39,6 +39,17 @@ PROPOSITION_TYPE_CRITERIA: dict[str, str] = {
     ),
 }
 
+PROPOSITION_TYPE_OPERATIONAL_RULES: list[str] = [
+    "Classify the proposition the question asks the system to evaluate, not the dataset format or answer option text.",
+    "Remove multiple-choice options before detecting the asked proposition; use options only as answer evidence when needed.",
+    "Apply precedence in this order: synthesis, comparative, categorical, inference, factual.",
+    "Use synthesis only when the answer must summarize purpose, theme, title, main idea, or overall rhetorical role.",
+    "Use comparative when the answer requires an ordered, numeric, temporal, threshold, count, duration, or before/after relation, even if the final answer is a named option.",
+    "Use categorical when the answer maps a stated fact to a class, role, label, meaning, audience, or object kind.",
+    "Use inference when the answer depends on an unstated attitude, motivation, cause, consequence, belief, intent, or licensed reader conclusion.",
+    "Use factual only when the answer is directly stated as an event, entity, attribute, value, location, or relation after the higher-precedence tests do not apply.",
+]
+
 
 def main() -> int:
     args = _parse_args()
@@ -111,6 +122,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
         "schema_version": "mrc_transfer_coordinate_summary_v2",
         "qa_root": str(qa_root),
         "proposition_type_criteria": PROPOSITION_TYPE_CRITERIA,
+        "proposition_type_operational_rules": PROPOSITION_TYPE_OPERATIONAL_RULES,
         "totals": {
             "question_count": question_count,
             "exact": exact,
@@ -129,7 +141,12 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
 
 
 def classify_proposition_type(row: dict[str, Any]) -> str:
-    """Classify the proposition being asked, independent of QA format."""
+    """Classify the proposition being asked, independent of QA format.
+
+    The operational contract is intentionally precedence ordered. A question
+    can contain words that look factual or comparative while still asking for a
+    synthesis or inference proposition.
+    """
     question = _strip_options(str(row.get("utterance") or ""))
     answer = str(row.get("reference_answer") or "")
     rationale = str((row.get("failure_surface") or {}).get("rationale") or "")
@@ -331,6 +348,9 @@ def _render_md(summary: dict[str, Any]) -> str:
     ]
     for key, value in (summary.get("proposition_type_criteria") or {}).items():
         lines.append(f"- `{key}`: {value}")
+    lines.extend(["", "## Proposition Type Operational Rules", ""])
+    for value in summary.get("proposition_type_operational_rules") or []:
+        lines.append(f"- {value}")
     lines.extend(
         [
             "",
