@@ -92,6 +92,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-033 | Dense corrected-duration repair. | Dense probe moved `5/1/2 -> 8/0/0`; original wide coordinate exposed evidence-plan context loss across bundles. |
 | BH-034 | Cross-bundle evidence-plan temporal context. | Original wide q015 moved miss -> exact with one-row temporal support; no fixture vocabulary added. |
 | BH-035 | Generic `*_status_at` interval support. | Two original wide point-state coordinates moved miss -> exact by recognizing `Entity, Date, Status` transition predicates. |
+| BH-036 | Arithmetic aggregation unstated-result probe. | Simple unlike sum/average aggregation with unprinted finals passed `8/0/0`; no repair justified. |
 
 ## Current Evidence
 
@@ -753,12 +754,82 @@ Next pressure:
   difference/deduplication, interval arithmetic with business-day or time-of-day
   rules, and source-text numeric fallback. Pick one geometry and probe unlike.
 
+### BH-036 - Arithmetic Aggregation Unstated Result Probe
+
+Before:
+
+- Active board priority 1 was arithmetic aggregation joins.
+- Remaining replayed hybrid rows included sums, averages, deltas, grouped
+  counts, and calendar/clock arithmetic.
+- The immediate question was whether plain numeric aggregation with printed
+  components but no printed final answer is already inside the set.
+
+Prediction:
+
+- If a small unlike probe with ordinary sum and average aggregation failed, the
+  next repair target would be generic aggregation support over component rows.
+- If it passed, the remaining wide arithmetic misses are denser variants:
+  policy-gated aggregation, grouped entities, source-text numeric fallback,
+  business-day arithmetic, or wall-clock arithmetic.
+
+Intervention:
+
+- Added `experiments\boundary_probes\hybrid_join_stage2\arithmetic_aggregation_unstated_pair`.
+- Probe A uses approved/proposed cost components and asks for an approved sum
+  plus proposed-inclusive sum without printing either final.
+- Probe B uses counted/excluded reviewer scores and asks for official and
+  all-recorded averages without printing either final.
+- Ran cold OpenRouter compile/QA with evidence-bundle execution and reference
+  judging.
+
+After:
+
+- Compile: `31 admitted`, `0 skipped`.
+- QA: `8 exact / 0 partial / 0 miss`.
+- Runtime load errors: `0`.
+- Write proposals: `0`.
+- Helper rows: `6`, all `source_record_table_body_count_support` clean-helper
+  rows from table-shape context, not aggregation-specific helpers.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\arithmetic_aggregation_unstated_pair`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage17_arithmetic_aggregation_20260513`
+- QA:
+  `tmp\boundary_probe_hybrid_qa_stage35_arithmetic_aggregation_20260513`
+
+Verification:
+
+- OpenRouter QA summary:
+  `question_count 8`, `judge_exact 8`, `judge_partial 0`, `judge_miss 0`,
+  `failure_surface_counts: not_applicable 8`.
+- Inspection confirms the answers came from component rows and aggregation-view
+  support, not a printed final aggregate.
+
+Lesson:
+
+- Plain unstated numeric aggregation is interior when the compile preserves
+  component values, inclusion/exclusion status, and the named aggregation view.
+  A helper would be premature. The next useful boundary pressure is denser
+  aggregation where the universe, membership, grouping, policy gate, or calendar
+  arithmetic changes the component set before arithmetic happens.
+
+Next pressure:
+
+- Split arithmetic residue into separate unlike probes:
+  policy-gated aggregation, set/dedupe aggregation, business-day arithmetic,
+  and wall-clock duration arithmetic.
+- Start with set/dedupe aggregation because it overlaps the board's second
+  pressure and several replayed rows.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | arithmetic aggregation joins | Remaining replayed hybrid rows repeatedly require summing, averaging, applying deltas, or business-day/clock arithmetic over admitted facts. | Build focused unlike probes that separate arithmetic grammar from source-specific quantities. |
-| 2 | set difference and dedupe | Remaining rows include universe-minus-affected sets, duplicate exclusion, union-after-amendment, and grouped-item counts. | Probe generic set subtraction/dedup before adding any helper. |
+| 1 | set difference and dedupe aggregation | Plain sum/average aggregation is interior; remaining rows need component-set construction before arithmetic. | Probe universe-minus-affected sets, duplicate exclusion, and union-after-amendment on unlike data. |
+| 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
@@ -767,13 +838,14 @@ Next pressure:
 
 Do this next:
 
-1. Build a small unlike arithmetic-aggregation probe with printed components
-   but no printed final answer.
+1. Build a small unlike set/dedupe aggregation probe with component rows and
+   membership/exclusion facts but no printed final set or count.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
    evidence.
-4. Keep q015 and the point-state rows as closed regressions, not tuning targets.
+4. Keep q015, the point-state rows, and plain aggregation as closed regressions,
+   not tuning targets.
 
 ## OpenRouter Rule
 
