@@ -6,11 +6,14 @@ from pathlib import Path
 from scripts.sample_mrc_transfer_fixtures import (
     _coerce_cuad_records,
     _coerce_maud_records,
+    _coerce_privacyqa_records,
     _coerce_race_records,
     _coerce_squad_records,
+    _filter_privacyqa_record_ids,
     _select_records,
     write_cuad_fixtures,
     write_maud_fixtures,
+    write_privacyqa_fixtures,
     write_race_fixtures,
     write_squad_fixtures,
 )
@@ -346,3 +349,73 @@ def test_write_maud_fixture_can_be_staged(tmp_path: Path) -> None:
     assert "Type of Consideration-Answer" in qa_md
     assert "All Cash" not in qa_md
     assert oracle[0]["reference_answer"] == "All Cash"
+
+
+def test_coerce_privacyqa_records_uses_snippets() -> None:
+    rows = [
+        {
+            "id": "privacy_qa_1",
+            "query": "Will my profile be visible to other users?",
+            "answer": "Your public profile is visible to other users.",
+            "corpus_file": "privacy_qa/Demo.txt",
+            "snippets": [
+                {
+                    "answer": "Your public profile is visible to other users.",
+                    "file_path": "privacy_qa/Demo.txt",
+                    "span": [10, 55],
+                }
+            ],
+        }
+    ]
+
+    [record] = _coerce_privacyqa_records(rows, max_answer_chars=200, max_context_chars=1000)
+
+    assert record["questions"] == ["Will my profile be visible to other users?"]
+    assert record["answers"] == ["Your public profile is visible to other users."]
+    assert "Your public profile is visible" in record["context"]
+    assert "10-55" in record["context"]
+
+
+def test_filter_privacyqa_record_ids_preserves_requested_order() -> None:
+    records = [
+        {"example_id": "privacy_qa_1", "questions": ["first"]},
+        {"example_id": "privacy_qa_2", "questions": ["second"]},
+    ]
+
+    filtered = _filter_privacyqa_record_ids(records, "privacy_qa_2, privacy_qa_1")
+
+    assert [record["example_id"] for record in filtered] == ["privacy_qa_2", "privacy_qa_1"]
+
+
+def test_write_privacyqa_fixture_can_be_staged(tmp_path: Path) -> None:
+    record = {
+        "context": "Privacy policy file: Demo\n\n## Snippet 1\n\nYour profile is visible to other users.",
+        "questions": ["Will my profile be visible?"],
+        "answers": ["Your profile is visible to other users."],
+        "question_ids": ["privacy_qa_1"],
+        "title": "privacy_qa/Demo.txt",
+        "example_id": "privacy_qa_1",
+        "source_span_count": 1,
+    }
+    incoming = tmp_path / "incoming"
+    staged = tmp_path / "staged"
+    [fixture] = write_privacyqa_fixtures(
+        records=[record],
+        out_root=incoming,
+        dataset_name="amentaphd/legalbench-qa-privacy_qa",
+        config_name="default",
+        split="train",
+        limit=1,
+    )
+
+    result = stage_fixture(fixture, out_root=staged)
+
+    assert result["qa_rows"] == 1
+    qa_md = (staged / fixture.name / "qa.md").read_text(encoding="utf-8")
+    oracle = [
+        json.loads(line)
+        for line in (staged / fixture.name / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert "Will my profile be visible?" in qa_md
+    assert "Your profile is visible" not in qa_md
+    assert oracle[0]["reference_answer"] == "Your profile is visible to other users."

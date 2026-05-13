@@ -58,6 +58,16 @@ def main() -> int:
             limit=args.limit,
             offset=args.offset,
         )
+    elif args.source_format == "privacyqa":
+        written = write_privacyqa_fixtures(
+            records=records,
+            out_root=args.out_root,
+            dataset_name=args.dataset,
+            config_name=config_name,
+            split=args.split,
+            limit=args.limit,
+            offset=args.offset,
+        )
     else:
         written = write_race_fixtures(
             records=records,
@@ -77,13 +87,13 @@ def main() -> int:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sample RACE-, SQuAD-, CUAD-, or MAUD-style machine-reading-comprehension records into "
+            "Sample RACE-, SQuAD-, CUAD-, MAUD-, or PrivacyQA-style machine-reading-comprehension records into "
             "Prethinker incoming fixtures with answers isolated in oracle.jsonl."
         )
     )
     parser.add_argument(
         "--source-format",
-        choices=["race", "squad", "cuad", "maud"],
+        choices=["race", "squad", "cuad", "maud", "privacyqa"],
         default="race",
         help="Input dataset schema to normalize.",
     )
@@ -156,6 +166,22 @@ def _parse_args() -> argparse.Namespace:
         default="main",
         help="MAUD data_type to prefer, or 'any'.",
     )
+    parser.add_argument(
+        "--privacyqa-max-answer-chars",
+        type=int,
+        default=2500,
+        help="Skip PrivacyQA rows with reference answers longer than this.",
+    )
+    parser.add_argument(
+        "--privacyqa-max-context-chars",
+        type=int,
+        default=9000,
+        help="Maximum PrivacyQA snippet context characters per fixture.",
+    )
+    parser.add_argument(
+        "--privacyqa-record-ids",
+        help="Comma-separated PrivacyQA ids to keep before sampling, for reproducible quality-filtered probes.",
+    )
     return parser.parse_args()
 
 
@@ -169,6 +195,9 @@ def _load_records(args: argparse.Namespace) -> list[dict[str, Any]]:
         return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
     if args.source_format == "maud":
         records = _load_maud_records(args)
+        return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
+    if args.source_format == "privacyqa":
+        records = _load_privacyqa_records(args)
         return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
     if args.local_jsonl:
         raw_records = _load_local_jsonl(args.local_jsonl)
@@ -316,6 +345,32 @@ def _load_maud_records(args: argparse.Namespace) -> list[dict[str, Any]]:
         max_answer_chars=int(args.maud_max_answer_chars),
         data_type=str(args.maud_data_type),
     )
+
+
+def _load_privacyqa_records(args: argparse.Namespace) -> list[dict[str, Any]]:
+    if int(args.privacyqa_max_answer_chars) < 100:
+        raise SystemExit("--privacyqa-max-answer-chars must be at least 100")
+    if int(args.privacyqa_max_context_chars) < 500:
+        raise SystemExit("--privacyqa-max-context-chars must be at least 500")
+    load_dataset = _import_huggingface_load_dataset()
+    dataset = load_dataset(str(args.dataset), split=str(args.split))
+    records = _coerce_privacyqa_records(
+        (dict(record) for record in dataset),
+        max_answer_chars=int(args.privacyqa_max_answer_chars),
+        max_context_chars=int(args.privacyqa_max_context_chars),
+    )
+    return _filter_privacyqa_record_ids(records, str(args.privacyqa_record_ids or ""))
+
+
+def _filter_privacyqa_record_ids(records: Sequence[dict[str, Any]], record_ids: str) -> list[dict[str, Any]]:
+    requested = [record_id.strip() for record_id in record_ids.split(",") if record_id.strip()]
+    if not requested:
+        return list(records)
+    by_id = {str(record.get("example_id", "")): record for record in records}
+    missing = [record_id for record_id in requested if record_id not in by_id]
+    if missing:
+        raise SystemExit(f"PrivacyQA record id(s) not found after filtering: {', '.join(missing)}")
+    return [by_id[record_id] for record_id in requested]
 
 
 def _download_maud_csv(*, dataset_name: str, split: str) -> list[dict[str, Any]]:
@@ -665,6 +720,92 @@ def _render_maud_context(*, title: str, excerpts: Sequence[dict[str, Any]]) -> s
     return "\n".join(lines).strip()
 
 
+def _coerce_privacyqa_records(
+    rows: Iterable[dict[str, Any]],
+    *,
+    max_answer_chars: int,
+    max_context_chars: int,
+) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for index, raw_row in enumerate(rows):
+        row = dict(raw_row)
+        query = _clean_external_text(str(row.get("query") or row.get("question") or "")).strip()
+        answer = _clean_external_text(str(row.get("answer") or "")).strip()
+        if not query or not answer or len(answer) > max_answer_chars:
+            continue
+        snippets = _privacyqa_snippets(row)
+        if not snippets:
+            continue
+        context = _render_privacyqa_context(
+            policy=str(row.get("corpus_file") or row.get("title") or f"privacy_policy_{index:05d}"),
+            snippets=snippets,
+            max_context_chars=max_context_chars,
+        )
+        records.append(
+            {
+                "context": context,
+                "questions": [query],
+                "answers": [answer],
+                "question_ids": [str(row.get("id") or f"privacyqa_{index:05d}")],
+                "title": str(row.get("corpus_file") or row.get("title") or f"privacy_policy_{index:05d}"),
+                "example_id": str(row.get("id") or f"privacyqa_{index:05d}"),
+                "source_span_count": len(snippets),
+            }
+        )
+    return records
+
+
+def _privacyqa_snippets(row: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_snippets = row.get("snippets")
+    snippets: list[dict[str, Any]] = []
+    if isinstance(raw_snippets, Sequence) and not isinstance(raw_snippets, (str, bytes)):
+        for item in raw_snippets:
+            if not isinstance(item, dict):
+                continue
+            text = _clean_external_text(str(item.get("answer") or "")).strip()
+            if not text:
+                continue
+            snippets.append(
+                {
+                    "answer": text,
+                    "file_path": str(item.get("file_path") or row.get("corpus_file") or ""),
+                    "span": item.get("span") if isinstance(item.get("span"), Sequence) else [],
+                }
+            )
+    if not snippets:
+        answer = _clean_external_text(str(row.get("answer") or "")).strip()
+        if answer:
+            snippets.append({"answer": answer, "file_path": str(row.get("corpus_file") or ""), "span": []})
+    return snippets
+
+
+def _render_privacyqa_context(*, policy: str, snippets: Sequence[dict[str, Any]], max_context_chars: int) -> str:
+    lines = [
+        f"Privacy policy file: {policy}",
+        "",
+        "The following are answer-bearing snippets from the privacy policy source.",
+        "",
+    ]
+    for index, snippet in enumerate(snippets, start=1):
+        span = snippet.get("span") if isinstance(snippet.get("span"), Sequence) else []
+        span_text = f"{span[0]}-{span[1]}" if len(span) >= 2 else "unknown"
+        lines.extend(
+            [
+                f"## Snippet {index}",
+                "",
+                f"- Source: {snippet.get('file_path') or policy}",
+                f"- Span: {span_text}",
+                "",
+                str(snippet.get("answer") or "").strip(),
+                "",
+            ]
+        )
+    rendered = "\n".join(lines).strip()
+    if len(rendered) <= max_context_chars:
+        return rendered
+    return rendered[:max_context_chars].rstrip()
+
+
 def _clean_external_text(value: str) -> str:
     replacements = {
         "â€œ": '"',
@@ -848,6 +989,43 @@ def write_maud_fixtures(
         )
         fixture_dir = out_root / fixture_name
         _write_maud_fixture(
+            record=record,
+            fixture_dir=fixture_dir,
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            fixture_name=fixture_name,
+            source_index=global_index,
+        )
+        written.append(fixture_dir)
+    return written
+
+
+def write_privacyqa_fixtures(
+    *,
+    records: Iterable[dict[str, Any]],
+    out_root: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    limit: int,
+    offset: int = 0,
+) -> list[Path]:
+    out_root.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for local_index, record in enumerate(records):
+        if len(written) >= limit:
+            break
+        global_index = offset + local_index
+        fixture_name = _fixture_name(
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            index=global_index,
+            example_id=str(record.get("example_id") or record.get("title") or ""),
+        )
+        fixture_dir = out_root / fixture_name
+        _write_privacyqa_fixture(
             record=record,
             fixture_dir=fixture_dir,
             dataset_name=dataset_name,
@@ -1222,6 +1400,94 @@ def _write_maud_fixture(
                 "- `source.md` contains bounded merger-agreement excerpts, not full contracts.",
                 "- `qa.md` contains question/field surfaces only.",
                 "- `oracle.jsonl` contains reference labels/answers for after-the-fact scoring.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_privacyqa_fixture(
+    *,
+    record: dict[str, Any],
+    fixture_dir: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    fixture_name: str,
+    source_index: int,
+) -> None:
+    context = _required_text(record, "context")
+    questions = _required_sequence(record, "questions")
+    answers = _required_sequence(record, "answers")
+    question_ids = record.get("question_ids") if isinstance(record.get("question_ids"), Sequence) else []
+    if len(questions) != len(answers):
+        raise ValueError(f"{fixture_name}: questions/answers length mismatch ({len(questions)}/{len(answers)})")
+
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    title = str(record.get("title") or "privacy_policy")
+    example_id = str(record.get("example_id") or title or source_index)
+    span_count = int(record.get("source_span_count") or 0)
+
+    (fixture_dir / "source.md").write_text(
+        "\n".join(
+            [
+                "# External Privacy Policy QA Snippets",
+                "",
+                f"- Dataset: `{dataset_name}`",
+                f"- Config: `{config_name}`",
+                f"- Split: `{split}`",
+                f"- Policy: `{title}`",
+                f"- Example id: `{example_id}`",
+                f"- Snippet count: `{span_count}`",
+                "",
+                "## Policy Snippets",
+                "",
+                context.strip(),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    qa_lines = [
+        f"# {fixture_name} QA",
+        "",
+        "Questions only. Reference privacy-policy answers are isolated in `oracle.jsonl`.",
+        "",
+    ]
+    oracle_rows: list[dict[str, Any]] = []
+    for index, question in enumerate(questions, start=1):
+        qid = f"q{index:03d}"
+        answer = str(answers[index - 1]).strip()
+        if not answer:
+            raise ValueError(f"{fixture_name}:{qid}: blank answer")
+        source_qid = str(question_ids[index - 1]).strip() if index - 1 < len(question_ids) else qid
+        qa_lines.append(f"{index}. {str(question).strip()}")
+        oracle_rows.append(
+            {
+                "id": qid,
+                "source_id": f"{source_qid}:{qid}",
+                "category": "external_privacy_policy_answer",
+                "reference_answer": answer,
+                "answer": answer,
+            }
+        )
+
+    (fixture_dir / "qa.md").write_text("\n".join(qa_lines), encoding="utf-8")
+    (fixture_dir / "oracle.jsonl").write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in oracle_rows) + "\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "fixture_notes.md").write_text(
+        "\n".join(
+            [
+                "# Fixture Notes",
+                "",
+                "- External PrivacyQA transfer sample; do not treat privacy-policy wording as architecture.",
+                "- `source.md` contains answer-bearing policy snippets, not full policies.",
+                "- `qa.md` contains user questions only.",
+                "- `oracle.jsonl` contains reference answers for after-the-fact scoring.",
                 "",
             ]
         ),

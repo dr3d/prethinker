@@ -1692,3 +1692,156 @@ Next pressure:
 - For a cleaner open-ended legal/document QA baseline, look next at PrivacyQA or
   another document-grounded QA set whose answers are naturally expressed in the
   source rather than annotation labels.
+
+### DT-018 - PrivacyQA Pre-Registered Interpretation Frame
+
+Before:
+
+- CUAD-10 and MAUD-10 showed that "legal" is too broad as an evaluation label:
+  - CUAD is ugly but closer to source-grounded extraction.
+  - MAUD is packaged cleanly but mostly tests external legal taxonomy labels.
+- PrivacyQA is the next candidate because privacy policies are legal-ish,
+  document-grounded, and closer to user-facing questions than merger-agreement
+  label rubrics.
+
+Prediction:
+
+- PrivacyQA should be interpreted only after measuring the literalness fraction.
+- If literalness is below `30%`, treat the run mostly as classification,
+  inference, or rubric pressure rather than extractive QA.
+- If `query_surface_resolution` dominates, that strengthens the CUAD finding:
+  legal-ish extraction pressure is about stable access to source-field/source-row
+  facts.
+- If `compile_surface_gap` dominates, PrivacyQA is exposing missing policy
+  surfaces rather than query access.
+- If inference-heavy rows dominate, privacy policy QA is closer to reader
+  conclusion MRC than contract extraction, and "legal" is not the useful frame.
+- Score bands are pre-committed:
+  - Around `70%`: CUAD probably approximates current legal-ish extraction
+    transfer.
+  - Around `85%`: CUAD was mostly corpus ugliness; cleaner legal-ish QA is much
+    closer to SQuAD/RACE.
+  - Around `50%`: CUAD was generous; legal/policy transfer is materially harder.
+
+Intervention:
+
+- Locked this frame before sampling or scoring PrivacyQA.
+- Probed OpenRouter with a tiny Qwen call; transport returned HTTP `200` via
+  Parasail, so hosted runs can be tried again with normal token budgets.
+
+After:
+
+- No PrivacyQA measurement yet.
+- OpenRouter appears available again, but previous provider 429/schema failures
+  remain part of the operating context; use hosted lanes when productive and
+  fall back locally if transport becomes the experiment.
+
+Artifacts:
+
+- OpenRouter probe: direct `/chat/completions` call against
+  `qwen/qwen3.6-35b-a3b`.
+
+Verification:
+
+- Probe returned HTTP `200`.
+
+Lesson:
+
+- Pre-commitment matters here because the next result can land in several
+  scientifically useful regimes. The interpretation should not be rewritten
+  after seeing the score.
+
+Next pressure:
+
+- Inspect PrivacyQA schema and answer literalness before building any adapter.
+- If the dataset is suitable, sample a small PrivacyQA-10 run and compare
+  coordinate distribution against CUAD and MAUD.
+
+### DT-019 - PrivacyQA-10 Source-Aligned Policy Probe
+
+Before:
+
+- DT-018 pre-committed the PrivacyQA interpretation bands before measurement:
+  literalness first, then score and coordinate shape.
+- The first blind even sample exposed a dataset-quality risk: some question /
+  snippet pairs looked visibly misaligned. That is dataset noise, not a useful
+  architecture boundary.
+
+Prediction:
+
+- If PrivacyQA is mostly source-grounded, it should score closer to SQuAD/RACE
+  than CUAD/MAUD.
+- If the score lands near `85%` or above with no dominant residue class, the
+  CUAD result should be read as partly corpus ugliness rather than a general
+  legal-ish extraction ceiling.
+- If the score lands near `70%` with `query_surface_resolution` residue, CUAD's
+  source-row access pressure transfers.
+
+Intervention:
+
+- Added PrivacyQA intake support to
+  `scripts/sample_mrc_transfer_fixtures.py`.
+- Added a reproducible `--privacyqa-record-ids` intake option so noisy rows can
+  be excluded without teaching the compiler or selector anything about privacy
+  policies. The ids are sampling metadata only.
+- Measured dataset literalness before scoring:
+  - Rows inspected: `194` across `7` policies.
+  - Full answer literal in snippets: `69 / 194 = 35.6%`.
+  - At least one answer line literal in snippets: `168 / 194 = 86.6%`.
+- Built a source-aligned PrivacyQA-10 probe with ten single-question fixtures.
+- Ran compile and QA through OpenRouter at `6` lanes using
+  `qwen/qwen3.6-35b-a3b`.
+
+After:
+
+- Compile: `10 / 10` parsed.
+- Compile totals: `66` candidate predicates, `287` admitted rows, `4` skipped
+  rows.
+- QA: `10 exact / 0 partial / 0 miss` over `10` questions.
+- Exact rate: `100.0%`.
+- Runtime load errors: `0`.
+- Write proposals: `0`.
+- Helper pressure: `0` helper rows; pressure label `no_helper_rows`.
+- No non-exact coordinate distribution exists for this probe.
+
+Artifacts:
+
+- Samples:
+  `tmp\mrc_transfer_samples_privacyqa10_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_privacyqa10_20260513`
+- Compile:
+  `tmp\mrc_transfer_compile_privacyqa10_source_records_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_privacyqa10_source_records_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_privacyqa10_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python -m pytest tests\test_sample_mrc_transfer_fixtures.py tests\test_summarize_mrc_transfer_qa.py tests\test_stage_incoming_fixtures.py -q`
+  - `40 passed`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_privacyqa10_source_records_20260513`
+  - `{"exact": 10, "exact_rate": 1.0, "miss": 0, "non_exact": 0, "not_judged": 0, "partial": 0, "question_count": 10}`
+
+Lesson:
+
+- PrivacyQA gives the clean legal-ish document-grounded result that CUAD and
+  MAUD did not. On source-aligned policy snippets, current Prethinker handles
+  the task as ordinary document QA.
+- The legal/domain label was too coarse. Contract fields, merger-agreement
+  taxonomies, and policy snippets have different transfer shapes.
+- The result should not trigger policy-specific architecture. It is a
+  measurement that the existing source-record path can answer clean
+  privacy-policy questions when the evidence snippet actually bears the answer.
+- The quality-filter step is part of dataset intake, not substrate. It prevents
+  benchmark noise from masquerading as a boundary class.
+
+Next pressure:
+
+- Keep PrivacyQA as evidence that cleaner policy QA is inside the current set.
+- Do not repair from PrivacyQA-10; there are no failures to explain.
+- For the next transfer probe, choose either:
+  - a larger PrivacyQA source-aligned sample to estimate stability; or
+  - a different document-grounded legal/policy corpus to test whether the
+    policy result transfers beyond this dataset.
