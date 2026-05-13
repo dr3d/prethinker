@@ -2996,3 +2996,71 @@ Next pressure:
   separately.
 - Before repair, build a tiny unlike probe for target-versus-anchor joins:
   joined/assigned/appointed/attached to target after/before anchor.
+
+### DT-033 - Target-Anchor Relation Probe
+
+Date: 2026-05-13
+
+Before:
+
+- DT-032 left one compile-surface miss: source phrasing bound a relation target
+  and a temporal anchor in the same clause, but the compile preserved the anchor
+  as if it were the target.
+- The open question was whether target-versus-anchor separation was a missing
+  axis or only a denser boundary variant.
+
+Prediction:
+
+- If the axis is missing, a clean unlike probe should fail on target questions:
+  joined/appointed/attached/enrolled/moved-to targets would collapse into
+  after/before/following/during anchors.
+- If the simple axis is inside, target and anchor questions should both answer
+  exactly, and the wide-corpus miss should be treated as a density case.
+
+Intervention:
+
+- Added `target_anchor_relation_ladder`, a focused unlike probe that pairs each
+  target question with its temporal/causal anchor question.
+- Ran OpenRouter compile and QA at `6` lanes with source-record ledger facts
+  enabled.
+
+After:
+
+- Target-anchor probe:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+- The compile did preserve target and anchor separately in the simple case.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\target_anchor_relation_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_target_anchor_relation_20260513`
+- QA:
+  `tmp\boundary_probe_qa_target_anchor_relation_20260513`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture target_anchor_relation_ladder --out-root tmp\boundary_probe_compile_target_anchor_relation_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture target_anchor_relation_ladder --compile-root tmp\boundary_probe_compile_target_anchor_relation_20260513 --out-root tmp\boundary_probe_qa_target_anchor_relation_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Target-versus-anchor separation is not absent. The clean coordinate is
+  interior.
+- The remaining wide-corpus miss is likely a resolution-density problem:
+  denser syntax, multiple candidate targets, ambiguous attachment, or a
+  relation label that the compile over-normalizes.
+- Do not add a repair from this probe. The evidence says to probe density
+  variants before changing compile guidance.
+
+Next pressure:
+
+- Build a denser target-anchor probe with multiple possible targets and anchors:
+  nested clauses, pronoun/role aliases, target lists, and target-vs-event
+  ambiguity. The repair, if any, must still preserve target relation and anchor
+  relation as separate coordinates without naming corpus vocabulary.
