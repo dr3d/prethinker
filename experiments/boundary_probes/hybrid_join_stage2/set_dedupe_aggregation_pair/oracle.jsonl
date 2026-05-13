@@ -1,0 +1,8 @@
+{"category":"set_dedupe_aggregation","id":"q001","reference_answer":"Row A-4 is an alias row for A-1.","source_id":"q001"}
+{"category":"set_dedupe_aggregation","id":"q002","reference_answer":"A-1, A-2, and A-3 count as unique active assets; A-4 duplicates A-1 and A-5 is retired.","source_id":"q002"}
+{"category":"set_dedupe_aggregation","id":"q003","reference_answer":"3 unique active assets.","source_id":"q003"}
+{"category":"set_dedupe_aggregation","id":"q004","reference_answer":"H-2 affects P-102 and P-104.","source_id":"q004"}
+{"category":"set_dedupe_aggregation","id":"q005","reference_answer":"P-101, P-103, and P-105 are unaffected.","source_id":"q005"}
+{"category":"set_dedupe_aggregation","id":"q006","reference_answer":"3 parcels are unaffected.","source_id":"q006"}
+{"category":"set_dedupe_aggregation","id":"q007","reference_answer":"Amendment M-7 adds P-106.","source_id":"q007"}
+{"category":"set_dedupe_aggregation","id":"q008","reference_answer":"6 parcels are in the post-amendment covered view: P-101 through P-106.","source_id":"q008"}

@@ -2200,6 +2200,143 @@ def _identifier_alias_count_companion(
     )
 
 
+def _set_difference_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate != "set_minus" or len(args) != 3:
+        return None
+    resolved_triples = _resolved_set_minus_triples(runtime, args=args, query=query)
+    if not resolved_triples:
+        return None
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for view_arg, base_arg, exclusion_arg in resolved_triples:
+        base_rows = _binary_fact_rows_for_first_arg(runtime, base_arg)
+        exclusion_rows = _binary_fact_rows_for_first_arg(runtime, exclusion_arg)
+        if not base_rows or not exclusion_rows:
+            continue
+        excluded_members = {row["member"] for row in exclusion_rows}
+        for base_row in base_rows:
+            member = base_row["member"]
+            if member in excluded_members:
+                continue
+            for exclusion_row in exclusion_rows:
+                key = (member, base_row["predicate"], exclusion_row["predicate"], exclusion_arg)
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "HelperClass": "clean-helper",
+                        "QueryView": view_arg,
+                        "BaseSet": base_arg,
+                        "ExclusionSet": exclusion_arg,
+                        "Member": member,
+                        "BasePredicate": base_row["predicate"],
+                        "ExclusionPredicate": exclusion_row["predicate"],
+                        "SupportKind": "set_difference_member",
+                    }
+                )
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "set_difference_support",
+        "prolog_query": (
+            "set_difference_support"
+            "(QueryView, BaseSet, ExclusionSet, Member, BasePredicate, ExclusionPredicate, SupportKind)."
+        ),
+        "variables": [
+            "HelperClass",
+            "QueryView",
+            "BaseSet",
+            "ExclusionSet",
+            "Member",
+            "BasePredicate",
+            "ExclusionPredicate",
+            "SupportKind",
+        ],
+        "rows": rows,
+        "num_rows": len(rows),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only set difference support derived output members from admitted binary membership "
+                "relations keyed by the base set and exclusion set; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [query],
+    }
+
+
+def _resolved_set_minus_triples(
+    runtime: CorePrologRuntime,
+    *,
+    args: tuple[Any, ...],
+    query: str,
+) -> list[tuple[str, str, str]]:
+    arg_texts = [str(arg).strip() for arg in args]
+    if any(not item for item in arg_texts):
+        return []
+    if not any(_is_prolog_variable(item) for item in arg_texts):
+        return [(arg_texts[0], arg_texts[1], arg_texts[2])]
+    result = runtime.query_rows(query)
+    if result.get("status") != "success":
+        return []
+    triples: list[tuple[str, str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for row in result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        resolved: list[str] = []
+        for arg in arg_texts:
+            value = str(row.get(arg, "")).strip() if _is_prolog_variable(arg) else arg
+            if not value:
+                resolved = []
+                break
+            resolved.append(value)
+        if len(resolved) != 3:
+            continue
+        triple = (resolved[0], resolved[1], resolved[2])
+        if triple in seen:
+            continue
+        seen.add(triple)
+        triples.append(triple)
+    return triples
+
+
+def _binary_fact_rows_for_first_arg(runtime: CorePrologRuntime, key: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    ignored_predicates = {"set_minus", "set_union"}
+    for clause in getattr(runtime.engine, "clauses", []) or []:
+        if getattr(clause, "body", None):
+            continue
+        head = getattr(clause, "head", None)
+        predicate = str(getattr(head, "name", "") or "").strip()
+        term_args = list(getattr(head, "args", []) or [])
+        if not predicate or predicate in ignored_predicates or predicate.startswith("source_record_"):
+            continue
+        if len(term_args) != 2:
+            continue
+        first = str(term_args[0]).strip()
+        second = str(term_args[1]).strip()
+        if first == key and second:
+            rows.append({"predicate": predicate, "member": second})
+    return rows
+
+
 def _identifier_alias_key(value: str) -> str:
     tokens = [token for token in _type_taxonomy_tokens(value) if token]
     if len(tokens) <= 1:
@@ -2231,6 +2368,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     alias_count = _identifier_alias_count_companion(runtime, predicate=predicate, args=args, query=query)
     if alias_count:
         source_record_companions.append(alias_count)
+    set_difference = _set_difference_companion(runtime, predicate=predicate, args=args, query=query)
+    if set_difference:
+        source_record_companions.append(set_difference)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)

@@ -93,6 +93,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-034 | Cross-bundle evidence-plan temporal context. | Original wide q015 moved miss -> exact with one-row temporal support; no fixture vocabulary added. |
 | BH-035 | Generic `*_status_at` interval support. | Two original wide point-state coordinates moved miss -> exact by recognizing `Entity, Date, Status` transition predicates. |
 | BH-036 | Arithmetic aggregation unstated-result probe. | Simple unlike sum/average aggregation with unprinted finals passed `8/0/0`; no repair justified. |
+| BH-037 | Set-minus member projection support. | Unlike set/dedupe probe exposed `7/1/0`; query-only set difference support moved replay to `8/0/0`. |
 
 ## Current Evidence
 
@@ -824,11 +825,86 @@ Next pressure:
 - Start with set/dedupe aggregation because it overlaps the board's second
   pressure and several replayed rows.
 
+### BH-037 - Set-Minus Member Projection
+
+Before:
+
+- BH-036 showed plain sum/average aggregation is interior.
+- The next pressure was component-set construction before counting or listing:
+  duplicate exclusion, universe-minus-affected sets, and union-after-amendment.
+
+Prediction:
+
+- If a small unlike set/dedupe probe passed, set construction would remain a
+  density problem in the wide rows.
+- If it failed after the KB preserved the component rows and set operation, the
+  repair target should be a query-only projection of set-operation members, not
+  a source-specific helper.
+
+Intervention:
+
+- Added `experiments\boundary_probes\hybrid_join_stage2\set_dedupe_aggregation_pair`.
+- The probe includes:
+  - duplicate/alias exclusion from a raw active register;
+  - base-set minus affected-set listing and count;
+  - post-amendment union count.
+- First replay was `7 exact / 1 partial / 0 miss`; the partial was the
+  base-minus-affected list. The KB had `set_minus(View, Base, Exclusion)` and
+  both member relations, but execution did not project result members.
+- Added query-only `set_difference_support` for `set_minus/3`. It derives
+  members from admitted binary membership relations keyed by the base set and
+  exclusion set. It also resolves variable-bound `set_minus` queries before
+  projecting members.
+
+After:
+
+- Focused regression passed for both ground and variable-bound `set_minus/3`.
+- Full unit file: `138 passed`.
+- Probe replay moved to `8 exact / 0 partial / 0 miss`.
+- Helper rows: `6`, all `set_difference_support` clean-helper rows.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\set_dedupe_aggregation_pair`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage18_set_dedupe_20260513`
+- Before repair QA:
+  `tmp\boundary_probe_hybrid_qa_stage36_set_dedupe_20260513`
+- Ground-only repair QA:
+  `tmp\boundary_probe_hybrid_qa_stage37_set_dedupe_support_20260513`
+- Variable-aware repair QA:
+  `tmp\boundary_probe_hybrid_qa_stage38_set_dedupe_var_support_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `138 passed`.
+- OpenRouter replay after variable-aware support:
+  `question_count 8`, `judge_exact 8`, `judge_partial 0`, `judge_miss 0`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- A set operation fact is not enough when the answer asks for projected members.
+  The reusable principle is query-only projection: when an admitted `set_minus`
+  view binds a base set and exclusion set, return the members present in a
+  binary base-membership relation and absent from a binary exclusion-membership
+  relation. This is architecture because it is phrased over set-operation shape,
+  not over fixture names or row text.
+
+Next pressure:
+
+- Replay the wide set/dedupe coordinates where compile artifacts exist:
+  duplicate exclusion, universe-minus-affected sets, union-after-amendment, and
+  grouped-item counts.
+- Keep `set_union` separate until an unlike or wide coordinate proves projection
+  needs a second generic support surface.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | set difference and dedupe aggregation | Plain sum/average aggregation is interior; remaining rows need component-set construction before arithmetic. | Probe universe-minus-affected sets, duplicate exclusion, and union-after-amendment on unlike data. |
+| 1 | set/dedupe wide replay | Focused `set_minus` projection is interior after generic support. | Replay wide coordinates that require duplicate exclusion, set difference, or grouped counts. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -838,14 +914,14 @@ Next pressure:
 
 Do this next:
 
-1. Build a small unlike set/dedupe aggregation probe with component rows and
-   membership/exclusion facts but no printed final set or count.
+1. Replay the wide set/dedupe-like coordinates against existing compile
+   artifacts after `set_difference_support`.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
    evidence.
-4. Keep q015, the point-state rows, and plain aggregation as closed regressions,
-   not tuning targets.
+4. Keep q015, the point-state rows, plain aggregation, and focused set-minus as
+   closed regressions, not tuning targets.
 
 ## OpenRouter Rule
 

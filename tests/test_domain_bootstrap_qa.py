@@ -4093,3 +4093,51 @@ def test_status_at_query_derives_interval_support_from_transition_anchors() -> N
     assert result_row["EffectiveFrom"] == "2025_09_10"
     assert result_row["EffectiveUntil"] == "2025_09_22"
     assert result_row["ObservedEntity"] == "asset_9"
+
+
+def test_set_minus_query_derives_projected_difference_members() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "group_member(base_set, item_a).",
+        "group_member(base_set, item_b).",
+        "group_member(base_set, item_c).",
+        "excluded_member(exclusion_set, item_b).",
+        "set_minus(output_view, base_set, exclusion_set).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["set_minus(output_view, base_set, exclusion_set)."])
+    support = [
+        item
+        for item in rows
+        if item.get("result", {}).get("predicate") == "set_difference_support"
+    ]
+
+    assert support
+    members = {row["Member"] for row in support[0]["result"]["rows"]}
+    assert members == {"item_a", "item_c"}
+    assert {row["SupportKind"] for row in support[0]["result"]["rows"]} == {"set_difference_member"}
+
+
+def test_set_minus_query_derives_difference_after_resolving_exclusion_variable() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "group_member(base_set, item_a).",
+        "group_member(base_set, item_b).",
+        "group_member(base_set, item_c).",
+        "excluded_member(exclusion_set, item_b).",
+        "set_minus(output_view, base_set, exclusion_set).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["set_minus(output_view, base_set, ExclusionSet)."])
+    support = [
+        item
+        for item in rows
+        if item.get("result", {}).get("predicate") == "set_difference_support"
+    ]
+
+    assert support
+    result_rows = support[0]["result"]["rows"]
+    assert {row["ExclusionSet"] for row in result_rows} == {"exclusion_set"}
+    assert {row["Member"] for row in result_rows} == {"item_a", "item_c"}
