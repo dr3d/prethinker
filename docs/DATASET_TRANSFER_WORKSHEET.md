@@ -1845,3 +1845,92 @@ Next pressure:
   - a larger PrivacyQA source-aligned sample to estimate stability; or
   - a different document-grounded legal/policy corpus to test whether the
     policy result transfers beyond this dataset.
+
+### DT-020 - PrivacyQA-30 Stability Probe
+
+Before:
+
+- DT-019 landed at `10 / 10` exact on a curated source-aligned PrivacyQA probe.
+- That was strong but too small. The next question was whether the result held
+  across a wider policy sample, or whether the ten-row probe was lucky.
+
+Prediction:
+
+- A larger source-aligned sample should stay near the DT-018 high band if
+  PrivacyQA is genuinely closer to source-grounded policy QA than CUAD/MAUD.
+- Any non-exact rows must be manually audited before being called architecture
+  gaps, because PrivacyQA already showed some question/snippet alignment noise.
+
+Intervention:
+
+- Counted available PrivacyQA rows under the current answer-length cap:
+  - `170` rows with answers at or below `2500` chars.
+  - `119` with query/evidence lexical overlap at least `0.2`.
+  - `95` with overlap at least `0.33`.
+  - `56` with overlap at least `0.5` across all splits; `43` in train.
+- Built a deterministic `30`-fixture train sample from the overlap `>= 0.5`
+  rows.
+- Staged `30 / 30` fixtures.
+- Ran compile on OpenRouter at `6` lanes, then retried `3` upstream `429`
+  transport failures at `1` lane.
+- Ran QA on OpenRouter at `6` lanes.
+
+After:
+
+- Compile after retry: `30 / 30` parsed.
+- QA raw score: `26 exact / 1 partial / 3 miss` over `30`.
+- Raw exact rate: `86.67%`.
+- Runtime load errors: `0`.
+- Write proposals: `0`.
+- Helper pressure: `0` helper rows; pressure label `no_helper_rows`.
+- Automated coordinate summary labeled the `4` non-exacts as
+  `compile_surface_gap`.
+- Manual audit changed the interpretation:
+  - The non-exact rows are not clean compile-boundary evidence.
+  - The reference snippets do not clearly answer the asked propositions in the
+    location / marketing cases.
+  - These are better treated as `dataset_answer_alignment_noise` until a cleaner
+    source confirms the same shape.
+
+Artifacts:
+
+- Samples:
+  `tmp\mrc_transfer_samples_privacyqa30_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_privacyqa30_20260513`
+- Compile:
+  `tmp\mrc_transfer_compile_privacyqa30_source_records_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_privacyqa30_source_records_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_privacyqa30_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_privacyqa30_source_records_20260513`
+  - `{"exact": 26, "exact_rate": 0.8667, "miss": 3, "non_exact": 4, "not_judged": 0, "partial": 1, "question_count": 30}`
+- OpenRouter provider behavior:
+  - Initial compile at `6` lanes hit upstream `429` on `3` fixtures.
+  - Narrow retry at `1` lane completed those `3` fixtures.
+  - QA completed without provider failure.
+
+Lesson:
+
+- The DT-018 score-band prediction held: PrivacyQA-30 landed in the high band
+  at `86.67%` raw exact, supporting the view that CUAD's lower score was partly
+  corpus/interface ugliness rather than a global legal-ish extraction ceiling.
+- The deeper lesson is intake quality. Lexical source-alignment reduces noise
+  but does not prove the reference answer actually answers the question.
+- No Prethinker repair should be made from these four non-exacts. The first
+  repair target is the dataset-transfer intake audit: distinguish answer-bearing
+  evidence from merely literal snippets.
+
+Next pressure:
+
+- Add a transfer-intake quality note or lightweight audit path that can flag
+  `reference_does_not_answer_question` before compile/QA results are interpreted
+  as architecture gaps.
+- For domain transfer, prefer cleaner document-grounded datasets or manually
+  audited slices over larger noisy PrivacyQA batches.
+- Keep OpenRouter default at `6` lanes for normal batches; use `1`-lane retry
+  for provider `429` residues.
