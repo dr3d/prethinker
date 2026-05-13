@@ -507,6 +507,20 @@ def test_run_query_plan_exposes_identifier_alias_count_for_event_surface() -> No
     ]
 
 
+def test_identifier_alias_count_requires_observed_canonical_suffix_entity() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "inspection_opened_on(north_zone_01, 2026_06_01).",
+        "inspection_opened_on(south_zone_01, 2026_06_02).",
+        "inspection_opened_on(east_zone_02, 2026_06_03).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["inspection_opened_on(Inspection, Date)."])
+
+    assert not any(item["result"].get("predicate") == "identifier_alias_count_support" for item in rows)
+
+
 def test_run_query_plan_exposes_duplicate_exclusion_count_for_unary_entity_surface() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

@@ -100,6 +100,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-041 | Review-bound remaining-set support. | Generic query-only support moved complete-contract rows exact while leaving R-A compile omissions exposed; scoped helper rows `22 -> 5`. |
 | BH-042 | Enumerated exclusion prompt probe. | Generic prompt-only compile retry did not recover the omitted first-notice exclusions; boundary remains compile-surface fidelity. |
 | BH-043 | Source identifier vs placeholder collision. | Mapper now distinguishes hyphenated source ids from `N/A` placeholders; dense implicit-difference replay moved to `11/0/0` with zero helper rows. |
+| BH-044 | Identifier alias trigger audit. | Suffix-form alias support now requires an observed canonical suffix entity, preventing coincidental suffix collisions from becoming alias architecture. |
 
 ## Current Evidence
 
@@ -1330,11 +1331,63 @@ Next pressure:
 - Keep business-day and wall-clock arithmetic separate until an explicit probe
   proves they share machinery.
 
+### BH-044 - Identifier Alias Trigger Audit
+
+Before:
+
+- The alias-count helper body was generic, but the trigger used suffix-form
+  grouping over every returned two-column event surface whose predicate ended
+  in `_on`, `_at`, or `_in`.
+- That caught real alias shapes, but the trigger could also collapse unrelated
+  identifiers that merely shared a final numeric suffix.
+
+Prediction:
+
+- Alias support should require evidence that the suffix form is itself an
+  observed entity in the returned surface. Without that canonical row, suffix
+  similarity is only a suspicion and should not produce helper architecture.
+
+Intervention:
+
+- Tightened `identifier_alias_count_support` so an alias group is emitted only
+  when:
+  - multiple returned atoms share the same suffix key; and
+  - the suffix key is also present as an observed entity atom.
+- Added a regression where unrelated entities share a suffix-like tail but no
+  canonical suffix entity is present.
+
+After:
+
+- Existing alias-count behavior still passes when both canonical and expanded
+  forms are present.
+- Coincidental suffix similarity no longer emits `identifier_alias_count_support`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `141 passed`.
+
+Lesson:
+
+- Helper triggers need their own fixture-free evidence. A clean helper body can
+  still overgeneralize if the trigger treats naming coincidence as identity.
+  The reusable principle is observed canonical-form evidence, not suffix
+  resemblance alone.
+
+Next pressure:
+
+- Continue trigger audits on status and source-section helpers. Especially
+  watch predicate suffix rules (`*_status`) and section-prefix assumptions.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-043 showed admission gates also need raw/source-form audits. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
+| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 tightened suffix-alias triggering after a fixture-free false-positive probe. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |

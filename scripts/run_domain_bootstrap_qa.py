@@ -2166,11 +2166,23 @@ def _identifier_alias_count_companion(
     groups: dict[str, set[str]] = {}
     for entity in raw_entities:
         groups.setdefault(_identifier_alias_key(entity), set()).add(entity)
-    alias_groups = {key: values for key, values in groups.items() if len(values) > 1}
+    raw_entity_set = set(raw_entities)
+    alias_groups = {
+        key: values
+        for key, values in groups.items()
+        if len(values) > 1 and key in raw_entity_set
+    }
     if not alias_groups:
         return None
 
-    canonical_entities = sorted(groups, key=_case_atom_key)
+    canonical_entities = sorted(
+        {
+            (key if key in alias_groups else entity)
+            for entity in raw_entities
+            for key in [_identifier_alias_key(entity)]
+        },
+        key=_case_atom_key,
+    )
     rows = [
         {
             "HelperClass": "clean-helper",
