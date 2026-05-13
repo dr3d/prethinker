@@ -21,7 +21,7 @@ case archive; this file is the intake and transfer-pressure board.
 
 ## Intake Tooling
 
-`scripts/sample_mrc_transfer_fixtures.py` samples RACE-style machine reading
+`scripts/sample_mrc_transfer_fixtures.py` samples RACE- and SQuAD-style machine reading
 comprehension records into Prethinker incoming fixture shape:
 
 ```powershell
@@ -29,6 +29,11 @@ python scripts/sample_mrc_transfer_fixtures.py --dataset ehovy/race --config hig
 ```
 
 Use `--sample-strategy even` for deterministic spread samples across a split.
+For open-ended extractive QA, use SQuAD-style rows:
+
+```powershell
+python scripts/sample_mrc_transfer_fixtures.py --source-format squad --dataset squad --no-config --split validation --limit 5 --sample-strategy even
+```
 
 Output defaults to `tmp/mrc_transfer_samples`. Each sampled passage has:
 
@@ -291,3 +296,73 @@ Next pressure:
   `false_or_exception_option_selection`.
 - Treat `title_theme_or_summary_answer` as likely answer-rendering/out-of-scope
   until it proves otherwise.
+
+### DT-004 - RACE Option-Inline Audit and SQuAD Pivot
+
+Before:
+
+- DT-003 treated RACE as external transfer evidence, but manual audit began by
+  reading the staged `qa.md` files rather than only the aggregate JSON.
+- The top-three stratified audit was supposed to inspect recurring boundary
+  classes before any repair.
+
+Audit finding:
+
+- The original RACE sampler wrote answer choices as indented lines under each
+  question.
+- `stage_incoming_fixtures.py` intentionally preserves only numbered question
+  lines for markdown QA, so staged RACE questions lost their option choices.
+- The `177`-question DT-003 run therefore measured open-ended questions, not
+  the intended multiple-choice interface.
+
+Intervention:
+
+- Changed the RACE sampler to inline the option set into the numbered question
+  line while still leaving the answer key isolated in `oracle.jsonl`.
+- Re-ran RACE-50 QA using the same source compiles and corrected staged QA.
+- Added SQuAD-style extractive-QA intake support to the sampler, because open
+  ended QA is closer to Prethinker's target than multiple-choice exam
+  selection.
+
+After:
+
+- Corrected RACE-50 with options inline:
+  `177` questions, `133 exact / 4 partial / 40 miss`, exact rate `0.7514`.
+- Runtime load errors: `0`.
+- Write proposal rows: `0`.
+- Helper rows: `0`.
+- SQuAD smoke sample staged cleanly: `2` fixtures, `0` failed.
+
+Artifacts:
+
+- Corrected RACE samples:
+  `tmp\mrc_transfer_samples_race50_options_20260513`
+- Corrected staged RACE:
+  `tmp\mrc_transfer_staged_race50_options_20260513`
+- Corrected RACE QA:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513`
+- Corrected coordinate summary:
+  `tmp\mrc_transfer_qa_race50_options_or_20260513\transfer_coordinate_summary.md`
+- SQuAD smoke:
+  `tmp\mrc_transfer_samples_squad_smoke_20260513`,
+  `tmp\mrc_transfer_staged_squad_smoke_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_sample_mrc_transfer_fixtures.py tests/test_summarize_mrc_transfer_qa.py tests/test_stage_incoming_fixtures.py -q`
+  -> `13 passed`.
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_race50_options_or_20260513`
+  -> `133 / 4 / 40 / 0`.
+
+Lesson:
+
+- The first manual audit did exactly what it should: it caught a measurement
+  interface bug before any repair work started. RACE remains useful as a
+  multiple-choice stressor, but the option interface itself is a benchmark
+  shape. Prethinker's cleaner transfer target is open-ended extractive QA.
+
+Next pressure:
+
+- Do not repair against RACE option-selection yet.
+- Run a SQuAD-50 extractive QA measurement next, using the same source compile
+  and QA machinery, then audit its top recurring classes.

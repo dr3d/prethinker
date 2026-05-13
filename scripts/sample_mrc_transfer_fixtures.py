@@ -26,15 +26,27 @@ DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "mrc_transfer_samples"
 def main() -> int:
     args = _parse_args()
     records = _load_records(args)
-    written = write_race_fixtures(
-        records=records,
-        out_root=args.out_root,
-        dataset_name=args.dataset,
-        config_name=args.config,
-        split=args.split,
-        limit=args.limit,
-        offset=args.offset,
-    )
+    config_name = "default" if bool(args.no_config) else str(args.config)
+    if args.source_format == "squad":
+        written = write_squad_fixtures(
+            records=records,
+            out_root=args.out_root,
+            dataset_name=args.dataset,
+            config_name=config_name,
+            split=args.split,
+            limit=args.limit,
+            offset=args.offset,
+        )
+    else:
+        written = write_race_fixtures(
+            records=records,
+            out_root=args.out_root,
+            dataset_name=args.dataset,
+            config_name=config_name,
+            split=args.split,
+            limit=args.limit,
+            offset=args.offset,
+        )
     for path in written:
         print(path)
     print(f"wrote {len(written)} fixture(s) to {args.out_root}")
@@ -44,12 +56,19 @@ def main() -> int:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sample RACE-style machine-reading-comprehension records into "
+            "Sample RACE- or SQuAD-style machine-reading-comprehension records into "
             "Prethinker incoming fixtures with answers isolated in oracle.jsonl."
         )
     )
+    parser.add_argument(
+        "--source-format",
+        choices=["race", "squad"],
+        default="race",
+        help="Input dataset schema to normalize.",
+    )
     parser.add_argument("--dataset", default="ehovy/race", help="HuggingFace dataset name.")
     parser.add_argument("--config", default="high", help="HuggingFace config/subset name.")
+    parser.add_argument("--no-config", action="store_true", help="Call HuggingFace load_dataset without a config.")
     parser.add_argument("--split", default="validation", help="HuggingFace split to sample.")
     parser.add_argument("--limit", type=int, default=5, help="Number of passages to write.")
     parser.add_argument("--offset", type=int, default=0, help="Starting record offset.")
@@ -80,12 +99,14 @@ def _load_records(args: argparse.Namespace) -> list[dict[str, Any]]:
     if args.offset < 0:
         raise SystemExit("--offset must be zero or positive")
     if args.local_jsonl:
-        records = _coerce_race_records(_load_local_jsonl(args.local_jsonl))
+        raw_records = _load_local_jsonl(args.local_jsonl)
+        records = _coerce_squad_records(raw_records) if args.source_format == "squad" else _coerce_race_records(raw_records)
         return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
 
     load_dataset = _import_huggingface_load_dataset()
-    dataset = load_dataset(args.dataset, args.config, split=args.split)
-    records = _coerce_race_records(dict(record) for record in dataset)
+    config = "" if bool(args.no_config) else str(args.config)
+    dataset = load_dataset(args.dataset, config, split=args.split) if config.strip() else load_dataset(args.dataset, split=args.split)
+    records = _coerce_squad_records(dict(record) for record in dataset) if args.source_format == "squad" else _coerce_race_records(dict(record) for record in dataset)
     return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
 
 
@@ -189,6 +210,35 @@ def _coerce_race_records(records: Iterable[dict[str, Any]]) -> list[dict[str, An
     return list(grouped.values())
 
 
+def _coerce_squad_records(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return context-level records from SQuAD-style question rows."""
+
+    grouped: dict[str, dict[str, Any]] = {}
+    for index, record in enumerate(records):
+        context = str(record.get("context") or "")
+        if not context.strip():
+            continue
+        answer_texts = (record.get("answers") or {}).get("text") if isinstance(record.get("answers"), dict) else None
+        if not answer_texts:
+            continue
+        title = str(record.get("title") or "untitled")
+        row_id = str(record.get("id") or f"record_{index:05d}")
+        key = f"{title}\n{context}"
+        if key not in grouped:
+            grouped[key] = {
+                "context": context,
+                "questions": [],
+                "answers": [],
+                "question_ids": [],
+                "title": title,
+                "example_id": row_id,
+            }
+        grouped[key]["questions"].append(record.get("question"))
+        grouped[key]["answers"].append(str(answer_texts[0]).strip())
+        grouped[key]["question_ids"].append(row_id)
+    return list(grouped.values())
+
+
 def write_race_fixtures(
     *,
     records: Iterable[dict[str, Any]],
@@ -218,6 +268,43 @@ def write_race_fixtures(
             fixture_dir=fixture_dir,
             dataset_name=dataset_name,
             config_name=config_name,
+            split=split,
+            fixture_name=fixture_name,
+            source_index=global_index,
+        )
+        written.append(fixture_dir)
+    return written
+
+
+def write_squad_fixtures(
+    *,
+    records: Iterable[dict[str, Any]],
+    out_root: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    limit: int,
+    offset: int = 0,
+) -> list[Path]:
+    out_root.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for local_index, record in enumerate(records):
+        if len(written) >= limit:
+            break
+        global_index = offset + local_index
+        fixture_name = _fixture_name(
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            index=global_index,
+            example_id=str(record.get("title") or record.get("example_id") or ""),
+        )
+        fixture_dir = out_root / fixture_name
+        _write_squad_fixture(
+            record=record,
+            fixture_dir=fixture_dir,
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
             split=split,
             fixture_name=fixture_name,
             source_index=global_index,
@@ -284,7 +371,11 @@ def _write_race_fixture(
             fixture_name=fixture_name,
             qid=qid,
         )
-        qa_lines.append(f"{index}. {str(question).strip()}")
+        option_clause = " ".join(
+            f"{_option_label(option_index)}. {option_text}"
+            for option_index, option_text in enumerate(option_values)
+        )
+        qa_lines.append(f"{index}. {str(question).strip()} Options: {option_clause}")
         for option_index, option_text in enumerate(option_values):
             qa_lines.append(f"   {_option_label(option_index)}. {option_text}")
         qa_lines.append("")
@@ -313,6 +404,92 @@ def _write_race_fixture(
                 "- `qa.md` contains questions and option surfaces only.",
                 "- `oracle.jsonl` contains the answer key for scoring after compilation/QA.",
                 "- Samples are generated under `tmp/` by default; git remains the archive for code, not dataset bulk storage.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_squad_fixture(
+    *,
+    record: dict[str, Any],
+    fixture_dir: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    fixture_name: str,
+    source_index: int,
+) -> None:
+    context = _required_text(record, "context")
+    questions = _required_sequence(record, "questions")
+    answers = _required_sequence(record, "answers")
+    question_ids = record.get("question_ids") if isinstance(record.get("question_ids"), Sequence) else []
+    if len(questions) != len(answers):
+        raise ValueError(f"{fixture_name}: questions/answers length mismatch ({len(questions)}/{len(answers)})")
+
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    title = str(record.get("title") or "untitled")
+    example_id = str(record.get("example_id") or title or source_index)
+
+    (fixture_dir / "source.md").write_text(
+        "\n".join(
+            [
+                "# External Extractive QA Passage",
+                "",
+                f"- Dataset: `{dataset_name}`",
+                f"- Config: `{config_name}`",
+                f"- Split: `{split}`",
+                f"- Title: `{title}`",
+                f"- Example id: `{example_id}`",
+                "",
+                "## Passage",
+                "",
+                context.strip(),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    qa_lines = [
+        f"# {fixture_name} QA",
+        "",
+        "Questions only. Reference answers are isolated in `oracle.jsonl`.",
+        "",
+    ]
+    oracle_rows: list[dict[str, Any]] = []
+    for index, question in enumerate(questions, start=1):
+        qid = f"q{index:03d}"
+        answer = str(answers[index - 1]).strip()
+        if not answer:
+            raise ValueError(f"{fixture_name}:{qid}: blank answer")
+        source_qid = str(question_ids[index - 1]).strip() if index - 1 < len(question_ids) else qid
+        qa_lines.append(f"{index}. {str(question).strip()}")
+        oracle_rows.append(
+            {
+                "id": qid,
+                "source_id": f"{source_qid}:{qid}",
+                "category": "external_extract_answer",
+                "reference_answer": answer,
+                "answer": answer,
+            }
+        )
+
+    (fixture_dir / "qa.md").write_text("\n".join(qa_lines), encoding="utf-8")
+    (fixture_dir / "oracle.jsonl").write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in oracle_rows) + "\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "fixture_notes.md").write_text(
+        "\n".join(
+            [
+                "# Fixture Notes",
+                "",
+                "- External extractive-QA transfer sample; do not treat dataset wording as architecture.",
+                "- `source.md` contains the passage context.",
+                "- `qa.md` contains open-ended questions only.",
+                "- `oracle.jsonl` contains reference answer spans for after-the-fact scoring.",
                 "",
             ]
         ),

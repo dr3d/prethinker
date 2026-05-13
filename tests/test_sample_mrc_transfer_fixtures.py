@@ -3,7 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from scripts.sample_mrc_transfer_fixtures import _coerce_race_records, _select_records, write_race_fixtures
+from scripts.sample_mrc_transfer_fixtures import (
+    _coerce_race_records,
+    _coerce_squad_records,
+    _select_records,
+    write_race_fixtures,
+    write_squad_fixtures,
+)
 from scripts.stage_incoming_fixtures import stage_fixture
 
 
@@ -33,6 +39,7 @@ def test_write_race_fixtures_isolates_answer_key(tmp_path: Path) -> None:
     ]
 
     assert "Who reviewed the plan?" in qa_md
+    assert "Options: A. The planner B. The reviewer" in qa_md
     assert "B. The reviewer" in qa_md
     assert "correct" not in qa_md.casefold()
     assert "reference_answer" not in qa_md
@@ -68,7 +75,7 @@ def test_sampled_fixture_can_be_staged(tmp_path: Path) -> None:
         json.loads(line)
         for line in (staged / fixture.name / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
     ]
-    assert "Which total is current?" in qa_md
+    assert "Which total is current? Options: A. 10 B. 12" in qa_md
     assert oracle[0]["reference_answer"] == "A. 10"
 
 
@@ -107,3 +114,60 @@ def test_select_records_evenly_spreads_candidates() -> None:
         "sample-6",
         "sample-9",
     ]
+
+
+def test_coerce_squad_rows_groups_by_context() -> None:
+    rows = [
+        {
+            "id": "s1",
+            "title": "Demo",
+            "context": "A shared context names a winner and a location.",
+            "question": "Who won?",
+            "answers": {"text": ["Ari"], "answer_start": [0]},
+        },
+        {
+            "id": "s2",
+            "title": "Demo",
+            "context": "A shared context names a winner and a location.",
+            "question": "Where?",
+            "answers": {"text": ["the hall"], "answer_start": [0]},
+        },
+    ]
+
+    [record] = _coerce_squad_records(rows)
+
+    assert record["questions"] == ["Who won?", "Where?"]
+    assert record["answers"] == ["Ari", "the hall"]
+
+
+def test_write_squad_fixture_can_be_staged(tmp_path: Path) -> None:
+    record = {
+        "context": "The committee met in the north hall. Mara chaired the meeting.",
+        "questions": ["Where did the committee meet?", "Who chaired the meeting?"],
+        "answers": ["north hall", "Mara"],
+        "question_ids": ["s1", "s2"],
+        "title": "Committee",
+        "example_id": "s1",
+    }
+    incoming = tmp_path / "incoming"
+    staged = tmp_path / "staged"
+    [fixture] = write_squad_fixtures(
+        records=[record],
+        out_root=incoming,
+        dataset_name="squad",
+        config_name="default",
+        split="validation",
+        limit=1,
+    )
+
+    result = stage_fixture(fixture, out_root=staged)
+
+    assert result["qa_rows"] == 2
+    qa_md = (staged / fixture.name / "qa.md").read_text(encoding="utf-8")
+    oracle = [
+        json.loads(line)
+        for line in (staged / fixture.name / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert "Where did the committee meet?" in qa_md
+    assert "north hall" not in qa_md
+    assert oracle[0]["reference_answer"] == "north hall"
