@@ -7,16 +7,18 @@ This is the short handoff for coding agents working in Prethinker.
 1. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 2. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 3. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
-4. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-5. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-6. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-7. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
-8. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
-9. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
-10. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-11. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-12. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
-13. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+4. [docs/CTO_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md)
+5. [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
+6. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+7. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+8. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+9. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
+10. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
+11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
+12. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+13. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
+14. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
+15. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -50,6 +52,11 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - Do not commit licensed UMLS source archives or extracted full Metathesaurus tables.
 - Keep local run data under ignored paths such as `tmp/`.
 - Preserve user changes in a dirty worktree; never revert unrelated edits.
+- Do not reintroduce the retired lab-automation, public benchmarking, or
+  publishing lanes. Git history has them.
+- Keep fixture nouns out of architecture. A selector/helper/scoring fix should
+  be describable without local row IDs, story names, or fixture-specific
+  people/groups.
 
 ## Verification
 
@@ -64,8 +71,9 @@ python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -
 python -m pytest -q
 ```
 
-The latest focused helper/selector verification is `153 passed`; rerun the full
-suite before updating any full-suite headline. Recent focused batteries also
+The latest full-suite cleanup pass is `996 passed, 2 subtests passed`. The latest focused
+helper/selector verification is `428 passed`; rerun the full suite before
+updating any full-suite headline. Recent focused batteries also
 cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI
 gateway phases, trace rendering, router agility, router training data, archived
 Lava stress packs, UMLS builders, profile bootstrap, raw-file intake planning,
@@ -110,10 +118,9 @@ Notes from the 2026-05-03 Codex upgrade/preflight:
   expects `--base-url http://127.0.0.1:1234`; passing `/v1` produced an empty
   profile response in a Three Moles replay. `run_domain_bootstrap_qa.py` and
   the profile smoke scripts use `--base-url http://127.0.0.1:1234/v1`.
-- Keep `tmp/` lean. Fixture handoff folders and bulky scratch outputs can be
-  moved to `C:\prethinker_tmp_archive`; active local keepers are currently
-  `tmp/licensed`, `tmp/cold_baselines`, `tmp/clarification_eagerness_runs`, and
-  `tmp/domain_bootstrap_qa_cache`.
+- Keep `tmp/` lean. It is scratch only, and should normally be empty except for
+  ad hoc local handoffs or active experiments. Fixture handoff folders and bulky
+  scratch outputs can be moved to `C:\prethinker_tmp_archive`.
 - Treat `C:\prethinker_tmp_archive` as the lab's cold-storage/RAG shelf. Search
   it for named artifacts or prior run evidence when needed, but do not bulk-load
   it into context. If an archived artifact becomes an active research result,

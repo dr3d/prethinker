@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-05-08
+Last updated: 2026-05-12
 
 ## One-Sentence Shape
 
@@ -9,6 +9,7 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
 ## Current Center
 
 - Runtime: `src/mcp_server.py`, especially `process_utterance()`.
+- CTO operating doctrine: `docs/CTO_ARCHITECTURE_BRIEF.md`.
 - Current pipeline reference: `docs/CURRENT_UTTERANCE_PIPELINE.md`.
 - Clean harness daily driver: `scripts/run_kb_pipeline_clean_harness.py`, backed
   by `src/kb_pipeline_clean`, captures canonical structural signatures while
@@ -29,6 +30,8 @@ Prethinker is a governed natural-language-to-Prolog workbench: neural models pro
   see the current turn plus prior admitted/pending state.
 - Current development model: `qwen/qwen3.6-35b-a3b` through LM Studio/OpenAI-compatible structured output. This is the best-known local path, not a permanent product dependency.
 - Current demonstration surface: prompt-book UI plus live ledger cards showing route, semantic workspace, deterministic admission, clarification, blocked execution, and KB mutation outcomes.
+- Retired lanes: lab automation, public benchmarking, and publishing are gone
+  from active architecture and code. Git history carries them.
 
 Current mini-architecture:
 
@@ -68,10 +71,16 @@ verdict = records what happened
 ## Recent Frontier Results
 
 - Current focused verification for the newest helper/selector work:
-  `153 passed` across `tests/test_domain_bootstrap_file.py`,
+  `428 passed` across `tests/test_domain_bootstrap_file.py`,
   `tests/test_domain_bootstrap_qa.py`, `tests/test_qa_mode_selector.py`, and
-  `tests/test_selector_guard_families.py`. Earlier full-suite counts remain
-  historical snapshots unless rerun in this branch.
+  `tests/test_selector_guard_families.py`. The latest full-suite cleanup pass
+  is `996 passed, 2 subtests passed`.
+- Current CTO guard-generalization pressure: a fresh six-lane hosted QA5 over
+  the helper-pressure compile set is `30 / 0 / 0` with `0` runtime load errors,
+  `0` write proposals, `191` helper rows, and bounded helper pressure. The new
+  `type_category_support` helper remains suspicious until unlike `_type/1`
+  transfer proves it is category/instance architecture rather than local
+  taxonomy luck.
 - Incoming-6 full-40 high-water: six new 2026-05-08 fixtures moved from a cold
   `186 / 16 / 38` to a diagnostic row-gated `240 / 0 / 0` over `240` rows. The
   result proves every row has a reachable surface, not that one global compiler
@@ -119,10 +128,10 @@ verdict = records what happened
 - Selector guard growth now has a family-level rollup:
   `scripts/summarize_selector_guard_families.py` parses selector guard reasons
   and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current inventory is
-  `125` guard return sites, `123` unique guard reasons, `7` semantic families,
-  `0` unclassified reasons, and `2` exact duplicate reasons queued for merge
-  review. Use the family count to detect sprawl, but keep watching raw guard
-  pressure; merge and retire before parameterizing.
+  `175` guard return sites, `175` unique guard reasons, `7` semantic families,
+  `0` unclassified reasons, and `0` exact duplicate reasons. Use the family
+  count to detect sprawl, but keep watching raw guard pressure; generalize,
+  merge, and retire before parameterizing.
 - Broad score-hold check after the rule/selector guard work is clean: the main
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon
@@ -544,7 +553,7 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
 - `semantic_ir_v1` now has a first-class `truth_maintenance` proposal block. The large model can propose support links, conflicts, retraction plans, and derived consequences; the mapper only copies that structure into diagnostics/traces and still admits durable effects exclusively from `candidate_operations`.
 - Admission diagnostics now compare the model's `truth_maintenance` proposal against mapper outcomes. Trace reports show support/conflict/retraction/consequence counts plus fuzzy edges such as admitted operations without model support, skipped operations with model support, conflict-policy mismatches, and retraction-plan/admitted-retract mismatches.
 - `semantic_ir_v1` now has an optional proposition spine as a v1-compatible bridge toward `semantic_ir_v2`: `propositions[]` records what the model thinks the text means, and `candidate_operations[].proposition_id` links proposed effects back to those meaning candidates. This is diagnostic only; durable truth still flows solely through mapper-admitted operations.
-- The Iron Harbor source-document benchmark now has a full 100-question run at `86 exact / 14 partial / 0 miss`, up from the prior best `81 / 14 / 5`. The improvement came from backbone-plus-detail source compilation and QA planner support-shape guidance, not Python prose interpretation.
+- The Iron Harbor source-document fixture now has a full 100-question run at `86 exact / 14 partial / 0 miss`, up from the prior best `81 / 14 / 5`. The improvement came from backbone-plus-detail source compilation and QA planner support-shape guidance, not Python prose interpretation.
 - `datasets/story_worlds/blackthorn_misconduct_case/` is now the hostile procedural-misconduct frontier fixture. It packages a university research-integrity source file, gold Prolog KB, 100-question QA battery, first-20 support map, failure buckets, fixture-owned ontology registry, and progress ledger. The current exact high-water run is BTC-027 at `85 exact / 4 partial / 11 miss`, with `0` write proposals, using evidence-bundle context filtering with a small broad-clause floor. BTC-023 still has the stronger exact-plus-partial split at `83 / 10 / 7`. BTC-024 post-run failure-surface classification split the BTC-023 remaining 17 non-exacts into 9 compile-surface gaps, 5 hybrid-join gaps, 2 query-surface gaps, and 1 answer-surface gap, suggesting Blackthorn is ready for compact question-shaped KB context and hybrid join support rather than simple predicate widening.
 - `datasets/story_worlds/kestrel_claim/` is now the maritime-insurance frontier fixture. It packages a source dispute record, oracle-only gold KB, 100-question QA battery, failure buckets, first-20 support map, a non-oracle starter domain profile, and a progress ledger that separates cold/source-aware/profile-guided evidence lanes. Current best source-aware non-registry run is KCL-007 at `14 exact / 2 partial / 4 miss` first-20 and `30 exact / 12 partial / 58 miss` full-100. Current profile-guided high-water is KCL-016 at `73 exact / 11 partial / 16 miss` full-100 after query-review, a richer non-oracle insurance-detail compile, deterministic admitted-clause union across two safe compiles, and source-faithful temporal atom parsing; KCL-015 also reached `20 exact / 0 partial / 0 miss` on first-20. KCL-017 failure-surface classification says 20 of 27 non-exacts are compile-surface gaps; KCL-018 broad-floor context filtering rescued 4 of those 27, and KCL-019 row-class focused compile union rescued 5 while lowering compile-surface gaps on the weak slice from 16 to 13. Kestrel remains primarily source-surface limited.
 - `datasets/enterprise_guidance/anaplan_polaris_performance_rules/` is now the first enterprise technical-guidance fixture. It packages a Polaris performance-tuning guidance source, oracle-only gold KB, 43-question QA battery, failure buckets, a non-oracle starter profile, and a progress ledger. APR-001 profile-guided baseline compiled `136` admitted operations with `186` skips and scored `29 exact / 6 partial / 8 miss` over 43 QA with `0` write proposals. APR-005 is the current single-compile exact high-water at `37 exact / 1 partial / 5 miss`; APR-010 raised the answer surface to `37 exact / 4 partial / 2 miss` by deterministic union of two safe admitted compile surfaces using `scripts/union_domain_bootstrap_compiles.py`. APR-016 is the current high-water at `42 exact / 1 partial / 0 miss`: it kept the default enterprise profile unchanged, used `scripts/run_support_acquisition_pass.py` for independent support-only source passes over the raw source plus APR-010's admitted backbone, then deterministically unioned the mapper-admitted support views into a `296`-fact surface with `0` runtime load errors and `0` QA write proposals. APR-006/APR-007 showed that broader causal-cue prose pressure and answer-shaped typed rationale predicates both regress the default compile; APR-011 showed that executing evidence-bundle plan queries can add answer-surface noise. Current lesson: preserve the backbone first, then acquire and accumulate rationale/effect/tradeoff support rows in separate safe passes.
@@ -552,7 +561,7 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
 - `datasets/clarification_eagerness/clarification_eagerness_trap/` is now the first CE-first fixture. It packages a small charter/procedure/case-file source, a compact clear answer key, 20 ingestion clarification-eagerness cases, 20 query clarification-eagerness cases, 10 baseline QA probes, expected CE behavior, and machine-readable JSONL views of the authored tables. The fixture measures when Prethinker should ask, when it should commit safe partials, when it should source-attribute or quarantine without asking, and when query ambiguity should become a clarification instead of a guessed answer. CET-013 held the source-context lane at `40/40` after the latest rule-admission changes, with `0` unsafe candidates, `0` context-write violations, `10/10` blocked-slot coverage, and safe partials at `11/13`. The scorer now separates ask/no-ask posture from safe partials, context-write hygiene, authored blocked-slot coverage, and source-context availability.
 - `datasets/story_worlds/black_lantern_maze/` is the hostile confusion frontier fixture for claim/finding/fact separation, title-time identity, near-name aliases, multilingual notes, overloaded approval semantics, correction safety, helper-supported rules, priority/anti-rule behavior, and CE over/under-eagerness. The cold lane has since run it; evidence-bundle context filtering lifted one unchanged compile from `27 exact / 7 partial / 6 miss` to `32 exact / 3 partial / 5 miss`, and a broader fallback held `32` exact while reducing hard misses to `3`. The remaining lesson is row-level activation, not more global context.
 - `datasets/story_worlds/three_moles_moon_marmalade_machine/` is a source-plus-QA-only story-world fixture. It intentionally has no gold KB, no strategy notes, and no ontology registry. A diagnostic replay added pass-contribution accounting: the event/causal lens initially contributed `0` unique rows, then a compact focused-pass retry recovered `28` unique rows while QA stayed mostly flat. This made lens usefulness measurable instead of aesthetic.
-- Post-ingestion QA now has optional `evidence_bundle_plan_v1`, `--execute-evidence-bundle-plan`, `--evidence-bundle-context-filter`, and `qa_failure_surface_v1` diagnostics. These passes see only the compiled KB predicate inventory, relevant admitted clauses, emitted query rows, query results, the current question, and, for failure classification, the benchmark reference answer. They do not see the raw source document and cannot authorize writes. `scripts/run_support_acquisition_pass.py` is a separate compile-surface experiment rather than a QA shortcut: it sees raw source plus an admitted backbone, emits only support/rationale operations, and still goes through mapper admission. APR-016 showed multi-support acquisition plus safe union is stronger than widening the default profile. BTC-026 showed plan-shaped context can rescue focused hard rows but needs a broad-context floor before becoming a default.
+- Post-ingestion QA now has optional `evidence_bundle_plan_v1`, `--execute-evidence-bundle-plan`, `--evidence-bundle-context-filter`, and `qa_failure_surface_v1` diagnostics. These passes see only the compiled KB predicate inventory, relevant admitted clauses, emitted query rows, query results, the current question, and, for failure classification, the source-provided oracle answer. They do not see the raw source document and cannot authorize writes. `scripts/run_support_acquisition_pass.py` is a separate compile-surface experiment rather than a QA shortcut: it sees raw source plus an admitted backbone, emits only support/rationale operations, and still goes through mapper admission. APR-016 showed multi-support acquisition plus safe union is stronger than widening the default profile. BTC-026 showed plan-shaped context can rescue focused hard rows but needs a broad-context floor before becoming a default.
 - `semantic_ir_v1` now has an optional `temporal_graph_v1` proposal block for event nodes, time anchors, intervals, and ordering edges. It is deliberately diagnostic: the mapper surfaces the graph in traces but does not write temporal facts unless matching `candidate_operations` independently pass admission.
 - A first deterministic temporal kernel now sits beside `temporal_graph_v1`: admitted `before/2` facts can support `after/2`, transitive `precedes/2`, `follows/2`, and coarse `concurrent/2` queries through Prolog rules instead of model-side reasoning. Its predicate contracts are loaded as a cross-cutting context module alongside selected domain profiles.
 - Stored-logic admission now treats `event_on/2`, `interval_start/2`, and `interval_end/2` as likely functional temporal anchors: a replacement anchor for the same record is blocked unless the Semantic IR includes an explicit retract/correction plan.
@@ -710,9 +719,10 @@ Domain/data lanes:
 
 ## Verification Snapshot
 
-**Current headline:** focused verification for the newest helper/selector work
-is `153 passed`; the current research center is row-gated semantic parallax
-over compiled KB artifacts. Multi-pass compilation, mapper-admitted
+**Current headline:** the latest full-suite cleanup pass is `996 passed, 2 subtests passed`, and
+focused verification for the newest helper/selector work is `428 passed`; the
+current research center is row-gated semantic parallax over compiled KB
+artifacts. Multi-pass compilation, mapper-admitted
 safe-surface accumulation, rule-lens promotion trials, query helpers,
 clarification eagerness, stenographer-mode stream simulation, and selector
 guards are now measured as row-level encounters with durable state.
@@ -765,17 +775,17 @@ If you read 3 things:
 
 1. `README.md`
 2. `docs/CURRENT_RESEARCH_HEADLINE.md`
-3. `docs/MULTI_PASS_SEMANTIC_COMPILER.md`
+3. `docs/CTO_ARCHITECTURE_BRIEF.md`
 
 If you have an hour:
 
 1. `PROJECT_STATE.md`
-2. `docs/ACTIVE_RESEARCH_LANES.md`
-3. `docs/CURRENT_HARNESS_INSTRUMENT.md`
-4. `docs/PUBLIC_DOCS_GUIDE.md`
-5. `docs/EXPLAINER.md`
-6. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
-7. `docs/FRONTIER_FIXTURE_STRATEGY.md`
+2. `docs/CTO_ARCHITECTURE_BRIEF.md`
+3. `docs/ACTIVE_RESEARCH_LANES.md`
+4. `docs/CURRENT_HARNESS_INSTRUMENT.md`
+5. `docs/PUBLIC_DOCS_GUIDE.md`
+6. `docs/EXPLAINER.md`
+7. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
 
 Deep dives:
 
@@ -793,4 +803,4 @@ Deep dives:
 
 ## What Was Pruned
 
-Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, old direct parser-probe scripts, retired lab-automation plans, publishing plans, benchmark-project plans, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.
+Historical markdown reports, dated prompt snapshots, generated ladder/report HTML, stale run manifests, old parser-lane orchestration notes, old direct parser-probe scripts, retired lab-automation plans, retired publishing plans, retired public-benchmarking plans, the old ladder-era JSON fixture set, generated `kb_runs/`, generated `kb_store/`, and large session/source notes were removed from the forward-facing tree. Git history still carries them. The repo should now privilege source, compact current-state docs, small fixtures, and tests over a stack of stale status artifacts.

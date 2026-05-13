@@ -146,7 +146,7 @@ role.
 
 ## Current Reality
 
-As of May 4, 2026:
+As of May 11, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -158,6 +158,7 @@ As of May 4, 2026:
 - UMLS Semantic Network assets are built locally for type/relation explanation
 - `intake_plan_v1` and `profile_bootstrap_v1` are the current hint-free raw-document/profile discovery path
 - post-ingestion document QA is now a first-class research surface: compiled KBs are queried through structured Semantic IR, support rows can be acquired in separate mapper-admitted passes, and deterministic safe unions can accumulate multiple safe symbolic views
+- lab automation, public benchmarking, and publishing are retired lanes; git history is the archive for that work
 
 That means the repo already supports the governed compiler shape directly.
 

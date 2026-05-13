@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-08
+Last updated: 2026-05-12
 
 This page is the short operational map for choosing the next few hours of work.
 It is intentionally stricter than a brainstorm: new ideas belong here only if
@@ -79,12 +79,18 @@ manifest, diagnostics). Query-time uncertainty and clarification should come
 from compiled symbolic state, not hidden source RAG.
 
 Selector guard growth is now tracked by
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `244` guard return sites collapse to
-`244` unique reasons across `7` families with `0` unclassified. Treat that
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`: `175` guard return sites collapse to
+`175` unique reasons across `7` families with `0` unclassified. Treat that
 family count, not the raw guard count, as the anti-sprawl metric, while still
 watching raw guard pressure. The current rule is merge before parameterizing:
 collapse duplicate semantic guards only after replay proof, and do not hide
 fixture-shaped enumerations inside clean-looking family functions.
+
+The immediate CTO job is the guard generality review described in
+`docs/CTO_ARCHITECTURE_BRIEF.md`: start with high-priority helper-pressure
+guards, rewrite each as a fixture-free semantic mismatch, and only then decide
+whether the replacement belongs in helper substrate, selector scoring, compile
+surface, predicate contract, source-addressability ledger, or scar/quarantine.
 
 Cross-fixture repair growth is now tracked by
 `docs/CROSS_FIXTURE_REPAIR_SLICES.md`: the current planner reads repair-target
@@ -138,8 +144,8 @@ evidence-provenance pegboard hooks.
 Current score-hold check: Larkspur, Calder, Oxalis, Avalon, and Sable frozen
 selector lanes still match their documented results with perfect selected-best
 counts and `0` selector errors. The latest focused helper/selector verification
-for the incoming-six exhaustion pass is `135 passed`; rerun the full suite
-before updating any full-suite headline.
+for the CTO guard-generalization work is `428 passed`, and the latest full
+suite is `996 passed, 2 subtests passed`.
 
 First repair-slice action: the rule-interpretation/application pass is a
 Meridian win and a Heronvale boundary marker. Meridian full-40 now reaches

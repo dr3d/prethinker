@@ -33,6 +33,7 @@ propagation = visible recomputation, not hidden belief
 ## Read First
 
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
+- [CTO architecture brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - the current operating doctrine for new high-context collaborators.
 - [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
 - [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
 - [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
@@ -126,11 +127,18 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The public repo currently tracks `61` pytest files under [tests/](https://github.com/dr3d/prethinker/tree/main/tests). Current focused local verification for the newest helper/guard work:
+The latest full local verification after the retired-lane cleanup is:
+
+```powershell
+python -m pytest
+# 996 passed, 2 subtests passed
+```
+
+Current focused local verification for the newest helper/guard work:
 
 ```powershell
 python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_qa_mode_selector.py tests\test_selector_guard_families.py -q
-# 153 passed
+# 428 passed
 ```
 
 Current high-signal evidence:
@@ -146,7 +154,7 @@ Current high-signal evidence:
 - Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
 - Cold generalization evidence: the 2026-05-07 sealed 10-fixture story batch has a row-gated high-water of `361 exact / 16 partial / 23 miss` across `400` QA rows (`90.25%`), with zero QA write proposals in the contributing runs.
 - Incoming-6 full-40 evidence: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.
-- Selector guard family rollup: `143` guard return sites, `141` unique reasons, `7` semantic families, `0` unclassified reasons. This is explicit guard discovery, not a frozen parameterized design.
+- Selector guard family rollup: `175` guard return sites, `175` unique reasons, `7` semantic families, `0` unclassified reasons. This is explicit guard discovery, not a frozen parameterized design.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
 - Historical Lava stress packs remain under `docs/data/frontier_packs/` as calibration evidence, but they are no longer treated as the active research frontier.

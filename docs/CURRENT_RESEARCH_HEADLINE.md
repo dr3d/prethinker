@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-08
+Last updated: 2026-05-12
 
 ## Row-Gated Semantic Parallax
 
@@ -61,6 +61,14 @@ names, and row addresses as first-class answer surfaces. Some candidates are
 live helpers. Some are temporary registry scaffolds. Most are row-gated until
 transfer proves them.
 
+The current CTO guard-generalization work is turning helper-pressure guards
+into fixture-free substrate tests. The latest six-lane hosted QA5 over the
+helper-pressure compile set is `30 / 0 / 0` with `0` runtime errors, `0` write
+proposals, and bounded helper pressure. The newest helper,
+`type_category_support`, is intentionally still suspicious: it fixes a
+category/instance count ambiguity, but it must transfer to unlike `_type/1`
+rows before it graduates beyond candidate evidence.
+
 ## Guard Pressure
 
 Selector guard growth is now a first-class design pressure, not background
@@ -69,11 +77,11 @@ noise.
 The current rollup from `scripts/select_qa_mode_without_oracle.py` reports:
 
 ```text
-guard return sites: 244
-unique guard reasons: 244
+guard return sites: 175
+unique guard reasons: 175
 semantic families: 7
 unclassified reasons: 0
-guards per family: 34.86
+guards per family: 25.0
 duplicate guard reasons: 0
 ```
 
@@ -109,9 +117,11 @@ to hold.
    families, status intervals, classification conversions, quantity
    conservation, and financial corrections are helper candidates when they
    compose admitted rows instead of interpreting source prose.
-4. **Hunt guard merges and retirements.** Use the duplicate-reason report and
-   near-duplicate review as a focused maintenance task. A merged guard should
-   lose fixture vocabulary and keep the semantic reason.
+4. **Run the guard generality review.** Start with the high-priority
+   helper-pressure guards. Rewrite each as a fixture-free semantic mismatch,
+   then decide whether the replacement belongs in helper substrate, selector
+   scoring, compile surface, predicate contracts, source-addressability ledger,
+   or scar/quarantine.
 5. **Keep the lab portable.** The current POWER/NITRO/LM Studio rig is a
    research convenience, not the product. Docs should describe endpoint
    configuration and artifact contracts, not a permanent home-lab dependency.
