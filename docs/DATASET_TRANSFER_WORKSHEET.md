@@ -3216,3 +3216,86 @@ Next pressure:
   distance ("three years before") but compile/query surfaces preserve only
   publication year and before relation, not the numeric distance or comparable
   endpoint.
+
+### DT-036 - Printed Temporal-Distance Surface
+
+Date: 2026-05-13
+
+Before:
+
+- DT-035 identified the next stable SQuAD residue: a source printed a relative
+  distance, but the compiled profile exposed only publication year plus a
+  boolean before-death relation.
+- The question was whether printed temporal distance was a missing axis or only
+  a dense-profile capability gap.
+
+Prediction:
+
+- A clean unlike probe should be inside if the architecture already knows how
+  to represent printed distances when the profile proposes an appropriate
+  predicate.
+- The motivating SQuAD row should remain outside until profile bootstrap is
+  told not to collapse printed intervals into boolean before/after predicates.
+
+Intervention:
+
+- Added `printed_relative_distance_ladder`, a focused unlike probe for printed
+  distances such as years before, months after, and days after.
+- Initial probe result:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Helper rows: `0`.
+- Replayed the motivating SQuAD fixture before profile repair:
+  - Fixture: `squad_default_validation_00006_martin_luther`.
+  - Exact / partial / miss: `4 / 0 / 1`.
+  - The miss had `published_before_death/2` but no distance/proximity slot.
+- Added profile-bootstrap and profile-review guidance: printed relative
+  intervals are first-class query surfaces and should get a duration/proximity
+  predicate rather than only a boolean before/after predicate.
+
+After:
+
+- Replayed the motivating SQuAD fixture after profile guidance:
+  - Questions: `5`.
+  - Exact / partial / miss: `5 / 0 / 0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+  - Helper rows: `0`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\printed_relative_distance_ladder`
+- Probe compile:
+  `tmp\boundary_probe_compile_printed_relative_distance_20260513`
+- Probe QA:
+  `tmp\boundary_probe_qa_printed_relative_distance_20260513`
+- SQuAD replay before profile repair:
+  `tmp\mrc_transfer_qa_squad30_dt036_luther_replay_20260513`
+- SQuAD replay after profile repair:
+  `tmp\mrc_transfer_qa_squad30_dt036_luther_profile_repair_20260513`
+
+Verification:
+
+- `python -m pytest tests\test_profile_bootstrap.py::ProfileBootstrapTests::test_bootstrap_guidance_preserves_source_records_reporters_and_conditions -q`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture printed_relative_distance_ladder --out-root tmp\boundary_probe_compile_printed_relative_distance_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture printed_relative_distance_ladder --compile-root tmp\boundary_probe_compile_printed_relative_distance_20260513 --out-root tmp\boundary_probe_qa_printed_relative_distance_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00006_martin_luther --out-root tmp\mrc_transfer_compile_squad30_dt036_luther_profile_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00006_martin_luther --compile-root tmp\mrc_transfer_compile_squad30_dt036_luther_profile_repair_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt036_luther_profile_repair_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+
+Lesson:
+
+- Printed relative distance is not a missing runtime helper problem when the
+  source explicitly states the distance. The architecture needs a profile slot
+  that preserves the printed distance.
+- Boolean temporal predicates such as `published_before_death/2` are too thin
+  when the source says how near or how long before/after. Endpoint dates,
+  ordering, and printed distance are separate query surfaces.
+- The repair transferred back to the motivating SQuAD coordinate with no helper
+  rows and no fixture vocabulary.
+
+Next pressure:
+
+- The remaining stable SQuAD residues are now mostly direct compile-surface
+  gaps and query-surface resolution around named entities or title/display
+  surfaces. Audit those before a full SQuAD-30 rerun.
