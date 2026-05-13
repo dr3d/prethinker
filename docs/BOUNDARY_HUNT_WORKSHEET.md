@@ -101,6 +101,8 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-042 | Enumerated exclusion prompt probe. | Generic prompt-only compile retry did not recover the omitted first-notice exclusions; boundary remains compile-surface fidelity. |
 | BH-043 | Source identifier vs placeholder collision. | Mapper now distinguishes hyphenated source ids from `N/A` placeholders; dense implicit-difference replay moved to `11/0/0` with zero helper rows. |
 | BH-044 | Identifier alias trigger audit. | Suffix-form alias support now requires an observed canonical suffix entity, preventing coincidental suffix collisions from becoming alias architecture. |
+| BH-045 | Source-section status trigger audit. | Section-prefix status counts now require a source-record label query surface instead of firing from unrelated `*_status` query names. |
+| BH-046 | Status timeline projection trigger audit. | Broad `*_status` timeline support now requires a status/state-like projection variable, preventing role/date predicates from being treated as state histories. |
 
 ## Current Evidence
 
@@ -1383,11 +1385,118 @@ Next pressure:
 - Continue trigger audits on status and source-section helpers. Especially
   watch predicate suffix rules (`*_status`) and section-prefix assumptions.
 
+### BH-045 - Source-Section Status Trigger Audit
+
+Before:
+
+- `source_section_status_count` used generic source-record section and label
+  facts, but it could be delivered after an unrelated `*_status` query if the
+  requested status term happened to match a `status_*` source label.
+- That meant a query such as `case_status(Case, unresolved)` could mine
+  source-section label rows even when the query surface did not ask for
+  source-record addressability.
+
+Prediction:
+
+- Section-prefix status counts should require the query surface to bind the
+  source-record label layer. Ordinary status predicates should keep using
+  entity/status rows and unary scope predicates, not silently switch into a
+  source-section hierarchy.
+
+Intervention:
+
+- Tightened `scoped_status_count_support` so the source-section branch runs
+  only when the active query predicate is `source_record_label` with a concrete
+  requested `status_*` label.
+- Kept the positive section-label count path intact.
+- Added a regression showing that unrelated `*_status` queries no longer emit
+  source-section status counts.
+
+After:
+
+- Source-label section counts still pass when the query explicitly asks for a
+  status label.
+- A broad status predicate no longer triggers `source_section_status_count`
+  from source-record labels.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `142 passed`.
+
+Lesson:
+
+- Section hierarchy is source addressability, not a universal status ontology.
+  The helper body can remain generic only if its trigger requires the source
+  layer to be part of the query evidence surface.
+
+Next pressure:
+
+- Continue audit on `*_status` timeline and scheduled-state triggers. The next
+  useful test is a false-positive probe where a predicate name looks
+  status-like but lacks date-bearing transition semantics.
+
+### BH-046 - Status Timeline Projection Trigger Audit
+
+Before:
+
+- `status_timeline_summary_support` was already bounded by arity and date
+  parsing, but the trigger still treated any query shaped like
+  `*_status(Entity, Variable, Date)` as a state timeline.
+- A predicate could be named `*_status` while its second slot was actually a
+  role-holder, reviewer, source, or other non-state value.
+
+Prediction:
+
+- Broad status timeline support should require the query projection itself to
+  ask for a status/state-like value. A suffix and date slot are not enough.
+
+Intervention:
+
+- Added a status projection variable gate for the timeline summary trigger.
+- The helper now requires the second query variable to carry status-like role
+  intent such as `Status`, `State`, `Classification`, `Disposition`, or
+  `Condition`.
+- Added a regression with a date-bearing `review_status(Document, Reviewer,
+  Date)` surface.
+
+After:
+
+- Existing broad status timeline support still fires for
+  `credential_status(Entity, Status, Date)`.
+- `review_status(Entity, Reviewer, Date)` no longer emits
+  `status_timeline_summary_support`.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `143 passed`.
+
+Lesson:
+
+- Predicate suffixes are weak evidence. A date-bearing third slot makes a row
+  temporal, but not necessarily a state timeline. The trigger needs query-role
+  evidence that the projected value is status-like.
+
+Next pressure:
+
+- Commit the trigger-audit batch, then continue with source-form and scheduled
+  transition probes. Scheduled-state support is already constrained by a small
+  event-to-state lexicon, but it still deserves a negative probe.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 tightened suffix-alias triggering after a fixture-free false-positive probe. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
+| 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 to BH-046 tightened suffix-alias, section-status, and status-timeline triggers after fixture-free false-positive probes. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |

@@ -468,6 +468,19 @@ def test_run_query_plan_exposes_status_timeline_summary_for_broad_status_query()
     assert support["result"]["rows"][0]["SupportKind"] == "latest_status_transition"
 
 
+def test_status_timeline_summary_requires_status_projection_variable() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "review_status(document_a, reviewer_alpha, 2026_01_05).",
+        "review_status(document_a, reviewer_beta, 2026_02_11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["review_status(document_a, Reviewer, Date)."])
+
+    assert not any(item["result"].get("predicate") == "status_timeline_summary_support" for item in rows)
+
+
 def test_run_query_plan_exposes_scheduled_state_summary_for_scheduled_query() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact("scheduled_archive(credential_a, 2026_03_05).").get("status") == "success"
@@ -2129,7 +2142,7 @@ def test_run_query_plan_derives_section_status_counts_for_related_status_terms()
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
-    rows = run_query_plan(runtime, ["case_status(Case, unresolved)."])
+    rows = run_query_plan(runtime, ["source_record_label(SourceRow, status_genuinely_unresolved)."])
 
     companion = next(item for item in rows if item["result"].get("predicate") == "scoped_status_count_support")
     result_rows = companion["result"]["rows"]
@@ -2140,6 +2153,21 @@ def test_run_query_plan_derives_section_status_counts_for_related_status_terms()
         for row in result_rows
     )
     assert not any(row.get("SemanticCriterion") == "timeline_resolvable" for row in result_rows)
+
+
+def test_section_status_counts_require_source_record_label_query_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_section(src_line_0125, v_3_3_identity_question).",
+        "source_record_label(src_line_0125, status_genuinely_unresolved).",
+        "source_record_section(src_line_0140, v_3_4_activity_question).",
+        "source_record_label(src_line_0140, status_genuinely_unresolved).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["case_status(Case, unresolved)."])
+
+    assert not any(item["result"].get("predicate") == "scoped_status_count_support" for item in rows)
 
 
 def test_run_query_plan_does_not_emit_section_status_counts_for_broad_source_label_scan() -> None:

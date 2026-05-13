@@ -1018,6 +1018,14 @@ def _is_prolog_variable(value: str) -> bool:
     return bool(re.fullmatch(r"[A-Z][A-Za-z0-9_]*", str(value or "").strip()))
 
 
+def _is_status_projection_variable(value: str) -> bool:
+    text = str(value or "").strip()
+    if not _is_prolog_variable(text):
+        return False
+    tokens = {token.lower() for token in re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)", text)}
+    return bool(tokens & {"status", "state", "classification", "disposition", "condition"})
+
+
 def _is_numeric_atom(value: str) -> bool:
     return bool(re.fullmatch(r"-?\d+(?:\.\d+)?", str(value or "").strip()))
 
@@ -1784,7 +1792,10 @@ def _status_timeline_summary_companion(
     entity_arg = str(args[0]).strip()
     status_arg = str(args[1]).strip()
     date_arg = str(args[2]).strip()
-    if _is_prolog_variable(entity_arg) or not (_is_prolog_variable(status_arg) and _is_prolog_variable(date_arg)):
+    if (
+        _is_prolog_variable(entity_arg)
+        or not (_is_status_projection_variable(status_arg) and _is_prolog_variable(date_arg))
+    ):
         return None
     result = runtime.query_rows(format_prolog_query(predicate, ["Entity", "Status", "Date"]))
     if result.get("status") != "success":
@@ -1979,10 +1990,14 @@ def _scoped_status_count_companion(
                     }
                 )
 
-    section_rows = _section_status_count_rows(
-        source_sections=source_sections,
-        source_labels=source_labels,
-        requested_statuses=requested_statuses,
+    section_rows = (
+        _section_status_count_rows(
+            source_sections=source_sections,
+            source_labels=source_labels,
+            requested_statuses=requested_statuses,
+        )
+        if predicate == "source_record_label" and requested_statuses
+        else []
     )
     for row in section_rows:
         key = (
