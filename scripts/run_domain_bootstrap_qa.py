@@ -2325,13 +2325,18 @@ def _policy_gated_counterfactual_total_companion(
         "excluded",
         "temporary",
         "temp",
+        "adjustment",
+        "request",
+        "change",
     }
     if not (query_tokens & trigger_tokens):
         return None
 
+    fact_rows = _runtime_fact_rows(runtime)
+    gated_subjects = _counterfactual_gated_subjects(fact_rows)
     base_rows: list[tuple[str, int]] = []
     delta_sources_by_value: dict[int, set[str]] = {}
-    for fact in _runtime_fact_rows(runtime):
+    for fact in fact_rows:
         fact_predicate = str(fact.get("predicate", "")).strip()
         fact_tokens = set(_type_taxonomy_tokens(fact_predicate))
         fact_args = [str(item).strip() for item in fact.get("args", [])]
@@ -2342,7 +2347,7 @@ def _policy_gated_counterfactual_total_companion(
             for value in numeric_values:
                 base_rows.append((fact_predicate, value))
             continue
-        if _counterfactual_delta_predicate(fact_tokens):
+        if _counterfactual_delta_predicate(fact_tokens, fact_args=fact_args, gated_subjects=gated_subjects):
             for value in numeric_values:
                 if value > 0:
                     delta_sources_by_value.setdefault(value, set()).add(fact_predicate)
@@ -2391,25 +2396,47 @@ def _counterfactual_base_total_predicate(tokens: set[str]) -> bool:
     return bool(tokens & {"final", "current", "base", "total"}) and bool(tokens & {"count", "total"})
 
 
-def _counterfactual_delta_predicate(tokens: set[str]) -> bool:
+def _counterfactual_delta_predicate(
+    tokens: set[str],
+    *,
+    fact_args: list[str],
+    gated_subjects: set[str],
+) -> bool:
     if tokens & {"withdrawn", "estimate", "estimated", "prior", "previous", "earlier"}:
         return False
-    return bool(
-        tokens
-        & {
-            "proposal",
-            "proposed",
-            "pending",
-            "unapproved",
-            "excluded",
-            "temporary",
-            "temp",
-            "addition",
-            "add",
-            "delta",
-            "change",
-        }
+    direct_delta = bool(
+        tokens & {"proposal", "proposed", "pending", "unapproved", "excluded", "temporary", "temp", "addition", "add", "delta"}
     )
+    if direct_delta:
+        return True
+    if not (tokens & {"adjustment", "request", "change"}):
+        return False
+    subjects = {arg for arg in fact_args if _int_from_atom(arg) is None}
+    return bool(subjects & gated_subjects)
+
+
+def _counterfactual_gated_subjects(facts: list[dict[str, Any]]) -> set[str]:
+    subjects: set[str] = set()
+    gate_terms = {"rejected", "pending", "unapproved", "excluded", "denied", "not", "approved"}
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        predicate_tokens = set(_type_taxonomy_tokens(predicate))
+        if not (predicate_tokens & {"status", "approval", "decision"}):
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 2:
+            continue
+        status = args[-1]
+        status_tokens = set(_type_taxonomy_tokens(status))
+        if not (status_tokens & gate_terms):
+            continue
+        if status_tokens <= {"approved"}:
+            continue
+        subject_candidates = [args[-2]] if len(args) >= 3 else [args[0]]
+        for subject in subject_candidates:
+            if subject and _int_from_atom(subject) is None:
+                subjects.add(subject)
+    return subjects
 
 
 def _set_difference_companion(

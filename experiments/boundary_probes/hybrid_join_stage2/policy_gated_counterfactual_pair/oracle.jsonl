@@ -1,0 +1,8 @@
+{"category":"policy_gated_counterfactual_total","id":"q001","reference_answer":"The certified inspection total is 12 units.","source_id":"q001"}
+{"category":"policy_gated_counterfactual_total","id":"q002","reference_answer":"Nine units came from the primary inspection list.","source_id":"q002"}
+{"category":"policy_gated_counterfactual_total","id":"q003","reference_answer":"Three reserve units are included in the certified total.","source_id":"q003"}
+{"category":"policy_gated_counterfactual_total","id":"q004","reference_answer":"No. The 4 temporary units are not part of the certified total because AR-5 was not approved before close.","source_id":"q004"}
+{"category":"policy_gated_counterfactual_total","id":"q005","reference_answer":"If AR-5 had been approved, the inspection total would be 16 units.","source_id":"q005"}
+{"category":"policy_gated_counterfactual_total","id":"q006","reference_answer":"The withdrawn earlier planning estimate was 18 units.","source_id":"q006"}
+{"category":"policy_gated_counterfactual_total","id":"q007","reference_answer":"No. Rejected request AR-6 does not change the certified total.","source_id":"q007"}
+{"category":"policy_gated_counterfactual_total","id":"q008","reference_answer":"Use the certified inspection total: 12 units.","source_id":"q008"}

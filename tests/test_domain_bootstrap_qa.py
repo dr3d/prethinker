@@ -599,6 +599,38 @@ def test_run_query_plan_derives_policy_gated_counterfactual_total() -> None:
     ]
 
 
+def test_policy_gated_counterfactual_total_uses_gated_adjustment_subject() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "certified_total(memo_a, 12).",
+        "adjustment_request(memo_a, adj_5, 4).",
+        "adjustment_status(memo_a, adj_5, rejected_pending).",
+        "adjustment_request(memo_a, adj_6, -2).",
+        "adjustment_status(memo_a, adj_6, rejected).",
+        "adjustment_request(memo_a, adj_7, 3).",
+        "adjustment_status(memo_a, adj_7, approved).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["adjustment_request(memo_a, Adjustment, Delta)."])
+
+    support = next(
+        item for item in rows if item["result"].get("predicate") == "policy_gated_counterfactual_total_support"
+    )
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SupportKind": "policy_gated_counterfactual_total",
+            "BasePredicate": "certified_total",
+            "BaseTotal": "12",
+            "DeltaSources": "adjustment_request",
+            "DeltaValue": "4",
+            "Operation": "add_if_gate_were_lifted",
+            "CounterfactualTotal": "16",
+        }
+    ]
+
+
 def test_run_query_plan_exposes_review_bound_remaining_set_support() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

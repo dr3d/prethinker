@@ -105,6 +105,7 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-046 | Status timeline projection trigger audit. | Broad `*_status` timeline support now requires a status/state-like projection variable, preventing role/date predicates from being treated as state histories. |
 | BH-047 | Scheduled-state negative trigger probe. | Scheduled-state support was confirmed not to fire for ordinary scheduled events outside the event-to-state lexicon. |
 | BH-048 | Policy-gated counterfactual total support. | Multilingual source-fidelity card moved `7/0/1 -> 8/0/0` with a query-only gated-delta arithmetic helper scoped to proposal/exclusion surfaces. |
+| BH-049 | Policy-gated adjustment transfer probe. | Unlike adjustment-request fixture passed `8/0/0`; helper generalized to positive request/change deltas only when the same adjustment id has a non-approved gate row. |
 
 ## Current Evidence
 
@@ -1616,12 +1617,82 @@ Next pressure:
 - Replay or probe another policy-gated arithmetic shape before broadening this
   helper further. Keep business-day and wall-clock arithmetic separate.
 
+### BH-049 - Policy-Gated Adjustment Transfer Probe
+
+Before:
+
+- BH-048 proved policy-gated arithmetic on one multilingual card where the
+  compile emitted direct unapproved/excluded numeric predicates.
+- That was not enough transfer evidence for broader adjustment/request
+  predicates, where the delta and gate status are split across separate rows.
+
+Prediction:
+
+- A second unlike probe should pass only if the helper can bind:
+  base total -> adjustment/request delta -> same adjustment id's non-approved
+  gate status.
+- Approved changes and negative/rejected removals must not become additive
+  counterfactual deltas.
+
+Intervention:
+
+- Added `policy_gated_counterfactual_pair`.
+- Recompiled it through OpenRouter.
+- The compile emitted:
+  `certified_total/2`, `certified_component/3`, `adjustment_request/3`, and
+  `adjustment_status/3`.
+- Extended the helper to recognize positive adjustment/request/change deltas
+  only when the same adjustment subject has a status/approval/decision row with
+  a non-approved gate such as rejected, pending, unapproved, denied, or
+  excluded.
+- Added a regression with one gated positive adjustment, one rejected negative
+  adjustment, and one approved positive adjustment.
+
+After:
+
+- Focused tests passed.
+- OpenRouter compile: `9` admitted, `0` skipped.
+- OpenRouter QA replay: `8 exact / 0 partial / 0 miss`.
+- Helper rows: `4`, all clean
+  `policy_gated_counterfactual_total_support`.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\policy_gated_counterfactual_pair`
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- Compile:
+  `tmp\boundary_probe_policy_gated_compile_stage50_20260513`
+- QA:
+  `tmp\boundary_probe_policy_gated_qa_stage51_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `146 passed`.
+- OpenRouter QA:
+  `question_count 8`, `judge_exact 8`, `judge_partial 0`, `judge_miss 0`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- Policy-gated arithmetic has a reusable substrate shape: current/base total
+  plus a gated positive delta, where the gate may be encoded directly in the
+  delta predicate or indirectly through a same-subject status/approval row.
+  The helper still does not do calendar math, wall-clock math, or arbitrary
+  arithmetic. It only exposes the gated-addition support surface.
+
+Next pressure:
+
+- Do not broaden this helper again without a new unlike failure. Move to
+  calendar/business-day or wall-clock arithmetic only as separate probes.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
 | 1 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped; BH-044 to BH-047 tightened or confirmed suffix-alias, section-status, status-timeline, and scheduled-state triggers. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
-| 2 | policy-gated and calendar arithmetic | Policy-gated count addition now has one clean transfer result; business-day and wall-clock arithmetic remain separate from plain aggregation. | Replay/probe another policy-gated arithmetic shape before broadening; keep calendar/clock arithmetic separate. |
+| 2 | policy-gated and calendar arithmetic | Policy-gated count addition now has two transfer results; business-day and wall-clock arithmetic remain separate from plain aggregation. | Pause policy-gated broadening; move to calendar/clock arithmetic only as separate probes. |
 | 3 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
 | 4 | source-form fidelity | Raw source identifiers, placeholder spelling, and section/address conventions can collide after normalization. | Probe unlike identifier forms before broadening any gate or helper trigger. |
 | 5 | `counterfactual_arithmetic_join` watch | Focused probes and original wide q040 now pass after generic compile guidance. | Reopen only if another original wide coordinate shows unlike arithmetic density. |
