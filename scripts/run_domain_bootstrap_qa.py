@@ -2419,6 +2419,105 @@ def _binary_fact_rows_for_first_arg(runtime: CorePrologRuntime, key: str) -> lis
     return rows
 
 
+def _review_remaining_set_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"review_source", "review_applies_notice"} or len(args) != 2:
+        return None
+    review_arg = str(args[0]).strip()
+    target_reviews = {review_arg} if review_arg and not _is_prolog_variable(review_arg) else None
+
+    review_sources: dict[str, str] = {}
+    review_notices: dict[str, str] = {}
+    memberships: list[tuple[str, str]] = []
+    exclusions: list[tuple[str, str]] = []
+    for clause in getattr(runtime.engine, "clauses", []) or []:
+        if getattr(clause, "body", None):
+            continue
+        head = getattr(clause, "head", None)
+        fact_predicate = str(getattr(head, "name", "") or "").strip()
+        term_args = [str(arg).strip() for arg in list(getattr(head, "args", []) or [])]
+        if fact_predicate == "review_source" and len(term_args) == 2:
+            review_sources[term_args[0]] = term_args[1]
+        elif fact_predicate == "review_applies_notice" and len(term_args) == 2:
+            review_notices[term_args[0]] = term_args[1]
+        elif fact_predicate == "member_of" and len(term_args) == 2:
+            memberships.append((term_args[0], term_args[1]))
+        elif fact_predicate == "excluded_by" and len(term_args) == 2:
+            exclusions.append((term_args[0], term_args[1]))
+
+    rows: list[dict[str, str]] = []
+    for review, source_set in sorted(review_sources.items(), key=lambda item: _case_atom_key(item[0])):
+        if target_reviews is not None and review not in target_reviews:
+            continue
+        notice = review_notices.get(review)
+        if not notice:
+            continue
+        members = {
+            right if left == source_set else left
+            for left, right in memberships
+            if left == source_set or right == source_set
+        }
+        if not members:
+            continue
+        excluded = {item for item, exclusion_notice in exclusions if exclusion_notice == notice}
+        remaining = sorted(members - excluded, key=_case_atom_key)
+        excluded_members = sorted(members & excluded, key=_case_atom_key)
+        rows.append(
+            {
+                "HelperClass": "clean-helper",
+                "Review": review,
+                "SourceSet": source_set,
+                "ExclusionNotice": notice,
+                "RemainingCount": str(len(remaining)),
+                "RemainingMembers": ", ".join(remaining),
+                "ExcludedMembers": ", ".join(excluded_members),
+                "SupportKind": "review_bound_remaining_set",
+            }
+        )
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "review_remaining_set_support",
+        "prolog_query": (
+            "review_remaining_set_support"
+            "(Review, SourceSet, ExclusionNotice, RemainingCount, RemainingMembers, ExcludedMembers, SupportKind)."
+        ),
+        "variables": [
+            "HelperClass",
+            "Review",
+            "SourceSet",
+            "ExclusionNotice",
+            "RemainingCount",
+            "RemainingMembers",
+            "ExcludedMembers",
+            "SupportKind",
+        ],
+        "rows": rows,
+        "num_rows": len(rows),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only review remaining-set support joined review source sets, applied exclusion notices, "
+                "source-set membership, and excluded members; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [query],
+    }
+
+
 def _identifier_alias_key(value: str) -> str:
     tokens = [token for token in _type_taxonomy_tokens(value) if token]
     if len(tokens) <= 1:
@@ -2456,6 +2555,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     set_difference = _set_difference_companion(runtime, predicate=predicate, args=args, query=query)
     if set_difference:
         source_record_companions.append(set_difference)
+    review_remaining_set = _review_remaining_set_companion(runtime, predicate=predicate, args=args, query=query)
+    if review_remaining_set:
+        source_record_companions.append(review_remaining_set)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)

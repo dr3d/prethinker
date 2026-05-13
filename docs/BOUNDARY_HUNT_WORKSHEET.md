@@ -96,6 +96,8 @@ The full entries are archived in the full worksheet copy. Current rollup:
 | BH-037 | Set-minus member projection support. | Unlike set/dedupe probe exposed `7/1/0`; query-only set difference support moved replay to `8/0/0`. |
 | BH-038 | Duplicate-relation distinct count support. | Wide duplicate coordinate moved partial -> exact with generic unary-list plus `*_duplicate_of` support. |
 | BH-039 | Implicit set-difference probe. | Unlike no-`set_minus` probe passed `8/0/0`; simple universe-minus-exclusion is already interior. |
+| BH-040 | Dense implicit-difference probe. | Dense multi-review probe exposed `7/1/3`: one compile-surface omission plus review-bound remaining-set join/count gaps. |
+| BH-041 | Review-bound remaining-set support. | Generic query-only support moved complete-contract rows exact while leaving R-A compile omissions exposed; scoped helper rows `22 -> 5`. |
 
 ## Current Evidence
 
@@ -1035,11 +1037,167 @@ Next pressure:
   two exclusion sources, and one question that must bind the correct population
   to the correct exclusion source without using local nouns.
 
+### BH-040 - Dense Implicit Difference Resolution
+
+Before:
+
+- BH-039 showed simple implicit set difference is already interior when the KB
+  has one population and one exclusion source.
+- The remaining question was whether that interior survives density: overlapping
+  populations, multiple exclusion notices, and a distractor notice in the same
+  packet.
+
+Prediction:
+
+- If density passed, the old wide residue would likely be even more local or
+  answer-surface shaped.
+- If density failed, the failure should split into either:
+  - compile-surface loss of review/population/notice binding; or
+  - query-side failure to assemble the review-bound remaining set from complete
+    component facts.
+
+Intervention:
+
+- Added
+  `experiments\boundary_probes\hybrid_join_stage2\dense_implicit_set_difference_pair`.
+- The probe has overlapping source sets, multiple exclusion notices, review
+  bindings, and a distractor notice that must not be applied to the wrong
+  review.
+- Compiled with source-record facts and focused pass planning.
+- Ran OpenRouter QA with evidence-bundle planning, execution, context filter,
+  reference judging, and failure-surface classification.
+
+After:
+
+- Compile admitted `62` clauses and skipped `6`.
+- QA result: `7 exact / 1 partial / 3 miss`.
+- Failure surfaces:
+  - `compile_surface_gap`: `1`
+  - `hybrid_join_gap`: `3`
+  - `not_applicable`: `7`
+- Helper rows: `2`, both clean `source_record_table_body_count_support`.
+- The compile preserved later review bindings but lost one exclusion notice and
+  one review-to-notice binding. Separately, rows with complete review/source/
+  notice/member facts still struggled to return the remaining count.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\hybrid_join_stage2\dense_implicit_set_difference_pair`
+- Compile:
+  `tmp\boundary_probe_hybrid_compile_stage20_dense_implicit_set_difference_20260513`
+- QA:
+  `tmp\boundary_probe_hybrid_qa_stage40_dense_implicit_set_difference_20260513`
+
+Verification:
+
+- OpenRouter QA:
+  `question_count 11`, `judge_exact 7`, `judge_partial 1`, `judge_miss 3`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- Simple implicit difference was not the missing axis. The boundary starts when
+  the set difference must be bound through a review contract:
+  review -> source population -> applied exclusion notice -> excluded members.
+  This is fixture-free architecture because it is a relation geometry, not a
+  name from the probe. The compile omission and the query join/count gap should
+  be treated as two separate pressures.
+
+Next pressure:
+
+- First repair only the query-side geometry where all four generic facts are
+  present: `review_source/2`, `review_applies_notice/2`, `member_of/2`, and
+  `excluded_by/2`.
+- Do not use this repair to hide compile-surface omissions. Rows missing an
+  applied notice or exclusion facts must remain compile-surface pressure.
+- After query-side support is proven, replay the dense probe and then decide
+  whether the compile omission needs a separate source-pass repair.
+
+### BH-041 - Review-Bound Remaining-Set Support
+
+Before:
+
+- BH-040 split dense implicit difference into two pressures:
+  - compile omitted one notice exclusion and one review-to-notice binding;
+  - rows with complete review/source/notice/member facts still failed or were
+    partial on remaining-set list/count assembly.
+
+Prediction:
+
+- A query-only support surface over the complete four-fact contract should move
+  complete-contract rows exact.
+- It must not synthesize missing compile facts. If a review lacks an applied
+  notice or the notice lacks excluded members, the row must remain boundary
+  pressure.
+
+Intervention:
+
+- Added `review_remaining_set_support`.
+- The support fires only from review-binding query surfaces:
+  `review_source/2` and `review_applies_notice/2`.
+- It joins:
+  `review_source(Review, SourceSet)`,
+  `review_applies_notice(Review, Notice)`,
+  `member_of(Member, SourceSet)` or `member_of(SourceSet, Member)`, and
+  `excluded_by(Member, Notice)`.
+- It returns remaining count, remaining members, and excluded members.
+- Tightened delivery after first replay: concrete-review queries now return only
+  the requested review's support row.
+- Added a neutral regression with one complete review and one incomplete review.
+
+After:
+
+- Focused tests passed.
+- Full unit file: `140 passed`.
+- Dense replay after scoped support:
+  `8 exact / 1 partial / 2 miss`.
+- Helper rows:
+  - first support replay: `22` `review_remaining_set_support` rows;
+  - scoped replay: `5` `review_remaining_set_support` rows;
+  - total scoped helper rows: `7` including existing source-record table counts.
+- Complete-contract rows for the later reviews moved exact. The remaining
+  non-exact rows all point back to the first review's missing compile facts:
+  no admitted exclusion rows for its notice and no admitted applied-notice
+  binding.
+
+Artifacts:
+
+- Code: `scripts\run_domain_bootstrap_qa.py`
+- Test: `tests\test_domain_bootstrap_qa.py`
+- First replay:
+  `tmp\boundary_probe_hybrid_qa_stage41_dense_remaining_support_20260513`
+- Scoped replay:
+  `tmp\boundary_probe_hybrid_qa_stage42_dense_remaining_support_scoped_20260513`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py -q` -> `140 passed`.
+- Scoped OpenRouter replay:
+  `question_count 11`, `judge_exact 8`, `judge_partial 1`, `judge_miss 2`,
+  `runtime_load_error_count 0`, `write_proposal_rows 0`.
+
+Lesson:
+
+- The reusable query-side principle is review-bound set difference, not a local
+  notice or token rule. But query support cannot repair facts the compile never
+  admitted. That is the right boundary: complete contracts become interior;
+  incomplete contracts stay compile-surface pressure.
+
+Next pressure:
+
+- Repair compile-source fidelity for enumerated exclusion statements where a
+  source says one notice excludes multiple listed members. The prior compile
+  skipped those facts as unresolved placeholders.
+- The repair should be prompt/contract-level: enumerate each listed member in
+  candidate operations; never use lowercase placeholder atoms such as `token`,
+  `item`, `member`, `notice`, or `set` as fact arguments.
+
 ## Active Pressure Board
 
 | Priority | Boundary | Current Shape | Next Move |
 | ---: | --- | --- | --- |
-| 1 | dense implicit set difference | Simple no-`set_minus` universe-minus-exclusion is interior; the remaining risk is binding the right population to the right exclusion source under density. | Build unlike dense probe with multiple populations and exclusion notices. |
+| 1 | enumerated exclusion compile fidelity | Review-bound remaining-set support works when component facts exist; first-review rows fail because compile skipped enumerated exclusion/binding facts. | Add generic source-pass guidance for enumerating listed members instead of placeholder args. |
 | 2 | policy-gated and calendar arithmetic | Business-day, wall-clock, and rule-gated arithmetic remain separate from plain aggregation. | Keep these separate until focused probes prove shared machinery. |
 | 3 | trigger audit | Helper bodies may be generic while triggers remain corpus-shaped. | Continue fresh probes for trigger conditions, especially predicate-name and source-form assumptions. |
 | 4 | domain transfer | Current evidence is still mostly from the lab corpus plus synthetic probes. | Add small unlike-domain fixtures only when they isolate a named pressure. |
@@ -1049,15 +1207,15 @@ Next pressure:
 
 Do this next:
 
-1. Build an unlike dense implicit-difference probe with multiple populations and
-   exclusion sources, now that simple no-`set_minus` is interior.
+1. Repair compile-source fidelity for enumerated exclusion statements, then
+   recompile/replay the dense probe.
 2. Keep business-day and wall-clock arithmetic separate until a probe proves
    they share machinery.
 3. Do not tune on the old fixture nouns; use the replayed rows only as geometry
    evidence.
 4. Keep q015, the point-state rows, plain aggregation, focused set-minus,
-   duplicate exclusion, and simple implicit difference as closed regressions,
-   not tuning targets.
+   duplicate exclusion, simple implicit difference, and BH-040's already-exact
+   rows as closed regressions, not tuning targets.
 
 ## OpenRouter Rule
 

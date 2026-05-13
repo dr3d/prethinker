@@ -534,6 +534,36 @@ def test_run_query_plan_exposes_duplicate_exclusion_count_for_unary_entity_surfa
     ]
 
 
+def test_run_query_plan_exposes_review_bound_remaining_set_support() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "member_of(item_01, source_set_a).",
+        "member_of(item_02, source_set_a).",
+        "member_of(item_03, source_set_a).",
+        "excluded_by(item_02, notice_a).",
+        "review_source(review_a, source_set_a).",
+        "review_applies_notice(review_a, notice_a).",
+        "review_source(review_b, source_set_a).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["review_source(Review, SourceSet)."])
+
+    support = next(item for item in rows if item["result"].get("predicate") == "review_remaining_set_support")
+    assert support["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "Review": "review_a",
+            "SourceSet": "source_set_a",
+            "ExclusionNotice": "notice_a",
+            "RemainingCount": "2",
+            "RemainingMembers": "item_01, item_03",
+            "ExcludedMembers": "item_02",
+            "SupportKind": "review_bound_remaining_set",
+        }
+    ]
+
+
 def test_summarize_counts_reference_judge_verdicts() -> None:
     rows = [
         {"ok": True, "queries": ["p(X)."], "reference_answer": "A", "reference_judge": {"verdict": "exact"}},

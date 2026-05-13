@@ -1,0 +1,11 @@
+{"category":"dense_implicit_set_difference","id":"q001","reference_answer":"T-01, T-02, T-03, T-04, T-05, and T-06 are in set S-1.","source_id":"q001"}
+{"category":"dense_implicit_set_difference","id":"q002","reference_answer":"Notice N-A excludes T-02 and T-05.","source_id":"q002"}
+{"category":"dense_implicit_set_difference","id":"q003","reference_answer":"T-01, T-03, T-04, and T-06 remain for review R-A.","source_id":"q003"}
+{"category":"dense_implicit_set_difference","id":"q004","reference_answer":"4 tokens remain for review R-A.","source_id":"q004"}
+{"category":"dense_implicit_set_difference","id":"q005","reference_answer":"T-03, T-04, T-05, T-06, T-07, and T-08 are in set S-2.","source_id":"q005"}
+{"category":"dense_implicit_set_difference","id":"q006","reference_answer":"Notice N-B excludes T-04 and T-07.","source_id":"q006"}
+{"category":"dense_implicit_set_difference","id":"q007","reference_answer":"T-03, T-05, T-06, and T-08 remain for review R-B.","source_id":"q007"}
+{"category":"dense_implicit_set_difference","id":"q008","reference_answer":"4 tokens remain for review R-B.","source_id":"q008"}
+{"category":"dense_implicit_set_difference","id":"q009","reference_answer":"Notice N-C is the exclusion notice for review R-C; N-D is only a distractor notice in the packet.","source_id":"q009"}
+{"category":"dense_implicit_set_difference","id":"q010","reference_answer":"U-11, U-12, and U-13 remain for review R-C.","source_id":"q010"}
+{"category":"dense_implicit_set_difference","id":"q011","reference_answer":"3 tokens remain for review R-C.","source_id":"q011"}
