@@ -37,6 +37,16 @@ def main() -> int:
             limit=args.limit,
             offset=args.offset,
         )
+    elif args.source_format == "cuad":
+        written = write_cuad_fixtures(
+            records=records,
+            out_root=args.out_root,
+            dataset_name=args.dataset,
+            config_name=config_name,
+            split=args.split,
+            limit=args.limit,
+            offset=args.offset,
+        )
     else:
         written = write_race_fixtures(
             records=records,
@@ -56,13 +66,13 @@ def main() -> int:
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sample RACE- or SQuAD-style machine-reading-comprehension records into "
+            "Sample RACE-, SQuAD-, or CUAD-style machine-reading-comprehension records into "
             "Prethinker incoming fixtures with answers isolated in oracle.jsonl."
         )
     )
     parser.add_argument(
         "--source-format",
-        choices=["race", "squad"],
+        choices=["race", "squad", "cuad"],
         default="race",
         help="Input dataset schema to normalize.",
     )
@@ -90,6 +100,29 @@ def _parse_args() -> argparse.Namespace:
         type=Path,
         help="Read RACE-shaped records from local JSONL instead of HuggingFace.",
     )
+    parser.add_argument(
+        "--local-json",
+        type=Path,
+        help="Read CUAD SQuAD-style JSON from disk instead of HuggingFace.",
+    )
+    parser.add_argument(
+        "--max-questions-per-record",
+        type=int,
+        default=4,
+        help="Maximum extractive questions to keep per CUAD contract sample.",
+    )
+    parser.add_argument(
+        "--cuad-answer-window",
+        type=int,
+        default=1400,
+        help="Characters of source context to keep on each side of a CUAD answer span.",
+    )
+    parser.add_argument(
+        "--cuad-max-answer-chars",
+        type=int,
+        default=800,
+        help="Skip CUAD answer spans longer than this unless no shorter answer is available.",
+    )
     return parser.parse_args()
 
 
@@ -98,6 +131,9 @@ def _load_records(args: argparse.Namespace) -> list[dict[str, Any]]:
         raise SystemExit("--limit must be positive")
     if args.offset < 0:
         raise SystemExit("--offset must be zero or positive")
+    if args.source_format == "cuad":
+        records = _load_cuad_records(args)
+        return _select_records(records, limit=args.limit, offset=args.offset, strategy=args.sample_strategy, seed=args.seed)
     if args.local_jsonl:
         raw_records = _load_local_jsonl(args.local_jsonl)
         records = _coerce_squad_records(raw_records) if args.source_format == "squad" else _coerce_race_records(raw_records)
@@ -210,6 +246,231 @@ def _coerce_race_records(records: Iterable[dict[str, Any]]) -> list[dict[str, An
     return list(grouped.values())
 
 
+def _load_cuad_records(args: argparse.Namespace) -> list[dict[str, Any]]:
+    if int(args.max_questions_per_record) < 1:
+        raise SystemExit("--max-questions-per-record must be positive")
+    if int(args.cuad_answer_window) < 100:
+        raise SystemExit("--cuad-answer-window must be at least 100")
+
+    if args.local_json:
+        payload = json.loads(args.local_json.read_text(encoding="utf-8-sig"))
+    else:
+        payload = _download_cuad_json(dataset_name=str(args.dataset))
+    return _coerce_cuad_records(
+        payload,
+        max_questions_per_record=int(args.max_questions_per_record),
+        answer_window=int(args.cuad_answer_window),
+        max_answer_chars=int(args.cuad_max_answer_chars),
+    )
+
+
+def _download_cuad_json(*, dataset_name: str) -> dict[str, Any]:
+    removed_entries: list[str] = []
+    for entry in list(sys.path):
+        candidate = Path(entry or os.getcwd()).resolve()
+        if candidate == REPO_ROOT:
+            sys.path.remove(entry)
+            removed_entries.append(entry)
+
+    try:
+        from huggingface_hub import hf_hub_download  # type: ignore[import-not-found]
+    except ImportError as exc:
+        raise SystemExit(
+            "huggingface_hub is not installed. Install it or pass --local-json "
+            "pointing at CUAD_v1.json."
+        ) from exc
+    finally:
+        for entry in reversed(removed_entries):
+            sys.path.insert(0, entry)
+
+    path = hf_hub_download(
+        repo_id=dataset_name,
+        repo_type="dataset",
+        filename="CUAD_v1/CUAD_v1.json",
+    )
+    return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+
+
+def _coerce_cuad_records(
+    payload: dict[str, Any],
+    *,
+    max_questions_per_record: int,
+    answer_window: int,
+    max_answer_chars: int,
+) -> list[dict[str, Any]]:
+    """Return contract-level excerpt records from CUAD SQuAD-style JSON."""
+
+    records: list[dict[str, Any]] = []
+    for doc_index, doc in enumerate(payload.get("data", [])):
+        if not isinstance(doc, dict):
+            continue
+        title = str(doc.get("title") or f"contract_{doc_index:05d}")
+        paragraph = _first_cuad_paragraph(doc)
+        if paragraph is None:
+            continue
+        context = str(paragraph.get("context") or "")
+        if not context.strip():
+            continue
+        qas = paragraph.get("qas") if isinstance(paragraph.get("qas"), list) else []
+        selected = _select_cuad_qas(
+            qas,
+            max_questions=max_questions_per_record,
+            max_answer_chars=max_answer_chars,
+        )
+        if not selected:
+            continue
+        windows = _cuad_windows_for_qas(selected, context=context, answer_window=answer_window)
+        records.append(
+            {
+                "context": _render_cuad_excerpt_context(title=title, context=context, windows=windows),
+                "questions": [_cuad_question_text(str(item.get("question") or "")) for item in selected],
+                "answers": [_cuad_reference_answer(item) for item in selected],
+                "question_ids": [
+                    str(item.get("id") or f"{doc_index:05d}_{index:03d}")
+                    for index, item in enumerate(selected)
+                ],
+                "categories": [_cuad_question_category(str(item.get("question") or "")) for item in selected],
+                "title": title,
+                "example_id": title,
+                "source_span_count": len(windows),
+            }
+        )
+    return records
+
+
+def _first_cuad_paragraph(doc: dict[str, Any]) -> dict[str, Any] | None:
+    paragraphs = doc.get("paragraphs")
+    if not isinstance(paragraphs, list):
+        return None
+    for paragraph in paragraphs:
+        if isinstance(paragraph, dict) and str(paragraph.get("context") or "").strip():
+            return paragraph
+    return None
+
+
+def _select_cuad_qas(
+    qas: Sequence[Any],
+    *,
+    max_questions: int,
+    max_answer_chars: int,
+) -> list[dict[str, Any]]:
+    eligible: list[dict[str, Any]] = []
+    fallback: list[dict[str, Any]] = []
+    seen_categories: set[str] = set()
+    for item in qas:
+        if not isinstance(item, dict) or bool(item.get("is_impossible")):
+            continue
+        if not _cuad_answers(item):
+            continue
+        reference = _cuad_reference_answer(item)
+        if not reference:
+            continue
+        category = _cuad_question_category(str(item.get("question") or "")).casefold()
+        row = dict(item)
+        if len(reference) <= max_answer_chars and category not in seen_categories:
+            eligible.append(row)
+            seen_categories.add(category)
+        else:
+            fallback.append(row)
+    selected = eligible[:max_questions]
+    if len(selected) < max_questions:
+        selected.extend(fallback[: max_questions - len(selected)])
+    return selected[:max_questions]
+
+
+def _cuad_answers(item: dict[str, Any]) -> list[dict[str, Any]]:
+    answers = item.get("answers")
+    if not isinstance(answers, list):
+        return []
+    cleaned: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for answer in answers:
+        if not isinstance(answer, dict):
+            continue
+        text = str(answer.get("text") or "").strip()
+        if not text or text.casefold() in seen:
+            continue
+        try:
+            start = int(answer.get("answer_start"))
+        except (TypeError, ValueError):
+            continue
+        seen.add(text.casefold())
+        cleaned.append({"text": text, "answer_start": start})
+    return cleaned
+
+
+def _cuad_reference_answer(item: dict[str, Any]) -> str:
+    answers = _cuad_answers(item)
+    return " | ".join(str(answer["text"]).strip() for answer in answers[:3] if str(answer["text"]).strip())
+
+
+def _cuad_windows_for_qas(
+    qas: Sequence[dict[str, Any]],
+    *,
+    context: str,
+    answer_window: int,
+) -> list[tuple[int, int]]:
+    windows: list[tuple[int, int]] = []
+    for item in qas:
+        for answer in _cuad_answers(item):
+            start = max(0, int(answer["answer_start"]) - answer_window)
+            end = min(len(context), int(answer["answer_start"]) + len(str(answer["text"])) + answer_window)
+            windows.append((start, end))
+    return _merge_windows(windows)
+
+
+def _merge_windows(windows: Sequence[tuple[int, int]]) -> list[tuple[int, int]]:
+    merged: list[tuple[int, int]] = []
+    for start, end in sorted(windows):
+        if not merged or start > merged[-1][1] + 200:
+            merged.append((start, end))
+        else:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+    return merged
+
+
+def _render_cuad_excerpt_context(*, title: str, context: str, windows: Sequence[tuple[int, int]]) -> str:
+    lines = [
+        f"Contract title: {title}",
+        "",
+        "The following are bounded excerpts from the contract source text.",
+        "",
+    ]
+    for index, (start, end) in enumerate(windows, start=1):
+        excerpt = context[start:end].strip()
+        lines.extend(
+            [
+                f"## Excerpt {index}",
+                "",
+                f"[excerpt begins at contract character {start}]",
+                "",
+                excerpt,
+                "",
+                f"[excerpt ends at contract character {end}]",
+                "",
+            ]
+        )
+    return "\n".join(lines).strip()
+
+
+def _cuad_question_category(question: str) -> str:
+    match = re.search(r'"([^"]+)"', question)
+    if match:
+        return match.group(1).strip()
+    detail = question.split("Details:", 1)[0]
+    return re.sub(r"\s+", " ", detail).strip() or "contract_text"
+
+
+def _cuad_question_text(question: str) -> str:
+    category = _cuad_question_category(question)
+    details = ""
+    if "Details:" in question:
+        details = re.sub(r"\s+", " ", question.split("Details:", 1)[1]).strip()
+    if details:
+        return f'What contract text relates to "{category}"? Details: {details}'
+    return f'What contract text relates to "{category}"?'
+
+
 def _coerce_squad_records(records: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     """Return context-level records from SQuAD-style question rows."""
 
@@ -301,6 +562,43 @@ def write_squad_fixtures(
         )
         fixture_dir = out_root / fixture_name
         _write_squad_fixture(
+            record=record,
+            fixture_dir=fixture_dir,
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            fixture_name=fixture_name,
+            source_index=global_index,
+        )
+        written.append(fixture_dir)
+    return written
+
+
+def write_cuad_fixtures(
+    *,
+    records: Iterable[dict[str, Any]],
+    out_root: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    limit: int,
+    offset: int = 0,
+) -> list[Path]:
+    out_root.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    for local_index, record in enumerate(records):
+        if len(written) >= limit:
+            break
+        global_index = offset + local_index
+        fixture_name = _fixture_name(
+            dataset_name=dataset_name,
+            config_name=config_name or "default",
+            split=split,
+            index=global_index,
+            example_id=str(record.get("title") or record.get("example_id") or ""),
+        )
+        fixture_dir = out_root / fixture_name
+        _write_cuad_fixture(
             record=record,
             fixture_dir=fixture_dir,
             dataset_name=dataset_name,
@@ -490,6 +788,97 @@ def _write_squad_fixture(
                 "- `source.md` contains the passage context.",
                 "- `qa.md` contains open-ended questions only.",
                 "- `oracle.jsonl` contains reference answer spans for after-the-fact scoring.",
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_cuad_fixture(
+    *,
+    record: dict[str, Any],
+    fixture_dir: Path,
+    dataset_name: str,
+    config_name: str,
+    split: str,
+    fixture_name: str,
+    source_index: int,
+) -> None:
+    context = _required_text(record, "context")
+    questions = _required_sequence(record, "questions")
+    answers = _required_sequence(record, "answers")
+    question_ids = record.get("question_ids") if isinstance(record.get("question_ids"), Sequence) else []
+    categories = record.get("categories") if isinstance(record.get("categories"), Sequence) else []
+    if len(questions) != len(answers):
+        raise ValueError(f"{fixture_name}: questions/answers length mismatch ({len(questions)}/{len(answers)})")
+
+    fixture_dir.mkdir(parents=True, exist_ok=True)
+    title = str(record.get("title") or "untitled_contract")
+    example_id = str(record.get("example_id") or title or source_index)
+    span_count = int(record.get("source_span_count") or 0)
+
+    (fixture_dir / "source.md").write_text(
+        "\n".join(
+            [
+                "# External Legal Contract Excerpts",
+                "",
+                f"- Dataset: `{dataset_name}`",
+                f"- Config: `{config_name}`",
+                f"- Split: `{split}`",
+                f"- Title: `{title}`",
+                f"- Example id: `{example_id}`",
+                f"- Excerpt count: `{span_count}`",
+                "",
+                "## Contract Excerpts",
+                "",
+                context.strip(),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    qa_lines = [
+        f"# {fixture_name} QA",
+        "",
+        "Questions only. Reference contract spans are isolated in `oracle.jsonl`.",
+        "",
+    ]
+    oracle_rows: list[dict[str, Any]] = []
+    for index, question in enumerate(questions, start=1):
+        qid = f"q{index:03d}"
+        answer = str(answers[index - 1]).strip()
+        if not answer:
+            raise ValueError(f"{fixture_name}:{qid}: blank answer")
+        source_qid = str(question_ids[index - 1]).strip() if index - 1 < len(question_ids) else qid
+        category = str(categories[index - 1]).strip() if index - 1 < len(categories) else "contract_text"
+        qa_lines.append(f"{index}. {str(question).strip()}")
+        oracle_rows.append(
+            {
+                "id": qid,
+                "source_id": f"{source_qid}:{qid}",
+                "category": "external_legal_contract_extract",
+                "reference_answer": answer,
+                "answer": answer,
+                "contract_category": category,
+            }
+        )
+
+    (fixture_dir / "qa.md").write_text("\n".join(qa_lines), encoding="utf-8")
+    (fixture_dir / "oracle.jsonl").write_text(
+        "\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in oracle_rows) + "\n",
+        encoding="utf-8",
+    )
+    (fixture_dir / "fixture_notes.md").write_text(
+        "\n".join(
+            [
+                "# Fixture Notes",
+                "",
+                "- External legal-domain transfer sample; do not treat CUAD wording as architecture.",
+                "- `source.md` contains bounded answer-neighborhood excerpts, not full contracts.",
+                "- `qa.md` contains extraction questions only.",
+                "- `oracle.jsonl` contains reference contract spans for after-the-fact scoring.",
                 "",
             ]
         ),

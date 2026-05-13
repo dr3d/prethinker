@@ -4,9 +4,11 @@ import json
 from pathlib import Path
 
 from scripts.sample_mrc_transfer_fixtures import (
+    _coerce_cuad_records,
     _coerce_race_records,
     _coerce_squad_records,
     _select_records,
+    write_cuad_fixtures,
     write_race_fixtures,
     write_squad_fixtures,
 )
@@ -171,3 +173,96 @@ def test_write_squad_fixture_can_be_staged(tmp_path: Path) -> None:
     assert "Where did the committee meet?" in qa_md
     assert "north hall" not in qa_md
     assert oracle[0]["reference_answer"] == "north hall"
+
+
+def test_coerce_cuad_records_keeps_answer_centered_excerpts() -> None:
+    context = (
+        "Intro text. "
+        "The agreement is between Alpha LLC and Beta Inc. "
+        "More neutral contract words follow for several clauses. "
+        "The term ends on December 31, 2030 unless renewed."
+    )
+    payload = {
+        "data": [
+            {
+                "title": "Demo Contract",
+                "paragraphs": [
+                    {
+                        "context": context,
+                        "qas": [
+                            {
+                                "id": "c1",
+                                "question": 'Highlight the parts (if any) of this contract related to "Parties". Details: The parties to the contract',
+                                "answers": [
+                                    {
+                                        "text": "Alpha LLC and Beta Inc.",
+                                        "answer_start": context.index("Alpha LLC"),
+                                    }
+                                ],
+                                "is_impossible": False,
+                            },
+                            {
+                                "id": "c2",
+                                "question": 'Highlight the parts (if any) of this contract related to "Expiration Date". Details: The date when the contract ends',
+                                "answers": [
+                                    {
+                                        "text": "December 31, 2030",
+                                        "answer_start": context.index("December"),
+                                    }
+                                ],
+                                "is_impossible": False,
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+
+    [record] = _coerce_cuad_records(
+        payload,
+        max_questions_per_record=2,
+        answer_window=30,
+        max_answer_chars=100,
+    )
+
+    assert record["title"] == "Demo Contract"
+    assert 'What contract text relates to "Parties"?' in record["questions"][0]
+    assert record["answers"] == ["Alpha LLC and Beta Inc.", "December 31, 2030"]
+    assert "Alpha LLC and Beta Inc." in record["context"]
+    assert "December 31, 2030" in record["context"]
+
+
+def test_write_cuad_fixture_can_be_staged(tmp_path: Path) -> None:
+    record = {
+        "context": "Contract title: Demo\n\n## Excerpt 1\n\nThe agreement is between Alpha LLC and Beta Inc.",
+        "questions": ['What contract text relates to "Parties"? Details: The parties to the contract'],
+        "answers": ["Alpha LLC and Beta Inc."],
+        "question_ids": ["cuad-1"],
+        "categories": ["Parties"],
+        "title": "Demo Contract",
+        "example_id": "demo-contract",
+        "source_span_count": 1,
+    }
+    incoming = tmp_path / "incoming"
+    staged = tmp_path / "staged"
+    [fixture] = write_cuad_fixtures(
+        records=[record],
+        out_root=incoming,
+        dataset_name="theatticusproject/cuad",
+        config_name="default",
+        split="train",
+        limit=1,
+    )
+
+    result = stage_fixture(fixture, out_root=staged)
+
+    assert result["qa_rows"] == 1
+    qa_md = (staged / fixture.name / "qa.md").read_text(encoding="utf-8")
+    oracle = [
+        json.loads(line)
+        for line in (staged / fixture.name / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+    ]
+    assert 'What contract text relates to "Parties"?' in qa_md
+    assert "Alpha LLC and Beta Inc." not in qa_md
+    assert oracle[0]["reference_answer"] == "Alpha LLC and Beta Inc."

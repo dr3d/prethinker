@@ -1391,3 +1391,184 @@ Next pressure:
   authority-agent residue is clarified.
 - Watch for regressions: the role-frame guidance is prompt-level substrate and
   should be kept only if broader transfer holds.
+
+### DT-015 - CUAD-10 Cross-Domain Legal Transfer
+
+Before:
+
+- RACE-50 and SQuAD-10 showed strong within-broad-English transfer with
+  source-record facts enabled:
+  - RACE-50 source-record replay: `147 / 5 / 25` over `177`, exact `83.05%`.
+  - SQuAD-10 source-record run: `62 / 1 / 8` over `71`, exact `87.32%`.
+- Both corpora are still academic/general English. The methodology needed a
+  structurally unlike domain before claiming cross-domain transfer.
+
+Prediction:
+
+- CUAD legal contracts should lower exact rate if the architecture is
+  genre-shaped around school/Wikipedia prose.
+- A useful result is not only the score; it is whether the residue is familiar
+  query/compile resolution or a new legal-only boundary class.
+- No repair should be made from a `10`-contract smoke alone.
+
+Intervention:
+
+- Added a CUAD intake adapter to `scripts\sample_mrc_transfer_fixtures.py`.
+- The adapter downloads `CUAD_v1.json` from HuggingFace, samples contract-level
+  records, and writes bounded answer-neighborhood excerpts rather than whole
+  contracts.
+- It keeps references isolated in `oracle.jsonl` and rewrites only the question
+  surface into open-ended extractive wording.
+- Tightened `scripts\summarize_mrc_transfer_qa.py` for cross-domain use:
+  - Latest QA artifact per fixture is summarized, so reruns do not double-count.
+  - Direct contract field/date extraction is factual, not comparative.
+  - Document-name extraction is not title/theme synthesis.
+  - Provider/classifier transport errors are separated from false-option
+    coordinates.
+
+After:
+
+- Sample/stage:
+  - `10` CUAD fixtures.
+  - `40` questions.
+  - Source excerpts range from about `2.2k` to `11.5k` chars.
+- Compile:
+  - `10 / 10` parsed.
+  - Candidate predicates `122`.
+  - Compile admitted/skipped `486 / 30`.
+  - Two initial OpenRouter provider-schema failures were retried at one lane and
+    cleared.
+- QA:
+  - `28 exact / 2 partial / 10 miss` over `40`.
+  - Exact rate `70.0%`.
+  - Runtime load errors `0`.
+  - Write proposal rows `0`.
+  - Helper rows `0`.
+- Residue:
+  - Proposition types: all `12` non-exact judged rows are `factual`.
+  - Transfer coordinates:
+    - `query_surface_resolution`: `6`.
+    - `direct_compile_surface_gap`: `3`.
+    - `judge_transport_uncertain`: `2`.
+    - `comparative_or_temporal_resolution`: `1`.
+  - Main real boundary: query surfaces fail to retrieve already-compiled legal
+    field/date/document facts.
+  - Secondary boundary: compile sometimes does not emit direct legal field
+    surfaces for parties or agreement date even though source rows preserve the
+    text.
+
+Artifacts:
+
+- Sampled fixtures:
+  `tmp\mrc_transfer_samples_cuad10_20260513`
+- Staged fixtures:
+  `tmp\mrc_transfer_staged_cuad10_20260513`
+- Compile:
+  `tmp\mrc_transfer_compile_cuad10_source_records_20260513`
+- QA:
+  `tmp\mrc_transfer_qa_cuad10_source_records_20260513`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_cuad10_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python -m pytest tests\test_summarize_mrc_transfer_qa.py tests\test_sample_mrc_transfer_fixtures.py -q`
+- `python scripts\sample_mrc_transfer_fixtures.py --source-format cuad --dataset theatticusproject/cuad --no-config --split train --limit 10 --sample-strategy even --max-questions-per-record 4 --cuad-answer-window 1400 --cuad-max-answer-chars 800 --out-root tmp\mrc_transfer_samples_cuad10_20260513`
+- `python scripts\stage_incoming_fixtures.py --root tmp\mrc_transfer_samples_cuad10_20260513 --out-root tmp\mrc_transfer_staged_cuad10_20260513`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --out-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --fixture cuad_default_train_00008__collaboration_agreement --fixture cuad_default_train_00009_10_endorsement_agreement --out-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --compile-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --out-root tmp\mrc_transfer_qa_cuad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --fixture cuad_default_train_00007_ontent_license_agreement --fixture cuad_default_train_00008__collaboration_agreement --fixture cuad_default_train_00009_10_endorsement_agreement --compile-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --out-root tmp\mrc_transfer_qa_cuad10_source_records_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --out-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --summarize-existing`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_cuad10_20260513 --compile-root tmp\mrc_transfer_compile_cuad10_source_records_20260513 --out-root tmp\mrc_transfer_qa_cuad10_source_records_20260513 --summarize-existing`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_cuad10_source_records_20260513`
+
+Lesson:
+
+- CUAD-10 is a real cross-domain drop from RACE/SQuAD, but not a collapse.
+  The architecture can answer most bounded legal extraction questions cold.
+- The boundary is not synthesis or inference; the first CUAD slice is almost
+  entirely factual field/date extraction.
+- The dominant pressure is legal-source queryability: facts often exist in
+  source-record rows or explicit legal predicates, but the query plan does not
+  reliably retrieve the field/date/document surface.
+- This is not permission for CUAD-specific contract helpers. The transferable
+  shape is "field-like source facts and effective-date/document-date/party
+  surfaces need stable query access."
+
+Next pressure:
+
+- Manual audit the `6` query-surface rows before any repair.
+- If they share one fixture-free predicate family, build a focused legal-field
+  extraction probe with document name, parties, agreement date, and effective
+  date across unlike contract prose.
+- Keep CUAD at measurement/probe status until a generic source-field query
+  principle is proven outside these `10` contracts.
+
+### DT-016 - CUAD Query-Surface Residue Audit
+
+Before:
+
+- DT-015 left `6` `query_surface_resolution` rows after the CUAD-10 run.
+- These rows mattered more than the raw `70.0%` score because they determine
+  whether the legal-domain gap is compile extraction or query addressability.
+
+Prediction:
+
+- If the rows share a fixture-free shape, the next work should be a focused
+  legal-field query probe.
+- If they are unrelated, CUAD-10 should remain only a measurement point and not
+  drive repair.
+
+Intervention:
+
+- Read the six `query_surface_resolution` rows from the CUAD coordinate summary.
+- Audited only question type, reference shape, and failure rationale; no fixture
+  names, row IDs, or answer strings were promoted into architecture.
+
+After:
+
+- The six rows share one broad shape:
+  field-like source facts are compiled, but the query plan does not retrieve
+  the answer-bearing surface.
+- Subshapes:
+  - Document-name/title fields: `2` rows. Facts exist as `contract_title` or
+    source-record title atoms, but query emission is empty or over-bound.
+  - Contract date fields: `3` rows. Facts exist as `agreement_effective_date` or
+    `effective_date`, but query emission is empty.
+  - Party fields: `1` row. Party-name facts and source-record party definition
+    text exist, but query emission is empty.
+- The residue is not a legal-domain missing-axis result. It is a query
+  addressability result over field-like source facts.
+
+Artifacts:
+
+- CUAD summary:
+  `tmp\mrc_transfer_qa_cuad10_source_records_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- Manual audit from
+  `tmp\mrc_transfer_qa_cuad10_source_records_20260513\transfer_coordinate_summary.json`
+
+Lesson:
+
+- CUAD's first useful boundary class is "field-like source fact queryability."
+  That is more general than contracts: any document with title/date/party-like
+  header fields can expose the same gap.
+- The repair target should not be CUAD categories. It should be a generic query
+  principle: when a question asks for a named source field or field-like
+  attribute, prefer direct field predicates and source-record text atoms whose
+  labels or atoms bind the requested field surface.
+
+Next pressure:
+
+- Build a small focused probe with unlike prose styles:
+  - formal contract header,
+  - policy memo header,
+  - invoice/order header,
+  - meeting notice header.
+- Ask only field-like extraction questions for document name, parties/actors,
+  agreement/event date, and effective/start date.
+- If the same query-surface miss reproduces, repair the query planner at the
+  generic source-field level and replay CUAD-10 plus SQuAD/RACE smoke.

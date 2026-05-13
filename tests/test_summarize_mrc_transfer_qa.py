@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
+
 from scripts.summarize_mrc_transfer_qa import (
     PROPOSITION_TYPE_OPERATIONAL_RULES,
     classify_proposition_type,
     classify_transfer_coordinate,
+    summarize_run,
 )
 
 
@@ -65,6 +68,70 @@ def test_classify_title_coordinate() -> None:
     }
 
     assert classify_transfer_coordinate(row) == "title_theme_or_summary_answer"
+
+
+def test_document_name_is_not_title_theme_coordinate() -> None:
+    row = {
+        "utterance": 'What contract text relates to "Document Name"? Details: The name of the contract',
+        "reference_answer": "DISTRIBUTOR AGREEMENT",
+        "failure_surface": {
+            "surface": "query_surface_gap",
+            "rationale": "A source row contains a title-like token, but the question asks for an explicit document field.",
+        },
+    }
+
+    assert classify_transfer_coordinate(row) == "query_surface_resolution"
+    assert classify_proposition_type(row) == "factual"
+
+
+def test_classifier_transport_error_is_not_false_option_coordinate() -> None:
+    row = {
+        "utterance": 'What contract text relates to "Effective Date"?',
+        "reference_answer": "February 21, 2011",
+        "failure_surface": {
+            "surface": "judge_uncertain",
+            "rationale": "classifier error: invalid_json_schema is_byok false",
+        },
+    }
+
+    assert classify_transfer_coordinate(row) == "judge_transport_uncertain"
+
+
+def test_summarize_uses_latest_qa_artifact_per_fixture(tmp_path) -> None:
+    fixture_dir = tmp_path / "fixture_a"
+    fixture_dir.mkdir()
+    old_payload = {
+        "rows": [
+            {
+                "id": "q001",
+                "ok": False,
+                "utterance": "Where?",
+                "reference_answer": "north hall",
+                "failure_surface": {"surface": "compile_surface_gap", "rationale": "old"},
+                "reference_judge": {"verdict": "miss"},
+            }
+        ]
+    }
+    new_payload = {
+        "rows": [
+            {
+                "id": "q001",
+                "ok": True,
+                "utterance": "Where?",
+                "reference_answer": "north hall",
+                "reference_judge": {"verdict": "exact"},
+            }
+        ]
+    }
+    old_path = fixture_dir / "domain_bootstrap_qa_20260101T000000000000Z_qa_model.json"
+    new_path = fixture_dir / "domain_bootstrap_qa_20260101T000001000000Z_qa_model.json"
+    old_path.write_text(json.dumps(old_payload), encoding="utf-8")
+    new_path.write_text(json.dumps(new_payload), encoding="utf-8")
+
+    summary = summarize_run(tmp_path)
+
+    assert summary["totals"]["question_count"] == 1
+    assert summary["totals"]["exact"] == 1
 
 
 def test_proposition_taxonomy_declares_operational_precedence() -> None:
@@ -143,6 +210,16 @@ def test_temporal_anchor_does_not_make_event_question_comparative() -> None:
         "utterance": "What did the students do after the announcement?",
         "reference_answer": "A. They packed their notebooks.",
         "failure_surface": {"surface": "compile_surface_gap", "rationale": "The later event is directly stated."},
+    }
+
+    assert classify_proposition_type(row) == "factual"
+
+
+def test_contract_date_extraction_is_factual_not_comparative() -> None:
+    row = {
+        "utterance": 'What contract text relates to "Agreement Date"? Details: The date of the contract',
+        "reference_answer": "October 30, 2017",
+        "failure_surface": {"surface": "compile_surface_gap", "rationale": "The date is directly stated."},
     }
 
     assert classify_proposition_type(row) == "factual"

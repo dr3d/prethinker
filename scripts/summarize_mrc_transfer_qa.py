@@ -81,7 +81,7 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
     by_proposition_type: Counter[str] = Counter()
     by_config: dict[str, Counter[str]] = {"high": Counter(), "middle": Counter()}
 
-    for qa_json in sorted(qa_root.glob("*/domain_bootstrap_qa_*.json")):
+    for qa_json in _latest_qa_jsons(qa_root):
         payload = json.loads(qa_json.read_text(encoding="utf-8"))
         fixture = qa_json.parent.name
         config = "middle" if fixture.startswith("race_middle_") else "high" if fixture.startswith("race_high_") else "unknown"
@@ -138,6 +138,18 @@ def summarize_run(qa_root: Path) -> dict[str, Any]:
         "transfer_coordinate_counts": dict(by_coordinate),
         "non_exact_rows": rows,
     }
+
+
+def _latest_qa_jsons(qa_root: Path) -> list[Path]:
+    latest: list[Path] = []
+    for fixture_dir in sorted(path for path in qa_root.iterdir() if path.is_dir()):
+        candidates = sorted(
+            fixture_dir.glob("domain_bootstrap_qa_*.json"),
+            key=lambda path: (path.stat().st_mtime_ns, path.name),
+        )
+        if candidates:
+            latest.append(candidates[-1])
+    return latest
 
 
 def classify_proposition_type(row: dict[str, Any]) -> str:
@@ -223,6 +235,8 @@ def classify_proposition_type(row: dict[str, Any]) -> str:
 def _is_comparative_proposition(question: str, answer: str, coordinate: str) -> bool:
     question_text = question.casefold()
     text = " ".join([question, answer]).casefold()
+    if question_text.startswith("what contract text relates to"):
+        return False
     if coordinate == "formula_or_rule_application":
         return True
     if _has_any(
@@ -246,9 +260,14 @@ def _is_comparative_proposition(question: str, answer: str, coordinate: str) -> 
         return True
     if re.search(r"\b(how many|how much|how long)\b", text):
         return True
-    if re.search(r"^\s*(when|what time|which day|which year|what year)\b", question_text):
+    if re.search(r"^\s*(when|what time|which day|which year|what year)\b", question_text) and _has_any(
+        question_text,
+        ["before", "after", "first", "last", "earlier", "later", "duration", "period", "deadline"],
+    ):
         return True
-    if re.search(r"\b\d+\b", answer) or re.search(r"\b(one|two|three|four|five|six|seven|eight|nine|ten)\b", answer.casefold()):
+    if re.search(r"\b(there are|number of|count of|total of)\b", question_text) and (
+        re.search(r"\b\d+\b", answer) or re.search(r"\b(one|two|three|four|five|six|seven|eight|nine|ten)\b", answer.casefold())
+    ):
         return True
     return False
 
@@ -290,7 +309,21 @@ def classify_transfer_coordinate(row: dict[str, Any]) -> str:
     question_text = _strip_options(question).casefold()
     text = " ".join([question, answer, surface, rationale]).casefold()
 
-    if _has_any(text, ["title", "main idea", "mainly about", "best describes", "theme", "subject of the passage"]):
+    if surface == "judge_uncertain" and _has_any(text, ["classifier error", "invalid_json_schema", "expecting value"]):
+        return "judge_transport_uncertain"
+    if _has_any(
+        question_text,
+        [
+            "best title",
+            "main idea",
+            "mainly about",
+            "best describes",
+            "theme",
+            "subject of the passage",
+            "purpose of the passage",
+            "best summary",
+        ],
+    ):
         return "title_theme_or_summary_answer"
     if _has_any(text, ["not true", "not correct", "incorrect", "false", "except", "contradict", "refut"]):
         return "false_or_exception_option_selection"
