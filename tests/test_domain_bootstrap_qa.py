@@ -18,6 +18,8 @@ from scripts.run_domain_bootstrap_qa import (
     _location_floor_hint_queries,
     _negative_join_with_previous,
     _negative_reference_supported_by_results,
+    _default_openrouter_title,
+    _chat_headers,
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
@@ -286,6 +288,26 @@ def test_negative_reference_supported_by_negative_query_results() -> None:
     assert _negative_reference_supported_by_results(row=row, reference="picture quality") is False
 
 
+def test_openrouter_title_header_uses_experiment_label(monkeypatch) -> None:
+    monkeypatch.delenv("PRETHINKER_OPENROUTER_TITLE", raising=False)
+    monkeypatch.delenv("OPENROUTER_APP_TITLE", raising=False)
+    monkeypatch.delenv("OPENROUTER_X_TITLE", raising=False)
+
+    title = _default_openrouter_title(Path("tmp") / "squad_probe_20260513" / "fixture_a")
+
+    assert title == "prethinker:squad_probe_20260513/fixture_a"
+
+
+def test_chat_headers_add_openrouter_title(monkeypatch) -> None:
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_TITLE", "Prethinker SQuAD Probe")
+    monkeypatch.delenv("PRETHINKER_API_KEY", raising=False)
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+
+    headers = _chat_headers()
+
+    assert headers["X-Title"] == "Prethinker SQuAD Probe"
+
+
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
     row = {
         "projected_decision": "answer",
@@ -339,6 +361,37 @@ def test_evidence_bundle_plan_accepts_conjunctive_source_record_queries() -> Non
     assert results[0]["result"]["status"] == "success"
     assert results[0]["result"]["reasoning_basis"]["validation"] == "predicate_and_arity_checked"
     assert results[0]["result"]["rows"][0]["Line"] == "src_1"
+
+
+def test_evidence_bundle_plan_repairs_source_text_memberchk_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_1, records_are_verified_in_the_field).",
+        "source_record_text_atom(src_2, records_are_verified_in_the_laboratory).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_text_contains",
+                    "purpose": "Find source text containing the requested normalized phrase.",
+                    "query_templates": [
+                        "source_record_text_atom(Line, Text), memberchk('in_the_laboratory', Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_text_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_2", "Text": "records_are_verified_in_the_laboratory"}
+    ]
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:

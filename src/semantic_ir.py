@@ -1088,7 +1088,22 @@ def _chat_headers(api_key: str = "") -> dict[str, str]:
     key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
+    title = _openrouter_title()
+    if title:
+        headers["X-Title"] = title
     return headers
+
+
+def _openrouter_title() -> str:
+    title = str(
+        os.environ.get("PRETHINKER_OPENROUTER_TITLE")
+        or os.environ.get("OPENROUTER_APP_TITLE")
+        or os.environ.get("OPENROUTER_X_TITLE")
+        or ""
+    ).strip()
+    cleaned = re.sub(r"[^A-Za-z0-9._:/ -]+", "-", title)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" -")
+    return cleaned[:120]
 
 
 def _urlopen_json_with_transient_retries(

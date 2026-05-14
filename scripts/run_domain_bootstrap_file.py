@@ -641,6 +641,7 @@ def main() -> int:
     args = parse_args()
     if str(args.api_key or "").strip():
         os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
+    _configure_openrouter_title(args.out_dir)
     text_path = args.text_file if args.text_file.is_absolute() else (REPO_ROOT / args.text_file).resolve()
     source_text = text_path.read_text(encoding="utf-8-sig")
     expected_path = None
@@ -2559,7 +2560,40 @@ def _chat_headers(api_key: str = "") -> dict[str, str]:
     key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
+    title = _openrouter_title()
+    if title:
+        headers["X-Title"] = title
     return headers
+
+
+def _configure_openrouter_title(out_dir: Path) -> None:
+    if _openrouter_title():
+        return
+    os.environ["PRETHINKER_OPENROUTER_TITLE"] = _default_openrouter_title(out_dir)
+
+
+def _openrouter_title() -> str:
+    title = str(
+        os.environ.get("PRETHINKER_OPENROUTER_TITLE")
+        or os.environ.get("OPENROUTER_APP_TITLE")
+        or os.environ.get("OPENROUTER_X_TITLE")
+        or ""
+    ).strip()
+    return _sanitize_header_value(title)
+
+
+def _default_openrouter_title(out_dir: Path) -> str:
+    path = out_dir if out_dir.is_absolute() else (REPO_ROOT / out_dir).resolve()
+    name = path.name or "run"
+    parent = path.parent.name
+    label = f"{parent}/{name}" if parent and parent not in {"tmp", REPO_ROOT.name} else name
+    return _sanitize_header_value(f"prethinker:{label}")
+
+
+def _sanitize_header_value(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._:/ -]+", "-", str(value or "").strip())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" -")
+    return cleaned[:120]
 
 
 def _is_openrouter_base_url(base_url: str) -> bool:

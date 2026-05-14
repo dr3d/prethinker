@@ -522,6 +522,7 @@ def main() -> int:
     args = parse_args()
     if str(args.api_key or "").strip():
         os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
+    _configure_openrouter_title(args.out_dir)
     run_path = args.run_json if args.run_json.is_absolute() else (REPO_ROOT / args.run_json).resolve()
     qa_path = args.qa_file if args.qa_file.is_absolute() else (REPO_ROOT / args.qa_file).resolve()
     run_record = json.loads(run_path.read_text(encoding="utf-8-sig"))
@@ -11962,6 +11963,18 @@ def run_evidence_bundle_plan_queries(
             if not query or query in seen:
                 continue
             seen.add(query)
+            source_text_filter = _source_text_memberchk_repair(query)
+            if source_text_filter:
+                results.append(
+                    _run_source_text_contains_filter(
+                        runtime=runtime,
+                        original_query=query,
+                        filter_spec=source_text_filter,
+                        bundle_id=bundle_id,
+                        purpose=purpose,
+                    )
+                )
+                continue
             parsed_goals = parse_prolog_query_goals(query)
             if parsed_goals is None:
                 results.append(
@@ -12047,6 +12060,70 @@ def run_evidence_bundle_plan_queries(
         item["derived_from_queries"] = derived_from
         results.append(item)
     return results
+
+
+def _source_text_memberchk_repair(query: str) -> dict[str, str] | None:
+    match = re.fullmatch(
+        r"\s*source_record_text_atom\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s*,\s*"
+        r"memberchk\(\s*['\"]([^'\"]+)['\"]\s*,\s*\2\s*\)\s*\.?\s*",
+        str(query or ""),
+    )
+    if not match:
+        return None
+    line_var, text_var, needle = match.groups()
+    if not line_var[:1].isupper() or not text_var[:1].isupper():
+        return None
+    return {"line_var": line_var, "text_var": text_var, "needle": needle}
+
+
+def _run_source_text_contains_filter(
+    *,
+    runtime: CorePrologRuntime,
+    original_query: str,
+    filter_spec: dict[str, str],
+    bundle_id: str,
+    purpose: str,
+) -> dict[str, Any]:
+    line_var = filter_spec["line_var"]
+    text_var = filter_spec["text_var"]
+    needle = _normalize_text_filter_atom(filter_spec["needle"])
+    repaired_query = f"source_record_text_atom({line_var}, {text_var})."
+    item = run_query_plan(runtime, [repaired_query])[0]
+    result = item.get("result", {}) if isinstance(item, dict) else {}
+    rows = result.get("rows", []) if isinstance(result, dict) else []
+    filtered_rows = [
+        row
+        for row in rows
+        if isinstance(row, dict)
+        and needle
+        and needle in _normalize_text_filter_atom(str(row.get(text_var, "")))
+    ]
+    return {
+        "query": original_query,
+        "result": {
+            "status": "success",
+            "predicate": "source_record_text_atom",
+            "prolog_query": repaired_query,
+            "result_type": "table",
+            "variables": [line_var, text_var],
+            "num_rows": len(filtered_rows),
+            "rows": filtered_rows,
+            "reasoning_basis": {
+                "kind": "evidence-bundle-plan",
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "validation": "source_text_contains_filter_repaired",
+                "original_query": original_query,
+                "repaired_query": repaired_query,
+                "unsupported_predicate": "memberchk/2",
+            },
+        },
+        "derived_from_queries": [repaired_query],
+    }
+
+
+def _normalize_text_filter_atom(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", str(value or "").casefold()).strip("_")
 
 
 def compact_relevant_clauses_for_evidence_plan(
@@ -12771,7 +12848,40 @@ def _chat_headers(api_key: str = "") -> dict[str, str]:
     key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
+    title = _openrouter_title()
+    if title:
+        headers["X-Title"] = title
     return headers
+
+
+def _configure_openrouter_title(out_dir: Path) -> None:
+    if _openrouter_title():
+        return
+    os.environ["PRETHINKER_OPENROUTER_TITLE"] = _default_openrouter_title(out_dir)
+
+
+def _openrouter_title() -> str:
+    title = str(
+        os.environ.get("PRETHINKER_OPENROUTER_TITLE")
+        or os.environ.get("OPENROUTER_APP_TITLE")
+        or os.environ.get("OPENROUTER_X_TITLE")
+        or ""
+    ).strip()
+    return _sanitize_header_value(title)
+
+
+def _default_openrouter_title(out_dir: Path) -> str:
+    path = out_dir if out_dir.is_absolute() else (REPO_ROOT / out_dir).resolve()
+    name = path.name or "run"
+    parent = path.parent.name
+    label = f"{parent}/{name}" if parent and parent not in {"tmp", REPO_ROOT.name} else name
+    return _sanitize_header_value(f"prethinker:{label}")
+
+
+def _sanitize_header_value(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._:/ -]+", "-", str(value or "").strip())
+    cleaned = re.sub(r"\s+", " ", cleaned).strip(" -")
+    return cleaned[:120]
 
 
 def _is_openrouter_base_url(base_url: str) -> bool:

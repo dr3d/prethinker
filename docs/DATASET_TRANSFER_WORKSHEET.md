@@ -4007,3 +4007,94 @@ Next pressure:
   strongest next candidates are false-reference rows, causal directness
   variance, and category/generalization gaps where the KB has supporting facts
   but the answer surface is too broad or too lexical to render cleanly.
+
+### DT-046 - Source Text Filter Query Repair and OpenRouter Tagging
+
+Date: 2026-05-13
+
+Before:
+
+- DT-044 left one clean `query_surface_resolution` row: the KB contained the
+  answer-bearing source text atom, but an evidence-bundle query tried to filter
+  it with unsupported `memberchk/2`.
+- The failure was not that the source text was absent. It was that the
+  control-plane query used a Prolog helper outside the compiled inventory.
+- OpenRouter logs also showed `App = Unknown` for hosted pressure runs, making
+  retrospective spend/runtime analysis harder than necessary.
+
+Prediction:
+
+- A generic source-text containment repair should move the `memberchk/2` row
+  without admitting new facts or helpers.
+- The repair should execute only for the narrow pattern
+  `source_record_text_atom(Line, Text), memberchk('normalized_phrase', Text)`;
+  everything else should still go through the normal predicate-inventory gate.
+- Hosted runs should carry an `X-Title` header derived from the experiment
+  output path unless the operator supplies an explicit title.
+
+Intervention:
+
+- Added a value-preserving evidence-bundle query repair:
+  - detect the narrow source-text/member containment pattern,
+  - execute the admitted `source_record_text_atom/2` predicate,
+  - apply normalized containment outside Prolog,
+  - mark the result as `source_text_contains_filter_repaired`.
+- Added a fixture-free unit test using generic source text.
+- Added OpenRouter `X-Title` support in the compile runner, QA runner, and
+  shared Semantic IR request layer. The default title is
+  `prethinker:<experiment>/<fixture>` from the output path, with
+  `PRETHINKER_OPENROUTER_TITLE`, `OPENROUTER_APP_TITLE`, or
+  `OPENROUTER_X_TITLE` as overrides.
+
+After:
+
+- Targeted geology replay:
+  - Questions: `5`.
+  - Exact / partial / miss: `4 / 0 / 1`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- The original `query_surface_resolution` row moved:
+  - q004 now exact.
+  - The returned row contains the answer-bearing source text, and the judge
+    recognizes the reference from that source row.
+- The remaining miss is a different compile-surface gap:
+  - q001 asks for the purpose/use of an instrument.
+  - The KB has instrument/property rows, but no symbolic surface linking those
+    rows to the broader source-stated purpose.
+- Broad QA tests:
+  - `154 passed`.
+
+Artifacts:
+
+- Targeted SQuAD replay:
+  `tmp\mrc_transfer_qa_squad30_dt046_geology_source_text_filter_20260513`
+- Summary:
+  `tmp\mrc_transfer_qa_squad30_dt046_geology_source_text_filter_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00013_geology --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt046_geology_source_text_filter_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt046_geology_source_text_filter_20260513`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+
+Lesson:
+
+- Evidence-bundle plans are allowed to be query guidance, not a new Prolog
+  language. When they emit an unsupported source-text filter, the architecture
+  should translate only the containment operation onto admitted source-record
+  rows rather than pretend `memberchk/2` is part of the compiled KB.
+- This is a query repair, not a helper or fixture repair. It is source-faithful
+  because it returns only existing source-record rows and adds no semantic
+  conclusion.
+- Operational tags matter now that dataset-transfer work uses hosted pressure
+  heavily. `X-Title` gives the lab a cheap way to separate SQuAD, RACE, MAUD,
+  PrivacyQA, and focused probe costs in OpenRouter logs.
+
+Next pressure:
+
+- The next machinery-shaped SQuAD gap is source-stated purpose/use: the source
+  text names a task or purpose, while structured rows preserve adjacent
+  instrument/property facts. Probe this as purpose-surface preservation before
+  any repair, because it may overlap with broader component/category surface
+  preservation.
