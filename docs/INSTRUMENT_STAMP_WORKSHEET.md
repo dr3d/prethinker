@@ -34,7 +34,36 @@ Corpus Inventory:
 | RACE-50 | `tmp\mrc_transfer_staged_race50_options_20260513` | 50 | 177 | Complete, `N=3`, corrected MCQ option-visible root |
 | PrivacyQA-30 | `tmp\mrc_transfer_staged_privacyqa30_20260513` | 30 | 30 | Complete, `N=3` |
 | MAUD-10 | `tmp\mrc_transfer_staged_maud10_20260513` | 10 | 40 | Complete, `N=3` |
-| CUAD-10 | `tmp\mrc_transfer_staged_cuad10_20260513` | 10 | 40 | Pending; treat as rough corpus evidence |
+| CUAD-10 | `tmp\mrc_transfer_staged_cuad10_20260513` | 10 | 40 | Complete, `N=3`; rough corpus evidence |
+
+## Stamp Rollup
+
+Date: 2026-05-14
+
+This rollup characterizes the frozen instrument after three fresh compile-plus-QA
+draws per completed corpus. It is a measurement table, not a repair queue.
+
+| Corpus | Questions per draw | Mean exact | Range | Peak | Dominant observed pressure |
+| --- | ---: | ---: | --- | ---: | --- |
+| SQuAD-30 | 171 | 92.20% | 91.23%-92.98% | 92.98% | direct factual QA with light compile variance |
+| RACE-50, option-visible | 177 | 84.56% | 83.05%-86.44% | 86.44% | inference/background facts over MCQ propositions |
+| PrivacyQA-30 | 30 | 82.22% | 80.00%-83.33% | 83.33% | factual policy compile/query resolution |
+| MAUD-10 | 40 | 45.00% | 45.00%-45.00% | 45.00% | categorical clause and exception semantics |
+| CUAD-10 | 40 | 92.50% | 90.00%-95.00% | 95.00% | mostly factual contract compile/query resolution |
+
+Rollup observations:
+
+- The frozen instrument is not merely fitting the original fixture corpus:
+  SQuAD and CUAD both stamp in the low-90s under fresh compiles.
+- Corrected RACE and PrivacyQA form a low/mid-80s transfer band where the
+  pressure is mostly proposition shape and resolution, not transport.
+- MAUD is the sharp boundary outlier. Its low score does not generalize to all
+  contract text because CUAD lands high; the pressure is categorical
+  clause-role and exception semantics.
+- OpenRouter transport was manageable at `6` lanes or fewer. RACE compile needed
+  narrow retries; PrivacyQA, MAUD, and CUAD compiled cleanly at `3` lanes.
+- The stamp has enough spread to support post-stamp work, but the code should
+  remain frozen for this measurement series.
 
 ## IS-001 - SQuAD-30 Stamp Imported From Dataset Transfer
 
@@ -463,3 +492,99 @@ Next pressure:
 - Stamp CUAD-10 as rougher contract evidence, then compare CUAD against MAUD
   before deciding whether contract transfer needs a dedicated post-stamp
   worksheet.
+
+## IS-006 - CUAD-10 Stamp
+
+Date: 2026-05-14
+
+Before:
+
+- MAUD-10 landed at a stable `45.00%`, raising the question of whether the
+  contract transfer gap was broad legal-domain weakness or a narrower
+  clause-category boundary.
+- CUAD-10 is rougher as a staged corpus, but it gives a second contract-shaped
+  measurement using a different question style.
+
+Prediction:
+
+- If contract text itself is the problem, CUAD should land near MAUD.
+- If MAUD exposed a narrower categorical/exception-clause boundary, CUAD should
+  land higher and its non-exacts should be mostly factual compile/query
+  resolution.
+
+Intervention:
+
+- Ran three fresh compile-plus-QA draws under the frozen instrument.
+- Used `3` OpenRouter compile lanes and `6` QA lanes.
+- No transport retries were needed in any compile draw.
+
+After:
+
+| Draw | Exact | Partial | Miss | Exact rate | Helper rows | Transport |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `draw1` | 37 | 2 | 1 | 92.50% | 0 | none |
+| `draw2` | 36 | 2 | 2 | 90.00% | 0 | none |
+| `draw3` | 38 | 1 | 1 | 95.00% | 0 | none |
+
+Stamp summary:
+
+- Mean exact rate: `92.50%`.
+- Range: `90.00%` to `95.00%`.
+- Peak: `95.00%`.
+- Runtime load errors: `0` in all QA draws.
+- Write proposal rows: `0` in all QA draws.
+- Helper pressure: absent.
+- Aggregate non-exact rows across the three draws: `9` (`4` miss, `5`
+  partial).
+
+Aggregate proposition types across non-exact rows:
+
+- `factual`: `8`
+- `inference`: `1`
+
+Aggregate transfer coordinates across non-exact rows:
+
+- `direct_compile_surface_gap`: `5`
+- `background_role_or_audience_fact`: `1`
+- `comparative_or_temporal_resolution`: `1`
+- `implicit_attitude_or_consequence`: `1`
+- `query_surface_resolution`: `1`
+
+Aggregate failure surfaces:
+
+- `compile_surface_gap`: `7`
+- `query_surface_gap`: `2`
+
+Artifacts:
+
+- `tmp\instrument_stamp_20260514_cuad10_draw1_compile`
+- `tmp\instrument_stamp_20260514_cuad10_draw1_qa`
+- `tmp\instrument_stamp_20260514_cuad10_draw1_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_cuad10_draw2_compile`
+- `tmp\instrument_stamp_20260514_cuad10_draw2_qa`
+- `tmp\instrument_stamp_20260514_cuad10_draw2_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_cuad10_draw3_compile`
+- `tmp\instrument_stamp_20260514_cuad10_draw3_qa`
+- `tmp\instrument_stamp_20260514_cuad10_draw3_qa\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- All three compile draws parsed `10/10` fixtures without transport retries.
+- All three QA summaries report `40` questions, `0` runtime load errors, and
+  `0` write proposal rows.
+
+Lesson:
+
+- CUAD does not confirm MAUD as a general contract ceiling. It lands in the
+  SQuAD-like low-90s band despite being contract prose.
+- The contrast points to question shape, not domain label: CUAD non-exacts are
+  mostly factual compile/query resolution, while MAUD non-exacts were entirely
+  categorical and heavily false/exception-option shaped.
+- The post-stamp contract agenda should therefore target categorical
+  clause-role and exception semantics, not generic "legal text" handling.
+
+Next pressure:
+
+- Produce the instrument-stamp rollup across all completed corpora, then decide
+  whether focused probe ladders should be included in the same stamp or kept as
+  post-stamp validation evidence.
