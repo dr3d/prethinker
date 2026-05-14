@@ -35,6 +35,7 @@ Corpus Inventory:
 | PrivacyQA-30 | `tmp\mrc_transfer_staged_privacyqa30_20260513` | 30 | 30 | Complete, `N=3` |
 | MAUD-10 | `tmp\mrc_transfer_staged_maud10_20260513` | 10 | 40 | Complete, `N=3` |
 | CUAD-10 | `tmp\mrc_transfer_staged_cuad10_20260513` | 10 | 40 | Complete, `N=3`; rough corpus evidence |
+| Story-world corpus | `datasets\story_worlds` | 56 | 2163 draw-1 scored | Provisional native stamp, `N=1` |
 
 ## Stamp Rollup
 
@@ -50,6 +51,7 @@ draws per completed corpus. It is a measurement table, not a repair queue.
 | PrivacyQA-30 | 30 | 82.22% | 80.00%-83.33% | 83.33% | factual policy compile/query resolution |
 | MAUD-10 | 40 | 45.00% | 45.00%-45.00% | 45.00% | categorical clause and exception semantics |
 | CUAD-10 | 40 | 92.50% | 90.00%-95.00% | 95.00% | mostly factual contract compile/query resolution |
+| Story-world corpus | 2163 | 84.33% | provisional `N=1` | 84.33% | native-corpus compile-surface gaps and helper volume |
 
 Rollup observations:
 
@@ -64,6 +66,9 @@ Rollup observations:
   narrow retries; PrivacyQA, MAUD, and CUAD compiled cleanly at `3` lanes.
 - The stamp has enough spread to support post-stamp work, but the code should
   remain frozen for this measurement series.
+- The current native story-world corpus is much larger than the earlier
+  41-fixture memory: `56` runnable source-plus-QA fixtures were present at stamp
+  time.
 
 ## IS-001 - SQuAD-30 Stamp Imported From Dataset Transfer
 
@@ -588,3 +593,106 @@ Next pressure:
 - Produce the instrument-stamp rollup across all completed corpora, then decide
   whether focused probe ladders should be included in the same stamp or kept as
   post-stamp validation evidence.
+
+## IS-007 - Story-World Corpus Native Draw 1
+
+Date: 2026-05-14
+
+Before:
+
+- The external transfer corpora had been stamped, but the home corpus itself
+  still needed a frozen-instrument reading.
+- The older working memory of `41` fixtures was stale. The current promoted
+  story-world corpus contains `56` runnable source-plus-QA fixtures.
+
+Prediction:
+
+- The native corpus should land near or above the earlier wide-corpus snapshot
+  (`82.76%` exact over `1218` questions), but helper volume may remain high
+  because the corpus includes the older high-pressure fixtures.
+- Compile transport may need narrow retries, but runtime/load and write-proposal
+  failures should remain absent if the instrument is stable.
+
+Intervention:
+
+- Ran one fresh compile-plus-QA draw under the frozen instrument across all
+  current `datasets\story_worlds` fixtures.
+- Used `3` OpenRouter compile lanes and `6` QA lanes.
+- Retried one compile transport failure narrowly at `1` lane after an upstream
+  `429`; no prompt or code changed.
+- The QA parent exceeded the interactive shell timeout while children remained
+  alive. All child jobs were allowed to finish, then the batch summary was
+  generated from existing artifacts.
+
+After:
+
+| Draw | Fixtures | Questions | Exact | Partial | Miss | Exact rate | Helper rows | Transport |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `draw1` | 56 | 2163 | 1824 | 92 | 247 | 84.33% | 7281 | one compile 429 retry; QA parent shell timeout, children completed |
+
+Stamp summary:
+
+- Mean exact rate: provisional `84.33%` (`N=1`).
+- Runtime load errors: `0`.
+- Write proposal rows: `0`.
+- Helper pressure: `high_clean_helper_volume`, rows/exact `3.992`,
+  candidate-helper share `0.1834`.
+
+Failure-surface counts:
+
+- `compile_surface_gap`: `242`
+- `hybrid_join_gap`: `54`
+- `query_surface_gap`: `31`
+- `answer_surface_gap`: `6`
+- `judge_uncertain`: `6`
+
+Helper-class counts:
+
+- `clean-helper`: `5895`
+- `candidate-helper`: `1335`
+- `unlabeled`: `51`
+
+Largest helper row sources:
+
+- `roster_state_support`: `2502`
+- `source_record_packet_metadata_support`: `1838`
+- `industrial_sensor_support`: `1260`
+- `clinic_recall_support`: `580`
+- `grant_award_support`: `408`
+
+Lowest exact-rate fixtures in draw 1:
+
+- `thornfield_variance`: `24 / 40`, exact `60.00%`
+- `sable_creek_budget`: `27 / 40`, exact `67.50%`
+- `heronvale_arts`: `17 / 25`, exact `68.00%`
+- `authority_possession_custody_packet`: `30 / 40`, exact `75.00%`
+- `university_lab_sample_chain`: `30 / 40`, exact `75.00%`
+
+Artifacts:
+
+- `tmp\instrument_stamp_20260514_story_worlds_draw1_compile`
+- `tmp\instrument_stamp_20260514_story_worlds_draw1_compile\compile_batch_summary.md`
+- `tmp\instrument_stamp_20260514_story_worlds_draw1_qa`
+- `tmp\instrument_stamp_20260514_story_worlds_draw1_qa\qa_batch_summary.md`
+
+Verification:
+
+- Compile parsed `56 / 56` fixtures after the narrow transport retry.
+- QA completed `56 / 56` fixtures and `2163` questions.
+- Runtime load errors and write proposals were both `0`.
+
+Lesson:
+
+- The native corpus reading is close to the corrected RACE transfer band and
+  above the older wide-corpus snapshot, but it is not a clean low-helper state.
+- The same broad boundary shape persists at corpus scale: compile-surface gaps
+  dominate non-exacts, while helper volume remains a separate delivery/scope
+  pressure.
+- The home corpus should not be used as a repair target during the stamp. This
+  draw is a baseline against which post-stamp work can be compared.
+
+Next pressure:
+
+- Decide whether the native corpus needs `N=3` despite its high runtime cost, or
+  whether one full native draw plus `N=3` external transfer stamps is the right
+  characterization package for the current paper-facing stamp.
