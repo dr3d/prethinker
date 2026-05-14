@@ -61,6 +61,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-evidence-bundle", action="store_true")
     parser.add_argument("--no-classify-failure-surfaces", action="store_true")
     parser.add_argument("--no-cache", action="store_true", help="Pass through to QA runner for fresh hosted calls.")
+    parser.add_argument(
+        "--helper-companion-row-limit",
+        type=int,
+        default=3,
+        help="Question-level budget for query-only helper companion rows. Use 0 to suppress them or -1 for unbounded forensic delivery.",
+    )
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -89,6 +95,7 @@ def main() -> int:
             evidence_bundle=not bool(args.no_evidence_bundle),
             classify_failure_surfaces=not bool(args.no_classify_failure_surfaces),
             cache=not bool(args.no_cache),
+            helper_companion_row_limit=args.helper_companion_row_limit,
         )
         for job in jobs
     ]
@@ -169,6 +176,7 @@ def _build_command(
     evidence_bundle: bool,
     classify_failure_surfaces: bool,
     cache: bool = True,
+    helper_companion_row_limit: int | None = None,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -196,6 +204,8 @@ def _build_command(
         command.append("--classify-failure-surfaces")
     if not cache:
         command.append("--no-cache")
+    if helper_companion_row_limit is not None:
+        command.extend(["--helper-companion-row-limit", str(int(helper_companion_row_limit))])
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
     return command

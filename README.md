@@ -37,6 +37,7 @@ propagation = visible recomputation, not hidden belief
 - [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
 - [Boundary hunt worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - the live workbench for wide-corpus boundary coordinates, probe backlog, and helper/source cleanup.
 - [Dataset transfer worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md) - external MRC/domain-transfer intake, first RACE smoke results, and transfer-pressure backlog.
+- [Helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - current helper-row delivery budget and cleanup evidence.
 - [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
 - [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
@@ -70,6 +71,8 @@ and then the
 [boundary hunt worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md).
 External transfer samples and RACE/CUAD-style dataset work are tracked in the
 [dataset transfer worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md).
+The helper-row cleanup lane is tracked in the
+[helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md).
 
 ## Current State
 
@@ -106,6 +109,7 @@ The short version:
 - [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current research headline and newest public framing.
 - [docs/BOUNDARY_HUNT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - live CTO workbench for boundary coordinates and transferable repairs.
 - [docs/DATASET_TRANSFER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md) - external dataset intake and transfer smoke evidence.
+- [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - helper-row delivery budget and residue audit.
 - [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public instrument spec for lenses, guards, uncertainty states, and calibration evidence.
 - [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the twelve reader/control lenses.
 - [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax and safe-surface accumulation.

@@ -15,6 +15,7 @@ from scripts.run_domain_bootstrap_qa import (
     _dedupe_helper_query_results,
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
+    _limit_helper_query_results,
     _location_floor_hint_queries,
     _negative_join_with_previous,
     _negative_reference_supported_by_results,
@@ -2138,6 +2139,66 @@ def test_run_query_plan_dedupes_repeated_helper_companion_rows() -> None:
     companions = [item for item in rows if item["result"].get("predicate") == "roster_state_support"]
     assert len(companions) == 1
     assert companions[0]["result"]["num_rows"] == 3
+
+
+def test_helper_companion_row_limit_prefers_question_relevant_support_rows() -> None:
+    results = [
+        {
+            "result": {
+                "predicate": "grant_award_support",
+                "rows": [
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "committee_recusal_vote_count",
+                        "Value": "5",
+                    },
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "appeal_window_rule",
+                        "Value": "14 days",
+                    },
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "total_application_count",
+                        "Value": "12",
+                    },
+                ],
+            }
+        }
+    ]
+
+    filtered = _limit_helper_query_results(
+        results,
+        1,
+        utterance="What is the appeal window length specified by procedure?",
+        queries=["grant_award(App, Status, Amount)."],
+    )
+
+    assert len(filtered) == 1
+    assert filtered[0]["result"]["rows"] == [
+        {
+            "HelperClass": "clean-helper",
+            "SupportKind": "appeal_window_rule",
+            "Value": "14 days",
+        }
+    ]
+    assert filtered[0]["result"]["reasoning_basis"]["delivery_filter"] == "query_relevance_helper_row_budget"
+
+
+def test_helper_companion_row_limit_zero_suppresses_helper_results_only() -> None:
+    results = [
+        {"result": {"predicate": "direct_fact", "rows": [{"Value": "kept"}]}},
+        {
+            "result": {
+                "predicate": "source_record_packet_metadata_support",
+                "rows": [{"HelperClass": "clean-helper", "SupportKind": "identifier"}],
+            }
+        },
+    ]
+
+    filtered = _limit_helper_query_results(results, 0, utterance="Which identifier?", queries=[])
+
+    assert filtered == [{"result": {"predicate": "direct_fact", "rows": [{"Value": "kept"}]}}]
 
 
 def test_run_query_plan_summarizes_type_categories_without_counting_instances() -> None:

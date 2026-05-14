@@ -503,6 +503,15 @@ def parse_args() -> argparse.Namespace:
         help="Minimum broad-context fallback clauses retained by --evidence-bundle-context-filter.",
     )
     parser.add_argument(
+        "--helper-companion-row-limit",
+        type=int,
+        default=3,
+        help=(
+            "Question-level budget for query-only helper companion rows. "
+            "Use 0 to suppress helper companions or -1 for unbounded forensic delivery."
+        ),
+    )
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
@@ -640,6 +649,7 @@ def main() -> int:
         evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
         evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
         evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
+        helper_companion_row_limit=args.helper_companion_row_limit,
         classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     for item in questions:
@@ -670,6 +680,7 @@ def main() -> int:
                 evidence_bundle_context_filter=bool(args.evidence_bundle_context_filter),
                 evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
                 evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
+                helper_companion_row_limit=args.helper_companion_row_limit,
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -745,6 +756,7 @@ def build_cache_context(
     evidence_bundle_context_filter: bool,
     evidence_bundle_context_max_clauses: int,
     evidence_bundle_context_broad_floor: int,
+    helper_companion_row_limit: int | None,
     classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     return {
@@ -793,6 +805,8 @@ def build_cache_context(
         "evidence_bundle_context_filter": bool(evidence_bundle_context_filter),
         "evidence_bundle_context_max_clauses": int(evidence_bundle_context_max_clauses or 0),
         "evidence_bundle_context_broad_floor": int(evidence_bundle_context_broad_floor or 0),
+        "helper_companion_row_limit": helper_companion_row_limit,
+        "helper_companion_budget_ranker": "lexical_query_overlap_v1",
         "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
@@ -1292,6 +1306,7 @@ def run_one_question(
     evidence_bundle_context_filter: bool,
     evidence_bundle_context_max_clauses: int,
     evidence_bundle_context_broad_floor: int,
+    helper_companion_row_limit: int | None,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     kb_context_pack = {
@@ -1415,6 +1430,12 @@ def run_one_question(
         )
         query_results = [*query_results, *evidence_plan_query_results]
     query_results = _dedupe_helper_query_results(query_results)
+    query_results = _limit_helper_query_results(
+        query_results,
+        helper_companion_row_limit,
+        utterance=utterance,
+        queries=queries,
+    )
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -1865,6 +1886,142 @@ def _dedupe_helper_query_results(results: list[dict[str, Any]]) -> list[dict[str
         if filtered is not None:
             out.append(filtered)
     return out
+
+
+def _limit_helper_query_results(
+    results: list[dict[str, Any]],
+    row_limit: int | None,
+    *,
+    utterance: str = "",
+    queries: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    if row_limit is None:
+        return results
+    if int(row_limit) < 0:
+        return results
+    budget = max(0, int(row_limit))
+    helper_items: list[tuple[int, dict[str, Any], dict[str, Any], list[Any]]] = []
+    ranked_rows: list[tuple[float, int, int, dict[str, Any]]] = []
+    query_tokens = _helper_budget_query_tokens(utterance=utterance, queries=queries or [])
+    for item_index, item in enumerate(results):
+        result = item.get("result", {}) if isinstance(item, dict) else {}
+        rows = result.get("rows") if isinstance(result, dict) else None
+        if not isinstance(rows, list) or not _is_helper_query_result(item):
+            continue
+        helper_items.append((item_index, item, result, rows))
+        predicate = str(item.get("predicate", "") or result.get("predicate", "") or "")
+        for row_index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            score = _helper_budget_row_score(
+                predicate=predicate,
+                row=row,
+                query_tokens=query_tokens,
+            )
+            ranked_rows.append((score, item_index, row_index, row))
+    if not helper_items:
+        return results
+    if budget <= 0:
+        helper_indexes = {item_index for item_index, *_ in helper_items}
+        return [item for index, item in enumerate(results) if index not in helper_indexes]
+
+    ranked_rows.sort(key=lambda item: (-item[0], item[1], item[2]))
+    selected = {(item_index, row_index) for _, item_index, row_index, _ in ranked_rows[:budget]}
+
+    helper_by_index = {item_index: (item, result, rows) for item_index, item, result, rows in helper_items}
+    out: list[dict[str, Any]] = []
+    for item_index, item in enumerate(results):
+        helper_payload = helper_by_index.get(item_index)
+        if helper_payload is None:
+            out.append(item)
+            continue
+        original_item, result, rows = helper_payload
+        kept_rows = [
+            row
+            for row_index, row in enumerate(rows)
+            if (item_index, row_index) in selected
+        ]
+        if not kept_rows:
+            continue
+        reasoning_basis = result.get("reasoning_basis", {})
+        if not isinstance(reasoning_basis, dict):
+            reasoning_basis = {}
+        out.append(
+            {
+                **original_item,
+                "result": {
+                    **result,
+                    "rows": kept_rows,
+                    "num_rows": len(kept_rows),
+                    "reasoning_basis": {
+                        **reasoning_basis,
+                        "delivery_filter": "query_relevance_helper_row_budget",
+                        "helper_companion_row_limit": row_limit,
+                        "helper_companion_original_rows": len(rows),
+                        "helper_companion_budget_ranker": "lexical_query_overlap_v1",
+                    },
+                },
+            }
+        )
+    return out
+
+
+def _helper_budget_query_tokens(*, utterance: str, queries: list[str]) -> set[str]:
+    tokens = set(_helper_budget_tokens(utterance))
+    for query in queries:
+        tokens.update(_helper_budget_tokens(query))
+    return {token for token in tokens if token not in GENERIC_QUERY_PLACEHOLDERS and len(token) > 1}
+
+
+def _helper_budget_row_score(
+    *,
+    predicate: str,
+    row: dict[str, Any],
+    query_tokens: set[str],
+) -> float:
+    if not query_tokens:
+        return 0.0
+    row_tokens = set(_helper_budget_tokens(" ".join(str(value) for value in row.values())))
+    predicate_tokens = set(_helper_budget_tokens(predicate))
+    support_tokens = set(
+        _helper_budget_tokens(
+            " ".join(
+                str(row.get(key, ""))
+                for key in ("SupportKind", "Kind", "SourcePredicate", "SourceRow", "SupportRole")
+            )
+        )
+    )
+    value_overlap = len(query_tokens & row_tokens)
+    support_overlap = len(query_tokens & support_tokens)
+    predicate_overlap = len(query_tokens & predicate_tokens)
+    exact_surface_bonus = 0.0
+    row_text = " ".join(str(value).lower() for value in row.values())
+    for token in query_tokens:
+        if len(token) >= 4 and token in row_text:
+            exact_surface_bonus += 0.25
+    return float(value_overlap) + (1.5 * support_overlap) + (0.5 * predicate_overlap) + exact_surface_bonus
+
+
+def _helper_budget_tokens(text: str) -> list[str]:
+    normalized = re.sub(r"([a-z])([A-Z])", r"\1 \2", str(text))
+    normalized = normalized.replace("_", " ").replace("-", " ")
+    return [token.lower() for token in re.findall(r"[A-Za-z0-9]+", normalized)]
+
+
+def _is_helper_query_result(item: dict[str, Any]) -> bool:
+    if not isinstance(item, dict):
+        return False
+    result = item.get("result", {})
+    if not isinstance(result, dict):
+        return False
+    predicate = str(item.get("predicate", "") or result.get("predicate", "") or "")
+    if predicate.endswith("_support"):
+        return True
+    reasoning_basis = result.get("reasoning_basis", {})
+    if isinstance(reasoning_basis, dict) and str(reasoning_basis.get("kind", "")) == "query-only-companion":
+        return True
+    rows = result.get("rows")
+    return isinstance(rows, list) and any(isinstance(row, dict) and "HelperClass" in row for row in rows)
 
 
 def _status_timeline_summary_companion(
