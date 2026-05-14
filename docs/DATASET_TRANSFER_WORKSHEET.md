@@ -4588,3 +4588,85 @@ Next pressure:
 - Then return to the dataset-transfer map: classify whether remaining SQuAD/RACE
   misses are frame-object, condition-as-tool, synthesis, or true absent-axis
   cases.
+
+### DT-052 - Source Support Regression Replay
+
+Date: 2026-05-14
+
+Before:
+
+- DT-051 moved the method-catalog probe to `16 / 0 / 0` by adding plain-prose
+  source ledger coverage, method-actor frame source support, and strict
+  source-record reference support.
+- The risk was over-crediting: if any source text containing the reference could
+  make an answer exact, the harness would drift toward text search instead of
+  governed KB evaluation.
+- The OpenRouter App column was also too verbose, so run titles needed to be
+  shortened from full run paths to phase-plus-fixture labels.
+
+Prediction:
+
+- A dense method-frame replay should remain exact with its existing
+  method-frame helper and should not gain unrelated helper volume.
+- The SQuAD geology recompile should not be falsely upgraded by source-record
+  support unless the query plan actually returns answer-bearing source text.
+- New OpenRouter rows should use compact titles like
+  `qa:method_catalog_surface_stability_ladder`.
+
+Intervention:
+
+- Shortened default OpenRouter titles:
+  - compile runner: `compile:<fixture>`
+  - QA runner: `qa:<fixture>`
+- Replayed two unlike probes:
+  - dense method-frame purpose,
+  - SQuAD geology fresh compile from DT-050.
+
+After:
+
+- Dense method-frame replay:
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Helper rows: `22`, all clean `method_frame_purpose_support`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- SQuAD geology replay:
+  - Exact / partial / miss: `3 / 1 / 1`.
+  - Helper rows: `0`.
+  - Failure surfaces: `compile_surface_gap: 1`, `query_surface_gap: 1`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+
+Artifacts:
+
+- Dense replay:
+  `tmp\boundary_probe_qa_dense_purpose_frame_dt052_replay_20260514`
+- Geology replay:
+  `tmp\mrc_transfer_qa_squad30_dt052_geology_source_support_replay_20260514`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_purpose_frame_ladder --compile-root tmp\boundary_probe_compile_dense_purpose_frame_20260514 --out-root tmp\boundary_probe_qa_dense_purpose_frame_dt052_replay_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00013_geology --compile-root tmp\mrc_transfer_compile_squad30_dt050_geology_recompile_20260514 --out-root tmp\mrc_transfer_qa_squad30_dt052_geology_source_support_replay_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python -m pytest tests\test_domain_bootstrap_file.py::test_openrouter_compile_title_uses_phase_and_fixture_only tests\test_domain_bootstrap_qa.py::test_openrouter_title_header_uses_experiment_label -q`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_source_record_ledger.py tests\test_domain_bootstrap_file.py -q`
+
+Lesson:
+
+- Source-record support did not indiscriminately inflate the SQuAD geology
+  score. It only helps when the query result surface actually includes
+  answer-bearing source text.
+- Method-frame purpose and method-actor frame-source support are adjacent but
+  distinct helper families: the former works when the compiler emits explicit
+  agent/frame predicates; the latter works when a method catalog exposes
+  actor/method/location rows and the frame object remains in source text.
+- Short OpenRouter titles are now operationally useful: phase plus fixture is
+  enough for log grouping without hiding the actual experiment under a timestamp
+  path.
+
+Next pressure:
+
+- Return to the dataset-transfer map and classify remaining SQuAD/RACE misses
+  by proposition type and boundary coordinate.
+- Watch helper volume: `50` method-actor frame rows for 16 questions is
+  acceptable for a focused probe, but future wide replays should flag this
+  helper if it appears on unrelated fixtures.
