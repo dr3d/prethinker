@@ -365,3 +365,89 @@ Next pressure:
   remaining delivery surface.
 - Compare exact-to-miss deltas between unbounded and ranked-cap native replays
   before tightening below cap `3`.
+
+## HR-006 - Remaining Packet Metadata Shape
+
+Date: 2026-05-14
+
+Before:
+
+- Full native ranked-cap replay left `976` helper rows.
+- `source_record_packet_metadata_support` was the largest remaining source at
+  `374` rows.
+
+Prediction:
+
+- If packet metadata still hides a broad flood, it should appear as many rows
+  per question or many unrelated support kinds. If the global budget is already
+  doing its job, it should appear as a small number of repeated source-support
+  rows across source/addressability questions.
+
+Intervention:
+
+- Audited `source_record_packet_metadata_support` rows in
+  `tmp\helper_residue_full_native_cap3_ranked_or_qa` by fixture, support kind,
+  delivered rows, unique rows, and per-question row count.
+
+After:
+
+- Delivered packet metadata rows: `374`.
+- Unique packet metadata rows: `137`.
+- Questions receiving packet metadata: `158`.
+- Average rows per packet-metadata question: `2.37`.
+
+Per-question packet row count:
+
+| Rows delivered | Questions |
+| ---: | ---: |
+| 1 | 37 |
+| 2 | 26 |
+| 3 | 95 |
+
+Largest support kinds:
+
+| Support kind | Rows |
+| --- | ---: |
+| `source_record_matching_token_source` | 51 |
+| `source_record_custody_location` | 40 |
+| `source_record_temporal_relation_note` | 31 |
+| `source_record_temporal_event_note` | 29 |
+| `source_record_sample_result_note` | 23 |
+| `source_record_order_section` | 23 |
+| `unreproduced_reference` | 22 |
+| `source_record_item_event_identifier_note` | 21 |
+| `source_record_statement_filing_note` | 16 |
+| `motion_status` | 14 |
+
+Fixture concentration:
+
+| Fixture | Packet rows | Dominant support shape |
+| --- | ---: | --- |
+| `greenhouse_quarantine` | 83 | temporal and sample-result source notes |
+| `probate_storage_access_register` | 88 | custody/location, motion status, assertion standing |
+| `rule_activation_exception_matrix` | 42 | matching-token source |
+| `hospital_shift_exception_log` | 38 | statement filing and timestamp authority |
+| `school_activity_roster_reconciliation` | 31 | accommodation/policy identifiers |
+| `grant_exception_cap_matrix` | 26 | unreproduced references and memo identifiers |
+
+Verification:
+
+- The global cap is active: packet metadata appears at no more than three rows
+  per question.
+- The remaining rows concentrate in source-addressability, temporal note,
+  custody/location, and order/status support. That is a real source-fidelity
+  surface, not an unbounded helper dump.
+
+Lesson:
+
+- The next packet-metadata reduction is not a global cap problem. The cap has
+  already made delivery small per question.
+- Further reduction should be source-specific: summarize repeated
+  source-addressability support only when it is semantically equivalent, and do
+  not collapse temporal/custody/order distinctions that are answer-bearing.
+
+Next pressure:
+
+- Do not lower cap `3` globally yet. First inspect exact-to-miss examples where
+  the ranked cap lost a previously exact answer, and separate true helper-loss
+  failures from ordinary hosted/judge variance.
