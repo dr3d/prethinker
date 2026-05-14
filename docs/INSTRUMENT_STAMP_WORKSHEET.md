@@ -33,7 +33,7 @@ Corpus Inventory:
 | SQuAD-30 | `tmp\mrc_transfer_staged_squad30_20260513` | 30 | 171 | Complete, `N=3` |
 | RACE-50 | `tmp\mrc_transfer_staged_race50_options_20260513` | 50 | 177 | Complete, `N=3`, corrected MCQ option-visible root |
 | PrivacyQA-30 | `tmp\mrc_transfer_staged_privacyqa30_20260513` | 30 | 30 | Complete, `N=3` |
-| MAUD-10 | `tmp\mrc_transfer_staged_maud10_20260513` | 10 | 40 | Pending |
+| MAUD-10 | `tmp\mrc_transfer_staged_maud10_20260513` | 10 | 40 | Complete, `N=3` |
 | CUAD-10 | `tmp\mrc_transfer_staged_cuad10_20260513` | 10 | 40 | Pending; treat as rough corpus evidence |
 
 ## IS-001 - SQuAD-30 Stamp Imported From Dataset Transfer
@@ -362,3 +362,104 @@ Next pressure:
 - Stamp MAUD-10 next. It is smaller but more contract-shaped than PrivacyQA,
   so it should clarify whether the legal-domain pressure is policy-generic or
   contract-specific.
+
+## IS-005 - MAUD-10 Stamp
+
+Date: 2026-05-14
+
+Before:
+
+- MAUD-10 is merger-agreement QA with four questions per contract fixture.
+- PrivacyQA landed in the low-80s, so MAUD tests whether legal-domain transfer
+  pressure is broad policy/legal prose or narrower contract-clause resolution.
+
+Prediction:
+
+- MAUD should be harder than PrivacyQA because the questions target categorical
+  legal-clause distinctions, exceptions, definitions, and conditions over dense
+  agreement text.
+- If the boundary is contract-specific, non-exacts should concentrate in
+  categorical compile/query surfaces rather than open-ended inference or
+  synthesis.
+
+Intervention:
+
+- Ran three fresh compile-plus-QA draws under the frozen instrument.
+- Used `3` OpenRouter compile lanes and `6` QA lanes.
+- No transport retries were needed in any compile draw.
+
+After:
+
+| Draw | Exact | Partial | Miss | Exact rate | Helper rows | Transport |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `draw1` | 18 | 5 | 17 | 45.00% | 0 | none |
+| `draw2` | 18 | 0 | 22 | 45.00% | 0 | none |
+| `draw3` | 18 | 3 | 19 | 45.00% | 0 | none |
+
+Stamp summary:
+
+- Mean exact rate: `45.00%`.
+- Range: `45.00%` to `45.00%`.
+- Peak: `45.00%`.
+- Runtime load errors: `0` in all QA draws.
+- Write proposal rows: `0` in all QA draws.
+- Helper pressure: absent.
+- Aggregate non-exact rows across the three draws: `66` (`58` miss, `8`
+  partial).
+
+Aggregate proposition types across non-exact rows:
+
+- `categorical`: `66`
+
+Aggregate transfer coordinates across non-exact rows:
+
+- `false_or_exception_option_selection`: `22`
+- `direct_compile_surface_gap`: `20`
+- `background_role_or_audience_fact`: `14`
+- `query_surface_resolution`: `6`
+- `answer_surface_mapping`: `2`
+- `judge_transport_uncertain`: `1`
+- `hybrid_join_resolution`: `1`
+
+Aggregate failure surfaces:
+
+- `compile_surface_gap`: `49`
+- `query_surface_gap`: `8`
+- `answer_surface_gap`: `5`
+- `hybrid_join_gap`: `3`
+- `judge_uncertain`: `1`
+
+Artifacts:
+
+- `tmp\instrument_stamp_20260514_maud10_draw1_compile`
+- `tmp\instrument_stamp_20260514_maud10_draw1_qa`
+- `tmp\instrument_stamp_20260514_maud10_draw1_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_maud10_draw2_compile`
+- `tmp\instrument_stamp_20260514_maud10_draw2_qa`
+- `tmp\instrument_stamp_20260514_maud10_draw2_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_maud10_draw3_compile`
+- `tmp\instrument_stamp_20260514_maud10_draw3_qa`
+- `tmp\instrument_stamp_20260514_maud10_draw3_qa\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- All three compile draws parsed `10/10` fixtures without transport retries.
+- All three QA summaries report `40` questions, `0` runtime load errors, and
+  `0` write proposal rows.
+
+Lesson:
+
+- MAUD is the first stamped corpus with a clear low-transfer ceiling: exactly
+  `45.00%` exact across all three fresh draws.
+- The legal-domain pressure is not uniform. Privacy policies were low-80s;
+  merger agreements are much harder under the frozen instrument.
+- The boundary is contract-categorical: false/exception option selection,
+  clause role/background facts, and direct compile-surface gaps dominate. That
+  is not a cue to patch toward MAUD during the stamp; it is evidence for the
+  next post-stamp repair agenda.
+
+Next pressure:
+
+- Stamp CUAD-10 as rougher contract evidence, then compare CUAD against MAUD
+  before deciding whether contract transfer needs a dedicated post-stamp
+  worksheet.
