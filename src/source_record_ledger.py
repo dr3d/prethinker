@@ -41,8 +41,8 @@ def extract_source_record_ledger(
     """Extract source row addressability without interpreting source meaning.
 
     The ledger preserves line-numbered markdown-ish structure: headings, table
-    rows, bullets, numbered rows, and labeled prose rows. It does not infer
-    relations, answer questions, or author KB clauses.
+    rows, bullets, numbered rows, labeled prose rows, and plain paragraph rows.
+    It does not infer relations, answer questions, or author KB clauses.
     """
 
     rows: list[SourceRecordRow] = []
@@ -164,6 +164,22 @@ def extract_source_record_ledger(
                 )
             )
             continuation_line = line_no
+        else:
+            pending_table_header = None
+            active_table_header = None
+            label = _clean_text(line.split(".", 1)[0], max_chars=80) or current_section or f"line {line_no}"
+            rows.append(
+                SourceRecordRow(
+                    row_id=_row_id(line_no),
+                    kind="paragraph_line",
+                    line=line_no,
+                    section=current_section,
+                    exact=_clean_text(line, max_chars=max_chars_per_row),
+                    label=label,
+                )
+            )
+            continuation_label = label
+            continuation_line = line_no
         if len(rows) >= max_rows:
             return _ledger(rows, truncated=True)
     return _ledger(rows, truncated=False)
@@ -177,7 +193,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         return []
     return [
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
-        "It records exact line-numbered headings, table rows, bullet rows, numbered rows, and labeled lines so compiler passes can preserve document addressability.",
+        "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
         "For markdown tables, it preserves deterministic column headers alongside row cells so table values can be queried as source-record fields without semantic interpretation.",
         "For explicit roster tables with both a grouping column and a member column, it also emits roster_table_member/4 as structural table membership; it does not infer membership from nearby prose.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",

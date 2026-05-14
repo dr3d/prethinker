@@ -14,6 +14,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
     _flat_plus_surface_contribution,
+    _default_openrouter_title,
     _invalid_profile_retry_context,
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
@@ -25,6 +26,7 @@ from scripts.run_domain_bootstrap_file import (
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
 import json
+from pathlib import Path
 
 
 def test_narrative_context_guards_attributes_and_official_duties() -> None:
@@ -241,6 +243,16 @@ def test_append_source_record_ledger_facts_marks_deterministic_policy() -> None:
     assert compile_record["unique_fact_count"] == len(compile_record["facts"])
     assert compile_record["deterministic_source_record_fact_count"] > 0
     assert compile_record["deterministic_source_record_policy"]["not_semantic_truth"] is True
+
+
+def test_openrouter_compile_title_uses_phase_and_fixture_only(monkeypatch) -> None:
+    monkeypatch.delenv("PRETHINKER_OPENROUTER_TITLE", raising=False)
+    monkeypatch.delenv("OPENROUTER_APP_TITLE", raising=False)
+    monkeypatch.delenv("OPENROUTER_X_TITLE", raising=False)
+
+    title = _default_openrouter_title(Path("tmp") / "compile_run_20260514" / "fixture_a")
+
+    assert title == "compile:fixture_a"
 
 
 def test_source_pass_ops_schema_is_operations_only() -> None:

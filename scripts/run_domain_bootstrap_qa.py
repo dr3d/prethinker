@@ -3182,7 +3182,7 @@ def _method_frame_purpose_companion(
 
 def _method_frame_source_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
-    for source_query in ("source_record_label(SourceRow, FrameText).", "source_record_text_atom(SourceRow, FrameText)."):
+    for source_query in ("source_record_text_atom(SourceRow, FrameText).", "source_record_label(SourceRow, FrameText)."):
         for row in _runtime_rows(runtime, source_query):
             source_row = str(row.get("SourceRow", "")).strip()
             frame_text = str(row.get("FrameText", "")).strip()
@@ -3210,6 +3210,212 @@ def _source_rows_for_method_frame(
         if agent_overlap <= 0 and domain_overlap < required_domain_overlap:
             continue
         score = agent_overlap * 2 + domain_overlap
+        scored.append((score, row))
+    scored.sort(key=lambda item: (-item[0], item[1].get("SourceRow", ""), item[1].get("FrameText", "")))
+    return [row for _, row in scored]
+
+
+def _method_actor_frame_source_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {
+        "method_actor",
+        "role_performs_method",
+        "method_primary_location",
+        "method_performed_at",
+        "method_log_location",
+        "method_domain",
+    }:
+        return None
+    arg_texts = [str(item).strip() for item in args]
+    actor_filter = ""
+    method_filter = ""
+    location_filter = ""
+    domain_filter = ""
+    if predicate == "method_actor" and len(arg_texts) >= 2:
+        method_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+        actor_filter = arg_texts[1] if arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else ""
+    elif predicate == "role_performs_method" and len(arg_texts) >= 2:
+        actor_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+        method_filter = arg_texts[1] if arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else ""
+    elif predicate in {"method_primary_location", "method_performed_at", "method_log_location"} and len(arg_texts) >= 2:
+        method_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+        location_filter = arg_texts[1] if arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else ""
+    elif predicate == "method_domain" and len(arg_texts) >= 2:
+        method_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+        domain_filter = arg_texts[1] if arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else ""
+    if not any((actor_filter, method_filter, location_filter, domain_filter)):
+        return None
+
+    method_actor_rows = _method_actor_rows(runtime)
+    if not method_actor_rows:
+        return None
+    locations_by_method = _method_location_map(runtime)
+    domains_by_method = _method_domain_map(runtime)
+    source_rows = _method_frame_source_rows(runtime)
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for method, actor in method_actor_rows:
+        if actor_filter and actor != actor_filter:
+            continue
+        if method_filter and method != method_filter:
+            continue
+        method_locations = locations_by_method.get(method, set())
+        method_domains = domains_by_method.get(method, set())
+        if location_filter and location_filter not in method_locations:
+            continue
+        if domain_filter and domain_filter not in method_domains:
+            continue
+        for frame in _source_rows_for_method_actor_frame(
+            source_rows,
+            actor=actor,
+            method=method,
+            locations=method_locations,
+            domains=method_domains,
+            require_actor=bool(actor_filter) or not method_filter,
+        )[:3]:
+            source_row = str(frame.get("SourceRow", "")).strip()
+            frame_text = str(frame.get("FrameText", "")).strip()
+            key = (actor, method, source_row)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "HelperClass": "clean-helper",
+                    "SupportKind": "method_actor_frame_source_support",
+                    "Actor": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "Method": method,
+                    "MethodDisplay": _display_source_phrase(method),
+                    "SourceRow": source_row,
+                    "FrameText": frame_text,
+                    "FrameTextDisplay": _display_source_phrase(frame_text),
+                }
+            )
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "method_actor_frame_source_support",
+        "prolog_query": "method_actor_frame_source_support(Actor, Method, SourceRow, FrameText).",
+        "variables": [
+            "HelperClass",
+            "SupportKind",
+            "Actor",
+            "ActorDisplay",
+            "Method",
+            "MethodDisplay",
+            "SourceRow",
+            "FrameText",
+            "FrameTextDisplay",
+        ],
+        "rows": rows[:24],
+        "num_rows": min(len(rows), 24),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only method-actor frame support joined admitted method actor/location/domain "
+                "rows to source-record frame text; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [
+            query,
+            "method_actor(Method, Actor).",
+            "role_performs_method(Actor, Method).",
+            "method_primary_location(Method, Location).",
+            "method_performed_at(Method, Location).",
+            "method_log_location(Method, Location).",
+            "method_domain(Method, Domain).",
+            "source_record_label(SourceRow, FrameText).",
+            "source_record_text_atom(SourceRow, FrameText).",
+        ],
+    }
+
+
+def _method_actor_rows(runtime: CorePrologRuntime) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for query, method_key, actor_key in (
+        ("method_actor(Method, Actor).", "Method", "Actor"),
+        ("role_performs_method(Actor, Method).", "Method", "Actor"),
+    ):
+        for row in _runtime_rows(runtime, query):
+            method = str(row.get(method_key, "")).strip()
+            actor = str(row.get(actor_key, "")).strip()
+            key = (method, actor)
+            if method and actor and key not in seen:
+                seen.add(key)
+                rows.append(key)
+    return rows
+
+
+def _method_location_map(runtime: CorePrologRuntime) -> dict[str, set[str]]:
+    out: dict[str, set[str]] = {}
+    for query in (
+        "method_primary_location(Method, Location).",
+        "method_performed_at(Method, Location).",
+        "method_log_location(Method, Location).",
+    ):
+        for row in _runtime_rows(runtime, query):
+            method = str(row.get("Method", "")).strip()
+            location = str(row.get("Location", "")).strip()
+            if method and location:
+                out.setdefault(method, set()).add(location)
+    return out
+
+
+def _method_domain_map(runtime: CorePrologRuntime) -> dict[str, set[str]]:
+    out: dict[str, set[str]] = {}
+    for row in _runtime_rows(runtime, "method_domain(Method, Domain)."):
+        method = str(row.get("Method", "")).strip()
+        domain = str(row.get("Domain", "")).strip()
+        if method and domain:
+            out.setdefault(method, set()).add(domain)
+    return out
+
+
+def _source_rows_for_method_actor_frame(
+    source_rows: list[dict[str, str]],
+    *,
+    actor: str,
+    method: str,
+    locations: set[str],
+    domains: set[str],
+    require_actor: bool,
+) -> list[dict[str, str]]:
+    actor_tokens = _loose_atom_token_set(actor)
+    method_tokens = _loose_atom_token_set(method)
+    location_tokens = set().union(*(_loose_atom_token_set(item) for item in locations)) if locations else set()
+    domain_tokens = set().union(*(_loose_atom_token_set(item) for item in domains)) if domains else set()
+    scored: list[tuple[int, dict[str, str]]] = []
+    for row in source_rows:
+        text_tokens = _loose_atom_token_set(str(row.get("FrameText", "")))
+        if not text_tokens:
+            continue
+        actor_overlap = len(actor_tokens & text_tokens)
+        method_overlap = len(method_tokens & text_tokens)
+        location_overlap = len(location_tokens & text_tokens)
+        domain_overlap = len(domain_tokens & text_tokens)
+        if require_actor:
+            if actor_overlap <= 0 or (method_overlap <= 0 and location_overlap <= 0 and domain_overlap <= 0):
+                continue
+            score = actor_overlap * 4 + method_overlap * 3 + location_overlap * 2 + domain_overlap
+        else:
+            if method_overlap <= 0 and not (actor_overlap > 0 and (location_overlap > 0 or domain_overlap > 0)):
+                continue
+            score = method_overlap * 10 + actor_overlap * 2 + location_overlap + domain_overlap
         scored.append((score, row))
     scored.sort(key=lambda item: (-item[0], item[1].get("SourceRow", ""), item[1].get("FrameText", "")))
     return [row for _, row in scored]
@@ -3280,6 +3486,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     method_frame_purpose = _method_frame_purpose_companion(runtime, predicate=predicate, args=args, query=query)
     if method_frame_purpose:
         source_record_companions.append(method_frame_purpose)
+    method_actor_frame = _method_actor_frame_source_companion(runtime, predicate=predicate, args=args, query=query)
+    if method_actor_frame:
+        source_record_companions.append(method_actor_frame)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
@@ -12682,6 +12891,14 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain explicit negative support matching the short negative reference answer.",
             "issues": [],
         }
+    if _source_record_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": "Query results contain source-record text that clearly embeds the reference answer.",
+            "issues": [],
+        }
     payload = {
         "task": "Compare deterministic Prolog query results with a human reference answer.",
         "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
@@ -12778,6 +12995,47 @@ def _negative_reference_supported_by_results(*, row: dict[str, Any], reference: 
                 if _value_has_negative_surface(value):
                     return True
     return False
+
+
+def _source_record_reference_supported_by_results(*, row: dict[str, Any], reference: str) -> bool:
+    reference_display = _display_source_phrase(str(reference or "").strip())
+    if not reference_display or reference_display in {"yes", "no", "not", "none", "false", "true"}:
+        return False
+    reference_tokens = _loose_atom_token_set(reference_display)
+    if len(reference_tokens) < 2 and len(reference_display) < 4:
+        return False
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {"source_record_text_atom", "source_record_label", "method_actor_frame_source_support"}:
+            continue
+        rows = result.get("rows") if isinstance(result, dict) else None
+        for result_row in rows or []:
+            for value in _iter_scalar_values(result_row):
+                if _display_phrase_contains_reference(
+                    value=value,
+                    reference_display=reference_display,
+                    reference_tokens=reference_tokens,
+                ):
+                    return True
+    return False
+
+
+def _display_phrase_contains_reference(
+    *,
+    value: Any,
+    reference_display: str,
+    reference_tokens: set[str],
+) -> bool:
+    displayed = _display_source_phrase(str(value or ""))
+    if not displayed:
+        return False
+    if reference_display and reference_display in displayed:
+        return True
+    value_tokens = _loose_atom_token_set(displayed)
+    return bool(reference_tokens and reference_tokens.issubset(value_tokens))
 
 
 def _iter_scalar_values(value: Any) -> list[str]:
@@ -13044,10 +13302,8 @@ def _openrouter_referer() -> str:
 
 def _default_openrouter_title(out_dir: Path) -> str:
     path = out_dir if out_dir.is_absolute() else (REPO_ROOT / out_dir).resolve()
-    name = path.name or "run"
-    parent = path.parent.name
-    label = f"{parent}/{name}" if parent and parent not in {"tmp", REPO_ROOT.name} else name
-    return _sanitize_header_value(f"prethinker:{label}")
+    fixture = path.name or "run"
+    return _sanitize_header_value(f"qa:{fixture}")
 
 
 def _sanitize_header_value(value: str) -> str:

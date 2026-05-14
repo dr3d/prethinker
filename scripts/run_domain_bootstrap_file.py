@@ -2598,10 +2598,8 @@ def _openrouter_referer() -> str:
 
 def _default_openrouter_title(out_dir: Path) -> str:
     path = out_dir if out_dir.is_absolute() else (REPO_ROOT / out_dir).resolve()
-    name = path.name or "run"
-    parent = path.parent.name
-    label = f"{parent}/{name}" if parent and parent not in {"tmp", REPO_ROOT.name} else name
-    return _sanitize_header_value(f"prethinker:{label}")
+    fixture = path.name or "run"
+    return _sanitize_header_value(f"compile:{fixture}")
 
 
 def _sanitize_header_value(value: str) -> str:

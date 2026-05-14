@@ -51,6 +51,30 @@ def test_source_record_ledger_context_is_guidance_not_truth() -> None:
     assert "not truth" in context
     assert "Do not infer ownership" in context
     assert "Exhibit C-1" in context
+    assert "plain paragraph lines" in context
+
+
+def test_source_record_ledger_preserves_plain_prose_lines_without_anchors() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "# Procedure Notes",
+                "",
+                "Harbor planners compare dock vibration in the north alcove using impact logging.",
+                "",
+                "Field coordinators verify generator readiness from the mobile trailer using load cycling.",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    kind_by_line = {row["line"]: row["kind"] for row in rows}
+    exact_by_line = {row["line"]: row["exact"] for row in rows}
+
+    assert kind_by_line[3] == "paragraph_line"
+    assert kind_by_line[5] == "paragraph_line"
+    assert "dock vibration" in exact_by_line[3]
+    assert "generator readiness" in exact_by_line[5]
 
 
 def test_source_record_ledger_preserves_long_statement_tail_clauses() -> None:

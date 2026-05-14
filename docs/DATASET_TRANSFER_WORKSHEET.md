@@ -4446,3 +4446,145 @@ Next pressure:
   - instrument or condition details,
   - location/context phrase extraction.
 - Treat success as multi-surface stability, not row-count expansion.
+
+### DT-051 - Method Catalog Stability Probe
+
+Date: 2026-05-14
+
+Before:
+
+- DT-050 showed a method-catalog surface tradeoff: a fresh compile could recover
+  method purpose, but detail and location surfaces could shift.
+- The next pressure was to test simultaneous preservation on an unlike,
+  fixture-free method catalog before designing any repair.
+
+Prediction:
+
+- If purpose, method detail, condition, and context-location surfaces all
+  survive together, the DT-050 SQuAD movement is mostly old-compile variance.
+- If the probe misses, classify whether the miss is:
+  - method-detail loss,
+  - context/location loss,
+  - frame-object loss,
+  - source-record addressability loss.
+
+Intervention:
+
+- Added `method_catalog_surface_stability_ladder`, a 16-question focused probe
+  over four unlike operational method paragraphs.
+- Compiled it with the current source-record ledger and current OpenRouter
+  request tagging.
+- Ran QA on the compile.
+- Briefly trialed a role-method source-frame helper after the two misses, then
+  discarded it when inspection showed the needed source-record rows were absent
+  rather than merely ignored.
+- Repaired deterministic source-record ledger coverage so plain paragraph lines
+  are addressable source rows, not only headings, tables, bullets, labels, and
+  heuristic anchor lines.
+- Added a query-only `method_actor_frame_source_support` companion plus a strict
+  source-record reference-support policy for cases where the asked frame object
+  is present in returned source-record text.
+- Shortened OpenRouter titles to phase-plus-fixture labels:
+  `compile:<fixture>` and `qa:<fixture>`.
+
+After:
+
+- Compile:
+  - Parsed OK: `1`.
+  - Candidate predicates: `9`.
+  - Compile admitted / skipped: `90 / 6`.
+  - Rough score: `0.833`.
+  - Repeated-structure role mismatch refs included `method_condition/2`,
+    `method_measures/2`, `method_not_performed_at/2`, and
+    `method_performed_at/2`.
+- First QA:
+  - Questions: `16`.
+  - Exact / partial / miss: `14 / 0 / 2`.
+  - Failure surfaces: `compile_surface_gap: 2`.
+  - Helper rows: `0`.
+- Diagnostic helper replay:
+  - Delivered `18` clean `role_method_frame_source_support` rows.
+  - Still scored `14 / 0 / 2`.
+  - Inspection showed the helper only had source-record text for the first and
+    third paragraphs; the second and fourth paragraph frame text was not emitted
+    as `source_record_text_atom`/`source_record_label`.
+  - No helper code was retained.
+- Ledger repair compile:
+  - Parsed OK: `1`.
+  - Candidate predicates: `8`.
+  - Compile admitted / skipped: `101 / 0`.
+  - Rough score: `0.833`.
+  - Repeated-structure role mismatch refs: none.
+- Ledger repair QA before source-record support:
+  - Exact / partial / miss: `12 / 0 / 4`.
+  - This got worse because the compile surface shifted to a cleaner
+    method-catalog vocabulary while the QA/judge layer still over-valued method
+    measures and under-valued returned source-record text.
+- Final QA after source-record support:
+  - Exact / partial / miss: `16 / 0 / 0`.
+  - Failure surfaces: `not_applicable: 16`.
+  - Helper rows: `50`, all clean `method_actor_frame_source_support`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+
+Boundary Classification:
+
+- The two misses were not method-detail failures. The KB retrieved role,
+  method, location, condition, and measurement rows.
+- The missing coordinate was the frame object/objective:
+  - what a role was comparing,
+  - what a role was verifying.
+- The deeper cause was source-record addressability incompleteness: deterministic
+  source-record support was present for only two of four method-catalog
+  paragraphs, so the QA layer could not recover the missing frame object from
+  source text.
+- After source-record ledger repair, a remaining condition miss showed a second
+  boundary: helper frame support must prefer exact source text atoms over broad
+  repeated paragraph labels when a method is explicitly bound.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\method_catalog_surface_stability_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_method_catalog_stability_20260514`
+- First QA:
+  `tmp\boundary_probe_qa_method_catalog_stability_20260514`
+- Diagnostic replay:
+  `tmp\boundary_probe_qa_method_catalog_stability_repair_20260514`
+- Ledger repair compile:
+  `tmp\boundary_probe_compile_method_catalog_stability_ledger_repair_20260514`
+- Ledger repair QA:
+  `tmp\boundary_probe_qa_method_catalog_stability_ledger_repair_20260514`
+- Final QA:
+  `tmp\boundary_probe_qa_method_catalog_stability_final2_20260514`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture method_catalog_surface_stability_ladder --out-root tmp\boundary_probe_compile_method_catalog_stability_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture method_catalog_surface_stability_ladder --compile-root tmp\boundary_probe_compile_method_catalog_stability_20260514 --out-root tmp\boundary_probe_qa_method_catalog_stability_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture method_catalog_surface_stability_ladder --compile-root tmp\boundary_probe_compile_method_catalog_stability_20260514 --out-root tmp\boundary_probe_qa_method_catalog_stability_repair_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture method_catalog_surface_stability_ladder --out-root tmp\boundary_probe_compile_method_catalog_stability_ledger_repair_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture method_catalog_surface_stability_ladder --compile-root tmp\boundary_probe_compile_method_catalog_stability_ledger_repair_20260514 --out-root tmp\boundary_probe_qa_method_catalog_stability_final2_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_source_record_ledger.py -q`
+
+Lesson:
+
+- The method-catalog surface is inside the set when deterministic source
+  addressability is complete and the QA layer treats returned source-record text
+  as answer-bearing.
+- The repair is generic: preserve plain prose source rows, expose role/method
+  frame text as query-only support, and prefer exact source text over repeated
+  labels when a method is bound. No fixture terms, row ids, answer strings, or
+  local entities entered architecture.
+- The failed intermediate helper was useful: it proved that helper policy cannot
+  compensate for missing source-record coverage. Ledger completeness comes
+  before helper confidence.
+
+Next pressure:
+
+- Re-run a small unlike replay set that uses source-record ledger facts to check
+  for helper-volume regressions and accidental source-text over-crediting.
+- Then return to the dataset-transfer map: classify whether remaining SQuAD/RACE
+  misses are frame-object, condition-as-tool, synthesis, or true absent-axis
+  cases.

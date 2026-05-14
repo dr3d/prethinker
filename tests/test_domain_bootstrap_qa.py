@@ -18,9 +18,11 @@ from scripts.run_domain_bootstrap_qa import (
     _location_floor_hint_queries,
     _negative_join_with_previous,
     _negative_reference_supported_by_results,
+    _source_record_reference_supported_by_results,
     _default_openrouter_title,
     _chat_headers,
     _method_frame_purpose_companion,
+    _method_actor_frame_source_companion,
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
@@ -296,7 +298,7 @@ def test_openrouter_title_header_uses_experiment_label(monkeypatch) -> None:
 
     title = _default_openrouter_title(Path("tmp") / "squad_probe_20260513" / "fixture_a")
 
-    assert title == "prethinker:squad_probe_20260513/fixture_a"
+    assert title == "qa:fixture_a"
 
 
 def test_chat_headers_add_openrouter_title(monkeypatch) -> None:
@@ -424,6 +426,76 @@ def test_method_frame_purpose_companion_links_method_to_agent_frame() -> None:
     assert result["rows"][0]["Agent"] == "operator"
     assert result["rows"][0]["FramePurpose"] == "surface_defect_detection"
     assert "surface defects" in result["rows"][0]["FrameTextDisplay"]
+
+
+def test_method_actor_frame_source_companion_links_actor_method_to_source_frame() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "method_actor(impact_logging, planner).",
+        "method_primary_location(impact_logging, north_alcove).",
+        "method_measures(impact_logging, peak_force).",
+        "source_record_text_atom(src_1, planners_compare_dock_vibration_in_the_north_alcove_using_impact_logging).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _method_actor_frame_source_companion(
+        runtime,
+        predicate="method_actor",
+        args=("Method", "planner"),
+        query="method_actor(Method, planner).",
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "method_actor_frame_source_support"
+    assert result["rows"][0]["SupportKind"] == "method_actor_frame_source_support"
+    assert result["rows"][0]["Actor"] == "planner"
+    assert result["rows"][0]["Method"] == "impact_logging"
+    assert "dock vibration" in result["rows"][0]["FrameTextDisplay"]
+
+
+def test_method_actor_frame_source_companion_prefers_bound_method_source_text() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "method_actor(residue_spectroscopy, calibration_analyst).",
+        "method_primary_location(residue_spectroscopy, intake_bay).",
+        "source_record_label(src_1, calibration_analysts_document_package_defects_inside_the_intake_bay).",
+        "source_record_label(src_2, calibration_analysts_document_package_defects_inside_the_intake_bay).",
+        "source_record_text_atom(src_2, residue_spectroscopy_runs_under_a_blue_filter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _method_actor_frame_source_companion(
+        runtime,
+        predicate="method_primary_location",
+        args=("residue_spectroscopy", "Location"),
+        query="method_primary_location(residue_spectroscopy, Location).",
+    )
+
+    assert companion is not None
+    frame_texts = [row["FrameTextDisplay"] for row in companion["result"]["rows"]]
+    assert "residue spectroscopy runs under a blue filter" in frame_texts
+
+
+def test_source_record_reference_supports_embedded_reference_answer() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_atom",
+                    "rows": [
+                        {
+                            "Line": "src_1",
+                            "Text": "planners_compare_dock_vibration_in_the_north_alcove",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(row=row, reference="dock vibration") is True
+    assert _source_record_reference_supported_by_results(row=row, reference="generator readiness") is False
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:
