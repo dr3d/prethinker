@@ -32,7 +32,7 @@ Corpus Inventory:
 | --- | --- | ---: | ---: | --- |
 | SQuAD-30 | `tmp\mrc_transfer_staged_squad30_20260513` | 30 | 171 | Complete, `N=3` |
 | RACE-50 | `tmp\mrc_transfer_staged_race50_options_20260513` | 50 | 177 | Complete, `N=3`, corrected MCQ option-visible root |
-| PrivacyQA-30 | `tmp\mrc_transfer_staged_privacyqa30_20260513` | 30 | 30 | Pending |
+| PrivacyQA-30 | `tmp\mrc_transfer_staged_privacyqa30_20260513` | 30 | 30 | Complete, `N=3` |
 | MAUD-10 | `tmp\mrc_transfer_staged_maud10_20260513` | 10 | 40 | Pending |
 | CUAD-10 | `tmp\mrc_transfer_staged_cuad10_20260513` | 10 | 40 | Pending; treat as rough corpus evidence |
 
@@ -262,3 +262,103 @@ Next pressure:
 
 - Stamp the next unlike corpus, starting with PrivacyQA-30, using the same
   no-repair protocol.
+
+## IS-004 - PrivacyQA-30 Stamp
+
+Date: 2026-05-14
+
+Before:
+
+- PrivacyQA-30 is policy/legal prose with one open-ended policy question per
+  fixture.
+- Earlier transfer discussion predicted three interpretable bands: around
+  `70%` would confirm a harder legal-domain extraction ceiling, around `85%`
+  would suggest CUAD-specific drag, and around `50%` would imply CUAD was
+  generous.
+
+Prediction:
+
+- PrivacyQA should be less distorted than CUAD by contract-specific annotation
+  roughness, but still unlike SQuAD/RACE because policy snippets emphasize
+  permissions, data uses, disclosure conditions, and exceptions.
+- If the legal-policy boundary is real, non-exacts should concentrate in
+  direct queryable-surface gaps rather than school-style synthesis.
+
+Intervention:
+
+- Ran three fresh compile-plus-QA draws under the frozen instrument.
+- Used `3` OpenRouter compile lanes and `6` QA lanes.
+- No transport retries were needed in any compile draw.
+
+After:
+
+| Draw | Exact | Partial | Miss | Exact rate | Helper rows | Transport |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `draw1` | 24 | 3 | 3 | 80.00% | 1 | none |
+| `draw2` | 25 | 2 | 3 | 83.33% | 1 | none |
+| `draw3` | 25 | 2 | 3 | 83.33% | 0 | none |
+
+Stamp summary:
+
+- Mean exact rate: `82.22%`.
+- Range: `80.00%` to `83.33%`.
+- Peak: `83.33%`.
+- Runtime load errors: `0` in all QA draws.
+- Write proposal rows: `0` in all QA draws.
+- Helper pressure: absent or bounded.
+- Aggregate non-exact rows across the three draws: `16` (`9` miss, `7`
+  partial).
+
+Aggregate proposition types across non-exact rows:
+
+- `factual`: `11`
+- `categorical`: `3`
+- `inference`: `2`
+
+Aggregate transfer coordinates across non-exact rows:
+
+- `direct_compile_surface_gap`: `11`
+- `query_surface_resolution`: `2`
+- `background_role_or_audience_fact`: `1`
+- `implicit_attitude_or_consequence`: `1`
+- `hybrid_join_resolution`: `1`
+
+Aggregate failure surfaces:
+
+- `compile_surface_gap`: `12`
+- `query_surface_gap`: `3`
+- `hybrid_join_gap`: `1`
+
+Artifacts:
+
+- `tmp\instrument_stamp_20260514_privacyqa30_draw1_compile`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw1_qa`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw1_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw2_compile`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw2_qa`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw2_qa\transfer_coordinate_summary_with_intake.md`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw3_compile`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw3_qa`
+- `tmp\instrument_stamp_20260514_privacyqa30_draw3_qa\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- All three compile draws parsed `30/30` fixtures without transport retries.
+- All three QA summaries report `30` questions, `0` runtime load errors, and
+  `0` write proposal rows.
+
+Lesson:
+
+- PrivacyQA lands in the low-80s band, close to corrected RACE and below
+  SQuAD. That supports a real cross-domain pressure, but not a collapse.
+- The boundary shape differs from RACE: policy non-exacts are mostly factual
+  direct compile-surface gaps, not synthesis or multiple-choice option
+  mechanics.
+- This is clean stamp evidence because transport was quiet; the variance band
+  is likely instrument/corpus behavior rather than provider noise.
+
+Next pressure:
+
+- Stamp MAUD-10 next. It is smaller but more contract-shaped than PrivacyQA,
+  so it should clarify whether the legal-domain pressure is policy-generic or
+  contract-specific.
