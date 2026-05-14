@@ -4670,3 +4670,103 @@ Next pressure:
 - Watch helper volume: `50` method-actor frame rows for 16 questions is
   acceptable for a focused probe, but future wide replays should flag this
   helper if it appears on unrelated fixtures.
+
+### DT-053 - Current SQuAD-30 Stability Replay
+
+Date: 2026-05-14
+
+Before:
+
+- DT-051 added deterministic plain-prose source ledger coverage and
+  source-record reference support.
+- DT-052 checked two narrow regressions and found no source-text over-crediting.
+- The next pressure was to establish a current SQuAD-30 anchor before any
+  instrument-lock rescan.
+
+Prediction:
+
+- The full SQuAD-30 slice should stay in the DT-037 to DT-044 band rather than
+  jump because source-record support should only help when answer-bearing
+  source rows are actually returned.
+- Remaining non-exacts should classify as boundary coordinates, not as helper
+  pressure or runtime instability.
+- OpenRouter titles should remain compact phase-plus-fixture labels.
+
+Intervention:
+
+- Replayed QA over the existing DT-036 SQuAD-30 compile with the current QA
+  instrument, OpenRouter at `6` lanes, and cache disabled.
+- Summarized the replay with the existing MRC transfer coordinate classifier
+  and intake audit.
+
+After:
+
+- Full SQuAD-30 replay:
+  - Questions: `171`.
+  - Exact / partial / miss / not judged: `161 / 2 / 8 / 0`.
+  - Exact rate: `94.15%`.
+  - Runtime load errors: `0`.
+  - Write proposal rows: `0`.
+  - Helper pressure: `bounded_helper_surface`.
+  - Helper rows: `4`, all clean.
+  - Helper rows per exact: `0.025`.
+- This is a small improvement over the previous best comparable full replay:
+  - DT-037: `160 / 4 / 7`.
+  - DT-044: `156 / 5 / 10`.
+  - DT-053: `161 / 2 / 8`.
+- Non-exact coordinate distribution:
+  - `direct_compile_surface_gap`: `6`.
+  - `comparative_or_temporal_resolution`: `1`.
+  - `query_surface_resolution`: `1`.
+  - `implicit_attitude_or_consequence`: `1`.
+  - `answer_surface_mapping`: `1`.
+- Failure-surface distribution:
+  - `compile_surface_gap`: `8`.
+  - `query_surface_gap`: `1`.
+  - `answer_surface_gap`: `1`.
+
+Residue Map:
+
+| Coordinate | Rows | Interpretation |
+| --- | ---: | --- |
+| `direct_compile_surface_gap` | 6 | Mostly missing value or general-name surfaces, not selector collapse. |
+| `comparative_or_temporal_resolution` | 1 | Numeric/currency value is present only as fragmented source tokens. |
+| `query_surface_resolution` | 1 | KB contains adjacent answer facts but query plan asks the wrong relation. |
+| `implicit_attitude_or_consequence` | 1 | Reference needs an inferred educational target not explicitly bound. |
+| `answer_surface_mapping` | 1 | Dataset/reference anomaly: answer is the asked subject, not the designer. |
+
+Artifacts:
+
+- QA:
+  `tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514`
+- Batch summary:
+  `tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514\qa_batch_summary.md`
+- Coordinate summary:
+  `tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514\transfer_coordinate_summary_with_intake.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514 --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514\transfer_coordinate_summary_with_intake.json --out-md tmp\mrc_transfer_qa_squad30_dt053_current_full_20260514\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- The current instrument is stable on SQuAD-30: exact rate is at a new full-run
+  high, helper volume is near zero, and source-record support did not turn into
+  broad text-search credit.
+- The residue is now small enough to treat as a validation map rather than a
+  repair queue. Several rows may be legitimate compile variance, dataset answer
+  noise, or dense proposition boundaries; none justify fixture-specific tuning.
+- This supports moving from build-and-probe mode toward a stamped measurement
+  pass, provided the instrument is frozen during the scan and misses are
+  reported rather than repaired mid-run.
+
+Next pressure:
+
+- Prepare an instrument-lock protocol before a full rescan:
+  - choose a clean commit and tag,
+  - freeze repairs during the scan,
+  - run `N >= 3` draws for the core corpora/probe ladders,
+  - report mean, range, and peak rather than a single best number.
+- Do not start the lock-rescan until the repository is clean and the current
+  journal entry is committed.
