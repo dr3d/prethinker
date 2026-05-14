@@ -4098,3 +4098,83 @@ Next pressure:
   instrument/property facts. Probe this as purpose-surface preservation before
   any repair, because it may overlap with broader component/category surface
   preservation.
+
+### DT-047 - Purpose/Use Surface Probe
+
+Date: 2026-05-14
+
+Before:
+
+- DT-046 moved the source-text query-filter row, leaving a different geology
+  miss: the source stated a broader task/use near instrument/property rows, but
+  the structured KB evidence available to QA emphasized the lower-level
+  properties.
+- This looked like a possible purpose/use surface gap, but the SQuAD row alone
+  was too local to justify repair.
+
+Prediction:
+
+- If purpose/use extraction is missing generally, an unlike probe with multiple
+  tools, uses, measurements, and negative-use boundaries should fail.
+- If the probe passes, the SQuAD row is a dense-context variant rather than a
+  missing axis. The right next step would be density characterization, not
+  architecture change.
+
+Intervention:
+
+- Added `purpose_use_surface_ladder`, a new unlike probe with:
+  - five tool/user/source-purpose pairs,
+  - adjacent measurement/property rows,
+  - explicit negative-use controls,
+  - open-ended QA for both broader use and narrower measured attributes.
+- Compiled and ran QA through OpenRouter using the new experiment title tagging.
+
+After:
+
+- Compile:
+  - Parsed OK: `1`.
+  - Candidate predicates: `7`.
+  - Compile admitted / skipped: `80 / 0`.
+  - Rough score: `0.833`.
+- QA:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- No repair was made.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\purpose_use_surface_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_purpose_use_surface_20260513`
+- QA:
+  `tmp\boundary_probe_qa_purpose_use_surface_20260513`
+- Summary:
+  `tmp\boundary_probe_qa_purpose_use_surface_20260513\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture purpose_use_surface_ladder --out-root tmp\boundary_probe_compile_purpose_use_surface_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture purpose_use_surface_ladder --compile-root tmp\boundary_probe_compile_purpose_use_surface_20260513 --out-root tmp\boundary_probe_qa_purpose_use_surface_20260513 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_qa_purpose_use_surface_20260513`
+
+Lesson:
+
+- Simple source-stated purpose/use is interior. The compile can preserve a
+  broader use surface separately from adjacent measurement/property surfaces and
+  can also preserve explicit negative-use boundaries.
+- The SQuAD geology miss should not be repaired as a broad purpose/use gap.
+  Its pressure is denser: the broad task is expressed as the frame for a method
+  paragraph, while the local structured rows bind the instrument to lower-level
+  measured properties.
+- This is the live-set pattern again: simple coordinate inside, dense variant
+  still blurry.
+
+Next pressure:
+
+- Probe density around purpose surfaces rather than adding machinery: cases
+  where a paragraph-level task frames several methods/instruments, and the
+  question asks for the frame-level task through one method.
