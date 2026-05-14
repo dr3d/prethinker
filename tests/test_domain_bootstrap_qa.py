@@ -20,6 +20,7 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_reference_supported_by_results,
     _default_openrouter_title,
     _chat_headers,
+    _method_frame_purpose_companion,
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
@@ -392,6 +393,34 @@ def test_evidence_bundle_plan_repairs_source_text_memberchk_filter() -> None:
     assert results[0]["result"]["rows"] == [
         {"Line": "src_2", "Text": "records_are_verified_in_the_laboratory"}
     ]
+
+
+def test_method_frame_purpose_companion_links_method_to_agent_frame() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "agent_uses_method(operator, laser_scan).",
+        "agent_operates_in(operator, surface_defect_detection).",
+        "method_action(laser_scan, measures_reflection_variance).",
+        "source_record_label(src_1, operators_detect_surface_defects_with_laser_scan_and_visual_review).",
+        "source_record_text_atom(src_1, operators_detect_surface_defects_with_laser_scan_and_visual_review).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _method_frame_purpose_companion(
+        runtime,
+        predicate="method_action",
+        args=("laser_scan", "Action"),
+        query="method_action(laser_scan, Action).",
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "method_frame_purpose_support"
+    assert result["rows"][0]["SupportKind"] == "method_frame_purpose_support"
+    assert result["rows"][0]["Method"] == "laser_scan"
+    assert result["rows"][0]["Agent"] == "operator"
+    assert result["rows"][0]["FramePurpose"] == "surface_defect_detection"
+    assert "surface defects" in result["rows"][0]["FrameTextDisplay"]
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:

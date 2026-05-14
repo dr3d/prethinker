@@ -3069,6 +3069,160 @@ def _causal_end_state_companion(
     }
 
 
+def _method_frame_purpose_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: tuple[Any, ...],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {"agent_uses_method", "method_action", "method_produces_metric"}:
+        return None
+    method_filter = ""
+    agent_filter = ""
+    arg_texts = [str(item).strip() for item in args]
+    if predicate == "agent_uses_method" and len(arg_texts) >= 2:
+        agent_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+        method_filter = arg_texts[1] if arg_texts[1] and not _is_prolog_variable(arg_texts[1]) else ""
+    elif predicate in {"method_action", "method_produces_metric"} and arg_texts:
+        method_filter = arg_texts[0] if arg_texts[0] and not _is_prolog_variable(arg_texts[0]) else ""
+    if not method_filter and not agent_filter:
+        return None
+
+    method_rows = _runtime_rows(runtime, "agent_uses_method(Agent, Method).")
+    domain_rows = _runtime_rows(runtime, "agent_operates_in(Agent, FramePurpose).")
+    if not method_rows or not domain_rows:
+        return None
+
+    domains_by_agent: dict[str, list[str]] = {}
+    for row in domain_rows:
+        agent = str(row.get("Agent", "")).strip()
+        domain = str(row.get("FramePurpose", "")).strip()
+        if agent and domain:
+            domains_by_agent.setdefault(agent, []).append(domain)
+    source_rows = _method_frame_source_rows(runtime)
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for row in method_rows:
+        agent = str(row.get("Agent", "")).strip()
+        method = str(row.get("Method", "")).strip()
+        if not agent or not method:
+            continue
+        if agent_filter and agent != agent_filter:
+            continue
+        if method_filter and method != method_filter:
+            continue
+        for domain in domains_by_agent.get(agent, []):
+            frame_rows = _source_rows_for_method_frame(source_rows, agent=agent, domain=domain)
+            if not frame_rows:
+                frame_rows = [{"SourceRow": "", "FrameText": ""}]
+            for frame in frame_rows[:3]:
+                source_row = str(frame.get("SourceRow", "")).strip()
+                frame_text = str(frame.get("FrameText", "")).strip()
+                key = (agent, method, domain, source_row)
+                if key in seen:
+                    continue
+                seen.add(key)
+                rows.append(
+                    {
+                        "HelperClass": "clean-helper",
+                        "SupportKind": "method_frame_purpose_support",
+                        "Agent": agent,
+                        "Method": method,
+                        "FramePurpose": domain,
+                        "FramePurposeDisplay": _display_source_phrase(domain),
+                        "SourceRow": source_row,
+                        "FrameText": frame_text,
+                        "FrameTextDisplay": _display_source_phrase(frame_text),
+                    }
+                )
+    if not rows:
+        return None
+
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "method_frame_purpose_support",
+        "prolog_query": "method_frame_purpose_support(Method, Agent, FramePurpose, SourceRow, FrameText).",
+        "variables": [
+            "HelperClass",
+            "SupportKind",
+            "Method",
+            "Agent",
+            "FramePurpose",
+            "FramePurposeDisplay",
+            "SourceRow",
+            "FrameText",
+            "FrameTextDisplay",
+        ],
+        "rows": rows[:24],
+        "num_rows": min(len(rows), 24),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only method-frame purpose support joined admitted method-use rows to admitted "
+                "agent/domain rows and source-record frame text; no durable fact was written"
+            ),
+            "original_query": query,
+        },
+    }
+    return {
+        "query": result["prolog_query"],
+        "result": result,
+        "derived_from_queries": [
+            query,
+            "agent_uses_method(Agent, Method).",
+            "agent_operates_in(Agent, FramePurpose).",
+            "source_record_label(SourceRow, FrameText).",
+            "source_record_text_atom(SourceRow, FrameText).",
+        ],
+    }
+
+
+def _method_frame_source_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for source_query in ("source_record_label(SourceRow, FrameText).", "source_record_text_atom(SourceRow, FrameText)."):
+        for row in _runtime_rows(runtime, source_query):
+            source_row = str(row.get("SourceRow", "")).strip()
+            frame_text = str(row.get("FrameText", "")).strip()
+            if source_row and frame_text:
+                rows.append({"SourceRow": source_row, "FrameText": frame_text})
+    return rows
+
+
+def _source_rows_for_method_frame(
+    source_rows: list[dict[str, str]],
+    *,
+    agent: str,
+    domain: str,
+) -> list[dict[str, str]]:
+    agent_tokens = _loose_atom_token_set(agent)
+    domain_tokens = _loose_atom_token_set(domain)
+    required_domain_overlap = 1 if len(domain_tokens) <= 2 else 2
+    scored: list[tuple[int, dict[str, str]]] = []
+    for row in source_rows:
+        text_tokens = _loose_atom_token_set(str(row.get("FrameText", "")))
+        if not text_tokens:
+            continue
+        agent_overlap = len(agent_tokens & text_tokens)
+        domain_overlap = len(domain_tokens & text_tokens)
+        if agent_overlap <= 0 and domain_overlap < required_domain_overlap:
+            continue
+        score = agent_overlap * 2 + domain_overlap
+        scored.append((score, row))
+    scored.sort(key=lambda item: (-item[0], item[1].get("SourceRow", ""), item[1].get("FrameText", "")))
+    return [row for _, row in scored]
+
+
+def _loose_atom_token_set(value: str) -> set[str]:
+    tokens = set(_type_taxonomy_tokens(value))
+    for token in list(tokens):
+        if len(token) > 3 and token.endswith("s"):
+            tokens.add(token[:-1])
+    return tokens
+
+
 def _identifier_alias_key(value: str) -> str:
     tokens = [token for token in _type_taxonomy_tokens(value) if token]
     if len(tokens) <= 1:
@@ -3123,6 +3277,9 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     causal_end_state = _causal_end_state_companion(runtime, predicate=predicate, args=args, query=query)
     if causal_end_state:
         source_record_companions.append(causal_end_state)
+    method_frame_purpose = _method_frame_purpose_companion(runtime, predicate=predicate, args=args, query=query)
+    if method_frame_purpose:
+        source_record_companions.append(method_frame_purpose)
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
@@ -12553,6 +12710,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",
             "Causal-chain policy: for questions asking what caused, triggered, led to, or brought about an ending, a chain such as led_to(Cause, EndingEvent) plus ended(EndingEvent, EndedState), caused_by(EndingEvent, Cause) plus ended(EndingEvent, EndedState), or triggered(Cause, EndingEvent) plus ended(EndingEvent, EndedState) can directly support Cause as the answer. Do not downgrade solely because ended/2 returns the immediate ending event when the question asks for the upstream cause.",
             "Causal-helper policy: a clean causal_end_state_support row is answer-bearing for cause-of-ending questions. If Cause matches the reference answer and EndedState binds the asked state/process, mark exact even when the primitive ended/2 query also returns the immediate EndingEvent.",
+            "Method-frame policy: a clean method_frame_purpose_support row is answer-bearing for method-use questions when Method binds the asked method, Agent binds the asked user or role, and FramePurpose or FrameText binds the broader source-stated task/purpose. Do not downgrade solely because method_action or method_produces_metric rows also expose lower-level measurements.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, clean helper rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped helper row directly matches the reference answer.",

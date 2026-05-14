@@ -4264,3 +4264,93 @@ Next pressure:
 - Implement and replay a generic method-frame purpose support surface that joins
   admitted method-use rows to admitted agent/domain rows and source-record frame
   text. Then replay both dense probe and the original SQuAD geology fixture.
+
+### DT-049 - Method-Frame Purpose Support Repair
+
+Date: 2026-05-14
+
+Before:
+
+- DT-048 isolated a real dense-purpose boundary:
+  - direct measurement rows held,
+  - negative-use controls held,
+  - frame-level purpose questions failed.
+- The desired repair had to connect a method to its broader agent/task frame
+  without naming any fixture method, domain, question, or answer.
+
+Prediction:
+
+- A query-only support surface that joins admitted method-use rows to admitted
+  agent/frame rows should move the dense probe if the frame axis is present.
+- The original SQuAD geology row may remain non-exact if its older compile
+  lacks the same frame-axis predicates.
+
+Intervention:
+
+- Added `method_frame_purpose_support`, a clean query-only companion.
+- Trigger shape:
+  - admitted `agent_uses_method(Agent, Method)`,
+  - admitted `agent_operates_in(Agent, FramePurpose)`,
+  - source-record label/text rows that overlap the agent or frame-purpose
+    tokens.
+- Added a judge policy stating that this support row is answer-bearing for
+  method-use questions when the method and agent bind the asked surface and the
+  frame purpose/source text binds the broader source-stated task.
+- Added a fixture-free unit test over generic operator/method/frame facts.
+
+After:
+
+- Dense purpose-frame replay:
+  - Questions: `10`.
+  - Exact / partial / miss: `10 / 0 / 0`.
+  - Helper rows: `22`.
+  - Helper class: `clean-helper`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- SQuAD geology replay:
+  - Questions: `5`.
+  - Exact / partial / miss: `4 / 0 / 1`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- Direct compile inspection explains the blocked transfer:
+  - SQuAD geology compile exposes `uses_instrument/2`, `analyzes_property/2`,
+    and source-record text.
+  - It does not expose `agent_uses_method/2` or `agent_operates_in/2`, so the
+    generic companion has no admitted frame axis to join.
+- Broad QA tests:
+  - `155 passed`.
+
+Artifacts:
+
+- Dense replay:
+  `tmp\boundary_probe_qa_dense_purpose_frame_repair_20260514`
+- SQuAD replay:
+  `tmp\mrc_transfer_qa_squad30_dt049_geology_method_frame_replay_20260514`
+- SQuAD compile inspected:
+  `tmp\mrc_transfer_compile_squad30_dt036_full_20260513\squad_default_validation_00013_geology`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_purpose_frame_ladder --compile-root tmp\boundary_probe_compile_dense_purpose_frame_20260514 --out-root tmp\boundary_probe_qa_dense_purpose_frame_repair_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00013_geology --compile-root tmp\mrc_transfer_compile_squad30_dt036_full_20260513 --out-root tmp\mrc_transfer_qa_squad30_dt049_geology_method_frame_replay_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+
+Lesson:
+
+- Dense method-frame purpose can be repaired generically when the compile
+  exposes a frame axis. This extends the interior for a real boundary found by
+  DT-048.
+- The SQuAD geology miss did not move because the compile surface is older and
+  narrower: it preserved method/property and source text, not agent/frame
+  linkage. That is valuable negative transfer evidence.
+- The next repair should not special-case `uses_instrument` or any geology
+  vocabulary. If we want this SQuAD row to move, the right target is a generic
+  compile-surface rule for preserving task/frame purpose around method catalogs.
+
+Next pressure:
+
+- Decide whether to recompile a small SQuAD geology-like fixture with current
+  source-record and frame-purpose expectations, or to build a generic compile
+  probe for method catalogs where a paragraph-level task frames methods and
+  measurements. Do not add QA helpers for the old compile surface alone.
