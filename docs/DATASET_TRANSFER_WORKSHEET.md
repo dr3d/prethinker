@@ -4770,3 +4770,114 @@ Next pressure:
   - report mean, range, and peak rather than a single best number.
 - Do not start the lock-rescan until the repository is clean and the current
   journal entry is committed.
+
+### DT-054 - SQuAD-30 Instrument Stamp
+
+Date: 2026-05-14
+
+Before:
+
+- DT-053 established a current QA-only SQuAD-30 stabilization anchor:
+  `161 / 2 / 8` over `171`, exact `94.15%`.
+- That run reused the existing DT-036 compile, so it did not measure fresh
+  compile variance.
+- The repository was clean, the current commit was tagged
+  `instrument-2026-05-14-dt053`, and the next question was whether the
+  instrument could be characterized as a locked measurement target.
+
+Prediction:
+
+- Fresh compile-plus-QA draws should land below or near the QA-only anchor,
+  because compile variance is now included.
+- The important statistic is not the best run; it is the band across multiple
+  draws.
+- No repair should be made during the stamp. Misses are measurement evidence,
+  not a tuning queue.
+
+Intervention:
+
+- Tagged and pushed the instrument under evaluation:
+  `instrument-2026-05-14-dt053`.
+- Ran three fresh SQuAD-30 compile-plus-QA draws under the locked instrument.
+- Used OpenRouter with no cache:
+  - compile lanes: `6` for draw 1, `4` for draws 2 and 3,
+  - QA lanes: `6`.
+- Retried transport-failed compile fixtures only, without changing code or
+  prompt policy.
+
+After:
+
+| Draw | Compile transport | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| `draw1` | 3 compile fixtures retried at 1 lane after upstream 429s | 158 | 2 | 11 | 92.40% | 0 |
+| `draw2` | 1 compile fixture retried at 1 lane after upstream 429 | 159 | 5 | 7 | 92.98% | 0 |
+| `draw3` | no compile transport retry needed | 156 | 2 | 13 | 91.23% | 3 |
+
+- Stamp summary:
+  - Mean exact rate: `92.20%`.
+  - Range: `91.23%` to `92.98%`.
+  - Peak fresh compile-plus-QA draw: `92.98%`.
+  - Runtime load errors: `0` in all QA draws.
+  - Write proposal rows: `0` in all QA draws.
+  - Helper pressure stayed absent or bounded:
+    - draw 1: `no_helper_rows`,
+    - draw 2: `no_helper_rows`,
+    - draw 3: `bounded_helper_surface`, `3` rows.
+- The earlier DT-053 QA-only anchor remains useful as a stabilization check,
+  but not as the fresh-stamp number:
+  - QA-only anchor: `94.15%`.
+  - Fresh stamp band: `91.23%` to `92.98%`.
+
+Artifacts:
+
+- Instrument tag:
+  `instrument-2026-05-14-dt053`
+- Draw 1 compile:
+  `tmp\instrument_stamp_20260514_squad30_draw1_compile`
+- Draw 1 QA:
+  `tmp\instrument_stamp_20260514_squad30_draw1_qa`
+- Draw 2 compile:
+  `tmp\instrument_stamp_20260514_squad30_draw2_compile`
+- Draw 2 QA:
+  `tmp\instrument_stamp_20260514_squad30_draw2_qa`
+- Draw 3 compile:
+  `tmp\instrument_stamp_20260514_squad30_draw3_compile`
+- Draw 3 QA:
+  `tmp\instrument_stamp_20260514_squad30_draw3_qa`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\instrument_stamp_20260514_squad30_draw1_compile --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00001_warsaw --fixture squad_default_validation_00016_can_broadcasting_company --fixture squad_default_validation_00017_pharmacy --out-root tmp\instrument_stamp_20260514_squad30_draw1_compile --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\instrument_stamp_20260514_squad30_draw1_compile --out-root tmp\instrument_stamp_20260514_squad30_draw1_qa --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\instrument_stamp_20260514_squad30_draw1_qa --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\instrument_stamp_20260514_squad30_draw1_qa\transfer_coordinate_summary_with_intake.json --out-md tmp\instrument_stamp_20260514_squad30_draw1_qa\transfer_coordinate_summary_with_intake.md`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\instrument_stamp_20260514_squad30_draw2_compile --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 4 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00014_ctoria_and_albert_museum --out-root tmp\instrument_stamp_20260514_squad30_draw2_compile --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\instrument_stamp_20260514_squad30_draw2_compile --out-root tmp\instrument_stamp_20260514_squad30_draw2_qa --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\instrument_stamp_20260514_squad30_draw2_qa --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\instrument_stamp_20260514_squad30_draw2_qa\transfer_coordinate_summary_with_intake.json --out-md tmp\instrument_stamp_20260514_squad30_draw2_qa\transfer_coordinate_summary_with_intake.md`
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --out-root tmp\instrument_stamp_20260514_squad30_draw3_compile --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 4 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --compile-root tmp\instrument_stamp_20260514_squad30_draw3_compile --out-root tmp\instrument_stamp_20260514_squad30_draw3_qa --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\instrument_stamp_20260514_squad30_draw3_qa --intake-audit tmp\mrc_transfer_samples_squad30_20260513\transfer_intake_audit.json --out-json tmp\instrument_stamp_20260514_squad30_draw3_qa\transfer_coordinate_summary_with_intake.json --out-md tmp\instrument_stamp_20260514_squad30_draw3_qa\transfer_coordinate_summary_with_intake.md`
+
+Lesson:
+
+- The locked SQuAD-30 instrument is best characterized as a low-90s fresh
+  compile-plus-QA system on this corpus, not as a single peak score.
+- Compile variance is real and measurable: the same tagged instrument produced
+  a `1.75` point exact-rate range across three fresh draws.
+- Helper pressure is not the stamp bottleneck. The stamp delivered zero or near
+  zero helper rows, so the remaining variance is dominated by compile/query
+  surface resolution rather than helper bloat.
+- OpenRouter transport remains a provider variable. Compile retries after 429s
+  should be logged as transport completion, not architecture repair.
+
+Next pressure:
+
+- Close the Dataset Transfer worksheet as the transfer/stamp archive.
+- Start a new worksheet for the next job. Good candidates:
+  - `docs\INSTRUMENT_STAMP_WORKSHEET.md` if the immediate phase is multi-corpus
+    stamping,
+  - `docs\CROSS_DOMAIN_PROBE_WORKSHEET.md` if the immediate phase is new
+    unseen/domain datasets,
+  - `docs\PRODUCT_BEACHHEAD_WORKSHEET.md` only after the science work clearly
+    chooses a deployment target.
