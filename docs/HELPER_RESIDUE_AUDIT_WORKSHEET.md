@@ -260,3 +260,108 @@ Next pressure:
   without losing the useful support rows.
 - Audit the remaining high helper sources under the ranked budget before
   changing helper generators themselves.
+
+## HR-005 - Full Native Ranked-Cap Replay
+
+Date: 2026-05-14
+
+Before:
+
+- Native unbounded stamp: `2163` questions, `1824 / 92 / 247`, exact `84.33%`.
+- Helper rows: `7281`, rows/exact `3.992`, rows/question `3.366`.
+- The top-five pressure replay showed ranked cap-3 could delete about `93%` of
+  helper rows in the worst fixtures without a miss increase.
+
+Prediction:
+
+- A full native replay under the ranked budget should reduce helper delivery by
+  an order-of-magnitude-ish amount. Some exact-rate movement is expected because
+  the QA judge and hosted provider draw are stochastic, but a large collapse
+  would mean the budget is too aggressive.
+
+Intervention:
+
+- Ran all `56` native fixtures from the frozen draw-1 compile artifacts with:
+  - `--helper-companion-row-limit 3`
+  - OpenRouter `qwen/qwen3.6-35b-a3b`
+  - `6` hosted lanes
+  - fresh QA calls (`--no-cache`)
+
+After:
+
+| Slice | Fixtures | Questions | Exact | Partial | Miss | Exact rate | Helper rows | Rows/exact | Rows/question |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Unbounded native stamp | 56 | 2163 | 1824 | 92 | 247 | 84.33% | 7281 | 3.992 | 3.366 |
+| Ranked cap-3 native replay | 56 | 2163 | 1804 | 99 | 260 | 83.40% | 976 | 0.541 | 0.451 |
+
+Delta:
+
+- Helper rows: `7281 -> 976`, a reduction of `6305` rows (`86.6%`).
+- Exact answers: `1824 -> 1804`, down `20` exact rows (`-0.93` percentage
+  points).
+- Partial answers: `92 -> 99`, up `7`.
+- Misses: `247 -> 260`, up `13`.
+- Runtime load errors: `0`.
+- Write proposal rows: `0`.
+
+Remaining helper sources:
+
+| Helper source | Rows |
+| --- | ---: |
+| `source_record_packet_metadata_support` | 374 |
+| `grant_award_support` | 100 |
+| `industrial_sensor_support` | 85 |
+| `archive_authority_custody_support` | 77 |
+| `source_record_table_body_count_support` | 66 |
+| `roster_state_support` | 65 |
+| `clinic_recall_support` | 61 |
+| `lifecycle_period_support` | 33 |
+| `story_choice_contrast_support` | 28 |
+| `status_timeline_summary_support` | 25 |
+
+Heaviest remaining fixture surfaces:
+
+| Fixture | Helper rows | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: | ---: |
+| `greenhouse_quarantine` | 101 | 32 | 2 | 6 |
+| `industrial_sensor_clock_correction` | 98 | 35 | 2 | 3 |
+| `grant_exception_cap_matrix` | 94 | 32 | 1 | 7 |
+| `authority_possession_custody_packet` | 89 | 30 | 3 | 7 |
+| `probate_storage_access_register` | 88 | 34 | 2 | 4 |
+| `count_composition_roster` | 76 | 33 | 1 | 6 |
+| `rule_activation_exception_matrix` | 75 | 37 | 1 | 2 |
+| `clinic_device_recall_field_packet` | 63 | 34 | 0 | 6 |
+| `school_activity_roster_reconciliation` | 52 | 31 | 2 | 7 |
+
+Artifacts:
+
+- `tmp\helper_residue_full_native_cap3_ranked_or_qa`
+- `tmp\helper_residue_full_native_cap3_ranked_or_qa\qa_batch_summary.json`
+- `tmp\helper_residue_full_native_cap3_ranked_or_qa\qa_batch_summary.md`
+
+Verification:
+
+- Completed `56 / 56` fixtures and `2163 / 2163` questions.
+- No active Python worker remained after completion.
+- Batch summary reports `0` runtime load errors and `0` write proposal rows.
+
+Lesson:
+
+- The feared `7281` helper rows were mostly query-time delivery residue. The
+  ranked budget removes `6305` delivered helper rows without deleting compiled
+  facts or helper generators.
+- The remaining `976` rows are now a tractable audit surface. They are not
+  random: they concentrate in `source_record_packet_metadata_support` and a
+  handful of historically helper-heavy fixtures.
+- The next deletion should not lower the global row cap blindly. It should
+  attack the remaining source-specific delivery shapes, especially packet
+  metadata, by asking whether repeated rows can be summarized, scoped, or routed
+  only when the question actually asks for source/addressability evidence.
+
+Next pressure:
+
+- Audit `source_record_packet_metadata_support` under the ranked budget. It is
+  still `374 / 976` rows, so one helper source now accounts for `38.3%` of the
+  remaining delivery surface.
+- Compare exact-to-miss deltas between unbounded and ranked-cap native replays
+  before tightening below cap `3`.
