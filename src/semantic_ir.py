@@ -1088,9 +1088,13 @@ def _chat_headers(api_key: str = "") -> dict[str, str]:
     key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
+    referer = _openrouter_referer()
+    if referer:
+        headers["HTTP-Referer"] = referer
     title = _openrouter_title()
     if title:
         headers["X-Title"] = title
+        headers["X-OpenRouter-Title"] = title
     return headers
 
 
@@ -1101,7 +1105,21 @@ def _openrouter_title() -> str:
         or os.environ.get("OPENROUTER_X_TITLE")
         or ""
     ).strip()
-    cleaned = re.sub(r"[^A-Za-z0-9._:/ -]+", "-", title)
+    return _sanitize_header_value(title)
+
+
+def _openrouter_referer() -> str:
+    referer = str(
+        os.environ.get("PRETHINKER_OPENROUTER_REFERER")
+        or os.environ.get("OPENROUTER_HTTP_REFERER")
+        or os.environ.get("OPENROUTER_REFERER")
+        or "https://github.com/dr3d/prethinker"
+    ).strip()
+    return _sanitize_header_value(referer)
+
+
+def _sanitize_header_value(value: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._:/ -]+", "-", str(value or "").strip())
     cleaned = re.sub(r"\s+", " ", cleaned).strip(" -")
     return cleaned[:120]
 

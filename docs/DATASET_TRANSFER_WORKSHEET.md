@@ -4354,3 +4354,95 @@ Next pressure:
   source-record and frame-purpose expectations, or to build a generic compile
   probe for method catalogs where a paragraph-level task frames methods and
   measurements. Do not add QA helpers for the old compile surface alone.
+
+### DT-050 - Geology Recompile Surface Tradeoff
+
+Date: 2026-05-14
+
+Before:
+
+- DT-049 repaired dense method-frame purpose when the compile exposes
+  `agent_uses_method` and `agent_operates_in`.
+- The original SQuAD geology compile did not expose that frame axis. It exposed
+  `uses_instrument`, `analyzes_property`, and source-record text instead.
+- The open question was whether a fresh compile would preserve the missing
+  purpose axis, or whether the compiler generally failed to capture it.
+
+Prediction:
+
+- If the fresh compile emits a purpose predicate for methods, then the old
+  SQuAD miss is a compile-surface variance/staleness problem rather than a
+  missing architecture capability.
+- If the fresh QA still fails, the remaining issue is likely answer rendering or
+  stable multi-surface preservation across alternative predicate palettes.
+
+Intervention:
+
+- Recompiled the original SQuAD geology fixture with the current compiler,
+  source-record ledger, flat-plus-plan passes, and OpenRouter tagging.
+- Ran QA against the fresh compile.
+- Compared the new predicate surface against the old compile.
+
+After:
+
+- Fresh compile:
+  - Parsed OK: `1`.
+  - Candidate predicates: `9`.
+  - Compile admitted / skipped: `31 / 0`.
+  - Rough score: `0.889`.
+- Fresh compile surface changed materially:
+  - New high-level purpose rows include
+    `primary_method(electron_microprobe, identifying_rocks_in_the_laboratory)`
+    and `primary_method(electron_microprobe, rock_identification)`.
+  - The old compile's `uses_instrument`/`analyzes_property` surface was replaced
+    by a different palette including `primary_method` and
+    `analyzes_component`.
+- Fresh QA:
+  - Questions: `5`.
+  - Exact / partial / miss: `3 / 1 / 1`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- Movement:
+  - The original purpose/use row moved inside.
+  - A property/lens row became partial because only one property was linked to
+    the lens-specific predicate.
+  - The location row became an answer-surface miss because the retrieved
+    purpose atom contained `..._in_the_laboratory`, but the final answer needed
+    the location phrase itself.
+
+Artifacts:
+
+- Fresh compile:
+  `tmp\mrc_transfer_compile_squad30_dt050_geology_recompile_20260514`
+- Fresh QA:
+  `tmp\mrc_transfer_qa_squad30_dt050_geology_recompile_20260514`
+- Summary:
+  `tmp\mrc_transfer_qa_squad30_dt050_geology_recompile_20260514\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00013_geology --out-root tmp\mrc_transfer_compile_squad30_dt050_geology_recompile_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root tmp\mrc_transfer_staged_squad30_20260513 --fixture squad_default_validation_00013_geology --compile-root tmp\mrc_transfer_compile_squad30_dt050_geology_recompile_20260514 --out-root tmp\mrc_transfer_qa_squad30_dt050_geology_recompile_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\mrc_transfer_qa_squad30_dt050_geology_recompile_20260514`
+
+Lesson:
+
+- The compiler can preserve method purpose when the pass plan asks for it. The
+  old SQuAD miss was not proof that the axis was unavailable.
+- But preserving one surface can trade off against another. The fresh compile
+  gained purpose rows while losing or narrowing the older property/lens surface.
+- This is the next major research shape: stable multi-surface preservation. The
+  architecture should preserve frame purpose, method details, measurement
+  properties, and location phrases together rather than rotating among them
+  across compiles.
+
+Next pressure:
+
+- Build a generic method-catalog compile probe that demands simultaneous
+  preservation of:
+  - frame purpose,
+  - method/property details,
+  - instrument or condition details,
+  - location/context phrase extraction.
+- Treat success as multi-surface stability, not row-count expansion.

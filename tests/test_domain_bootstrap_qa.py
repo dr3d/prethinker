@@ -301,12 +301,15 @@ def test_openrouter_title_header_uses_experiment_label(monkeypatch) -> None:
 
 def test_chat_headers_add_openrouter_title(monkeypatch) -> None:
     monkeypatch.setenv("PRETHINKER_OPENROUTER_TITLE", "Prethinker SQuAD Probe")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_REFERER", "https://example.test/prethinker/squad")
     monkeypatch.delenv("PRETHINKER_API_KEY", raising=False)
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
 
     headers = _chat_headers()
 
     assert headers["X-Title"] == "Prethinker SQuAD Probe"
+    assert headers["X-OpenRouter-Title"] == "Prethinker SQuAD Probe"
+    assert headers["HTTP-Referer"] == "https://example.test/prethinker/squad"
 
 
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
