@@ -4178,3 +4178,89 @@ Next pressure:
 - Probe density around purpose surfaces rather than adding machinery: cases
   where a paragraph-level task frames several methods/instruments, and the
   question asks for the frame-level task through one method.
+
+### DT-048 - Dense Purpose Frame Boundary
+
+Date: 2026-05-14
+
+Before:
+
+- DT-047 showed that direct purpose/use surfaces are interior.
+- The unresolved SQuAD pressure was denser: a paragraph-level task frames
+  multiple methods or instruments, and the question asks what one method is
+  used for. The method's local rows preserve measurements/actions, while the
+  frame-level task may sit on the paragraph anchor or agent/domain row.
+
+Prediction:
+
+- A dense probe should fail if the architecture cannot connect method-level
+  rows back to the agent/task frame.
+- Failures should cluster on high-level task answers; direct measurement and
+  negative-use controls should mostly hold.
+
+Intervention:
+
+- Added `dense_purpose_frame_ladder`, an unlike probe with:
+  - four agent/task frames,
+  - two methods per frame,
+  - lower-level metrics/actions per method,
+  - explicit negative-purpose controls,
+  - QA that alternates frame-level purpose questions with direct metric and
+    negative-control questions.
+- Compiled and ran QA through OpenRouter.
+
+After:
+
+- Compile:
+  - Parsed OK: `1`.
+  - Candidate predicates: `9`.
+  - Compile admitted / skipped: `104 / 0`.
+  - Rough score: `0.88`.
+- QA:
+  - Questions: `10`.
+  - Exact / partial / miss: `6 / 1 / 3`.
+  - Failure surfaces: `answer_surface_gap=1`, `compile_surface_gap=3`.
+  - Helper rows: `0`.
+  - Runtime load errors: `0`.
+  - Write proposals: `0`.
+- The non-exact rows are exactly the frame-level purpose questions:
+  - method used for diagnosing a frame-level problem,
+  - method used for restoring a frame-level object,
+  - method used for comparing frame-level samples,
+  - method used for evaluating a frame-level technique.
+- Direct metric questions and negative-use controls held.
+
+Artifacts:
+
+- Probe:
+  `experiments\boundary_probes\dataset_transfer_stage2\dense_purpose_frame_ladder`
+- Compile:
+  `tmp\boundary_probe_compile_dense_purpose_frame_20260514`
+- QA:
+  `tmp\boundary_probe_qa_dense_purpose_frame_20260514`
+- Summary:
+  `tmp\boundary_probe_qa_dense_purpose_frame_20260514\transfer_coordinate_summary.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_purpose_frame_ladder --out-root tmp\boundary_probe_compile_dense_purpose_frame_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 1 --timeout 900 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --source-record-ledger --source-record-ledger-facts`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\boundary_probes\dataset_transfer_stage2 --fixture dense_purpose_frame_ladder --compile-root tmp\boundary_probe_compile_dense_purpose_frame_20260514 --out-root tmp\boundary_probe_qa_dense_purpose_frame_20260514 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --no-cache`
+- `python scripts\summarize_mrc_transfer_qa.py --qa-root tmp\boundary_probe_qa_dense_purpose_frame_20260514`
+
+Lesson:
+
+- Purpose/use is not one coordinate. Direct purpose is interior; inherited
+  frame purpose is boundary.
+- The failure is not measurement extraction. Metrics and local method actions
+  survive. The missing surface is the bridge from method to paragraph-level
+  task through the agent/domain/source anchor.
+- This is a good repair candidate only if phrased as a generic method-frame
+  support surface: method plus agent plus frame/task/domain source row. It
+  should not encode any of the probe's method names, domains, or reference
+  answers.
+
+Next pressure:
+
+- Implement and replay a generic method-frame purpose support surface that joins
+  admitted method-use rows to admitted agent/domain rows and source-record frame
+  text. Then replay both dense probe and the original SQuAD geology fixture.
