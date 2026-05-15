@@ -59,6 +59,15 @@
 | `status_phase_surface` | `[6, 15, 15]` | 9 |
 | `task_scope_surface` | `[2, 10, 5]` | 8 |
 
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
 - Missing union facts: `105`
@@ -190,6 +199,15 @@
 | `object_record_surface` | `[0, 5, 21]` | 21 |
 | `status_phase_surface` | `[31, 5, 5]` | 26 |
 | `task_scope_surface` | `[10, 7, 2]` | 8 |
+
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 2 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -335,6 +353,15 @@
 | `status_phase_surface` | `[5, 4, 4]` | 1 |
 | `task_scope_surface` | `[3, 3, 1]` | 2 |
 
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 1 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
 - Missing union facts: `67`
@@ -472,6 +499,15 @@
 | `status_phase_surface` | `[13, 12, 8]` | 5 |
 | `task_scope_surface` | `[3, 5, 2]` | 3 |
 
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 1 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
 - Missing union facts: `74`
@@ -601,6 +637,15 @@
 | `object_record_surface` | `[23, 5, 2]` | 21 |
 | `status_phase_surface` | `[10, 4, 3]` | 7 |
 | `task_scope_surface` | `[2, 1, 1]` | 1 |
+
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 1 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -738,6 +783,15 @@
 | `object_record_surface` | `[15, 5, 26]` | 21 |
 | `status_phase_surface` | `[3, 9, 9]` | 6 |
 | `task_scope_surface` | `[5, 0, 2]` | 5 |
+
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 2 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 

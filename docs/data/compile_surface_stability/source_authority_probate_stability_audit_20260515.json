@@ -8,6 +8,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\compile_surface_invariant_focused_probate_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T023857493498Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 9,
+              "source_signal_count": 12,
+              "status": "partial"
+            }
+          ],
           "direct_fact_count": 162,
           "direct_predicate_count": 22,
           "parsed_ok": true,
@@ -21,6 +35,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\compile_surface_invariant_recompile_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T022827147502Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 12,
+              "status": "ledger_only"
+            }
+          ],
           "direct_fact_count": 12,
           "direct_predicate_count": 6,
           "parsed_ok": true,
@@ -32,6 +60,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\source_authority_density_probate_compile_local_20260515\\probate_storage_access_register\\domain_bootstrap_file_20260515T095018438942Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 13,
+              "source_signal_count": 12,
+              "status": "pass"
+            }
+          ],
           "direct_fact_count": 127,
           "direct_predicate_count": 15,
           "parsed_ok": true,
@@ -44,6 +86,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\source_authority_invariant_probate_compile_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T040140094735Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 5,
+              "source_signal_count": 12,
+              "status": "partial"
+            }
+          ],
           "direct_fact_count": 61,
           "direct_predicate_count": 7,
           "parsed_ok": true,
@@ -55,6 +111,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\source_authority_invariant_probate_compile_local_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T040742270464Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 13,
+              "source_signal_count": 12,
+              "status": "pass"
+            }
+          ],
           "direct_fact_count": 133,
           "direct_predicate_count": 15,
           "parsed_ok": true,

@@ -276,3 +276,85 @@ Add contract-level recognizers for the two compile-stability primitives:
 
 Then rerun the stability audit on the assignment, operational, and
 source-authority evidence sets.
+
+## CS-004 - Contract-Level Stability Recognizers
+
+Date: 2026-05-15
+
+Question:
+
+Can the compile-stability audit score preservation contracts directly, instead
+of relying only on broad predicate/surface drift counts?
+
+Before:
+
+CS-001 and CS-002 showed large drift, but exact fact and predicate drift are
+too coarse. Equivalent predicate dialects can make stable surfaces look
+unstable, while a single missing sibling event can be hidden inside a large
+drift board.
+
+Prediction:
+
+A first contract recognizer should make the assignment-scope evidence legible:
+the first draw should be partial, and the redraw should pass, because the
+redraw preserved both parallel assignee-task events.
+
+Intervention:
+
+Extended `scripts/audit_compile_surface_stability.py` with two first-pass
+contract recognizers:
+
+- `parallel_assignment_event_preservation`
+- `source_authority_pair_preservation`
+
+These recognizers are audit-only. They compare source-record signals against
+direct surfaces within each draw and do not merge facts, repair compiles, or
+alter QA.
+
+After:
+
+Assignment equipment two-draw replay:
+
+- first draw: `parallel_assignment_event_preservation=partial`
+  - source signals=`2`
+  - direct surfaces=`1`
+- redraw: `parallel_assignment_event_preservation=pass`
+  - source signals=`2`
+  - direct surfaces=`2`
+
+The broader stability summaries remain:
+
+- assignment two-draw: unstable facts=`41`, predicate drift=`17`, surface
+  drift=`6`
+- source-authority/probate: unstable facts=`342`, predicate drift=`38`,
+  surface drift=`4`
+- operational-record/status: unstable facts=`679`, predicate drift=`183`,
+  surface drift=`35`
+
+Artifacts:
+
+- `scripts/audit_compile_surface_stability.py`
+- `tests/test_compile_surface_stability.py`
+- regenerated stability reports in `docs/data/compile_surface_stability/`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_surface_stability.py`
+- `python -m pytest tests\test_compile_surface_stability.py -q` -> `1 passed`
+
+Lesson:
+
+Contract-level scoring is the right direction. It turns the vague statement
+"compile drift happened" into a testable preservation claim: the source exposed
+two assignment events, and the draw preserved one or two of them. This is much
+closer to architecture than exact fact equality.
+
+The source-authority recognizer is still a first-pass proxy and needs sharper
+slot logic before it should drive repair decisions.
+
+Next pressure:
+
+Harden the source-authority pair recognizer so it scores governed subject,
+recipient/action, and authority/source slots rather than broad source tokens.
+Then use the recognizer to decide whether source-authority stability needs a
+compile contract, a profile-palette constraint, or multi-draw consensus.

@@ -21,22 +21,24 @@ def _write_compile(path: Path, facts: list[str]) -> Path:
 def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_a" / "domain_bootstrap_file_a.json",
-        [
-            "task_assigned_to(task_alpha, person_one, 2026_01_01).",
-            "task_description(task_alpha, first_task).",
-            "task_description(task_beta, second_task).",
-            "source_record_text_atom(src_1, person_two_was_assigned_to_second_task).",
-        ],
+            [
+                "task_assigned_to(task_alpha, person_one, 2026_01_01).",
+                "task_description(task_alpha, first_task).",
+                "task_description(task_beta, second_task).",
+                "source_record_text_atom(src_0, person_one_was_assigned_to_first_task).",
+                "source_record_text_atom(src_1, person_two_was_assigned_to_second_task).",
+            ],
     )
     draw2 = _write_compile(
         tmp_path / "draw2" / "fixture_a" / "domain_bootstrap_file_b.json",
         [
-            "task_assigned_to(task_alpha, person_one, 2026_01_01).",
-            "task_assigned_to(task_beta, person_two, 2026_01_02).",
-            "task_description(task_alpha, first_task).",
-            "task_description(task_beta, second_task).",
-            "source_record_text_atom(src_1, person_two_was_assigned_to_second_task).",
-        ],
+                "task_assigned_to(task_alpha, person_one, 2026_01_01).",
+                "task_assigned_to(task_beta, person_two, 2026_01_02).",
+                "task_description(task_alpha, first_task).",
+                "task_description(task_beta, second_task).",
+                "source_record_text_atom(src_0, person_one_was_assigned_to_first_task).",
+                "source_record_text_atom(src_1, person_two_was_assigned_to_second_task).",
+            ],
     )
 
     report = audit_paths([draw1, draw2])
@@ -55,4 +57,8 @@ def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: P
         "max": 2,
         "delta": 1,
     }
+    first_contracts = {row["contract"]: row for row in fixture["draws"][0]["contracts"]}
+    second_contracts = {row["contract"]: row for row in fixture["draws"][1]["contracts"]}
+    assert first_contracts["parallel_assignment_event_preservation"]["status"] == "partial"
+    assert second_contracts["parallel_assignment_event_preservation"]["status"] == "pass"
     assert report["summary"]["unstable_fixture_count"] == 1

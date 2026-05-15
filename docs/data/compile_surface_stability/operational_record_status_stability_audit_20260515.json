@@ -8,6 +8,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T162948498323Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 20,
           "direct_predicate_count": 11,
           "parsed_ok": true,
@@ -22,6 +36,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T133445359341Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 51,
           "direct_predicate_count": 16,
           "parsed_ok": true,
@@ -36,6 +64,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T175020840734Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 55,
           "direct_predicate_count": 8,
           "parsed_ok": true,
@@ -580,6 +622,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T163025062154Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 2,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 56,
           "direct_predicate_count": 14,
           "parsed_ok": true,
@@ -594,6 +650,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T133415056595Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 43,
           "direct_predicate_count": 7,
           "parsed_ok": true,
@@ -609,6 +679,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T174828801002Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 24,
           "direct_predicate_count": 6,
           "parsed_ok": true,
@@ -1088,6 +1172,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T163029879736Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 64,
           "direct_predicate_count": 15,
           "parsed_ok": true,
@@ -1103,6 +1201,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T133422071796Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 42,
           "direct_predicate_count": 15,
           "parsed_ok": true,
@@ -1117,6 +1229,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T174923134962Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 1,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 27,
           "direct_predicate_count": 10,
           "parsed_ok": true,
@@ -1727,6 +1853,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T163028691084Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 37,
           "direct_predicate_count": 10,
           "parsed_ok": true,
@@ -1742,6 +1882,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T133338320343Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 1,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 49,
           "direct_predicate_count": 11,
           "parsed_ok": true,
@@ -1757,6 +1911,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T174922376403Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 29,
           "direct_predicate_count": 14,
           "parsed_ok": true,
@@ -2291,6 +2459,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T163009695712Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 39,
           "direct_predicate_count": 12,
           "parsed_ok": true,
@@ -2306,6 +2488,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T133812222411Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 13,
           "direct_predicate_count": 10,
           "parsed_ok": true,
@@ -2321,6 +2517,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T174839078801Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 1,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 16,
           "direct_predicate_count": 9,
           "parsed_ok": true,
@@ -2778,6 +2988,20 @@
       "draws": [
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T162951841328Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 26,
           "direct_predicate_count": 13,
           "parsed_ok": true,
@@ -2793,6 +3017,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T133453034488Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 66,
           "direct_predicate_count": 15,
           "parsed_ok": true,
@@ -2806,6 +3044,20 @@
         },
         {
           "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T174942407460Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 2,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            }
+          ],
           "direct_fact_count": 35,
           "direct_predicate_count": 8,
           "parsed_ok": true,

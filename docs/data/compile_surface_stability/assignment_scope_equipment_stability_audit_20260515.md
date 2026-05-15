@@ -44,6 +44,13 @@
 | `status_phase_surface` | `[3, 4]` | 1 |
 | `task_scope_surface` | `[5, 8]` | 3 |
 
+| Draw | Contract | Status | Source signals | Direct surfaces |
+| --- | --- | --- | ---: | ---: |
+| `assignment_scope_v1_compile_20260515` | `parallel_assignment_event_preservation` | `partial` | 2 | 1 |
+| `assignment_scope_v1_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+| `assignment_scope_v1_equipment_redraw_compile_20260515` | `parallel_assignment_event_preservation` | `pass` | 2 | 2 |
+| `assignment_scope_v1_equipment_redraw_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 |
+
 ### Missing From `assignment_scope_v1_compile_20260515`
 
 - Missing union facts: `26`
