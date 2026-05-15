@@ -1050,3 +1050,182 @@ Do not broaden operational guidance from these two misses. If assignment-scope
 questions recur, add a focused profile-palette probe for assignment purpose or
 scope slots. If initial/current status omissions recur, treat them as compile
 surface gaps and test with focused unlike probes before changing guidance.
+
+## TD-011 - Query/Transition Resolution Residue Board
+
+Date: 2026-05-15
+
+Question:
+
+After the temporal-status and operational-record/status lens passes, what layer
+do the remaining not-exact QA rows actually pressure?
+
+Before:
+
+Two unlike-probe QA runs were mostly inside the set with zero helper rows:
+
+- temporal status: `16 / 0 / 2`
+- operational record/status: `46 / 0 / 2`
+
+The misses were easy to overread as a generic need for more temporal or
+operational guidance. That would be the wrong repair shape unless the residues
+share a contract.
+
+Prediction:
+
+If the new deterministic normalizer is doing its job, remaining misses should
+separate by layer rather than collapse into one broad "add more helpers" or
+"add more guidance" class. Some rows should be compile-surface omissions, and
+some should be query/projection gaps over already-admitted facts.
+
+Intervention:
+
+Added an audit-only diagnostic:
+
+- `scripts/audit_query_transition_resolution.py`
+- `tests/test_query_transition_resolution_audit.py`
+
+The diagnostic reads QA artifacts and classifies only not-exact rows by generic
+question/plan shape:
+
+- `interval_scoped_status_flattened`
+- `return_to_state_requires_intervening_end`
+- `assignment_scope_missing`
+- `initial_status_not_admitted`
+- fallback `unclassified_query_transition_residue`
+
+This classifier is not architecture. It does not alter compile, query,
+selector, helper, or lens behavior. It is a measurement board so the next repair
+is chosen from observed layer pressure.
+
+After:
+
+Four-row residue board:
+
+- `assignment_scope_missing`: `1`
+- `initial_status_not_admitted`: `1`
+- `interval_scoped_status_flattened`: `1`
+- `return_to_state_requires_intervening_end`: `1`
+
+Failure surfaces:
+
+- `compile_surface_gap`: `2`
+- `hybrid_join_gap`: `2`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_residue_20260515.md`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_residue_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_query_transition_resolution.py`
+- `python -m pytest tests\test_query_transition_resolution_audit.py -q` -> `4 passed`
+
+Lesson:
+
+The remaining residue is not helper pressure. These runs already have zero
+helper rows. The misses split into two compile-surface gaps and two
+query/projection gaps.
+
+The strongest surgical candidate is `return_to_state_requires_intervening_end`:
+the facts already bind an intervening state's end time, but the query asks for
+the start of the returned-to state and lands on the earlier state-start row.
+That is a reusable transition-query interpretation, not a fixture repair.
+
+The `assignment_scope_missing` row is not ready for a query-only repair because
+the admitted assignment fact lacks the requested task/scope slot. The
+`initial_status_not_admitted` and `interval_scoped_status_flattened` rows are
+compile-surface pressures and should get focused unlike probes before compile
+guidance changes.
+
+Next pressure:
+
+Implement only the return-to-state query interpretation if it can be expressed
+as a query-only companion over admitted `*_start` and `*_end` transition rows.
+Do not broaden operational or temporal guidance from this four-row board.
+
+## TD-012 - Return-To-State Query Companion
+
+Date: 2026-05-15
+
+Question:
+
+Can the ready hybrid-join residue be repaired without broad temporal guidance,
+new durable facts, or fixture-specific vocabulary?
+
+Before:
+
+The TD-011 board had one ready query/projection repair:
+
+- `return_to_state_requires_intervening_end`: `1`
+
+The observed shape was generic: a query asked for the time an entity returned
+or reverted back to a state, but the direct `*_start(entity, state, time)` row
+returned an earlier start of that state. The answer-bearing coordinate was the
+end of an intervening state, already admitted as `*_end(entity, other_state,
+end_time)`.
+
+Prediction:
+
+If the repair is structural, it should be expressible as a query-only companion
+that fires only when the query itself carries return/revert/back semantics and
+the KB already contains matching `*_start` and `*_end` transition rows.
+
+Intervention:
+
+Added `_return_to_state_transition_companion()` to the domain companion layer.
+It fires when:
+
+- the queried predicate is a three-slot `*_start`;
+- entity and returned state are bound constants;
+- the time variable is a return/revert/back variable;
+- matching `*_end(entity, intervening_state, end_time)` rows exist;
+- the intervening state differs from the returned state;
+- the end time is later than the direct returned-state start.
+
+The companion emits `return_to_state_transition_support(...)` as query-only
+evidence. It writes no durable facts and reads no source prose, question IDs,
+fixture names, answer strings, or local organizations.
+
+After:
+
+Focused replay test:
+
+- direct row: `state_start(unit_7, standby, 2026_09_14_06_10)`
+- intervening row: `state_end(unit_7, active, 2026_09_14_11_55)`
+- query: `state_start(unit_7, standby, ReturnTime).`
+- support row: `ReturnTime=2026_09_14_11_55`,
+  `InterveningState=active`, `SupportKind=intervening_state_end_transition`
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\audit_query_transition_resolution.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_return_to_state_query_derives_support_from_intervening_state_end tests\test_query_transition_resolution_audit.py -q` -> `5 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_case_status_at_date_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_generic_status_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_status_at_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_return_to_state_query_derives_support_from_intervening_state_end tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_query_transition_resolution_audit.py -q` -> `63 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py tests\test_domain_bootstrap_qa.py::test_case_status_at_date_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_generic_status_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_status_at_query_derives_interval_support_from_transition_anchors tests\test_domain_bootstrap_qa.py::test_return_to_state_query_derives_support_from_intervening_state_end tests\test_query_transition_resolution_audit.py -q` -> `99 passed`
+- Actual temporal-status compile replay produced
+  `return_to_state_transition_support` with
+  `ReturnTime=2026_09_14t11_55`,
+  `ReturnedState=standby`, and `InterveningState=active_pumping`.
+
+Lesson:
+
+This is the clean version of the query-resolution layer: the compiler already
+admitted the transition facts, and the query layer needed a small interpretation
+for return/revert/back questions over lifecycle rows. The repair is deliberately
+narrow. It does not teach the harness any fixture story; it teaches the query
+layer how to read a common transition shape.
+
+Next pressure:
+
+Replay the temporal-status QA probe when compute is available, then inspect
+whether the remaining misses are still the two compile-surface classes from
+TD-011: interval-scoped flat status and initial status not admitted. Do not
+repair assignment scope until a focused profile-palette probe shows the scope
+slot can be admitted generically.

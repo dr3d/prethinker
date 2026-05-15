@@ -4822,6 +4822,31 @@ def test_status_at_query_derives_interval_support_from_transition_anchors() -> N
     assert result_row["ObservedEntity"] == "asset_9"
 
 
+def test_return_to_state_query_derives_support_from_intervening_state_end() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "state_start(unit_7, standby, 2026_09_14_06_10).",
+        "state_start(unit_7, active, 2026_09_14_07_25).",
+        "state_end(unit_7, active, 2026_09_14_11_55).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["state_start(unit_7, standby, ReturnTime)."])
+    companion = [
+        row
+        for row in rows
+        if row.get("query")
+        == "return_to_state_transition_support(QueryEntity, ReturnedState, ReturnTime, InterveningState, SupportKind)."
+    ]
+
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["QueryEntity"] == "unit_7"
+    assert result_row["ReturnedState"] == "standby"
+    assert result_row["ReturnTime"] == "2026_09_14_11_55"
+    assert result_row["InterveningState"] == "active"
+
+
 def test_set_minus_query_derives_projected_difference_members() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

@@ -3847,6 +3847,9 @@ def _domain_companion_queries(
         return []
     predicate, args = parsed
     source_record_companions: list[dict[str, Any]] = []
+    return_to_state = _return_to_state_transition_companion(runtime, predicate=predicate, args=args, query=query)
+    if return_to_state:
+        source_record_companions.append(return_to_state)
     status_timeline = _status_timeline_summary_companion(runtime, predicate=predicate, args=args, query=query)
     if status_timeline:
         source_record_companions.append(status_timeline)
@@ -12527,6 +12530,104 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
         "query": result["prolog_query"],
         "result": result,
         "derived_from_queries": [query, timeline_query],
+    }
+
+
+def _return_to_state_transition_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if len(args) != 3 or not predicate.endswith("_start"):
+        return None
+    entity_arg = str(args[0]).strip()
+    returned_state_arg = str(args[1]).strip()
+    time_arg = str(args[2]).strip()
+    if (
+        not entity_arg
+        or not returned_state_arg
+        or _is_prolog_variable(entity_arg)
+        or _is_prolog_variable(returned_state_arg)
+        or not _is_prolog_variable(time_arg)
+    ):
+        return None
+    if not any(marker in time_arg.lower() for marker in ("return", "revert", "back")):
+        return None
+
+    end_predicate = predicate.removesuffix("_start") + "_end"
+    start_result = runtime.query_rows(format_prolog_query(predicate, [entity_arg, returned_state_arg, "StartTime"]))
+    end_result = runtime.query_rows(format_prolog_query(end_predicate, [entity_arg, "InterveningState", "EndTime"]))
+    if start_result.get("status") != "success" or end_result.get("status") != "success":
+        return None
+
+    direct_starts: list[datetime] = []
+    for row in start_result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        start_time = _runtime_temporal_datetime(runtime, str(row.get("StartTime", "")).strip())
+        if start_time is not None:
+            direct_starts.append(start_time)
+    if not direct_starts:
+        return None
+    earliest_direct_start = min(direct_starts)
+
+    rows: list[dict[str, str]] = []
+    for row in end_result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        intervening_state = str(row.get("InterveningState", "")).strip()
+        end_time = str(row.get("EndTime", "")).strip()
+        ended_at = _runtime_temporal_datetime(runtime, end_time)
+        if not intervening_state or not end_time or ended_at is None:
+            continue
+        if intervening_state == returned_state_arg:
+            continue
+        if ended_at <= earliest_direct_start:
+            continue
+        rows.append(
+            {
+                "QueryEntity": entity_arg,
+                "ReturnedState": returned_state_arg,
+                "ReturnTime": end_time,
+                "InterveningState": intervening_state,
+                "SupportKind": "intervening_state_end_transition",
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(key=lambda item: _runtime_temporal_datetime(runtime, item["ReturnTime"]) or datetime.min)
+
+    support_query = (
+        "return_to_state_transition_support"
+        "(QueryEntity, ReturnedState, ReturnTime, InterveningState, SupportKind)."
+    )
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "return_to_state_transition_support",
+        "prolog_query": support_query,
+        "variables": list(rows[0].keys()),
+        "rows": rows,
+        "num_rows": len(rows),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only transition support inferred a return/revert/back-to-state time "
+                f"from admitted {end_predicate}/3 rows for intervening states; no durable fact was written"
+            ),
+            "original_query": query,
+            "support_queries": [
+                format_prolog_query(predicate, [entity_arg, returned_state_arg, "StartTime"]),
+                format_prolog_query(end_predicate, [entity_arg, "InterveningState", "EndTime"]),
+            ],
+        },
+    }
+    return {
+        "query": support_query,
+        "result": result,
+        "derived_from_queries": [query],
     }
 
 
