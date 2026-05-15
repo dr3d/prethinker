@@ -29,6 +29,7 @@ from scripts.run_domain_bootstrap_qa import (
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
+    _source_column_text_hint_queries,
     _source_record_table_count_hint_queries,
     _temporal_join_with_previous,
     _urlopen_json_with_transient_retries,
@@ -3966,6 +3967,20 @@ def test_source_record_table_count_hint_routes_explicit_table_count_questions() 
 
     assert _source_record_table_count_hint_queries(
         utterance="How many applications were eligible?",
+        kb_inventory=inventory,
+    ) == []
+
+
+def test_source_column_text_hint_routes_exact_source_column_questions() -> None:
+    inventory = {"signatures": ["source_record_text_atom/2"]}
+
+    assert _source_column_text_hint_queries(
+        utterance="What source column is listed for the access row?",
+        kb_inventory=inventory,
+    ) == ["source_record_text_atom(SourceRow, TextAtom)."]
+
+    assert _source_column_text_hint_queries(
+        utterance="Which access row applies?",
         kb_inventory=inventory,
     ) == []
 

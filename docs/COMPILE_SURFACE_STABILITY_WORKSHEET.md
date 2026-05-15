@@ -1270,3 +1270,93 @@ mixed source layers and embedded correspondence, or add an audit that compares
 source-stated grouped identifiers with emitted governed-subject rows in a
 fixture-free way. The target is density/resolution under layered source
 statements.
+
+## CSS-017 - Layered Multi-Subject Authority Probe
+
+Date: 2026-05-15
+
+Before:
+
+CSS-016 proved that simple multi-subject authority is interior. The remaining
+question was whether authority mediated through correspondence, source columns,
+or decision packets is also interior, or whether the probate miss points to a
+missing layered-source axis.
+
+Prediction:
+
+If explicit layered source authority is inside the set, a fresh unlike probe
+with source columns, correspondence references, decision packets, source actors,
+dates, and nearby non-authority notes should pass without helpers. If it fails,
+the failure should say whether source text, source-reference joins, or
+multi-subject coverage is weak.
+
+Intervention:
+
+Added
+`experiments/boundary_probes/compile_surface_stage1/layered_multi_subject_authority_pair`.
+The probe has:
+
+- an archive access register where a source column points to correspondence
+  which references an unreproduced access letter governing two files;
+- a specimen release summary where a decision packet governs two releases and a
+  follow-up note identifies the board decision authority;
+- nearby preparation/intake notes that are explicitly not authority.
+
+The first QA pass landed at `7/1/0`: identifiers were recovered, but an exact
+source-column wording question needed source-record text. Added a narrow
+source-column query hint that only fires for exact source-column/source-text
+questions when `source_record_text_atom/2` exists.
+
+Artifacts:
+
+- `experiments/boundary_probes/compile_surface_stage1/layered_multi_subject_authority_pair/README.md`
+- `experiments/boundary_probes/compile_surface_stage1/layered_multi_subject_authority_pair/source.md`
+- `experiments/boundary_probes/compile_surface_stage1/layered_multi_subject_authority_pair/qa.md`
+- `experiments/boundary_probes/compile_surface_stage1/layered_multi_subject_authority_pair/oracle.jsonl`
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/layered_multi_subject_authority_probe_audit_20260515.json`
+- `docs/data/compile_surface_stability/layered_multi_subject_authority_probe_audit_20260515.md`
+- `docs/data/compile_surface_stability/layered_multi_subject_authority_probe_qa_20260515.json`
+- `docs/data/compile_surface_stability/layered_multi_subject_authority_probe_qa_20260515.md`
+
+After:
+
+Compile:
+
+- parsed_ok=`true`
+- admitted=`35`
+- skipped=`7`
+- direct facts included both governed file rows, both governed specimen rows,
+  source-reference rows, document author rows, and document date rows
+
+Final QA:
+
+- exact=`8`
+- partial=`0`
+- miss=`0`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposal rows=`0`
+- failure surfaces: `not_applicable=8`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `201 passed`
+
+Lesson:
+
+Explicit layered multi-subject authority is interior. The system can handle
+source columns, correspondence references, decision-packet references,
+source actors, dates, governed subjects, and nearby non-authority notes without
+helpers when the source layers are crisp. The probate miss is likely a denser
+production-style source-resolution issue rather than a missing basic axis.
+
+Next pressure:
+
+Return to the original probate miss only with a density lens. The next useful
+instrument is a source-to-row coverage audit that can compare grouped
+source-stated identifiers to emitted governed-subject rows without naming the
+fixture, or a denser unlike probe with less explicit grouping and competing
+source layers.

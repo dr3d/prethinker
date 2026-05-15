@@ -1520,6 +1520,7 @@ def run_one_question(
         [
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_complementary_relation_hint_queries(
@@ -1802,6 +1803,22 @@ def _source_record_table_count_hint_queries(
     if "source_record_row/5" not in signatures or "source_record_field/3" not in signatures:
         return []
     return ["source_record_row(SourceRow, table_row, Line, SectionAtom, Label)."]
+
+
+def _source_column_text_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Add source-record text evidence for exact source-column wording questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in ("source column", "source listed", "listed source", "source text")):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_text_atom/2" not in signatures:
+        return []
+    return ["source_record_text_atom(SourceRow, TextAtom)."]
 
 
 def _location_floor_hint_queries(
