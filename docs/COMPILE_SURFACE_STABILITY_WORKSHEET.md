@@ -737,3 +737,68 @@ Use the remaining gap queue to choose the next bounded compile-side repair.
 The strongest candidates are direct source-authority surfaces and section
 addressability for answer-bearing records, because many misses ask for who/what
 authorized, which source governs, or which section contains a record.
+
+## CSS-010 - Strengthen Source Authority Compile Invariants
+
+Date: 2026-05-14
+
+Before:
+
+CSS-009 left a focused no-helper score of `28/1/11`. The remaining gap queue
+showed two recurring compile-side shapes:
+
+- records, orders, claims, exhibits, and documents were not always directly
+  linked to the section/source coordinate that contained them;
+- authority/source rows were not always distinct from the party receiving
+  permission or the item under control.
+
+Prediction:
+
+If future compiles preserve these two relations directly, no-helper QA should
+need fewer source-record fallbacks for questions asking which section contains
+a record, who/what authorized an action, what source governs access, or which
+authority controls a finding.
+
+Intervention:
+
+Extended `COMPILE_SURFACE_INVARIANT_CONTEXT_V1` with two fixture-free rules:
+
+- preserve the relation between a subject id and the section/source coordinate
+  when a record/order/claim/exhibit/item/event/document is listed, filed,
+  reproduced, referenced, or contained by a source layer;
+- preserve the authority/source relation separately from the party receiving
+  permission or the item being controlled.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_domain_bootstrap_file.py`
+
+After:
+
+This is a compile-guidance change, not a replay result yet. It should be tested
+by recompiling the focused custody/control probe and rerunning the strict
+no-helper QA. The expected improvement is not generic score inflation; it is
+movement on the source-authority and section-addressability rows in the
+remaining gap queue.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `30 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `195 passed`
+
+Lesson:
+
+Helper retirement now depends on compile contracts that preserve query-bearing
+source relations, not only object/status/event facts. Section containment and
+authority-source relations are architecture-level surfaces because they recur
+across legal, policy, audit, catalog, and operational sources.
+
+Next pressure:
+
+Run one focused recompile on the custody/control probe with the strengthened
+invariants active, then audit direct surfaces and rerun strict no-helper QA.
+If authority/section rows move while helper rows stay at zero, the next phase
+is to widen this compile-side invariant to unlike probes rather than restore
+native helpers.
