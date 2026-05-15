@@ -1,0 +1,22 @@
+{
+  "schema": "compile_surface_stability_qa_summary_v1",
+  "experiment": "authority_source_query_contract_slice",
+  "date": "2026-05-14",
+  "fixture": "probate_storage_access_register",
+  "question_ids": ["q010", "q031", "q039", "q040"],
+  "questions": 4,
+  "reference_judge": {
+    "exact": 1,
+    "partial": 1,
+    "miss": 2
+  },
+  "failure_surfaces": {
+    "compile_surface_gap": 3,
+    "not_applicable": 1
+  },
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "artifact": "tmp/authority_source_query_contract_slice_20260514/probate_storage_access_register/domain_bootstrap_qa_20260515T042328262779Z_qa_qwen-qwen3-6-35b-a3b.json",
+  "lesson": "The authority-source query contract changed the planner behavior in the intended direction: it queried access_source/3 for an authorization question. Remaining misses are now compile coverage: one item lacks the corresponding access-source row, and source/correspondence authority is still not dense enough."
+}

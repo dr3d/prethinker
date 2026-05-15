@@ -951,3 +951,68 @@ Build a small targeted authority-source QA slice or run a short subset replay
 once the harness supports question selection. Avoid another full 40-question
 replay until the test can isolate authority/source movement without spending a
 full stochastic draw.
+
+## CSS-013 - Authority Source Targeted Slice
+
+Date: 2026-05-14
+
+Before:
+
+CSS-012 added the planner contract for authority/source questions. The harness
+already supported `--only-ids`, so a full 40-question replay was unnecessary.
+
+Prediction:
+
+If the query contract works, authority/source questions should query
+`access_source` or equivalent source predicates. If rows still miss, the
+remaining failure should classify as compile coverage rather than query-surface
+confusion.
+
+Intervention:
+
+Ran a four-question local QA slice against the local authority-invariant
+compile: `q010`, `q031`, `q039`, and `q040`.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/authority_source_query_contract_slice_20260514.json`
+- `docs/data/compile_surface_stability/authority_source_query_contract_slice_20260514.md`
+
+After:
+
+- exact=`1`
+- partial=`1`
+- miss=`2`
+- helper rows=`0`
+- failure surfaces: `compile_surface_gap=3`, `not_applicable=1`
+
+The result split cleanly:
+
+- `q010` became exact.
+- `q031` queried `access_source/3` as intended, but the compile only had the
+  paired authority/source row for one requested item.
+- `q039` queried `access_source/3`, but the compile did not preserve the
+  registrar correspondence plus loan-agreement source densely enough.
+- `q040` partially exposed forensic-report evidence, but did not preserve the
+  court-ultimate-ruling/source-authority distinction cleanly.
+
+Verification:
+
+- targeted QA slice completed with `4` parsed rows, `0` helper rows, `0`
+  runtime load errors, and `0` write proposals.
+
+Lesson:
+
+This was the desired handoff between layers. The planner now asks the right
+authority/source family. The remaining failures are compile coverage: paired
+authority rows, source/correspondence source identity, and authority-for-finding
+distinctions.
+
+Next pressure:
+
+Do not broaden query repair again. The next bounded work should be a focused
+compile pass or profile contract for source/correspondence authority density:
+when a source says a source document, report, correspondence, court order, or
+policy is the authority for a claim/status/access/finding, preserve the
+source-document id, author/source actor, date when stated, governed subject, and
+authority role in direct rows.
