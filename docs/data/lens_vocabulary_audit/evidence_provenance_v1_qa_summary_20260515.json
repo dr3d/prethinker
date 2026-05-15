@@ -1,0 +1,57 @@
+{
+  "schema": "lens_vocabulary_qa_summary_v1",
+  "lens": "evidence_provenance",
+  "date": "2026-05-15",
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "totals": {
+    "questions": 18,
+    "exact": 16,
+    "partial": 0,
+    "miss": 2
+  },
+  "fixtures": [
+    {
+      "fixture": "community_lab_notice",
+      "questions": 5,
+      "exact": 4,
+      "partial": 0,
+      "miss": 1,
+      "helper_rows": 0,
+      "failure_surfaces": {
+        "not_applicable": 4,
+        "query_surface_gap": 1
+      },
+      "artifact": "tmp/lens_vocab_evidence_provenance_qa_20260515/community_lab_notice/domain_bootstrap_qa_20260515T102424172377Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "reading": "Presenter slot was not preserved for one presented-to surface."
+    },
+    {
+      "fixture": "craft_fair_review",
+      "questions": 6,
+      "exact": 5,
+      "partial": 0,
+      "miss": 1,
+      "helper_rows": 0,
+      "failure_surfaces": {
+        "compile_surface_gap": 1,
+        "not_applicable": 5
+      },
+      "artifact": "tmp/lens_vocab_evidence_provenance_qa_20260515/craft_fair_review/domain_bootstrap_qa_20260515T102516696991Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "reading": "Storage location attached to the review packet rather than the note."
+    },
+    {
+      "fixture": "garden_water_log",
+      "questions": 7,
+      "exact": 7,
+      "partial": 0,
+      "miss": 0,
+      "helper_rows": 0,
+      "failure_surfaces": {
+        "not_applicable": 7
+      },
+      "artifact": "tmp/lens_vocab_evidence_provenance_qa_20260515/garden_water_log/domain_bootstrap_qa_20260515T102623395665Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "reading": "Full evidence-provenance vocabulary transfer."
+    }
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "compile_count": 3,
+  "lens": "evidence_provenance",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\community_lab_notice\\domain_bootstrap_file_20260515T102010701669Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 18,
+      "fixture": "community_lab_notice",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 67,
+      "summary": {
+        "not_applicable": 3,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "prepared"
+          ],
+          "source_hits": [
+            "prepared"
+          ],
+          "status": "structural",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [
+            "presented"
+          ],
+          "source_hits": [
+            "presented"
+          ],
+          "status": "structural",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [
+            "corrected"
+          ],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "located"
+          ],
+          "source_hits": [
+            "found"
+          ],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\craft_fair_review\\domain_bootstrap_file_20260515T102122309286Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 16,
+      "fixture": "craft_fair_review",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 65,
+      "summary": {
+        "not_applicable": 3,
+        "source_only": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "source_hits": [
+            "wrote"
+          ],
+          "status": "source_only",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [
+            "entered"
+          ],
+          "source_hits": [
+            "entered"
+          ],
+          "status": "structural",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [
+            "requested"
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "stored"
+          ],
+          "source_hits": [
+            "stored"
+          ],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\garden_water_log\\domain_bootstrap_file_20260515T102240476349Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 23,
+      "fixture": "garden_water_log",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 81,
+      "summary": {
+        "source_only": 1,
+        "structural": 7
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "source_hits": [
+            "prepared"
+          ],
+          "status": "source_only",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [
+            "submitted"
+          ],
+          "source_hits": [
+            "submitted"
+          ],
+          "status": "structural",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [
+            "date"
+          ],
+          "source_hits": [
+            "dated"
+          ],
+          "status": "structural",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [
+            "admitted"
+          ],
+          "source_hits": [
+            "admitted"
+          ],
+          "status": "structural",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [
+            "commissioned"
+          ],
+          "source_hits": [
+            "commissioned"
+          ],
+          "status": "structural",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [
+            "amended"
+          ],
+          "source_hits": [
+            "amended"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "held"
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 6,
+      "source_only": 2,
+      "structural": 16
+    },
+    "term_status_counts": {
+      "admitted": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "commissioned": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "corrected": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "dated": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "located": {
+        "structural": 3
+      },
+      "prepared": {
+        "source_only": 2,
+        "structural": 1
+      },
+      "presented": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "relied_on": {
+        "structural": 3
+      }
+    }
+  }
+}
