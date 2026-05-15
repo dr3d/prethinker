@@ -12951,6 +12951,7 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
     if predicate in {"before", "after", "add_hours", "elapsed_minutes", "elapsed_hours", "elapsed_days"}:
         return None
     relaxed_args: list[str] = []
+    relaxed_constants: list[dict[str, Any]] = []
     relaxed_count = 0
     for index, arg in enumerate(args, start=1):
         item = str(arg or "").strip()
@@ -12961,7 +12962,9 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
             relaxed_args.append(item)
             continue
         relaxed_count += 1
-        relaxed_args.append(f"Relaxed{index}")
+        variable = f"Relaxed{index}"
+        relaxed_args.append(variable)
+        relaxed_constants.append({"index": index, "variable": variable, "value": item})
     if relaxed_count == 0:
         return None
     relaxed_query = f"{predicate}({', '.join(relaxed_args)})."
@@ -12970,18 +12973,100 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
     result = runtime.query_rows(relaxed_query)
     if result.get("status") != "success":
         return None
+    rows = result.get("rows")
+    token_filtered = _token_subset_filter_relaxed_rows(
+        rows=rows if isinstance(rows, list) else [],
+        relaxed_constants=relaxed_constants,
+    )
+    if token_filtered is not None:
+        result = {
+            **result,
+            "rows": token_filtered["rows"],
+            "num_rows": len(token_filtered["rows"]),
+        }
+    reasoning_basis = {
+        "kind": "core-local",
+        "note": "diagnostic relaxed query synthesized after an over-bound structured query returned no results",
+        "original_query": text,
+    }
+    if token_filtered is not None:
+        reasoning_basis.update(
+            {
+                "token_subset_filter": True,
+                "unfiltered_num_rows": token_filtered["unfiltered_num_rows"],
+                "filtered_num_rows": len(token_filtered["rows"]),
+                "filtered_constants": token_filtered["filtered_constants"],
+            }
+        )
     return {
         "query": relaxed_query,
         "result": {
             **result,
-            "reasoning_basis": {
-                "kind": "core-local",
-                "note": "diagnostic relaxed query synthesized after an over-bound structured query returned no results",
-                "original_query": text,
-            },
+            "reasoning_basis": reasoning_basis,
         },
         "derived_from_queries": [text],
     }
+
+
+def _token_subset_filter_relaxed_rows(
+    *,
+    rows: list[Any],
+    relaxed_constants: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if not rows or not relaxed_constants:
+        return None
+    filter_specs: list[dict[str, Any]] = []
+    for item in relaxed_constants:
+        value = str(item.get("value", "")).strip()
+        tokens = _query_atom_tokens(value)
+        if len(tokens) < 2:
+            continue
+        filter_specs.append({**item, "tokens": tokens})
+    if not filter_specs:
+        return None
+
+    filtered_rows: list[Any] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        matched_all = True
+        for spec in filter_specs:
+            variable = str(spec.get("variable", ""))
+            row_tokens = _query_atom_tokens(str(row.get(variable, "")))
+            if not row_tokens:
+                matched_all = False
+                break
+            spec_tokens = set(spec["tokens"])
+            row_token_set = set(row_tokens)
+            if not (spec_tokens <= row_token_set or row_token_set <= spec_tokens):
+                matched_all = False
+                break
+        if matched_all:
+            filtered_rows.append(row)
+    if not filtered_rows or len(filtered_rows) >= len(rows):
+        return None
+    return {
+        "rows": filtered_rows,
+        "unfiltered_num_rows": len(rows),
+        "filtered_constants": [
+            {
+                "index": int(spec["index"]),
+                "variable": str(spec["variable"]),
+                "value": str(spec["value"]),
+                "tokens": list(spec["tokens"]),
+            }
+            for spec in filter_specs
+        ],
+    }
+
+
+def _query_atom_tokens(value: str) -> list[str]:
+    tokens = [
+        token
+        for token in re.split(r"[^a-z0-9]+", str(value or "").casefold())
+        if token and token not in GENERIC_QUERY_PLACEHOLDERS
+    ]
+    return tokens
 
 
 def _negative_join_with_previous(

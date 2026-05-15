@@ -2032,6 +2032,27 @@ def test_relaxed_constant_query_recovers_over_bound_atom_drift() -> None:
     ]
 
 
+def test_relaxed_constant_query_filters_token_subset_matches() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "located_at(ex_001, safestore_vault).",
+        "located_at(ex_002, estate_warehouse_bay_4).",
+        "located_at(ex_003, northpoint_regional_museum).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    exact = runtime.query_rows("located_at(Item, safestore_vault_services).")
+    assert exact["status"] == "no_results"
+
+    relaxed = _relaxed_constant_query(runtime, query="located_at(Item, safestore_vault_services).")
+
+    assert relaxed is not None
+    assert relaxed["result"]["status"] == "success"
+    assert relaxed["result"]["reasoning_basis"]["token_subset_filter"] is True
+    assert relaxed["result"]["reasoning_basis"]["unfiltered_num_rows"] == 3
+    assert relaxed["result"]["rows"] == [{"Item": "ex_001", "Relaxed2": "safestore_vault"}]
+
+
 def test_run_query_plan_derives_recall_classification_at_date() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
