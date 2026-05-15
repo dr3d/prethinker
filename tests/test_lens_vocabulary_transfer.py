@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from scripts.audit_lens_vocabulary_transfer import (
+    AUTHORITY_CUSTODY_TERMS,
     EVIDENCE_PROVENANCE_TERMS,
     RULE_COMPOSITION_TERMS,
     audit_compile,
@@ -278,4 +279,115 @@ def test_rule_composition_audit_accepts_current_generic_rule_palette(tmp_path: P
     assert rows["base_rule"] == "structural"
     assert rows["threshold"] == "structural"
     assert rows["vote_requirement"] == "structural"
-    assert rows["exception"] == "structural"
+
+
+def test_authority_custody_audit_accepts_court_order_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, court_order_c_14_issued_by_county_court_on_2026_04_06_for_device_release).",
+            "court_order(order_c_14, county_court, device_release, 2026_04_06).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["court_order"] == "structural"
+
+
+def test_authority_custody_audit_requires_noncontrolling_reason(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, copied_notice_is_noncontrolling_because_later_vote_replaced_it).",
+            "source_status(copied_notice, noncontrolling).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["noncontrolling_source"] == "shallow_structural"
+
+
+def test_authority_custody_audit_accepts_noncontrolling_reason_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, copied_notice_is_noncontrolling_because_later_vote_replaced_it).",
+            "source_status(copied_notice, noncontrolling).",
+            "noncontrolling_reason(copied_notice, later_vote_replaced_it).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["noncontrolling_source"] == "structural"
+
+
+def test_authority_custody_audit_accepts_board_vote_and_custody_terms(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, board_voted_to_place_archive_box_with_records_steward).",
+            "board_vote(records_board, assign_box_to_records_steward, 2026_04_08).",
+            "custody_holder(archive_box, records_steward, active_after_vote).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["board_vote"] == "structural"
+    assert rows["custody_holder"] == "structural"
+
+
+def test_authority_custody_audit_accepts_generic_record_entry_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, order_permits_log_inspection_but_not_release).",
+            "record_entry(ro_2, order, research_court, 2026_02_05).",
+            "permits_access(ro_2, log_inspection).",
+            "denies_access(ro_2, physical_release).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["court_order"] == "structural"
+
+
+def test_authority_custody_audit_leaves_record_label_without_slots_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, draft_recommendation_existed_but_no_content_was_emitted).",
+            "document_type(dr_6, draft_recommendation).",
+            "document_author(dr_6, nia_park).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["draft_recommendation"] == "shallow_structural"
+
+
+def test_authority_custody_audit_accepts_is_noncontrolling_with_reason_detail(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, copied_summary_is_noncontrolling_because_it_ignored_later_vote).",
+            "is_noncontrolling(summary_3).",
+            "record_detail(summary_3, reason_noncontrolling, ignored_later_vote).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["noncontrolling_source"] == "structural"

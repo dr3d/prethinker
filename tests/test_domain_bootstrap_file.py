@@ -136,9 +136,14 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
     assert "source actor/author" in context
     assert "governed subject/item/claim/action" in context
     assert "Evidence provenance slot contract" in context
+    assert "Authority and custody slot contract" in context
+    assert "Authority record-detail rule" in context
     assert "artifact/source id" in context
     assert "recipient, admitting body, relying body, or presentation context" in context
     assert "role-only, recipient-only, or context-only rows" in context
+    assert "reason a source is noncontrolling" in context
+    assert "draft recommendation, staff note, official record, and controlling finding" in context
+    assert "Type, author, date, and status alone are shallow record metadata" in context
 
     selected = "\n".join(
         _source_compiler_context(
@@ -149,6 +154,18 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
 
     assert "source_authority_audit_strategy_v1" in selected
     assert "numeric counts, publication years, date ranges" in selected
+
+
+def test_compile_surface_invariants_keep_authority_custody_ladder_slots() -> None:
+    context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+
+    assert "authority or custody ladder" in context
+    assert "court order with issuer, content/action, date, and scope" in context
+    assert "governing rule with rule, jurisdiction/body, and applicable condition" in context
+    assert "noncontrolling source with source, content, and reason noncontrolling" in context
+    assert "custody/access control with holder or access actor" in context
+    assert "authority/custody record metadata is not enough by itself" in context
+    assert "same-anchor content/effect/scope/condition/decision/governed-subject/reason rows" in context
 
 
 def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:

@@ -119,7 +119,71 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
     ),
 )
 
+AUTHORITY_CUSTODY_TERMS: tuple[LensTerm, ...] = (
+    LensTerm(
+        "court_order",
+        ("court", "order", "injunction", "judgment"),
+        3,
+        ("court_order", "court_.*order", "order_issued_by", "legal_order", "injunction_order"),
+    ),
+    LensTerm(
+        "governing_rule",
+        ("governing", "rule", "policy", "bylaw", "ordinance"),
+        3,
+        ("governing_rule", "rule_governs", "applicable_rule", "policy_rule", "ordinance_rule"),
+    ),
+    LensTerm(
+        "board_vote",
+        ("board", "vote", "voted", "decision"),
+        3,
+        ("board_vote", "body_vote", "vote_decision", "board_decision", "approved_by_vote"),
+    ),
+    LensTerm(
+        "official_record",
+        ("official", "record", "registry", "register", "filed"),
+        3,
+        ("official_record", "record_status", "registry_record", "filed_record", "register_entry"),
+    ),
+    LensTerm(
+        "staff_note",
+        ("staff", "note", "memo"),
+        3,
+        ("staff_note", "staff_memo", "memo_by", "note_by", "staff_record"),
+    ),
+    LensTerm(
+        "draft_recommendation",
+        ("draft", "recommendation", "recommended", "proposed"),
+        3,
+        ("draft_recommendation", "recommendation_status", "recommended_by", "proposed_by", "draft_proposal"),
+    ),
+    LensTerm(
+        "controlling_finding",
+        ("controlling", "finding", "binding", "final"),
+        3,
+        ("controlling_finding", "binding_finding", "final_finding", "controlling_source", "effective_authority"),
+    ),
+    LensTerm(
+        "noncontrolling_source",
+        ("noncontrolling", "advisory", "copied", "superseded", "rejected"),
+        3,
+        ("noncontrolling_source", "advisory_source", "superseded_source", "rejected_source"),
+    ),
+    LensTerm(
+        "custody_holder",
+        ("custody", "custodian", "holder", "held"),
+        2,
+        ("custody_holder", "custodian_for", "held_by", "custody_of", "custody_assignment"),
+    ),
+    LensTerm(
+        "access_control",
+        ("access", "permission", "release", "unlock"),
+        2,
+        ("access_control", "access_controller", "access_permission", "release_authority", "permission_source", "unlock_authority"),
+    ),
+)
+
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
+    "authority_custody": AUTHORITY_CUSTODY_TERMS,
     "evidence_provenance": EVIDENCE_PROVENANCE_TERMS,
     "rule_composition": RULE_COMPOSITION_TERMS,
 }
@@ -326,6 +390,14 @@ def _shallow_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) ->
 
 
 def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term == "noncontrolling_source":
+        special = _noncontrolling_source_contract_rows(direct_rows)
+        if special:
+            return special
+    if term.term in AUTHORITY_CUSTODY_TERM_NAMES:
+        special = _authority_record_contract_rows(term, direct_rows)
+        if special:
+            return special
     if term.term == "exception":
         special = _rule_exception_link_contract_rows(direct_rows)
         if special:
@@ -344,6 +416,14 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
 
 
 def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term == "noncontrolling_source":
+        special = _partial_noncontrolling_source_rows(direct_rows)
+        if special:
+            return special
+    if term.term in AUTHORITY_CUSTODY_TERM_NAMES:
+        special = _partial_authority_record_rows(term, direct_rows)
+        if special:
+            return special
     if term.term == "exception":
         special = _partial_rule_exception_link_rows(direct_rows)
         if special:
@@ -455,6 +535,181 @@ def _rows_by_anchor(direct_rows: list[dict[str, Any]], predicates: tuple[str, ..
             continue
         out.setdefault(str(row["args"][0]), []).append(str(row["fact"]))
     return out
+
+
+NONCONTROLLING_TOKENS = {"noncontrolling", "non_controlling", "advisory", "copied", "superseded", "rejected"}
+AUTHORITY_CUSTODY_TERM_NAMES = {term.term for term in AUTHORITY_CUSTODY_TERMS}
+AUTHORITY_TYPE_TOKENS: dict[str, set[str]] = {
+    "court_order": {"court_order", "order", "injunction", "judgment"},
+    "governing_rule": {"governing_rule", "rule", "bylaw", "policy", "ordinance"},
+    "board_vote": {"board_vote", "vote", "committee_vote"},
+    "official_record": {"official_record", "official_equipment_register", "register", "registry", "chain_of_custody"},
+    "staff_note": {"staff_note", "note", "memo"},
+    "draft_recommendation": {"draft_recommendation", "draft", "proposal", "recommendation"},
+    "controlling_finding": {"controlling_finding", "finding", "final_finding"},
+}
+AUTHORITY_SUPPORT_PREDICATES = {
+    "access_condition",
+    "access_denied",
+    "access_granted",
+    "conflict_resolved_by",
+    "denies_access",
+    "denies_authority",
+    "document_content",
+    "permits_access",
+    "record_detail",
+    "register_entry",
+    "rule_condition",
+    "rule_effect",
+    "rule_governs",
+    "vote_result",
+}
+AUTHORITY_METADATA_PREDICATES = {
+    "authority_level",
+    "document_author",
+    "document_date",
+    "document_status",
+    "document_type",
+    "epistemic_status",
+    "is_controlling",
+    "record_entry",
+}
+
+
+def _noncontrolling_source_contract_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    reason_rows = _rows_by_anchor(
+        direct_rows,
+        (
+            "noncontrolling_reason",
+            "non_controlling_reason",
+            "source_reason",
+            "authority_reason",
+            "status_reason",
+        ),
+    )
+    record_detail_reasons = _record_detail_rows_by_field(
+        direct_rows,
+        {"reason_noncontrolling", "reason_non_controlling", "source_of", "source_of_copy"},
+    )
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate in {"noncontrolling_source", "non_controlling_source", "advisory_source", "superseded_source", "rejected_source"}:
+            if len(row["args"]) >= 3:
+                return [str(row["fact"])]
+            if row["args"] and reason_rows.get(str(row["args"][0])):
+                return [str(row["fact"]), reason_rows[str(row["args"][0])][0]]
+        if predicate == "is_noncontrolling" and row["args"]:
+            anchor = str(row["args"][0])
+            if record_detail_reasons.get(anchor):
+                return [str(row["fact"]), record_detail_reasons[anchor][0]]
+            continue
+        if predicate not in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "epistemic_status"}:
+            continue
+        if not _row_mentions_noncontrolling_status(row):
+            continue
+        if len(row["args"]) >= 3:
+            return [str(row["fact"])]
+        if row["args"] and reason_rows.get(str(row["args"][0])):
+            return [str(row["fact"]), reason_rows[str(row["args"][0])][0]]
+        if row["args"] and record_detail_reasons.get(str(row["args"][0])):
+            return [str(row["fact"]), record_detail_reasons[str(row["args"][0])][0]]
+    return []
+
+
+def _partial_noncontrolling_source_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate in {"noncontrolling_source", "non_controlling_source", "advisory_source", "superseded_source", "rejected_source"} and len(row["args"]) < 3:
+            out.append(str(row["fact"]))
+        elif predicate == "is_noncontrolling" and row["args"]:
+            out.append(str(row["fact"]))
+        elif predicate in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "epistemic_status"} and _row_mentions_noncontrolling_status(row) and len(row["args"]) < 3:
+            out.append(str(row["fact"]))
+    return out
+
+
+def _row_mentions_noncontrolling_status(row: dict[str, Any]) -> bool:
+    tokens = set(TOKEN_RE.findall(" ".join(str(arg).lower() for arg in row.get("args", []))))
+    return bool(tokens & NONCONTROLLING_TOKENS)
+
+
+def _authority_record_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term not in AUTHORITY_TYPE_TOKENS:
+        return []
+    for anchor, typed_row in _authority_typed_records(term, direct_rows):
+        support_rows = _authority_support_rows(anchor, direct_rows)
+        if not support_rows:
+            continue
+        if term.term == "court_order" and not _anchor_has_court_status(anchor, typed_row, direct_rows):
+            continue
+        return [typed_row, *support_rows[:3]]
+    return []
+
+
+def _partial_authority_record_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term not in AUTHORITY_TYPE_TOKENS:
+        return []
+    out: list[str] = []
+    for anchor, typed_row in _authority_typed_records(term, direct_rows):
+        support_rows = _authority_support_rows(anchor, direct_rows)
+        if support_rows:
+            continue
+        out.append(typed_row)
+    return out
+
+
+def _authority_typed_records(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    target_tokens = AUTHORITY_TYPE_TOKENS.get(term.term, set())
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        args = [str(arg).lower() for arg in row["args"]]
+        if predicate == "document_type" and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
+            out.append((str(row["args"][0]), str(row["fact"])))
+        elif predicate == "record_entry" and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
+            out.append((str(row["args"][0]), str(row["fact"])))
+    return out
+
+
+def _authority_support_rows(anchor: str, direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate in AUTHORITY_METADATA_PREDICATES:
+            continue
+        if predicate not in AUTHORITY_SUPPORT_PREDICATES:
+            continue
+        if row["args"] and str(row["args"][0]) == anchor:
+            out.append(str(row["fact"]))
+    return out
+
+
+def _anchor_has_court_status(anchor: str, typed_row: str, direct_rows: list[dict[str, Any]]) -> bool:
+    if "court" in typed_row.lower():
+        return True
+    for row in direct_rows:
+        if not row["args"] or str(row["args"][0]) != anchor:
+            continue
+        if "court" in " ".join(str(arg).lower() for arg in row["args"]):
+            return True
+    return False
+
+
+def _record_detail_rows_by_field(direct_rows: list[dict[str, Any]], fields: set[str]) -> dict[str, list[str]]:
+    out: dict[str, list[str]] = {}
+    for row in direct_rows:
+        if str(row["predicate"]).lower() != "record_detail" or len(row["args"]) < 2:
+            continue
+        if str(row["args"][1]).lower() in fields:
+            out.setdefault(str(row["args"][0]), []).append(str(row["fact"]))
+    return out
+
+
+def _value_has_any_token(value: str, tokens: set[str]) -> bool:
+    normalized = str(value).lower()
+    value_tokens = set(TOKEN_RE.findall(normalized))
+    return normalized in tokens or bool(value_tokens & tokens)
 
 
 def _predicate_matches(term: LensTerm, predicate: str, predicate_tokens: set[str]) -> bool:

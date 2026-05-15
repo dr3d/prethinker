@@ -729,3 +729,224 @@ Decision:
 Rule composition is calibrated enough for this pass. The next lens vocabulary
 audit should move to authority/custody rather than continuing to chase the last
 rank-only precedence cases in this same probe set.
+
+## LV-005 - Authority/Custody Slot Contracts
+
+Date: 2026-05-15
+
+Question:
+
+Does the authority/custody vocabulary transfer to unlike documents, and can its
+terms be audited with slot contracts rather than surface labels?
+
+Before:
+
+The source-authority work from CSS had already improved compile guidance for
+orders, board decisions, controlling findings, and custody/access states. What
+had not been checked was the lens vocabulary admission layer. The worry was
+that terms such as `court_order`, `governing_rule`, `board_vote`,
+`official_record`, `staff_note`, `draft_recommendation`,
+`controlling_finding`, `noncontrolling_source`, `custody_holder`, and
+`access_control` might fire because of familiar labels rather than because the
+compiler preserved the governing slots.
+
+Prediction:
+
+Authority/custody should look different from evidence provenance and rule
+composition. Its terms form a ladder of authority and custody states:
+draft/staff/official/controlling/noncontrolling plus holder/access surfaces. The
+right audit should therefore be stricter than QA. It should accept direct
+relations such as item+custody-holder or item+access-controller, and it should
+also accept transferable linked record contracts such as
+`record_entry(Source, Type, Body, Date)` plus answer-bearing
+`record_detail/3`, access, rule, vote, or content rows. A label-only
+`document_type(Source, court_order)` should remain shallow unless the governed
+action/scope/reason is also queryable.
+
+Intervention:
+
+- Added the `authority_custody` lens vocabulary to
+  `scripts/audit_lens_vocabulary_transfer.py`.
+- Added a noncontrolling-source contract that requires the source plus either
+  an in-row reason/content slot or a linked reason detail. A bare
+  `source_status(Source, noncontrolling)` remains shallow.
+- Added generic record-entry/document-type linked contracts for authority
+  records. This accepts unlike, transferable palettes such as
+  `record_entry/4 + record_detail/3`, not just named predicates.
+- Tightened source-authority and compile-surface guidance to preserve authority
+  and custody ladder slots: source/body, governed subject/claim/action/item,
+  authority status or precedence, scope/date, custody/access actor, and reason
+  noncontrolling when stated.
+- Built three fresh unlike fixtures:
+  `clinic_device_custody`, `housing_archive_access`, and `lab_sample_chain`.
+
+After:
+
+Compile:
+
+- fixtures=`3`
+- parsed_ok=`3`
+- candidate predicates=`54`
+- admitted/skipped=`348 / 27`
+
+Lens audit:
+
+- `structural=18`
+- `shallow_structural=11`
+- `source_only=1`
+- `not_applicable=0`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | Reading |
+| --- | ---: | ---: | ---: | --- |
+| `access_control` | 3 | 0 | 0 | Stable. Direct access-controller/access-permission surfaces transfer. |
+| `custody_holder` | 3 | 0 | 0 | Stable. Item+holder is a legitimate compact relation when stated. |
+| `board_vote` | 2 | 1 | 0 | Mostly structural; one compile preserved vote effects without full vote source/body/date. |
+| `governing_rule` | 2 | 1 | 0 | Mostly structural; one bylaw-style source lacked anchored rule content. |
+| `official_record` | 2 | 1 | 0 | Mostly structural; one official label lacked enough governed content. |
+| `staff_note` | 2 | 1 | 0 | Mostly structural; one note was typed without recommendation content. |
+| `draft_recommendation` | 1 | 2 | 0 | Weakest recommendation surface; labels often survived without effect/status slots. |
+| `controlling_finding` | 1 | 2 | 0 | Controlling status often survived, but finding scope/content remained thin. |
+| `court_order` | 1 | 2 | 0 | Strict by design; order label alone does not pass without governed access/action rows. |
+| `noncontrolling_source` | 1 | 1 | 1 | Reason-bearing noncontrol transfers, but copied/superseded reasons are still fragile. |
+
+QA:
+
+- questions=`30`
+- exact/partial/miss=`30 / 0 / 0`
+- helper rows=`0`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_slot_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_slot_contract_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_qa_summary_20260515.json`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/`
+- `tmp/lens_vocab_authority_custody_compile_20260515`
+- `tmp/lens_vocab_authority_custody_qa_20260515`
+
+Verification:
+
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_domain_bootstrap_file.py -q` -> `51 passed`
+
+Lesson:
+
+Authority/custody confirms the distinction between answerability and vocabulary
+resolution. The system can answer the unlike fixture questions perfectly with
+zero helper rows, but the lens audit still exposes shallow terms where the
+compiler preserved a source label or authority status without the governed
+action, scope, or noncontrol reason. That is the correct calibration. The
+architecture should not treat `court_order` or `controlling_finding` as earned
+just because those words reached a type slot.
+
+Next pressure:
+
+The strongest remaining pressure is not helper delivery. It is authority-ladder
+resolution: draft recommendation content/effect, controlling finding
+scope/content, court-order governed action/scope, and noncontrolling reason
+should survive as linked rows when stated. A focused follow-on should strengthen
+those compile surfaces and then replay the same three fixtures. After that, the
+next lens-vocabulary candidate is operational record status.
+
+## LV-006 - Authority Record-Detail Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does an explicit record-detail invariant reduce authority/custody shallow terms
+on the same three unlike probes?
+
+Before:
+
+LV-005 established that QA can be perfect while vocabulary resolution remains
+thin. The shallow terms were not random. They clustered around authority record
+metadata: `court_order`, `official_record`, `draft_recommendation`,
+`controlling_finding`, and `noncontrolling_source`. The compiler often emitted
+type/status rows but not a same-anchor governed action, scope, content, or
+reason row.
+
+Prediction:
+
+Adding one compact invariant should help if the failure is simply that the
+compiler needs a stronger reminder to pair authority record metadata with
+same-anchor details. If the result is stochastic or palette-sensitive, the
+audit may not improve monotonically even if QA remains stable.
+
+Intervention:
+
+Added an authority record-detail rule to both the source-authority context and
+the global compile-surface invariant context:
+
+- when emitting `document_type/2` or `record_entry/4` for an order, rule, vote,
+  finding, note, draft, register, copied notice, or custody/access source,
+  pair it with same-anchor content/effect/scope/condition/decision/governed
+  subject/reason rows when those details are stated;
+- type, author, date, and status alone remain shallow record metadata.
+
+After:
+
+Compile:
+
+- fixtures=`3`
+- parsed_ok=`3`
+- candidate predicates=`53`
+- admitted/skipped=`395 / 43`
+
+Lens audit:
+
+- before=`18 structural / 11 shallow / 1 source-only`
+- after=`16 structural / 13 shallow / 1 source-only`
+
+Term changes:
+
+- `governing_rule`: `2 structural / 1 shallow` -> `3 structural / 0 shallow`
+- `controlling_finding`: `1 structural / 2 shallow` -> `2 structural / 1 shallow`
+- `noncontrolling_source`: `1 structural / 1 shallow / 1 source-only` -> `0 structural / 2 shallow / 1 source-only`
+- `official_record`: `2 structural / 1 shallow` -> `0 structural / 3 shallow`
+- `access_control`: `3 structural / 0 shallow` -> `2 structural / 1 shallow`
+
+QA:
+
+- questions=`30`
+- exact/partial/miss=`30 / 0 / 0`
+- helper rows=`0`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_record_detail_qa_summary_20260515.json`
+- `tmp/lens_vocab_authority_custody_record_detail_compile_20260515`
+- `tmp/lens_vocab_authority_custody_record_detail_qa_20260515`
+
+Verification:
+
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_domain_bootstrap_file.py -q` -> `51 passed`
+
+Lesson:
+
+The record-detail invariant is directionally right but not enough to treat as a
+landed repair. It improved governed-rule and controlling-finding resolution but
+lost structural credit on official-record and noncontrolling-source terms under
+a fresh stochastic compile. QA stayed perfect with zero helper rows. The
+scientific reading is that authority/custody is palette-sensitive: the same
+source can compile into multiple generic record grammars that answer correctly,
+but the lens audit only sees transfer-stable structure when the source row and
+its governed detail share an anchor.
+
+Next pressure:
+
+Do not chase this with fixture-shaped record names. The next useful move is to
+make the authority record-detail invariant executable at the audit/contract
+level for more generic palettes, especially official-register and copied-source
+reason rows, then run a two-draw replay only if the contract change is clearly
+generic. Otherwise switch to operational record status as the next lens and
+return to authority/custody with a larger transfer set.

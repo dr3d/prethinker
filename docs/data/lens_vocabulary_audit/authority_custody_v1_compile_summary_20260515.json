@@ -1,0 +1,69 @@
+{
+  "generated": "2026-05-15T12:53:24.336239+00:00",
+  "lanes": 3,
+  "base_timeout": 900,
+  "effective_timeout": 2700,
+  "fixture_count": 3,
+  "parsed_ok_count": 3,
+  "totals": {
+    "candidate_predicates": 54,
+    "compile_admitted": 348,
+    "compile_skipped": 27
+  },
+  "results": [
+    {
+      "fixture": "clinic_device_custody",
+      "returncode": 0,
+      "started": "2026-05-15T12:45:12.310579+00:00",
+      "finished": "2026-05-15T12:50:08.228116+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\clinic_device_custody",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\clinic_device_custody\\domain_bootstrap_file_20260515T125008201116Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 14,
+        "compile_admitted": 72,
+        "compile_skipped": 1,
+        "rough_score": 0.944,
+        "risk_count": 5
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\clinic_device_custody\\domain_bootstrap_file_20260515T125008201116Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\clinic_device_custody\\domain_bootstrap_file_20260515T125008201116Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 14, \"compile_admitted\": 72, \"compile_skipped\": 1, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 4, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 14, \"repeated_structure_count\": 1, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 5, \"rough_score\": 0.944, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "housing_archive_access",
+      "returncode": 0,
+      "started": "2026-05-15T12:45:12.310579+00:00",
+      "finished": "2026-05-15T12:53:24.336239+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\housing_archive_access",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\housing_archive_access\\domain_bootstrap_file_20260515T125324303723Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 19,
+        "compile_admitted": 143,
+        "compile_skipped": 6,
+        "rough_score": 0.778,
+        "risk_count": 5
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\housing_archive_access\\domain_bootstrap_file_20260515T125324303723Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\housing_archive_access\\domain_bootstrap_file_20260515T125324303723Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 19, \"compile_admitted\": 143, \"compile_skipped\": 6, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 5, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 1, \"frontier_unknown_positive_predicate_refs\": [\"document_metadata/4\"], \"generic_predicate_count\": 0, \"predicate_count\": 19, \"repeated_structure_count\": 2, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [\"access_rule/2\", \"document_metadata/4\"], \"risk_count\": 5, \"rough_score\": 0.778, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "lab_sample_chain",
+      "returncode": 0,
+      "started": "2026-05-15T12:45:12.310579+00:00",
+      "finished": "2026-05-15T12:52:36.446246+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\lab_sample_chain",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\lab_sample_chain\\domain_bootstrap_file_20260515T125236415358Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 21,
+        "compile_admitted": 133,
+        "compile_skipped": 20,
+        "rough_score": 0.806,
+        "risk_count": 5
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\lab_sample_chain\\domain_bootstrap_file_20260515T125236415358Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_authority_custody_compile_20260515\\lab_sample_chain\\domain_bootstrap_file_20260515T125236415358Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 21, \"compile_admitted\": 133, \"compile_skipped\": 20, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 3, \"frontier_case_count\": 7, \"frontier_unknown_positive_predicate_count\": 1, \"frontier_unknown_positive_predicate_refs\": [\"overridden_by/1\"], \"generic_predicate_count\": 0, \"predicate_count\": 21, \"repeated_structure_count\": 1, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 5, \"rough_score\": 0.806, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ]
+}
