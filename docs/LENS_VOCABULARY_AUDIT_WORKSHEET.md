@@ -2107,3 +2107,145 @@ Next pressure:
 Close this epistemic pass after full verification. Move the lens audit framework
 to the next vocabulary family, or separately design a generic change-event
 surface if the same before/after partial recurs outside this probe.
+
+## LV-018 - Entity/Role Vocabulary Initial Transfer
+
+Date: 2026-05-15
+
+Question:
+
+Can the lens-vocabulary audit framework transfer to the entity/role family
+without teaching it old fixture identities, roster nouns, or question-answer
+vocabulary?
+
+Before:
+
+The audit framework covered five vocabulary families:
+
+- evidence provenance;
+- rule composition;
+- authority/custody;
+- operational record/status;
+- epistemic uncertainty.
+
+Entity/role was present in the semantic roster and guard ledger, but it had no
+compile-artifact vocabulary audit. This was a gap because current boundary
+work repeatedly surfaced alias splits, role-holder questions, membership
+changes, custody/ownership distinctions, family/guardian distinctions, and
+responsibility-vs-supervision distinctions.
+
+Prediction:
+
+If entity/role is a real structural family, unlike probes should be answerable
+with zero helper rows. The vocabulary audit may start under-recognizing the
+direct facts because the compiler uses a broad generic palette (`has_alias`,
+`is_same_person`, `held_role`, `owns`, `has_custody`, `responsible_for`,
+`is_family_member`) rather than one frozen predicate vocabulary.
+
+Intervention:
+
+Added `entity_role` to the lens vocabulary audit with nine terms:
+
+- `alias`
+- `identity_equivalence`
+- `role_holder`
+- `role_transition`
+- `membership`
+- `ownership`
+- `custody`
+- `responsibility`
+- `family_relationship`
+
+Added three unlike probes:
+
+- `badge_role_alias`: badge/person equivalence, scoped alias, temporary and
+  standing role holders, responsibility, supervision, and team ownership.
+- `membership_transition_ownership`: join/leave membership language, role
+  replacement, custody separate from ownership, and separate responsibility.
+- `family_guardian_custody`: parent vs temporary guardian, nickname alias,
+  wristband assignment, custody vs ownership, and responsibility without
+  custody.
+
+Ran compile and no-helper QA with OpenRouter at six lanes.
+
+Initial audit result:
+
+- `9 structural / 7 shallow / 4 source-only / 7 N/A`
+
+Then tightened only the audit admission vocabulary, not compile guidance:
+
+- `has_alias` counts as alias;
+- `is_same_person` counts as identity equivalence;
+- `held_role` counts as role-holder evidence;
+- `owns`/`owned_by` count as ownership;
+- `has_custody`/`has_custody_of` count as custody;
+- two-slot `responsible_for`/`supervised` rows count as responsibility;
+- two-slot `is_family_member` rows count as family relationship.
+
+After:
+
+Compile:
+
+- fixtures=`3`
+- parsed OK=`3`
+- candidate predicates=`38`
+- admitted/skipped=`103 / 11`
+- rough scores=`0.861` to `0.889`
+
+No-helper QA:
+
+- questions=`24`
+- exact/partial/miss=`24 / 0 / 0`
+- helper rows=`0`
+
+Contract audit after recognition:
+
+- `16 structural / 2 shallow / 2 source-only / 7 N/A`
+- `alias`, `identity_equivalence`, `role_holder`, `ownership`, `custody`,
+  `responsibility`, and `family_relationship` all have structural hits.
+- Remaining residue:
+  - `membership` remains shallow/source-only because join/leave language is
+    compiled through role rows and relative-time anchors rather than direct
+    membership-transition rows.
+  - `role_transition` remains source-only in the replacement probe because the
+    compile emitted current/previous role facts and cessation, but not a direct
+    replacement relation binding predecessor, successor, role, and scope.
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/entity_role_v1/`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/entity_role_v1_contract_audit_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `42 passed`
+- `python -m pytest tests -q` -> `1239 passed, 2 subtests passed`
+
+Lesson:
+
+Entity/role behaves like the other mature vocabulary families: QA can be fully
+inside the set while vocabulary admission starts conservative. The right first
+repair was not compile guidance. It was recognizing generic predicate families
+that already encode the required slots.
+
+The remaining residue is meaningful and should not be hidden by looser audit
+terms. Membership and role-transition require direct change contracts: member,
+group, join/leave state, time/scope; predecessor, successor, role, scope, and
+effective interval. Those are not entity names. They are reusable transition
+slots, and they rhyme with the change-event/delta pressure surfaced in LV-017.
+
+Next pressure:
+
+Do not broaden entity/role guidance from this first pass. The emerging shared
+pressure is a generic transition/delta contract across entity/role,
+operational-status, and document supersession. Build one focused transition
+probe only if we see the same before/after residue recur again; otherwise move
+the lens audit framework to the next roster family.

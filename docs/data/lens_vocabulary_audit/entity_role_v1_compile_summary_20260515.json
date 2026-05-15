@@ -1,0 +1,69 @@
+{
+  "generated": "2026-05-15T18:32:34.115565+00:00",
+  "lanes": 6,
+  "base_timeout": 900,
+  "effective_timeout": 5400,
+  "fixture_count": 3,
+  "parsed_ok_count": 3,
+  "totals": {
+    "candidate_predicates": 38,
+    "compile_admitted": 103,
+    "compile_skipped": 11
+  },
+  "results": [
+    {
+      "fixture": "badge_role_alias",
+      "returncode": 0,
+      "started": "2026-05-15T18:29:26.159356+00:00",
+      "finished": "2026-05-15T18:32:23.602749+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\badge_role_alias",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\badge_role_alias\\domain_bootstrap_file_20260515T183223581741Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 12,
+        "compile_admitted": 26,
+        "compile_skipped": 3,
+        "rough_score": 0.889,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\badge_role_alias\\domain_bootstrap_file_20260515T183223581741Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\badge_role_alias\\domain_bootstrap_file_20260515T183223581741Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 12, \"compile_admitted\": 26, \"compile_skipped\": 3, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 8, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 12, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "family_guardian_custody",
+      "returncode": 0,
+      "started": "2026-05-15T18:29:26.159356+00:00",
+      "finished": "2026-05-15T18:32:07.371135+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\family_guardian_custody",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\family_guardian_custody\\domain_bootstrap_file_20260515T183207348135Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 12,
+        "compile_admitted": 38,
+        "compile_skipped": 4,
+        "rough_score": 0.861,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\family_guardian_custody\\domain_bootstrap_file_20260515T183207348135Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\family_guardian_custody\\domain_bootstrap_file_20260515T183207348135Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 12, \"compile_admitted\": 38, \"compile_skipped\": 4, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 3, \"frontier_case_count\": 8, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 12, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.861, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "membership_transition_ownership",
+      "returncode": 0,
+      "started": "2026-05-15T18:29:26.160357+00:00",
+      "finished": "2026-05-15T18:32:34.115565+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\membership_transition_ownership",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\membership_transition_ownership\\domain_bootstrap_file_20260515T183234091558Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 14,
+        "compile_admitted": 39,
+        "compile_skipped": 4,
+        "rough_score": 0.889,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\membership_transition_ownership\\domain_bootstrap_file_20260515T183234091558Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\membership_transition_ownership\\domain_bootstrap_file_20260515T183234091558Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 14, \"compile_admitted\": 39, \"compile_skipped\": 4, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 14, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

@@ -1,0 +1,475 @@
+{
+  "compile_count": 3,
+  "lens": "entity_role",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\badge_role_alias\\domain_bootstrap_file_20260515T183223581741Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 18,
+      "fixture": "badge_role_alias",
+      "lens": "entity_role",
+      "parsed_ok": true,
+      "run": "lens_vocab_entity_role_compile_20260515",
+      "source_record_fact_count": 83,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 2,
+        "source_only": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "alias"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "has_alias(mara_chen, mc_relief, evening_shift)."
+          ],
+          "source_hits": [
+            "alias"
+          ],
+          "status": "structural",
+          "term": "alias"
+        },
+        {
+          "direct_hits": [
+            "same"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "is_same_person(b_41, mara_chen)."
+          ],
+          "source_hits": [
+            "same"
+          ],
+          "status": "structural",
+          "term": "identity_equivalence"
+        },
+        {
+          "direct_hits": [
+            "role"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "held_role(mara_chen, dock_lead, temporary, 18_00_22_00).",
+            "held_role(tomas_iri, dock_lead, standing, evening_window).",
+            "held_role(tomas_iri, dock_lead, standing, 18_00_22_00)."
+          ],
+          "source_hits": [
+            "role",
+            "served"
+          ],
+          "status": "structural",
+          "term": "role_holder"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "role_transition"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "left"
+          ],
+          "status": "source_only",
+          "term": "membership"
+        },
+        {
+          "direct_hits": [
+            "owned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "owned_by(bc_2, receiving_team).",
+            "not_owned_by(bc_2, mara_chen)."
+          ],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "ownership"
+        },
+        {
+          "direct_hits": [
+            "held"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "held_role(mara_chen, dock_lead, temporary, 18_00_22_00).",
+            "held_role(tomas_iri, dock_lead, standing, evening_window).",
+            "held_role(tomas_iri, dock_lead, standing, 18_00_22_00)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "custody"
+        },
+        {
+          "direct_hits": [
+            "responsible"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "responsible_for(mara_chen, checking_the_freezer_seal).",
+            "not_responsible_for(kai_noor, checking_the_freezer_seal).",
+            "responsible_for(mara_chen, checking_freezer_seal)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "responsible"
+          ],
+          "status": "shallow_structural",
+          "term": "responsibility"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "family_relationship"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\family_guardian_custody\\domain_bootstrap_file_20260515T183207348135Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 24,
+      "fixture": "family_guardian_custody",
+      "lens": "entity_role",
+      "parsed_ok": true,
+      "run": "lens_vocab_entity_role_compile_20260515",
+      "source_record_fact_count": 79,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 3,
+        "source_only": 1,
+        "structural": 3
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "alias"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "has_alias(iven_vale, ivy)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "alias"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "identity_equivalence"
+        },
+        {
+          "direct_hits": [
+            "role"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "holds_role(dima_kaur, temporary_workshop_guardian, saturday_workshop)."
+          ],
+          "source_hits": [
+            "role"
+          ],
+          "status": "structural",
+          "term": "role_holder"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "role_transition"
+        },
+        {
+          "direct_hits": [
+            "member"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "is_family_member(nora_vale, iven_vale).",
+            "is_not_family_member(dima_kaur, iven_vale)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "member"
+          ],
+          "status": "shallow_structural",
+          "term": "membership"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "ownership"
+          ],
+          "status": "source_only",
+          "term": "ownership"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "custodian"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "has_custody_of(dima_kaur, medication_pouch).",
+            "is_not_custodian(rafi_sen, medication_pouch)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "custody"
+          ],
+          "status": "shallow_structural",
+          "term": "custody"
+        },
+        {
+          "direct_hits": [
+            "responsible",
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "responsible_for(rafi_sen, checking_the_sign_out_table)."
+          ],
+          "slot_rows": [
+            "assigned_to(w_19, iven_vale, weekend_youth_workshop)."
+          ],
+          "source_hits": [
+            "responsible",
+            "assigned"
+          ],
+          "status": "structural",
+          "term": "responsibility"
+        },
+        {
+          "direct_hits": [
+            "guardian",
+            "family"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "is_family_member(nora_vale, iven_vale).",
+            "is_not_family_member(dima_kaur, iven_vale)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "parent",
+            "guardian",
+            "family"
+          ],
+          "status": "shallow_structural",
+          "term": "family_relationship"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_entity_role_compile_20260515\\membership_transition_ownership\\domain_bootstrap_file_20260515T183234091558Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 23,
+      "fixture": "membership_transition_ownership",
+      "lens": "entity_role",
+      "parsed_ok": true,
+      "run": "lens_vocab_entity_role_compile_20260515",
+      "source_record_fact_count": 82,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 2,
+        "source_only": 2,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "alias"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "identity_equivalence"
+        },
+        {
+          "direct_hits": [
+            "role"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "holds_role(lio_vale, rotation_steward, repair_circle).",
+            "holds_role(nessa_cho, volunteer, saturday_clinics).",
+            "held_role(nessa_cho, rotation_steward, repair_circle).",
+            "role_cessation(nessa_cho, rotation_steward, repair_circle).",
+            "holds_role(nessa_cho, volunteer, clinic)."
+          ],
+          "source_hits": [
+            "role"
+          ],
+          "status": "structural",
+          "term": "role_holder"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "replaced"
+          ],
+          "status": "source_only",
+          "term": "role_transition"
+        },
+        {
+          "direct_hits": [
+            "joined",
+            "left"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "membership",
+            "joined",
+            "left"
+          ],
+          "status": "shallow_structural",
+          "term": "membership"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "ownership",
+            "owned"
+          ],
+          "status": "source_only",
+          "term": "ownership"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "held"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "held_role(nessa_cho, rotation_steward, repair_circle).",
+            "has_custody(lio_vale, tablet_t_8, october_repair_circle_shifts).",
+            "custody_constraint(src_fact_013, return_condition, return_to_desk_drawer_after_each_shift).",
+            "has_custody(lio_vale, tablet_t_8, october_shifts).",
+            "custody_constraint(p_custody_t8, return_location, desk_drawer)."
+          ],
+          "source_hits": [
+            "custody",
+            "held"
+          ],
+          "status": "structural",
+          "term": "custody"
+        },
+        {
+          "direct_hits": [
+            "responsible"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "responsible_for(amir_sol, key_box)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "responsible"
+          ],
+          "status": "shallow_structural",
+          "term": "responsibility"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "family_relationship"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 7,
+      "shallow_structural": 7,
+      "source_only": 4,
+      "structural": 9
+    },
+    "term_status_counts": {
+      "alias": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "custody": {
+        "shallow_structural": 1,
+        "structural": 2
+      },
+      "family_relationship": {
+        "not_applicable": 2,
+        "shallow_structural": 1
+      },
+      "identity_equivalence": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "membership": {
+        "shallow_structural": 2,
+        "source_only": 1
+      },
+      "ownership": {
+        "shallow_structural": 1,
+        "source_only": 2
+      },
+      "responsibility": {
+        "shallow_structural": 2,
+        "structural": 1
+      },
+      "role_holder": {
+        "structural": 3
+      },
+      "role_transition": {
+        "not_applicable": 2,
+        "source_only": 1
+      }
+    }
+  }
+}

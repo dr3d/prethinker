@@ -3,6 +3,7 @@ from pathlib import Path
 
 from scripts.audit_lens_vocabulary_transfer import (
     AUTHORITY_CUSTODY_TERMS,
+    ENTITY_ROLE_TERMS,
     EVIDENCE_PROVENANCE_TERMS,
     EPISTEMIC_UNCERTAINTY_TERMS,
     OPERATIONAL_RECORD_STATUS_TERMS,
@@ -655,3 +656,81 @@ def test_epistemic_uncertainty_audit_accepts_missing_field_contract(tmp_path: Pa
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["unstated"] == "structural"
+
+
+def test_entity_role_audit_accepts_alias_and_role_holder_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, badge_name_is_an_alias_and_mara_served_as_dock_lead).",
+            "alias_of(mara_chen, badge_m17).",
+            "role_holder(dock_lead, mara_chen, 2026_04_01).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="entity_role", terms=ENTITY_ROLE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["alias"] == "structural"
+    assert rows["role_holder"] == "structural"
+
+
+def test_entity_role_audit_requires_role_transition_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, old_dispatch_lead_was_replaced_but_successor_missing).",
+            "role_transition(dispatch_lead, previous_holder).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="entity_role", terms=ENTITY_ROLE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["role_transition"] == "shallow_structural"
+
+
+def test_entity_role_audit_accepts_membership_ownership_and_responsibility_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, inventory_circle_member_owned_cabinet_and_supervised_repair).",
+            "group_member(inventory_circle, jo_ren, active).",
+            "owner_of(cabinet_c9, jo_ren, legal_title).",
+            "responsible_for(jo_ren, repair_check, 2026_04_08).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="entity_role", terms=ENTITY_ROLE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["membership"] == "structural"
+    assert rows["ownership"] == "structural"
+    assert rows["responsibility"] == "structural"
+
+
+def test_entity_role_audit_accepts_current_generic_palette(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, identity_alias_role_custody_family_and_responsibility_rows).",
+            "is_same_person(badge_9, mira_sol).",
+            "has_alias(mira_sol, night_lead, evening_shift).",
+            "held_role(mira_sol, dock_lead, temporary, evening_shift).",
+            "owns(tool_library, tablet_t_8).",
+            "has_custody(mira_sol, tablet_t_8, evening_shift).",
+            "responsible_for(rafi_sen, signout_table).",
+            "is_family_member(nora_vale, iven_vale).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="entity_role", terms=ENTITY_ROLE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["identity_equivalence"] == "structural"
+    assert rows["alias"] == "structural"
+    assert rows["role_holder"] == "structural"
+    assert rows["ownership"] == "structural"
+    assert rows["custody"] == "structural"
+    assert rows["responsibility"] == "structural"
+    assert rows["family_relationship"] == "structural"

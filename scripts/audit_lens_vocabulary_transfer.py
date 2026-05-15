@@ -213,8 +213,66 @@ EPISTEMIC_UNCERTAINTY_TERMS: tuple[LensTerm, ...] = (
     LensTerm("unsupported", ("unsupported", "unverified", "uncorroborated"), 2, ("unsupported", "unverified_claim", "uncorroborated", "unsupported_by")),
 )
 
+ENTITY_ROLE_TERMS: tuple[LensTerm, ...] = (
+    LensTerm(
+        "alias",
+        ("alias", "aka", "called", "known"),
+        2,
+        ("alias_of", "entity_alias", "known_as", "also_called", "canonical_alias", "has_alias"),
+    ),
+    LensTerm(
+        "identity_equivalence",
+        ("same", "identity", "equivalent", "identified"),
+        2,
+        ("same_entity", "identity_equivalence", "identified_as", "canonical_entity", "entity_equivalent", "is_same_person"),
+    ),
+    LensTerm(
+        "role_holder",
+        ("role", "holder", "served", "title"),
+        3,
+        ("role_holder", "holds_role", "held_role", "served_as", "appointed_as", "person_role", "role_assignment"),
+    ),
+    LensTerm(
+        "role_transition",
+        ("replaced", "succeeded", "former", "became"),
+        4,
+        ("role_transition", "role_replaced_by", "succeeded_by", "former_role_holder", "became_role"),
+    ),
+    LensTerm(
+        "membership",
+        ("member", "membership", "joined", "left", "group"),
+        3,
+        ("group_member", "member_of", "membership", "joined_group", "left_group", "membership_interval"),
+    ),
+    LensTerm(
+        "ownership",
+        ("owner", "ownership", "owned", "title"),
+        2,
+        ("owner_of", "owned_by", "owns", "ownership_holder", "legal_owner", "title_holder"),
+    ),
+    LensTerm(
+        "custody",
+        ("custody", "custodian", "held", "holder", "possession"),
+        2,
+        ("custody_holder", "custodian_for", "held_by", "has_custody", "has_custody_of", "possession_holder", "custody_transfer"),
+    ),
+    LensTerm(
+        "responsibility",
+        ("responsible", "assigned", "supervises", "supervisor"),
+        2,
+        ("responsible_for", "assigned_responsible", "supervises", "supervised", "supervisor_for", "responsibility_assignment"),
+    ),
+    LensTerm(
+        "family_relationship",
+        ("parent", "guardian", "sibling", "spouse", "child", "family"),
+        2,
+        ("parent_of", "guardian_of", "sibling_of", "spouse_of", "child_of", "family_relationship", "is_family_member"),
+    ),
+)
+
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
     "authority_custody": AUTHORITY_CUSTODY_TERMS,
+    "entity_role": ENTITY_ROLE_TERMS,
     "evidence_provenance": EVIDENCE_PROVENANCE_TERMS,
     "epistemic_uncertainty": EPISTEMIC_UNCERTAINTY_TERMS,
     "operational_record_status": OPERATIONAL_RECORD_STATUS_TERMS,
