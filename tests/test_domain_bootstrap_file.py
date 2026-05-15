@@ -422,6 +422,8 @@ def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatc
     user_message = next(item for item in captured["messages"] if item["role"] == "user")
     assert "compile_surface_invariant_strategy_v1" in user_message["content"]
     assert "source addressability as queryable rows" in user_message["content"]
+    assert "relation between the subject id and the section/source coordinate" in user_message["content"]
+    assert "authority/source relation separately from the party receiving permission" in user_message["content"]
     assert "Candidate predicate names are not enough" in user_message["content"]
 
 
