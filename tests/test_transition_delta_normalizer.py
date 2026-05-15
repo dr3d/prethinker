@@ -182,6 +182,51 @@ def test_normalizes_attribute_timeline_from_identification_rows() -> None:
     } in observations
 
 
+def test_normalizes_related_document_value_transitions() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "amends(amended_notice, original_notice).",
+            "authorized_count(original_notice, food_stalls, 18).",
+            "authorized_count(original_notice, craft_stalls, 6).",
+            "closing_time(original_notice, 20_00).",
+            "authorized_count(amended_notice, food_stalls, 16).",
+            "authorized_count(amended_notice, craft_stalls, 6).",
+            "closing_time(amended_notice, 19_30).",
+        ]
+    )
+
+    assert {
+        "kind": "related_document_value_transition",
+        "relation": "amends",
+        "predecessor": "original_notice",
+        "successor": "amended_notice",
+        "field": "food_stalls",
+        "old_value": "18",
+        "new_value": "16",
+        "source_predicate": "authorized_count",
+    } in observations
+    assert {
+        "kind": "related_document_value_unchanged",
+        "relation": "amends",
+        "predecessor": "original_notice",
+        "successor": "amended_notice",
+        "field": "craft_stalls",
+        "old_value": "6",
+        "new_value": "6",
+        "source_predicate": "authorized_count",
+    } in observations
+    assert {
+        "kind": "related_document_value_transition",
+        "relation": "amends",
+        "predecessor": "original_notice",
+        "successor": "amended_notice",
+        "field": "value",
+        "old_value": "20_00",
+        "new_value": "19_30",
+        "source_predicate": "closing_time",
+    } in observations
+
+
 def test_summarizes_observations_by_kind() -> None:
     summary = summarize_observations(
         [

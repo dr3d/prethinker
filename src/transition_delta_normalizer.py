@@ -179,6 +179,7 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
             timeline_values[(subject, predicate)].append((date, status, predicate))
 
     observations.extend(_timeline_transition_observations(timeline_values))
+    observations.extend(_related_document_transition_observations(parsed))
     for field in sorted(set(before_snapshots) & set(after_snapshots)):
         for predecessor, old_value in before_snapshots[field]:
             for successor, new_value in after_snapshots[field]:
@@ -208,6 +209,72 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
 
     observations.extend(_source_record_table_transition_observations(parsed))
     return observations
+
+
+def _related_document_transition_observations(parsed: list[Fact]) -> list[dict[str, Any]]:
+    relation_predicates = {"amends", "corrects", "supersedes"}
+    relations: list[tuple[str, str, str]] = []
+    facts_by_subject: dict[str, list[Fact]] = defaultdict(list)
+
+    for predicate, args in parsed:
+        if len(args) >= 1:
+            facts_by_subject[args[0]].append((predicate, args))
+        if len(args) == 2 and (predicate in relation_predicates or predicate.endswith("_supersedes")):
+            successor, predecessor = args
+            relations.append((predicate, successor, predecessor))
+
+    observations: list[dict[str, Any]] = []
+    for relation, successor, predecessor in relations:
+        before = _comparable_document_values(facts_by_subject.get(predecessor, []))
+        after = _comparable_document_values(facts_by_subject.get(successor, []))
+        for key in sorted(set(before) & set(after)):
+            old_value = before[key]
+            new_value = after[key]
+            predicate, field = key
+            kind = "related_document_value_unchanged" if old_value == new_value else "related_document_value_transition"
+            observations.append(
+                {
+                    "kind": kind,
+                    "relation": relation,
+                    "predecessor": predecessor,
+                    "successor": successor,
+                    "field": field,
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "source_predicate": predicate,
+                }
+            )
+        for key in sorted(set(after) - set(before)):
+            predicate, field = key
+            observations.append(
+                {
+                    "kind": "related_document_value_added",
+                    "relation": relation,
+                    "successor": successor,
+                    "field": field,
+                    "new_value": after[key],
+                    "source_predicate": predicate,
+                }
+            )
+    return _dedupe_observations(observations)
+
+
+def _comparable_document_values(facts: list[Fact]) -> dict[tuple[str, str], str]:
+    values: dict[tuple[str, str], str] = {}
+    ignored = {
+        "document_id",
+        "document_type",
+        "document_date",
+        "document_status",
+    }
+    for predicate, args in facts:
+        if predicate in ignored or predicate in {"amends", "corrects", "supersedes"} or predicate.endswith("_supersedes"):
+            continue
+        if len(args) == 2:
+            values.setdefault((predicate, "value"), args[1])
+        elif len(args) >= 3:
+            values.setdefault((predicate, args[1]), args[2])
+    return values
 
 
 def _timeline_transition_observations(
