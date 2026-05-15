@@ -1,0 +1,191 @@
+{
+  "compile_count": 1,
+  "lens": "rule_composition",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_rule_composition_activation_anchor_compile_20260515\\makerspace_tool_access\\domain_bootstrap_file_20260515T111320376267Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 23,
+      "fixture": "makerspace_tool_access",
+      "lens": "rule_composition",
+      "parsed_ok": true,
+      "run": "lens_vocab_rule_composition_activation_anchor_compile_20260515",
+      "source_record_fact_count": 100,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 4,
+        "structural": 3
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "base"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "rule_condition(ta_4_base, weekend_reservation_request).",
+            "rule_action(ta_4_base, allow_reservation)."
+          ],
+          "source_hits": [
+            "base"
+          ],
+          "status": "structural",
+          "term": "base_rule"
+        },
+        {
+          "direct_hits": [
+            "exception"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_exception(ta_4_base, ta_4_exception)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "exception"
+          ],
+          "status": "shallow_structural",
+          "term": "exception"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "threshold"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "rule_condition(ta_4_base, weekend_reservation_request).",
+            "rule_action(ta_4_base, allow_reservation)."
+          ],
+          "source_hits": [
+            "activation"
+          ],
+          "status": "structural",
+          "term": "activation_condition"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "eligibility_condition"
+        },
+        {
+          "direct_hits": [
+            "override"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "overrides"
+          ],
+          "status": "shallow_structural",
+          "term": "override"
+        },
+        {
+          "direct_hits": [
+            "precedence"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_precedence(ta_4_safety, ta_4_exception)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "precedence"
+          ],
+          "status": "shallow_structural",
+          "term": "precedence"
+        },
+        {
+          "direct_hits": [
+            "expires"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "expires"
+          ],
+          "status": "shallow_structural",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "vote_requirement"
+        },
+        {
+          "direct_hits": [
+            "fallback"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "fallback_procedure(weekend_roster_tool_offline, paper_sign_up_sheet).",
+            "fallback_procedure(roster_tool_offline, paper_sign_up_sheet_at_front_desk)."
+          ],
+          "source_hits": [
+            "fallback"
+          ],
+          "status": "structural",
+          "term": "fallback_rule"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 3,
+      "shallow_structural": 4,
+      "structural": 3
+    },
+    "term_status_counts": {
+      "activation_condition": {
+        "structural": 1
+      },
+      "base_rule": {
+        "structural": 1
+      },
+      "eligibility_condition": {
+        "not_applicable": 1
+      },
+      "exception": {
+        "shallow_structural": 1
+      },
+      "expiration": {
+        "shallow_structural": 1
+      },
+      "fallback_rule": {
+        "structural": 1
+      },
+      "override": {
+        "shallow_structural": 1
+      },
+      "precedence": {
+        "shallow_structural": 1
+      },
+      "threshold": {
+        "not_applicable": 1
+      },
+      "vote_requirement": {
+        "not_applicable": 1
+      }
+    }
+  }
+}

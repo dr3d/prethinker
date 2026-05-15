@@ -338,3 +338,211 @@ Run the same contract-style audit on another settled lens vocabulary. The best
 next candidate is source authority/custody or rule composition, because those
 vocabularies are likely to contain official-document terms that may look
 generic while depending on development-corpus surface conventions.
+
+## LV-004 - Rule Composition Slot Contracts
+
+Date: 2026-05-15
+
+Before:
+
+Evidence provenance proved the slot-contract audit pattern on mostly flat
+2-3 slot relations. Rule composition is harder: the vocabulary is inherently
+relational, and many terms are only useful when they preserve partners and
+scope, not just a rule label. The terms under audit were named before the
+probe run:
+
+- `base_rule`
+- `exception`
+- `threshold`
+- `activation_condition`
+- `eligibility_condition`
+- `override`
+- `precedence`
+- `expiration`
+- `vote_requirement`
+- `fallback_rule`
+
+Prediction:
+
+The audit should find more shallow structural cases than evidence provenance.
+Likely weak forms include exception rows without effect, override rows without
+scope or overridden partner, precedence levels without compared rules, quorum
+rows not anchored to a vote requirement, and fallback actions not joined to the
+trigger.
+
+Intervention:
+
+- Added `rule_composition` to `scripts/audit_lens_vocabulary_transfer.py`.
+- Extended the audit grammar with shared-anchor contract groups so a term can
+  be structural across multiple rows when the rows share a rule/condition
+  anchor.
+- Added tests for complete and partial exception contracts and split threshold
+  contracts.
+- Added three unlike rule-composition probes:
+  - `experiments/lens_vocabulary_audits/rule_composition_v1/makerspace_tool_access`
+  - `experiments/lens_vocabulary_audits/rule_composition_v1/garden_plot_governance`
+  - `experiments/lens_vocabulary_audits/rule_composition_v1/library_room_booking`
+- Compiled the probes with OpenRouter, source-record ledger facts enabled, and
+  no legacy helper adapters.
+- Added rule-composition slot-contract guidance to rule-ingestion context and
+  global compile-surface invariants.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_slot_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_slot_contract_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_qa_summary_20260515.json`
+- `tmp/lens_vocab_rule_composition_compile_20260515`
+- `tmp/lens_vocab_rule_composition_qa_20260515`
+
+After:
+
+Compile batch:
+
+- compiles=`3`
+- parsed_ok=`3`
+- admitted/skipped=`74 / 6`
+
+Slot-contract audit:
+
+- `structural=12`
+- `shallow_structural=9`
+- `source_only=5`
+- `not_applicable=4`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | N/A | Reading |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `activation_condition` | 0 | 0 | 3 | 0 | Dominant source-only gap; activation phrases stayed in ledger text. |
+| `base_rule` | 2 | 1 | 0 | 0 | Usually stable, but one probe emitted adjacent rule rows rather than a base-rule contract. |
+| `eligibility_condition` | 1 | 2 | 0 | 0 | Often condition-like but not anchored with all required slots. |
+| `exception` | 2 | 1 | 0 | 0 | Transfers, with one shallow exception surface. |
+| `expiration` | 2 | 0 | 0 | 1 | Stable where present. |
+| `fallback_rule` | 2 | 1 | 0 | 0 | Split trigger/action can be shallow when not joined by an anchor. |
+| `override` | 1 | 1 | 1 | 0 | Still weak; scope/partner retention varies. |
+| `precedence` | 1 | 2 | 0 | 0 | Often emitted as rank/level instead of pairwise rule order. |
+| `threshold` | 1 | 0 | 1 | 1 | Weak in the garden probe; threshold phrase stayed source-only. |
+| `vote_requirement` | 0 | 1 | 0 | 2 | Vote rows need scoped quorum/presence contracts. |
+
+QA over the same probes:
+
+- questions=`25`
+- exact/partial/miss=`24 / 1 / 0`
+- helper rows=`0`
+
+Reading:
+
+The user-facing QA is already strong on the simple probes, but the lens audit
+shows why this layer still needs contract work. Rule composition can answer
+many questions from thin surfaces, yet those thin surfaces are not robust
+architecture: `activation_condition` remained entirely source-only, and
+`precedence`, `override`, `vote_requirement`, and `fallback_rule` frequently
+lost partner/scope joins. This is exactly the case where exact answers can hide
+weak extraction.
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_domain_bootstrap_file.py -q` -> `36 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `210 passed`
+
+Guidance replay:
+
+After adding the slot-contract guidance, the same three probes were recompiled
+and audited.
+
+Replay artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_replay_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_replay_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_replay_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_replay_qa_summary_20260515.json`
+- `tmp/lens_vocab_rule_composition_guidance_replay_compile_20260515`
+- `tmp/lens_vocab_rule_composition_guidance_replay_qa_20260515`
+
+Replay compile:
+
+- compiles=`3`
+- parsed_ok=`3`
+- admitted/skipped=`73 / 4`
+
+Replay slot-contract audit:
+
+- `structural=12`
+- `shallow_structural=10`
+- `source_only=4`
+- `not_applicable=4`
+
+Replay deltas:
+
+- `exception`: `2 structural / 1 shallow` -> `3 structural / 0 shallow`
+- `vote_requirement`: `0 structural / 1 shallow / 2 N/A` -> `1 structural / 0 shallow / 2 N/A`
+- `activation_condition`: `3 source-only` -> `1 shallow / 2 source-only`
+- `override`: `1 structural / 1 shallow / 1 source-only` -> `0 structural / 3 shallow`
+- `fallback_rule`: `2 structural / 1 shallow` -> `2 structural / 1 source-only`
+
+Replay QA:
+
+- questions=`25`
+- exact/partial/miss=`23 / 1 / 1`
+- helper rows=`0`
+
+Replay reading:
+
+The guidance helped the most concrete relational contracts but did not simply
+lift the whole lens. `exception` and `vote_requirement` improved. Activation
+conditions began to move out of source-only, but remained weak. Override and
+precedence stayed resolution-sensitive: the compiler often knows there is a
+priority relation but still emits rank/priority or two-slot override rows that
+do not carry all partner/scope slots. QA stayed high but slightly less stable
+on the replay, with the makerspace activation question becoming a
+compile-surface miss. That makes activation-condition anchoring the cleanest
+next repair target.
+
+Activation-anchor repair:
+
+A focused repair added an activation-condition anchoring rule to rule-ingestion
+guidance and the global compile-surface invariants. Then the makerspace probe,
+the coordinate that had regressed on activation QA, was replayed alone.
+
+Activation-anchor artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_anchor_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_anchor_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_anchor_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_anchor_qa_summary_20260515.json`
+- `tmp/lens_vocab_rule_composition_activation_anchor_compile_20260515`
+- `tmp/lens_vocab_rule_composition_activation_anchor_qa_20260515`
+
+Activation-anchor replay:
+
+- compile parsed_ok=`1/1`
+- admitted/skipped=`37 / 0`
+- audit over makerspace: `3 structural / 4 shallow / 0 source-only / 3 N/A`
+- `activation_condition`: `source-only` -> `structural`
+- QA: `7 exact / 0 partial / 0 miss`
+- helper rows=`0`
+
+The successful surface used `rule_condition/2` and `rule_action/2` rows sharing
+the same rule anchor. The audit grammar was extended to count that generic
+condition/action pair as a structural activation contract. That is not a
+fixture-specific synonym: it is the minimum transferable shape for "this rule
+activates under this condition and has this governed action."
+
+Lesson:
+
+Rule composition confirms the value of slot contracts more strongly than
+evidence provenance did. The lens vocabulary is not fixture-shaped, but it is
+resolution-sensitive: the architecture can preserve enough rule facts for QA
+while still losing the joins needed for transfer-stable rule reasoning. The
+right repair target is compile-surface guidance for anchored rule relations,
+not helper rows and not fixture-specific rule names.
+
+Next pressure:
+
+The remaining weak rule-composition surface is partner/scope resolution for
+`override`, `precedence`, and `exception`. The next repair should target
+pairwise rule relations: preserve higher rule, lower rule, conflict/scope, and
+effect without relying on rank-only rows such as `precedence_level(rule, high)`.

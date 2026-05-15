@@ -1,0 +1,10 @@
+{"category":"rule_composition_vocabulary","id":"q001","reference_answer":"Study rooms may be booked for two hours at a time.","source_id":"q001"}
+{"category":"rule_composition_vocabulary","id":"q002","reference_answer":"A group asking for a room during public service hours activates the rule.","source_id":"q002"}
+{"category":"rule_composition_vocabulary","id":"q003","reference_answer":"The requester must hold a current library card.","source_id":"q003"}
+{"category":"rule_composition_vocabulary","id":"q004","reference_answer":"Eight or more attendees defines a large-group booking.","source_id":"q004"}
+{"category":"rule_composition_vocabulary","id":"q005","reference_answer":"Large-group bookings require staff approval before confirmation.","source_id":"q005"}
+{"category":"rule_composition_vocabulary","id":"q006","reference_answer":"A public exam-prep session sponsored by a school, with the school sponsor named on the request, replaces staff approval with same-day notification to the branch manager.","source_id":"q006"}
+{"category":"rule_composition_vocabulary","id":"q007","reference_answer":"Emergency closure notices override every room-booking rule.","source_id":"q007"}
+{"category":"rule_composition_vocabulary","id":"q008","reference_answer":"The emergency closure notice has precedence.","source_id":"q008"}
+{"category":"rule_composition_vocabulary","id":"q009","reference_answer":"RB-12 is valid until 2026-12-31.","source_id":"q009"}
+{"category":"rule_composition_vocabulary","id":"q010","reference_answer":"Record requests in the blue room ledger.","source_id":"q010"}

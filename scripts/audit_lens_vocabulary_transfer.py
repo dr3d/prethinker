@@ -27,6 +27,8 @@ class LensTerm:
     tokens: tuple[str, ...]
     min_arity: int = 2
     predicate_patterns: tuple[str, ...] = ()
+    contract_groups: tuple[tuple[str, ...], ...] = ()
+    contract_anchor: int = 0
 
 
 EVIDENCE_PROVENANCE_TERMS: tuple[LensTerm, ...] = (
@@ -50,8 +52,76 @@ EVIDENCE_PROVENANCE_TERMS: tuple[LensTerm, ...] = (
     LensTerm("located", ("located", "found", "stored", "held"), 2, ("located_in", "found_in", "stored_in", "held_in")),
 )
 
+RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
+    LensTerm(
+        "base_rule",
+        ("base", "default", "standard", "normal"),
+        2,
+        ("base_rule", "default_rule", "standard_rule", "rule_text", "rule_scope"),
+        (("rule_condition",), ("rule_action", "rule_outcome")),
+    ),
+    LensTerm(
+        "exception",
+        ("exception", "except", "unless", "waiver", "exempt"),
+        3,
+        ("exception_rule", "rule_exception", "exception_applies", "waiver_rule", "exemption_rule"),
+        (("exception_condition", "waiver_condition", "exemption_condition"), ("exception_effect", "waiver_effect", "exemption_effect")),
+    ),
+    LensTerm(
+        "threshold",
+        ("threshold", "minimum", "maximum", "cap", "limit"),
+        3,
+        (".*_threshold", "threshold", "rule_threshold", "limit_rule", "cap_rule"),
+        (("threshold_measure", "threshold_subject"), ("threshold_value", "threshold_amount", "threshold_limit")),
+    ),
+    LensTerm(
+        "activation_condition",
+        ("activates", "activation", "triggered", "when"),
+        3,
+        ("activation_condition", "trigger_condition", "applies_when", "rule_activation"),
+        (("rule_condition", "trigger_condition", "applies_when"), ("rule_action", "rule_outcome")),
+    ),
+    LensTerm(
+        "eligibility_condition",
+        ("eligible", "eligibility", "qualifies", "qualify", "required"),
+        3,
+        ("eligibility_condition", "qualifies_when", "required_condition", "requirement_condition"),
+    ),
+    LensTerm(
+        "override",
+        ("override", "overrides", "supersede", "supersedes"),
+        3,
+        ("override", "overrides", "rule_override", "supersedes"),
+    ),
+    LensTerm(
+        "precedence",
+        ("precedence", "priority", "prior", "before"),
+        3,
+        ("precedence", "rule_precedence", "priority_order", "takes_precedence"),
+    ),
+    LensTerm(
+        "expiration",
+        ("expires", "expiration", "sunset", "valid"),
+        2,
+        ("expiration", "expires_on", "sunset_date", "valid_until"),
+    ),
+    LensTerm(
+        "vote_requirement",
+        ("vote", "votes", "majority", "quorum"),
+        3,
+        ("vote_requirement", "required_vote", "approval_vote", "quorum_requirement"),
+    ),
+    LensTerm(
+        "fallback_rule",
+        ("fallback", "otherwise", "default"),
+        2,
+        ("fallback_rule", "otherwise_rule", "default_rule", "fallback_to"),
+    ),
+)
+
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
     "evidence_provenance": EVIDENCE_PROVENANCE_TERMS,
+    "rule_composition": RULE_COMPOSITION_TERMS,
 }
 
 
@@ -145,6 +215,12 @@ def _audit_term(
     direct_hits = [token for token in term.tokens if token in direct_tokens]
     slot_rows = _slot_rows_for_term(term, direct_rows)
     shallow_rows = _shallow_rows_for_term(term, direct_rows)
+    contract_rows = _contract_rows_for_term(term, direct_rows)
+    partial_contract_rows = _partial_contract_rows_for_term(term, direct_rows)
+    if contract_rows:
+        slot_rows = [*slot_rows, *contract_rows]
+    if partial_contract_rows:
+        shallow_rows = [*shallow_rows, *partial_contract_rows]
     if slot_rows:
         status = "structural"
     elif direct_hits or shallow_rows:
@@ -247,6 +323,41 @@ def _shallow_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) ->
         if _predicate_matches(term, predicate, predicate_tokens):
             out.append(str(row["fact"]))
     return out
+
+
+def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if not term.contract_groups:
+        return []
+    grouped = _matching_contract_rows(term, direct_rows)
+    for group_rows in grouped.values():
+        if all(any(group_index == index for group_index, _ in group_rows) for index in range(len(term.contract_groups))):
+            return [fact for _, fact in group_rows]
+    return []
+
+
+def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if not term.contract_groups:
+        return []
+    grouped = _matching_contract_rows(term, direct_rows)
+    out: list[str] = []
+    for group_rows in grouped.values():
+        covered = {group_index for group_index, _ in group_rows}
+        if covered and len(covered) < len(term.contract_groups):
+            out.extend(fact for _, fact in group_rows)
+    return out
+
+
+def _matching_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> dict[str, list[tuple[int, str]]]:
+    grouped: dict[str, list[tuple[int, str]]] = {}
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if len(row["args"]) <= term.contract_anchor:
+            continue
+        for index, patterns in enumerate(term.contract_groups):
+            if any(re.fullmatch(pattern, predicate) for pattern in patterns):
+                anchor = str(row["args"][term.contract_anchor])
+                grouped.setdefault(anchor, []).append((index, str(row["fact"])))
+    return grouped
 
 
 def _predicate_matches(term: LensTerm, predicate: str, predicate_tokens: set[str]) -> bool:

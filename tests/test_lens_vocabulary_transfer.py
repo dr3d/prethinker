@@ -1,7 +1,12 @@
 import json
 from pathlib import Path
 
-from scripts.audit_lens_vocabulary_transfer import EVIDENCE_PROVENANCE_TERMS, audit_compile, summarize_reports
+from scripts.audit_lens_vocabulary_transfer import (
+    EVIDENCE_PROVENANCE_TERMS,
+    RULE_COMPOSITION_TERMS,
+    audit_compile,
+    summarize_reports,
+)
 
 
 def _write_compile(path: Path, facts: list[str]) -> Path:
@@ -105,3 +110,67 @@ def test_lens_vocabulary_summary_counts_terms(tmp_path: Path) -> None:
 
     assert summary["term_status_counts"]["prepared"]["structural"] == 1
     assert summary["term_status_counts"]["prepared"]["source_only"] == 1
+
+
+def test_rule_composition_audit_accepts_shared_anchor_contracts(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, exception_applies_unless_supervisor_signs_the_waiver).",
+            "exception_condition(after_hours_access_waiver, supervisor_signature).",
+            "exception_effect(after_hours_access_waiver, permit_after_hours_access).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["exception"] == "structural"
+
+
+def test_rule_composition_audit_marks_partial_contracts_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, exception_applies_unless_supervisor_signs_the_waiver).",
+            "exception_condition(after_hours_access_waiver, supervisor_signature).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["exception"] == "shallow_structural"
+
+
+def test_rule_composition_audit_requires_relational_threshold_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, the_threshold_is_three_consecutive_clean_logs).",
+            "threshold_value(clean_log_rule, three_consecutive_clean_logs).",
+            "threshold_measure(clean_log_rule, inspection_logs).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["threshold"] == "structural"
+
+
+def test_rule_composition_audit_accepts_condition_action_activation_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, the_rule_activates_when_a_weekend_request_is_made).",
+            "rule_condition(weekend_access_rule, weekend_reservation_request).",
+            "rule_action(weekend_access_rule, allow_reservation_after_training).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["activation_condition"] == "structural"
+    assert rows["base_rule"] == "structural"

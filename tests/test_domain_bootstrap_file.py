@@ -6,6 +6,7 @@ from scripts.run_domain_bootstrap_file import (
     OPERATIONAL_RECORD_STATUS_CONTEXT_V1,
     PROBATE_PROPERTY_STATUS_CONTEXT_V1,
     PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA,
+    RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1,
     SOURCE_AUTHORITY_AUDIT_CONTEXT_V1,
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
@@ -148,6 +149,27 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
 
     assert "source_authority_audit_strategy_v1" in selected
     assert "numeric counts, publication years, date ranges" in selected
+
+
+def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:
+    context = "\n".join(RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1)
+
+    assert "Rule composition slot contract" in context
+    assert "Exceptions need governed rule, condition, and effect/scope" in context
+    assert "thresholds need measure, value/unit, and governed rule" in context
+    assert "fallback rules need trigger and fallback action" in context
+    assert "Activation-condition anchoring rule" in context
+    assert "governed rule, trigger/context, and governed subject or action" in context
+
+    selected = "\n".join(
+        _source_compiler_context(
+            domain_hint="policy rule exception threshold override precedence fallback eligibility vote quorum",
+            intake_plan=None,
+        )
+    )
+
+    assert "rule_ingestion_source_compiler_strategy_v1" in selected
+    assert "Rule composition slot contract" in selected
 
 
 def test_fiction_reference_context_keeps_story_layer_boundaries() -> None:
@@ -435,6 +457,10 @@ def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatc
     assert "source document id, source actor/author" in user_message["content"]
     assert "provenance slot contract directly" in user_message["content"]
     assert "preparer/presenter/submitter/filer/commissioner" in user_message["content"]
+    assert "rule-composition slot contract directly" in user_message["content"]
+    assert "Unanchored condition-only, priority-only, quorum-only" in user_message["content"]
+    assert "preserve the activation anchor directly" in user_message["content"]
+    assert "A rule label that merely contains the trigger words is not enough" in user_message["content"]
     assert "Candidate predicate names are not enough" in user_message["content"]
 
 
