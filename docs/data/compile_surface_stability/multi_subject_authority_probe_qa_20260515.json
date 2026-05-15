@@ -1,0 +1,22 @@
+{
+  "schema": "compile_surface_stability_qa_summary_v1",
+  "experiment": "multi_subject_authority_probe",
+  "date": "2026-05-15",
+  "fixture": "multi_subject_authority_pair",
+  "question_ids": ["q001", "q002", "q003", "q004", "q005", "q006", "q007", "q008"],
+  "questions": 8,
+  "reference_judge": {
+    "exact": 8,
+    "partial": 0,
+    "miss": 0
+  },
+  "failure_surfaces": {
+    "not_applicable": 8
+  },
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "compile_artifact": "tmp/multi_subject_authority_compile_20260515/multi_subject_authority_pair/domain_bootstrap_file_20260515T095815102314Z_source_qwen-qwen3-6-35b-a3b.json",
+  "qa_artifact": "tmp/multi_subject_authority_metadata_qa_20260515/multi_subject_authority_pair/domain_bootstrap_qa_20260515T100211329038Z_qa_qwen-qwen3-6-35b-a3b.json",
+  "lesson": "A fresh unlike multi-subject authority probe passed 8/0/0 with zero helpers. The current instrument can compile one authority governing multiple subjects into direct rows when the source is simple; the remaining probate authority miss is density/resolution, not a missing axis."
+}

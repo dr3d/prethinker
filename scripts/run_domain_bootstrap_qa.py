@@ -1521,6 +1521,7 @@ def run_one_question(
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_complementary_relation_hint_queries(
                 utterance=utterance,
                 kb_inventory=kb_inventory,
@@ -1821,6 +1822,27 @@ def _location_floor_hint_queries(
         out.append("located_at(Item, Location).")
     if "locker_floor/2" in signatures:
         out.append("locker_floor(Location, Floor).")
+    return out
+
+
+def _authority_instrument_metadata_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Add issuer/date/type rows for source-authority instrument questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in ("source", "authoriz", "authority", "directive", "order", "policy")):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "instrument_type/2" in signatures:
+        out.append("instrument_type(Instrument, InstrumentType).")
+    if "instrument_issuer/2" in signatures:
+        out.append("instrument_issuer(Instrument, Issuer).")
+    if "instrument_date/2" in signatures:
+        out.append("instrument_date(Instrument, Date).")
     return out
 
 

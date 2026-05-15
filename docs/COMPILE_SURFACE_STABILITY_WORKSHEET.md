@@ -1175,3 +1175,98 @@ Do not add a helper. Build a small unlike multi-subject authority probe and a
 compile audit that can detect when a source sentence governs multiple named
 subjects but the admitted rows cover only one. Keep business logic out of the
 audit; the transferable shape is source-stated multi-subject coverage.
+
+## CSS-016 - Unlike Multi-Subject Authority Probe
+
+Date: 2026-05-15
+
+Before:
+
+CSS-015 left two compile-surface misses in the probate slice. One was
+multi-subject authority coverage: a source authority named more than one
+governed subject, but the compile emitted direct access/source rows for only
+one. The open question was whether this was a missing architectural axis or a
+dense variant of an already supported shape.
+
+Prediction:
+
+If simple multi-subject authority is already inside the instrument, a fresh
+unlike probe should compile one row per governed subject and answer individual
+source-authority questions without helpers. If it fails, the architecture needs
+a broader compile repair before returning to probate density.
+
+Intervention:
+
+Added `experiments/boundary_probes/compile_surface_stage1/multi_subject_authority_pair`.
+The probe has two unlike domains:
+
+- an equipment access bulletin governing three cabinets, plus an older memo
+  that applies only to one different cabinet;
+- a package release directive governing two packages, plus a holding note that
+  is explicitly not transfer authority.
+
+The probe tests source authority, issuer/date metadata, governed subject
+coverage, and nearby negative authority boundaries without probate vocabulary.
+
+The first QA pass landed at `7/1/0`: the compile emitted the needed rows, but
+QA did not ask instrument issuer/date metadata after identifying an authority
+instrument. Added a generic query-planning hint: for source/authority questions,
+if the KB exposes `instrument_type/2`, `instrument_issuer/2`, or
+`instrument_date/2`, include those metadata queries.
+
+Artifacts:
+
+- `experiments/boundary_probes/compile_surface_stage1/multi_subject_authority_pair/README.md`
+- `experiments/boundary_probes/compile_surface_stage1/multi_subject_authority_pair/source.md`
+- `experiments/boundary_probes/compile_surface_stage1/multi_subject_authority_pair/qa.md`
+- `experiments/boundary_probes/compile_surface_stage1/multi_subject_authority_pair/oracle.jsonl`
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/multi_subject_authority_probe_audit_20260515.json`
+- `docs/data/compile_surface_stability/multi_subject_authority_probe_audit_20260515.md`
+- `docs/data/compile_surface_stability/multi_subject_authority_probe_qa_20260515.json`
+- `docs/data/compile_surface_stability/multi_subject_authority_probe_qa_20260515.md`
+
+After:
+
+Compile:
+
+- parsed_ok=`true`
+- admitted=`56`
+- skipped=`7`
+- direct facts included one row per governed subject:
+  `grants_access/4` for all three cabinets and `cleared_for_transfer/3` for
+  both packages
+- explicit negative authority rows were also preserved with
+  `does_not_authorize/3`
+
+Final QA:
+
+- exact=`8`
+- partial=`0`
+- miss=`0`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposal rows=`0`
+- failure surfaces: `not_applicable=8`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `200 passed`
+
+Lesson:
+
+Simple multi-subject authority is interior for a fresh unlike fixture. The
+instrument can emit direct rows for each governed subject without helpers when
+the source shape is uncluttered. The remaining probate failure is therefore a
+dense compile-resolution problem, not evidence that the architecture lacks the
+axis.
+
+Next pressure:
+
+Do not repair from probate names. Either build a denser unlike variant with
+mixed source layers and embedded correspondence, or add an audit that compares
+source-stated grouped identifiers with emitted governed-subject rows in a
+fixture-free way. The target is density/resolution under layered source
+statements.

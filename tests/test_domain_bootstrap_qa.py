@@ -9,6 +9,7 @@ from scripts.run_domain_bootstrap_qa import (
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
     _anchor_relation_hint_queries,
+    _authority_instrument_metadata_hint_queries,
     _classification_deferral_effect_companion,
     _complementary_relation_hint_queries,
     _conversion_assessment_delta_companion,
@@ -3979,6 +3980,24 @@ def test_location_floor_hint_routes_comparative_locker_questions() -> None:
 
     assert _location_floor_hint_queries(
         utterance="Which item is stored in LK-3?",
+        kb_inventory=inventory,
+    ) == []
+
+
+def test_authority_instrument_metadata_hint_routes_source_authority_questions() -> None:
+    inventory = {"signatures": ["instrument_type/2", "instrument_issuer/2", "instrument_date/2"]}
+
+    assert _authority_instrument_metadata_hint_queries(
+        utterance="What source authorizes the release of PK-8?",
+        kb_inventory=inventory,
+    ) == [
+        "instrument_type(Instrument, InstrumentType).",
+        "instrument_issuer(Instrument, Issuer).",
+        "instrument_date(Instrument, Date).",
+    ]
+
+    assert _authority_instrument_metadata_hint_queries(
+        utterance="Which packages were cleared for transfer?",
         kb_inventory=inventory,
     ) == []
 
