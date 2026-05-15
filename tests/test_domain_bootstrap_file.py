@@ -15,6 +15,8 @@ from scripts.run_domain_bootstrap_file import (
     _compile_health_summary,
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
+    _profile_admission_report,
+    _attach_profile_admission_report,
     _flat_plus_surface_contribution,
     _default_openrouter_title,
     _invalid_profile_retry_context,
@@ -656,6 +658,80 @@ def test_compile_health_summary_classifies_pass_surface() -> None:
     assert skip_warning["verdict"] == "warning"
     assert skip_warning["recommendation"] == "run_qa_but_treat_thin_lens_results_as_diagnostic"
     assert skip_warning["semantic_progress"]["zombie_risk"] == "medium"
+
+
+def test_profile_admission_flags_shallow_operational_lifecycle_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "On 2026-03-01 record R-1 was filed with status pending.\n"
+            "On 2026-03-04 record R-1 was closed as approved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status/2", "args": ["record_id", "status"]},
+                {"signature": "event_date/3", "args": ["record_id", "event_type", "date"]},
+            ]
+        },
+    )
+
+    assert report["source_signal_counts"]["operational_lifecycle"] == 2
+    assert report["candidate_contract_counts"]["operational_lifecycle_capable"] == 0
+    assert report["findings"][0]["class"] == "shallow_lifecycle_palette"
+
+
+def test_profile_admission_accepts_complete_operational_lifecycle_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "On 2026-03-01 permit P-1 status was pending.\n"
+            "On 2026-03-04 permit P-1 status was approved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "permit_status_at/3", "args": ["permit_file", "date", "status"]},
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["operational_lifecycle_capable"] == 1
+    assert report["findings"] == []
+
+
+def test_profile_admission_warning_updates_compile_health() -> None:
+    source_compile = {
+        "unique_fact_count": 5,
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 5,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        source_text=(
+            "On 2026-03-01 record R-1 status was pending.\n"
+            "On 2026-03-04 record R-1 status was approved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status/2", "args": ["record_id", "status"]},
+                {"signature": "event_date/3", "args": ["record_id", "event_type", "date"]},
+            ]
+        },
+    )
+
+    health = source_compile["compile_health"]
+    assert health["verdict"] == "warning"
+    assert health["recommendation"] == "run_qa_but_treat_thin_lens_results_as_diagnostic"
+    assert health["flag_counts"]["shallow_lifecycle_palette"] == 1
+    assert "profile_admission" in health["unhealthy_passes"]
 
 
 def test_invalid_profile_retry_context_blocks_arg_role_runaway() -> None:

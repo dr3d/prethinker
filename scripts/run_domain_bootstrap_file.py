@@ -28,6 +28,52 @@ DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_file"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+PROFILE_ADMISSION_TOKEN_RE = re.compile(r"[a-z0-9]+")
+PROFILE_ADMISSION_DATE_RE = re.compile(r"\b(?:v_)?\d{4}[-_]\d{2}[-_]\d{2}\b")
+PROFILE_ADMISSION_DATE_SLOTS = {"date", "dated", "timestamp", "time", "turn", "source"}
+PROFILE_ADMISSION_SUBJECT_SLOTS = {
+    "application",
+    "artifact",
+    "case",
+    "docket",
+    "entity",
+    "file",
+    "id",
+    "item",
+    "license",
+    "object",
+    "permit",
+    "proposal",
+    "queue",
+    "record",
+    "sample",
+    "subject",
+    "ticket",
+}
+PROFILE_ADMISSION_STATE_SLOTS = {"outcome", "phase", "result", "state", "status"}
+PROFILE_ADMISSION_LIFECYCLE_TERMS = {
+    "approved",
+    "assigned",
+    "closed",
+    "completed",
+    "corrected",
+    "denied",
+    "filed",
+    "lifecycle",
+    "logged",
+    "pending",
+    "phase",
+    "received",
+    "reinstated",
+    "reopened",
+    "result",
+    "state",
+    "status",
+    "superseded",
+    "transition",
+    "withdrawn",
+}
+
 PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -1024,6 +1070,12 @@ def main() -> int:
             intake_plan=intake_plan,
             args=args,
             extra_context=extra_compile_context,
+        )
+    if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
+        _attach_profile_admission_report(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
         )
     if (
         bool(args.source_record_ledger_facts)
@@ -2198,6 +2250,142 @@ def _compile_health_summary(surface_contribution: list[dict[str, Any]]) -> dict[
     }
 
 
+def _attach_profile_admission_report(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+) -> None:
+    report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
+    source_compile["profile_admission"] = report
+    warning_flags = [
+        str(item.get("class", "")).strip()
+        for item in report.get("findings", [])
+        if isinstance(item, dict) and str(item.get("class", "")).strip()
+    ]
+    if not warning_flags:
+        return
+    health = source_compile.get("compile_health")
+    if not isinstance(health, dict):
+        health = {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 0,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": int(source_compile.get("unique_fact_count", 0) or 0),
+            "duplicate_total": 0,
+            "semantic_progress": assess_semantic_progress(surface_contribution=[]),
+        }
+    flag_counts = health.get("flag_counts") if isinstance(health.get("flag_counts"), dict) else {}
+    for flag in warning_flags:
+        flag_counts[flag] = int(flag_counts.get(flag, 0) or 0) + 1
+    unhealthy_passes = [
+        str(item)
+        for item in health.get("unhealthy_passes", [])
+        if str(item).strip()
+    ] if isinstance(health.get("unhealthy_passes"), list) else []
+    if "profile_admission" not in unhealthy_passes:
+        unhealthy_passes.append("profile_admission")
+    health["flag_counts"] = flag_counts
+    health["unhealthy_passes"] = unhealthy_passes
+    health["unhealthy_pass_count"] = len(unhealthy_passes)
+    if health.get("verdict") == "healthy":
+        health["verdict"] = "warning"
+        health["recommendation"] = "run_qa_but_treat_thin_lens_results_as_diagnostic"
+    source_compile["compile_health"] = health
+
+
+def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:
+    source_mentions = _operational_lifecycle_source_mentions(source_text)
+    candidates = parsed_profile.get("candidate_predicates")
+    candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    lifecycle_capable = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_can_carry_operational_lifecycle_unit(item)
+    ]
+    findings: list[dict[str, Any]] = []
+    if len(source_mentions) >= 2 and not lifecycle_capable:
+        nearby = [
+            _candidate_signature(item)
+            for item in candidate_rows
+            if _candidate_signature(item)
+            and _operational_lifecycle_text(_candidate_signature(item) + " " + " ".join(_candidate_args(item)))
+        ]
+        findings.append(
+            {
+                "class": "shallow_lifecycle_palette",
+                "source_signal_count": len(source_mentions),
+                "candidate_count": len(candidate_rows),
+                "nearby_signatures": nearby[:12],
+                "evidence": source_mentions[:3],
+            }
+        )
+    return {
+        "schema_version": "profile_admission_contracts_v1",
+        "source_signal_counts": {
+            "operational_lifecycle": len(source_mentions),
+        },
+        "candidate_contract_counts": {
+            "operational_lifecycle_capable": len(lifecycle_capable),
+        },
+        "capable_signatures": {
+            "operational_lifecycle": lifecycle_capable[:12],
+        },
+        "findings": findings,
+    }
+
+
+def _operational_lifecycle_source_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.lower()
+        if _operational_lifecycle_text(lowered) and (
+            PROFILE_ADMISSION_DATE_RE.search(lowered)
+            or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_STATE_SLOTS
+            or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_LIFECYCLE_TERMS
+        ):
+            mentions.append(line[:240])
+    return mentions
+
+
+def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    args = _candidate_args(candidate)
+    if signature.split("/", 1)[0] in {"record_lifecycle_event", "record_status_phase", "record_status_at"}:
+        return True
+    if len(args) < 3:
+        return False
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_subject = any(tokens & PROFILE_ADMISSION_SUBJECT_SLOTS for tokens in arg_tokens)
+    has_state = any(tokens & PROFILE_ADMISSION_STATE_SLOTS for tokens in arg_tokens)
+    has_date = any(tokens & PROFILE_ADMISSION_DATE_SLOTS for tokens in arg_tokens)
+    return has_subject and has_state and has_date and _operational_lifecycle_text(signature + " " + " ".join(args))
+
+
+def _candidate_signature(candidate: dict[str, Any]) -> str:
+    return str(candidate.get("signature") or "")
+
+
+def _candidate_args(candidate: dict[str, Any]) -> list[str]:
+    args = candidate.get("args")
+    return [str(arg) for arg in args] if isinstance(args, list) else []
+
+
+def _operational_lifecycle_text(text: str) -> bool:
+    return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_LIFECYCLE_TERMS)
+
+
+def _profile_admission_tokens(text: str) -> set[str]:
+    return set(PROFILE_ADMISSION_TOKEN_RE.findall(str(text or "").lower()))
+
+
 def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint: str = "") -> list[str]:
     """Return context modules selected from LLM-owned/source-external control data.
 
@@ -2764,6 +2952,27 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
     risks = [str(item).strip() for item in parsed.get("admission_risks", []) if str(item).strip()] if isinstance(parsed.get("admission_risks"), list) else []
     lines.extend([f"- {item}" for item in risks] or ["- none"])
     if compile_record:
+        profile_admission = compile_record.get("profile_admission") if isinstance(compile_record.get("profile_admission"), dict) else {}
+        profile_admission_lines: list[str] = []
+        if profile_admission:
+            findings = profile_admission.get("findings", []) if isinstance(profile_admission.get("findings"), list) else []
+            profile_admission_lines.extend(
+                [
+                    "### Profile Admission",
+                    "",
+                    f"- Schema: `{profile_admission.get('schema_version', '')}`",
+                    f"- Source signals: `{profile_admission.get('source_signal_counts', {})}`",
+                    f"- Candidate contracts: `{profile_admission.get('candidate_contract_counts', {})}`",
+                    f"- Finding count: `{len(findings)}`",
+                ]
+            )
+            for finding in findings:
+                if isinstance(finding, dict):
+                    profile_admission_lines.append(
+                        f"- `{finding.get('class', '')}`: source_signals={finding.get('source_signal_count', '')}, "
+                        f"candidates={finding.get('candidate_count', '')}, nearby={finding.get('nearby_signatures', [])}"
+                    )
+            profile_admission_lines.append("")
         contribution_lines = [
             "| "
             + " | ".join(
@@ -2797,6 +3006,7 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Semantic progress risk: `{(((compile_record.get('compile_health') or {}).get('semantic_progress') or {}).get('zombie_risk', ''))}`",
                 f"- Semantic progress action: `{(((compile_record.get('compile_health') or {}).get('semantic_progress') or {}).get('recommended_action', ''))}`",
                 "",
+                *profile_admission_lines,
                 "### Surface Contribution",
                 "",
                 "| Pass | Unique | Duplicates | Facts | Rules | Queries | Health | Purpose |",

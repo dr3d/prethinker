@@ -938,3 +938,121 @@ is shallow, strengthen profile/admission constraints. If the palette is complete
 but emitted facts are split, deterministic normalization may be valid only when
 the join is explicit. If both palette and facts are complete, any residual miss
 belongs downstream in selector/query planning.
+
+## CS-012 - Profile Admission Contract In The Compile Flow
+
+Date: 2026-05-15
+
+Question:
+
+Can shallow operational lifecycle palettes be detected during the compile run
+itself, before QA and before helper/query layers see the artifact?
+
+Before:
+
+CS-011 added an offline diagnostic. It could identify candidate predicate
+palettes where repeated dated lifecycle/status source lines existed but no
+candidate predicate could carry subject, status/result, and date/source
+together. That was useful after the fact, but it was not yet part of the
+instrument's own compile-health surface.
+
+Prediction:
+
+The compile should emit a profile-admission report with:
+
+- operational lifecycle source-signal count;
+- count of candidate predicates capable of carrying operational lifecycle
+  units;
+- a `shallow_lifecycle_palette` finding when source pressure exists and the
+  palette is incapable.
+
+That finding should make compile health a warning, but it must not repair facts
+or add helpers.
+
+Intervention:
+
+Updated `scripts/run_domain_bootstrap_file.py`:
+
+- added `profile_admission_contracts_v1`;
+- attached profile admission reports to `source_compile`;
+- folded admission findings into `compile_health.flag_counts`;
+- rendered profile admission status in compile markdown summaries.
+
+The operational lifecycle admission contract is structural: repeated dated
+status/lifecycle pressure requires at least one candidate shape that can carry
+subject plus state/result plus date/source, or a canonical lifecycle predicate.
+Two-slot status/result predicates plus separate date/event predicates are
+reported as shallow palette pressure.
+
+After:
+
+Ran a fresh six-lane OpenRouter replay on the operational probe set.
+
+Compile result:
+
+- fixtures: 6;
+- parsed OK: 6;
+- candidate predicates: 86;
+- compile admitted/skipped: 344/6.
+
+Profile admission result:
+
+- 5 of 6 compiles had at least one operational-lifecycle-capable candidate;
+- `grant_review_queue` had zero capable candidates and was marked
+  `shallow_lifecycle_palette`;
+- the warning appeared in the compile markdown and in `compile_health`.
+
+Preservation contract result:
+
+| Probe | Lifecycle preservation | Complete | Partial | Split | Profile admission |
+| --- | --- | ---: | ---: | ---: | --- |
+| `clinic_intake_corrections` | partial | 5 | 2 | 1 | capable |
+| `grant_review_queue` | ledger-only | 0 | 31 | 1 | shallow |
+| `library_preservation_queue` | pass | 4 | 6 | 1 | capable |
+| `permit_renewal_docket` | partial | 3 | 10 | 1 | capable |
+| `warehouse_repair_log` | partial | 3 | 2 | 1 | capable |
+| `water_sample_docket` | pass | 7 | 18 | 3 | capable |
+
+This is a material improvement in observability. Warehouse and water, which
+were the two hard ledger-only cases in CS-010, produced capable candidate
+palettes and nonzero complete lifecycle rows in this draw. Grant stayed shallow
+at the profile/admission layer, which is exactly the failure class this contract
+is supposed to expose.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/operational_profile_admission_6probe_compile_summary_20260515.md`
+- `docs/data/compile_surface_stability/operational_profile_admission_6probe_compile_summary_20260515.json`
+- `docs/data/compile_surface_stability/operational_profile_admission_6probe_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_profile_admission_6probe_stability_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_profile_admission_6probe_palette_shape_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_profile_admission_6probe_palette_shape_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_operational_lifecycle_palette_audit.py tests\test_compile_surface_stability.py -q` -> `48 passed`
+
+Lesson:
+
+The new layer is real: profile/admission stability sits before compile
+preservation. It lets the instrument say, "the palette itself is too shallow,"
+instead of letting QA, helpers, or selector guards absorb the missing surface.
+That is the right boundary for this pressure.
+
+The replay also warns against overclaiming. A capable palette does not guarantee
+complete preservation: clinic, permit, and warehouse still landed partial under
+the strict lifecycle contract. So the next architecture distinction is:
+
+- shallow palette: repair admission/profile constraints;
+- capable palette but partial facts: repair preservation or deterministic
+  normalization only when rows are explicitly joinable;
+- complete facts but QA miss: repair query planning/selector.
+
+Next pressure:
+
+Do a narrow grant-focused repair at the admission/profile layer. The target is
+not "grant" vocabulary; it is any operational queue/proposal/application source
+whose profile proposes separate `status/2` and `status_changed_on/2` shapes
+instead of a complete status-at-date candidate. The desired repair is to prefer
+or require a complete `*_status_at` / `record_status_phase`-equivalent predicate
+when repeated dated status lines are present.

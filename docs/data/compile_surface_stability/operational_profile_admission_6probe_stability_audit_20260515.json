@@ -1,0 +1,388 @@
+{
+  "compile_count": 6,
+  "fixture_count": 6,
+  "fixtures": [
+    {
+      "common_fact_count": 22,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T224849030861Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 5,
+              "direct_partial_count": 2,
+              "direct_split_count": 1,
+              "direct_surface_count": 5,
+              "source_signal_count": 6,
+              "source_text_mention_count": 6,
+              "status": "partial"
+            }
+          ],
+          "direct_fact_count": 22,
+          "direct_predicate_count": 13,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "completion_transition_surface": 1,
+            "identity_role_surface": 8,
+            "status_phase_surface": 7,
+            "task_scope_surface": 3
+          }
+        }
+      ],
+      "fixture": "clinic_intake_corrections",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T224849030861Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 22,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 72,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T225000840546Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 31,
+              "direct_split_count": 1,
+              "direct_surface_count": 0,
+              "source_signal_count": 5,
+              "source_text_mention_count": 5,
+              "status": "ledger_only"
+            }
+          ],
+          "direct_fact_count": 72,
+          "direct_predicate_count": 13,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 2,
+            "completion_transition_surface": 7,
+            "identity_role_surface": 16,
+            "status_phase_surface": 20,
+            "task_scope_surface": 6
+          }
+        }
+      ],
+      "fixture": "grant_review_queue",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T225000840546Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 72,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 23,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T224939029113Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 4,
+              "direct_partial_count": 6,
+              "direct_split_count": 1,
+              "direct_surface_count": 4,
+              "source_signal_count": 4,
+              "source_text_mention_count": 4,
+              "status": "pass"
+            }
+          ],
+          "direct_fact_count": 23,
+          "direct_predicate_count": 18,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 3,
+            "completion_transition_surface": 1,
+            "identity_role_surface": 7,
+            "status_phase_surface": 4,
+            "task_scope_surface": 1
+          }
+        }
+      ],
+      "fixture": "library_preservation_queue",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T224939029113Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 23,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 37,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T224904328200Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 1,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 3,
+              "direct_partial_count": 10,
+              "direct_split_count": 1,
+              "direct_surface_count": 3,
+              "source_signal_count": 5,
+              "source_text_mention_count": 5,
+              "status": "partial"
+            }
+          ],
+          "direct_fact_count": 37,
+          "direct_predicate_count": 15,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 2,
+            "completion_transition_surface": 3,
+            "identity_role_surface": 3,
+            "object_record_surface": 3,
+            "status_phase_surface": 11,
+            "task_scope_surface": 3
+          }
+        }
+      ],
+      "fixture": "permit_renewal_docket",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T224904328200Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 37,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 37,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T224903349217Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 3,
+              "direct_partial_count": 2,
+              "direct_split_count": 1,
+              "direct_surface_count": 3,
+              "source_signal_count": 6,
+              "source_text_mention_count": 6,
+              "status": "partial"
+            }
+          ],
+          "direct_fact_count": 37,
+          "direct_predicate_count": 10,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 2,
+            "completion_transition_surface": 3,
+            "identity_role_surface": 11,
+            "object_record_surface": 8,
+            "status_phase_surface": 8,
+            "task_scope_surface": 3
+          }
+        }
+      ],
+      "fixture": "warehouse_repair_log",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T224903349217Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 37,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 64,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T224946646934Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 7,
+              "direct_partial_count": 18,
+              "direct_split_count": 3,
+              "direct_surface_count": 7,
+              "source_signal_count": 6,
+              "source_text_mention_count": 6,
+              "status": "pass"
+            }
+          ],
+          "direct_fact_count": 64,
+          "direct_predicate_count": 13,
+          "parsed_ok": true,
+          "run": "operational_profile_admission_6probe_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 1,
+            "completion_transition_surface": 6,
+            "identity_role_surface": 21,
+            "object_record_surface": 19,
+            "status_phase_surface": 15,
+            "task_scope_surface": 4
+          }
+        }
+      ],
+      "fixture": "water_sample_docket",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_profile_admission_6probe_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T224946646934Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_profile_admission_6probe_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 64,
+      "unstable_fact_count": 0
+    }
+  ],
+  "schema_version": "compile_surface_stability_audit_v1",
+  "summary": {
+    "predicate_drift_count": 0,
+    "stable_fixture_count": 6,
+    "surface_drift_count": 0,
+    "unstable_fact_count": 0,
+    "unstable_fixture_count": 0
+  }
+}
