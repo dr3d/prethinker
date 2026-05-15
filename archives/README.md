@@ -21,3 +21,11 @@ but do not belong on the public docs front door.
    intentionally promoted.
 3. Promote only curated artifacts that need to be shared; leave bulk scratch
    traces in Git history or the external archive.
+
+## Current External Archive Bundles
+
+Recent repo-cleanup sweeps moved bulky or stale local material to:
+
+- `C:\prethinker_tmp_archive\repo_doc_retire_20260514`
+- `C:\prethinker_tmp_archive\repo_stale_assets_20260514`
+- `C:\prethinker_tmp_archive\tmp_sweep_20260514`

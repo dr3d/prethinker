@@ -232,7 +232,7 @@ These are as important as the positive ones:
 - **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
 - **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether active guard return sites are collapsing into a smaller number of semantic families (currently 4 families, 0 unclassified)
 - **[Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)** - active workbench for wide-corpus boundary coordinates and transferable repairs
-- **[Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)** - the fixture design methodology, difficulty calibration, and cross-fixture regression protocol
+- **[Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)** - the current fixture/probe methodology for boundary coordinates, resolution ladders, and transfer-safe repair pressure
 
 ---
 

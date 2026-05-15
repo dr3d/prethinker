@@ -17,8 +17,9 @@ This is the short handoff for coding agents working in Prethinker.
 11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 12. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 13. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-14. [docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
-15. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+14. [docs/DATASET_TRANSFER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md)
+15. [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
+16. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 

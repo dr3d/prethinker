@@ -230,10 +230,9 @@ coordinates, designed probes, and helper/source cleanup:
 
 - `docs/BOUNDARY_HUNT_WORKSHEET.md`
 
-The guard-generalization worksheet is the completed compression archive unless
-a boundary hunt discovers a new transferable guard replacement:
-
-- `docs/GUARD_GENERALIZATION_WORKSHEET.md`
+The guard-generalization worksheet is now a completed compression archive in
+Git history/cold storage unless a boundary hunt discovers a new transferable
+guard replacement.
 
 When guard count drops, ask what changed:
 

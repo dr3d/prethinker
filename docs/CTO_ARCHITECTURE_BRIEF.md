@@ -63,9 +63,9 @@ source or utterance
 
 ## Guard Compression State
 
-Guard compression has reached terminal-audit mode. The active workbench for the
-completed compression cycle is `docs/GUARD_GENERALIZATION_WORKSHEET.md`; do not
-restart guard retirement just to make the count smaller.
+Guard compression has reached terminal-audit mode. The completed compression
+workbench was moved out of the front-door docs into cold archive/Git history;
+do not restart guard retirement just to make the count smaller.
 
 Current selector ledger accounting from the terminal audit:
 

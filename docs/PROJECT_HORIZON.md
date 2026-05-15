@@ -33,7 +33,7 @@ For the detailed technical contract, see:
 - [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
-- [Portability And Model Transfer](https://github.com/dr3d/prethinker/blob/main/docs/PORTABILITY_AND_MODEL_TRANSFER.md)
+- [Dataset Transfer Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md)
 
 ## What Exists Today
 

@@ -30,8 +30,7 @@ Use this short path if you are new:
 Then go deeper:
 
 - [Semantic IR Mapper Spec](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - what the deterministic admission layer accepts, skips, blocks, projects, or clarifies.
-- [KB Interrogator](https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md) - interrogator/scoring harness notes.
-- [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md) - how hostile fixtures are designed without oracle leakage.
+- [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed as boundary probes without fixture-vocabulary leakage.
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md) - when Prethinker should ask instead of guessing during ingestion or query.
 - [Prethinker Design Overview](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md) - stable design overview, secondary to the current snapshot.
 - [Roadmap](https://github.com/dr3d/prethinker/blob/main/ROADMAP.md) - secondary planning note; current truth stays in Project State and the headline.
@@ -41,8 +40,8 @@ Then go deeper:
 - [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 - [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md)
 - [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
+- [Dataset Transfer Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md)
 - [Helper Residue Audit Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
-- [Guard Generalization Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/GUARD_GENERALIZATION_WORKSHEET.md) - completed compression archive; use the boundary hunt worksheet for active work.
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
@@ -50,30 +49,21 @@ Then go deeper:
 - [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
 - [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language lens explainer.
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - deeper lab calibration roster.
-- [Frontier Fixture Strategy](https://github.com/dr3d/prethinker/blob/main/docs/FRONTIER_FIXTURE_STRATEGY.md)
 - [Clarification Eagerness Strategy](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
-- [Stenographer Mode Simulation](https://github.com/dr3d/prethinker/blob/main/docs/STENOGRAPHER_MODE_SIMULATION.md)
-- [No Language Handling In Python Audit](https://github.com/dr3d/prethinker/blob/main/docs/NO_LANGUAGE_HANDLING_IN_PYTHON_AUDIT.md)
-- [Multilingual Semantic IR Probe](https://github.com/dr3d/prethinker/blob/main/docs/MULTILINGUAL_SEMANTIC_IR_PROBE.md)
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Domain Bootstrapping Meta Mode](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md)
-- [Temporal Graph V1](https://github.com/dr3d/prethinker/blob/main/docs/TEMPORAL_GRAPH_V1.md)
 
 ## Query And QA Instruments
 
-- [KB Interrogator](https://github.com/dr3d/prethinker/blob/main/docs/KB_INTERROGATOR.md)
 - [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 
 ## Domain Notes
 
-- [Medical Profile](https://github.com/dr3d/prethinker/blob/main/docs/MEDICAL_PROFILE.md)
-- [UMLS MVP](https://github.com/dr3d/prethinker/blob/main/docs/UMLS_MVP.md)
-- [CourtListener Domain](https://github.com/dr3d/prethinker/blob/main/docs/COURTLISTENER_DOMAIN.md)
-- [SEC Contracts Domain](https://github.com/dr3d/prethinker/blob/main/docs/SEC_CONTRACTS_DOMAIN.md)
+- [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
+- [Domain Bootstrapping Meta Mode](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_BOOTSTRAPPING_META_MODE.md)
 
 ## Demo And UI
 
-- [Policy Reimbursement Demo](https://github.com/dr3d/prethinker/blob/main/docs/POLICY_REIMBURSEMENT_DEMO.md)
 - [UI Gateway README](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 ## History

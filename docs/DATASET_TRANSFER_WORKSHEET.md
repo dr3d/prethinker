@@ -4877,7 +4877,7 @@ Next pressure:
 - Start a new worksheet for the next job. Good candidates:
   - `docs\INSTRUMENT_STAMP_WORKSHEET.md` if the immediate phase is multi-corpus
     stamping,
-  - `docs\CROSS_DOMAIN_PROBE_WORKSHEET.md` if the immediate phase is new
+  - a new cross-domain probe worksheet if the immediate phase is new
     unseen/domain datasets,
-  - `docs\PRODUCT_BEACHHEAD_WORKSHEET.md` only after the science work clearly
-    chooses a deployment target.
+  - a product/beachhead worksheet only after the science work clearly chooses a
+    deployment target.

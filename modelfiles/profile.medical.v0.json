@@ -101,8 +101,8 @@
   ],
   "evidence": {
     "project_state": "PROJECT_STATE.md",
-    "umls_mvp": "docs/UMLS_MVP.md",
-    "medical_profile": "docs/MEDICAL_PROFILE.md",
+    "umls_mvp": "archived:repo_doc_retire_20260514/UMLS_MVP.md",
+    "medical_profile": "archived:repo_doc_retire_20260514/MEDICAL_PROFILE.md",
     "ontology_prospector": "docs/ONTOLOGY_PROSPECTOR.md"
   }
 }

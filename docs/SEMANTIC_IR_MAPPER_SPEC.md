@@ -133,7 +133,8 @@ every other operation. If the model emits a temporal graph but no matching safe
 candidate operation, the graph appears in diagnostics and the KB remains
 unchanged.
 
-See [TEMPORAL_GRAPH_V1.md](https://github.com/dr3d/prethinker/blob/main/docs/TEMPORAL_GRAPH_V1.md).
+The older temporal-graph note has been archived; current temporal/status work
+is tracked through the active harness, boundary, and dataset-transfer docs.
 
 ## Operation Admission
 

@@ -27,7 +27,7 @@ http://127.0.0.1:8765
 ```
 
 For a compact governed-rules walkthrough, see the
-[Policy Reimbursement Demo](https://github.com/dr3d/prethinker/blob/main/docs/POLICY_REIMBURSEMENT_DEMO.md).
+current root README and docs hub.
 
 Direct file-open also works now:
 
@@ -150,7 +150,7 @@ Use the runner to execute a turnset through the same HTTP front door used by the
 
 ```powershell
 python scripts/run_gateway_turnset.py `
-  --turns stories/excursions/hn_midground_v3/turnsets/hn_signal_notification_forensics_turnset_v1.json `
+  --turns path\to\turnset.json `
   --base-url http://prethink:1234 `
   --strict-lock
 ```
