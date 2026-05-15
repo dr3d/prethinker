@@ -802,3 +802,94 @@ invariants active, then audit direct surfaces and rerun strict no-helper QA.
 If authority/section rows move while helper rows stay at zero, the next phase
 is to widen this compile-side invariant to unlike probes rather than restore
 native helpers.
+
+## CSS-011 - Source Authority Recompile Replay
+
+Date: 2026-05-14
+
+Before:
+
+CSS-010 strengthened compile invariants for section/source containment and
+authority/source relations. The open question was whether those rules would
+move the focused custody/control probe without bringing back helpers.
+
+Prediction:
+
+A useful recompile should improve source-authority surfaces while maintaining
+direct-surface audit health. QA should improve specifically on authority/source
+and section-addressability questions, not merely through broader source-record
+fallback.
+
+Intervention:
+
+First attempted the recompile through OpenRouter. The flat skeleton compiled,
+but every focused pass failed with provider `429`, leaving only `61` direct
+facts and a poor compile-health verdict. That artifact was audited but not used
+for QA.
+
+Then reran locally through the available LM Studio endpoint on
+`http://127.0.0.1:1234` with the same model id and strengthened invariant
+context.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_audit_20260514.json`
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_audit_20260514.md`
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_local_audit_20260514.json`
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_local_audit_20260514.md`
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_local_qa_20260514.json`
+- `docs/data/compile_surface_stability/source_authority_invariant_probate_local_qa_20260514.md`
+
+After:
+
+OpenRouter transport result:
+
+- direct facts=`61`
+- source-record facts=`2380`
+- invariant audit: pass=`3`, partial=`2`, ledger_only=`2`
+- focused passes all failed with provider `429`
+- no QA run
+
+Local compile result:
+
+- admitted=`175`
+- skipped=`8`
+- compile health=`healthy`
+- invariant audit: pass=`4`, partial=`3`, candidate_only=`0`,
+  ledger_only=`0`
+- emitted useful authority/source palette rows such as `access_source/3`,
+  `access_authorized_to/3`, `court_order/4`, `claim_asserted_by/3`, and
+  `claim_evidence/3`
+
+Local QA result:
+
+- exact=`21`
+- partial=`4`
+- miss=`15`
+- helper rows=`0`
+- failure surfaces: `query_surface_gap=9`, `compile_surface_gap=10`,
+  `not_applicable=21`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `30 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `195 passed`
+
+Lesson:
+
+The strengthened invariant did make the compiler speak more directly about
+authority/source, but it also changed the predicate palette. QA fell because
+the planner still expects or prefers adjacent dialects. This is the same
+architecture lesson at a deeper layer: direct surfaces are necessary, but
+surface contracts must be query-plannable across palette variants.
+
+Next pressure:
+
+Do not adopt the local authority compile as the baseline. Keep the strict
+token-subset no-helper run (`28/1/11`) as the current best zero-helper reading.
+The next repair should be predicate-contract-aware query planning for
+authority/source families: when the inventory contains predicates like
+`access_source/3`, `access_authorized_to/3`, `court_order/4`, or equivalent
+authority/source rows, the planner must distinguish authorized recipient from
+authorizing source.

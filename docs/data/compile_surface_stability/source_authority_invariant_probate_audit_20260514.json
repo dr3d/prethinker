@@ -1,0 +1,319 @@
+{
+  "compile_count": 1,
+  "reports": [
+    {
+      "candidate_predicate_count": 18,
+      "compile_json": "C:\\prethinker\\tmp\\source_authority_invariant_probate_compile_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T040140094735Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 61,
+      "direct_predicates": [
+        "court_order",
+        "item_description",
+        "item_external_id",
+        "party_role",
+        "physical_custodian",
+        "title_contested_by",
+        "title_recorded_as"
+      ],
+      "families": [
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "custodian_or_holder": [
+              "custodian",
+              "holder"
+            ],
+            "legal_or_claim_role": [
+              "counsel",
+              "claimant"
+            ],
+            "registrar_or_recorder": [
+              "recorded"
+            ],
+            "supervisor_or_authority": [
+              "authority"
+            ]
+          },
+          "description": "named people or organizations with answer-bearing roles",
+          "family": "identity_role_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "custodian_or_holder": [
+              "custodian",
+              "custody",
+              "holder",
+              "held"
+            ],
+            "legal_or_claim_role": [
+              "counsel",
+              "claimant"
+            ],
+            "registrar_or_recorder": [
+              "registrar",
+              "compiled",
+              "recorded"
+            ],
+            "supervisor_or_authority": [
+              "authorized",
+              "authority"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "section_coordinate": [
+              "part"
+            ],
+            "title_or_heading": [
+              "title"
+            ]
+          },
+          "description": "named sections, titles, register parts, and source coordinates",
+          "family": "source_addressability_surface",
+          "ledger_only_groups": {
+            "basis_coordinate": [
+              "basis"
+            ],
+            "chronology_coordinate": [
+              "chronology"
+            ],
+            "negative_inference_coordinate": [
+              "not"
+            ]
+          },
+          "missing_groups": [
+            "basis_coordinate",
+            "chronology_coordinate",
+            "negative_inference_coordinate"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "basis_coordinate": [
+              "basis"
+            ],
+            "chronology_coordinate": [
+              "chronology"
+            ],
+            "negative_inference_coordinate": [
+              "not"
+            ],
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "title",
+              "heading"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "rules, policies, procedure identifiers, clauses, ratios, and governing sections",
+          "family": "rule_policy_surface",
+          "ledger_only_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "policy",
+              "section"
+            ]
+          },
+          "missing_groups": [
+            "exception_or_exclusion",
+            "policy_or_rule_id"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "policy",
+              "section"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "object_or_item_id": [
+              "item",
+              "inventory",
+              "id",
+              "item_description"
+            ]
+          },
+          "description": "objects, devices, systems, vendor/model identifiers, and inventory ids",
+          "family": "object_device_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "object_or_item_id": [
+              "item",
+              "inventory",
+              "id"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {
+            "event_or_action": [
+              "event"
+            ]
+          },
+          "covered_groups": {
+            "interval_or_window": [
+              "deadline"
+            ]
+          },
+          "description": "events, raw/corrected timestamps, effective dates, and transitions",
+          "family": "temporal_event_surface",
+          "ledger_only_groups": {
+            "timestamp_or_date": [
+              "time",
+              "date",
+              "dated"
+            ]
+          },
+          "missing_groups": [
+            "event_or_action",
+            "timestamp_or_date"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "event_or_action": [
+              "event",
+              "change"
+            ],
+            "interval_or_window": [
+              "end",
+              "deadline"
+            ],
+            "timestamp_or_date": [
+              "time",
+              "date",
+              "dated"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "explicit counts, thresholds, durations, percentages, and computed requirements",
+          "family": "measure_count_surface",
+          "ledger_only_groups": {
+            "measurement_value": [
+              "second"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ]
+          },
+          "missing_groups": [
+            "measurement_value",
+            "ratio_or_formula"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "measurement_value": [
+              "second"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "access_or_location": [
+              "access",
+              "storage"
+            ],
+            "custody_or_possession": [
+              "holder"
+            ],
+            "ownership_or_title": [
+              "title"
+            ],
+            "recall_or_return": [
+              "loan"
+            ]
+          },
+          "description": "custody, access, ownership, recall/return, and control state",
+          "family": "custody_control_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "access_or_location": [
+              "access",
+              "storage",
+              "room"
+            ],
+            "custody_or_possession": [
+              "custody",
+              "possession",
+              "holder",
+              "held"
+            ],
+            "ownership_or_title": [
+              "ownership",
+              "title"
+            ],
+            "recall_or_return": [
+              "return",
+              "loan"
+            ]
+          }
+        }
+      ],
+      "fixture": "probate_storage_access_register",
+      "parsed_ok": true,
+      "run": "source_authority_invariant_probate_compile_20260514",
+      "source_record_fact_count": 2380,
+      "summary": {
+        "ledger_only": 2,
+        "partial": 2,
+        "pass": 3
+      }
+    }
+  ],
+  "schema_version": "compile_surface_invariant_audit_v1",
+  "summary": {
+    "family_status_counts": {
+      "custody_control_surface": {
+        "pass": 1
+      },
+      "identity_role_surface": {
+        "pass": 1
+      },
+      "measure_count_surface": {
+        "ledger_only": 1
+      },
+      "object_device_surface": {
+        "pass": 1
+      },
+      "rule_policy_surface": {
+        "ledger_only": 1
+      },
+      "source_addressability_surface": {
+        "partial": 1
+      },
+      "temporal_event_surface": {
+        "partial": 1
+      }
+    },
+    "status_counts": {
+      "ledger_only": 2,
+      "partial": 2,
+      "pass": 3
+    }
+  }
+}

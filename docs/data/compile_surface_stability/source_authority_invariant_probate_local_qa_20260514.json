@@ -1,0 +1,23 @@
+{
+  "schema": "compile_surface_stability_qa_summary_v1",
+  "experiment": "source_authority_invariant_probate_local_qa_limit0_oracle",
+  "date": "2026-05-14",
+  "fixture": "probate_storage_access_register",
+  "questions": 40,
+  "reference_judge": {
+    "exact": 21,
+    "partial": 4,
+    "miss": 15
+  },
+  "failure_surfaces": {
+    "compile_surface_gap": 10,
+    "not_applicable": 21,
+    "query_surface_gap": 9
+  },
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "compile_artifact": "tmp/source_authority_invariant_probate_compile_local_20260514/probate_storage_access_register/domain_bootstrap_file_20260515T040742270464Z_source_qwen-qwen3-6-35b-a3b.json",
+  "qa_artifact": "tmp/source_authority_invariant_probate_local_qa_limit0_oracle_20260514/probate_storage_access_register/domain_bootstrap_qa_20260515T041919315179Z_qa_qwen-qwen3-6-35b-a3b.json",
+  "lesson": "The strengthened invariant produced direct authority/source rows in a local compile, but the predicate palette shifted enough that QA fell to 21 exact. Compile-side surface acquisition and query-planner palette alignment must be evaluated together."
+}
