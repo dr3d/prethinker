@@ -1,0 +1,234 @@
+{
+  "compile_count": 6,
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T162948498323Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 20,
+      "finding_counts": {
+        "phase_classification_missing": 1
+      },
+      "findings": [
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_02_02_intake_aide_mara_chen_received_referral_r_44_from_the_front_desk_and_filed_ci_44_with_status_pending_triage"
+          ],
+          "phase": "initial"
+        }
+      ],
+      "fixture": "clinic_intake_corrections",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 84
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T163025062154Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 56,
+      "finding_counts": {
+        "alias_split": 2,
+        "phase_classification_missing": 2
+      },
+      "findings": [
+        {
+          "class": "alias_split",
+          "code": "gq5",
+          "evidence": [
+            "identity code `gq5` appears as gq_5, queue_gq5"
+          ],
+          "variants": [
+            "gq_5",
+            "queue_gq5"
+          ]
+        },
+        {
+          "class": "alias_split",
+          "code": "p5",
+          "evidence": [
+            "identity code `p5` appears as p_5, proposal_p5"
+          ],
+          "variants": [
+            "p_5",
+            "proposal_p5"
+          ]
+        },
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_05_02_grants_clerk_ilya_ren_received_proposal_p_5_and_filed_it_with_status_pending_eligibility_check"
+          ],
+          "phase": "initial"
+        },
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_05_10_director_mei_holt_closed_gq_5_as_approved_for_the_tool_shed_without_the_solar_panel_line_the_current_status_is_approved_with_revised_budget"
+          ],
+          "phase": "current"
+        }
+      ],
+      "fixture": "grant_review_queue",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 98
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T163029879736Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 64,
+      "finding_counts": {},
+      "findings": [],
+      "fixture": "library_preservation_queue",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 81
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T163028691084Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 37,
+      "finding_counts": {
+        "alias_split": 1,
+        "ambiguous_repeated_verb": 1,
+        "phase_classification_missing": 2,
+        "supersession_target_collapse": 1
+      },
+      "findings": [
+        {
+          "class": "alias_split",
+          "code": "pr18",
+          "evidence": [
+            "identity code `pr18` appears as applicant_pr18, pr_18"
+          ],
+          "variants": [
+            "applicant_pr18",
+            "pr_18"
+          ]
+        },
+        {
+          "class": "ambiguous_repeated_verb",
+          "evidence": [
+            "on_2026_01_04_clerk_erin_moss_received_application_a_18_and_filed_it_as_pr_18_the_initial_status_was_pending_completeness_review",
+            "on_2026_01_18_payment_was_received_and_the_permit_was_reopened_for_final_issuance"
+          ],
+          "predicate_surfaces": [
+            "action_performed"
+          ],
+          "verb": "received"
+        },
+        {
+          "class": "supersession_target_collapse",
+          "evidence": [
+            "on_2026_01_12_payment_failed_the_approval_was_superseded_by_hold_notice_h_2_and_pr_18_returned_to_pending_payment_status"
+          ],
+          "fact": "status_superseded_by(approved_subject_to_payment, pending_payment).",
+          "source_target_codes": [
+            "h2",
+            "pr18"
+          ]
+        },
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_01_04_clerk_erin_moss_received_application_a_18_and_filed_it_as_pr_18_the_initial_status_was_pending_completeness_review"
+          ],
+          "phase": "initial"
+        },
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_01_20_supervisor_vale_closed_pr_18_as_approved_for_weekday_operation_only_the_current_status_of_pr_18_is_approved_weekday_renewal"
+          ],
+          "phase": "current"
+        }
+      ],
+      "fixture": "permit_renewal_docket",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 88
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T163009695712Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 39,
+      "finding_counts": {},
+      "findings": [],
+      "fixture": "warehouse_repair_log",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 85
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T162951841328Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 26,
+      "finding_counts": {
+        "alias_split": 1,
+        "ambiguous_repeated_verb": 1,
+        "phase_classification_missing": 1
+      },
+      "findings": [
+        {
+          "class": "alias_split",
+          "code": "b12",
+          "evidence": [
+            "identity code `b12` appears as b_12, sample_b12"
+          ],
+          "variants": [
+            "b_12",
+            "sample_b12"
+          ]
+        },
+        {
+          "class": "ambiguous_repeated_verb",
+          "evidence": [
+            "on_2026_04_10_field_collector_niko_shah_received_sample_b_12_and_filed_docket_ws_12_with_status_pending_lab_receipt",
+            "on_2026_04_11_lab_desk_ada_voss_logged_b_12_as_received_and_assigned_it_to_nitrate_testing"
+          ],
+          "predicate_surfaces": [
+            "sample_received"
+          ],
+          "verb": "received"
+        },
+        {
+          "class": "phase_classification_missing",
+          "evidence": [
+            "on_2026_04_10_field_collector_niko_shah_received_sample_b_12_and_filed_docket_ws_12_with_status_pending_lab_receipt"
+          ],
+          "phase": "initial"
+        }
+      ],
+      "fixture": "water_sample_docket",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 82
+    }
+  ],
+  "schema": "operational_lifecycle_palette_audit_v1",
+  "summary": {
+    "class_counts": {
+      "alias_split": 4,
+      "ambiguous_repeated_verb": 2,
+      "phase_classification_missing": 6,
+      "supersession_target_collapse": 1
+    },
+    "fixture_counts": {
+      "clinic_intake_corrections": {
+        "phase_classification_missing": 1
+      },
+      "grant_review_queue": {
+        "alias_split": 2,
+        "phase_classification_missing": 2
+      },
+      "library_preservation_queue": {},
+      "permit_renewal_docket": {
+        "alias_split": 1,
+        "ambiguous_repeated_verb": 1,
+        "phase_classification_missing": 2,
+        "supersession_target_collapse": 1
+      },
+      "warehouse_repair_log": {},
+      "water_sample_docket": {
+        "alias_split": 1,
+        "ambiguous_repeated_verb": 1,
+        "phase_classification_missing": 1
+      }
+    },
+    "fixtures_with_findings": 4
+  }
+}

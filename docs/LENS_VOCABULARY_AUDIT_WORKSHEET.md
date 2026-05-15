@@ -1528,3 +1528,90 @@ compile experiment. The repair should prefer phase-bearing status predicates,
 alias/equivalence rows for docket/file/queue ids, separated receipt/logging
 event layers, and a distinction between the source/event/document that
 supersedes and the resulting status after supersession.
+
+## LV-013 - Operational Lifecycle Palette Diagnostic
+
+Date: 2026-05-15
+
+Question:
+
+Can we measure the operational record/status failure shape without adding
+another repair, so the next layer is chosen from data rather than guessed?
+
+Before:
+
+LV-012 named four suspected lifecycle pressures:
+
+- alias splits across local record atoms;
+- ambiguous repeated verbs across event layers;
+- supersession target collapse, where the compile keeps the resulting status
+  but not the superseding document/event;
+- missing status phase, especially initial/current/final distinctions.
+
+Prediction:
+
+The diagnostic should show whether the operational problem is widespread or
+concentrated. If all four classes fire everywhere, the profile needs a broad
+lifecycle grammar. If only specific classes recur, the next repair can be
+smaller.
+
+Intervention:
+
+Added `scripts/audit_operational_lifecycle_palette.py`, a compile-artifact
+diagnostic. It does not judge QA and does not propose repairs. It detects:
+
+- `alias_split`: compact identity codes with multiple direct atom variants;
+- `ambiguous_repeated_verb`: repeated lifecycle verbs whose direct predicates
+  lack event-layer distinction;
+- `supersession_target_collapse`: source says a document/event superseded
+  something, but the direct row collapses the target to a resulting status;
+- `phase_classification_missing`: source states initial/current/final status
+  but no phase-bearing direct surface exists.
+
+The first detector pass overcounted dates and long source-addressability labels.
+Tuned it before treating the output as evidence.
+
+After:
+
+Operational lifecycle diagnostic over the six existing probes:
+
+- compiles=`6`
+- fixtures with findings=`4`
+- class counts=`6 phase_classification_missing / 4 alias_split / 2 ambiguous_repeated_verb / 1 supersession_target_collapse`
+
+Fixture summary:
+
+| Fixture | Alias Split | Ambiguous Verb | Supersession Collapse | Phase Missing |
+| --- | ---: | ---: | ---: | ---: |
+| `clinic_intake_corrections` | 0 | 0 | 0 | 1 |
+| `grant_review_queue` | 2 | 0 | 0 | 2 |
+| `library_preservation_queue` | 0 | 0 | 0 | 0 |
+| `permit_renewal_docket` | 1 | 1 | 1 | 2 |
+| `warehouse_repair_log` | 0 | 0 | 0 | 0 |
+| `water_sample_docket` | 1 | 1 | 0 | 1 |
+
+Artifacts:
+
+- `scripts/audit_operational_lifecycle_palette.py`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_lifecycle_palette_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_lifecycle_palette_audit_20260515.json`
+
+Lesson:
+
+The operational gap is narrower than feared. Two probes are clean under this
+diagnostic, and supersession target collapse is not the dominant class. The
+largest pressure is phase-bearing status: source text states initial/current
+status six times across four fixtures, but the compiles often preserve only a
+local status row without a stable phase slot. Alias split is second: record ids
+and short ids drift into multiple atoms. Repeated-verb ambiguity is real but
+limited to cases where the same ordinary verb names different event layers
+(`received` as field receipt versus lab receipt, or application received versus
+payment received).
+
+Next pressure:
+
+Design the smallest operational lifecycle profile contract around the measured
+classes: phase-bearing status rows first, canonical alias/equivalence second,
+and event-layer distinction for repeated verbs third. Supersession target
+collapse should be included, but it is a focused one-fixture pressure rather
+than the center of the repair.
