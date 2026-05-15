@@ -1,0 +1,343 @@
+{
+  "compile_count": 2,
+  "fixture_count": 1,
+  "fixtures": [
+    {
+      "common_fact_count": 0,
+      "draw_count": 2,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T214905290127Z_source_qwen-qwen3-6-35b-a3b.json",
+          "direct_fact_count": 15,
+          "direct_predicate_count": 9,
+          "parsed_ok": true,
+          "run": "assignment_scope_v1_compile_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 3,
+            "identity_role_surface": 6,
+            "object_record_surface": 4,
+            "status_phase_surface": 3,
+            "task_scope_surface": 5
+          }
+        },
+        {
+          "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_equipment_redraw_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T215213816741Z_source_qwen-qwen3-6-35b-a3b.json",
+          "direct_fact_count": 26,
+          "direct_predicate_count": 12,
+          "parsed_ok": true,
+          "run": "assignment_scope_v1_equipment_redraw_compile_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 7,
+            "completion_transition_surface": 2,
+            "identity_role_surface": 9,
+            "object_record_surface": 8,
+            "status_phase_surface": 4,
+            "task_scope_surface": 8
+          }
+        }
+      ],
+      "fixture": "equipment_service_queue",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T214905290127Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 26,
+          "missing_union_facts": [
+            "assigned_role(mara_lin, coordinator).",
+            "assigned_role(priya_noor, electrician).",
+            "assigned_role(theo_aran, mechanic).",
+            "equipment_assigned_to_record(sr_44, g_44).",
+            "equipment_id(equip_g44, g_44).",
+            "equipment_id(g_44, g_44).",
+            "equipment_type(equip_g44, portable_generator).",
+            "equipment_type(g_44, portable_generator).",
+            "person_name(mara_lin, mara_lin).",
+            "person_name(person_mara_lin, mara_lin).",
+            "person_name(person_priya_noor, priya_noor).",
+            "person_name(person_theo_aran, theo_aran).",
+            "person_name(priya_noor, priya_noor).",
+            "person_name(theo_aran, theo_aran).",
+            "record_created_by(sr_44, mara_lin, 2026_12_11t08_15).",
+            "record_status(sr_44, pending_signoff).",
+            "service_record_id(sr_44, sr_44).",
+            "signoff_condition(sr_44, both_assignments_were_marked_complete).",
+            "task_assigned_to(task_fuel, theo_aran, 2026_12_11t09_00).",
+            "task_assigned_to(task_voltage, priya_noor, 2026_12_12).",
+            "task_completed_by(task_fuel, theo_aran, 2026_12_13).",
+            "task_completed_by(task_voltage, priya_noor, 2026_12_14).",
+            "task_description(task_fuel, fuel_line_inspection).",
+            "task_description(task_fuel_line_001, fuel_line_inspection).",
+            "task_description(task_voltage, voltage_output_testing)."
+          ],
+          "run": "assignment_scope_v1_compile_20260515"
+        },
+        {
+          "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_equipment_redraw_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T215213816741Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 15,
+          "missing_union_facts": [
+            "equipment_id(g_44).",
+            "equipment_service_record(g_44, sr_44).",
+            "person_name(mara_lin).",
+            "person_name(priya_noor).",
+            "person_name(theo_aran).",
+            "person_role(mara_lin, coordinator).",
+            "person_role(priya_noor, electrician).",
+            "person_role(theo_aran, mechanic).",
+            "service_record_id(sr_44).",
+            "service_record_status(sr_44, pending).",
+            "task_assigned(theo_aran, fuel_line_inspection, 2026_12_11, 09_00).",
+            "task_dependency(sr_44, both_assignments_complete).",
+            "task_dependency(sr_44, pending_signoff_until_both_assignments_were_marked_complete).",
+            "task_type(fuel_line_inspection, fuel_line_inspection).",
+            "task_type(voltage_output_testing, voltage_output_testing)."
+          ],
+          "run": "assignment_scope_v1_equipment_redraw_compile_20260515"
+        }
+      ],
+      "predicate_drift": [
+        {
+          "counts": [
+            0,
+            3
+          ],
+          "delta": 3,
+          "max": 3,
+          "min": 0,
+          "predicate": "assigned_role"
+        },
+        {
+          "counts": [
+            0,
+            1
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "equipment_assigned_to_record"
+        },
+        {
+          "counts": [
+            1,
+            2
+          ],
+          "delta": 1,
+          "max": 2,
+          "min": 1,
+          "predicate": "equipment_id"
+        },
+        {
+          "counts": [
+            1,
+            0
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "equipment_service_record"
+        },
+        {
+          "counts": [
+            0,
+            2
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "predicate": "equipment_type"
+        },
+        {
+          "counts": [
+            3,
+            6
+          ],
+          "delta": 3,
+          "max": 6,
+          "min": 3,
+          "predicate": "person_name"
+        },
+        {
+          "counts": [
+            3,
+            0
+          ],
+          "delta": 3,
+          "max": 3,
+          "min": 0,
+          "predicate": "person_role"
+        },
+        {
+          "counts": [
+            0,
+            1
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "record_created_by"
+        },
+        {
+          "counts": [
+            0,
+            1
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "record_status"
+        },
+        {
+          "counts": [
+            1,
+            0
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "service_record_status"
+        },
+        {
+          "counts": [
+            0,
+            1
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "signoff_condition"
+        },
+        {
+          "counts": [
+            1,
+            0
+          ],
+          "delta": 1,
+          "max": 1,
+          "min": 0,
+          "predicate": "task_assigned"
+        },
+        {
+          "counts": [
+            0,
+            2
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "predicate": "task_assigned_to"
+        },
+        {
+          "counts": [
+            0,
+            2
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "predicate": "task_completed_by"
+        },
+        {
+          "counts": [
+            2,
+            0
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "predicate": "task_dependency"
+        },
+        {
+          "counts": [
+            0,
+            4
+          ],
+          "delta": 4,
+          "max": 4,
+          "min": 0,
+          "predicate": "task_description"
+        },
+        {
+          "counts": [
+            2,
+            0
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "predicate": "task_type"
+        }
+      ],
+      "stable": false,
+      "surface_drift": [
+        {
+          "counts": [
+            3,
+            7
+          ],
+          "delta": 4,
+          "max": 7,
+          "min": 3,
+          "surface": "assignment_binding_surface"
+        },
+        {
+          "counts": [
+            0,
+            2
+          ],
+          "delta": 2,
+          "max": 2,
+          "min": 0,
+          "surface": "completion_transition_surface"
+        },
+        {
+          "counts": [
+            6,
+            9
+          ],
+          "delta": 3,
+          "max": 9,
+          "min": 6,
+          "surface": "identity_role_surface"
+        },
+        {
+          "counts": [
+            4,
+            8
+          ],
+          "delta": 4,
+          "max": 8,
+          "min": 4,
+          "surface": "object_record_surface"
+        },
+        {
+          "counts": [
+            3,
+            4
+          ],
+          "delta": 1,
+          "max": 4,
+          "min": 3,
+          "surface": "status_phase_surface"
+        },
+        {
+          "counts": [
+            5,
+            8
+          ],
+          "delta": 3,
+          "max": 8,
+          "min": 5,
+          "surface": "task_scope_surface"
+        }
+      ],
+      "union_fact_count": 41,
+      "unstable_fact_count": 41
+    }
+  ],
+  "schema_version": "compile_surface_stability_audit_v1",
+  "summary": {
+    "predicate_drift_count": 17,
+    "stable_fixture_count": 0,
+    "surface_drift_count": 6,
+    "unstable_fact_count": 41,
+    "unstable_fixture_count": 1
+  }
+}
