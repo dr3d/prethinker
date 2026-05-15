@@ -207,3 +207,72 @@ Draft the first compile-stability contract in fixture-free language:
 
 Then add an audit recognizer that can score those contracts directly instead of
 using broad surface counts as a proxy.
+
+## CS-003 - Consolidation Checkpoint
+
+Date: 2026-05-15
+
+Question:
+
+What methodological refinements should be carried forward before the next
+repair cycle?
+
+Before:
+
+The lens sweep, transition/delta work, helper retirement, and compile-surface
+stability work were all producing useful artifacts, but the boundary between
+them was easy to blur. A single not-exact row could look like a lens problem,
+a query problem, a helper problem, or a compile problem depending on which
+worksheet was open.
+
+Refinement:
+
+The current doctrine is now:
+
+1. Lens vocabulary audit asks whether bounded structural terms and slot
+   contracts transfer to unlike documents.
+2. Query/transition repair is allowed only when the needed facts are already
+   admitted and the gap is how to interpret or join them.
+3. Compile-surface repair is allowed only when an unlike hard probe reproduces
+   the missing answer-bearing surface.
+4. Compile-stability audit is separate from compile-surface repair: it measures
+   whether sibling surfaces are preserved consistently across draws or compile
+   regimes.
+5. Helper resurrection is disfavored unless a reusable surface proves that
+   query-only support is the right layer.
+
+After:
+
+Verification pass:
+
+- `python -m pytest tests\test_compile_surface_stability.py tests\test_compile_surface_invariants.py tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_query_transition_resolution_audit.py tests\test_operational_lifecycle_palette_audit.py tests\test_audit_helper_classes.py tests\test_audit_helper_usage.py tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_qa_batch.py -q`
+- result: `283 passed`
+
+Working-tree status before this journal entry was clean, so there were no
+pending normalizer artifacts to commit.
+
+Lesson:
+
+The project now has a clearer layer stack:
+
+- vocabulary/slot transfer;
+- deterministic transition normalization;
+- query interpretation over admitted rows;
+- compile-surface acquisition;
+- compile-surface stability across draws;
+- helper compatibility quarantine.
+
+The next work should not collapse those layers. In particular, compile
+stability is now its own research lane: the first repair target is a direct
+contract audit for repeated parallel events and source-authority pairs, not a
+prompt paragraph and not a helper.
+
+Next pressure:
+
+Add contract-level recognizers for the two compile-stability primitives:
+
+- repeated parallel event preservation;
+- source-authority pair preservation.
+
+Then rerun the stability audit on the assignment, operational, and
+source-authority evidence sets.
