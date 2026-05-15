@@ -8,6 +8,7 @@ from scripts.audit_lens_vocabulary_transfer import (
     EPISTEMIC_UNCERTAINTY_TERMS,
     OPERATIONAL_RECORD_STATUS_TERMS,
     RULE_COMPOSITION_TERMS,
+    TEMPORAL_STATUS_TERMS,
     audit_compile,
     summarize_reports,
 )
@@ -734,3 +735,36 @@ def test_entity_role_audit_accepts_current_generic_palette(tmp_path: Path) -> No
     assert rows["custody"] == "structural"
     assert rows["responsibility"] == "structural"
     assert rows["family_relationship"] == "structural"
+
+
+def test_temporal_status_audit_accepts_status_timeline_and_effective_date(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, status_changed_on_effective_date).",
+            "transition_effective_date(change_7, 2026_04_12).",
+            "permit_status(permit_4, pending, 2026_04_01).",
+            "permit_status(permit_4, approved, 2026_04_12).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="temporal_status", terms=TEMPORAL_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["effective_date"] == "structural"
+    assert rows["status_at"] == "structural"
+
+
+def test_temporal_status_audit_marks_label_without_slots_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, a_deadline_was_mentioned_without_date).",
+            "deadline(task_9).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="temporal_status", terms=TEMPORAL_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["deadline"] == "shallow_structural"

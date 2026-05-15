@@ -1,0 +1,667 @@
+{
+  "compile_count": 6,
+  "lens": "temporal_status",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_compile_20260515\\document_field_delta\\domain_bootstrap_file_20260515T183941704264Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 15,
+      "fixture": "document_field_delta",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_compile_20260515",
+      "source_record_fact_count": 65,
+      "summary": {
+        "not_applicable": 6,
+        "shallow_structural": 1,
+        "structural": 1
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status",
+            "current",
+            "prior"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "transition_status(f_9, current).",
+            "transition_status(d_4, prior)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "current"
+          ],
+          "status": "shallow_structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [
+            "replaced",
+            "prior",
+            "current"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "replaced_role(f_9, d_4)."
+          ],
+          "source_hits": [
+            "replaced",
+            "current"
+          ],
+          "status": "structural",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_compile_20260515\\role_membership_transition\\domain_bootstrap_file_20260515T184104000930Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 29,
+      "fixture": "role_membership_transition",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_compile_20260515",
+      "source_record_fact_count": 58,
+      "summary": {
+        "not_applicable": 4,
+        "shallow_structural": 2,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "effective",
+            "date"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "update_date(update_u_12, 2026_12_04).",
+            "update_date(u_12, 2026_12_04).",
+            "transition_effective_date(trans_ren_left_crew, 2026_12_04).",
+            "transition_effective_date(trans_ren_role_change, 2026_12_04).",
+            "transition_effective_date(trans_001, 2026_12_04)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [
+            "by"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "posted_by(update_u_12, volunteer_dispatch_board).",
+            "posted_by(u_12, volunteer_dispatch_board)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "current"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [
+            "replaced",
+            "current"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "replaced"
+          ],
+          "status": "shallow_structural",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_compile_20260515\\status_value_transition\\domain_bootstrap_file_20260515T184009229973Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 13,
+      "fixture": "status_value_transition",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_compile_20260515",
+      "source_record_fact_count": 56,
+      "summary": {
+        "not_applicable": 5,
+        "shallow_structural": 1,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [
+            "by"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "log_entry_by(sn_3, jae_lin)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status",
+            "current"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_transition(w_6, pending_inspection, approved_for_release, 2026_12_12t13_40, sn_3)."
+          ],
+          "source_hits": [
+            "status"
+          ],
+          "status": "structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [
+            "current"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_compile_20260515\\document_section_delta\\domain_bootstrap_file_20260515T184701634315Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 9,
+      "fixture": "document_section_delta",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_td002_compile_20260515",
+      "source_record_fact_count": 70,
+      "summary": {
+        "not_applicable": 5,
+        "shallow_structural": 1,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "date"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "revision_note_date(rn_14, 2026_12_15)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "form_status(rf_5, active)."
+          ],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [
+            "replaced"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "form_replaced(of_2, rf_5, rn_14)."
+          ],
+          "source_hits": [
+            "replaced"
+          ],
+          "status": "structural",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_compile_20260515\\status_reason_delta\\domain_bootstrap_file_20260515T184702809677Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 17,
+      "fixture": "status_reason_delta",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_td002_compile_20260515",
+      "source_record_fact_count": 63,
+      "summary": {
+        "not_applicable": 5,
+        "structural": 3
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "date"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "log_entry_date(cl_22, 2026_12_18)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "payment_receipt_status(t_17, unstated)."
+          ],
+          "slot_rows": [
+            "ticket_status(t_17, on_hold, 09_00).",
+            "ticket_status(t_17, ready_for_scheduling, 14_20)."
+          ],
+          "source_hits": [
+            "status"
+          ],
+          "status": "structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [
+            "timestamp",
+            "occurred",
+            "received"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "transition_occurred(t_17, on_hold, ready_for_scheduling, cl_22).",
+            "transition_timestamp(cl_22, 14_20)."
+          ],
+          "source_hits": [
+            "received"
+          ],
+          "status": "structural",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td004_compile_20260515\\policy_threshold_revision\\domain_bootstrap_file_20260515T185956769930Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 11,
+      "fixture": "policy_threshold_revision",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "transition_delta_contract_td004_compile_20260515",
+      "source_record_fact_count": 81,
+      "summary": {
+        "not_applicable": 6,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "date"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "revision_date(2027_01_06, source_md)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "supersedes(memo_r_19, bulletin_c_14)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "temporal_supersession"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 31,
+      "shallow_structural": 5,
+      "structural": 12
+    },
+    "term_status_counts": {
+      "deadline": {
+        "not_applicable": 4,
+        "structural": 2
+      },
+      "duration": {
+        "not_applicable": 6
+      },
+      "effective_date": {
+        "not_applicable": 2,
+        "structural": 4
+      },
+      "expiration": {
+        "not_applicable": 6
+      },
+      "interval": {
+        "not_applicable": 6
+      },
+      "status_at": {
+        "not_applicable": 1,
+        "shallow_structural": 3,
+        "structural": 2
+      },
+      "temporal_supersession": {
+        "not_applicable": 1,
+        "shallow_structural": 2,
+        "structural": 3
+      },
+      "timestamp": {
+        "not_applicable": 5,
+        "structural": 1
+      }
+    }
+  }
+}

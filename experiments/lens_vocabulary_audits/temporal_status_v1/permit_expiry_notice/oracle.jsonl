@@ -1,0 +1,6 @@
+{"category":"temporal_status_vocabulary","id":"q001","reference_answer":"Permit card PC-12 became effective on 2026-08-05 at 00:00.","source_id":"q001"}
+{"category":"temporal_status_vocabulary","id":"q002","reference_answer":"PC-12 expired after 2026-08-19 at 23:59.","source_id":"q002"}
+{"category":"temporal_status_vocabulary","id":"q003","reference_answer":"PC-12 was active for fourteen days.","source_id":"q003"}
+{"category":"temporal_status_vocabulary","id":"q004","reference_answer":"During the active interval, PC-12 was valid for evening equipment setup only.","source_id":"q004"}
+{"category":"temporal_status_vocabulary","id":"q005","reference_answer":"After expiration, the permit status changed to expired.","source_id":"q005"}
+{"category":"temporal_status_vocabulary","id":"q006","reference_answer":"The renewal request was due by 2026-08-17 at 12:00.","source_id":"q006"}

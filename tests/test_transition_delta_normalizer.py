@@ -87,6 +87,49 @@ def test_normalizes_status_transition_with_reason_and_timestamp() -> None:
     } in observations
 
 
+def test_normalizes_operational_status_phase_and_assignment_rows() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "record_status_phase(case_7, pending_review, 2026_02_01).",
+            "record_status_phase(case_7, closed, 2026_02_09).",
+            "record_status_phase(case_8, 2026_03_01, pending_intake).",
+            "record_assigned_to(case_7, reviewer_a, 2026_02_02).",
+        ]
+    )
+
+    assert {
+        "kind": "status_phase_observation",
+        "subject": "case_7",
+        "status": "pending_review",
+        "date": "2026_02_01",
+        "source_predicate": "record_status_phase",
+    } in observations
+    assert {
+        "kind": "status_phase_observation",
+        "subject": "case_8",
+        "status": "pending_intake",
+        "date": "2026_03_01",
+        "source_predicate": "record_status_phase",
+    } in observations
+    assert {
+        "kind": "assignment_observation",
+        "subject": "case_7",
+        "assignee": "reviewer_a",
+        "date": "2026_02_02",
+        "source_predicate": "record_assigned_to",
+    } in observations
+    assert {
+        "kind": "timeline_value_transition",
+        "subject": "case_7",
+        "field": "record_status_phase",
+        "old_value": "pending_review",
+        "new_value": "closed",
+        "old_date": "2026_02_01",
+        "new_date": "2026_02_09",
+        "source_predicate": "record_status_phase",
+    } in observations
+
+
 def test_normalizes_source_record_table_order_transitions() -> None:
     observations = normalize_transition_delta_facts(
         [
@@ -129,6 +172,7 @@ def test_normalizes_generic_supersession_and_status_timeline() -> None:
     observations = normalize_transition_delta_facts(
         [
             "amendment_supersedes(amended_doc, original_doc).",
+            "record_superseded_by(old_status, new_status).",
             "tree_protection_status(tree_19, eligible_for_removal, 2026_04_02, original_permit).",
             "tree_protection_status(tree_19, protected, 2026_04_25, amendment).",
         ]
@@ -139,6 +183,12 @@ def test_normalizes_generic_supersession_and_status_timeline() -> None:
         "successor": "amended_doc",
         "predecessor": "original_doc",
         "source_predicate": "amendment_supersedes",
+    } in observations
+    assert {
+        "kind": "supersession",
+        "successor": "new_status",
+        "predecessor": "old_status",
+        "source_predicate": "record_superseded_by",
     } in observations
     assert {
         "kind": "timeline_value_transition",
@@ -186,12 +236,15 @@ def test_normalizes_related_document_value_transitions() -> None:
     observations = normalize_transition_delta_facts(
         [
             "amends(amended_notice, original_notice).",
+            "draft_superseded_by(original_form, final_form).",
             "authorized_count(original_notice, food_stalls, 18).",
             "authorized_count(original_notice, craft_stalls, 6).",
             "closing_time(original_notice, 20_00).",
             "authorized_count(amended_notice, food_stalls, 16).",
             "authorized_count(amended_notice, craft_stalls, 6).",
             "closing_time(amended_notice, 19_30).",
+            "form_status(original_form, pending).",
+            "form_status(final_form, approved).",
         ]
     )
 
@@ -225,6 +278,65 @@ def test_normalizes_related_document_value_transitions() -> None:
         "new_value": "19_30",
         "source_predicate": "closing_time",
     } in observations
+    assert {
+        "kind": "related_document_value_transition",
+        "relation": "draft_superseded_by",
+        "predecessor": "original_form",
+        "successor": "final_form",
+        "field": "value",
+        "old_value": "pending",
+        "new_value": "approved",
+        "source_predicate": "form_status",
+    } in observations
+
+
+def test_normalizes_role_lifecycle_and_unique_holder_transition() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "holds_role(new_holder, coordinator, lab_group).",
+            "held_role(prior_holder, coordinator, lab_group).",
+            "role_cessation(prior_holder, coordinator, lab_group).",
+            "holds_role(side_observer, reviewer, lab_group).",
+        ]
+    )
+
+    assert {
+        "kind": "role_lifecycle_state",
+        "subject": "new_holder",
+        "role": "coordinator",
+        "scope": "lab_group",
+        "state": "current",
+        "source_predicate": "holds_role",
+    } in observations
+    assert {
+        "kind": "role_lifecycle_state",
+        "subject": "prior_holder",
+        "role": "coordinator",
+        "scope": "lab_group",
+        "state": "ended",
+        "source_predicate": "held_role|role_cessation",
+    } in observations
+    assert {
+        "kind": "role_holder_transition",
+        "predecessor": "prior_holder",
+        "successor": "new_holder",
+        "role": "coordinator",
+        "scope": "lab_group",
+        "source_predicate": "holds_role|held_role|role_cessation",
+    } in observations
+
+
+def test_role_holder_transition_requires_unique_current_and_prior_ended_holder() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "holds_role(new_holder_a, coordinator, lab_group).",
+            "holds_role(new_holder_b, coordinator, lab_group).",
+            "held_role(prior_holder, coordinator, lab_group).",
+            "role_cessation(prior_holder, coordinator, lab_group).",
+        ]
+    )
+
+    assert not any(item["kind"] == "role_holder_transition" for item in observations)
 
 
 def test_summarizes_observations_by_kind() -> None:

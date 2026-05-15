@@ -198,6 +198,57 @@ OPERATIONAL_RECORD_STATUS_TERMS: tuple[LensTerm, ...] = (
     LensTerm("status_transition", ("transition", "before", "after"), 4, ("status_transition", "status_changed", "state_transition", "status_before_after")),
 )
 
+TEMPORAL_STATUS_TERMS: tuple[LensTerm, ...] = (
+    LensTerm(
+        "effective_date",
+        ("effective", "date", "valid"),
+        2,
+        ("effective_date", "effective_on", "valid_from", "takes_effect_on", "transition_effective_date"),
+    ),
+    LensTerm(
+        "expiration",
+        ("expires", "expiration", "sunset", "until"),
+        2,
+        ("expiration", "expires_on", "sunset_date", "valid_until"),
+    ),
+    LensTerm(
+        "deadline",
+        ("deadline", "due", "by"),
+        2,
+        ("deadline", "due_date", "must_by", "required_by"),
+    ),
+    LensTerm(
+        "interval",
+        ("interval", "window", "start", "end", "period"),
+        2,
+        ("interval", "date_range", "active_interval", "valid_between", "shift_period", "time_window"),
+    ),
+    LensTerm(
+        "status_at",
+        ("status", "state", "current", "prior"),
+        3,
+        ("status_at", "status_on", "status_during", ".*_status", ".*_state"),
+    ),
+    LensTerm(
+        "duration",
+        ("duration", "elapsed", "hours", "days"),
+        2,
+        ("duration", "elapsed_time", "duration_hours", "hours_between", "days_between"),
+    ),
+    LensTerm(
+        "timestamp",
+        ("timestamp", "time", "occurred", "received"),
+        2,
+        ("timestamp", "transition_timestamp", "occurred_at", "event_time", "received_at"),
+    ),
+    LensTerm(
+        "temporal_supersession",
+        ("superseded", "replaced", "prior", "current"),
+        2,
+        ("supersedes", ".*_supersedes", "superseded_by", ".*_superseded_by", "form_replaced"),
+    ),
+)
+
 EPISTEMIC_UNCERTAINTY_TERMS: tuple[LensTerm, ...] = (
     LensTerm("confirmed", ("confirmed", "verified", "established"), 2, ("confirmed", "verified", "established_fact", "source_confirms")),
     LensTerm("corrected", ("corrected", "correction", "revised", "amended"), 2, ("corrected_by", "correction_.*", "revised_by", "amended_.*")),
@@ -277,6 +328,7 @@ LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
     "epistemic_uncertainty": EPISTEMIC_UNCERTAINTY_TERMS,
     "operational_record_status": OPERATIONAL_RECORD_STATUS_TERMS,
     "rule_composition": RULE_COMPOSITION_TERMS,
+    "temporal_status": TEMPORAL_STATUS_TERMS,
 }
 
 

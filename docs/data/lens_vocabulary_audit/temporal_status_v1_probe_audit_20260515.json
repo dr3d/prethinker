@@ -1,0 +1,419 @@
+{
+  "compile_count": 3,
+  "lens": "temporal_status",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_temporal_status_compile_20260515\\machine_uptime_log\\domain_bootstrap_file_20260515T211138513446Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 10,
+      "fixture": "machine_uptime_log",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_temporal_status_compile_20260515",
+      "source_record_fact_count": 69,
+      "summary": {
+        "not_applicable": 5,
+        "structural": 3
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [
+            "window",
+            "start",
+            "end"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "state_start(pu_3, standby, 2026_09_14t06_10).",
+            "state_start(pu_3, active_pumping, 2026_09_14t07_25).",
+            "state_end(pu_3, active_pumping, 2026_09_14t11_55).",
+            "calibration_window(pu_3, 2026_09_14t12_30, 2026_09_14t13_00, complete)."
+          ],
+          "source_hits": [
+            "window"
+          ],
+          "status": "structural",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "state"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "state_start(pu_3, standby, 2026_09_14t06_10).",
+            "state_start(pu_3, active_pumping, 2026_09_14t07_25).",
+            "state_end(pu_3, active_pumping, 2026_09_14t11_55).",
+            "state_duration(pu_3, active_pumping, 4h30m).",
+            "state_duration(pu_3, standby_gap, 1h15m)."
+          ],
+          "source_hits": [
+            "status"
+          ],
+          "status": "structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [
+            "duration"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "state_duration(pu_3, active_pumping, 4h30m).",
+            "state_duration(pu_3, standby_gap, 1h15m)."
+          ],
+          "source_hits": [
+            "duration",
+            "hours"
+          ],
+          "status": "structural",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_temporal_status_compile_20260515\\permit_expiry_notice\\domain_bootstrap_file_20260515T211139673567Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 15,
+      "fixture": "permit_expiry_notice",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_temporal_status_compile_20260515",
+      "source_record_fact_count": 66,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 1,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "effective",
+            "valid"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "effective_from(pc_12, 2026_08_05_00_00).",
+            "valid_until(pc_12, 2026_08_19_23_59).",
+            "valid_until(pc_12, 2026_08_19t23_59)."
+          ],
+          "source_hits": [
+            "effective",
+            "valid"
+          ],
+          "status": "structural",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [
+            "until"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "valid_until(pc_12, 2026_08_19_23_59).",
+            "valid_until(pc_12, 2026_08_19t23_59)."
+          ],
+          "source_hits": [
+            "until"
+          ],
+          "status": "structural",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [
+            "deadline",
+            "by"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "issued_by(pc_12, inspection_office).",
+            "renewal_deadline(pc_12, 2026_08_17_12_00).",
+            "renewal_deadline(pc_12, 2026_08_17t12_00)."
+          ],
+          "source_hits": [
+            "due",
+            "by"
+          ],
+          "status": "structural",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [
+            "interval"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "interval_duration(pc_12, fourteen_days)."
+          ],
+          "source_hits": [
+            "interval"
+          ],
+          "status": "structural",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "permit_status(pc_12, valid).",
+            "permit_status(pc_12, expired).",
+            "status_changed_at(pc_12, 2026_08_19_23_59).",
+            "status_changed_at(pc_12, 2026_08_19t23_59)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "status"
+          ],
+          "status": "shallow_structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [
+            "duration",
+            "days"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "interval_duration(pc_12, fourteen_days)."
+          ],
+          "source_hits": [
+            "days"
+          ],
+          "status": "structural",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "temporal_supersession"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_temporal_status_compile_20260515\\rental_window_notice\\domain_bootstrap_file_20260515T211138232128Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 11,
+      "fixture": "rental_window_notice",
+      "lens": "temporal_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_temporal_status_compile_20260515",
+      "source_record_fact_count": 68,
+      "summary": {
+        "not_applicable": 4,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "effective_date"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [
+            "deadline",
+            "by"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "return_deadline(ck_4, 2026_06_07_17_00)."
+          ],
+          "source_hits": [
+            "deadline",
+            "by"
+          ],
+          "status": "structural",
+          "term": "deadline"
+        },
+        {
+          "direct_hits": [
+            "interval",
+            "window",
+            "start",
+            "end"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "pickup_window_start(ck_4, 2026_06_03_09_00).",
+            "pickup_window_end(ck_4, 2026_06_07_17_00).",
+            "loan_interval_duration(ck_4, four_calendar_days_plus_eight_hours)."
+          ],
+          "source_hits": [
+            "interval",
+            "window"
+          ],
+          "status": "structural",
+          "term": "interval"
+        },
+        {
+          "direct_hits": [
+            "status"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "condition_triggers_status(not_returned_by_deadline, ck_4, overdue)."
+          ],
+          "source_hits": [
+            "status"
+          ],
+          "status": "structural",
+          "term": "status_at"
+        },
+        {
+          "direct_hits": [
+            "duration",
+            "hours",
+            "days"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "loan_interval_duration(ck_4, four_calendar_days_plus_eight_hours)."
+          ],
+          "source_hits": [
+            "hours",
+            "days"
+          ],
+          "status": "structural",
+          "term": "duration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "timestamp"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "temporal_supersession"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 11,
+      "shallow_structural": 1,
+      "structural": 12
+    },
+    "term_status_counts": {
+      "deadline": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "duration": {
+        "structural": 3
+      },
+      "effective_date": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "expiration": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "interval": {
+        "structural": 3
+      },
+      "status_at": {
+        "shallow_structural": 1,
+        "structural": 2
+      },
+      "temporal_supersession": {
+        "not_applicable": 3
+      },
+      "timestamp": {
+        "not_applicable": 3
+      }
+    }
+  }
+}

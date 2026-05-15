@@ -2249,3 +2249,394 @@ pressure is a generic transition/delta contract across entity/role,
 operational-status, and document supersession. Build one focused transition
 probe only if we see the same before/after residue recur again; otherwise move
 the lens audit framework to the next roster family.
+
+Resolution note:
+
+TD-008 confirmed this as transition/delta pressure, not entity/role guidance
+pressure. The audit-only normalizer now recovers role lifecycle states and a
+unique role-holder transition from admitted direct facts without reading source
+prose or fixture labels. Entity/role vocabulary should stay strict; reusable
+before/after structure belongs in the transition/delta layer.
+
+## LV-019 - Temporal Status Vocabulary Replay
+
+Date: 2026-05-15
+
+Question:
+
+Can the lens-vocabulary audit harness cover Temporal Status, one of the named
+document-reader lenses that was not yet represented as an explicit vocabulary
+family?
+
+Before:
+
+The audit harness covered six vocabulary families:
+
+- evidence provenance;
+- rule composition;
+- authority/custody;
+- operational record/status;
+- epistemic uncertainty;
+- entity/role.
+
+`docs/TWELVE_LENSES_EXPLAINED.md` also names Temporal Status as a distinct
+reader lens: status-at-time, effective dates, expiration, intervals, deadline
+arithmetic, and supersession by time. Transition/delta work had been auditing
+some of this behavior indirectly, but there was no explicit temporal-status
+vocabulary audit.
+
+Prediction:
+
+Existing unlike transition/delta probes should give a conservative first read.
+They should trigger effective-date, status-at, timestamp, deadline, and
+temporal-supersession terms where the compile already emits direct temporal
+rows. Terms like expiration, interval, and duration may remain not applicable
+until separate probes exercise them.
+
+Intervention:
+
+Added `temporal_status` to `scripts/audit_lens_vocabulary_transfer.py` with
+eight operational terms:
+
+- `effective_date`
+- `expiration`
+- `deadline`
+- `interval`
+- `status_at`
+- `duration`
+- `timestamp`
+- `temporal_supersession`
+
+Then ran the audit over six existing unlike transition/delta compiles rather
+than generating new fixtures.
+
+After:
+
+Temporal-status replay audit:
+
+- compiles=`6`
+- `12 structural / 5 shallow / 0 source-only / 31 N/A`
+
+Term readout:
+
+- `effective_date`: `4 structural / 0 shallow`
+- `deadline`: `2 structural / 0 shallow`
+- `status_at`: `2 structural / 3 shallow`
+- `temporal_supersession`: `3 structural / 2 shallow`
+- `timestamp`: `1 structural / 0 shallow`
+- `duration`, `expiration`, and `interval`: all N/A in this replay set
+
+Artifacts:
+
+- `scripts/audit_lens_vocabulary_transfer.py`
+- `tests/test_lens_vocabulary_transfer.py`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_transition_replay_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_transition_replay_audit_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `44 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `84 passed`
+
+Lesson:
+
+Temporal Status is now visible to the vocabulary audit harness, but this was a
+replay audit, not a full vocabulary proof. The structural hits show that the
+existing compiles already preserve effective dates, deadlines, timestamps, and
+some status/supersession rows. The shallow cases are useful: they distinguish
+label-level temporal vocabulary from slot-bearing temporal state.
+
+The N/A terms are also informative. Expiration, interval, and duration need
+their own focused unlike probes before we can say whether the vocabulary
+transfers. Do not infer weakness from this replay; the source set simply did
+not exercise those terms enough.
+
+Next pressure:
+
+Build a compact three-probe temporal-status set only for the unexercised terms:
+expiration, interval, and duration. Keep it unlike and boring: rental windows,
+permit expiry, machine uptime, or access hours. Do not use internal fixture
+vocabulary or story nouns.
+
+## LV-020 - Temporal Status Focused Probe
+
+Date: 2026-05-15
+
+Question:
+
+Do the unexercised Temporal Status terms from LV-019 transfer on fresh unlike
+fixtures, and can they answer QA without helper rows?
+
+Before:
+
+LV-019 added the Temporal Status vocabulary to the audit harness and replayed it
+over existing transition/delta compiles. The replay showed structural hits for
+effective dates, deadlines, status-at, timestamps, and temporal supersession,
+but left `expiration`, `interval`, and `duration` unexercised.
+
+Prediction:
+
+Small unlike documents with ordinary temporal records should trigger these
+terms without new helper rows. If misses appear, they should identify
+transition/query-resolution pressure rather than vocabulary-body pressure.
+
+Intervention:
+
+Added three focused probes:
+
+- `rental_window_notice`
+- `permit_expiry_notice`
+- `machine_uptime_log`
+
+Compiled them with source-record ledger facts, then ran no-helper QA and the
+Temporal Status vocabulary audit.
+
+After:
+
+Compile:
+
+- fixtures=`3`
+- parsed OK=`3`
+- candidate predicates=`30`
+- admitted/skipped=`63 / 0`
+
+No-helper QA:
+
+- questions=`18`
+- exact/partial/miss=`16 / 0 / 2`
+- helper rows=`0`
+
+Vocabulary audit:
+
+- `12 structural / 1 shallow / 0 source-only / 11 N/A`
+- `duration`: `3 structural / 0 shallow`
+- `interval`: `3 structural / 0 shallow`
+- `expiration`: `1 structural / 0 shallow`
+- `deadline`: `2 structural / 0 shallow`
+- `effective_date`: `1 structural / 0 shallow`
+- `status_at`: `2 structural / 1 shallow`
+
+The two QA misses were not caused by missing Temporal Status vocabulary:
+
+- In the permit probe, the KB had flat `valid` and `expired` status facts plus
+  validity boundaries, but did not bind the `valid` status specifically to the
+  active interval.
+- In the machine probe, the KB had the active interval end timestamp, but the
+  query selected the first `standby` start instead of deriving "return to
+  standby" from the end of the intervening active state.
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/temporal_status_v1/`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_probe_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/temporal_status_v1_probe_audit_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `44 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `84 passed`
+
+Lesson:
+
+Temporal Status vocabulary transfers under fresh pressure. Expiration,
+interval, and duration are not internal-fixture terms; they fire on unlike
+ordinary temporal records and support no-helper QA.
+
+The remaining pressure is sharper than a vocabulary repair. These misses are
+about binding a status value to the interval in which it applies, and about
+distinguishing an initial state entry from a return transition after an
+intervening state. That belongs to transition/query-resolution or deterministic
+temporal normalization, not to looser Temporal Status admission.
+
+Next pressure:
+
+Do not broaden Temporal Status guidance from this probe. If the same miss shape
+recurs, build a targeted transition/delta diagnostic for interval-scoped status
+and return-to-state events. Otherwise continue the lens audit to another
+vocabulary family.
+
+## LV-021 - Operational Status Residue Replay
+
+Date: 2026-05-15
+
+Question:
+
+Do the two remaining operational-record/status palette misses call for another
+vocabulary repair, or do they belong to a different layer?
+
+Before:
+
+The operational-record/status palette run scored `46 / 0 / 2` with zero helper
+rows. The vocabulary audit still showed many shallow/source-only labels, but QA
+was mostly inside the set. The remaining misses were:
+
+- an assignment row where the assignee was admitted but the assignment purpose
+  was not a bound slot;
+- an initial-status row where the source text named the status but the compile
+  did not admit it as a direct status fact.
+
+Prediction:
+
+A transition/delta replay should recover ordinary status-phase and assignment
+contracts where they already exist. It should not make the initial-status miss
+disappear if the compile never admitted the status row.
+
+Intervention:
+
+TD-010 added audit-only normalizer contracts for:
+
+- status phase rows, including both observed slot orders;
+- assignment rows with subject, assignee, and date.
+
+Then replayed the normalizer over the two miss fixtures and the full
+operational palette compile set.
+
+After:
+
+Two-miss replay:
+
+- observations=`9`
+- `assignment_observation`: `1`
+- `status_phase_observation`: `3`
+- `timeline_value_transition`: `2`
+- `supersession`: `3`
+
+Full operational palette replay:
+
+- observations=`36`
+- `status_phase_observation`: `15`
+- `timeline_value_transition`: `11`
+- `supersession`: `8`
+- `assignment_observation`: `1`
+- `related_document_value_unchanged`: `1`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_two_miss_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_two_miss_replay_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_palette_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_palette_replay_20260515.json`
+- `docs/TRANSITION_DELTA_CONTRACT_WORKSHEET.md`
+
+Verification:
+
+- `python -m pytest tests\test_transition_delta_normalizer.py -q` -> `11 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `85 passed`
+
+Lesson:
+
+Operational status does not need a broad vocabulary repair right now. The
+normalizer can recover admitted status-phase and assignment structure, including
+slot-order variation, without loosening vocabulary admission.
+
+The unresolved edges are clearer now:
+
+- assignment-purpose questions need a purpose/scope slot if they recur;
+- initial/current status omissions remain compile-surface gaps when no direct
+  status fact is admitted.
+
+Next pressure:
+
+Continue lens auditing by layer, not by anxiety. The next repair should be a
+focused profile-palette probe only if assignment-scope or missing-status rows
+repeat. Otherwise move to another lens family or build the source-surface
+invariant board instead of adding more operational vocabulary.
+
+## LV-022 - Source Surface Invariant Board Replay
+
+Date: 2026-05-15
+
+Question:
+
+Should Source Surface become another lens-vocabulary enum now, or is its current
+measurement better handled by the existing compile-surface invariant audit?
+
+Before:
+
+Seven explicit vocabulary families now have audit harness coverage:
+
+- evidence provenance;
+- rule composition;
+- authority/custody;
+- operational record/status;
+- epistemic uncertainty;
+- entity/role;
+- temporal status.
+
+Source Surface is broader than those families. It covers raw admitted entities,
+dates, quantities, rules, corrections, exceptions, claims, and events. A loose
+new enum here would be more likely to create false confidence than resolution.
+The repo already has `scripts/audit_compile_surface_invariants.py`, which asks
+a better Source Surface question: when the source-record ledger contains a
+generic surface family, did admitted direct facts expose that surface too?
+
+Prediction:
+
+On the fresh operational and temporal lens probes, compile-surface invariant
+audit should mostly show pass/partial/ledger-only rather than hard fail. The
+ledger-only rows should be interpreted as an audit board, not automatic repair
+pressure, because the corresponding no-helper QA scores were already high.
+
+Intervention:
+
+Ran the compile-surface invariant audit over:
+
+- six operational-record/status palette compiles;
+- three temporal-status compiles.
+
+After:
+
+Source-surface invariant replay:
+
+- compiles=`9`
+- status counts:
+  - `pass`: `24`
+  - `partial`: `11`
+  - `ledger_only`: `19`
+  - `not_applicable`: `18`
+  - `candidate_only`: `0`
+  - `fail`: `0`
+
+The repeated weak families were:
+
+- `source_addressability_surface`, often ledger-only for section/title markers;
+- `source_authority_surface`, often partial when source-document rows were not
+  promoted beyond ledger text;
+- `rule_policy_surface`, often ledger-only for policy/rule identifiers.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/source_surface_invariant_lens_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/source_surface_invariant_lens_replay_20260515.json`
+
+Verification:
+
+- `python scripts\audit_compile_surface_invariants.py ...`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `85 passed`
+
+Lesson:
+
+Source Surface should stay measured by compile-surface invariants for now, not
+converted into a broad vocabulary enum. The replay produced no hard failures and
+no candidate-only surfaces. The weak rows are mostly ledger-only addressability,
+source-document, and policy identifiers that did not block these focused QA
+runs.
+
+This board is still valuable. If later misses ask for exact source headings,
+governing source documents, or policy identifiers, the board tells us where to
+look. But it is not permission to promote every ledger coordinate into direct
+facts by default.
+
+Next pressure:
+
+Keep Source Surface as an invariant board. Continue explicit vocabulary audits
+only where a lens has a stable bounded term set. For these fresh probes, the
+next real work is not broad source-surface repair; it is targeted recurrence
+tracking for assignment scope, interval-scoped status, and return-to-state
+query planning.

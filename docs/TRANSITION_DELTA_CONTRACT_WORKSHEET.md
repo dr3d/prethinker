@@ -741,3 +741,312 @@ Start the foreign-language leakage probe before broadening the normalizer
 again. The multilingual fixture should test whether trigger conditions,
 source-record labels, date/number handling, placeholder repair, and QA planning
 are secretly English-shaped.
+
+## TD-008 - Entity/Role Transition Normalizer Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does the entity/role lens residue from LV-018 belong in the transition/delta
+normalizer rather than in entity/role-specific compile guidance?
+
+Before:
+
+LV-018 reached perfect no-helper QA on three unlike entity/role probes, but the
+vocabulary audit still showed residue:
+
+- `membership`: shallow/source-only because join/leave language compiled as role
+  and relative-time rows rather than direct membership-transition rows;
+- `role_transition`: source-only because the compile emitted current/prior role
+  facts and cessation, but not a single direct replacement row.
+
+The existing transition/delta normalizer recovered document, status, table,
+related-document, and timeline transitions. When run unchanged over the
+entity/role compiles, it produced zero observations.
+
+Prediction:
+
+If the residue is structural, the admitted direct facts should already bind the
+minimum slots for at least part of the transition: subject, role, scope, current
+state, ended prior state, and a unique predecessor/successor relation. If the
+normalizer has to read source prose or fixture labels to recover it, the repair
+does not belong.
+
+Intervention:
+
+Added an audit-only entity/role transition recognizer to
+`src/transition_delta_normalizer.py`:
+
+- `holds_role(Person, Role, Scope)` emits a `role_lifecycle_state` with
+  `state=current`;
+- `held_role(Person, Role, Scope)` plus
+  `role_cessation(Person, Role, Scope)` emits a `role_lifecycle_state` with
+  `state=ended`;
+- a `role_holder_transition` is emitted only when exactly one current holder and
+  exactly one ended prior holder share the same role and scope.
+
+The recognizer does not read source-record prose, fixture names, question
+strings, or local entity vocabulary. It uses only admitted direct fact
+predicates and slot equality.
+
+After:
+
+Entity/role transition normalization over the LV-018 compiles:
+
+- files=`3`
+- observations=`6`
+- kind counts:
+  - `role_lifecycle_state`: `5`
+  - `role_holder_transition`: `1`
+
+Recovered:
+
+- current role lifecycle states for directly bound role holders;
+- ended prior role lifecycle state where prior role and cessation shared slots;
+- one unique role-holder transition binding predecessor, successor, role, and
+  scope.
+
+The badge/alias fixture still produced zero transition observations because it
+uses `held_role/4` for standing/temporary role typing rather than a current/prior
+cessation pattern. That is correct: standing-vs-temporary role classification is
+not the same contract as role-holder replacement.
+
+Artifacts:
+
+- `src/transition_delta_normalizer.py`
+- `tests/test_transition_delta_normalizer.py`
+- `docs/data/lens_vocabulary_audit/transition_delta_entity_role_normalization_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_entity_role_normalization_audit_20260515.json`
+
+Verification:
+
+- `python -m py_compile src\transition_delta_normalizer.py scripts\audit_transition_delta_normalization.py`
+- `python -m pytest tests\test_transition_delta_normalizer.py -q` -> `10 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py -q` -> `52 passed`
+- `python scripts\audit_transition_delta_normalization.py ...` ->
+  observations=`6`
+
+Lesson:
+
+The entity/role residue was not a reason to broaden entity/role guidance. It was
+another transfer point for the transition/delta layer. This is the new layer
+becoming clearer: vocabulary families can remain strict, while a deterministic
+normalizer recovers reusable before/after and lifecycle contracts from admitted
+facts after compile.
+
+The uniqueness gate matters. A role-holder transition is structural only when
+the facts bind one current holder and one ended prior holder for the same role
+and scope. Multiple current holders, missing cessation, or role typing without
+replacement should stay lifecycle/classification evidence, not transition
+evidence.
+
+Next pressure:
+
+Replay the transition/delta normalizer across the existing operational-status
+and epistemic pending/supersession probe compiles as a cross-lens audit sweep.
+Do not add more recognizers until the replay shows a repeated missing contract.
+
+## TD-009 - Cross-Lens Supersession Direction Replay
+
+Date: 2026-05-15
+
+Question:
+
+Do operational-status and epistemic lifecycle compiles expose repeated
+transition/delta contracts that the normalizer still misses?
+
+Before:
+
+TD-008 added entity/role lifecycle recovery and named the next step as a
+cross-lens replay. The candidate compiles were:
+
+- six operational record/status palette probes;
+- one epistemic pending/supersession lifecycle probe.
+
+Initial replay with the TD-008 normalizer produced only one observation:
+
+- `timeline_value_transition`: `1`
+
+Inspection showed a repeated missing contract: the compiler often emits
+`superseded_by(Old, New)` or `record_superseded_by(Old, New)`, while the
+normalizer only recognized `supersedes(New, Old)` and `*_supersedes(New, Old)`.
+That is a predicate-direction synonym, not a domain-specific phrase.
+
+Prediction:
+
+If the contract is generic, adding `superseded_by` directionality should recover
+supersession observations across both operational and epistemic probes without
+new helper rows, source prose parsing, or fixture vocabulary.
+
+Intervention:
+
+Extended the audit-only normalizer:
+
+- `superseded_by(Predecessor, Successor)` emits a `supersession`;
+- `*_superseded_by(Predecessor, Successor)` emits a `supersession`;
+- related-document comparison uses the same predecessor/successor direction for
+  value comparisons.
+
+After:
+
+Cross-lens replay:
+
+- files=`7`
+- observations=`12`
+- kind counts:
+  - `supersession`: `10`
+  - `related_document_value_unchanged`: `1`
+  - `timeline_value_transition`: `1`
+
+Recovered:
+
+- operational record supersessions from `record_superseded_by/2`;
+- epistemic note/status supersessions from `superseded_by/2`;
+- one related-document unchanged value across superseded lifecycle events;
+- the already-visible ticket-status timeline transition.
+
+Artifacts:
+
+- `src/transition_delta_normalizer.py`
+- `tests/test_transition_delta_normalizer.py`
+- `docs/data/lens_vocabulary_audit/transition_delta_cross_lens_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_cross_lens_replay_20260515.json`
+
+Verification:
+
+- `python -m py_compile src\transition_delta_normalizer.py scripts\audit_transition_delta_normalization.py`
+- `python -m pytest tests\test_transition_delta_normalizer.py -q` -> `10 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `82 passed`
+- `python scripts\audit_transition_delta_normalization.py ...` ->
+  observations=`12`
+
+Lesson:
+
+The new layer is not a bag of domain adapters. It is a deterministic contract
+normalizer over admitted facts. `supersedes(New, Old)` and
+`superseded_by(Old, New)` are the same structural relation expressed in opposite
+predicate direction. Normalizing that relation lets multiple lens families share
+the same downstream audit surface.
+
+The replay also shows what not to do. Most operational lifecycle residue is not
+fixed by adding more transition recognizers. Existing operational diagnostics
+still show alias splits, phase-classification gaps, and supersession-target
+collapse. Those are profile/identity/palette issues. The normalizer should
+recover transitions that are already structurally present; it should not invent
+missing lifecycle records from source prose.
+
+Next pressure:
+
+Audit the remaining lens families for structural residue, but split the response
+by layer:
+
+- if facts already bind before/after state, add a deterministic normalizer
+  contract;
+- if facts are shallow because identity aliases split, inspect profile palette or
+  identity normalization;
+- if facts are absent, create a focused unlike probe before any compile guidance.
+
+## TD-010 - Operational Status Phase And Assignment Replay
+
+Date: 2026-05-15
+
+Question:
+
+Do the remaining operational-record/status QA misses expose reusable
+transition/delta contracts already present in admitted facts?
+
+Before:
+
+The operational-record/status palette run scored `46 / 0 / 2` with zero helper
+rows over six unlike probes. The two not-exact rows were:
+
+- an assignment question where `record_assigned_to(record, actor, date)` existed
+  but the assignment purpose/scope was not a bound slot;
+- an initial-status question where the source and profile expectation named the
+  initial status, but no direct initial-status row was admitted.
+
+The TD-009 normalizer replay over the two miss fixtures saw only supersession
+contracts, so it was blind to admitted status-phase and assignment rows.
+
+Prediction:
+
+If operational status phase and assignment rows are structural, the normalizer
+should recover them from direct facts only. It should not recover the missing
+initial status from source-record text, because that would turn the normalizer
+into a prose parser.
+
+Intervention:
+
+Added two audit-only recognizers:
+
+- `record_status_phase(Subject, Status, Date)` and
+  `*_status_phase(Subject, Status, Date)` emit `status_phase_observation` and
+  feed timeline-transition recovery.
+- The same recognizer also accepts the observed profile-palette variant
+  `record_status_phase(Subject, Date, Status)` when the middle slot is a
+  temporal anchor.
+- `record_assigned_to(Subject, Assignee, Date)` and
+  `*_assigned_to(Subject, Assignee, Date)` emit `assignment_observation`.
+
+These contracts use predicate shape and temporal-slot detection only. They do
+not read source prose, fixture names, question strings, or answer keys.
+
+After:
+
+Two-miss replay:
+
+- files=`2`
+- observations=`9`
+- kind counts:
+  - `assignment_observation`: `1`
+  - `status_phase_observation`: `3`
+  - `supersession`: `3`
+  - `timeline_value_transition`: `2`
+
+Full operational palette replay:
+
+- files=`6`
+- observations=`36`
+- kind counts:
+  - `status_phase_observation`: `15`
+  - `timeline_value_transition`: `11`
+  - `supersession`: `8`
+  - `assignment_observation`: `1`
+  - `related_document_value_unchanged`: `1`
+
+Artifacts:
+
+- `src/transition_delta_normalizer.py`
+- `tests/test_transition_delta_normalizer.py`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_two_miss_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_two_miss_replay_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_palette_replay_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_operational_palette_replay_20260515.json`
+
+Verification:
+
+- `python -m py_compile src\transition_delta_normalizer.py scripts\audit_transition_delta_normalization.py`
+- `python -m pytest tests\test_transition_delta_normalizer.py -q` -> `11 passed`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_domain_bootstrap_file.py -q` -> `85 passed`
+
+Lesson:
+
+Operational status uses a structural event spine, but the palette still wobbles
+in slot order and granularity. `record_status_phase(subject, status, date)` and
+`record_status_phase(subject, date, status)` are the same contract, so the
+normalizer should absorb that deterministic variation. This is a clean
+normalization win, not a fixture-specific repair.
+
+The two original misses split cleanly by layer. The assignment miss has a
+recoverable assignment row but no task/scope slot, so it is a query/projection
+or profile-contract pressure. The initial-status miss has no admitted
+initial-status fact; it remains compile-surface pressure. The normalizer must
+not fill that gap by reading ledger prose.
+
+Next pressure:
+
+Do not broaden operational guidance from these two misses. If assignment-scope
+questions recur, add a focused profile-palette probe for assignment purpose or
+scope slots. If initial/current status omissions recur, treat them as compile
+surface gaps and test with focused unlike probes before changing guidance.

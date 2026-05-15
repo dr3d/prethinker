@@ -69,6 +69,16 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
                     "source_predicate": predicate,
                 }
             )
+        elif (predicate == "superseded_by" or predicate.endswith("_superseded_by")) and len(args) == 2:
+            predecessor, successor = args
+            observations.append(
+                {
+                    "kind": "supersession",
+                    "successor": successor,
+                    "predecessor": predecessor,
+                    "source_predicate": predicate,
+                }
+            )
         elif predicate == "form_replaced" and len(args) >= 2:
             predecessor, successor = args[:2]
             observation = {
@@ -95,6 +105,33 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
             if subject in transition_reasons:
                 observation["reason"] = transition_reasons[subject]
             observations.append(observation)
+        elif (predicate == "record_status_phase" or predicate.endswith("_status_phase")) and len(args) >= 3:
+            subject = args[0]
+            if _looks_temporal_anchor(args[1]) and not _looks_temporal_anchor(args[2]):
+                date, status = args[1], args[2]
+            else:
+                status, date = args[1], args[2]
+            observations.append(
+                {
+                    "kind": "status_phase_observation",
+                    "subject": subject,
+                    "status": status,
+                    "date": date,
+                    "source_predicate": predicate,
+                }
+            )
+            timeline_values[(subject, predicate)].append((date, status, predicate))
+        elif (predicate == "record_assigned_to" or predicate.endswith("_assigned_to")) and len(args) >= 3:
+            subject, assignee, date = args[:3]
+            observations.append(
+                {
+                    "kind": "assignment_observation",
+                    "subject": subject,
+                    "assignee": assignee,
+                    "date": date,
+                    "source_predicate": predicate,
+                }
+            )
         elif predicate == "tree_identified" and len(args) >= 5:
             subject, species, dbh, source, date = args[:5]
             timeline_values[(subject, "species")].append((date, species, predicate))
@@ -180,6 +217,7 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
 
     observations.extend(_timeline_transition_observations(timeline_values))
     observations.extend(_related_document_transition_observations(parsed))
+    observations.extend(_entity_role_transition_observations(parsed))
     for field in sorted(set(before_snapshots) & set(after_snapshots)):
         for predecessor, old_value in before_snapshots[field]:
             for successor, new_value in after_snapshots[field]:
@@ -221,6 +259,9 @@ def _related_document_transition_observations(parsed: list[Fact]) -> list[dict[s
             facts_by_subject[args[0]].append((predicate, args))
         if len(args) == 2 and (predicate in relation_predicates or predicate.endswith("_supersedes")):
             successor, predecessor = args
+            relations.append((predicate, successor, predecessor))
+        elif len(args) == 2 and (predicate == "superseded_by" or predicate.endswith("_superseded_by")):
+            predecessor, successor = args
             relations.append((predicate, successor, predecessor))
 
     observations: list[dict[str, Any]] = []
@@ -275,6 +316,65 @@ def _comparable_document_values(facts: list[Fact]) -> dict[tuple[str, str], str]
         elif len(args) >= 3:
             values.setdefault((predicate, args[1]), args[2])
     return values
+
+
+def _entity_role_transition_observations(parsed: list[Fact]) -> list[dict[str, Any]]:
+    current_by_role: dict[tuple[str, str], set[str]] = defaultdict(set)
+    prior_by_role: dict[tuple[str, str], set[str]] = defaultdict(set)
+    ceased_by_role: dict[tuple[str, str], set[str]] = defaultdict(set)
+
+    for predicate, args in parsed:
+        if predicate == "holds_role" and len(args) == 3:
+            person, role, scope = args
+            current_by_role[(role, scope)].add(person)
+        elif predicate == "held_role" and len(args) == 3:
+            person, role, scope = args
+            prior_by_role[(role, scope)].add(person)
+        elif predicate == "role_cessation" and len(args) == 3:
+            person, role, scope = args
+            ceased_by_role[(role, scope)].add(person)
+
+    observations: list[dict[str, Any]] = []
+    for role_key in sorted(set(current_by_role) | set(prior_by_role) | set(ceased_by_role)):
+        role, scope = role_key
+        for person in sorted(current_by_role.get(role_key, set())):
+            observations.append(
+                {
+                    "kind": "role_lifecycle_state",
+                    "subject": person,
+                    "role": role,
+                    "scope": scope,
+                    "state": "current",
+                    "source_predicate": "holds_role",
+                }
+            )
+        ended = prior_by_role.get(role_key, set()) & ceased_by_role.get(role_key, set())
+        for person in sorted(ended):
+            observations.append(
+                {
+                    "kind": "role_lifecycle_state",
+                    "subject": person,
+                    "role": role,
+                    "scope": scope,
+                    "state": "ended",
+                    "source_predicate": "held_role|role_cessation",
+                }
+            )
+        current = sorted(current_by_role.get(role_key, set()))
+        prior_ended = sorted(ended)
+        if len(current) == 1 and len(prior_ended) == 1 and current[0] != prior_ended[0]:
+            observations.append(
+                {
+                    "kind": "role_holder_transition",
+                    "predecessor": prior_ended[0],
+                    "successor": current[0],
+                    "role": role,
+                    "scope": scope,
+                    "source_predicate": "holds_role|held_role|role_cessation",
+                }
+            )
+
+    return observations
 
 
 def _timeline_transition_observations(
@@ -408,6 +508,15 @@ def _normalize_transition_value(value: str) -> str:
             item = item[: -len(suffix)]
             break
     return item
+
+
+def _looks_temporal_anchor(value: str) -> bool:
+    text = str(value or "").strip().lower()
+    return bool(
+        re.fullmatch(r"\d{4}[-_]\d{1,2}[-_]\d{1,2}(?:[t_]\d{1,2}[-_]\d{1,2})?", text)
+        or re.fullmatch(r"day[_-]?\d+", text)
+        or re.fullmatch(r"\d{1,2}:\d{2}", text)
+    )
 
 
 def _dedupe_observations(observations: list[dict[str, Any]]) -> list[dict[str, Any]]:

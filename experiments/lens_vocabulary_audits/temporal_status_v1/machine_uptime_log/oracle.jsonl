@@ -1,0 +1,6 @@
+{"category":"temporal_status_vocabulary","id":"q001","reference_answer":"PU-3 entered standby at 2026-09-14 06:10.","source_id":"q001"}
+{"category":"temporal_status_vocabulary","id":"q002","reference_answer":"PU-3 started active pumping at 2026-09-14 07:25.","source_id":"q002"}
+{"category":"temporal_status_vocabulary","id":"q003","reference_answer":"PU-3 returned to standby at 2026-09-14 11:55.","source_id":"q003"}
+{"category":"temporal_status_vocabulary","id":"q004","reference_answer":"Active pumping lasted four hours and thirty minutes.","source_id":"q004"}
+{"category":"temporal_status_vocabulary","id":"q005","reference_answer":"The calibration window opened at 2026-09-14 12:30 and closed at 2026-09-14 13:00.","source_id":"q005"}
+{"category":"temporal_status_vocabulary","id":"q006","reference_answer":"After the calibration window closed, the calibration status was complete.","source_id":"q006"}

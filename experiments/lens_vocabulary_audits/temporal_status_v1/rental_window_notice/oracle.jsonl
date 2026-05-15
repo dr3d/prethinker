@@ -1,0 +1,6 @@
+{"category":"temporal_status_vocabulary","id":"q001","reference_answer":"The loan notice expired at 2026-06-08 09:00.","source_id":"q001"}
+{"category":"temporal_status_vocabulary","id":"q002","reference_answer":"The return deadline for CK-4 was 2026-06-07 at 17:00.","source_id":"q002"}
+{"category":"temporal_status_vocabulary","id":"q003","reference_answer":"CK-4 was available for pickup from 2026-06-03 09:00 through 2026-06-07 17:00.","source_id":"q003"}
+{"category":"temporal_status_vocabulary","id":"q004","reference_answer":"The loan interval was four calendar days plus eight hours.","source_id":"q004"}
+{"category":"temporal_status_vocabulary","id":"q005","reference_answer":"The reservation status would become overdue if CK-4 was not returned by the deadline.","source_id":"q005"}
+{"category":"temporal_status_vocabulary","id":"q006","reference_answer":"Item loan notice LN-27 was posted on 2026-06-02.","source_id":"q006"}
