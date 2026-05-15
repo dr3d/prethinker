@@ -667,3 +667,204 @@ Next pressure:
   native no-legacy replay.
 - Keep legacy adapters available for forensic replay, but treat any request to
   turn them on as a compatibility decision rather than current architecture.
+
+## HR-009 - Direct-Surface Recompile Smoke
+
+Date: 2026-05-14
+
+Before:
+
+- HR-008 proved the legacy gate can reduce helper delivery to `0` on a
+  high-pressure native smoke using the frozen stamp compile.
+- That test did not prove that fresh native compiles would now emit all helper
+  replacement surfaces. It only proved the helper adapter gate was closed.
+
+Prediction:
+
+- If the direct-surface guidance is sufficient, a fresh compile of the roster,
+  custody, and sensor pressure fixtures should preserve or improve QA while
+  still delivering `0` helper rows.
+- If the guidance is directionally right but incomplete, helper rows should stay
+  at `0` while misses shift into compile/query surface gaps that name the next
+  compile-side surfaces to preserve.
+
+Intervention:
+
+- Recompiled three high-pressure native fixtures under the strengthened
+  direct-surface guidance:
+  - `count_composition_roster`,
+  - `industrial_sensor_clock_correction`,
+  - `probate_storage_access_register`.
+- Ran the same `8`-question no-legacy, unbounded-helper QA smoke against the
+  fresh compile artifacts.
+
+After:
+
+Compile summary:
+
+| Fixture | Predicates | Admitted | Skipped | Rough |
+| --- | ---: | ---: | ---: | ---: |
+| `count_composition_roster` | 16 | 28 | 0 | 0.833 |
+| `industrial_sensor_clock_correction` | 21 | 0 | 0 | 1.0 |
+| `probate_storage_access_register` | 14 | 16 | 0 | 0.778 |
+
+QA summary:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `count_composition_roster` | 8 | 8 | 0 | 0 | 0 |
+| `industrial_sensor_clock_correction` | 8 | 5 | 0 | 3 | 0 |
+| `probate_storage_access_register` | 8 | 6 | 0 | 2 | 0 |
+| Total | 24 | 19 | 0 | 5 | 0 |
+
+Compared with the frozen-compile no-legacy smoke:
+
+| Compile | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Frozen stamp compile | 21 | 1 | 2 | 0 |
+| Fresh direct-surface compile | 19 | 0 | 5 | 0 |
+
+Miss shape:
+
+- Roster improved from `7 / 1 / 0` to `8 / 0 / 0`; direct roster surfaces are
+  moving in the right direction.
+- Sensor lost answers for vendor/model, section addressability, and operator
+  attendance. That is not helper pressure; it is source-fidelity/surface
+  retention pressure.
+- Custody lost answers for registrar identity and chronology-section
+  addressability. Again, the gap moved to compile surface breadth, not helper
+  delivery.
+
+Artifacts:
+
+- `tmp\helper_direct_surface_recompile_20260514`
+- `tmp\helper_direct_surface_recompile_qa_smoke_20260514`
+
+Verification:
+
+- Recompile completed for all `3 / 3` fixtures.
+- QA completed `24 / 24` questions.
+- Helper pressure stayed at `no_helper_rows` with `0` rows while helper delivery
+  was unbounded.
+
+Lesson:
+
+- The helper-quarantine direction is correct: the system can run these native
+  pressure questions with no helper rows at all.
+- The next risk is not helper absence. It is compile sparsity. Fresh direct
+  compiles must preserve source-fidelity surfaces such as vendor/model identity,
+  operator/attendee roles, registrar identity, and section/chronology
+  addressability while still avoiding old helper adapters.
+- Roster is the first high-pressure native family to show the desired shape:
+  direct compile surfaces plus no helper rows plus improved QA.
+
+Next pressure:
+
+- Strengthen compile guidance for source-addressability and role/identity
+  fidelity in operational and custody registers:
+  - preserve vendor/model/manufacturer and procedure identifiers,
+  - preserve attended-by/operator-at-console/observer role rows,
+  - preserve registrar/compiler/custodian identity rows,
+  - preserve named section titles and chronology/location sections as queryable
+    source coordinates.
+- Then rerun the same three-fixture direct-surface smoke before considering a
+  broader no-legacy native replay.
+
+## HR-010 - Source-Fidelity Guidance Smoke
+
+Date: 2026-05-14
+
+Before:
+
+- HR-009 showed that zero-helper direct compiles were possible but could become
+  too sparse.
+- The losses were source-fidelity/addressability losses: vendor/model identity,
+  operator/attendant roles, registrar identity, and named section coordinates.
+
+Prediction:
+
+- Strengthening source-fidelity guidance should improve sensor and custody
+  misses without reintroducing helper rows.
+- If the compile remains stochastic, a small improvement in one family may be
+  offset by sparsity in another; that would argue for repeated compile draws or
+  stronger invariant checks before a broad replay.
+
+Intervention:
+
+- Added generic source-fidelity guidance:
+  - operational records must preserve vendor, manufacturer, model number,
+    procedure/manual identifiers, operators, console attendants, observers,
+    reviewers, and named section/title coordinates,
+  - custody/property registers must preserve registrar, compiler, recorder,
+    custodian, counsel, claimant, object/register identifiers, named chronology
+    sections, location sections, and other section/title coordinates.
+- Recompiled the same three-fixture native smoke slice.
+- Reran the same no-legacy, unbounded-helper QA smoke.
+
+After:
+
+Compile summary:
+
+| Fixture | Predicates | Admitted | Skipped | Rough |
+| --- | ---: | ---: | ---: | ---: |
+| `count_composition_roster` | 14 | 42 | 0 | 1.0 |
+| `industrial_sensor_clock_correction` | 15 | 52 | 2 | 1.0 |
+| `probate_storage_access_register` | 26 | 0 | 0 | 0.778 |
+
+QA summary:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `count_composition_roster` | 8 | 5 | 1 | 2 | 0 |
+| `industrial_sensor_clock_correction` | 8 | 7 | 0 | 1 | 0 |
+| `probate_storage_access_register` | 8 | 7 | 1 | 0 | 0 |
+| Total | 24 | 19 | 2 | 3 | 0 |
+
+Compared with HR-009:
+
+| Compile | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| HR-009 direct-surface recompile | 19 | 0 | 5 | 0 |
+| HR-010 source-fidelity recompile | 19 | 2 | 3 | 0 |
+
+Observed movement:
+
+- Sensor improved from `5 / 0 / 3` to `7 / 0 / 1`. Vendor/model and
+  operator-attendance gaps were repaired; one section-addressability miss
+  remained.
+- Custody improved from `6 / 0 / 2` to `7 / 1 / 0`. Registrar/chronology
+  losses became recoverable or partially recoverable; one section-basis answer
+  remained partial.
+- Roster regressed from `8 / 0 / 0` to `5 / 1 / 2`. The misses were registered
+  nurse identity, policy-section identity, and the exact ratio expression. This
+  looks like compile sparsity/variance, not helper pressure.
+
+Artifacts:
+
+- `tmp\helper_source_fidelity_recompile_20260514`
+- `tmp\helper_source_fidelity_recompile_qa_smoke_20260514`
+
+Verification:
+
+- Recompile completed for all `3 / 3` fixtures.
+- QA completed `24 / 24` questions.
+- Helper rows stayed at `0` with helper delivery unbounded.
+
+Lesson:
+
+- The no-helper objective is holding. The remaining work is not to revive
+  native helpers; it is to make compile surfaces reliably broad enough.
+- Source-fidelity guidance helped the classes it named, especially sensor and
+  custody identity/addressability.
+- Single compile draws are too noisy to declare a locked replacement. The next
+  repair should be framed as compile-surface invariants, not more prose
+  nudges: the compiler should preserve role identity, policy/rule identifiers,
+  and named section coordinates whenever those are stated.
+
+Next pressure:
+
+- Add a lightweight compile-surface audit for no-helper native replay candidates:
+  expected identity/addressability surfaces should be visible before QA is used
+  as the only signal.
+- Keep full native replay paused until the three-fixture smoke can repeatedly
+  stay near or above the frozen no-legacy baseline without helper rows.

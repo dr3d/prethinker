@@ -346,6 +346,7 @@ OPERATIONAL_RECORD_STATUS_CONTEXT_V1 = [
     "Operational itemized-failure rule: aggregate inspection failures should preserve itemized failed subjects and stated deficiency reasons when the source lists them. Count rows and status rows are useful but not enough for which-and-why questions.",
     "Operational quarantine/lot-status rule: for quarantine, nursery, greenhouse, lab, lot, sample, movement, destruction, or disease-control records, preserve lot id, location, species, count, subset count, sample count, positive/negative result count, status transition, movement interval, destruction deadline/completion, supervisor/witness, and final current status as separate queryable rows rather than hiding them inside a status summary.",
     "Operational direct-surface rule: for sensor, instrument, clock-drift, threshold, correction, or breach sheets, emit direct rows for sensor id, raw timestamp, corrected timestamp, correction rule, reading value, threshold, event status, inspection window, and breach classification. Do not rely on query-time sensor helpers to reconstruct those surfaces later.",
+    "Operational source-fidelity rule: preserve stated vendor, manufacturer, model number, procedure/manual identifier, operator, console attendant, observer, reviewer, and named section/title coordinates as direct queryable rows when the source states them. These are answer-bearing identity/addressability surfaces, not decorative provenance.",
 ]
 
 PROBATE_PROPERTY_STATUS_CONTEXT_V1 = [
@@ -358,6 +359,7 @@ PROBATE_PROPERTY_STATUS_CONTEXT_V1 = [
     "Probate/property arithmetic rule: stated balances, payments, seasonal values, totals, and over-recovery comparisons should remain queryable. Do not collapse them into a pledge-satisfied label if amount/value predicates or compatible detail rows are available.",
     "Probate/property QA-readiness rule: choose one canonical atom for each person, estate, property unit, organization, court, debt, pledge, claim, and date. Reuse those atoms across transaction, evidence, status, and ruling rows so later QA can join without alias repair.",
     "Custody direct-surface rule: for any custody, access, loan, specimen, archive, property, or object-control register, emit direct rows for physical holder, legal owner, custody status, location, access event, authorizing source, recall/return clause, and recall-issued state when the source states them. Do not depend on query-time custody helpers to bridge from source-record prose.",
+    "Custody source-fidelity rule: preserve registrar, compiler, recorder, custodian, counsel, claimant, object identifier, register identifier, named chronology section, location section, and other section/title coordinates as direct queryable rows when stated. Section addressability and record-author identity are part of the answer surface.",
 ]
 
 COMPETITION_ROLE_ALIAS_CONTEXT_V1 = [
