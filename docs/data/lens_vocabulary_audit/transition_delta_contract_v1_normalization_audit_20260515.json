@@ -1,0 +1,149 @@
+{
+  "file_count": 3,
+  "results": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_compile_20260515\\document_section_delta\\domain_bootstrap_file_20260515T184701634315Z_source_qwen-qwen3-6-35b-a3b.json",
+      "observations": [
+        {
+          "kind": "supersession",
+          "predecessor": "of_2",
+          "source": "rn_14",
+          "source_predicate": "form_replaced",
+          "successor": "rf_5"
+        },
+        {
+          "field": "applicant_name",
+          "kind": "field_unchanged",
+          "source": "rn_14",
+          "source_predicate": "field_unchanged",
+          "value": "mina_rao"
+        },
+        {
+          "field": "fee_amount",
+          "kind": "field_unchanged",
+          "source": "rn_14",
+          "source_predicate": "field_unchanged",
+          "value": "40_credits"
+        },
+        {
+          "field": "inspection_checklist_section",
+          "kind": "value_transition",
+          "new_value": "section_5",
+          "old_value": "section_3",
+          "predecessor": "of_2",
+          "source_predicate": "field_value_snapshot",
+          "successor": "rf_5"
+        },
+        {
+          "field": "emergency_contact",
+          "kind": "absence_persistence",
+          "objects": [
+            "of_2",
+            "rf_5"
+          ],
+          "source_predicate": "field_absent"
+        }
+      ],
+      "summary": {
+        "kind_counts": {
+          "absence_persistence": 1,
+          "field_unchanged": 2,
+          "supersession": 1,
+          "value_transition": 1
+        },
+        "observation_count": 5
+      }
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_compile_20260515\\status_reason_delta\\domain_bootstrap_file_20260515T184702809677Z_source_qwen-qwen3-6-35b-a3b.json",
+      "observations": [
+        {
+          "event": "cl_22",
+          "kind": "status_transition",
+          "new_value": "ready_for_scheduling",
+          "old_value": "on_hold",
+          "reason": "address_proof_received",
+          "source_predicate": "transition_occurred",
+          "subject": "t_17",
+          "timestamp": "14_20"
+        }
+      ],
+      "summary": {
+        "kind_counts": {
+          "status_transition": 1
+        },
+        "observation_count": 1
+      }
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_contract_td004_compile_20260515\\policy_threshold_revision\\domain_bootstrap_file_20260515T185956769930Z_source_qwen-qwen3-6-35b-a3b.json",
+      "observations": [
+        {
+          "kind": "supersession",
+          "predecessor": "bulletin_c_14",
+          "source_predicate": "supersedes",
+          "successor": "memo_r_19"
+        },
+        {
+          "field": "standard_parcel_weight_limit",
+          "kind": "value_transition",
+          "new_value": "22_kg",
+          "old_value": "18_kg",
+          "source_predicate": "policy_field_changed",
+          "subject": "memo_r_19"
+        },
+        {
+          "field": "cold_pack_supervisor_note_requirement",
+          "kind": "field_removed",
+          "predecessor": "bulletin_c_14",
+          "source_predicate": "policy_field_removed",
+          "successor": "memo_r_19"
+        },
+        {
+          "field": "oversized_label_photo_check_requirement",
+          "kind": "field_added",
+          "new_value": "required",
+          "source_predicate": "policy_field_added",
+          "subject": "memo_r_19"
+        },
+        {
+          "field": "cold_pack_supervisor_note_requirement",
+          "kind": "value_transition",
+          "new_value": "removed",
+          "old_value": "required",
+          "source_predicate": "policy_field_changed",
+          "subject": "memo_r_19"
+        },
+        {
+          "field": "oversized_label_photo_check_requirement",
+          "kind": "value_transition",
+          "new_value": "required",
+          "old_value": "not_required",
+          "source_predicate": "policy_field_changed",
+          "subject": "memo_r_19"
+        }
+      ],
+      "summary": {
+        "kind_counts": {
+          "field_added": 1,
+          "field_removed": 1,
+          "supersession": 1,
+          "value_transition": 3
+        },
+        "observation_count": 6
+      }
+    }
+  ],
+  "summary": {
+    "kind_counts": {
+      "absence_persistence": 1,
+      "field_added": 1,
+      "field_removed": 1,
+      "field_unchanged": 2,
+      "status_transition": 1,
+      "supersession": 2,
+      "value_transition": 4
+    },
+    "observation_count": 12
+  }
+}

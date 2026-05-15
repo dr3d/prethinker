@@ -412,3 +412,102 @@ Pause broad transition/delta repair. Either design a small deterministic
 normalization sketch for transition/delta rows, or return to the lens audit
 queue and apply the same evidence to the next unsettled vocabulary. Do not add
 compile guidance unless a future unlike replay shows a true absent coordinate.
+
+## TD-005 - Audit-Only Transition Normalizer Prototype
+
+Date: 2026-05-15
+
+Question:
+
+Can the already-emitted transition/delta surfaces be projected into a canonical
+audit vocabulary deterministically, without changing compile prompts, QA
+selection, or helper delivery?
+
+Before:
+
+TD-004 shifted the pressure from compile-surface absence to normalization. The
+compiler produced answer-bearing rows, but equivalent transition ideas appeared
+under several shapes:
+
+- `form_replaced/3`
+- `field_value_snapshot/4`
+- `field_absent/2`
+- `transition_occurred/4`
+- `policy_field_changed/4`
+- `policy_field_added/3`
+- `policy_field_removed/3`
+- `supersedes/2`
+
+Prediction:
+
+If a deterministic normalization layer is the right next layer, a small
+audit-only pass should recover canonical observations across the unlike probes:
+supersession, value transition, status transition, field add/remove,
+unchanged field, and absence persistence.
+
+Intervention:
+
+Added an audit-only normalizer:
+
+- `src/transition_delta_normalizer.py`
+- `scripts/audit_transition_delta_normalization.py`
+- `tests/test_transition_delta_normalizer.py`
+
+The normalizer reads admitted compile facts and emits observation dictionaries.
+It does not write facts back into the runtime and does not affect compile or QA.
+
+After:
+
+Ran the normalizer over the TD-002 and TD-004 compile JSON files:
+
+- compile files=`3`
+- canonical observations=`12`
+- kind counts:
+  - `absence_persistence`: `1`
+  - `field_added`: `1`
+  - `field_removed`: `1`
+  - `field_unchanged`: `2`
+  - `status_transition`: `1`
+  - `supersession`: `2`
+  - `value_transition`: `4`
+
+The first pass initially missed the status/reason probe, which exposed a
+recognizer-vocabulary gap rather than an architecture failure. Adding
+`transition_occurred/4` with optional `transition_timestamp/2` and
+`transition_reason/2` attachment brought the status probe into the canonical
+audit.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_normalization_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_normalization_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_transition_delta_normalizer.py -q` -> `4 passed`
+- `python -m pytest tests -q` -> `1245 passed, 2 subtests passed`
+- `python scripts\audit_transition_delta_normalization.py ...` ->
+  observations=`12`
+
+Lesson:
+
+The deterministic normalization layer is now a concrete candidate, not just an
+idea. It should begin as audit/reporting infrastructure because that preserves
+the scientific separation:
+
+- compile emits source-grounded surfaces;
+- QA answers from admitted surfaces;
+- normalization observes equivalent transition/delta structure after the fact.
+
+The recognizer vocabulary should be expected to grow under probe pressure, but
+only by accepting reusable predicate contracts. The status transition miss in
+the first normalizer pass is the right failure mode: it expanded the recognizer
+with a general contract rather than pushing status language into the epistemic
+lens or adding another helper.
+
+Next pressure:
+
+Keep the normalizer audit-only for another cycle. Apply it to future transition
+probes and one internal fixture compile before integrating it into any selector
+or QA pathway. The key question is coverage of reusable predicate contracts,
+not answer-score improvement yet.
