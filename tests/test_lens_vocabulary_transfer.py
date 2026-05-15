@@ -223,3 +223,35 @@ def test_rule_composition_audit_marks_unresolved_exception_link_shallow(tmp_path
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["exception"] == "shallow_structural"
+
+
+def test_rule_composition_audit_accepts_scoped_two_slot_override_link(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, emergency_closure_overrides_the_normal_booking_rule_when_active).",
+            "rule_precedence(emergency_closure_rule, normal_booking_rule).",
+            "rule_condition(emergency_closure_rule, closure_notice_active).",
+            "rule_action(emergency_closure_rule, suspend_room_bookings).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["override"] == "structural"
+
+
+def test_rule_composition_audit_leaves_rank_only_override_link_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, emergency_closure_overrides_the_normal_booking_rule_when_active).",
+            "rule_precedence(emergency_closure_rule, normal_booking_rule).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["override"] == "shallow_structural"

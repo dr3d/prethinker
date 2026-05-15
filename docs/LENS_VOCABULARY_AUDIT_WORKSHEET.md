@@ -597,6 +597,37 @@ status. This is still a useful audit fix: it prevents future generic
 `rule_exception + rule_condition + rule_action` compiles from being falsely
 treated as shallow.
 
+Override-scope follow-on:
+
+The two-slot override weakness has the same linked-row form, anchored on the
+higher or overriding rule:
+
+- `rule_precedence(HigherRule, LowerRule)` or equivalent two-slot override link
+- `rule_condition(HigherRule, Condition)`
+- `rule_action(HigherRule, EffectOrScope)`
+
+That is now structural for `override`. A bare two-slot override/precedence link
+remains shallow, and rank-only rows remain shallow.
+
+Override-scope artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_override_scope_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_override_scope_reaudit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_override_scope_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_override_scope_reaudit_20260515.json`
+
+Focused activation replay delta:
+
+- before exception-link audit: `4 structural / 3 shallow / 0 source-only / 3 N/A`
+- after override-scope audit: `5 structural / 2 shallow / 0 source-only / 3 N/A`
+- `override`: `shallow` -> `structural`
+
+Three-fixture guidance replay stayed at `13 structural / 9 shallow / 4
+source-only / 4 N/A` because the older replay compiles do not expose the
+condition/action pair for the two-slot override links. The focused replay now
+shows the target state: activation, exception, and override can all become
+structural when the compiler emits the linked generic contracts.
+
 Lesson:
 
 Rule composition confirms the value of slot contracts more strongly than
@@ -609,7 +640,7 @@ not helper rows and not fixture-specific rule names.
 Next pressure:
 
 The remaining weak rule-composition surface is still partner/scope resolution,
-but it is now narrower: rank-only precedence and two-slot override links. The
-next repair should focus on avoiding `precedence_level(rule, high)` when the
-source names the compared rule, and avoiding two-slot override rows when the
-source also states the conflict/scope/effect.
+but it is now mostly rank-only precedence and older compiles that never emitted
+the linked contracts. Rule composition has reached the point where the next
+useful move is either a fresh three-fixture replay under the tightened audit, or
+switching to the next lens vocabulary: authority/custody.

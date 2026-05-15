@@ -330,6 +330,10 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
         special = _rule_exception_link_contract_rows(direct_rows)
         if special:
             return special
+    if term.term == "override":
+        special = _rule_override_link_contract_rows(direct_rows)
+        if special:
+            return special
     if not term.contract_groups:
         return []
     grouped = _matching_contract_rows(term, direct_rows)
@@ -342,6 +346,10 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
 def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
     if term.term == "exception":
         special = _partial_rule_exception_link_rows(direct_rows)
+        if special:
+            return special
+    if term.term == "override":
+        special = _partial_rule_override_link_rows(direct_rows)
         if special:
             return special
     if not term.contract_groups:
@@ -398,6 +406,42 @@ def _rule_exception_links(direct_rows: list[dict[str, Any]]) -> dict[str, str]:
         if str(row["predicate"]).lower() != "rule_exception" or len(row["args"]) < 2:
             continue
         links[str(row["args"][1])] = str(row["fact"])
+    return links
+
+
+def _rule_override_link_contract_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    links = _rule_override_links(direct_rows)
+    condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "override_condition", "trigger_condition"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "override_effect"))
+    for higher_rule, link_fact in links.items():
+        if condition_rows.get(higher_rule) and effect_rows.get(higher_rule):
+            return [link_fact, condition_rows[higher_rule][0], effect_rows[higher_rule][0]]
+    return []
+
+
+def _partial_rule_override_link_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    links = _rule_override_links(direct_rows)
+    if not links:
+        return []
+    condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "override_condition", "trigger_condition"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "override_effect"))
+    out: list[str] = []
+    for higher_rule, link_fact in links.items():
+        rows = [link_fact, *condition_rows.get(higher_rule, [])[:1], *effect_rows.get(higher_rule, [])[:1]]
+        if 1 <= len(rows) < 3:
+            out.extend(rows)
+    return out
+
+
+def _rule_override_links(direct_rows: list[dict[str, Any]]) -> dict[str, str]:
+    links: dict[str, str] = {}
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in {"rule_precedence", "override_rule", "rule_override"} or len(row["args"]) < 2:
+            continue
+        if len(row["args"]) >= 3:
+            continue
+        links[str(row["args"][0])] = str(row["fact"])
     return links
 
 
