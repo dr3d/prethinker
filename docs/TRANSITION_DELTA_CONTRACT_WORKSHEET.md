@@ -1295,3 +1295,100 @@ The active queue is now two focused compile-surface probes:
   status-to-interval contract;
 - initial status admission, where a source record states an initial status but
   no direct status fact is emitted.
+
+## TD-014 - Focused Compile-Surface Probe Pair
+
+Date: 2026-05-15
+
+Question:
+
+Are the remaining interval-scoped status and initial-status residues missing
+basic axes, or are they denser variants of axes the current instrument already
+handles?
+
+Before:
+
+TD-011 left two compile-surface classes open:
+
+- `interval_scoped_status_flattened`
+- `initial_status_not_admitted`
+
+The risk was to add broad compile guidance from a tiny residue board. The
+better test was to author fresh unlike probes for the two shapes and run them
+with helper delivery suppressed.
+
+Prediction:
+
+If these are missing axes, the focused probes should fail in the same way. If
+they are density/resolution variants, simple unlike versions should compile and
+answer cleanly with zero helper rows.
+
+Intervention:
+
+Added two fresh unlike fixtures:
+
+- `experiments/lens_vocabulary_audits/query_transition_resolution_v1/interval_scope_access_badge`
+- `experiments/lens_vocabulary_audits/query_transition_resolution_v1/initial_status_repair_ticket`
+
+Ran OpenRouter compile and no-helper QA:
+
+- compile lanes=`2`
+- QA lanes=`2`
+- model=`qwen/qwen3.6-35b-a3b`
+- helper companion row limit=`0`
+
+After:
+
+Compile:
+
+- fixtures=`2`
+- parsed OK=`2`
+- candidate predicates=`17`
+- admitted/skipped=`34 / 0`
+
+QA:
+
+- questions=`12`
+- exact/partial/miss=`12 / 0 / 0`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposals=`0`
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/query_transition_resolution_v1/`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_qa_summary_20260515.json`
+
+Verification:
+
+- OpenRouter compile completed with `2 / 2` parsed artifacts.
+- OpenRouter QA completed with `12 / 0 / 0` and no helper rows.
+
+Lesson:
+
+The basic axes are inside the current instrument. Interval-scoped status binding
+and initial-status admission do not need broad guidance from their simple
+forms. The old misses are resolution-density cases: either the source wording
+combined scope/status/boundary in a harder way, or the query/projection plan
+failed to select the right admitted surface.
+
+This is the same shape the boundary hunt kept finding: simple coordinate
+interior, dense coordinate boundary. The next repair should not be a wide
+compile prompt change. It should inspect the old miss compiles against the new
+probe compiles and ask exactly what structural distinction was missing.
+
+Next pressure:
+
+Diff the admitted predicate palettes for the old interval/initial misses
+against the fresh exact probes. Look for a fixture-free invariant, such as:
+
+- interval status needs the status value, active interval, and scope bound in
+  one row or joinable predicate family;
+- initial status needs filing/intake event, status value, and temporal anchor
+  bound in the same row or clearly linked rows.
+
+Only then decide whether this belongs in compile guidance, query planning, or a
+deterministic normalization contract.

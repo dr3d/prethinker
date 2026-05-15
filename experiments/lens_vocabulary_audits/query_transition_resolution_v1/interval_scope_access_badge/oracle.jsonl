@@ -1,0 +1,6 @@
+{"category":"query_transition_resolution","id":"q001","reference_answer":"Access badge AB-47 became effective on 2026-10-03 at 08:00.","source_id":"q001"}
+{"category":"query_transition_resolution","id":"q002","reference_answer":"AB-47 stopped being active on 2026-10-10 at 18:00.","source_id":"q002"}
+{"category":"query_transition_resolution","id":"q003","reference_answer":"AB-47 was active for seven days and ten hours.","source_id":"q003"}
+{"category":"query_transition_resolution","id":"q004","reference_answer":"During the active interval, AB-47's status was limited to supervised calibration-room entry.","source_id":"q004"}
+{"category":"query_transition_resolution","id":"q005","reference_answer":"After the active interval ended, AB-47's status changed to inactive.","source_id":"q005"}
+{"category":"query_transition_resolution","id":"q006","reference_answer":"The renewal request was due by 2026-10-08 at 12:00.","source_id":"q006"}

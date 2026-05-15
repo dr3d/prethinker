@@ -1,0 +1,6 @@
+{"category":"query_transition_resolution","id":"q001","reference_answer":"Desk operator Morgan Vale filed repair ticket RT-18.","source_id":"q001"}
+{"category":"query_transition_resolution","id":"q002","reference_answer":"RT-18's initial status was awaiting triage.","source_id":"q002"}
+{"category":"query_transition_resolution","id":"q003","reference_answer":"Technician Imani Cho was assigned to triage review.","source_id":"q003"}
+{"category":"query_transition_resolution","id":"q004","reference_answer":"After triage review, RT-18's status changed to parts ordered.","source_id":"q004"}
+{"category":"query_transition_resolution","id":"q005","reference_answer":"RT-18 was closed as repaired on 2026-11-09.","source_id":"q005"}
+{"category":"query_transition_resolution","id":"q006","reference_answer":"No customer pickup could be scheduled until the closed status was recorded.","source_id":"q006"}
