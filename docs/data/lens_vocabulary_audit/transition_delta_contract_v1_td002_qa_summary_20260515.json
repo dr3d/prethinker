@@ -1,0 +1,110 @@
+{
+  "generated": "2026-05-15T18:51:37.783703+00:00",
+  "lanes": 6,
+  "base_timeout": 900,
+  "effective_timeout": 5400,
+  "totals": {
+    "question_count": 17,
+    "judge_exact": 16,
+    "judge_partial": 0,
+    "judge_miss": 1,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0,
+    "exact_rate": 0.9412
+  },
+  "helper_pressure_summary": {
+    "row_count": 0,
+    "helper_class_counts": {},
+    "companion_row_totals": {},
+    "answer_surface_summary": {
+      "question_count": 17,
+      "judge_rows": 17,
+      "judge_exact": 16,
+      "judge_partial": 0,
+      "judge_miss": 1
+    },
+    "candidate_helper_share": 0.0,
+    "clean_helper_share": 0.0,
+    "exact_rate": 0.9412,
+    "helper_rows_per_exact": 0.0,
+    "helper_rows_per_question": 0.0,
+    "pressure_label": "no_helper_rows"
+  },
+  "results": [
+    {
+      "fixture": "document_section_delta",
+      "returncode": 0,
+      "started": "2026-05-15T18:47:11.174893+00:00",
+      "finished": "2026-05-15T18:49:24.144225+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\document_section_delta",
+      "qa_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\document_section_delta\\domain_bootstrap_qa_20260515T184924115640Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 132782,
+        "failure_surface_counts": {
+          "not_applicable": 7,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 7,
+        "judge_miss": 1,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\document_section_delta\\domain_bootstrap_qa_20260515T184924115640Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\document_section_delta\\domain_bootstrap_qa_20260515T184924115640Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 132782, \"failure_surface_counts\": {\"not_applicable\": 7, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 7, \"judge_miss\": 1, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "status_reason_delta",
+      "returncode": 0,
+      "started": "2026-05-15T18:47:11.174893+00:00",
+      "finished": "2026-05-15T18:51:37.783703+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\status_reason_delta",
+      "qa_json": "C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\status_reason_delta\\domain_bootstrap_qa_20260515T185137754740Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 9,
+        "elapsed_ms": 266421,
+        "failure_surface_counts": {
+          "not_applicable": 9
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 9,
+        "judge_miss": 0,
+        "judge_partial": 0,
+        "judge_rows": 9,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 9,
+        "query_rows": 9,
+        "question_count": 9,
+        "reference_answer_rows": 9,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\status_reason_delta\\domain_bootstrap_qa_20260515T185137754740Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\transition_delta_contract_td002_qa_20260515\\status_reason_delta\\domain_bootstrap_qa_20260515T185137754740Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 9, \"elapsed_ms\": 266421, \"failure_surface_counts\": {\"not_applicable\": 9}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 9, \"judge_miss\": 0, \"judge_partial\": 0, \"judge_rows\": 9, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 9, \"query_rows\": 9, \"question_count\": 9, \"reference_answer_rows\": 9, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

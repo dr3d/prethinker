@@ -1619,6 +1619,25 @@ def test_placeholder_repair_promotes_lowercase_evidence_slots() -> None:
     ]
 
 
+def test_placeholder_repair_promotes_lowercase_document_version_slots() -> None:
+    repaired = _placeholder_repaired_query("field_absent(form, emergency_contact).")
+
+    assert repaired is not None
+    assert repaired["query"] == "field_absent(Form, emergency_contact)."
+    assert repaired["repairs"] == [{"index": 1, "from": "form", "to": "Form"}]
+
+
+def test_placeholder_repair_promotes_lowercase_field_slot() -> None:
+    repaired = _placeholder_repaired_query("field_absent(document, field).")
+
+    assert repaired is not None
+    assert repaired["query"] == "field_absent(Document, Field)."
+    assert repaired["repairs"] == [
+        {"index": 1, "from": "document", "to": "Document"},
+        {"index": 2, "from": "field", "to": "Field"},
+    ]
+
+
 def test_source_record_field_repair_joins_sibling_event_field() -> None:
     repaired = _source_record_field_sibling_repaired_query(
         "source_record_field(IngressEvent, description, lab_entry)."
