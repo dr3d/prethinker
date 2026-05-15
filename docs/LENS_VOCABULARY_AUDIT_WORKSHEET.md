@@ -1998,3 +1998,112 @@ Do not broaden epistemic compile guidance yet. First add one small replay for
 pending/superseded epistemic lifecycle rows, because those are the only
 remaining hard-case residues. After that, move the same audit framework to the
 next roster facet instead of overfitting this lens.
+
+## LV-017 - Pending/Supersession Epistemic Lifecycle Replay
+
+Date: 2026-05-15
+
+Question:
+
+Are the remaining epistemic hard-case residues (`pending` and `superseded`)
+real vocabulary gaps, or do they resolve under a focused unlike lifecycle
+replay without helper support?
+
+Before:
+
+LV-016 left only two hard-case residues after the epistemic contract
+recognition pass:
+
+- `pending` remained shallow on one hard-case fixture;
+- `superseded` remained source-only on the same hard-case fixture.
+
+Hard-case QA was already stable at `28 / 0 / 0` with zero helper rows, so this
+was not an answerability failure. The open question was whether these terms
+needed broader epistemic guidance or simply a focused replay against a cleaner
+pending/supersession lifecycle.
+
+Prediction:
+
+If `pending` and `superseded` are structural terms, a compact unlike lifecycle
+fixture should compile direct status/supersession surfaces and answer without
+helpers. If they are still fixture-shaped, the audit should keep them shallow
+or source-only even when the source states the lifecycle plainly.
+
+Intervention:
+
+Added one focused unlike replay, `pending_supersession_lifecycle`, covering:
+
+- a received request that remains pending until a review check;
+- a correction note superseding an earlier ready label;
+- a permit that remains pending because a required item is missing;
+- a prior draft replaced by a final packet with a changed missing item;
+- an explicitly ruled-out cause;
+- an unstated estimate field.
+
+Ran compile, no-helper QA, and lens audit with OpenRouter at six lanes. No
+compile guidance or audit recognizer code changed in this step.
+
+After:
+
+Compile:
+
+- fixtures=`1`
+- parsed OK=`1`
+- candidate predicates=`18`
+- admitted/skipped=`48 / 0`
+- rough score=`0.889`
+
+No-helper QA:
+
+- questions=`9`
+- exact/partial/miss=`8 / 1 / 0`
+- helper rows=`0`
+- failure surfaces=`not_applicable: 8`, `hybrid_join_gap: 1`
+
+Lens audit:
+
+- `4 structural / 0 shallow / 1 source-only / 7 N/A`
+- `pending`, `superseded`, `resolved_negative`, and `unstated` all fired
+  structurally.
+- `corrected` remained source-only because the source expresses a changed
+  missing item through the supersession/status update rather than as a direct
+  correction contract.
+
+The lone partial was not an epistemic vocabulary failure. It asked for the
+changed missing item after one packet replaced another. The compiler exposed
+missing-item rows and the supersession relation, but the query path blurred
+the before/after binding enough to require a relaxed query.
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/epistemic_uncertainty_v1/pending_supersession_lifecycle/`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_pending_supersession_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests -q` -> `1235 passed, 2 subtests passed`
+
+Lesson:
+
+Pending and superseded epistemic lifecycle rows are inside the vocabulary
+contract when the source binds the lifecycle cleanly. The remaining pressure is
+not helper delivery and not epistemic compile guidance. It is a general
+change-event or delta surface problem: old value, new value, field, predecessor,
+successor, and scope need to stay bound when a later record replaces an earlier
+one.
+
+That repair should not be smuggled into the epistemic lens. If it is pursued,
+it belongs as a reusable before/after change-event contract that can transfer
+across operational records, rule revisions, corrected evidence, and document
+supersession.
+
+Next pressure:
+
+Close this epistemic pass after full verification. Move the lens audit framework
+to the next vocabulary family, or separately design a generic change-event
+surface if the same before/after partial recurs outside this probe.
