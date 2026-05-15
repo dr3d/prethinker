@@ -190,3 +190,36 @@ def test_rule_composition_audit_accepts_rule_precedence_as_override_contract(tmp
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["override"] == "structural"
     assert rows["precedence"] == "structural"
+
+
+def test_rule_composition_audit_accepts_linked_exception_condition_action(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, the_exception_applies_when_a_sponsor_signs_and_waives_review).",
+            "rule_exception(base_review_rule, sponsor_exception).",
+            "rule_condition(sponsor_exception, sponsor_signature).",
+            "rule_action(sponsor_exception, waive_staff_review).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["exception"] == "structural"
+
+
+def test_rule_composition_audit_marks_unresolved_exception_link_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, the_exception_applies_when_a_sponsor_signs_and_waives_review).",
+            "rule_exception(base_review_rule, sponsor_exception).",
+            "rule_condition(sponsor_exception, sponsor_signature).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["exception"] == "shallow_structural"

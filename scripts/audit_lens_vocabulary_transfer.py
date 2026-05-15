@@ -326,6 +326,10 @@ def _shallow_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) ->
 
 
 def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term == "exception":
+        special = _rule_exception_link_contract_rows(direct_rows)
+        if special:
+            return special
     if not term.contract_groups:
         return []
     grouped = _matching_contract_rows(term, direct_rows)
@@ -336,6 +340,10 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
 
 
 def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term == "exception":
+        special = _partial_rule_exception_link_rows(direct_rows)
+        if special:
+            return special
     if not term.contract_groups:
         return []
     grouped = _matching_contract_rows(term, direct_rows)
@@ -358,6 +366,50 @@ def _matching_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -
                 anchor = str(row["args"][term.contract_anchor])
                 grouped.setdefault(anchor, []).append((index, str(row["fact"])))
     return grouped
+
+
+def _rule_exception_link_contract_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    links = _rule_exception_links(direct_rows)
+    condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "exception_condition", "waiver_condition"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "exception_effect", "waiver_effect"))
+    for exception_id, link_fact in links.items():
+        if condition_rows.get(exception_id) and effect_rows.get(exception_id):
+            return [link_fact, condition_rows[exception_id][0], effect_rows[exception_id][0]]
+    return []
+
+
+def _partial_rule_exception_link_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
+    links = _rule_exception_links(direct_rows)
+    if not links:
+        return []
+    condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "exception_condition", "waiver_condition"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "exception_effect", "waiver_effect"))
+    out: list[str] = []
+    for exception_id, link_fact in links.items():
+        rows = [link_fact, *condition_rows.get(exception_id, [])[:1], *effect_rows.get(exception_id, [])[:1]]
+        if 1 <= len(rows) < 3:
+            out.extend(rows)
+    return out
+
+
+def _rule_exception_links(direct_rows: list[dict[str, Any]]) -> dict[str, str]:
+    links: dict[str, str] = {}
+    for row in direct_rows:
+        if str(row["predicate"]).lower() != "rule_exception" or len(row["args"]) < 2:
+            continue
+        links[str(row["args"][1])] = str(row["fact"])
+    return links
+
+
+def _rows_by_anchor(direct_rows: list[dict[str, Any]], predicates: tuple[str, ...]) -> dict[str, list[str]]:
+    out: dict[str, list[str]] = {}
+    predicate_set = set(predicates)
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in predicate_set or not row["args"]:
+            continue
+        out.setdefault(str(row["args"][0]), []).append(str(row["fact"]))
+    return out
 
 
 def _predicate_matches(term: LensTerm, predicate: str, predicate_tokens: set[str]) -> bool:

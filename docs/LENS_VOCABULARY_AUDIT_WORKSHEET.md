@@ -563,6 +563,40 @@ This is intentionally modest. The repair does not pretend every precedence
 surface is structural. It only recognizes the pairwise three-slot form as
 architecture and leaves rank-only rows as pressure.
 
+Exception-link follow-on:
+
+The two-slot exception weakness had a slightly different shape than pairwise
+precedence. In the activation-anchor replay, the compiler emitted a generic
+and transferable pattern:
+
+- `rule_exception(BaseRule, ExceptionRule)`
+- `rule_condition(ExceptionRule, Condition)`
+- `rule_action(ExceptionRule, EffectOrScope)`
+
+That should satisfy the exception lens even though no single row has all
+slots. The audit now recognizes that linked-row contract. A bare
+`rule_exception(BaseRule, ExceptionRule)` remains shallow unless the exception
+anchor also has condition and effect/scope rows.
+
+Exception-link artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_exception_link_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_exception_link_reaudit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_exception_link_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_guidance_exception_link_reaudit_20260515.json`
+
+Focused activation replay delta:
+
+- before: `3 structural / 4 shallow / 0 source-only / 3 N/A`
+- after: `4 structural / 3 shallow / 0 source-only / 3 N/A`
+- `exception`: `shallow` -> `structural`
+
+Three-fixture guidance replay stayed at `13 structural / 9 shallow / 4
+source-only / 4 N/A` because its exception terms had already reached structural
+status. This is still a useful audit fix: it prevents future generic
+`rule_exception + rule_condition + rule_action` compiles from being falsely
+treated as shallow.
+
 Lesson:
 
 Rule composition confirms the value of slot contracts more strongly than
@@ -575,7 +609,7 @@ not helper rows and not fixture-specific rule names.
 Next pressure:
 
 The remaining weak rule-composition surface is still partner/scope resolution,
-but it is now narrower: rank-only precedence and two-slot override/exception
-links. The next repair should focus on avoiding `precedence_level(rule, high)`
-when the source names the compared rule, and avoiding `rule_exception(Base,
-Exception)` without also preserving the exception condition and effect/scope.
+but it is now narrower: rank-only precedence and two-slot override links. The
+next repair should focus on avoiding `precedence_level(rule, high)` when the
+source names the compared rule, and avoiding two-slot override rows when the
+source also states the conflict/scope/effect.

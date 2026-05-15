@@ -1,0 +1,539 @@
+{
+  "compile_count": 3,
+  "lens": "rule_composition",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_rule_composition_guidance_replay_compile_20260515\\garden_plot_governance\\domain_bootstrap_file_20260515T110526169713Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 25,
+      "fixture": "garden_plot_governance",
+      "lens": "rule_composition",
+      "parsed_ok": true,
+      "run": "lens_vocab_rule_composition_guidance_replay_compile_20260515",
+      "source_record_fact_count": 120,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 1,
+        "source_only": 2,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "base"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "base"
+          ],
+          "status": "shallow_structural",
+          "term": "base_rule"
+        },
+        {
+          "direct_hits": [
+            "exception"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "exception_prerequisite(hardship_exception, document, medical_absence_note)."
+          ],
+          "source_hits": [
+            "exception"
+          ],
+          "status": "structural",
+          "term": "exception"
+        },
+        {
+          "direct_hits": [
+            "threshold"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "threshold_metric(workday_attendance, 3, workdays, current_season).",
+            "threshold_metric(missed_watering_shifts, 2, shifts, calendar_month)."
+          ],
+          "source_hits": [
+            "threshold"
+          ],
+          "status": "structural",
+          "term": "threshold"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "when"
+          ],
+          "status": "source_only",
+          "term": "activation_condition"
+        },
+        {
+          "direct_hits": [
+            "eligibility"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "eligibility_condition(recipient, waitlist_status, active).",
+            "eligibility_condition(recipient, workday_attendance, 1).",
+            "eligibility_condition(recipient, workday_attendance, 3_current_season)."
+          ],
+          "source_hits": [
+            "eligibility"
+          ],
+          "status": "structural",
+          "term": "eligibility_condition"
+        },
+        {
+          "direct_hits": [
+            "overrides"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "rule_precedence(anti_speculation_rule, hardship_exception, conflict).",
+            "rule_precedence(anti_speculation_rule, every_transfer_exception, always)."
+          ],
+          "source_hits": [
+            "overrides"
+          ],
+          "status": "structural",
+          "term": "override"
+        },
+        {
+          "direct_hits": [
+            "precedence"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "rule_precedence(anti_speculation_rule, hardship_exception, conflict).",
+            "rule_precedence(anti_speculation_rule, every_transfer_exception, always)."
+          ],
+          "source_hits": [
+            "precedence"
+          ],
+          "status": "structural",
+          "term": "precedence"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [
+            "vote",
+            "majority",
+            "quorum"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "vote_requirement(base_transfer_rule, simple_majority, any).",
+            "vote_requirement(hardship_exception, two_thirds, 5).",
+            "vote_requirement(plot_transfer_base, simple_majority, any)."
+          ],
+          "source_hits": [
+            "vote",
+            "majority",
+            "quorum"
+          ],
+          "status": "structural",
+          "term": "vote_requirement"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "fallback"
+          ],
+          "status": "source_only",
+          "term": "fallback_rule"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_rule_composition_guidance_replay_compile_20260515\\library_room_booking\\domain_bootstrap_file_20260515T110101584868Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 22,
+      "fixture": "library_room_booking",
+      "lens": "rule_composition",
+      "parsed_ok": true,
+      "run": "lens_vocab_rule_composition_guidance_replay_compile_20260515",
+      "source_record_fact_count": 108,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 5,
+        "source_only": 1,
+        "structural": 3
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "base"
+          ],
+          "status": "source_only",
+          "term": "base_rule"
+        },
+        {
+          "direct_hits": [
+            "exception"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "exception_replaces_requirement(public_exam_prep_session_sponsored_by_a_school, staff_approval_requirement, same_day_notification_to_the_branch_manager).",
+            "exception_replaces_requirement(public_exam_prep_session_with_named_school_sponsor, staff_approval, same_day_notification)."
+          ],
+          "source_hits": [
+            "exception"
+          ],
+          "status": "structural",
+          "term": "exception"
+        },
+        {
+          "direct_hits": [
+            "threshold"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "group_size_threshold(rb_12, eight_or_more_attendees)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "threshold"
+          ],
+          "status": "shallow_structural",
+          "term": "threshold"
+        },
+        {
+          "direct_hits": [
+            "activation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "activation_condition(rb_12, public_service_hours)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "activates",
+            "when"
+          ],
+          "status": "shallow_structural",
+          "term": "activation_condition"
+        },
+        {
+          "direct_hits": [
+            "eligibility"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "eligibility_requirement(rb_12, current_library_card).",
+            "eligibility_requirement(rb_12, requester_must_hold_a_current_library_card)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "eligibility"
+          ],
+          "status": "shallow_structural",
+          "term": "eligibility_condition"
+        },
+        {
+          "direct_hits": [
+            "override"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "override_scope(emergency_closure_notices, every_room_booking_rule).",
+            "override_scope(emergency_closure_notice, every_room_booking_rule)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "override"
+          ],
+          "status": "shallow_structural",
+          "term": "override"
+        },
+        {
+          "direct_hits": [
+            "precedence"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "precedence_over(emergency_closure_notices, school_sponsored_exception).",
+            "precedence_over(emergency_closure_notice, school_sponsored_exception)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "precedence",
+            "before"
+          ],
+          "status": "shallow_structural",
+          "term": "precedence"
+        },
+        {
+          "direct_hits": [
+            "valid"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "valid_until(rb_12, 2026_12_31)."
+          ],
+          "source_hits": [
+            "valid"
+          ],
+          "status": "structural",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "vote_requirement"
+        },
+        {
+          "direct_hits": [
+            "fallback"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "fallback_trigger(booking_calendar_is_unavailable, booking_calendar_is_unavailable).",
+            "fallback_action(booking_calendar_is_unavailable, record_requests_in_the_blue_room_ledger).",
+            "fallback_trigger(rb_12, booking_calendar_unavailable).",
+            "fallback_action(booking_calendar_unavailable, record_requests_in_blue_room_ledger)."
+          ],
+          "source_hits": [
+            "fallback"
+          ],
+          "status": "structural",
+          "term": "fallback_rule"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_rule_composition_guidance_replay_compile_20260515\\makerspace_tool_access\\domain_bootstrap_file_20260515T105959070808Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 12,
+      "fixture": "makerspace_tool_access",
+      "lens": "rule_composition",
+      "parsed_ok": true,
+      "run": "lens_vocab_rule_composition_guidance_replay_compile_20260515",
+      "source_record_fact_count": 100,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 3,
+        "source_only": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "base"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "base_rule(ta_4, weekend_reservation_laser_cutter, two_supervised_sessions).",
+            "base_rule(ta_4, weekend_reservation_request, two_supervised_sessions)."
+          ],
+          "source_hits": [
+            "base"
+          ],
+          "status": "structural",
+          "term": "base_rule"
+        },
+        {
+          "direct_hits": [
+            "exception"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "exception_rule(ta_4, instructor_endorsement_signed, two_supervised_sessions, next_weekend_reservation_only)."
+          ],
+          "source_hits": [
+            "exception"
+          ],
+          "status": "structural",
+          "term": "exception"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "threshold"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "activation"
+          ],
+          "status": "source_only",
+          "term": "activation_condition"
+        },
+        {
+          "direct_hits": [
+            "eligibility"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "eligibility_condition"
+        },
+        {
+          "direct_hits": [
+            "overrides"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "precedence_overrides(safety_hold_laser_cutter, exception_instructor_endorsement).",
+            "precedence_overrides(safety_hold, endorsement_exception)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "overrides"
+          ],
+          "status": "shallow_structural",
+          "term": "override"
+        },
+        {
+          "direct_hits": [
+            "precedence"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "precedence_overrides(safety_hold_laser_cutter, exception_instructor_endorsement).",
+            "precedence_overrides(safety_hold, endorsement_exception)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "precedence"
+          ],
+          "status": "shallow_structural",
+          "term": "precedence"
+        },
+        {
+          "direct_hits": [
+            "valid"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "valid_until(exception_instructor_endorsement, 2026_08_31).",
+            "valid_until(ta_4, 2026_08_31).",
+            "valid_until(endorsement_exception_ta_4, 2026_08_31)."
+          ],
+          "source_hits": [
+            "expires"
+          ],
+          "status": "structural",
+          "term": "expiration"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "vote_requirement"
+        },
+        {
+          "direct_hits": [
+            "fallback"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "fallback_condition(roster_tool_offline, paper_sign_up_sheet).",
+            "fallback_condition(roster_tool_offline, use_paper_sign_up_sheet)."
+          ],
+          "source_hits": [
+            "fallback"
+          ],
+          "status": "structural",
+          "term": "fallback_rule"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 4,
+      "shallow_structural": 9,
+      "source_only": 4,
+      "structural": 13
+    },
+    "term_status_counts": {
+      "activation_condition": {
+        "shallow_structural": 1,
+        "source_only": 2
+      },
+      "base_rule": {
+        "shallow_structural": 1,
+        "source_only": 1,
+        "structural": 1
+      },
+      "eligibility_condition": {
+        "shallow_structural": 2,
+        "structural": 1
+      },
+      "exception": {
+        "structural": 3
+      },
+      "expiration": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "fallback_rule": {
+        "source_only": 1,
+        "structural": 2
+      },
+      "override": {
+        "shallow_structural": 2,
+        "structural": 1
+      },
+      "precedence": {
+        "shallow_structural": 2,
+        "structural": 1
+      },
+      "threshold": {
+        "not_applicable": 1,
+        "shallow_structural": 1,
+        "structural": 1
+      },
+      "vote_requirement": {
+        "not_applicable": 2,
+        "structural": 1
+      }
+    }
+  }
+}
