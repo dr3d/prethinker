@@ -1615,3 +1615,124 @@ classes: phase-bearing status rows first, canonical alias/equivalence second,
 and event-layer distinction for repeated verbs third. Supersession target
 collapse should be included, but it is a focused one-fixture pressure rather
 than the center of the repair.
+
+## LV-014 - Operational Lifecycle Palette Extension
+
+Date: 2026-05-15
+
+Question:
+
+Can a small profile-palette extension make operational record/status compiles
+more compact and useful without adding helper rows or teaching the harness the
+six probe stories?
+
+Before:
+
+LV-013 showed a narrow operational lifecycle shape:
+
+- `phase_classification_missing` was the largest class;
+- alias splits were second;
+- repeated-verb ambiguity was real but limited;
+- supersession target collapse was present but not central.
+
+The previous actor/content replay also showed a warning sign: stronger slot
+guidance improved the vocabulary audit while worsening QA. That meant the next
+repair had to be tested against no-helper QA, not only against vocabulary
+admission counts.
+
+Prediction:
+
+A compact canonical lifecycle palette should improve answerability and reduce
+compile delivery volume. It should not be judged a full vocabulary repair unless
+the audit also shows the lifecycle terms binding their required slots.
+
+Intervention:
+
+Added operational lifecycle palette guidance at two layers:
+
+- operational profile context now prefers `record_alias/2`,
+  `record_status_phase/4`, `record_status_at/3`,
+  `record_lifecycle_event/5`, and `record_superseded_by/4` when those predicates
+  can carry stated lifecycle slots;
+- compile-surface invariants now ask operational lifecycle compiles to preserve
+  phase, dated status, event layer, alias, and supersession source separately
+  from local labels.
+
+This is a palette preference, not a helper. It adds no fixture-named predicates
+and no corpus-specific vocabulary.
+
+After:
+
+Compile replay over the six operational probes:
+
+- fixtures=`6`
+- parsed OK=`6`
+- candidate predicates=`58`
+- admitted/skipped=`276 / 12`
+
+This is materially more compact than the LV-009 actor/content replay
+(`352 / 8`) while preserving the same fixture set.
+
+No-helper QA replay:
+
+- questions=`48`
+- exact/partial/miss=`46 / 0 / 2`
+- exact rate=`95.83%`
+- helper rows=`0`
+
+The replay recovered from the LV-009 QA regression (`44 / 1 / 3`) and matched
+the original six-probe exact count while keeping helper delivery at zero. Two
+previously fragile surfaces improved: the permit supersession/status case and
+the grant current-status case both returned to exact.
+
+The lifecycle diagnostic did not become clean:
+
+- `alias_split`: `6`
+- `supersession_target_collapse`: `2`
+- `phase_classification_missing`: `7`
+- `ambiguous_repeated_verb`: `1`
+
+The lens vocabulary admission audit remains mostly shallow:
+
+- `9 structural / 48 shallow / 13 source-only / 8 N/A`
+
+The two remaining no-helper misses are:
+
+- an assignment join gap where the answer requires binding the assigned actor to
+  the review target;
+- an initial-status compile gap where the source states the initial status but
+  the direct surface is still filed/received-oriented.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_lifecycle_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_lifecycle_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_lens_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_lens_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_file.py -q` -> `30 passed`
+- `python -m pytest tests -q` -> `1230 passed, 2 subtests passed`
+
+Lesson:
+
+Operational lifecycle is a palette/profile problem before it is a helper
+problem. A small canonical palette can restore no-helper QA and reduce compile
+volume, but vocabulary admission still needs stricter slot contracts before the
+terms can be called structurally clean. The architecture should distinguish
+"answerable with zero helpers" from "lens vocabulary fully earned." Those are
+different claims, and LV-014 proves they can diverge.
+
+Next pressure:
+
+Do not add another broad operational guidance paragraph. The next operational
+work should be surgical: deterministic identity normalization for record aliases
+and a small query/profile pass for assignment joins and initial/current status
+selection. In parallel, the lens audit framework is ready to move to the next
+remaining vocabulary, using the same rule: unlike probes first, slot contracts
+second, repair only after the audit shape is visible.

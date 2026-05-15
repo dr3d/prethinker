@@ -1,0 +1,259 @@
+{
+  "generated": "2026-05-15T17:54:02.060977+00:00",
+  "lanes": 6,
+  "base_timeout": 900,
+  "effective_timeout": 5400,
+  "totals": {
+    "question_count": 48,
+    "judge_exact": 46,
+    "judge_partial": 0,
+    "judge_miss": 2,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0,
+    "exact_rate": 0.9583
+  },
+  "helper_pressure_summary": {
+    "row_count": 0,
+    "helper_class_counts": {},
+    "companion_row_totals": {},
+    "answer_surface_summary": {
+      "question_count": 48,
+      "judge_rows": 48,
+      "judge_exact": 46,
+      "judge_partial": 0,
+      "judge_miss": 2
+    },
+    "candidate_helper_share": 0.0,
+    "clean_helper_share": 0.0,
+    "exact_rate": 0.9583,
+    "helper_rows_per_exact": 0.0,
+    "helper_rows_per_question": 0.0,
+    "pressure_label": "no_helper_rows"
+  },
+  "results": [
+    {
+      "fixture": "clinic_intake_corrections",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.680490+00:00",
+      "finished": "2026-05-15T17:53:37.207670+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\clinic_intake_corrections",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\clinic_intake_corrections\\domain_bootstrap_qa_20260515T175337180776Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 185335,
+        "failure_surface_counts": {
+          "not_applicable": 8
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 8,
+        "judge_miss": 0,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\clinic_intake_corrections\\domain_bootstrap_qa_20260515T175337180776Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\clinic_intake_corrections\\domain_bootstrap_qa_20260515T175337180776Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 185335, \"failure_surface_counts\": {\"not_applicable\": 8}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 8, \"judge_miss\": 0, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "grant_review_queue",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.680490+00:00",
+      "finished": "2026-05-15T17:53:41.215627+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\grant_review_queue",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\grant_review_queue\\domain_bootstrap_qa_20260515T175341190626Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 189346,
+        "failure_surface_counts": {
+          "not_applicable": 8
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 8,
+        "judge_miss": 0,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\grant_review_queue\\domain_bootstrap_qa_20260515T175341190626Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\grant_review_queue\\domain_bootstrap_qa_20260515T175341190626Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 189346, \"failure_surface_counts\": {\"not_applicable\": 8}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 8, \"judge_miss\": 0, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "library_preservation_queue",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.681490+00:00",
+      "finished": "2026-05-15T17:53:44.699287+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\library_preservation_queue",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\library_preservation_queue\\domain_bootstrap_qa_20260515T175344673291Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 192829,
+        "failure_surface_counts": {
+          "hybrid_join_gap": 1,
+          "not_applicable": 7
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 7,
+        "judge_miss": 1,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\library_preservation_queue\\domain_bootstrap_qa_20260515T175344673291Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\library_preservation_queue\\domain_bootstrap_qa_20260515T175344673291Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 192829, \"failure_surface_counts\": {\"hybrid_join_gap\": 1, \"not_applicable\": 7}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 7, \"judge_miss\": 1, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "permit_renewal_docket",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.681490+00:00",
+      "finished": "2026-05-15T17:53:37.007129+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\permit_renewal_docket",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\permit_renewal_docket\\domain_bootstrap_qa_20260515T175336979129Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 185135,
+        "failure_surface_counts": {
+          "not_applicable": 8
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 8,
+        "judge_miss": 0,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\permit_renewal_docket\\domain_bootstrap_qa_20260515T175336979129Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\permit_renewal_docket\\domain_bootstrap_qa_20260515T175336979129Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 185135, \"failure_surface_counts\": {\"not_applicable\": 8}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 8, \"judge_miss\": 0, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "warehouse_repair_log",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.681490+00:00",
+      "finished": "2026-05-15T17:53:41.158890+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\warehouse_repair_log",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\warehouse_repair_log\\domain_bootstrap_qa_20260515T175341132374Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 189288,
+        "failure_surface_counts": {
+          "not_applicable": 8
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 8,
+        "judge_miss": 0,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\warehouse_repair_log\\domain_bootstrap_qa_20260515T175341132374Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\warehouse_repair_log\\domain_bootstrap_qa_20260515T175341132374Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 189288, \"failure_surface_counts\": {\"not_applicable\": 8}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 8, \"judge_miss\": 0, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "water_sample_docket",
+      "returncode": 0,
+      "started": "2026-05-15T17:50:31.681490+00:00",
+      "finished": "2026-05-15T17:54:02.059915+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\water_sample_docket",
+      "qa_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\water_sample_docket\\domain_bootstrap_qa_20260515T175402030951Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 210187,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "not_applicable": 7
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 7,
+        "judge_miss": 1,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\water_sample_docket\\domain_bootstrap_qa_20260515T175402030951Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_palette_qa_20260515\\water_sample_docket\\domain_bootstrap_qa_20260515T175402030951Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 210187, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"not_applicable\": 7}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 7, \"judge_miss\": 1, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

@@ -50,6 +50,9 @@ def test_operational_record_context_guards_status_corrections_and_unresolved_ite
     assert "status before/after" in context
     assert "original/superseded value" in context
     assert "pending, unresolved, referred, deferred" in context
+    assert "Operational lifecycle canonical palette preference" in context
+    assert "record_status_phase/4" in context
+    assert "record_lifecycle_event/5" in context
     assert "Operational record slot contract" in context
     assert "Operational received/filing actor rule" in context
     assert "Operational withdrawn-request content rule" in context
@@ -185,6 +188,8 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "operational record/status events" in context
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
+    assert "operational lifecycle compiles should prefer stable phase and event surfaces" in context
+    assert "record_superseded_by/4" in context
     assert "Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition" in context
     assert "preserve the receiving or filing actor separately from the submitter/source actor" in context
     assert "preserve the requested action/content/line item or descriptive target" in context
