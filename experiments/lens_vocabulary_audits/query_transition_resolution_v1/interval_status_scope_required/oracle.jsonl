@@ -1,0 +1,5 @@
+{"category":"query_transition_resolution","id":"q001","reference_answer":"Temporary key TK-31 became effective on 2026-12-14 at 06:00.","source_id":"q001"}
+{"category":"query_transition_resolution","id":"q002","reference_answer":"TK-31's active interval ended on 2026-12-18 at 20:00.","source_id":"q002"}
+{"category":"query_transition_resolution","id":"q003","reference_answer":"During the active interval, TK-31's status was approved only for escorted archive-room scanning.","source_id":"q003"}
+{"category":"query_transition_resolution","id":"q004","reference_answer":"After the active interval ended, TK-31's status changed to disabled.","source_id":"q004"}
+{"category":"query_transition_resolution","id":"q005","reference_answer":"The renewal packet was due by 2026-12-17 at 09:00.","source_id":"q005"}

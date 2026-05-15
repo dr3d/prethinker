@@ -1392,3 +1392,164 @@ against the fresh exact probes. Look for a fixture-free invariant, such as:
 
 Only then decide whether this belongs in compile guidance, query planning, or a
 deterministic normalization contract.
+
+## TD-015 - Predicate Palette Diff
+
+Date: 2026-05-15
+
+Question:
+
+What changed between the old misses and the fresh exact probes?
+
+Before:
+
+TD-014 showed `12 / 0 / 0` on the fresh focused pair, but that score alone
+could hide a resolution gap if the judge accepted a partial structural surface
+as exact.
+
+Prediction:
+
+The palette diff should show whether the new probes truly admitted the missing
+contracts, or merely made the question easier.
+
+Intervention:
+
+Compared the old miss compile facts with the new exact compile facts for the
+two remaining classes.
+
+After:
+
+Interval-scoped status:
+
+- old miss had separate status, scope, and boundary rows;
+- fresh exact also had separate status, scope/location, and boundary rows;
+- the fresh query retrieved the core status but not the full scope;
+- the judge accepted the core status as exact.
+
+Initial status:
+
+- old miss embedded status inside a filed-event sentence and did not emit a
+  direct initial-status row;
+- fresh exact stated the initial status explicitly and emitted
+  `initial_status(entity, status)`.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/query_transition_palette_diff_20260515.md`
+
+Verification:
+
+- Manual palette diff over the four compile artifacts named in TD-011 and
+  TD-014.
+
+Lesson:
+
+The fresh probes were useful, but one of them was too easy. They prove the
+basic axes are present, not that dense status/scope and filing-status forms are
+resolved. This prevents a false conclusion from a clean `12 / 0 / 0` score.
+
+Next pressure:
+
+Build hard probes that force the unresolved bindings:
+
+- status plus scope during an interval, where both pieces are required;
+- filed/intake event with status value embedded in the event phrase, without
+  explicit "initial status was" wording.
+
+## TD-016 - Hard Binding Probe Replay
+
+Date: 2026-05-15
+
+Question:
+
+Do hard unlike probes reproduce the two remaining compile-surface residues?
+
+Before:
+
+TD-015 showed that the first fresh probes were too easy for final repair
+decisions. The next probes needed to force:
+
+- status plus scope during an interval;
+- status at filing time without saying "initial status was".
+
+Prediction:
+
+If the old failures were missing architecture, these harder unlike probes
+should fail or degrade. If they pass, the old failures are likely density,
+compile variance, source segmentation, or query-palette selection around local
+surface shape.
+
+Intervention:
+
+Added two harder probes:
+
+- `filed_status_manifest`
+- `interval_status_scope_required`
+
+Ran OpenRouter compile and no-helper QA:
+
+- compile lanes=`2`
+- QA lanes=`2`
+- model=`qwen/qwen3.6-35b-a3b`
+- helper companion row limit=`0`
+
+After:
+
+Compile:
+
+- fixtures=`2`
+- parsed OK=`2`
+- candidate predicates=`12`
+- admitted/skipped=`33 / 6`
+
+QA:
+
+- questions=`10`
+- exact/partial/miss=`10 / 0 / 0`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposals=`0`
+
+Key rows:
+
+- interval status/scope query retrieved `key_permission(...)` rows binding
+  scope and permission status, with active start/end context;
+- filed-status query retrieved `record_status(...)` at the filing timestamp and
+  `actor_action(..., filed, Timestamp)` at the same timestamp.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_hard_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_hard_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_hard_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/query_transition_resolution_v1_hard_qa_summary_20260515.json`
+- `experiments/lens_vocabulary_audits/query_transition_resolution_v1/filed_status_manifest/`
+- `experiments/lens_vocabulary_audits/query_transition_resolution_v1/interval_status_scope_required/`
+
+Verification:
+
+- OpenRouter compile completed with `2 / 2` parsed artifacts.
+- OpenRouter QA completed with `10 / 0 / 0` and no helper rows.
+
+Lesson:
+
+The architecture already knows how to solve the hard generic forms when the
+compile emits clean predicates:
+
+- status/scope can bind through permission/scope predicates plus interval
+  context;
+- filed-with-status can bind through status-at-time plus filed action at the
+  same timestamp.
+
+That means the old misses should not trigger broad new compile guidance. They
+are better treated as local density/variance examples until a repeated unlike
+pattern fails. The correct next layer is a small predicate-palette invariant:
+for status-at-event questions, prefer rows that bind entity, status, and event
+time, then join the event action on the same time; for interval status/scope
+questions, prefer rows that bind permission/scope/status plus interval anchors.
+
+Next pressure:
+
+Do not repair from the old misses alone. Continue the lens audit to the next
+family, carrying this new rule of thumb: a not-exact internal row only becomes
+architecture work after an unlike hard probe reproduces the failure.
