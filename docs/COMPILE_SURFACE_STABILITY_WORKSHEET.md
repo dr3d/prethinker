@@ -658,3 +658,82 @@ Split the remaining no-helper misses into two queues:
 
 Only the first queue should influence compile-surface invariant guidance. The
 second should become query-planning tests, not helper adapters.
+
+## CSS-009 - Strict Relaxed-Row Token Filtering
+
+Date: 2026-05-14
+
+Before:
+
+CSS-008 split the remaining no-helper misses into compile coverage and query
+choice. One recurring query-choice shape was over-bound constants: a query
+with a concrete atom returned no rows, then the diagnostic relaxed query
+returned an entire predicate table. That broad relaxed table helped debugging
+but was too noisy for answer selection.
+
+Prediction:
+
+If the over-bound constant and the returned atom are lexical variants of the
+same value, a strict token-subset filter can keep only the relevant relaxed
+rows. This should help wording drift such as a requested organization/location
+name versus a more specific stored location atom. It should not repair missing
+facts or single-token placeholders.
+
+Intervention:
+
+Added a filter inside `_relaxed_constant_query`: when relaxed fallback succeeds,
+rows are narrowed only if the requested constant's non-generic tokens are a
+subset of the returned atom tokens, or the returned atom tokens are a subset of
+the requested constant tokens. The filter requires at least two non-generic
+tokens. It does not write facts, add helpers, or invent predicates.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/token_subset_relaxed_probate_qa_20260514.json`
+- `docs/data/compile_surface_stability/token_subset_relaxed_probate_qa_20260514.md`
+- `docs/data/compile_surface_stability/bound_query_constants_remaining_gap_queue_20260514.md`
+
+After:
+
+The replay produced the best focused no-helper score in this series:
+
+- exact=`28`
+- partial=`1`
+- miss=`11`
+- helper rows=`0`
+- failure surfaces: `compile_surface_gap=7`, `query_surface_gap=4`,
+  `hybrid_join_gap=1`, `not_applicable=28`
+
+The gain was not a universal score lift; some rows moved backward under
+stochastic QA planning. But the net result improved, helper rows stayed at
+zero, and compile-surface gaps dropped from `9` to `7`.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q` -> `165 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `195 passed`
+- no-helper QA replay: exact=`28` partial=`1` miss=`11`, helper rows=`0`
+
+Guardrail:
+
+A broader "distinctive overlap" variant was tried next: accept relaxed rows
+when two or more distinctive tokens overlap, even when neither side is a
+subset. That sounded generic, but the replay fell to `26/2/12`, so the
+broadening was reverted. The architecture keeps the stricter subset repair.
+
+Lesson:
+
+Query repair can replace a sliver of helper behavior when it is phrased as a
+general execution rule: over-bound constant -> relaxed query -> strict lexical
+row narrowing. The remaining gap is no longer helper-volume evidence. It is
+mostly compile coverage and planner slot choice.
+
+Next pressure:
+
+Use the remaining gap queue to choose the next bounded compile-side repair.
+The strongest candidates are direct source-authority surfaces and section
+addressability for answer-bearing records, because many misses ask for who/what
+authorized, which source governs, or which section contains a record.
