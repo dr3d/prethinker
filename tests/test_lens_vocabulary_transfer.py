@@ -442,6 +442,73 @@ def test_authority_custody_audit_accepts_event_type_outcome_contract(tmp_path: P
     assert rows["board_vote"] == "structural"
 
 
+def test_authority_custody_audit_accepts_draft_proposal_pending_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, draft_recommendation_proposed_supervised_checkout).",
+            "record_type(dr_2, draft_recommendation).",
+            "proposed_action(dr_2, supervised_checkout).",
+            "pending_approval(dr_2, director_vote).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["draft_recommendation"] == "structural"
+
+
+def test_authority_custody_audit_accepts_doc_alias_draft_content_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, draft_recommendation_proposed_checkout).",
+            "doc_type(dr_2, draft_recommendation).",
+            "doc_status(dr_2, draft).",
+            "doc_content(dr_2, proposed_supervised_checkout).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["draft_recommendation"] == "structural"
+
+
+def test_authority_custody_audit_accepts_noncontrolling_omitted_source_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, copied_notice_omitted_controlling_vote).",
+            "noncontrolling_source(notice_5, copied_notice).",
+            "copied_from(notice_5, draft_recommendation).",
+            "omitted_authority(notice_5, controlling_vote).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["noncontrolling_source"] == "structural"
+
+
+def test_authority_custody_audit_accepts_source_recorded_noncontrolling_reason(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, copied_notice_omitted_final_order).",
+            "document_status(notice_5, noncontrolling).",
+            "source_recorded(notice_5, noncontrolling_reason, copied_draft_and_omitted_final_order).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["noncontrolling_source"] == "structural"
+
+
 def test_operational_record_audit_accepts_record_detail_status_contract(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

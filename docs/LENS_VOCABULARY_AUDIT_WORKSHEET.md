@@ -1354,3 +1354,177 @@ authority/custody work should target only the hard noncontrol reason/source
 slot and maybe draft recommendation content. The broader CTO focus should stay
 on distinguishing valid sparse authority metadata from missing source-detail
 resolution.
+
+## LV-011 - Authority Hard-Case Gradient Replay
+
+Date: 2026-05-15
+
+Question:
+
+Do focused unlike probes for draft-recommendation content and noncontrolling
+source reason/source binding show a repairable gap, a valid sparsity ceiling, or
+a query-only issue?
+
+Before:
+
+The expanded six-probe authority/custody audit was strong on direct state terms
+but weak on gradient terms:
+
+- expanded QA=`54 / 0 / 0`
+- expanded audit after gradient contracts=`31 structural / 29 shallow`
+- `draft_recommendation`=`1 / 6 structural`
+- `noncontrolling_source`=`0 / 6 structural`
+
+Prediction:
+
+If the gradient terms are merely under-tested, fresh focused probes should
+produce same-anchor content/reason rows. If they have a structural ceiling, QA
+may remain high while the audit stays shallow because the compiler stores
+content in neighboring document/status rows or source-record text.
+
+Intervention:
+
+Added six small unlike authority/custody probes:
+
+- `clinic_fridge_notice`
+- `repair_room_signage`
+- `theater_prop_cage`
+- `library_cart_policy_draft`
+- `pool_lane_schedule_draft`
+- `studio_key_access_draft`
+
+Strengthened the generic surface contracts, not fixture terms:
+
+- source guidance now says draft recommendations need proposed
+  content/action/scope plus pending approval/review/vote/legal condition;
+- source guidance now says copied/advisory/superseded/rejected/noncontrolling
+  sources need the weaker source, copied/superseded relation, and stated reason
+  or omitted controlling source;
+- the audit now accepts common generic aliases such as `doc_type`, `doc_status`,
+  `doc_content`, `proposal_content`, `proposed_action`, `pending_approval`,
+  `copied_from`, `omitted_authority`, and source-recorded noncontrol reasons.
+
+After:
+
+Hard-case compile:
+
+- fixtures=`6`
+- parsed_ok=`6`
+- candidate predicates=`84`
+- admitted/skipped=`465 / 8`
+
+Hard-case QA:
+
+- questions=`30`
+- exact/partial/miss=`28 / 1 / 1`
+- helper rows=`0`
+
+Hard-case lens audit:
+
+- before alias-contract repair=`15 structural / 35 shallow / 1 source-only / 9 N/A`
+- after alias-contract repair=`22 structural / 28 shallow / 1 source-only / 9 N/A`
+- `draft_recommendation`=`2 structural / 4 shallow`
+- `noncontrolling_source`=`1 structural / 4 shallow / 1 N/A`
+
+Combined current authority/custody audit over the earlier six plus the six hard
+cases:
+
+- compiles=`12`
+- status counts=`53 structural / 57 shallow / 1 source-only / 9 N/A`
+- `access_control`=`12 / 12 structural`
+- `custody_holder`=`10 structural / 1 shallow / 1 source-only`
+- `draft_recommendation`=`3 structural / 9 shallow`
+- `noncontrolling_source`=`1 structural / 10 shallow / 1 N/A`
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/authority_custody_v1/clinic_fridge_notice`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/repair_room_signage`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/theater_prop_cage`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/library_cart_policy_draft`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/pool_lane_schedule_draft`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/studio_key_access_draft`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_hardcases_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_hardcases_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_hardcases_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_combined_12_audit_20260515.md`
+
+Lesson:
+
+The answers are mostly inside the set, but the gradient vocabulary is not clean.
+Authority/custody direct state is stable without helpers. Draft and
+noncontrolling terms are different: the compiler often emits the answer-bearing
+content as document text, `doc_content`, `supersedes`, or source-record evidence
+near the source anchor, while the vocabulary audit requires a same-anchor
+content/reason contract. Some gradient sparsity is valid for official records,
+but the hard-case probes state the draft content and noncontrol reason
+explicitly, so the remaining shallow rows are compile-resolution pressure, not
+acceptable absence.
+
+Next pressure:
+
+Do not chase authority/custody to 100 percent. The hard case is now named:
+draft and noncontrolling source need same-anchor content/reason resolution. The
+next requested work is operational status, but it should inspect candidate
+predicate selection and profile palette before making another repair.
+
+## LV-012 - Operational Palette Inspection
+
+Date: 2026-05-15
+
+Question:
+
+Why did operational record/status stay noisy after LV-009, and is the issue
+helper absence, mapper rejection, QA query planning, or profile-palette shape?
+
+Before:
+
+LV-009 improved the operational lens audit but worsened QA:
+
+- audit moved `15 structural / 41 shallow / 14 source-only / 8 N/A` to
+  `32 structural / 29 shallow / 10 source-only / 7 N/A`
+- QA moved `46 / 0 / 2` to `44 / 1 / 3`
+- helper rows remained `0`
+
+Intervention:
+
+Inspected the four not-exact rows and the compile palettes for the six
+operational probes. This was an inspection pass only: no new helper, no new
+prompt prose, no fixture-specific repair.
+
+After:
+
+The remaining failures are palette/profile issues, not mapper-admission issues:
+
+- `grant_review_queue q008`: the answer exists as
+  `status_at(gq_5, approved_with_revised_budget, 2026_05_10)`, but another
+  alias `queue_gq5` carries only `approved`.
+- `permit_renewal_docket q005`: the source says hold notice `H-2` superseded
+  approval, but the compile emits `status_superseded_by(..., pending_payment)`,
+  turning the superseding document into the resulting status.
+- `water_sample_docket q001`: field receipt and lab receipt both use receipt
+  language; the compile puts lab receipt in `sample_received` and field receipt
+  in `docket_filed`.
+- `water_sample_docket q002`: initial status is in source text but no direct
+  initial-status row exists.
+
+Artifact:
+
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_palette_inspection_20260515.md`
+
+Lesson:
+
+Operational status needs a stable lifecycle palette, not helper rows and not
+more broad guidance. The weak slots are canonical record identity, status phase
+(`initial`, `current`, `final`, point-in-time), repeated-verb event layer, and
+supersession target type. The compiler is producing plausible local predicates,
+but the selectors need a cross-fixture grammar to avoid alias splits and
+document-vs-status collapse.
+
+Next pressure:
+
+Design a profile-palette contract for operational lifecycle rows before another
+compile experiment. The repair should prefer phase-bearing status predicates,
+alias/equivalence rows for docket/file/queue ids, separated receipt/logging
+event layers, and a distinction between the source/event/document that
+supersedes and the resulting status after supersession.

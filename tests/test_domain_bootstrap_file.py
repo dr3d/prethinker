@@ -150,6 +150,10 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
     assert "role-only, recipient-only, or context-only rows" in context
     assert "reason a source is noncontrolling" in context
     assert "draft recommendation, staff note, official record, and controlling finding" in context
+    assert "Authority draft-recommendation rule" in context
+    assert "proposed content/action/scope" in context
+    assert "Authority noncontrolling-source rule" in context
+    assert "omitted controlling source" in context
     assert "Type, author, date, and status alone are shallow record metadata" in context
 
     selected = "\n".join(

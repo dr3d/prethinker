@@ -1,0 +1,2365 @@
+{
+  "compile_count": 12,
+  "lens": "authority_custody",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\clinic_device_custody\\domain_bootstrap_file_20260515T134552611264Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 55,
+      "fixture": "clinic_device_custody",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 102,
+      "summary": {
+        "shallow_structural": 4,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "court",
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "source_document(co_14, court_order)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "court",
+            "order"
+          ],
+          "status": "shallow_structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "rule_condition(r_8, cracked_sterile_seal, device_with_cracked_sterile_seal).",
+            "rule_consequence(r_8, moved_only_for_inspection_or_replacement, device_with_cracked_sterile_seal).",
+            "rule_consequence(r_8, family_pickup_requires_later_controlling_source, family_pickup).",
+            "rule_condition(r_8, cracked_sterile_seal, device).",
+            "rule_consequence(r_8, move_only_for_inspection_or_replacement, device)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "source_document(vote_20260405, vote)."
+          ],
+          "slot_rows": [
+            "vote_outcome(vote_2026_04_05, place_p_17_under_respiratory_team_until_seal_replaced, did_not_authorize_family_pickup).",
+            "vote_outcome(vote_2026_04_05, place_under_respiratory_team, no_authorization_for_family_pickup).",
+            "source_document(vote_2026_04_05, vote).",
+            "vote_outcome(vote_2026_04_05, place_p_17_under_respiratory_team_until_seal_replaced, did_not_authorize_family_pickup).",
+            "vote_outcome(vote_2026_04_05, place_under_respiratory_team, no_authorization_for_family_pickup)."
+          ],
+          "source_hits": [
+            "vote",
+            "voted"
+          ],
+          "status": "structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "source_document(er_442, equipment_register_entry).",
+            "source_declares(er_442, p_17, active_equipment_with_cracked_seal_respiratory_team_is_temporary_custody_holder_until_seal_is_replaced)."
+          ],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "source_document(sn_19, staff_note).",
+            "source_grants_no_authorization(sn_19, release_authority)."
+          ],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "source_document(dr_6, recommendation)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "source_document(cf_3, controlling_finding).",
+            "source_declares(cf_3, p_17, respiratory_team_remains_custody_holder_until_replacement_complete_co_14_controls_family_pickup_only_after_that_condition).",
+            "source_declares(cf_3, custody_holder, respiratory_team_remains_custody_holder_until_replacement_complete).",
+            "source_declares(cf_3, family_pickup_authority, co_14_controls_family_pickup_only_after_seal_replacement)."
+          ],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling",
+            "superseded"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied",
+            "superseded"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "shallow_structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "release"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "condition_for_release(p_17, seal_replacement_logged)."
+          ],
+          "source_hits": [
+            "access",
+            "release"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\community_garden_gate_key\\domain_bootstrap_file_20260515T134537468514Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 99,
+      "fixture": "community_garden_gate_key",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 91,
+      "summary": {
+        "shallow_structural": 5,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "court",
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_type(co_6, court_order)."
+          ],
+          "slot_rows": [
+            "event_type(event_court_order, court_order).",
+            "event_outcome(event_court_order, emergency_access_for_fire_inspection)."
+          ],
+          "source_hits": [
+            "court",
+            "order"
+          ],
+          "status": "structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_applies_when(ga_2, restricted_keys_stay_with_gate_coordinator).",
+            "rule_exception(ga_2, council_vote).",
+            "rule_exception(ga_2, court_order).",
+            "rule_applies_when(ga_2, default_restricted_key_custody).",
+            "record_type(ga_2, rule)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "shallow_structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "event_type(event_council_vote, council_vote).",
+            "event_outcome(event_council_vote, temporary_checkout_allowed_to_plot_captains)."
+          ],
+          "source_hits": [
+            "vote",
+            "voted"
+          ],
+          "status": "structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "record",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_type(kr_6, official_register).",
+            "record_status(kr_6, official).",
+            "record_author(kr_6, ona_bell).",
+            "record_date(kr_6, 2026_09_01).",
+            "record_type(sn_6, staff_note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_type(sn_6, staff_note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "shallow_structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_type(dr_6, draft)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_type(cf_6, controlling_finding)."
+          ],
+          "slot_rows": [
+            "event_type(evt_controlling_finding, controlling_finding).",
+            "event_outcome(evt_controlling_finding, custody_and_access_hierarchy_confirmed)."
+          ],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(north_gate_key, jae_park)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_granted_to(north_gate_key, plot_captains, temporary_checkout).",
+            "access_granted_to(north_gate_key, fire_inspection, emergency_access).",
+            "access_condition(temporary_checkout, council_vote).",
+            "access_condition(emergency_access, court_order).",
+            "access_condition(fire_inspection, court_order)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\housing_archive_access\\domain_bootstrap_file_20260515T134718082734Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 94,
+      "fixture": "housing_archive_access",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 106,
+      "summary": {
+        "shallow_structural": 6,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "court",
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(dc_20, district_court_order).",
+            "controls_action(dc_20, removal_requests)."
+          ],
+          "source_hits": [
+            "court",
+            "order"
+          ],
+          "status": "structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule",
+            "bylaw"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "governs_rule(b_2, tenant_record_cartons).",
+            "document_type(b_2, bylaw)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "bylaw"
+          ],
+          "status": "shallow_structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(board_vote, board_vote).",
+            "permits_access(board_vote, supervised_inspection_copies, tenant_archive_carton_a_204)."
+          ],
+          "source_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "status": "structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "record",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(ar_77, register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(sn_4, staff_note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "shallow_structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_11, draft_recommendation)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding",
+            "final"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(af_5, controlling_finding)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "epistemic_status(nl_8, noncontrolling).",
+            "epistemic_status(sn_4, noncontrolling)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "holds_custody(mina_rao, carton_a_204).",
+            "holds_custody(mina_rao, carton_a204)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "permits_access(board_vote, supervised_inspection_copies, tenant_archive_carton_a_204).",
+            "permits_access(mo_9, viewing, tenant_photographs).",
+            "prohibits_access(mo_9, removal_from_archive_custody, tenant_photographs).",
+            "permits_access(board_vote_20260315, supervised_inspection_copies, carton_a204).",
+            "permits_access(municipal_order_mo9, viewing, tenant_photographs)."
+          ],
+          "source_hits": [
+            "access",
+            "release"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\lab_sample_chain\\domain_bootstrap_file_20260515T134659210274Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 88,
+      "fixture": "lab_sample_chain",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 103,
+      "summary": {
+        "shallow_structural": 5,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "court",
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(ro_2, court_order).",
+            "access_denied(ro_2, release_of_the_vial)."
+          ],
+          "source_hits": [
+            "court",
+            "order"
+          ],
+          "status": "structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "governing_rule(v_31, l_5).",
+            "rule_release_requirement(l_5, biosafety_officer_records_a_release_finding).",
+            "rule_release_requirement(l_5, biosafety_officer_release_finding).",
+            "rule_release_requirement(l_5, biosafety_officer_records_release_finding)."
+          ],
+          "slot_rows": [
+            "rule_condition(l_5, alarm_affected, stays_with_the_freezer_custodian_until_the_biosafety_officer_records_a_release_finding).",
+            "rule_condition(l_5, alarm_affected, custodian_holds).",
+            "rule_condition(l_5, alarm_affected, stays_with_freezer_custodian).",
+            "document_type(l_5, biospecimen_rule).",
+            "rule_condition(l_5, alarm_affected, stays_with_the_freezer_custodian_until_the_biosafety_officer_records_a_release_finding)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "vote_margin(ethics_board_vote, 4_2)."
+          ],
+          "slot_rows": [
+            "board_vote(ethics_board_vote, keep_v_31_in_freezer_bay_4_and_allow_only_a_sealed_duplicate_report_to_leave_the_lab, 4_2).",
+            "vote_outcome(ethics_board_vote, keep_v_31_in_freezer_bay_4, allow_only_a_sealed_duplicate_report_to_leave_the_lab).",
+            "board_vote(evt_vote_005, keep_in_freezer, 4_2).",
+            "board_vote(ethics_board_vote_2026_02_04, keep_v_31_in_freezer_bay_4, 4_2).",
+            "vote_outcome(ethics_board_vote_2026_02_04, keep_v_31_in_freezer_bay_4, allow_only_sealed_duplicate_report_to_leave_lab)."
+          ],
+          "source_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "status": "structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "record"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "non_controlling_record(ss_3, copied_draft_recommendation_dr_9_and_ignored_the_ethics_board_vote_and_bf_7).",
+            "record_date(cc_31, 2026_02_02).",
+            "record_date(sn_28, 2026_02_03).",
+            "record_date(dr_9, 2026_02_03).",
+            "record_date(ro_2, 2026_02_05)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(sn_28, staff_note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "shallow_structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_9, draft_recommendation).",
+            "document_type(dr_9, draft)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "controlling_finding(bf_7, theo_lane_remains_custody_holder_l_5_controls_physical_custody_ro_2_controls_log_inspection_only).",
+            "non_controlling_record(ss_3, copied_draft_recommendation_dr_9_and_ignored_the_ethics_board_vote_and_bf_7).",
+            "non_controlling_for(ss_3, bf_7).",
+            "controlling_finding(bf_7, theo_lane_remains_custody_holder_l_5_controls_physical_custody_ro_2_controls_log_inspection).",
+            "non_controlling_record(ss_3, copied_draft_dr_9_ignored_ethics_board_vote_and_bf_7)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "custodian",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(v_31, theo_lane)."
+          ],
+          "source_hits": [
+            "custody",
+            "custodian",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access",
+            "release"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_controller(freezer_bay_4, theo_lane).",
+            "access_controller(freezer_bay_4, biosafety_officer).",
+            "rule_release_requirement(l_5, biosafety_officer_records_a_release_finding).",
+            "access_denied(ro_2, release_of_the_vial).",
+            "rule_release_requirement(l_5, biosafety_officer_release_finding)."
+          ],
+          "source_hits": [
+            "access",
+            "release"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\makerspace_tool_lockout\\domain_bootstrap_file_20260515T134707740943Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 81,
+      "fixture": "makerspace_tool_lockout",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 94,
+      "summary": {
+        "shallow_structural": 3,
+        "structural": 7
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "order"
+          ],
+          "status": "shallow_structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "governs_rule(c_9, mr_4)."
+          ],
+          "slot_rows": [
+            "record_type(mr_4, machine_rule).",
+            "record_provision(mr_4, lockout_condition, remains_locked_until_board_vote_or_inspector_order)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "vote",
+            "decision"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "status": "shallow_structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record(tl_9).",
+            "record(tr_9).",
+            "record(sn_9).",
+            "record(dr_9).",
+            "record(mr_4)."
+          ],
+          "slot_rows": [
+            "record_provision(mr_4, lockout_condition, remains_locked_until_board_vote_or_inspector_order).",
+            "record_provision(cf_9, custody_holder, ben_ives).",
+            "record_provision(cf_9, governing_rule, mr_4).",
+            "record_provision(cf_9, access_scope, diagnostics_only).",
+            "record_provision(mb_9, content, members_may_operate_c_9_after_a_clean_test_cut)."
+          ],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "record_type(sn_9, staff_note).",
+            "record_provision(sn_9, recommendation, supervised_setup_practice)."
+          ],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "record_type(dr_9, draft_recommendation).",
+            "record_provision(dr_9, recommendation, unlock_after_clean_test_cut)."
+          ],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "record_type(cf_9, controlling_finding).",
+            "grants_access(cf_9, c_9, diagnostics).",
+            "restricts_access(cf_9, c_9, member_operation).",
+            "record_provision(cf_9, custody_holder, ben_ives)."
+          ],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "copied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "holds_custody(ben_ives, c_9)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access",
+            "permission",
+            "unlock"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "grants_access(io_9, c_9, diagnostics).",
+            "grants_access(cf_9, c_9, diagnostics).",
+            "restricts_access(io_9, c_9, member_operation).",
+            "restricts_access(cf_9, c_9, member_operation)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_expanded_compile_20260515\\transit_lost_property_release\\domain_bootstrap_file_20260515T134547628286Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 54,
+      "fixture": "transit_lost_property_release",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_expanded_compile_20260515",
+      "source_record_fact_count": 92,
+      "summary": {
+        "shallow_structural": 6,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "court",
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "court_order(co_50, mira).",
+            "document_type(co_50, court_order)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "court",
+            "order"
+          ],
+          "status": "shallow_structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_governs_action(tp_7, instrument_release).",
+            "rule_condition(tp_7, board_vote_or_court_order)."
+          ],
+          "slot_rows": [
+            "document_type(tp_7, rule).",
+            "rule_governs_action(tp_7, instrument_release).",
+            "rule_condition(tp_7, board_vote_or_court_order)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "board_vote(board_vote_2026_07_04, allow_inspection_keep_custody)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "status": "shallow_structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "record",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_status(sn_50, recommendation).",
+            "record_status(dr_50, draft).",
+            "record_status(kn_50, non_controlling).",
+            "non_authorizing_record(sn_50).",
+            "non_authorizing_record(dr_50)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(sn_50, staff_note).",
+            "authorization_denied(sn_50, release)."
+          ],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_50, draft_recommendation)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "controlling_finding(cf_50).",
+            "document_type(cf_50, controlling_finding).",
+            "controlling_finding(cf_50)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "record_status(kn_50, superseded)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "custodian",
+            "held"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_held_by(violin_case, orin_vale, lr_50).",
+            "custody_held_by(lp_50, orin_vale, cf_50)."
+          ],
+          "source_hits": [
+            "custody",
+            "custodian",
+            "holder",
+            "held"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access",
+            "release"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "release_condition(co_50, signed_receipt_form_rf_50).",
+            "access_controlled_by(lp_50, orin_vale).",
+            "release_condition(cf_50, signed_receipt_form_rf_50)."
+          ],
+          "source_hits": [
+            "access",
+            "release"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\clinic_fridge_notice\\domain_bootstrap_file_20260515T164854809483Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 51,
+      "fixture": "clinic_fridge_notice",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 83,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 7,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(mo_4, order)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "order"
+          ],
+          "status": "shallow_structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(sr_4, rule)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "shallow_structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(er_4, register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(sn_4, note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "shallow_structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_4, recommendation)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "is_controlling(cf_4).",
+            "document_type(cf_4, finding)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "is_noncontrolling(bn_4).",
+            "is_noncontrolling(bn_4).",
+            "document_status(bn_4, noncontrolling)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(vaccine_fridge_key, tomas_reed)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_condition(vaccine_fridge_key, supervised_checkout).",
+            "access_condition(vaccine_fridge_key, flu_clinic_hours).",
+            "access_granted_to(vaccine_fridge_key, shift_nurse).",
+            "access_condition(asset_vaccine_fridge_key, restricted_to_pharmacy_supervisor).",
+            "access_condition(asset_vaccine_fridge_key, requires_medical_director_approval_for_wider_checkout)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\library_cart_policy_draft\\domain_bootstrap_file_20260515T164840066564Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 38,
+      "fixture": "library_cart_policy_draft",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 74,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 3,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "order"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "governing_order(outreach_laptop_cart, do_2).",
+            "doc_type(do_2, director_order)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "order"
+          ],
+          "status": "shallow_structural",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_condition(er_2, checkout_stays_with_circulation_staff_unless_director_approves_named_delegate).",
+            "governing_order(outreach_laptop_cart, do_2).",
+            "rule_condition(er_2, checkout_stays_with_circulation_staff_unless_the_library_director_approves_a_named_delegate_class).",
+            "rule_condition(er_2, default_custody_holder_is_circulation_staff)."
+          ],
+          "slot_rows": [
+            "doc_type(er_2, equipment_rule).",
+            "rule_condition(er_2, checkout_stays_with_circulation_staff_unless_director_approves_named_delegate).",
+            "rule_condition(er_2, checkout_stays_with_circulation_staff_unless_the_library_director_approves_a_named_delegate_class).",
+            "rule_condition(er_2, default_custody_holder_is_circulation_staff)."
+          ],
+          "source_hits": [
+            "rule",
+            "policy"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_type(lr_2, equipment_register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "doc_type(sn_2, staff_note).",
+            "proposal_content(sn_2, narrower_pilot_for_two_senior_interns_only)."
+          ],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "doc_type(dr_2, draft_recommendation).",
+            "proposal_content(dr_2, allow_trained_student_interns_checkout_for_school_visits).",
+            "proposal_content(dr_2, allow_trained_student_interns_to_check_out_the_outreach_laptop_cart_for_school_visits)."
+          ],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "controlling_finding(cf_2, do_2_controls_pilot_and_dev_singh_remains_custody_holder).",
+            "controlling_finding(cf_2, do_2_controls_the_pilot).",
+            "doc_type(cf_2, controlling_finding).",
+            "controlling_finding(cf_2, do_2_controls_pilot_and_dev_singh_remains_custody_holder).",
+            "controlling_finding(cf_2, do_2_controls_the_pilot)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(dev_singh, outreach_laptop_cart)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access",
+            "permission"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_permission_granted(outreach_laptop_cart, two_named_senior_interns, school_visits).",
+            "permission_exclusion(do_2, all_trained_interns)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\pool_lane_schedule_draft\\domain_bootstrap_file_20260515T164912745953Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 50,
+      "fixture": "pool_lane_schedule_draft",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 76,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 3,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(gl_7, governing_rule)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "governing",
+            "rule"
+          ],
+          "status": "shallow_structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "vote"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "vote_outcome(recreation_committee_vote, recreation_committee, approved_early_morning_lane_entry_only_for_head_coaches_listed_on_the_season_roster).",
+            "vote_outcome(cf_7, recreation_committee, early_morning_lane_entry_only_for_head_coaches_listed_on_the_season_roster)."
+          ],
+          "source_hits": [
+            "vote"
+          ],
+          "status": "structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(or_7, official_register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_7, draft_recommendation)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(cf_7, controlling_finding).",
+            "vote_outcome(cf_7, recreation_committee, early_morning_lane_entry_only_for_head_coaches_listed_on_the_season_roster)."
+          ],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling",
+            "copied",
+            "superseded"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "superseded_by(te_7, cf_7).",
+            "document_status(te_7, noncontrolling)."
+          ],
+          "slot_rows": [
+            "document_status(te_7, noncontrolling).",
+            "source_recorded(te_7, noncontrolling_reason, copied_dr_7_before_the_recreation_committee_vote_and_omitted_cf_7)."
+          ],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "holds_custody(ben_orta, lane_reservation_tablet)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "grants_access(ben_orta, lane_reservation_tablet, controlled_by_aquatics_manager)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\repair_room_signage\\domain_bootstrap_file_20260515T164848476141Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 39,
+      "fixture": "repair_room_signage",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 73,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 6,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "governing",
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_text(gt_8, controlled_equipment_keys_stay_with_the_bench_captain_unless_the_workshop_board_approves_a_checkout_class).",
+            "rule_text(cf_8, board_vote_controls_checkout_scope_and_omar_vale_remains_custody_holder).",
+            "access_rule_derived_from(checkout_to_certified_mentors_during_supervised_repair_hours, board_vote_2026_11_03).",
+            "access_rule_derived_from(board_vote_checkout_rule, board_vote_20261103).",
+            "access_rule_derived_from(governing_rule_checkout, gt_8)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "governing",
+            "rule"
+          ],
+          "status": "shallow_structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "board",
+            "vote",
+            "voted"
+          ],
+          "status": "shallow_structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_status(hs_8, noncontrolling)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(soldering_cabinet_key, omar_vale)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_rule_derived_from(checkout_to_certified_mentors_during_supervised_repair_hours, board_vote_2026_11_03).",
+            "access_rule_derived_from(board_vote_checkout_rule, board_vote_20261103).",
+            "access_rule_derived_from(governing_rule_checkout, gt_8)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\studio_key_access_draft\\domain_bootstrap_file_20260515T164901647721Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 62,
+      "fixture": "studio_key_access_draft",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 82,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 4,
+        "source_only": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_condition(ms_5, restricted_material_keys_stay_with_the_kiln_supervisor_unless_facilities_approves_a_delegate_list)."
+          ],
+          "slot_rows": [
+            "doc_type(ms_5, rule).",
+            "rule_condition(ms_5, restricted_material_keys_stay_with_the_kiln_supervisor_unless_facilities_approves_a_delegate_list)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "decision"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "decision"
+          ],
+          "status": "shallow_structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "official",
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_type(ok_5, register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "note",
+            "memo"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_type(ska_5, memo)."
+          ],
+          "slot_rows": [
+            "doc_type(sn_5, note).",
+            "doc_content(sn_5, recommended_weekend_checkout_for_two_monitor_trained_students_only)."
+          ],
+          "source_hits": [
+            "staff",
+            "note",
+            "memo"
+          ],
+          "status": "structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommended",
+            "proposed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "doc_type(dr_5, draft).",
+            "doc_content(dr_5, proposed_weekend_glaze_room_checkout_for_all_advanced_students)."
+          ],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_type(cf_5, finding)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "shallow_structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "doc_status(sm_5, noncontrolling)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied",
+            "rejected"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "source_only",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_granted_to_role(glaze_room_key, monitor_trained_students, weekend).",
+            "denies_access(glaze_room_key, all_advanced_students).",
+            "access_controlled_by(glaze_room_key, p_marco_bell).",
+            "access_controlled_by(glaze_room_key, marco_bell)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_authority_custody_hardcases_compile_20260515\\theater_prop_cage\\domain_bootstrap_file_20260515T164901538295Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 37,
+      "fixture": "theater_prop_cage",
+      "lens": "authority_custody",
+      "parsed_ok": true,
+      "run": "lens_vocab_authority_custody_hardcases_compile_20260515",
+      "source_record_fact_count": 82,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 5,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "court_order"
+        },
+        {
+          "direct_hits": [
+            "rule"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "rule_text(ss_3, prop_cage_key_stays_with_prop_master_unless_safety_committee_authorizes_named_checkout_group).",
+            "document_type(ss_3, rule)."
+          ],
+          "slot_rows": [
+            "rule_exception(ss_3, safety_committee_authorizes_named_checkout_group, named_checkout_group)."
+          ],
+          "source_hits": [
+            "rule"
+          ],
+          "status": "structural",
+          "term": "governing_rule"
+        },
+        {
+          "direct_hits": [
+            "board",
+            "decision"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "board",
+            "decision"
+          ],
+          "status": "shallow_structural",
+          "term": "board_vote"
+        },
+        {
+          "direct_hits": [
+            "register"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(pr_3, register)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "official",
+            "record",
+            "register",
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "official_record"
+        },
+        {
+          "direct_hits": [
+            "staff",
+            "note"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(sn_3, staff_note).",
+            "document_type(sn_3, note)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "staff",
+            "note"
+          ],
+          "status": "shallow_structural",
+          "term": "staff_note"
+        },
+        {
+          "direct_hits": [
+            "draft",
+            "recommendation"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "document_type(dr_3, draft_recommendation).",
+            "document_type(dr_3, draft)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "draft",
+            "recommendation",
+            "recommended",
+            "proposed"
+          ],
+          "status": "shallow_structural",
+          "term": "draft_recommendation"
+        },
+        {
+          "direct_hits": [
+            "controlling",
+            "finding"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "document_type(cf_3, controlling_finding).",
+            "document_content(cf_3, safety_committee_decision_controls_prop_cage_access_and_kira_moss_remains_custody_holder)."
+          ],
+          "source_hits": [
+            "controlling",
+            "finding"
+          ],
+          "status": "structural",
+          "term": "controlling_finding"
+        },
+        {
+          "direct_hits": [
+            "noncontrolling",
+            "rejected"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "noncontrolling_source(rg_3).",
+            "rejected_request(weekend_cast_captain_checkout, safety_committee_rejection).",
+            "rejected_request(weekend_cast_captain_checkout, safety_committee).",
+            "rejected_request(weekend_cast_captain_checkout, safety_committee_decision).",
+            "document_status(rg_3, noncontrolling)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "noncontrolling",
+            "copied",
+            "rejected"
+          ],
+          "status": "shallow_structural",
+          "term": "noncontrolling_source"
+        },
+        {
+          "direct_hits": [
+            "custody",
+            "holder"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "custody_holder(prop_cage_key, kira_moss)."
+          ],
+          "source_hits": [
+            "custody",
+            "holder"
+          ],
+          "status": "structural",
+          "term": "custody_holder"
+        },
+        {
+          "direct_hits": [
+            "access"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "access_granted_to(prop_cage_key, assistant_directors, supervised_rehearsal_only)."
+          ],
+          "source_hits": [
+            "access"
+          ],
+          "status": "structural",
+          "term": "access_control"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 9,
+      "shallow_structural": 57,
+      "source_only": 1,
+      "structural": 53
+    },
+    "term_status_counts": {
+      "access_control": {
+        "structural": 12
+      },
+      "board_vote": {
+        "not_applicable": 2,
+        "shallow_structural": 5,
+        "structural": 5
+      },
+      "controlling_finding": {
+        "shallow_structural": 7,
+        "structural": 5
+      },
+      "court_order": {
+        "not_applicable": 4,
+        "shallow_structural": 5,
+        "structural": 3
+      },
+      "custody_holder": {
+        "shallow_structural": 1,
+        "source_only": 1,
+        "structural": 10
+      },
+      "draft_recommendation": {
+        "shallow_structural": 9,
+        "structural": 3
+      },
+      "governing_rule": {
+        "shallow_structural": 5,
+        "structural": 7
+      },
+      "noncontrolling_source": {
+        "not_applicable": 1,
+        "shallow_structural": 10,
+        "structural": 1
+      },
+      "official_record": {
+        "shallow_structural": 10,
+        "structural": 2
+      },
+      "staff_note": {
+        "not_applicable": 2,
+        "shallow_structural": 5,
+        "structural": 5
+      }
+    }
+  }
+}

@@ -264,7 +264,11 @@ def audit_compile(path: Path, *, lens: str, terms: tuple[LensTerm, ...]) -> dict
     data = json.loads(path.read_text(encoding="utf-8"))
     facts = _facts_from_compile(data)
     source_facts = [fact for fact in facts if _predicate_name(fact).startswith("source_record")]
-    direct_facts = [fact for fact in facts if not _predicate_name(fact).startswith("source_record")]
+    direct_facts = [
+        fact
+        for fact in facts
+        if not _predicate_name(fact).startswith("source_record") or _predicate_name(fact) == "source_recorded"
+    ]
     direct_rows = _fact_rows(direct_facts)
     source_tokens = _tokens_for_facts(source_facts)
     direct_tokens = _tokens_for_facts(direct_facts)
@@ -581,11 +585,20 @@ AUTHORITY_SUPPORT_PREDICATES = {
     "authorization_denied",
     "conflict_resolved_by",
     "controls_action",
+    "copied_from",
     "denies_access",
     "denies_authority",
+    "doc_content",
     "document_content",
     "event_outcome",
     "grants_access",
+    "omitted_authority",
+    "omitted_source",
+    "pending_approval",
+    "pending_condition",
+    "proposal_content",
+    "proposed_action",
+    "proposed_content",
     "permits_access",
     "prohibits_access",
     "record_provision",
@@ -604,6 +617,10 @@ AUTHORITY_SUPPORT_PREDICATES = {
 }
 AUTHORITY_METADATA_PREDICATES = {
     "authority_level",
+    "doc_author",
+    "doc_date",
+    "doc_status",
+    "doc_type",
     "document_author",
     "document_date",
     "document_status",
@@ -633,11 +650,24 @@ def _noncontrolling_source_contract_rows(direct_rows: list[dict[str, Any]]) -> l
             "source_reason",
             "authority_reason",
             "status_reason",
+            "omitted_authority",
+            "omitted_source",
+            "copied_from",
         ),
     )
     record_detail_reasons = _record_detail_rows_by_field(
         direct_rows,
-        {"reason_noncontrolling", "reason_non_controlling", "source_of", "source_of_copy"},
+        {
+            "reason_noncontrolling",
+            "reason_non_controlling",
+            "source_of",
+            "source_of_copy",
+            "noncontrolling_reason",
+            "non_controlling_reason",
+            "copied_from",
+            "omitted_authority",
+            "omitted_source",
+        },
     )
     for row in direct_rows:
         predicate = str(row["predicate"]).lower()
@@ -651,7 +681,7 @@ def _noncontrolling_source_contract_rows(direct_rows: list[dict[str, Any]]) -> l
             if record_detail_reasons.get(anchor):
                 return [str(row["fact"]), record_detail_reasons[anchor][0]]
             continue
-        if predicate not in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "epistemic_status"}:
+        if predicate not in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "doc_status", "epistemic_status"}:
             continue
         if not _row_mentions_noncontrolling_status(row):
             continue
@@ -672,7 +702,7 @@ def _partial_noncontrolling_source_rows(direct_rows: list[dict[str, Any]]) -> li
             out.append(str(row["fact"]))
         elif predicate == "is_noncontrolling" and row["args"]:
             out.append(str(row["fact"]))
-        elif predicate in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "epistemic_status"} and _row_mentions_noncontrolling_status(row) and len(row["args"]) < 3:
+        elif predicate in {"source_status", "authority_status", "source_authority_status", "record_status", "document_status", "doc_status", "epistemic_status"} and _row_mentions_noncontrolling_status(row) and len(row["args"]) < 3:
             out.append(str(row["fact"]))
     return out
 
@@ -713,7 +743,7 @@ def _authority_typed_records(term: LensTerm, direct_rows: list[dict[str, Any]]) 
     for row in direct_rows:
         predicate = str(row["predicate"]).lower()
         args = [str(arg).lower() for arg in row["args"]]
-        if predicate == "document_type" and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
+        if predicate in {"document_type", "doc_type"} and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
             out.append((str(row["args"][0]), str(row["fact"])))
         elif predicate == "record_entry" and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
             out.append((str(row["args"][0]), str(row["fact"])))
@@ -764,7 +794,7 @@ def _anchor_has_label(anchor: str, labels: set[str], direct_rows: list[dict[str,
 def _record_detail_rows_by_field(direct_rows: list[dict[str, Any]], fields: set[str]) -> dict[str, list[str]]:
     out: dict[str, list[str]] = {}
     for row in direct_rows:
-        if str(row["predicate"]).lower() != "record_detail" or len(row["args"]) < 2:
+        if str(row["predicate"]).lower() not in {"record_detail", "source_recorded"} or len(row["args"]) < 2:
             continue
         if str(row["args"][1]).lower() in fields:
             out.setdefault(str(row["args"][0]), []).append(str(row["fact"]))
