@@ -120,3 +120,90 @@ Run the same stability audit on one source-authority multi-draw pair and one
 operational lifecycle pair. If the same surface drift appears across those
 contexts, promote this from assignment-scope finding to a general
 compile-stability contract.
+
+## CS-002 - Cross-Context Stability Confirmation
+
+Date: 2026-05-15
+
+Question:
+
+Does compile-surface instability recur outside assignment scope?
+
+Before:
+
+CS-001 showed large drift on a two-draw assignment fixture. The user connected
+that pressure to older source-authority CSS work and operational lifecycle
+work. The claim needed evidence across those contexts.
+
+Prediction:
+
+If this is a cross-cutting compile-stability primitive, source-authority and
+operational lifecycle compiles should show the same pattern: direct facts and
+predicate palettes move across draws or compile regimes, even when source
+content is the same.
+
+Intervention:
+
+Ran `scripts/audit_compile_surface_stability.py` over:
+
+- five probate/source-authority compile draws;
+- three operational-record/status compile regimes for six fixtures.
+
+After:
+
+Source-authority/probate:
+
+- compiles=`5`
+- fixtures=`1`
+- stable fixtures=`0`
+- unstable direct facts=`342`
+- predicate drift rows=`38`
+- surface drift rows=`4`
+
+Operational-record/status:
+
+- compiles=`18`
+- fixtures=`6`
+- stable fixtures=`0`
+- unstable direct facts=`679`
+- predicate drift rows=`183`
+- surface drift rows=`35`
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/source_authority_probate_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/source_authority_probate_stability_audit_20260515.json`
+- `docs/data/compile_surface_stability/operational_record_status_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_record_status_stability_audit_20260515.json`
+
+Verification:
+
+- `python scripts\audit_compile_surface_stability.py ...` completed for both
+  contexts.
+
+Lesson:
+
+The pressure is real and cross-cutting. It is larger than assignment scope,
+larger than operational lifecycle, and larger than source authority. The
+compiler can preserve different sibling surfaces across draws and under
+different guidance regimes. This explains why a single draw can score cleanly
+or miss a row without any query/helper change.
+
+The audit also exposes a second measurement problem: exact direct-fact
+intersection is often zero because predicate dialect changes. Surface-level
+counts are more useful than exact fact equality, but still coarse. The next
+useful primitive is a declarative preservation contract for repeated parallel
+events and source-authority pairs, not another broad prompt paragraph.
+
+Next pressure:
+
+Draft the first compile-stability contract in fixture-free language:
+
+- For repeated parallel events, preserve every event as a row binding event
+  subject/object, actor when explicit, role when explicit, action/task/scope,
+  and time/date when explicit.
+- For source-authority pairs, preserve both the governed subject/action and the
+  authority/source companion when explicit.
+
+Then add an audit recognizer that can score those contracts directly instead of
+using broad surface counts as a proxy.
