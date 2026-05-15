@@ -857,3 +857,84 @@ palette as shallow when repeated lifecycle source lines are present but no
 allowed predicate can carry subject, state/action, and date/event together. Do
 not broaden QA helpers to patch this. The failure is upstream of query-time
 support.
+
+## CS-011 - Shallow Lifecycle Palette Diagnostic
+
+Date: 2026-05-15
+
+Question:
+
+Can the operational lifecycle palette audit detect the upstream failure before
+QA: repeated lifecycle/status source pressure with no candidate predicate able
+to carry subject, status/result, and date together?
+
+Before:
+
+CS-010 showed the two-miss replay still produced ledger-only preservation
+status. The compile outputs had nearby predicates, but their palette was
+shallow: two-slot status/result predicates plus separate date/event predicates.
+That shape is upstream of query support because the required direct row shape
+was never offered as a candidate surface.
+
+Prediction:
+
+A useful diagnostic should:
+
+- flag palettes that offer only split status/date surfaces;
+- not flag palettes that have a legitimate complete status-at-date predicate;
+- stay generic enough to apply to permits, queues, tickets, samples, dockets,
+  applications, records, and similar operational logs without fixture terms.
+
+Intervention:
+
+Extended `scripts/audit_operational_lifecycle_palette.py` with a
+`shallow_lifecycle_palette` finding. It fires when source-record text contains
+repeated lifecycle/status pressure and the parsed candidate predicate palette
+has no candidate with subject, status/result, and date/source slots, or one of
+the canonical lifecycle predicates.
+
+The diagnostic is admission-side measurement only. It does not repair facts and
+does not loosen QA support.
+
+After:
+
+Six-probe invariant replay:
+
+- `shallow_lifecycle_palette`: 3 findings.
+- Flagged: grant queue, warehouse repair, water sample.
+- Not flagged: clinic intake, library preservation, permit renewal.
+- The permit case was an important calibration: `permit_status_at/3` with
+  `permit_file`, `date`, and `status` is a valid complete candidate, so the
+  audit no longer treats it as shallow.
+
+Two-miss replay:
+
+- `warehouse_repair_log`: shallow palette plus alias pressure.
+- `water_sample_docket`: shallow palette plus initial phase missing.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/operational_lifecycle_invariant_replay_palette_shape_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_lifecycle_invariant_replay_palette_shape_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_lifecycle_two_miss_palette_shape_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_lifecycle_two_miss_palette_shape_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_operational_lifecycle_palette_audit.py tests\test_compile_surface_stability.py -q` -> `15 passed`
+
+Lesson:
+
+The architecture now has a clearer pre-stamp gate: not merely "did the direct
+compile preserve complete rows?" but "did the candidate palette even contain a
+row shape capable of preserving them?" This is the new layer taking shape:
+profile/admission stability before compile preservation, before deterministic
+normalization, before QA.
+
+Next pressure:
+
+Use this diagnostic to decide the next repair surface. If the candidate palette
+is shallow, strengthen profile/admission constraints. If the palette is complete
+but emitted facts are split, deterministic normalization may be valid only when
+the join is explicit. If both palette and facts are complete, any residual miss
+belongs downstream in selector/query planning.

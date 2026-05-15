@@ -3,8 +3,10 @@ from pathlib import Path
 
 from scripts.audit_operational_lifecycle_palette import (
     audit_compile,
+    candidate_can_carry_lifecycle_unit,
     detect_alias_splits,
     detect_phase_classification_missing,
+    detect_shallow_lifecycle_palette,
     detect_supersession_target_collapse,
     fact_rows,
     identity_code,
@@ -67,6 +69,71 @@ def test_detect_missing_initial_status_phase() -> None:
     assert findings
     assert findings[0]["class"] == "phase_classification_missing"
     assert findings[0]["phase"] == "initial"
+
+
+def test_candidate_lifecycle_unit_requires_status_subject_and_date_slots() -> None:
+    assert candidate_can_carry_lifecycle_unit(
+        {
+            "signature": "record_status_phase/4",
+            "args": ["record_id", "phase", "status", "date_or_source"],
+        }
+    )
+    assert candidate_can_carry_lifecycle_unit(
+        {
+            "signature": "docket_status_on/3",
+            "args": ["docket_id", "status", "date"],
+        }
+    )
+    assert candidate_can_carry_lifecycle_unit(
+        {
+            "signature": "permit_status_at/3",
+            "args": ["permit_file", "date", "status"],
+        }
+    )
+    assert not candidate_can_carry_lifecycle_unit(
+        {
+            "signature": "docket_status/2",
+            "args": ["docket_id", "status"],
+        }
+    )
+    assert not candidate_can_carry_lifecycle_unit(
+        {
+            "signature": "event_date/3",
+            "args": ["record_id", "event_type", "date"],
+        }
+    )
+
+
+def test_detect_shallow_lifecycle_palette_when_source_needs_complete_unit() -> None:
+    source = [
+        "on_2026_05_01_record_a_status_was_pending",
+        "on_2026_05_02_record_a_was_closed_as_approved",
+    ]
+    parsed = {
+        "candidate_predicates": [
+            {"signature": "record_status/2", "args": ["record_id", "status"]},
+            {"signature": "event_date/3", "args": ["record_id", "event_type", "date"]},
+        ]
+    }
+
+    findings = detect_shallow_lifecycle_palette(parsed, source)
+
+    assert findings
+    assert findings[0]["class"] == "shallow_lifecycle_palette"
+
+
+def test_detect_shallow_lifecycle_palette_allows_complete_candidate() -> None:
+    source = [
+        "on_2026_05_01_record_a_status_was_pending",
+        "on_2026_05_02_record_a_was_closed_as_approved",
+    ]
+    parsed = {
+        "candidate_predicates": [
+            {"signature": "record_status_on/3", "args": ["record_id", "status", "date"]},
+        ]
+    }
+
+    assert detect_shallow_lifecycle_palette(parsed, source) == []
 
 
 def test_audit_compile_reports_expected_classes(tmp_path: Path) -> None:

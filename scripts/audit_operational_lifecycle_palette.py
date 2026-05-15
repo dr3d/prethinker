@@ -18,6 +18,33 @@ from typing import Any
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+DATE_SLOT_TOKENS = {"date", "dated", "timestamp", "time", "turn", "source"}
+SUBJECT_SLOT_TOKENS = {
+    "application",
+    "artifact",
+    "case",
+    "docket",
+    "entity",
+    "file",
+    "id",
+    "item",
+    "license",
+    "object",
+    "permit",
+    "proposal",
+    "queue",
+    "record",
+    "sample",
+    "subject",
+    "ticket",
+}
+STATE_SLOT_TOKENS = {
+    "outcome",
+    "phase",
+    "result",
+    "state",
+    "status",
+}
 STATUS_TOKENS = {
     "active",
     "approved",
@@ -138,6 +165,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         *detect_ambiguous_repeated_verbs(direct_rows, source_texts),
         *detect_supersession_target_collapse(direct_rows, source_texts),
         *detect_phase_classification_missing(direct_rows, source_texts),
+        *detect_shallow_lifecycle_palette(data.get("parsed"), source_texts),
     ]
     return {
         "compile_json": str(path),
@@ -269,6 +297,77 @@ def detect_phase_classification_missing(direct_rows: list[dict[str, Any]], sourc
     return findings
 
 
+def detect_shallow_lifecycle_palette(parsed: Any, source_texts: list[str]) -> list[dict[str, Any]]:
+    if not isinstance(parsed, dict):
+        return []
+    source_mentions = [
+        text
+        for text in source_texts
+        if lifecycle_pressure_text(text) and (has_date_token(text) or set(TOKEN_RE.findall(text.lower())) & STATUS_TOKENS)
+    ]
+    if len(source_mentions) < 2:
+        return []
+    candidates = parsed.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return []
+    if any(candidate_can_carry_lifecycle_unit(candidate) for candidate in candidates):
+        return []
+    signatures = [candidate_signature(candidate) for candidate in candidates if candidate_signature(candidate)]
+    shallow = [
+        sig
+        for sig in signatures
+        if lifecycle_pressure_text(sig) or "date" in sig.lower() or "result" in sig.lower()
+    ]
+    return [
+        {
+            "class": "shallow_lifecycle_palette",
+            "source_signal_count": len(source_mentions),
+            "candidate_count": len(signatures),
+            "nearby_signatures": shallow[:10],
+            "evidence": source_mentions[:3],
+        }
+    ]
+
+
+def candidate_can_carry_lifecycle_unit(candidate: Any) -> bool:
+    signature = candidate_signature(candidate).lower()
+    args = candidate_args(candidate)
+    arg_tokens = [set(TOKEN_RE.findall(arg.lower())) for arg in args]
+    joined = " ".join([signature, *args]).lower()
+    if signature.split("/", 1)[0] in {"record_lifecycle_event", "record_status_phase", "record_status_at"}:
+        return True
+    if len(args) < 3:
+        return False
+    has_subject = any(tokens & SUBJECT_SLOT_TOKENS for tokens in arg_tokens)
+    has_state = any(tokens & STATE_SLOT_TOKENS for tokens in arg_tokens)
+    has_date = any(tokens & DATE_SLOT_TOKENS for tokens in arg_tokens)
+    return has_subject and has_state and has_date and lifecycle_pressure_text(joined)
+
+
+def candidate_signature(candidate: Any) -> str:
+    if isinstance(candidate, dict):
+        return str(candidate.get("signature") or "")
+    return ""
+
+
+def candidate_args(candidate: Any) -> list[str]:
+    if not isinstance(candidate, dict):
+        return []
+    args = candidate.get("args")
+    if not isinstance(args, list):
+        return []
+    return [str(arg) for arg in args]
+
+
+def lifecycle_pressure_text(text: str) -> bool:
+    tokens = set(TOKEN_RE.findall(str(text).lower()))
+    return bool(tokens & (STATUS_TOKENS | LIFECYCLE_VERBS | {"status", "state", "phase", "transition", "lifecycle"}))
+
+
+def has_date_token(text: str) -> bool:
+    return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", str(text).lower()))
+
+
 def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     class_counts: Counter[str] = Counter()
     fixture_counts: dict[str, dict[str, int]] = {}
@@ -294,18 +393,19 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Fixture Summary",
         "",
-        "| Fixture | Alias Split | Ambiguous Verb | Supersession Collapse | Phase Missing |",
-        "| --- | ---: | ---: | ---: | ---: |",
+        "| Fixture | Alias Split | Ambiguous Verb | Supersession Collapse | Phase Missing | Shallow Palette |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
     ]
     for report in payload["reports"]:
         counts = Counter(item["class"] for item in report["findings"])
         lines.append(
-            "| `{fixture}` | {alias} | {verb} | {super} | {phase} |".format(
+            "| `{fixture}` | {alias} | {verb} | {super} | {phase} | {palette} |".format(
                 fixture=report["fixture"],
                 alias=counts.get("alias_split", 0),
                 verb=counts.get("ambiguous_repeated_verb", 0),
                 super=counts.get("supersession_target_collapse", 0),
                 phase=counts.get("phase_classification_missing", 0),
+                palette=counts.get("shallow_lifecycle_palette", 0),
             )
         )
     lines.extend(["", "## Findings", ""])
