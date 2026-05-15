@@ -794,6 +794,11 @@ def main() -> int:
             sample["context"].append(
                 "The intake_plan_v1 object is an LLM-owned document-to-logic strategy. Use it as planning guidance, not as approved facts."
             )
+    profile_admission_context = _profile_bootstrap_admission_context(
+        intake_plan=intake_plan,
+        domain_hint=str(args.domain_hint or ""),
+    )
+    sample["context"].extend(profile_admission_context)
     started = time.perf_counter()
     messages: list[dict[str, str]] = []
     if bool(args.use_profile_registry_direct):
@@ -889,6 +894,46 @@ def main() -> int:
         if isinstance(roster_profile, dict):
             parsed = roster_profile
             error = ""
+    profile_admission_retry: dict[str, Any] | None = None
+    if profile_admission_context and isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
+        admission_report = _profile_admission_report(parsed_profile=parsed, source_text=source_text)
+        if any(
+            isinstance(item, dict) and item.get("class") == "shallow_lifecycle_palette"
+            for item in admission_report.get("findings", [])
+            if isinstance(admission_report.get("findings"), list)
+        ):
+            retry_sample = dict(sample)
+            retry_context = list(sample.get("context", [])) if isinstance(sample.get("context"), list) else []
+            retry_context.extend(_profile_admission_retry_context(admission_report))
+            retry_sample["context"] = retry_context
+            retry_started = time.perf_counter()
+            retry_response = _call_lmstudio_json_schema(
+                base_url=str(args.base_url),
+                model=str(args.model),
+                messages=build_profile_bootstrap_messages(samples=[retry_sample], domain_hint=str(args.domain_hint or "")),
+                schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+                schema_name="profile_bootstrap_v1",
+                timeout=int(args.timeout),
+                temperature=float(args.temperature),
+                top_p=float(args.top_p),
+                max_tokens=min(int(args.max_tokens), 9000),
+            )
+            retry_parsed, retry_error = parse_profile_bootstrap_json(str(retry_response.get("content", "")))
+            retry_report = _profile_admission_report(
+                parsed_profile=retry_parsed if isinstance(retry_parsed, dict) else {},
+                source_text=source_text,
+            )
+            profile_admission_retry = {
+                "latency_ms": int((time.perf_counter() - retry_started) * 1000),
+                "parsed_ok": isinstance(retry_parsed, dict),
+                "parse_error": retry_error,
+                "previous_report": admission_report,
+                "retry_report": retry_report,
+                "raw_content": str(retry_response.get("content", ""))[:12000],
+            }
+            if isinstance(retry_parsed, dict) and not retry_report.get("findings"):
+                parsed = retry_parsed
+                error = retry_error
     profile_review: dict[str, Any] | None = None
     profile_review_retry: dict[str, Any] | None = None
     if bool(args.review_profile) and isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
@@ -976,6 +1021,8 @@ def main() -> int:
         record["profile_retry"] = profile_retry
     if profile_signature_roster_retry is not None:
         record["profile_signature_roster_retry"] = profile_signature_roster_retry
+    if profile_admission_retry is not None:
+        record["profile_admission_retry"] = profile_admission_retry
     if profile_review is not None:
         record["profile_review"] = profile_review
     if profile_review_retry is not None:
@@ -1076,6 +1123,8 @@ def main() -> int:
             source_compile=record["source_compile"],
             parsed_profile=parsed,
             source_text=source_text,
+            intake_plan=intake_plan,
+            domain_hint=str(args.domain_hint or ""),
         )
     if (
         bool(args.source_record_ledger_facts)
@@ -2255,7 +2304,11 @@ def _attach_profile_admission_report(
     source_compile: dict[str, Any],
     parsed_profile: dict[str, Any],
     source_text: str,
+    intake_plan: dict[str, Any] | None = None,
+    domain_hint: str = "",
 ) -> None:
+    if not _profile_bootstrap_admission_context(intake_plan=intake_plan, domain_hint=domain_hint):
+        return
     report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
     source_compile["profile_admission"] = report
     warning_flags = [
@@ -2296,6 +2349,75 @@ def _attach_profile_admission_report(
         health["verdict"] = "warning"
         health["recommendation"] = "run_qa_but_treat_thin_lens_results_as_diagnostic"
     source_compile["compile_health"] = health
+
+
+def _profile_bootstrap_admission_context(
+    *,
+    intake_plan: dict[str, Any] | None,
+    domain_hint: str = "",
+) -> list[str]:
+    label_parts = [str(domain_hint or "").casefold()]
+    if isinstance(intake_plan, dict):
+        label_parts.append(json.dumps(intake_plan, ensure_ascii=False).casefold())
+    label = " ".join(label_parts)
+    if not any(
+        token in label
+        for token in (
+            "application",
+            "docket",
+            "grant",
+            "intake",
+            "lifecycle",
+            "operational",
+            "permit",
+            "proposal",
+            "queue",
+            "record status",
+            "status lifecycle",
+            "status record",
+            "ticket",
+        )
+    ):
+        return []
+    return [
+        (
+            "Profile admission rule: when an operational record, queue, proposal, application, ticket, docket, "
+            "permit, sample, or intake source has repeated dated lifecycle/status lines, the candidate predicate "
+            "palette must include at least one complete status-at-date or lifecycle-event shape carrying subject, "
+            "state/action/result, and date/source together."
+        ),
+        (
+            "Do not offer only separate status/2 plus status_changed_on/2, event_date/2, or event_date/3 surfaces "
+            "for repeated dated status timelines. Those split palettes are shallow unless another candidate can carry "
+            "the joined subject/status/date unit."
+        ),
+    ]
+
+
+def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    nearby: list[str] = []
+    for finding in findings:
+        if isinstance(finding, dict):
+            nearby.extend(str(item) for item in finding.get("nearby_signatures", []) if str(item).strip())
+    return [
+        (
+            "PROFILE ADMISSION RETRY: the previous profile had a shallow_lifecycle_palette finding. "
+            "Regenerate the profile so repeated dated lifecycle/status source lines have a complete candidate "
+            "predicate shape carrying subject, state/action/result, and date/source together."
+        ),
+        (
+            "Acceptable shapes include record_status_phase/4, record_status_at/3, record_lifecycle_event/5, "
+            "or source-local equivalents such as proposal_status_at/3, queue_status_at/3, docket_status_at/3, "
+            "ticket_status_at/3, application_status_at/3, sample_status_at/3, or *_status_on/3 when their args "
+            "are subject, status/result/state, and date/source."
+        ),
+        (
+            "Do not merely keep split surfaces like "
+            f"{', '.join(nearby[:8]) or 'status/2 plus event_date/status_changed_on'} "
+            "unless a complete joined status-at-date candidate is also present."
+        ),
+    ]
 
 
 def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:

@@ -16,8 +16,10 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
     _profile_admission_report,
+    _profile_admission_retry_context,
     _attach_profile_admission_report,
     _flat_plus_surface_contribution,
+    _profile_bootstrap_admission_context,
     _default_openrouter_title,
     _invalid_profile_retry_context,
     _lmstudio_chat_completions_url,
@@ -679,6 +681,36 @@ def test_profile_admission_flags_shallow_operational_lifecycle_palette() -> None
     assert report["findings"][0]["class"] == "shallow_lifecycle_palette"
 
 
+def test_profile_bootstrap_admission_context_guides_operational_status_palettes() -> None:
+    context = _profile_bootstrap_admission_context(
+        intake_plan=None,
+        domain_hint="grant queue proposal status lifecycle",
+    )
+    joined = "\n".join(context)
+
+    assert "complete status-at-date or lifecycle-event shape" in joined
+    assert "subject, state/action/result, and date/source together" in joined
+    assert "status_changed_on/2" in joined
+
+
+def test_profile_admission_retry_context_names_complete_status_shapes() -> None:
+    context = _profile_admission_retry_context(
+        {
+            "findings": [
+                {
+                    "class": "shallow_lifecycle_palette",
+                    "nearby_signatures": ["proposal_status/2", "status_changed_on/2"],
+                }
+            ]
+        }
+    )
+    joined = "\n".join(context)
+
+    assert "PROFILE ADMISSION RETRY" in joined
+    assert "proposal_status_at/3" in joined
+    assert "proposal_status/2" in joined
+
+
 def test_profile_admission_accepts_complete_operational_lifecycle_palette() -> None:
     report = _profile_admission_report(
         source_text=(
@@ -715,6 +747,7 @@ def test_profile_admission_warning_updates_compile_health() -> None:
 
     _attach_profile_admission_report(
         source_compile=source_compile,
+        domain_hint="operational record status lifecycle",
         source_text=(
             "On 2026-03-01 record R-1 status was pending.\n"
             "On 2026-03-04 record R-1 status was approved."
@@ -732,6 +765,42 @@ def test_profile_admission_warning_updates_compile_health() -> None:
     assert health["recommendation"] == "run_qa_but_treat_thin_lens_results_as_diagnostic"
     assert health["flag_counts"]["shallow_lifecycle_palette"] == 1
     assert "profile_admission" in health["unhealthy_passes"]
+
+
+def test_profile_admission_warning_is_operational_context_bounded() -> None:
+    source_compile = {
+        "unique_fact_count": 5,
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 5,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="literary character status",
+        source_text=(
+            "On 2026-03-01 record R-1 status was pending.\n"
+            "On 2026-03-04 record R-1 status was approved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status/2", "args": ["record_id", "status"]},
+                {"signature": "event_date/3", "args": ["record_id", "event_type", "date"]},
+            ]
+        },
+    )
+
+    assert "profile_admission" not in source_compile
+    assert source_compile["compile_health"]["verdict"] == "healthy"
 
 
 def test_invalid_profile_retry_context_blocks_arg_role_runaway() -> None:

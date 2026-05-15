@@ -1056,3 +1056,132 @@ whose profile proposes separate `status/2` and `status_changed_on/2` shapes
 instead of a complete status-at-date candidate. The desired repair is to prefer
 or require a complete `*_status_at` / `record_status_phase`-equivalent predicate
 when repeated dated status lines are present.
+
+## CS-013 - Freeze Candidate Admission Gate
+
+Date: 2026-05-15
+
+Question:
+
+Can the known operational admission gap be closed without letting a
+predicate-arity rule leak into unrelated lenses, and is the instrument ready to
+freeze for full-corpora stamping?
+
+Before:
+
+CS-012 landed profile admission reporting in the compile flow, but the first
+replay still had one live `shallow_lifecycle_palette` case: an operational
+queue/proposal source whose candidate palette split dated status into separate
+status and date predicates.
+
+There was also a scope risk: "status/2 plus event_date/3 is shallow" is a
+valid operational-record admission finding, but predicate arity is too fragile
+to use as a global classifier across lenses.
+
+Prediction:
+
+The repair should remain operational-record bounded:
+
+- profile-bootstrap guidance should only be selected for operational
+  record/status/lifecycle contexts;
+- profile-admission retry should only run in that context;
+- non-operational sources with superficially similar predicate arities should
+  not be marked by this contract;
+- the operational six-probe replay should have zero
+  `shallow_lifecycle_palette` findings.
+
+Intervention:
+
+Updated `scripts/run_domain_bootstrap_file.py`:
+
+- added operational-context profile bootstrap guidance requiring a complete
+  status-at-date or lifecycle-event candidate for repeated dated lifecycle
+  lines;
+- added one bounded profile-admission retry when an operational profile remains
+  shallow;
+- scoped profile admission attachment to operational contexts only;
+- removed broad `status` as a standalone context trigger so the contract does
+  not fire merely because another lens contains status-like language.
+
+Updated tests to pin:
+
+- the operational profile-bootstrap admission guidance;
+- retry guidance that names complete status-at-date shapes;
+- compile-health warning behavior for operational contexts;
+- non-operational context non-firing.
+
+After:
+
+Ran a fresh six-lane OpenRouter replay after the scope fix.
+
+Compile result:
+
+- fixtures: 6;
+- parsed OK: 6;
+- candidate predicates: 76;
+- compile admitted/skipped: 361/7.
+
+Profile admission result:
+
+- 6 of 6 compiles had at least one operational-lifecycle-capable candidate;
+- 0 `shallow_lifecycle_palette` findings;
+- profile admission remained operationally scoped.
+
+Preservation result:
+
+| Probe | Lifecycle preservation | Complete | Partial | Split | Shallow palette |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `clinic_intake_corrections` | pass | 8 | 6 | 1 | 0 |
+| `grant_review_queue` | partial | 2 | 2 | 2 | 0 |
+| `library_preservation_queue` | partial | 2 | 23 | 1 | 0 |
+| `permit_renewal_docket` | pass | 19 | 5 | 1 | 0 |
+| `warehouse_repair_log` | partial | 3 | 21 | 1 | 0 |
+| `water_sample_docket` | partial | 2 | 3 | 1 | 0 |
+
+The freeze candidate does not claim all operational lifecycle preservation is
+perfect. It claims the profile/admission layer now correctly rejects the known
+shallow-palette failure class, and remaining operational lifecycle gaps are
+preservation/normalization questions rather than helper or admission leakage.
+
+Residual pressure classes in the palette audit:
+
+- alias splits;
+- phase classification missing;
+- supersession target collapse;
+- one repeated-verb ambiguity.
+
+These are known diagnostic classes, not active fixture-specific repair targets
+for the freeze. They should be measured during the stamp rather than fixed
+mid-stamp.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/operational_freeze_candidate_6probe_compile_summary_20260515.md`
+- `docs/data/compile_surface_stability/operational_freeze_candidate_6probe_compile_summary_20260515.json`
+- `docs/data/compile_surface_stability/operational_freeze_candidate_6probe_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_freeze_candidate_6probe_stability_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_freeze_candidate_6probe_palette_shape_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_freeze_candidate_6probe_palette_shape_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_operational_lifecycle_palette_audit.py tests\test_compile_surface_stability.py -q` -> `51 passed`
+
+Lesson:
+
+The architecture is now separated into the right gates:
+
+1. profile/admission: does the candidate palette offer a capable row shape?
+2. compile preservation: did the facts actually preserve the required slots?
+3. deterministic normalization: are split rows explicitly joinable?
+4. QA/selector: can the question reach an already-preserved surface?
+
+That separation is enough to freeze the instrument for a full-corpora stamp as
+long as the stamp treats residual diagnostic warnings as measurement, not as
+permission to repair mid-run.
+
+Freeze recommendation:
+
+After the compact regression battery passes, tag the current commit as the
+instrument freeze candidate and begin full-corpora stamping with no code or
+prompt repairs during the stamp.
