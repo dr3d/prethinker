@@ -566,9 +566,9 @@ NONCONTROLLING_TOKENS = {"noncontrolling", "non_controlling", "advisory", "copie
 AUTHORITY_CUSTODY_TERM_NAMES = {term.term for term in AUTHORITY_CUSTODY_TERMS}
 AUTHORITY_TYPE_TOKENS: dict[str, set[str]] = {
     "court_order": {"court_order", "order", "injunction", "judgment"},
-    "governing_rule": {"governing_rule", "rule", "bylaw", "policy", "ordinance"},
-    "board_vote": {"board_vote", "vote", "committee_vote"},
-    "official_record": {"official_record", "official_equipment_register", "register", "registry", "chain_of_custody"},
+    "governing_rule": {"governing_rule", "rule", "bylaw", "policy", "ordinance", "machine_rule"},
+    "board_vote": {"board_vote", "vote", "committee_vote", "council_vote"},
+    "official_record": {"official_record", "official_equipment_register", "official_tool_register", "official_register", "register", "registry", "chain_of_custody"},
     "staff_note": {"staff_note", "note", "memo"},
     "draft_recommendation": {"draft_recommendation", "draft", "proposal", "recommendation"},
     "controlling_finding": {"controlling_finding", "finding", "final_finding"},
@@ -577,17 +577,30 @@ AUTHORITY_SUPPORT_PREDICATES = {
     "access_condition",
     "access_denied",
     "access_granted",
+    "access_granted_to",
+    "authorization_denied",
     "conflict_resolved_by",
+    "controls_action",
     "denies_access",
     "denies_authority",
     "document_content",
+    "event_outcome",
+    "grants_access",
     "permits_access",
+    "prohibits_access",
+    "record_provision",
+    "restricts_access",
     "record_detail",
     "register_entry",
     "rule_condition",
     "rule_effect",
     "rule_governs",
+    "rule_governs_action",
+    "rule_consequence",
+    "source_declares",
+    "source_grants_no_authorization",
     "vote_result",
+    "vote_outcome",
 }
 AUTHORITY_METADATA_PREDICATES = {
     "authority_level",
@@ -595,9 +608,19 @@ AUTHORITY_METADATA_PREDICATES = {
     "document_date",
     "document_status",
     "document_type",
+    "event_date",
+    "event_occurred",
+    "event_occurred_on",
+    "event_type",
     "epistemic_status",
     "is_controlling",
+    "record_status",
+    "record_type",
     "record_entry",
+    "source_author",
+    "source_date",
+    "source_document",
+    "source_epistemic_label",
 }
 
 
@@ -694,6 +717,14 @@ def _authority_typed_records(term: LensTerm, direct_rows: list[dict[str, Any]]) 
             out.append((str(row["args"][0]), str(row["fact"])))
         elif predicate == "record_entry" and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
             out.append((str(row["args"][0]), str(row["fact"])))
+        elif predicate in {"record_type", "source_document", "event_type"} and len(args) >= 2 and _value_has_any_token(args[1], target_tokens):
+            out.append((str(row["args"][0]), str(row["fact"])))
+        elif term.term == "draft_recommendation" and predicate in {"source_document", "document_type", "record_type"} and len(args) >= 2 and _value_has_any_token(args[1], {"recommendation"}) and _anchor_has_label(str(row["args"][0]), {"draft"}, direct_rows):
+            out.append((str(row["args"][0]), str(row["fact"])))
+        elif term.term == "controlling_finding" and predicate == "controlling_finding" and row["args"]:
+            out.append((str(row["args"][0]), str(row["fact"])))
+        elif term.term == "noncontrolling_source" and predicate in {"non_controlling_record", "noncontrolling_record", "noncontrolling_source", "non_controlling_source"} and row["args"]:
+            out.append((str(row["args"][0]), str(row["fact"])))
     return out
 
 
@@ -717,6 +748,15 @@ def _anchor_has_court_status(anchor: str, typed_row: str, direct_rows: list[dict
         if not row["args"] or str(row["args"][0]) != anchor:
             continue
         if "court" in " ".join(str(arg).lower() for arg in row["args"]):
+            return True
+    return False
+
+
+def _anchor_has_label(anchor: str, labels: set[str], direct_rows: list[dict[str, Any]]) -> bool:
+    for row in direct_rows:
+        if not row["args"] or str(row["args"][0]) != anchor:
+            continue
+        if _row_has_any_token(row, labels):
             return True
     return False
 

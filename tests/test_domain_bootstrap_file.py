@@ -51,8 +51,12 @@ def test_operational_record_context_guards_status_corrections_and_unresolved_ite
     assert "original/superseded value" in context
     assert "pending, unresolved, referred, deferred" in context
     assert "Operational record slot contract" in context
+    assert "Operational received/filing actor rule" in context
+    assert "Operational withdrawn-request content rule" in context
     assert "status before and after when stated" in context
     assert "record type or status word alone is shallow metadata" in context
+    assert "Do not substitute the submitter/applicant/source actor" in context
+    assert "requested action/content/line item or descriptive target" in context
 
 
 def test_source_compiler_context_selects_operational_record_lens_from_domain_hint() -> None:
@@ -178,6 +182,8 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
     assert "Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition" in context
+    assert "preserve the receiving or filing actor separately from the submitter/source actor" in context
+    assert "preserve the requested action/content/line item or descriptive target" in context
 
 
 def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:

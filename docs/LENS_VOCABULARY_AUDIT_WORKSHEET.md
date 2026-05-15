@@ -1160,3 +1160,197 @@ content/effect/scope/reason row. But operational record/status has the more
 actionable immediate misses, so the next implementation slice should repair
 operational received/filed actor binding and withdrawn-request descriptive
 content first.
+
+## LV-009 - Operational Actor/Content Replay
+
+Date: 2026-05-15
+
+Question:
+
+Can a small compile-guidance repair fix the two operational QA misses without
+adding helper rows or fixture-specific vocabulary?
+
+Before:
+
+LV-007 produced `46 / 0 / 2` QA on six operational probes with zero helpers.
+The misses were generic:
+
+- a received/filed event bound the submitted object to the submitter rather
+  than the receiving clerk;
+- a withdrawn request row preserved the record id and date but not the
+  descriptive requested action.
+
+Prediction:
+
+If the misses are prompt-level compile omissions, explicit guidance should keep
+the receiving/filing actor distinct from the submitter/source actor and preserve
+withdrawn request content. If the issue is palette instability, the lens audit
+may improve while QA variance moves elsewhere.
+
+Intervention:
+
+Added two operational compile-surface rules:
+
+- received/filed/logged/docketed events must bind the receiving or filing actor
+  to the submitted object and keep that actor distinct from the
+  submitter/source actor;
+- withdrawn/retracted/cancelled/denied/approved/superseded request rows must
+  preserve the requested action/content/line item or descriptive target when
+  stated.
+
+After:
+
+Compile:
+
+- fixtures=`6`
+- parsed_ok=`6`
+- candidate predicates=`80`
+- admitted/skipped=`352 / 8`
+
+Lens audit:
+
+- before=`15 structural / 41 shallow / 14 source-only / 8 N/A`
+- after=`32 structural / 29 shallow / 10 source-only / 7 N/A`
+
+QA:
+
+- before=`46 / 0 / 2`
+- after=`44 / 1 / 3`
+- helper rows=`0`
+
+Result details:
+
+- `warehouse_repair_log q006` improved: the withdrawn scanner-replacement
+  request became answerable.
+- `permit_renewal_docket q001` stayed a miss: receiving clerk binding remained
+  thin.
+- New misses/partial appeared in `water_sample_docket` and
+  `grant_review_queue`, showing compile variance moved the boundary rather than
+  cleanly extending it.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_actor_content_qa_summary_20260515.json`
+- `tmp/lens_vocab_operational_record_status_actor_content_compile_20260515`
+- `tmp/lens_vocab_operational_record_status_actor_content_qa_20260515`
+
+Lesson:
+
+This is not a landed repair. The vocabulary audit improved sharply, but QA
+worsened. That means stronger prose guidance can move the compile palette
+toward slot completeness while also perturbing which facts survive. The correct
+next step is not more prose pressure. Operational received/filed and
+withdrawn-content surfaces likely need either profile-palette support or an
+audit of candidate predicate selection, not helper rows and not fixture-specific
+terms.
+
+Next pressure:
+
+Pause operational repair here. Treat LV-009 as evidence that operational status
+has higher compile variance than the earlier lenses. Move to the requested
+authority gradient slot contracts, where the current pressure is audit
+admission and structural ceiling rather than QA failure.
+
+## LV-010 - Authority Gradient Slot Contracts
+
+Date: 2026-05-15
+
+Question:
+
+Can authority/custody gradient terms earn more structural credit under generic
+linked contracts, and do the remaining shallow cases indicate a real structural
+ceiling?
+
+Before:
+
+The expanded six-probe authority/custody replay was `54 / 0 / 0` QA with zero
+helpers, but the audit was `19 structural / 41 shallow`. The direct state terms
+held; the gradient terms did not. A manual read showed that several compiles
+used generic but previously unrecognized palettes:
+
+- `source_document/2 + source_declares/3`
+- `record_type/2 + record_provision/3`
+- `event_type/2 + event_outcome/2`
+- direct single-row authority surfaces such as `controlling_finding/2`,
+  `non_controlling_record/2`, and `vote_outcome/3`
+
+Prediction:
+
+Adding these linked contracts should improve the audit, but gradient terms will
+still yield less than direct custody/access terms. Some remaining shallow cases
+may be valid sparsity: the source may legitimately identify a source layer
+without binding a separate action/scope/reason slot, or the compiler may place
+the answer-bearing content in a neighboring state row rather than same-anchor
+source detail.
+
+Intervention:
+
+Expanded the authority/custody audit contracts to accept generic linked
+authority palettes:
+
+- `source_document`, `record_type`, and `event_type` can provide the typed
+  source/event anchor;
+- `source_declares`, `source_grants_no_authorization`, `record_provision`,
+  `event_outcome`, `vote_outcome`, access/prohibition rows, and rule-effect
+  rows can satisfy the governed content/effect/scope slot;
+- draft recommendations can be recognized when a recommendation source also has
+  a draft label.
+
+After:
+
+Lens audit over the same six authority/custody compiles:
+
+- before=`19 structural / 41 shallow`
+- after=`31 structural / 29 shallow`
+
+Term movement:
+
+| Term | Before Structural | After Structural | Reading |
+| --- | ---: | ---: | --- |
+| `access_control` | 6 | 6 | Already stable. |
+| `custody_holder` | 5 | 5 | Already mostly stable. |
+| `board_vote` | 3 | 4 | Modest gain via event/vote outcome contracts. |
+| `governing_rule` | 3 | 4 | Modest gain via rule-effect contracts. |
+| `court_order` | 1 | 3 | Real gain from event/order outcome contracts. |
+| `controlling_finding` | 0 | 3 | Real gain from source/record provision contracts. |
+| `staff_note` | 0 | 3 | Real gain from record-provision contracts. |
+| `official_record` | 1 | 2 | Small gain; often valid sparse metadata. |
+| `draft_recommendation` | 0 | 1 | Still weak. |
+| `noncontrolling_source` | 0 | 0 | Still weak; reason/source-of-copy is the hard slot. |
+
+QA:
+
+- unchanged expanded authority/custody readout=`54 / 0 / 0`
+- helper rows=`0`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_gradient_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_gradient_contract_audit_20260515.json`
+
+Lesson:
+
+The gradient-slot contract worked, but it also exposed a ceiling shape. There
+is no ceiling for authority/custody as a whole: structural count moved from 19
+to 31 without fixture-specific names. There is, however, a practical ceiling
+for gradient terms in this compile regime. Direct state terms (`access_control`,
+`custody_holder`) are compact and stable. Gradient terms need same-anchor source
+content, scope, effect, or reason rows, and those are often absent or placed in
+neighboring state rows. Some official-record sparsity is acceptable: a source
+can be an official register while the custody/access fact carries the operative
+content. Noncontrolling-source is different: because the source explicitly
+states the reason in all six probes, remaining shallow cases are not valid
+sparsity; they are still compile-resolution pressure.
+
+Next pressure:
+
+Do not attempt to force all gradient terms to 100 percent structural. The next
+authority/custody work should target only the hard noncontrol reason/source
+slot and maybe draft recommendation content. The broader CTO focus should stay
+on distinguishing valid sparse authority metadata from missing source-detail
+resolution.

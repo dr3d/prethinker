@@ -1,0 +1,1267 @@
+{
+  "compile_count": 6,
+  "lens": "operational_record_status",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T162948498323Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 20,
+      "fixture": "clinic_intake_corrections",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 84,
+      "summary": {
+        "shallow_structural": 6,
+        "source_only": 1,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "received",
+            "intake"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "received",
+            "intake"
+          ],
+          "status": "shallow_structural",
+          "term": "received"
+        },
+        {
+          "direct_hits": [
+            "filed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "routed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "routed"
+          ],
+          "status": "shallow_structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "approved"
+          ],
+          "status": "shallow_structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [
+            "denied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "denied"
+          ],
+          "status": "shallow_structural",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "request_withdrawn(ci_44, morning_only_appointment_window, 2026_02_07)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "current_status(ci_44, scheduled)."
+          ],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "corrected"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "referral_corrected(r_44, mobility_score_ms_9, 2026_02_05)."
+          ],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "source_only",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [
+            "reopened"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "case_reopened(ci_44, 2026_02_08)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "reopened"
+          ],
+          "status": "shallow_structural",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "case_closed(ci_44, scheduled_for_standard_afternoon_therapy, 2026_02_09)."
+          ],
+          "source_hits": [
+            "closed"
+          ],
+          "status": "structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [
+            "current"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "current_status(ci_44, scheduled).",
+            "current_status(ci_44, scheduled)."
+          ],
+          "source_hits": [
+            "current"
+          ],
+          "status": "structural",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [
+            "transition"
+          ],
+          "min_arity": 4,
+          "shallow_rows": [
+            "status_transition_reason(ci_44, 2026_02_04, referral_lacked_a_mobility_score)."
+          ],
+          "slot_rows": [
+            "status_transition(ci_44, denied, pending_nurse_review, 2026_02_05)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "status_transition"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T163025062154Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 56,
+      "fixture": "grant_review_queue",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 98,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 2,
+        "source_only": 1,
+        "structural": 9
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "received"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "received"
+          ],
+          "status": "shallow_structural",
+          "term": "received"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "filed"
+          ],
+          "status": "source_only",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "assigned_to(evt_assigned_20260504, proposal_p5, budget_review).",
+            "assigned_to(evt_002, p_5, budget_review).",
+            "status_at(proposal_p5, assigned_to_budget_review, 2026_05_04).",
+            "status_at(p_5, assigned_to_budget_review, 2026_05_04)."
+          ],
+          "source_hits": [
+            "assigned"
+          ],
+          "status": "structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(queue_gq5, approved, 2026_05_10).",
+            "status_at(p_5, approved, 2026_05_10).",
+            "status_at(gq_5, approved_with_revised_budget, 2026_05_10)."
+          ],
+          "source_hits": [
+            "approved"
+          ],
+          "status": "structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [
+            "denied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(proposal_p5, denied, 2026_05_05).",
+            "status_at(p_5, denied, 2026_05_05)."
+          ],
+          "source_hits": [
+            "denied"
+          ],
+          "status": "structural",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "withdrawn(evt_withdrawn_20260508, lineitem_solar_panel).",
+            "withdrawn(evt_withdrawal_20260508, solar_panel_line_item)."
+          ],
+          "slot_rows": [
+            "status_at(proposal_p5, withdrawn, 2026_05_08)."
+          ],
+          "source_hits": [
+            "withdrawn"
+          ],
+          "status": "structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(proposal_p5, pending_eligibility_check, 2026_05_02).",
+            "status_at(p_5, pending_eligibility_check, 2026_05_02)."
+          ],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "corrected",
+            "revised"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(proposal_p5, corrected, 2026_05_06).",
+            "status_at(gq_5, approved_with_revised_budget, 2026_05_10)."
+          ],
+          "source_hits": [
+            "corrected",
+            "revised"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(p_5, superseded, 2026_05_07)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [
+            "reopened",
+            "reinstated"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "reopened(evt_reopened_20260509, proposal_p5).",
+            "reopened(evt_005, p_5)."
+          ],
+          "slot_rows": [
+            "status_at(proposal_p5, reinstated, 2026_05_07).",
+            "status_at(proposal_p5, reopened, 2026_05_09).",
+            "status_at(p_5, reopened, 2026_05_09)."
+          ],
+          "source_hits": [
+            "reopened",
+            "reinstated"
+          ],
+          "status": "structural",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "closed(evt_closed_20260510, queue_gq5).",
+            "closed(evt_006, gq_5).",
+            "closed(evt_close_20260510, gq_5)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "closed"
+          ],
+          "status": "shallow_structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_at(proposal_p5, pending_eligibility_check, 2026_05_02).",
+            "status_at(proposal_p5, assigned_to_budget_review, 2026_05_04).",
+            "status_at(proposal_p5, denied, 2026_05_05).",
+            "status_at(proposal_p5, corrected, 2026_05_06).",
+            "status_at(proposal_p5, reinstated, 2026_05_07)."
+          ],
+          "source_hits": [
+            "current"
+          ],
+          "status": "structural",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "status_transition"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T163029879736Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 64,
+      "fixture": "library_preservation_queue",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 81,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 7,
+        "source_only": 3,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "received"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "received"
+          ],
+          "status": "shallow_structural",
+          "term": "received"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "entered"
+          ],
+          "status": "source_only",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "assigned_role(ravi_sen, condition_review, evt_002).",
+            "assigned_role(actor_ravi_sen, condition_review, evt_assign_ravi_20260602)."
+          ],
+          "source_hits": [
+            "assigned"
+          ],
+          "status": "structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "approved",
+            "granted"
+          ],
+          "status": "shallow_structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [
+            "denied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "denied"
+          ],
+          "status": "shallow_structural",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "request_withdrawn(open_table_handling, evt_007).",
+            "request_withdrawn(open_table_handling, evt_20260607_withdrawal)."
+          ],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "shallow_structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "corrected"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "corrected_value(evt_004, repaired_hinge_strip).",
+            "corrected_value(evt_corr_20260604, repaired_hinge_strip)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "shallow_structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "superseded_by(digitization_only_plan, approved_display_plan)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "closed"
+          ],
+          "status": "shallow_structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "current"
+          ],
+          "status": "source_only",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "after"
+          ],
+          "status": "source_only",
+          "term": "status_transition"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T163028691084Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 37,
+      "fixture": "permit_renewal_docket",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 88,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 8,
+        "source_only": 1,
+        "structural": 2
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "received",
+            "submitted"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "received",
+            "submitted"
+          ],
+          "status": "shallow_structural",
+          "term": "received"
+        },
+        {
+          "direct_hits": [
+            "filed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "filed"
+          ],
+          "status": "shallow_structural",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "assigned"
+          ],
+          "status": "shallow_structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "approved"
+          ],
+          "status": "shallow_structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "request_component_withdrawn(pr_18, weekend_hours)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "withdrawn"
+          ],
+          "status": "shallow_structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "shallow_structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "source_only",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "status_superseded_by(approved_subject_to_payment, pending_payment)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [
+            "reopened"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "reopened"
+          ],
+          "status": "shallow_structural",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed",
+            "final"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "docket_final_status(pr_18, approved_weekday_renewal)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "closed",
+            "final"
+          ],
+          "status": "shallow_structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [
+            "final",
+            "active"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "request_component_active(pr_18, weekday_renewal).",
+            "docket_final_status(pr_18, approved_weekday_renewal)."
+          ],
+          "source_hits": [
+            "current",
+            "final",
+            "active"
+          ],
+          "status": "structural",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "status_transition"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T163009695712Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 39,
+      "fixture": "warehouse_repair_log",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 85,
+      "summary": {
+        "not_applicable": 1,
+        "shallow_structural": 3,
+        "source_only": 2,
+        "structural": 7
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "received"
+          ],
+          "status": "source_only",
+          "term": "received"
+        },
+        {
+          "direct_hits": [
+            "logged"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "logged"
+          ],
+          "status": "shallow_structural",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "ticket_assigned_to(wr_62, rhea_lin, 2026_03_02)."
+          ],
+          "source_hits": [
+            "assigned"
+          ],
+          "status": "structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "approved"
+          ],
+          "status": "shallow_structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [
+            "denied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "request_denied_by(wr_62, scanner_replacement, rhea_lin, 2026_03_03).",
+            "request_denied_by(wr_62, scanner_replacement, person_rhea_lin, 2026_03_03)."
+          ],
+          "source_hits": [
+            "denied"
+          ],
+          "status": "structural",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "request_withdrawn_by(wr_62, scanner_replacement, 2026_03_06)."
+          ],
+          "source_hits": [
+            "withdrawn"
+          ],
+          "status": "structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "shallow_structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "corrected"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "diagnosis_corrected_by(wr_62, power_test, 2026_03_04)."
+          ],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "ticket_superseded_by(wr_63, wr_62)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed",
+            "completed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "ticket_closed_by(wr_62, june_malik, 2026_03_08).",
+            "ticket_closed_by(wr_62, person_june_malik, 2026_03_08)."
+          ],
+          "source_hits": [
+            "closed",
+            "completed"
+          ],
+          "status": "structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [
+            "current"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "equipment_current_status(s_6, working)."
+          ],
+          "source_hits": [
+            "current",
+            "active"
+          ],
+          "status": "structural",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "after"
+          ],
+          "status": "source_only",
+          "term": "status_transition"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_actor_content_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T162951841328Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 26,
+      "fixture": "water_sample_docket",
+      "lens": "operational_record_status",
+      "parsed_ok": true,
+      "run": "lens_vocab_operational_record_status_actor_content_compile_20260515",
+      "source_record_fact_count": 82,
+      "summary": {
+        "not_applicable": 2,
+        "shallow_structural": 3,
+        "source_only": 2,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "received"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "sample_received(ada_voss, b_12, 2026_04_11).",
+            "sample_received(actor_ada_voss, sample_b12, 2026_04_11)."
+          ],
+          "source_hits": [
+            "received"
+          ],
+          "status": "structural",
+          "term": "received"
+        },
+        {
+          "direct_hits": [
+            "filed"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "docket_filed(niko_shah, ws_12, b_12, 2026_04_10)."
+          ],
+          "source_hits": [
+            "filed",
+            "logged"
+          ],
+          "status": "structural",
+          "term": "filed"
+        },
+        {
+          "direct_hits": [
+            "assigned"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "test_assigned(b_12, nitrate_testing, 2026_04_11).",
+            "test_assigned(sample_b12, nitrate_testing, 2026_04_11)."
+          ],
+          "source_hits": [
+            "assigned"
+          ],
+          "status": "structural",
+          "term": "assigned"
+        },
+        {
+          "direct_hits": [
+            "approved"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "test_approved(nitrate_testing, b_12, below_threshold, 2026_04_14)."
+          ],
+          "source_hits": [
+            "approved"
+          ],
+          "status": "structural",
+          "term": "approved"
+        },
+        {
+          "direct_hits": [
+            "denied"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [
+            "test_denied(nitrate_testing, b_12, loose_seal, 2026_04_12).",
+            "test_denied(nitrate_testing, sample_b12, loose_seal, 2026_04_12)."
+          ],
+          "source_hits": [
+            "denied"
+          ],
+          "status": "structural",
+          "term": "denied"
+        },
+        {
+          "direct_hits": [
+            "withdrawn"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "withdrawn"
+          ],
+          "status": "shallow_structural",
+          "term": "withdrawn"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "shallow_structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "source_only",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "source_only",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "reopened"
+        },
+        {
+          "direct_hits": [
+            "closed",
+            "completed",
+            "final"
+          ],
+          "min_arity": 3,
+          "shallow_rows": [
+            "docket_final_status(ws_12, completed_below_threshold)."
+          ],
+          "slot_rows": [],
+          "source_hits": [
+            "closed",
+            "completed"
+          ],
+          "status": "shallow_structural",
+          "term": "closed"
+        },
+        {
+          "direct_hits": [
+            "final"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "docket_final_status(ws_12, completed_below_threshold)."
+          ],
+          "source_hits": [
+            "current"
+          ],
+          "status": "structural",
+          "term": "current_status"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 4,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "status_transition"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 7,
+      "shallow_structural": 29,
+      "source_only": 10,
+      "structural": 32
+    },
+    "term_status_counts": {
+      "approved": {
+        "shallow_structural": 4,
+        "structural": 2
+      },
+      "assigned": {
+        "shallow_structural": 2,
+        "structural": 4
+      },
+      "closed": {
+        "shallow_structural": 4,
+        "structural": 2
+      },
+      "corrected": {
+        "shallow_structural": 1,
+        "source_only": 2,
+        "structural": 3
+      },
+      "current_status": {
+        "source_only": 1,
+        "structural": 5
+      },
+      "denied": {
+        "not_applicable": 1,
+        "shallow_structural": 2,
+        "structural": 3
+      },
+      "filed": {
+        "shallow_structural": 3,
+        "source_only": 2,
+        "structural": 1
+      },
+      "pending": {
+        "shallow_structural": 4,
+        "structural": 2
+      },
+      "received": {
+        "shallow_structural": 4,
+        "source_only": 1,
+        "structural": 1
+      },
+      "reopened": {
+        "not_applicable": 3,
+        "shallow_structural": 2,
+        "structural": 1
+      },
+      "status_transition": {
+        "not_applicable": 3,
+        "source_only": 2,
+        "structural": 1
+      },
+      "superseded": {
+        "source_only": 2,
+        "structural": 4
+      },
+      "withdrawn": {
+        "shallow_structural": 3,
+        "structural": 3
+      }
+    }
+  }
+}

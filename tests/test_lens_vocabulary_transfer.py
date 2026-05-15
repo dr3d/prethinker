@@ -394,6 +394,54 @@ def test_authority_custody_audit_accepts_is_noncontrolling_with_reason_detail(tm
     assert rows["noncontrolling_source"] == "structural"
 
 
+def test_authority_custody_audit_accepts_source_document_declares_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, controlling_finding_declares_current_custody).",
+            "source_document(cf_3, controlling_finding).",
+            "source_declares(cf_3, custody_holder, team_remains_holder_until_replacement).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["controlling_finding"] == "structural"
+
+
+def test_authority_custody_audit_accepts_record_type_provision_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, staff_note_recommended_supervised_access).",
+            "record_type(sn_9, staff_note).",
+            "record_provision(sn_9, recommendation, supervised_access).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["staff_note"] == "structural"
+
+
+def test_authority_custody_audit_accepts_event_type_outcome_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, council_vote_allowed_temporary_checkout).",
+            "event_type(event_council_vote, council_vote).",
+            "event_outcome(event_council_vote, temporary_checkout_allowed_to_plot_captains).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="authority_custody", terms=AUTHORITY_CUSTODY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["board_vote"] == "structural"
+
+
 def test_operational_record_audit_accepts_record_detail_status_contract(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",
