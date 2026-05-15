@@ -49,6 +49,38 @@ def test_qa_batch_accepts_markdown_answer_key_without_oracle(tmp_path: Path) -> 
     assert "--include-legacy-native-helper-adapters" in legacy_command
 
 
+def test_qa_batch_stamp_command_can_run_with_helpers_genuinely_off(tmp_path: Path) -> None:
+    dataset_root = tmp_path / "datasets"
+    compile_root = tmp_path / "compiles"
+    out_root = tmp_path / "qa"
+    fixture = "stamp_fixture"
+    fixture_dir = dataset_root / fixture
+    compile_dir = compile_root / fixture
+    fixture_dir.mkdir(parents=True)
+    compile_dir.mkdir(parents=True)
+    (fixture_dir / "qa.md").write_text("1. What happened?\n\n## Answers\n\n1. It happened.\n", encoding="utf-8")
+    (compile_dir / "domain_bootstrap_file_20260512T000000Z_source_model.json").write_text("{}", encoding="utf-8")
+
+    job = _build_job(fixture, dataset_root=dataset_root, compile_root=compile_root, out_root=out_root)
+    command = _build_command(
+        job,
+        model="test-model",
+        base_url="http://example.test/v1",
+        limit=3,
+        timeout=10,
+        evidence_bundle=True,
+        classify_failure_surfaces=True,
+        cache=False,
+        helper_companion_row_limit=0,
+        include_legacy_native_helper_adapters=False,
+    )
+
+    assert "--helper-companion-row-limit" in command
+    assert command[command.index("--helper-companion-row-limit") + 1] == "0"
+    assert "--include-legacy-native-helper-adapters" not in command
+    assert "--no-cache" in command
+
+
 def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
     summary = _summarize(
         [

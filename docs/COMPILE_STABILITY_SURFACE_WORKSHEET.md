@@ -1185,3 +1185,88 @@ Freeze recommendation:
 After the compact regression battery passes, tag the current commit as the
 instrument freeze candidate and begin full-corpora stamping with no code or
 prompt repairs during the stamp.
+
+## CS-014 - Stamp Operating Protocol
+
+Date: 2026-05-15
+
+Question:
+
+Can the freeze stamp double as helper-retirement evidence, and if so what has
+to be held constant so the measurement remains interpretable?
+
+Before:
+
+The freeze candidate separated helper-era residues from current compile and QA
+machinery, but the QA batch runner still defaults to three generic helper
+companion rows. Legacy native helper adapters are opt-in, but a stamp run that
+silently delivered three helper companions would not be a clean no-helper
+measurement.
+
+Prediction:
+
+A defensible stamp needs an operator-visible contract:
+
+- helper-retirement evidence requires helper companion delivery to be set to
+  zero, not merely legacy adapters disabled;
+- cached QA artifacts from earlier helper-bearing runs must not be reused;
+- corpus expansion should not be mixed with the freeze stamp;
+- stochastic score movement during the stamp is measurement, not permission for
+  repair.
+
+Intervention:
+
+Pinned the no-helper stamp command shape in
+`tests/test_domain_bootstrap_qa_batch.py`:
+
+- `--helper-companion-row-limit 0`;
+- no `--include-legacy-native-helper-adapters`;
+- `--no-cache`.
+
+Operating protocol for the first full stamp:
+
+1. Use the already-established corpora and focused transfer suites. Do not add
+   HotpotQA, DROP, BoolQ, or other new benchmark adapters during this freeze.
+   Those belong in the next freeze cycle because adding them now would mix
+   instrument characterization with benchmark expansion.
+2. Use N=3 for existing external corpora where runtime is practical. Use N=1
+   for the internal corpus until throughput improves enough to make repeated
+   internal draws a clean measurement rather than an operations bottleneck.
+3. Run QA with helpers genuinely off: `--helper-companion-row-limit 0`, no
+   legacy-native-helper flag, and `--no-cache`.
+4. Treat transport failures differently from model behavior. Provider 429/503,
+   incomplete reads, and process failures may be rerun with the same frozen
+   command. Score drops, new misses, or changed boundary distributions are
+   journaled as residuals and remeasured after the freeze; they are not repaired
+   mid-stamp.
+5. Use granular OpenRouter titles by experiment surface, phase, and draw, for
+   example `stamp/internal/qa/draw1` or `stamp/race/compile/draw2`.
+
+After:
+
+The stamp now has a clear helper state:
+
+- legacy native adapters: off unless explicitly requested;
+- helper companion rows: off for stamp evidence by setting the row limit to 0;
+- cache: off so old helper-bearing artifacts cannot masquerade as no-helper
+  results.
+
+Corpora decision:
+
+Hold HotpotQA, DROP, BoolQ, and similar public benchmark additions for the next
+cycle. The immediate job is to characterize this frozen instrument across the
+corpora already used to shape the method. New corpora are valuable, but they
+should enter as a separate expansion step after the stamp is complete.
+
+Lesson:
+
+Helper retirement is not proven by disabling legacy adapters alone. The stamp
+has to suppress the whole helper-delivery path and fail the protocol if helper
+rows appear. That keeps "no-helper performance" as an interpretable claim
+instead of an accidental configuration artifact.
+
+Next pressure:
+
+Run the stamp under this protocol. If the internal corpus remains operationally
+expensive, record it as N=1 for this freeze and prioritize throughput work or
+helper-context deletion before attempting repeated internal draws.
