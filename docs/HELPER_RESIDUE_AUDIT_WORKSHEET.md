@@ -451,3 +451,112 @@ Next pressure:
 - Do not lower cap `3` globally yet. First inspect exact-to-miss examples where
   the ranked cap lost a previously exact answer, and separate true helper-loss
   failures from ordinary hosted/judge variance.
+
+## HR-007 - Unlike Helper Transfer Probe
+
+Date: 2026-05-14
+
+Before:
+
+- External transfer corpora used `0-3` helper rows per draw, while the native
+  ranked-cap replay still used `976`.
+- The unresolved question was whether native helpers are domain-correct
+  structural helpers or fixture/palette-shaped recognizers.
+
+Prediction:
+
+- If helpers are domain-correct, novel documents with the same structural
+  families should trigger the same helper families:
+  - a non-school roster should trigger roster support,
+  - a non-probate custody register should trigger custody support,
+  - a non-factory sensor sheet should trigger sensor support.
+- If helpers are fixture/palette-shaped, the novel documents should compile and
+  answer through new direct predicates while the old helper families stay
+  silent.
+
+Intervention:
+
+- Built three unlike probe fixtures under
+  `tmp\helper_transfer_probe_20260514`:
+  - `novel_club_roster`: volunteer squad rotation with changes and supervisors.
+  - `novel_specimen_custody`: botanical specimen custody/access register.
+  - `novel_freezer_sensor`: freezer sensor clock correction and threshold
+    breach sheet.
+- Compiled them with source-record ledger facts and the same current compiler
+  machinery.
+- Ran QA with unbounded helper delivery
+  (`--helper-companion-row-limit -1`) so any helper trigger would be visible.
+
+After:
+
+| Probe | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `novel_club_roster` | 8 | 8 | 0 | 0 | 0 |
+| `novel_specimen_custody` | 8 | 8 | 0 | 0 | 0 |
+| `novel_freezer_sensor` | 8 | 8 | 0 | 0 | 0 |
+
+Compiled predicate surfaces:
+
+- Roster probe emitted direct predicates such as `volunteer_in_squad`,
+  `roster_change_event`, `change_detail`, `supervisor_assignment`,
+  `squad_minimum_size`.
+- Custody probe emitted direct predicates such as `physical_holder`,
+  `legal_owner`, `custody_status`, `access_event`, `authorized_by`,
+  `recall_issued`.
+- Sensor probe emitted direct predicates such as `sensor_clock_drift`,
+  `correction_rule`, `event_corrected_timestamp`, `event_reading`,
+  `event_status`, `breach_threshold`.
+
+Helper trigger readout:
+
+- `roster_state_support` did not fire because its trigger/row vocabulary expects
+  older palette names such as `student_group_assignment`, `group_member`,
+  `adult_role`, `supervision_assignment`, or related roster-table rows. The
+  novel compile used `volunteer_in_squad` and `supervisor_assignment`.
+- `archive_authority_custody_support` did not fire because its trigger/row
+  vocabulary expects names such as `physical_custodian`,
+  `physical_custody`, `access_log_entry`, or `access_authorized_by`. The novel
+  compile used `physical_holder`, `legal_owner`, `access_event`, and
+  `authorized_by`.
+- `industrial_sensor_support` did not fire on the novel sensor sheet despite
+  source-record predicates being queried. Its body contains an explicit
+  fixture-era token gate for old sensor/event atoms before it will produce
+  support rows.
+
+Artifacts:
+
+- `tmp\helper_transfer_probe_20260514`
+- `tmp\helper_transfer_probe_compile_20260514`
+- `tmp\helper_transfer_probe_qa_unbounded_20260514`
+
+Verification:
+
+- Compile completed for all `3 / 3` probes.
+- QA completed `24 / 24` questions with `24 / 0 / 0`.
+- Unbounded helper delivery reported `0` helper rows, so the absence of helper
+  rows is not caused by the cap.
+
+Lesson:
+
+- The asymmetry is real. These helper families are not general domain
+  recognizers over arbitrary roster/custody/sensor documents. They are largely
+  adapters for older native palette names and, in at least one case, explicit
+  fixture-era token gates.
+- The better architecture is not to make these helpers fire everywhere. The
+  better architecture is to preserve the direct compiled surfaces that already
+  answered the novel probes, then retire or quarantine native helper adapters as
+  legacy scaffolding once equivalent direct predicates exist.
+- The native corpus is harder partly because it carries old palette history. The
+  external/unlike probes show that new material can compile into cleaner direct
+  predicates and avoid helper delivery entirely.
+
+Next pressure:
+
+- Treat remaining native helper rows as legacy adapter debt unless a helper
+  proves transfer on unlike documents without trigger-name or token-shape
+  leakage.
+- For each high-volume helper, either:
+  - replace it with direct compile-surface guidance that emits answer-bearing
+    predicates, or
+  - keep it quarantined as a forensic/native compatibility adapter, not as
+    current architecture.
