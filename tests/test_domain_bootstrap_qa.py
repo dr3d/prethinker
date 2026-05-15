@@ -186,11 +186,54 @@ def test_compiled_kb_inventory_uses_clause_surfaces_not_english() -> None:
     assert "can_depart(X)." in inventory["query_templates"]
 
 
+def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
+    facts = [
+        "item_id(ex_001, painting).",
+        "asset_id(ex_001).",
+        "asset_description(ex_001, sealed_crate).",
+        "external_reference(ex_001, catalog_44).",
+        "access_authorized(ex_001, executor, standing, court_order).",
+        "authorized_party(ex_001, executor, physical_access).",
+        "order_id(order_1, p_26_347_d).",
+        "order_effect(order_1, access_granted).",
+        "chronological_event(event_1, inventory_opened, d_2026_01_01).",
+        "event_occurred_before(event_1, event_2).",
+        "source_claim(claim_1, subject_1, private_gift).",
+        "assertion_recorded(assertion_1, private_gift, section_h_3).",
+    ]
+
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+    families = {row["family"]: row for row in inventory["surface_alias_inventory"]}
+
+    assert "item_identifier_surface" in families
+    assert {"item_id/2", "asset_id/1", "asset_description/2"}.issubset(
+        set(families["item_identifier_surface"]["signatures"])
+    )
+    assert "external_identifier_surface" in families
+    assert "external_reference/2" in families["external_identifier_surface"]["signatures"]
+    assert "access_authorization_surface" in families
+    assert {"access_authorized/4", "authorized_party/3"}.issubset(
+        set(families["access_authorization_surface"]["signatures"])
+    )
+    assert "order_effect_surface" in families
+    assert {"order_id/2", "order_effect/2"}.issubset(set(families["order_effect_surface"]["signatures"]))
+    assert "chronology_event_surface" in families
+    assert {"chronological_event/3", "event_occurred_before/2"}.issubset(
+        set(families["chronology_event_surface"]["signatures"])
+    )
+    assert "source_assertion_surface" in families
+    assert {"source_claim/3", "assertion_recorded/3"}.issubset(
+        set(families["source_assertion_surface"]["signatures"])
+    )
+    assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
+
+
 def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     strategy = POST_INGESTION_QA_QUERY_STRATEGY
 
     assert strategy["name"] == "post_ingestion_qa_query_strategy_v1"
     assert "compiled_predicate_inventory.signatures" in " ".join(strategy["predicate_surface_policy"])
+    assert "compiled_surface_alias_inventory" in " ".join(strategy["predicate_surface_policy"])
     assert "relevant_clauses" in " ".join(strategy["predicate_surface_policy"])
     assert "complementary phrasing" in " ".join(strategy["predicate_surface_policy"])
     assert "sibling predicates over the same subject" in " ".join(strategy["predicate_surface_policy"])

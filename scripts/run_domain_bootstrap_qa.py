@@ -287,6 +287,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "Use compiled_predicate_inventory.signatures as the available query vocabulary.",
         "Use relevant_clauses as the primary evidence surface for choosing constants and record ids; compiled_predicate_inventory.examples is only a compact index.",
         "Prefer compiled_query_templates when a question asks for a value that appears in an existing predicate slot.",
+        "Use compiled_surface_alias_inventory to notice when the compiled KB expresses the same abstract surface through decomposed or sibling predicate names; query only the actual predicates listed in compiled_predicate_inventory.",
         "If a desired meaning is split across multiple predicates, emit multiple query operations with shared constants or variables.",
         "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, treat the named baseline relation as context, not as the answer surface. Query sibling predicates over the same subject whose returned slot can express the additional property, effect, capability, knowledge, authority, role, maintained item, or other complement requested by the question.",
         "Do not invent composite predicates such as who_accused/2 or why_recalled/2 unless that exact predicate exists in the compiled KB inventory.",
@@ -592,6 +593,7 @@ def main() -> int:
         "For who/what/which/where/when/why questions, leave the requested answer position as a variable. Do not fill that slot with a likely answer from relevant_clauses unless the user question itself names that value.",
         "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
+        "compiled_surface_alias_inventory shows predicate families actually present in this compile. Use it to find sibling or decomposed surfaces before falling back to helpers or source-record text.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For homeroom membership or homeroom student-count questions, if compiled_query_templates includes roster_table_member/4, prefer roster_table_member(SourceRow, Version, Group, Student) for explicit table membership before sparse semantic member predicates such as homeroom_member/3.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
@@ -946,7 +948,96 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
         "counts": counts,
         "examples": {signature: examples.get(signature, []) for signature in signatures[:80]},
         "query_templates": [query_template_for_signature(signature) for signature in signatures],
+        "surface_alias_inventory": compiled_surface_alias_inventory(signatures),
     }
+
+
+def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, Any]]:
+    """Group present predicates into generic query-planning surface families.
+
+    This is not a synonym table for one corpus. It is a compact hint that
+    predicate palettes can pack the same answer-bearing surface differently.
+    The QA planner still has to query real predicates listed in the inventory.
+    """
+
+    family_specs: tuple[tuple[str, str, tuple[str, ...], tuple[str, ...]], ...] = (
+        (
+            "identity_role_surface",
+            "people or organizations bound to source-stated roles",
+            ("role", "party", "person", "authority", "counsel", "claimant", "owner"),
+            ("identity", "role", "party"),
+        ),
+        (
+            "item_identifier_surface",
+            "item, asset, object, inventory, and description identifiers",
+            ("item", "asset", "object", "inventory", "description", "id"),
+            ("item", "asset", "object", "inventory", "description", "id"),
+        ),
+        (
+            "external_identifier_surface",
+            "external references, external ids, catalog ids, and source ids",
+            ("external", "reference", "ref", "catalog", "source", "id"),
+            ("external", "reference"),
+        ),
+        (
+            "custody_location_surface",
+            "physical custody, holder, location, storage, and custodian rows",
+            ("custody", "custodian", "holder", "held", "physical", "location", "storage"),
+            ("custody", "custodian", "location"),
+        ),
+        (
+            "title_status_surface",
+            "recorded title, ownership, contestation, and status rows",
+            ("title", "owner", "ownership", "status", "contested", "recorded"),
+            ("title", "status", "ownership"),
+        ),
+        (
+            "access_authorization_surface",
+            "access permission, access denial, authorization, and authority source rows",
+            ("access", "authoriz", "authority", "party", "no", "source"),
+            ("access", "authoriz", "authority", "party"),
+        ),
+        (
+            "order_effect_surface",
+            "orders, order dates, order ids, effects, rulings, and issued decisions",
+            ("order", "ruling", "issued", "effect", "date", "decision"),
+            ("order", "effect"),
+        ),
+        (
+            "chronology_event_surface",
+            "chronology events, event ordering, before/after anchors, and dated events",
+            ("chronolog", "event", "before", "after", "occurred", "date"),
+            ("event", "chronology"),
+        ),
+        (
+            "source_assertion_surface",
+            "source claims, assertions, disputes, objections, grounds, and status",
+            ("claim", "assert", "dispute", "objection", "ground", "status", "source"),
+            ("claim", "assert", "dispute"),
+        ),
+    )
+    out: list[dict[str, Any]] = []
+    for family, purpose, any_tokens, anchor_tokens in family_specs:
+        matches: list[str] = []
+        for signature in signatures:
+            if "/" not in str(signature):
+                continue
+            predicate = str(signature).split("/", 1)[0]
+            lowered = predicate.casefold()
+            if not any(token in lowered for token in anchor_tokens):
+                continue
+            if any(token in lowered for token in any_tokens):
+                matches.append(str(signature))
+        if matches:
+            out.append(
+                {
+                    "family": family,
+                    "purpose": purpose,
+                    "signatures": matches[:16],
+                    "query_policy": "Use the present signatures in this family as alternative or decomposed surfaces; do not invent predicates outside compiled_predicate_inventory.",
+                }
+            )
+    return out
 
 
 def compiled_kb_contracts(signatures: list[str]) -> list[dict[str, Any]]:
@@ -1261,11 +1352,13 @@ def build_evidence_bundle_plan(
             "counts": kb_inventory.get("counts", {}),
             "examples": kb_inventory.get("examples", {}),
         },
+        "compiled_surface_alias_inventory": kb_inventory.get("surface_alias_inventory", [])[:32],
         "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
         "relevant_clauses": [*facts[:600], *rules[:160]],
         "planning_policy": [
             "A support bundle is a small group of primitive Prolog queries that, together, can support an answer.",
             "Prefer multiple primitive queries over an invented composite query.",
+            "Use compiled_surface_alias_inventory only as a map of sibling/decomposed predicate surfaces that are already present.",
             "Use uppercase variables for unknown answer slots.",
             "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
             "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
@@ -1332,6 +1425,7 @@ def run_one_question(
             "counts": kb_inventory.get("counts", {}),
             "examples": kb_inventory.get("examples", {}),
         },
+        "compiled_surface_alias_inventory": kb_inventory.get("surface_alias_inventory", [])[:32],
         "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
         "relevant_clauses": [*facts[:600], *rules[:160]],
         "source_fact_count": len(facts),
