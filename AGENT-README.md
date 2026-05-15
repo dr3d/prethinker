@@ -19,7 +19,8 @@ This is the short handoff for coding agents working in Prethinker.
 13. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 14. [docs/DATASET_TRANSFER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md)
 15. [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
-16. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+16. [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
+17. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
 
 Treat older reports and prompt snapshots as Git history, not live guidance.
 
@@ -58,6 +59,9 @@ Treat older reports and prompt snapshots as Git history, not live guidance.
 - Keep fixture nouns out of architecture. A selector/helper/scoring fix should
   be describable without local row IDs, story names, or fixture-specific
   people/groups.
+- Treat helper retirement as a compile-surface stability problem. Direct
+  admitted surfaces should replace helper bridges; source-record fallback alone
+  is useful evidence but not proof that a helper can disappear.
 
 ## Verification
 

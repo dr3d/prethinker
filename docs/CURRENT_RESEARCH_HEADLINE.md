@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-12
+Last updated: 2026-05-14
 
 ## Row-Gated Semantic Parallax
 
@@ -68,6 +68,12 @@ coordinates: compile-surface gaps, hybrid-join gaps, query-surface gaps,
 answer-surface gaps, and judge-uncertainty cases to be probed without
 fixture-specific repairs.
 
+The newest successor pressure is compile-surface stability. Helper rows are
+being treated as legacy compatibility bridges unless the direct compile product
+can prove it already emits the reusable surface they were bridging to. The new
+invariant audit checks source-record ledgers against admitted direct facts
+before no-helper QA burns, so "fewer helpers" cannot hide a weaker compile.
+
 ## Guard Pressure
 
 Selector guard growth is now a first-class design pressure, not background
@@ -112,10 +118,12 @@ to hold.
 2. **Promote only transfer-backed surfaces.** A registry scaffold may earn a
    candidate slot after one fixture; it earns a roster slot only after unlike
    transfer and exact-row protection.
-3. **Deepen helpers where rows prove the shape.** Temporal slots, deadline
+3. **Retire helpers through compile-surface proof.** Temporal slots, deadline
    families, status intervals, classification conversions, quantity
-   conservation, and financial corrections are helper candidates when they
-   compose admitted rows instead of interpreting source prose.
+   conservation, and financial corrections are helper candidates only when
+   they compose admitted rows. Native adapters that merely bridge legacy source
+   shapes should be quarantined unless the compiler emits the direct surface
+   they point toward.
 4. **Run the boundary hunt.** Classify not-exact rows by fixture-free failure
    geometry, design small probes around one axis at a time, and promote only
    repairs that replay on unlike rows.
@@ -138,6 +146,7 @@ to hold.
 
 - [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
 - [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
+- [Compile Surface Stability Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
 - [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)

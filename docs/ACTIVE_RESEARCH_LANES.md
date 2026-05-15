@@ -25,7 +25,7 @@ gold KB vocabulary, answer-shaped strategy, or Python prose interpretation.
 | ---: | --- | --- | --- |
 | 1 | Source-surface acquisition | The cold-10 high-water still has `23` misses after row gating, and the biggest wins came from acquiring missing source/provenance surfaces rather than answer prompting. | Improve compact acquisition/lens coverage and replay against unlike fixtures such as Lantern, Salvage, Museum/Dream, Oxalis, and Avalon. |
 | 2 | Rule composition and promotion | Product power comes from executable inference, but cold fixtures still admit `0` rules by default. Glass Tide proved the staged path. | Generalize body-fact -> rule-lens -> shortcut-audit -> probe workflow to Avalon/Sable/Oxalis without fixture-specific clauses. |
-| 3 | Temporal/status/reasoning helpers | Regulatory, grant, ledger, recall, and story fixtures all need dates, intervals, deadlines, status-at-time, threshold, and exception helpers. | Add helper substrates only when two fixtures need the same helper shape. |
+| 3 | Compile-surface stability | Helper retirement only works if the compiler emits recurring answer-bearing surfaces directly instead of relying on native adapters or source-record fallback. | Run invariant audits before no-helper QA and strengthen direct admitted surfaces where the ledger shows recurring roles, source coordinates, temporal state, measurements, or custody/control state. |
 | 4 | Clarification and stenographer mode | Live UI use is streaming, not monolithic. CE and queued delivery protect truth while reducing interruption. | Build fixtures/runs that score queued-slot closure, safe partials, and later-turn resolution. |
 | 5 | Query-surface selection | APR showed the KB can contain the answer while the query planner fails to ask for it. | Apply row-level/evidence-mode selectors after compile/reasoning changes, not as a substitute for missing source surface. |
 | 6 | Anti-meta-rot cold replay | The harness must not become good only at its favorite fixtures. | Every general harness change should replay at least two cold fixtures and one older regression fixture. |
@@ -92,6 +92,11 @@ The immediate CTO job is the boundary hunt described in
 `docs/BOUNDARY_HUNT_WORKSHEET.md`: classify not-exact rows by fixture-free
 failure geometry, design small probes around one axis at a time, and promote
 only repairs that replay on unlike rows.
+
+The helper-retirement successor job is tracked in
+`docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md`: use source-record ledgers to
+audit whether recurring answer-bearing surfaces also appear as direct admitted
+compile facts before deleting native helper bridges.
 
 The older cross-fixture repair-slice report is archived outside the active tree.
 Current boundary growth is tracked by `docs/BOUNDARY_HUNT_WORKSHEET.md` and
