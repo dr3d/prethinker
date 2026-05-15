@@ -628,3 +628,116 @@ Run this audit on 2-3 more helper-heavy internal fixtures before integrating
 anything. The key measurement is whether source-record table normalization
 recurs across unlike internal documents, or whether this replay is specific to
 evacuation/order tables.
+
+## TD-007 - Internal Permit Amendment Normalizer Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does a second internal fixture confirm the source-record table finding from
+TD-006, or does a different internal document expose another reusable
+transition/delta recognizer family?
+
+Before:
+
+TD-006 recovered evacuation order transitions from deterministic source-record
+table geometry. The next question was whether that was an evacuation-table
+special case. `municipal_tree_permit_amendment` has a different transition
+shape: permit amendment, species/measurement reclassification, procedural
+status changes, physical state changes, and current authoritative values.
+
+Prediction:
+
+If the normalizer is still too table-oriented, the permit amendment fixture
+should undercount until it recognizes timeline-style domain predicates such as
+status/state and identification rows.
+
+Intervention:
+
+Compiled `datasets/story_worlds/municipal_tree_permit_amendment`, ran
+zero-helper QA over all 40 questions, then ran the audit-only normalizer.
+
+Initial normalizer result:
+
+- observations=`0`
+
+Inspection showed the compile had strong domain predicates, including:
+
+- `amendment_supersedes/2`
+- `tree_identified/5`
+- `tree_protection_status/4`
+- `tree_physical_state/3`
+- `procedural_status/3`
+
+Added audit-only recognizers for:
+
+- generic `*_supersedes/2` as supersession;
+- generic `*_status` and `*_state` timelines with subject, value, date;
+- identification-style attribute timelines for species and measurement values.
+
+After:
+
+No-helper QA:
+
+- questions=`40`
+- exact/partial/miss=`33 / 3 / 4`
+- helper rows=`0`
+- write proposals=`0`
+- failure surfaces: `compile_surface_gap=3`, `hybrid_join_gap=4`
+
+Normalizer:
+
+- compile files=`1`
+- observations=`27`
+- kind counts:
+  - `attribute_observation`: `20`
+  - `supersession`: `1`
+  - `timeline_value_transition`: `6`
+
+Recovered transition structure included:
+
+- amendment supersedes original permit;
+- tree #19 species changed from one classification to another;
+- tree #19 measurement changed from one DBH value to another;
+- tree #19 protection status changed from eligible-for-removal to protected;
+- tree #19 physical state changed from standing to felled to stump-present;
+- amendment procedural status changed from filed to issued.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_qa_nohelpers_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_qa_nohelpers_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_normalization_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_tree_normalization_audit_20260515.json`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py ... --fixture municipal_tree_permit_amendment ...` ->
+  parsed OK, admitted/skipped=`109 / 11`
+- `python scripts\run_domain_bootstrap_qa_batch.py ... --helper-companion-row-limit 0 ...` ->
+  `33 / 3 / 4`, helpers=`0`
+- `python scripts\audit_transition_delta_normalization.py ...` ->
+  observations=`27`
+- `python -m pytest tests -q` -> `1248 passed, 2 subtests passed`
+
+Lesson:
+
+The second internal fixture confirms the general direction but changes the
+recognizer family. Internal transition structure is not only table geometry;
+it also appears as timeline-like domain predicates. That supports the
+normalizer as a deterministic audit layer over multiple reusable contracts.
+
+It also sharpens the helper-retirement path: if zero-helper QA is already
+`33/40` on two internal fixtures and the normalizer recovers the transition
+structure post-compile, helper pressure should be audited for remaining gaps
+rather than assumed necessary.
+
+Next pressure:
+
+Start the foreign-language leakage probe before broadening the normalizer
+again. The multilingual fixture should test whether trigger conditions,
+source-record labels, date/number handling, placeholder repair, and QA planning
+are secretly English-shaped.

@@ -125,6 +125,63 @@ def test_normalizes_source_record_table_order_transitions() -> None:
     } in observations
 
 
+def test_normalizes_generic_supersession_and_status_timeline() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "amendment_supersedes(amended_doc, original_doc).",
+            "tree_protection_status(tree_19, eligible_for_removal, 2026_04_02, original_permit).",
+            "tree_protection_status(tree_19, protected, 2026_04_25, amendment).",
+        ]
+    )
+
+    assert {
+        "kind": "supersession",
+        "successor": "amended_doc",
+        "predecessor": "original_doc",
+        "source_predicate": "amendment_supersedes",
+    } in observations
+    assert {
+        "kind": "timeline_value_transition",
+        "subject": "tree_19",
+        "field": "tree_protection_status",
+        "old_value": "eligible_for_removal",
+        "new_value": "protected",
+        "old_date": "2026_04_02",
+        "new_date": "2026_04_25",
+        "source_predicate": "tree_protection_status",
+    } in observations
+
+
+def test_normalizes_attribute_timeline_from_identification_rows() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "tree_identified(tree_19, acer_platanoides, 22, surveyor_a, 2026_03_24).",
+            "tree_identified(tree_19, acer_saccharum, 24_5, arborist_b, 2026_04_14).",
+        ]
+    )
+
+    assert {
+        "kind": "timeline_value_transition",
+        "subject": "tree_19",
+        "field": "species",
+        "old_value": "acer_platanoides",
+        "new_value": "acer_saccharum",
+        "old_date": "2026_03_24",
+        "new_date": "2026_04_14",
+        "source_predicate": "tree_identified",
+    } in observations
+    assert {
+        "kind": "timeline_value_transition",
+        "subject": "tree_19",
+        "field": "dbh",
+        "old_value": "22",
+        "new_value": "24_5",
+        "old_date": "2026_03_24",
+        "new_date": "2026_04_14",
+        "source_predicate": "tree_identified",
+    } in observations
+
+
 def test_summarizes_observations_by_kind() -> None:
     summary = summarize_observations(
         [

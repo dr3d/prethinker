@@ -46,9 +46,20 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
         for predicate, args in parsed
         if predicate == "transition_reason" and len(args) >= 2
     }
+    timeline_values: dict[tuple[str, str], list[tuple[str, str, str]]] = defaultdict(list)
 
     for predicate, args in parsed:
         if predicate == "supersedes" and len(args) == 2:
+            successor, predecessor = args
+            observations.append(
+                {
+                    "kind": "supersession",
+                    "successor": successor,
+                    "predecessor": predecessor,
+                    "source_predicate": predicate,
+                }
+            )
+        elif predicate.endswith("_supersedes") and len(args) == 2:
             successor, predecessor = args
             observations.append(
                 {
@@ -84,6 +95,32 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
             if subject in transition_reasons:
                 observation["reason"] = transition_reasons[subject]
             observations.append(observation)
+        elif predicate == "tree_identified" and len(args) >= 5:
+            subject, species, dbh, source, date = args[:5]
+            timeline_values[(subject, "species")].append((date, species, predicate))
+            timeline_values[(subject, "dbh")].append((date, dbh, predicate))
+            observations.append(
+                {
+                    "kind": "attribute_observation",
+                    "subject": subject,
+                    "field": "species",
+                    "value": species,
+                    "source": source,
+                    "date": date,
+                    "source_predicate": predicate,
+                }
+            )
+            observations.append(
+                {
+                    "kind": "attribute_observation",
+                    "subject": subject,
+                    "field": "dbh",
+                    "value": dbh,
+                    "source": source,
+                    "date": date,
+                    "source_predicate": predicate,
+                }
+            )
         elif predicate == "policy_field_changed" and len(args) == 4:
             field, old_value, new_value, subject = args
             observations.append(
@@ -137,7 +174,11 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
         elif predicate == "field_absent" and len(args) == 2:
             obj, field = args
             absent_by_field[field].append(obj)
+        elif (predicate.endswith("_status") or predicate.endswith("_state")) and len(args) >= 3:
+            subject, status, date = args[:3]
+            timeline_values[(subject, predicate)].append((date, status, predicate))
 
+    observations.extend(_timeline_transition_observations(timeline_values))
     for field in sorted(set(before_snapshots) & set(after_snapshots)):
         for predecessor, old_value in before_snapshots[field]:
             for successor, new_value in after_snapshots[field]:
@@ -167,6 +208,45 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
 
     observations.extend(_source_record_table_transition_observations(parsed))
     return observations
+
+
+def _timeline_transition_observations(
+    timeline_values: dict[tuple[str, str], list[tuple[str, str, str]]],
+) -> list[dict[str, Any]]:
+    observations: list[dict[str, Any]] = []
+    for (subject, field), entries in sorted(timeline_values.items()):
+        deduped = _dedupe_timeline_entries(entries)
+        if len(deduped) < 2:
+            continue
+        for before, after in zip(deduped, deduped[1:]):
+            old_date, old_value, old_predicate = before
+            new_date, new_value, new_predicate = after
+            if old_value == new_value:
+                continue
+            observations.append(
+                {
+                    "kind": "timeline_value_transition",
+                    "subject": subject,
+                    "field": field,
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "old_date": old_date,
+                    "new_date": new_date,
+                    "source_predicate": new_predicate if new_predicate == old_predicate else f"{old_predicate}|{new_predicate}",
+                }
+            )
+    return observations
+
+
+def _dedupe_timeline_entries(entries: list[tuple[str, str, str]]) -> list[tuple[str, str, str]]:
+    seen: set[tuple[str, str, str]] = set()
+    result: list[tuple[str, str, str]] = []
+    for entry in sorted(entries, key=lambda item: (item[0], item[1], item[2])):
+        if entry in seen:
+            continue
+        seen.add(entry)
+        result.append(entry)
+    return result
 
 
 def _source_record_table_transition_observations(parsed: list[Fact]) -> list[dict[str, Any]]:

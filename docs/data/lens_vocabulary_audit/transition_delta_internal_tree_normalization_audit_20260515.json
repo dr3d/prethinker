@@ -1,0 +1,272 @@
+{
+  "file_count": 1,
+  "results": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_internal_tree_compile_20260515\\municipal_tree_permit_amendment\\domain_bootstrap_file_20260515T195901614297Z_source_qwen-qwen3-6-35b-a3b.json",
+      "observations": [
+        {
+          "kind": "supersession",
+          "predecessor": "tr_2026_014",
+          "source_predicate": "amendment_supersedes",
+          "successor": "tr_2026_014_a1"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "acer_platanoides"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "22"
+        },
+        {
+          "date": "2026_04_14",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "acer_saccharum"
+        },
+        {
+          "date": "2026_04_14",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "24.5"
+        },
+        {
+          "date": "2026_04_14",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "dr_robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "acer_saccharum"
+        },
+        {
+          "date": "2026_04_14",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "dr_robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "24.5"
+        },
+        {
+          "date": "2026_04_30",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "dr_robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "acer_saccharum"
+        },
+        {
+          "date": "2026_04_30",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "dr_robin_tahir",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19",
+          "value": "24.5"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_04",
+          "value": "quercus_alba"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_04",
+          "value": "28"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_11",
+          "value": "quercus_rubra"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_11",
+          "value": "26"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_14",
+          "value": "quercus_rubra"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_14",
+          "value": "22"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_15",
+          "value": "ulmus_americana"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_15",
+          "value": "19"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_21",
+          "value": "acer_saccharum"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_21",
+          "value": "31"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "species",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_22",
+          "value": "quercus_alba"
+        },
+        {
+          "date": "2026_03_24",
+          "field": "dbh",
+          "kind": "attribute_observation",
+          "source": "apex_land_survey",
+          "source_predicate": "tree_identified",
+          "subject": "tree_22",
+          "value": "35"
+        },
+        {
+          "field": "procedural_status",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_25",
+          "new_value": "issued",
+          "old_date": "2026_04_18",
+          "old_value": "filed",
+          "source_predicate": "procedural_status",
+          "subject": "amendment_tr_2026_014_a1"
+        },
+        {
+          "field": "dbh",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_14",
+          "new_value": "24.5",
+          "old_date": "2026_03_24",
+          "old_value": "22",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19"
+        },
+        {
+          "field": "species",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_14",
+          "new_value": "acer_saccharum",
+          "old_date": "2026_03_24",
+          "old_value": "acer_platanoides",
+          "source_predicate": "tree_identified",
+          "subject": "tree_19"
+        },
+        {
+          "field": "tree_physical_state",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_21",
+          "new_value": "felled",
+          "old_date": "2026_04_14",
+          "old_value": "standing",
+          "source_predicate": "tree_physical_state",
+          "subject": "tree_19"
+        },
+        {
+          "field": "tree_physical_state",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_30",
+          "new_value": "stump_present",
+          "old_date": "2026_04_21",
+          "old_value": "felled",
+          "source_predicate": "tree_physical_state",
+          "subject": "tree_19"
+        },
+        {
+          "field": "tree_protection_status",
+          "kind": "timeline_value_transition",
+          "new_date": "2026_04_25",
+          "new_value": "protected",
+          "old_date": "2026_04_02",
+          "old_value": "eligible_for_removal",
+          "source_predicate": "tree_protection_status",
+          "subject": "tree_19"
+        }
+      ],
+      "summary": {
+        "kind_counts": {
+          "attribute_observation": 20,
+          "supersession": 1,
+          "timeline_value_transition": 6
+        },
+        "observation_count": 27
+      }
+    }
+  ],
+  "summary": {
+    "kind_counts": {
+      "attribute_observation": 20,
+      "supersession": 1,
+      "timeline_value_transition": 6
+    },
+    "observation_count": 27
+  }
+}
