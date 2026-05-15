@@ -893,3 +893,61 @@ authority/source families: when the inventory contains predicates like
 `access_source/3`, `access_authorized_to/3`, `court_order/4`, or equivalent
 authority/source rows, the planner must distinguish authorized recipient from
 authorizing source.
+
+## CSS-012 - Authority Source Query Planning Contract
+
+Date: 2026-05-14
+
+Before:
+
+CSS-011 showed a clean distinction: the local compile emitted direct
+authority/source rows, but QA still answered some authority questions from the
+recipient surface. For example, `access_authorized_to` identifies who receives
+access; it does not by itself identify the authorizing court, order, policy, or
+source.
+
+Prediction:
+
+A query-planning contract that explicitly separates recipient/authorized-party
+surfaces from authority/source surfaces should reduce query-surface misses in
+future replays without changing compile facts or adding helper rows.
+
+Intervention:
+
+Added a fixture-free strategy rule to `POST_INGESTION_QA_QUERY_STRATEGY`: for
+who/what-authorized, governing-source, controlled-by, or source-of-access
+questions, query authority/source predicates such as `access_source`,
+`access_authority_source`, `authority_source`, `governed_by`, `court_order`,
+`policy_source`, or `source_authority` with shared item/action/recipient
+variables before answering from recipient predicates like `authorized_party` or
+`access_authorized_to`.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+
+After:
+
+This is a planner contract, not a replay result yet. It is intentionally small:
+no runtime rewrite, no helper adapter, no fixture names. It should be tested on
+the next no-helper QA replay after provider state is stable or a smaller
+targeted authority-source QA slice exists.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `195 passed`
+
+Lesson:
+
+Predicate-palette stability is not only aliasing. It is slot-role discipline:
+the same row family can expose recipient, authority, source, status, and item
+slots, and QA must ask the slot that matches the proposition type.
+
+Next pressure:
+
+Build a small targeted authority-source QA slice or run a short subset replay
+once the harness supports question selection. Avoid another full 40-question
+replay until the test can isolate authority/source movement without spending a
+full stochastic draw.
