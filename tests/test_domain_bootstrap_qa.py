@@ -295,6 +295,26 @@ def test_anchor_relation_hints_query_direct_trigger_surfaces() -> None:
     assert hints == ["triggered_by(moved_to_permit_queue, Anchor)."]
 
 
+def test_run_query_plan_exposes_bound_query_constants_as_evidence() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("source_record_text_atom(src_line_001, court_alpha_probate_court).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["source_record_text_atom(Row, court_alpha_probate_court)."])
+
+    result = rows[0]["result"]
+    assert result["status"] == "success"
+    assert result["bound_query_constants"] == [
+        {"arg_index": 2, "value": "court_alpha_probate_court", "display": "court alpha probate court"}
+    ]
+    assert result["rows"] == [
+        {
+            "Row": "src_line_001",
+            "BoundArg2": "court_alpha_probate_court",
+            "BoundArg2Display": "court alpha probate court",
+        }
+    ]
+
+
 def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearing() -> None:
     source = Path("scripts/run_domain_bootstrap_qa.py").read_text(encoding="utf-8")
 

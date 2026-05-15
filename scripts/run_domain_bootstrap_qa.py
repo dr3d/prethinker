@@ -1889,6 +1889,15 @@ def run_query_plan(
                 result = runtime.query_rows(query)
                 results.append({"query": query, "result": result})
 
+        if results:
+            last_item = results[-1]
+            if isinstance(last_item, dict) and isinstance(last_item.get("result"), dict):
+                last_query = str(last_item.get("query", effective_query) or effective_query)
+                last_item["result"] = _augment_result_with_bound_query_constants(
+                    query=last_query,
+                    result=last_item["result"],
+                )
+
         last_result = results[-1].get("result", {}) if results else {}
         source_record_repair = _source_record_field_sibling_repaired_query(effective_query)
         if source_record_repair:
@@ -1960,6 +1969,54 @@ def run_query_plan(
             results.append(negative_join)
         previous_queries.append(effective_query)
     return results
+
+
+def _augment_result_with_bound_query_constants(*, query: str, result: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(result, dict) or result.get("status") != "success":
+        return result
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return result
+    _predicate, args = parsed
+    bound_constants: list[dict[str, Any]] = []
+    for index, arg in enumerate(args, start=1):
+        item = str(arg or "").strip()
+        if not item or _is_prolog_variable(item):
+            continue
+        display = _display_source_date_atom(item)
+        bound: dict[str, Any] = {"arg_index": index, "value": item}
+        if display and display != item:
+            bound["display"] = display
+        bound_constants.append(bound)
+    if not bound_constants:
+        return result
+
+    augmented = dict(result)
+    augmented["bound_query_constants"] = bound_constants
+    rows = augmented.get("rows")
+    if isinstance(rows, list) and rows:
+        new_rows: list[Any] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                new_rows.append(row)
+                continue
+            enriched = dict(row)
+            for bound in bound_constants:
+                index = int(bound["arg_index"])
+                value = str(bound["value"])
+                enriched[f"BoundArg{index}"] = value
+                display = str(bound.get("display", "")).strip()
+                if display and display != value:
+                    enriched[f"BoundArg{index}Display"] = display
+            new_rows.append(enriched)
+        augmented["rows"] = new_rows
+    reasoning_basis = augmented.get("reasoning_basis", {})
+    if isinstance(reasoning_basis, dict):
+        augmented["reasoning_basis"] = {
+            **reasoning_basis,
+            "bound_query_constants_visible": True,
+        }
+    return augmented
 
 
 def _dedupe_helper_companion_rows(
