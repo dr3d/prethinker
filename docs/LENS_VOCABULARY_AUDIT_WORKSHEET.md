@@ -21,7 +21,8 @@ For a settled lens vocabulary:
 2. Build small unlike documents that contain the structural patterns.
 3. Compile with the current instrument.
 4. Audit term firing as:
-   - `structural`: term appears in admitted direct facts,
+   - `structural`: direct facts preserve the term's required slots,
+   - `shallow_structural`: direct facts name the term family but omit required slots,
    - `source_only`: term appears in source-record text only,
    - `not_applicable`: term family was absent from the source.
 5. Run focused QA where useful to test slot completeness.
@@ -253,3 +254,87 @@ artifact-creation slot family. For `presented`, the stronger next move is
 compile guidance: when a source states that someone presented/submitted/filed a
 document to a body, preserve presenter, artifact, recipient/body, and date or
 context when stated.
+
+## LV-003 - Evidence Provenance Predicate Contracts
+
+Date: 2026-05-15
+
+Before:
+
+LV-002 proved that token matching was too weak in two directions. It missed
+generic equivalent surfaces such as `created_by/3` for preparation, and it
+accepted shallow predicates such as `presented_to/2` as if they carried a full
+presentation relation. The compiler guidance also named provenance roles but
+did not spell out the slot contract.
+
+Prediction:
+
+If evidence provenance is a structural lens rather than a vocabulary list, then
+equivalent predicates should satisfy a term only when they preserve the needed
+roles. A `created_by(Artifact, Actor, Date)` row should count for preparation;
+a `presented_to(Artifact, Body)` row should remain shallow because it drops the
+presenting actor or event context.
+
+Intervention:
+
+- Added an explicit evidence provenance slot contract to source-authority
+  guidance and the global compile-surface invariants.
+- Extended the lens audit so each term can recognize generic predicate
+  contracts in addition to literal term tokens.
+- Kept slot arity as the gate: `presented_to/2` and `submitted_to/2` remain
+  shallow; `read_aloud/3` counts as a presentation surface because it preserves
+  actor, artifact, and context.
+- Added focused tests for equivalent preparation predicates and shallow versus
+  structural presentation rows.
+
+After:
+
+Artifact:
+
+- `docs/data/lens_vocabulary_audit/evidence_provenance_v1_predicate_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/evidence_provenance_v1_predicate_contract_audit_20260515.json`
+
+Slot-contract audit:
+
+- `structural=16`
+- `shallow_structural=2`
+- `source_only=1`
+- `not_applicable=5`
+
+Delta from LV-002:
+
+- `prepared`: `1 structural / 2 source-only` -> `2 structural / 1 source-only`
+- `presented`: `0 structural / 2 shallow / 1 N/A` -> `1 structural / 2 shallow / 0 N/A`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | N/A | Reading |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `admitted` | 2 | 0 | 0 | 1 | Stable where present. |
+| `commissioned` | 2 | 0 | 0 | 1 | Stable outside legal prose. |
+| `corrected` | 2 | 0 | 0 | 1 | Stable through correction/amendment rows. |
+| `dated` | 1 | 0 | 0 | 2 | Stable where explicit date predicates exist. |
+| `located` | 3 | 0 | 0 | 0 | Strong transfer. |
+| `prepared` | 2 | 0 | 1 | 0 | Improved by accepting artifact-creation predicates with actor slots. |
+| `presented` | 1 | 2 | 0 | 0 | One structural equivalent found; two recipient-only rows remain shallow. |
+| `relied_on` | 3 | 0 | 0 | 0 | Strong transfer. |
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py tests\test_domain_bootstrap_file.py -q` -> `32 passed`
+
+Lesson:
+
+Slot contracts are the right defense against fixture-shaped vocabulary at the
+lens layer. A term can transfer through a different predicate name, but only if
+the predicate carries the same structural roles. This prevents the audit from
+overfitting to internal predicate spelling while also refusing shallow rows that
+sound right but cannot answer provenance questions.
+
+Next pressure:
+
+Run the same contract-style audit on another settled lens vocabulary. The best
+next candidate is source authority/custody or rule composition, because those
+vocabularies are likely to contain official-document terms that may look
+generic while depending on development-corpus surface conventions.

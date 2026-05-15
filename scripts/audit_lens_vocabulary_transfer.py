@@ -26,17 +26,28 @@ class LensTerm:
     term: str
     tokens: tuple[str, ...]
     min_arity: int = 2
+    predicate_patterns: tuple[str, ...] = ()
 
 
 EVIDENCE_PROVENANCE_TERMS: tuple[LensTerm, ...] = (
-    LensTerm("prepared", ("prepared", "preparer", "drafted", "wrote", "written"), 2),
-    LensTerm("presented", ("presented", "submitted", "filed", "introduced"), 3),
-    LensTerm("dated", ("dated", "date"), 2),
-    LensTerm("admitted", ("admitted", "entered"), 2),
-    LensTerm("relied_on", ("relied", "relies", "basis", "cited"), 2),
-    LensTerm("commissioned", ("commissioned", "requested", "ordered"), 3),
-    LensTerm("corrected", ("corrected", "correction", "revised", "amended"), 2),
-    LensTerm("located", ("located", "found", "stored", "held"), 2),
+    LensTerm(
+        "prepared",
+        ("prepared", "preparer", "drafted", "wrote", "written"),
+        2,
+        ("prepared_by", "report_prepared_by", "created_by", "written_by", "drafted_by", "authored_by"),
+    ),
+    LensTerm(
+        "presented",
+        ("presented", "submitted", "filed", "introduced"),
+        3,
+        ("presented_by", "presented_to", "submitted_by", "submitted_to", "filed_by", "filed_with", "introduced_by", "read_aloud"),
+    ),
+    LensTerm("dated", ("dated", "date"), 2, (".*_date", "dated")),
+    LensTerm("admitted", ("admitted", "entered"), 2, ("admitted_into", "admitted_by", "entered_into", "entered_by")),
+    LensTerm("relied_on", ("relied", "relies", "basis", "cited"), 2, ("relied_on", "basis_for", "cited_by", "cited_in", "used_as_basis")),
+    LensTerm("commissioned", ("commissioned", "requested", "ordered"), 3, ("commissioned_by", "commissioned_test", "requested_by", "ordered_by")),
+    LensTerm("corrected", ("corrected", "correction", "revised", "amended"), 2, ("corrected_by", "correction_.*", "revised_by", "amended_.*")),
+    LensTerm("located", ("located", "found", "stored", "held"), 2, ("located_in", "found_in", "stored_in", "held_in")),
 )
 
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
@@ -133,8 +144,11 @@ def _audit_term(
     source_hits = [token for token in term.tokens if token in source_tokens]
     direct_hits = [token for token in term.tokens if token in direct_tokens]
     slot_rows = _slot_rows_for_term(term, direct_rows)
-    if direct_hits:
-        status = "structural" if slot_rows else "shallow_structural"
+    shallow_rows = _shallow_rows_for_term(term, direct_rows)
+    if slot_rows:
+        status = "structural"
+    elif direct_hits or shallow_rows:
+        status = "shallow_structural"
     elif source_hits:
         status = "source_only"
     else:
@@ -146,6 +160,7 @@ def _audit_term(
         "source_hits": source_hits,
         "direct_hits": direct_hits,
         "slot_rows": slot_rows[:5],
+        "shallow_rows": shallow_rows[:5],
     }
 
 
@@ -212,13 +227,32 @@ def _split_fact_args(raw_args: str) -> list[str]:
 def _slot_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
     out: list[str] = []
     for row in direct_rows:
-        predicate_tokens = set(TOKEN_RE.findall(str(row["predicate"]).lower()))
+        predicate = str(row["predicate"]).lower()
+        predicate_tokens = set(TOKEN_RE.findall(predicate))
         arg_count = len(row["args"])
         if arg_count < term.min_arity:
             continue
-        if any(token in predicate_tokens for token in term.tokens):
+        if _predicate_matches(term, predicate, predicate_tokens):
             out.append(str(row["fact"]))
     return out
+
+
+def _shallow_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        predicate_tokens = set(TOKEN_RE.findall(predicate))
+        if len(row["args"]) >= term.min_arity:
+            continue
+        if _predicate_matches(term, predicate, predicate_tokens):
+            out.append(str(row["fact"]))
+    return out
+
+
+def _predicate_matches(term: LensTerm, predicate: str, predicate_tokens: set[str]) -> bool:
+    if any(re.fullmatch(pattern, predicate) for pattern in term.predicate_patterns):
+        return True
+    return any(token in predicate_tokens for token in term.tokens)
 
 
 def _tokens_for_facts(facts: list[str]) -> set[str]:

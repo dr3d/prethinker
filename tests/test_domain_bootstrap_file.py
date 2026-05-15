@@ -134,6 +134,10 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
     assert "source document id" in context
     assert "source actor/author" in context
     assert "governed subject/item/claim/action" in context
+    assert "Evidence provenance slot contract" in context
+    assert "artifact/source id" in context
+    assert "recipient, admitting body, relying body, or presentation context" in context
+    assert "role-only, recipient-only, or context-only rows" in context
 
     selected = "\n".join(
         _source_compiler_context(
@@ -429,6 +433,8 @@ def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatc
     assert "relation between the subject id and the section/source coordinate" in user_message["content"]
     assert "authority/source relation separately from the party receiving permission" in user_message["content"]
     assert "source document id, source actor/author" in user_message["content"]
+    assert "provenance slot contract directly" in user_message["content"]
+    assert "preparer/presenter/submitter/filer/commissioner" in user_message["content"]
     assert "Candidate predicate names are not enough" in user_message["content"]
 
 

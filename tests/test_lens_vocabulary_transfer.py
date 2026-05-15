@@ -50,6 +50,36 @@ def test_lens_vocabulary_audit_marks_shallow_structural_when_slots_are_missing(t
     assert rows["presented"] == "shallow_structural"
 
 
+def test_lens_vocabulary_audit_accepts_equivalent_preparation_predicates(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, rowan_wrote_the_safety_note_on_2026_04_06).",
+            "created_by(safety_note, rowan_hale, 2026_04_06).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="evidence_provenance", terms=EVIDENCE_PROVENANCE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["prepared"] == "structural"
+
+
+def test_lens_vocabulary_audit_requires_presentation_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, laila_read_the_safety_note_aloud_at_closing_huddle).",
+            "read_aloud(laila_chen, safety_note, closing_huddle).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="evidence_provenance", terms=EVIDENCE_PROVENANCE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["presented"] == "structural"
+
+
 def test_lens_vocabulary_summary_counts_terms(tmp_path: Path) -> None:
     first = audit_compile(
         _write_compile(
