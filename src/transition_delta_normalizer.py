@@ -165,7 +165,114 @@ def normalize_transition_delta_facts(facts: list[str]) -> list[dict[str, Any]]:
                 }
             )
 
+    observations.extend(_source_record_table_transition_observations(parsed))
     return observations
+
+
+def _source_record_table_transition_observations(parsed: list[Fact]) -> list[dict[str, Any]]:
+    sections: dict[str, str] = {}
+    fields_by_row: dict[str, dict[str, str]] = defaultdict(dict)
+
+    for predicate, args in parsed:
+        if predicate == "source_record_section" and len(args) >= 2:
+            sections[args[0]] = args[1]
+        elif predicate == "source_record_field" and len(args) >= 3:
+            row, field, value = args[:3]
+            fields_by_row[row][field] = value
+
+    if not fields_by_row:
+        return []
+
+    rows: list[dict[str, str]] = []
+    for row, fields in fields_by_row.items():
+        item = {"row": row, "section": sections.get(row, "")}
+        item.update(fields)
+        rows.append(item)
+
+    observations: list[dict[str, Any]] = []
+    for key_field in ("zone", "record", "document", "item", "subject"):
+        value_pairs = (("order", "new_order"), ("status", "new_status"), ("state", "new_state"), ("value", "new_value"))
+        old_rows = [row for row in rows if key_field in row]
+        for old_field, new_field in value_pairs:
+            before = [row for row in old_rows if old_field in row]
+            after = [row for row in old_rows if new_field in row]
+            if not before or not after:
+                continue
+            before_by_key = _first_by_key(before, key_field)
+            after_by_key = _first_by_key(after, key_field)
+            for key in sorted(set(before_by_key) & set(after_by_key)):
+                old_row = before_by_key[key]
+                new_row = after_by_key[key]
+                old_value = _normalize_transition_value(old_row[old_field])
+                new_value = _normalize_transition_value(new_row[new_field])
+                if not old_value or not new_value:
+                    continue
+                observations.append(
+                    {
+                        "kind": "source_record_value_transition",
+                        "subject": key,
+                        "field": old_field,
+                        "old_value": old_value,
+                        "new_value": new_value,
+                        "predecessor": old_row["row"],
+                        "successor": new_row["row"],
+                        "predecessor_section": old_row.get("section", ""),
+                        "successor_section": new_row.get("section", ""),
+                        "source_predicate": "source_record_field",
+                    }
+                )
+            for key in sorted(set(after_by_key) - set(before_by_key)):
+                new_row = after_by_key[key]
+                new_value = _normalize_transition_value(new_row[new_field])
+                if not new_value:
+                    continue
+                observations.append(
+                    {
+                        "kind": "source_record_subject_added",
+                        "subject": key,
+                        "field": old_field,
+                        "new_value": new_value,
+                        "successor": new_row["row"],
+                        "successor_section": new_row.get("section", ""),
+                        "source_predicate": "source_record_field",
+                    }
+                )
+
+    return _dedupe_observations(observations)
+
+
+def _first_by_key(rows: list[dict[str, str]], key_field: str) -> dict[str, dict[str, str]]:
+    result: dict[str, dict[str, str]] = {}
+    for row in rows:
+        key = row.get(key_field, "")
+        if key and key not in result:
+            result[key] = row
+    return result
+
+
+def _normalize_transition_value(value: str) -> str:
+    item = str(value or "").strip()
+    for prefix in ("downgraded_to_", "upgraded_to_", "changed_to_", "set_to_"):
+        if item.startswith(prefix):
+            item = item[len(prefix) :]
+            break
+    for suffix in ("_unchanged", "_current"):
+        if item.endswith(suffix):
+            item = item[: -len(suffix)]
+            break
+    return item
+
+
+def _dedupe_observations(observations: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[str] = set()
+    deduped: list[dict[str, Any]] = []
+    for observation in observations:
+        key = repr(sorted(observation.items()))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(observation)
+    return deduped
 
 
 def summarize_observations(observations: list[dict[str, Any]]) -> dict[str, Any]:

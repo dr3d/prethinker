@@ -511,3 +511,120 @@ Keep the normalizer audit-only for another cycle. Apply it to future transition
 probes and one internal fixture compile before integrating it into any selector
 or QA pathway. The key question is coverage of reusable predicate contracts,
 not answer-score improvement yet.
+
+## TD-006 - Internal Fixture Normalizer Replay
+
+Date: 2026-05-15
+
+Question:
+
+What happens when the audit-only transition/delta normalizer is applied to an
+internal fixture with real revision/correction structure, while QA remains
+zero-helper and unchanged?
+
+Before:
+
+TD-005 proved the normalizer on focused transition probes. The open question
+was whether the same audit vocabulary would see transition structure inside an
+internal story-world fixture, where historical helper pressure and source
+ledger fallback are much higher.
+
+Prediction:
+
+If modern internal compiles emit direct domain transition facts, the normalizer
+should recover observations from admitted predicates such as supersession,
+status transition, or field-delta rows. If the transition evidence mostly lives
+in source-record ledger rows, the first pass should undercount until a
+source-record table recognizer is added.
+
+Intervention:
+
+Compiled `datasets/story_worlds/wildfire_evacuation_revision_order` with the
+current instrument and ran zero-helper QA over all 40 questions. Then ran the
+audit-only normalizer over the compile output.
+
+Initial normalizer result:
+
+- observations=`0`
+
+Inspection showed the compile admitted sparse domain facts and many
+source-record table rows. The source-record ledger contained the visible
+transition evidence:
+
+- original order table rows with `order`;
+- revised order table rows with `new_order`;
+- shared row key `zone`;
+- sections distinguishing original and revised order documents.
+
+Added a generic audit recognizer for repeated source-record table snapshots:
+
+- key fields: `zone`, `record`, `document`, `item`, `subject`;
+- value pairs: `order/new_order`, `status/new_status`, `state/new_state`,
+  `value/new_value`;
+- generic transition modifiers such as `downgraded_to_`, `upgraded_to_`, and
+  `_unchanged` are normalized away.
+
+After:
+
+No-helper QA:
+
+- questions=`40`
+- exact/partial/miss=`33 / 2 / 5`
+- helper rows=`0`
+- write proposals=`0`
+- failure surfaces: `query_surface_gap=4`, `hybrid_join_gap=2`,
+  `answer_surface_gap=1`
+
+Normalizer:
+
+- compile files=`1`
+- observations=`5`
+- kind counts:
+  - `source_record_value_transition`: `4`
+  - `source_record_subject_added`: `1`
+
+Recovered observations:
+
+- `tc_7`: `mandatory_evacuation` -> `evacuation_warning`
+- `tc_8`: `mandatory_evacuation` -> `mandatory_evacuation`
+- `tc_9`: `evacuation_warning` -> `mandatory_evacuation`
+- `tc_10`: `shelter_in_place_advisory` -> `evacuation_warning`
+- `tc_11`: newly added with `evacuation_warning`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_qa_nohelpers_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_qa_nohelpers_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_normalization_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_internal_wildfire_normalization_audit_20260515.json`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py ... --fixture wildfire_evacuation_revision_order ...` ->
+  parsed OK, admitted/skipped=`46 / 82`
+- `python scripts\run_domain_bootstrap_qa_batch.py ... --helper-companion-row-limit 0 ...` ->
+  `33 / 2 / 5`, helpers=`0`
+- `python scripts\audit_transition_delta_normalization.py ...` ->
+  observations=`5`
+- `python -m pytest tests -q` -> `1246 passed, 2 subtests passed`
+
+Lesson:
+
+The internal fixture does not disprove the transition/delta layer. It shows
+where the layer has to look. Focused probes produced domain predicates; the
+internal fixture preserved transition structure mainly in deterministic source
+ledger table rows. The normalizer can recover that structure without changing
+QA or adding helpers.
+
+This is the first concrete bridge from helper-heavy internal fixtures toward
+audit-only deterministic normalization: do not ask helpers to carry this
+transition structure if source-record table geometry already preserves it.
+
+Next pressure:
+
+Run this audit on 2-3 more helper-heavy internal fixtures before integrating
+anything. The key measurement is whether source-record table normalization
+recurs across unlike internal documents, or whether this replay is specific to
+evacuation/order tables.

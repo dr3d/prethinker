@@ -87,6 +87,44 @@ def test_normalizes_status_transition_with_reason_and_timestamp() -> None:
     } in observations
 
 
+def test_normalizes_source_record_table_order_transitions() -> None:
+    observations = normalize_transition_delta_facts(
+        [
+            "source_record_section(row_a, original_policy).",
+            "source_record_field(row_a, zone, zone_7).",
+            "source_record_field(row_a, order, mandatory_evacuation).",
+            "source_record_section(row_b, revised_policy).",
+            "source_record_field(row_b, zone, zone_7).",
+            "source_record_field(row_b, new_order, downgraded_to_evacuation_warning).",
+            "source_record_section(row_c, revised_policy).",
+            "source_record_field(row_c, zone, zone_8).",
+            "source_record_field(row_c, new_order, evacuation_warning).",
+        ]
+    )
+
+    assert {
+        "kind": "source_record_value_transition",
+        "subject": "zone_7",
+        "field": "order",
+        "old_value": "mandatory_evacuation",
+        "new_value": "evacuation_warning",
+        "predecessor": "row_a",
+        "successor": "row_b",
+        "predecessor_section": "original_policy",
+        "successor_section": "revised_policy",
+        "source_predicate": "source_record_field",
+    } in observations
+    assert {
+        "kind": "source_record_subject_added",
+        "subject": "zone_8",
+        "field": "order",
+        "new_value": "evacuation_warning",
+        "successor": "row_c",
+        "successor_section": "revised_policy",
+        "source_predicate": "source_record_field",
+    } in observations
+
+
 def test_summarizes_observations_by_kind() -> None:
     summary = summarize_observations(
         [

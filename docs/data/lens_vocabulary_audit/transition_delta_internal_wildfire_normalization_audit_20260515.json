@@ -1,0 +1,81 @@
+{
+  "file_count": 1,
+  "results": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\transition_delta_internal_compile_20260515\\wildfire_evacuation_revision_order\\domain_bootstrap_file_20260515T192721066327Z_source_qwen-qwen3-6-35b-a3b.json",
+      "observations": [
+        {
+          "field": "order",
+          "kind": "source_record_value_transition",
+          "new_value": "evacuation_warning",
+          "old_value": "shelter_in_place_advisory",
+          "predecessor": "src_line_0020",
+          "predecessor_section": "v_2_original_evacuation_order_eo_2026_014a",
+          "source_predicate": "source_record_field",
+          "subject": "tc_10",
+          "successor": "src_line_0037",
+          "successor_section": "v_3_revised_evacuation_order_eo_2026_014b"
+        },
+        {
+          "field": "order",
+          "kind": "source_record_value_transition",
+          "new_value": "evacuation_warning",
+          "old_value": "mandatory_evacuation",
+          "predecessor": "src_line_0017",
+          "predecessor_section": "v_2_original_evacuation_order_eo_2026_014a",
+          "source_predicate": "source_record_field",
+          "subject": "tc_7",
+          "successor": "src_line_0034",
+          "successor_section": "v_3_revised_evacuation_order_eo_2026_014b"
+        },
+        {
+          "field": "order",
+          "kind": "source_record_value_transition",
+          "new_value": "mandatory_evacuation",
+          "old_value": "mandatory_evacuation",
+          "predecessor": "src_line_0018",
+          "predecessor_section": "v_2_original_evacuation_order_eo_2026_014a",
+          "source_predicate": "source_record_field",
+          "subject": "tc_8",
+          "successor": "src_line_0035",
+          "successor_section": "v_3_revised_evacuation_order_eo_2026_014b"
+        },
+        {
+          "field": "order",
+          "kind": "source_record_value_transition",
+          "new_value": "mandatory_evacuation",
+          "old_value": "evacuation_warning",
+          "predecessor": "src_line_0019",
+          "predecessor_section": "v_2_original_evacuation_order_eo_2026_014a",
+          "source_predicate": "source_record_field",
+          "subject": "tc_9",
+          "successor": "src_line_0036",
+          "successor_section": "v_3_revised_evacuation_order_eo_2026_014b"
+        },
+        {
+          "field": "order",
+          "kind": "source_record_subject_added",
+          "new_value": "evacuation_warning",
+          "source_predicate": "source_record_field",
+          "subject": "tc_11",
+          "successor": "src_line_0038",
+          "successor_section": "v_3_revised_evacuation_order_eo_2026_014b"
+        }
+      ],
+      "summary": {
+        "kind_counts": {
+          "source_record_subject_added": 1,
+          "source_record_value_transition": 4
+        },
+        "observation_count": 5
+      }
+    }
+  ],
+  "summary": {
+    "kind_counts": {
+      "source_record_subject_added": 1,
+      "source_record_value_transition": 4
+    },
+    "observation_count": 5
+  }
+}
