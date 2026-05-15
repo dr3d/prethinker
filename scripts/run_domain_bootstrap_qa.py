@@ -512,6 +512,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--include-legacy-native-helper-adapters",
+        action="store_true",
+        help=(
+            "Opt in to older native-corpus helper adapters for forensic compatibility. "
+            "Default QA relies on direct compile surfaces plus current generic companions."
+        ),
+    )
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
@@ -650,6 +658,7 @@ def main() -> int:
         evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
         evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
         helper_companion_row_limit=args.helper_companion_row_limit,
+        include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
         classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     for item in questions:
@@ -681,6 +690,7 @@ def main() -> int:
                 evidence_bundle_context_max_clauses=int(args.evidence_bundle_context_max_clauses or 0),
                 evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
                 helper_companion_row_limit=args.helper_companion_row_limit,
+                include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -757,6 +767,7 @@ def build_cache_context(
     evidence_bundle_context_max_clauses: int,
     evidence_bundle_context_broad_floor: int,
     helper_companion_row_limit: int | None,
+    include_legacy_native_helper_adapters: bool,
     classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     return {
@@ -807,6 +818,7 @@ def build_cache_context(
         "evidence_bundle_context_broad_floor": int(evidence_bundle_context_broad_floor or 0),
         "helper_companion_row_limit": helper_companion_row_limit,
         "helper_companion_budget_ranker": "lexical_query_overlap_v1",
+        "include_legacy_native_helper_adapters": bool(include_legacy_native_helper_adapters),
         "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
@@ -1307,6 +1319,7 @@ def run_one_question(
     evidence_bundle_context_max_clauses: int,
     evidence_bundle_context_broad_floor: int,
     helper_companion_row_limit: int | None,
+    include_legacy_native_helper_adapters: bool,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     kb_context_pack = {
@@ -1420,13 +1433,18 @@ def run_one_question(
     )
     facts_out = [str(q).strip() for q in clauses.get("facts", []) if str(q).strip()]
     rules_out = [str(q).strip() for q in clauses.get("rules", []) if str(q).strip()]
-    query_results = run_query_plan(runtime, queries)
+    query_results = run_query_plan(
+        runtime,
+        queries,
+        include_legacy_native_helpers=include_legacy_native_helper_adapters,
+    )
     evidence_plan_query_results: list[dict[str, Any]] = []
     if evidence_plan is not None and bool(execute_evidence_bundle_plan):
         evidence_plan_query_results = run_evidence_bundle_plan_queries(
             runtime=runtime,
             evidence_plan=evidence_plan,
             kb_inventory=kb_inventory,
+            include_legacy_native_helpers=include_legacy_native_helper_adapters,
         )
         query_results = [*query_results, *evidence_plan_query_results]
     query_results = _dedupe_helper_query_results(query_results)
@@ -1704,7 +1722,12 @@ def _location_floor_hint_queries(
     return out
 
 
-def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[str, Any]]:
+def run_query_plan(
+    runtime: CorePrologRuntime,
+    queries: list[str],
+    *,
+    include_legacy_native_helpers: bool = True,
+) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
     delivered_helper_rows: set[tuple[str, str]] = set()
@@ -1813,7 +1836,11 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
             if status_interval:
                 append_companion(status_interval)
                 last_result = status_interval.get("result", {})
-        for domain_companion in _domain_companion_queries(runtime, query=effective_query):
+        for domain_companion in _domain_companion_queries(
+            runtime,
+            query=effective_query,
+            include_legacy_native_helpers=include_legacy_native_helpers,
+        ):
             append_companion(domain_companion)
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
@@ -1825,7 +1852,11 @@ def run_query_plan(runtime: CorePrologRuntime, queries: list[str]) -> list[dict[
         companion = _evidence_table_companion_query(runtime, query=effective_query)
         append_companion(companion)
         if not used_relaxed_fallback:
-            for domain_companion in _domain_companion_queries(runtime, query=effective_query):
+            for domain_companion in _domain_companion_queries(
+                runtime,
+                query=effective_query,
+                include_legacy_native_helpers=include_legacy_native_helpers,
+            ):
                 append_companion(domain_companion)
         temporal_join = _temporal_join_with_previous(runtime, previous_queries=previous_queries, query=effective_query)
         if temporal_join:
@@ -3602,7 +3633,12 @@ def _normalize_status_atom(value: str) -> str:
     return text.removeprefix("status_")
 
 
-def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list[dict[str, Any]]:
+def _domain_companion_queries(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    include_legacy_native_helpers: bool = True,
+) -> list[dict[str, Any]]:
     parsed = parse_prolog_query(query)
     if parsed is None:
         return []
@@ -3649,35 +3685,22 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
-    table_body_count = _source_record_table_body_count_companion(runtime, predicate=predicate, args=args, query=query)
-    if table_body_count:
-        source_record_companions.append(table_body_count)
-    section_display = _source_record_section_display_companion(runtime, predicate=predicate, query=query)
-    if section_display:
-        source_record_companions.append(section_display)
-    packet_metadata = _source_record_packet_metadata_companion(runtime, predicate=predicate, args=args, query=query)
-    if packet_metadata:
-        source_record_companions.append(packet_metadata)
-    homeroom_alias = _homeroom_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
-    if homeroom_alias:
-        source_record_companions.append(homeroom_alias)
-    roster_table_alias = _roster_table_member_alias_companion(runtime, predicate=predicate, args=args, query=query)
-    if roster_table_alias:
-        source_record_companions.append(roster_table_alias)
-    roster_table_counts = _roster_table_count_companion(runtime, predicate=predicate, args=args, query=query)
-    if roster_table_counts:
-        source_record_companions.append(roster_table_counts)
-    grant_award = _grant_award_companion(runtime, predicate=predicate, args=args, query=query)
-    if grant_award:
-        source_record_companions.append(grant_award)
-    industrial_sensor = _industrial_sensor_companion(runtime, predicate=predicate, args=args, query=query)
-    if industrial_sensor:
-        source_record_companions.append(industrial_sensor)
-    clinic_recall = _clinic_device_recall_companion(runtime, predicate=predicate, args=args, query=query)
-    if clinic_recall:
-        source_record_companions.append(clinic_recall)
+    if include_legacy_native_helpers:
+        for legacy_companion in (
+            _source_record_table_body_count_companion(runtime, predicate=predicate, args=args, query=query),
+            _source_record_section_display_companion(runtime, predicate=predicate, query=query),
+            _source_record_packet_metadata_companion(runtime, predicate=predicate, args=args, query=query),
+            _homeroom_member_alias_companion(runtime, predicate=predicate, args=args, query=query),
+            _roster_table_member_alias_companion(runtime, predicate=predicate, args=args, query=query),
+            _roster_table_count_companion(runtime, predicate=predicate, args=args, query=query),
+            _grant_award_companion(runtime, predicate=predicate, args=args, query=query),
+            _industrial_sensor_companion(runtime, predicate=predicate, args=args, query=query),
+            _clinic_device_recall_companion(runtime, predicate=predicate, args=args, query=query),
+        ):
+            if legacy_companion:
+                source_record_companions.append(_mark_legacy_native_helper_adapter(legacy_companion))
     if source_record_companions:
-        if predicate in {
+        if include_legacy_native_helpers and predicate in {
             "adult_role",
             "attendance_scan",
             "bus_assignment",
@@ -3698,20 +3721,21 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
         }:
             roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
             if roster_state:
-                source_record_companions.append(roster_state)
+                source_record_companions.append(_mark_legacy_native_helper_adapter(roster_state))
         return source_record_companions
-    clock_sync = _source_record_clock_sync_companion(runtime, predicate=predicate, query=query)
-    if clock_sync:
-        return [clock_sync]
-    authority_custody = _authority_custody_companion(runtime, predicate=predicate, query=query)
-    if authority_custody:
-        return [authority_custody]
-    clear_sample_clock = _clear_sample_clock_pause_companion(runtime, predicate=predicate, query=query)
-    if clear_sample_clock:
-        return [clear_sample_clock]
-    roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
-    if roster_state:
-        return [roster_state]
+    if include_legacy_native_helpers:
+        clock_sync = _source_record_clock_sync_companion(runtime, predicate=predicate, query=query)
+        if clock_sync:
+            return [_mark_legacy_native_helper_adapter(clock_sync)]
+        authority_custody = _authority_custody_companion(runtime, predicate=predicate, query=query)
+        if authority_custody:
+            return [_mark_legacy_native_helper_adapter(authority_custody)]
+        clear_sample_clock = _clear_sample_clock_pause_companion(runtime, predicate=predicate, query=query)
+        if clear_sample_clock:
+            return [_mark_legacy_native_helper_adapter(clear_sample_clock)]
+        roster_state = _roster_state_companion(runtime, predicate=predicate, args=args, query=query)
+        if roster_state:
+            return [_mark_legacy_native_helper_adapter(roster_state)]
     initial_status = _initial_status_scope_companion(runtime, predicate=predicate, args=args, query=query)
     if initial_status:
         return [initial_status]
@@ -3932,6 +3956,27 @@ def _domain_companion_queries(runtime: CorePrologRuntime, *, query: str) -> list
             )
         return out
     return []
+
+
+def _mark_legacy_native_helper_adapter(companion: dict[str, Any]) -> dict[str, Any]:
+    result = companion.get("result", {}) if isinstance(companion, dict) else {}
+    if not isinstance(result, dict):
+        return companion
+    basis = result.get("reasoning_basis", {})
+    if not isinstance(basis, dict):
+        basis = {}
+    return {
+        **companion,
+        "result": {
+            **result,
+            "reasoning_basis": {
+                **basis,
+                "adapter_status": "legacy_native_compatibility_adapter",
+                "default_delivery": "disabled",
+                "replacement_direction": "prefer direct compile-surface predicates over query-time helper bridges",
+            },
+        },
+    }
 
 
 def _source_record_packet_metadata_companion(
@@ -12468,6 +12513,7 @@ def run_evidence_bundle_plan_queries(
     runtime: CorePrologRuntime,
     evidence_plan: dict[str, Any],
     kb_inventory: dict[str, Any],
+    include_legacy_native_helpers: bool = True,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -12495,6 +12541,7 @@ def run_evidence_bundle_plan_queries(
                         filter_spec=source_text_filter,
                         bundle_id=bundle_id,
                         purpose=purpose,
+                        include_legacy_native_helpers=include_legacy_native_helpers,
                     )
                 )
                 continue
@@ -12545,7 +12592,11 @@ def run_evidence_bundle_plan_queries(
             query_basis[query] = {"bundle_id": bundle_id, "purpose": purpose}
     if not plan_queries:
         return results
-    for item in run_query_plan(runtime, plan_queries):
+    for item in run_query_plan(
+        runtime,
+        plan_queries,
+        include_legacy_native_helpers=include_legacy_native_helpers,
+    ):
         item = dict(item)
         result = item.get("result", {})
         derived_from = [
@@ -12606,12 +12657,17 @@ def _run_source_text_contains_filter(
     filter_spec: dict[str, str],
     bundle_id: str,
     purpose: str,
+    include_legacy_native_helpers: bool = True,
 ) -> dict[str, Any]:
     line_var = filter_spec["line_var"]
     text_var = filter_spec["text_var"]
     needle = _normalize_text_filter_atom(filter_spec["needle"])
     repaired_query = f"source_record_text_atom({line_var}, {text_var})."
-    item = run_query_plan(runtime, [repaired_query])[0]
+    item = run_query_plan(
+        runtime,
+        [repaired_query],
+        include_legacy_native_helpers=include_legacy_native_helpers,
+    )[0]
     result = item.get("result", {}) if isinstance(item, dict) else {}
     rows = result.get("rows", []) if isinstance(result, dict) else []
     filtered_rows = [

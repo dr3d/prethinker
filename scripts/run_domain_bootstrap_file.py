@@ -345,6 +345,7 @@ OPERATIONAL_RECORD_STATUS_CONTEXT_V1 = [
     "Operational event-outcome rule: completed inspections, displays, hearings, pickups, repairs, or reviews need outcome rows even when the related license immediately expires or remains pending afterward. Event occurrence/outcome and current permit status are different surfaces.",
     "Operational itemized-failure rule: aggregate inspection failures should preserve itemized failed subjects and stated deficiency reasons when the source lists them. Count rows and status rows are useful but not enough for which-and-why questions.",
     "Operational quarantine/lot-status rule: for quarantine, nursery, greenhouse, lab, lot, sample, movement, destruction, or disease-control records, preserve lot id, location, species, count, subset count, sample count, positive/negative result count, status transition, movement interval, destruction deadline/completion, supervisor/witness, and final current status as separate queryable rows rather than hiding them inside a status summary.",
+    "Operational direct-surface rule: for sensor, instrument, clock-drift, threshold, correction, or breach sheets, emit direct rows for sensor id, raw timestamp, corrected timestamp, correction rule, reading value, threshold, event status, inspection window, and breach classification. Do not rely on query-time sensor helpers to reconstruct those surfaces later.",
 ]
 
 PROBATE_PROPERTY_STATUS_CONTEXT_V1 = [
@@ -356,6 +357,7 @@ PROBATE_PROPERTY_STATUS_CONTEXT_V1 = [
     "Probate/property inventory rule: named inherited sets and compound property units are query-bearing. Preserve both the aggregate unit and its member objects, and keep the same atoms across part_of, inheritance, will_transfer, court_ruling, ownership/status, and possession rows.",
     "Probate/property arithmetic rule: stated balances, payments, seasonal values, totals, and over-recovery comparisons should remain queryable. Do not collapse them into a pledge-satisfied label if amount/value predicates or compatible detail rows are available.",
     "Probate/property QA-readiness rule: choose one canonical atom for each person, estate, property unit, organization, court, debt, pledge, claim, and date. Reuse those atoms across transaction, evidence, status, and ruling rows so later QA can join without alias repair.",
+    "Custody direct-surface rule: for any custody, access, loan, specimen, archive, property, or object-control register, emit direct rows for physical holder, legal owner, custody status, location, access event, authorizing source, recall/return clause, and recall-issued state when the source states them. Do not depend on query-time custody helpers to bridge from source-record prose.",
 ]
 
 COMPETITION_ROLE_ALIAS_CONTEXT_V1 = [
@@ -405,6 +407,7 @@ ADMINISTRATIVE_ROSTER_TIMELINE_CONTEXT_V1 = [
     "Administrative completion-report rule: closing reports are compact authoritative summaries. Preserve each listed incident/outcome as a separate row, including illness, injury, absence, hazard report, unresolved discrepancy, final attendance, and no-touch/no-hazard determinations.",
     "Administrative attendance/count rule: attendance counts and exceptions need scoped rows: full trip attendance, session attendance, absent/ill/injured participants, chaperone presence, return-coach count, and final accounted-for status are different surfaces.",
     "Administrative incident-report rule: incident reports can conflict. Preserve reporter, filing time, claim content, observed aftermath, unresolved discrepancy, and authoritative non-finding separately. Do not merge competing student reports into one objective event unless the source states a finding.",
+    "Administrative direct-surface rule: for any roster-like document, emit direct membership, assignment, supervisor, version/status, change-event, count, and minimum/ratio-rule rows using the profile's current predicate palette. Do not depend on query-time roster helpers or old school-trip predicate names to recover roster state later.",
 ]
 
 RULE_INGESTION_SOURCE_COMPILER_CONTEXT_V1 = [

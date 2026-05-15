@@ -33,6 +33,20 @@ def test_qa_batch_accepts_markdown_answer_key_without_oracle(tmp_path: Path) -> 
     assert "--judge-reference-answers" in command
     assert "--classify-failure-surfaces" in command
     assert "--no-cache" in command
+    assert "--include-legacy-native-helper-adapters" not in command
+
+    legacy_command = _build_command(
+        job,
+        model="test-model",
+        base_url="http://example.test/v1",
+        limit=3,
+        timeout=10,
+        evidence_bundle=False,
+        classify_failure_surfaces=True,
+        cache=False,
+        include_legacy_native_helper_adapters=True,
+    )
+    assert "--include-legacy-native-helper-adapters" in legacy_command
 
 
 def test_qa_batch_summary_rolls_up_helper_pressure() -> None:

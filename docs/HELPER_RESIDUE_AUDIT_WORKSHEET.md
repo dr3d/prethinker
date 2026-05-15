@@ -560,3 +560,110 @@ Next pressure:
     predicates, or
   - keep it quarantined as a forensic/native compatibility adapter, not as
     current architecture.
+
+## HR-008 - Quarantine Legacy Native Helper Adapters
+
+Date: 2026-05-14
+
+Before:
+
+- The unlike helper transfer probe showed that modern compiles can answer
+  roster, custody, and sensor structures through direct predicates with `0`
+  helper rows.
+- The native corpus still delivered high-volume helper rows because old helper
+  families bridged from older palette names and fixture-era source shapes.
+- The risk was architectural confusion: helper delivery could look like current
+  substrate when it was really legacy compatibility scaffolding.
+
+Prediction:
+
+- If the native helper families are mostly legacy adapters, they can be disabled
+  by default without changing the generic helper substrate.
+- A useful quarantine must cover every query execution path, including evidence
+  bundle repairs, not only the primary query list.
+- Compile guidance should move in the opposite direction: make direct predicates
+  more explicit so new compiles do not need query-time helper bridges.
+
+Intervention:
+
+- Added an opt-in CLI flag:
+  `--include-legacy-native-helper-adapters`.
+- Default QA and batch QA now run with legacy native adapters disabled.
+- Marked opt-in legacy adapter results with
+  `adapter_status=legacy_native_compatibility_adapter`,
+  `default_delivery=disabled`, and a replacement direction that prefers direct
+  compile surfaces.
+- Quarantined the old native adapter families behind that opt-in gate:
+  roster/table counts, school-style alias rows, packet metadata, grant/sensor
+  adapters, clinic recall support, clock-sync support, custody support, clear
+  sample clock pause support, and roster-state support.
+- Strengthened compile guidance for:
+  - roster-like documents: direct membership, assignment, supervisor,
+    version/status, change-event, count, and minimum/ratio-rule rows,
+  - custody/access/control registers: physical holder, legal owner, custody
+    status, location, access event, authorizing source, recall/return clause,
+    and recall-issued state,
+  - sensor/clock/threshold sheets: sensor id, raw timestamp, corrected
+    timestamp, correction rule, reading value, threshold, event status,
+    inspection window, and breach classification.
+
+After:
+
+- A first no-legacy top-five smoke exposed a leak: evidence-bundle query repair
+  still called `run_query_plan()` through its default legacy-compatible path and
+  delivered old helper rows.
+- Fixed the propagation so `include_legacy_native_helpers=False` flows through:
+  - primary QA query execution,
+  - evidence-bundle plan execution,
+  - source-text containment repair.
+- A second smoke with unbounded helper delivery and evidence bundles on produced
+  `0` helper rows across `24` high-pressure native smoke questions:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `count_composition_roster` | 8 | 7 | 1 | 0 | 0 |
+| `industrial_sensor_clock_correction` | 8 | 6 | 0 | 2 | 0 |
+| `probate_storage_access_register` | 8 | 8 | 0 | 0 | 0 |
+| Total | 24 | 21 | 1 | 2 | 0 |
+
+Artifacts:
+
+- `tmp\helper_legacy_disabled_top5_unbounded_or_20260514`
+  - failed gate smoke; retained as evidence that evidence-bundle repair was a
+    helper leak path.
+- `tmp\helper_legacy_disabled_smoke_unbounded_or_20260514`
+  - fixed gate smoke; `0` helper rows with legacy adapters disabled and helper
+    delivery unbounded.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\run_domain_bootstrap_qa_batch.py scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_qa_batch.py -q`
+- Result: `165 passed`.
+- Added regression coverage for:
+  - default batch commands not including the legacy adapter flag,
+  - explicit opt-in preserving the legacy flag,
+  - direct `run_query_plan(... include_legacy_native_helpers=False)` suppressing
+    legacy helpers,
+  - the subtle case where a generic companion fires first and must not reopen
+    `roster_state_support`.
+
+Lesson:
+
+- Quarantine is not just a CLI option. It is a whole execution-path invariant.
+  Helper adapters must stay disabled through primary queries, repaired evidence
+  queries, and secondary filter probes.
+- Generic helper names are not enough. Any helper whose trigger depends on old
+  native palette names or fixture-era tokens belongs behind the compatibility
+  gate until it proves unlike transfer.
+- The replacement direction is compile-side, not helper-side: emit the
+  answer-bearing surfaces directly, then let query-time helpers shrink toward
+  true generic substrate.
+
+Next pressure:
+
+- Recompile a small native slice under the strengthened direct-surface guidance
+  and compare old-vs-new predicate palettes before spending hours on a full
+  native no-legacy replay.
+- Keep legacy adapters available for forensic replay, but treat any request to
+  turn them on as a compatibility decision rather than current architecture.

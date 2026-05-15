@@ -3,6 +3,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import scripts.run_domain_bootstrap_qa as qa_module
 from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
     _assessment_revenue_companion,
@@ -2118,6 +2119,64 @@ def test_run_query_plan_adds_roster_state_support_from_group_membership() -> Non
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
+    assert companion["result"]["reasoning_basis"]["adapter_status"] == "legacy_native_compatibility_adapter"
+
+
+def test_run_query_plan_suppresses_legacy_native_helpers_when_disabled() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "group_membership(arden, red_group, 2025_10_07t09_15, 2025_10_07t16_00).",
+        "group_membership(bettina, red_group, 2025_10_07t09_15, 2025_10_07t16_00).",
+        "supervision_assignment(ms_strand, red_group, 2025_10_07t09_15, 2025_10_07t16_00).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["group_membership(Student, Group, Start, End)."],
+        include_legacy_native_helpers=False,
+    )
+
+    assert all(item["result"].get("predicate") != "roster_state_support" for item in rows)
+    assert any(item["result"].get("predicate") == "group_membership" for item in rows)
+
+
+def test_run_query_plan_suppresses_legacy_native_helpers_after_generic_companion(monkeypatch) -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+
+    def fake_generic_companion(*args, **kwargs):
+        return {
+            "query": "generic_probe.",
+            "result": {
+                "status": "success",
+                "predicate": "status_timeline_summary_support",
+                "rows": [{"SupportKind": "generic"}],
+                "num_rows": 1,
+            },
+        }
+
+    def fake_roster_companion(*args, **kwargs):
+        return {
+            "query": "legacy_roster_probe.",
+            "result": {
+                "status": "success",
+                "predicate": "roster_state_support",
+                "rows": [{"SupportKind": "legacy"}],
+                "num_rows": 1,
+            },
+        }
+
+    monkeypatch.setattr(qa_module, "_status_timeline_summary_companion", fake_generic_companion)
+    monkeypatch.setattr(qa_module, "_roster_state_companion", fake_roster_companion)
+
+    rows = run_query_plan(
+        runtime,
+        ["group_membership(Student, Group, Start, End)."],
+        include_legacy_native_helpers=False,
+    )
+
+    assert any(item["result"].get("predicate") == "status_timeline_summary_support" for item in rows)
+    assert all(item["result"].get("predicate") != "roster_state_support" for item in rows)
 
 
 def test_run_query_plan_dedupes_repeated_helper_companion_rows() -> None:

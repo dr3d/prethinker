@@ -67,6 +67,11 @@ def parse_args() -> argparse.Namespace:
         default=3,
         help="Question-level budget for query-only helper companion rows. Use 0 to suppress them or -1 for unbounded forensic delivery.",
     )
+    parser.add_argument(
+        "--include-legacy-native-helper-adapters",
+        action="store_true",
+        help="Opt in to older native-corpus helper adapters for forensic compatibility.",
+    )
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -96,6 +101,7 @@ def main() -> int:
             classify_failure_surfaces=not bool(args.no_classify_failure_surfaces),
             cache=not bool(args.no_cache),
             helper_companion_row_limit=args.helper_companion_row_limit,
+            include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
         )
         for job in jobs
     ]
@@ -177,6 +183,7 @@ def _build_command(
     classify_failure_surfaces: bool,
     cache: bool = True,
     helper_companion_row_limit: int | None = None,
+    include_legacy_native_helper_adapters: bool = False,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -206,6 +213,8 @@ def _build_command(
         command.append("--no-cache")
     if helper_companion_row_limit is not None:
         command.extend(["--helper-companion-row-limit", str(int(helper_companion_row_limit))])
+    if include_legacy_native_helper_adapters:
+        command.append("--include-legacy-native-helper-adapters")
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
     return command
