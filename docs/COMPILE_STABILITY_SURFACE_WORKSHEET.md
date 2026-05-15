@@ -686,3 +686,89 @@ local compile capacity is worthwhile. Compare only the preservation-contract
 statuses first. If ledger-only/partial rows persist, classify them as remaining
 compile variance or profile-palette limitations before broad internal
 restamping.
+
+## CS-009 - Operational Invariant Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does the new operational lifecycle invariant move the six unlike operational
+probes into complete direct-surface preservation, or does it expose a sharper
+pre-stamp pressure?
+
+Before:
+
+CS-008 added only compile/profile language. No helper, query repair, fixture
+branch, or QA tuning was added. The expected result was not guaranteed uplift;
+the expected result was a cleaner distinction between:
+
+- complete lifecycle/status units;
+- split rows where date and state survive but not as one queryable unit;
+- true preservation gaps where the direct surface keeps nearby vocabulary but
+  loses the slot set.
+
+Prediction:
+
+If the invariant is enough, the six-probe replay should move toward complete
+direct units without increasing helper delivery. If not, the audit should name
+which pressure remains without counting split fragments as success.
+
+Intervention:
+
+Ran a six-lane OpenRouter compile replay over the existing unlike operational
+record/status probes using source-record ledger facts and the new invariant.
+Then reran the compile-surface stability audit.
+
+Also refined the audit recognizer to report `direct_split_count` for operational
+lifecycle surfaces. A split surface is a date-only lifecycle/status row and a
+state-only lifecycle/status row sharing the same subject. This is measurement
+only: split rows remain non-passing because the direct compile did not preserve
+subject, state/action, and date/turn in the same queryable unit.
+
+After:
+
+The replay compiled all six probes successfully.
+
+| Probe | Contract status | Source signals | Complete | Partial | Split | Reading |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| `clinic_intake_corrections` | pass | 6 | 8 | 8 | 1 | Complete units exist; split rows are extra noise, not blocking. |
+| `grant_review_queue` | ledger-only | 5 | 0 | 15 | 2 | Date and state partially survive as split surfaces; this is a normalization/preservation pressure, not a helper need. |
+| `library_preservation_queue` | pass | 4 | 8 | 2 | 2 | Complete units exist despite nearby split fragments. |
+| `permit_renewal_docket` | pass | 5 | 6 | 1 | 1 | Complete units exist. |
+| `warehouse_repair_log` | ledger-only | 6 | 0 | 7 | 0 | Status fragments survive, but date/turn is not preserved with them. |
+| `water_sample_docket` | ledger-only | 6 | 0 | 2 | 0 | Result/status fragments survive, but not as dated lifecycle units. |
+
+So the invariant did not close the operational lifecycle pressure. It made the
+pressure more legible: one case is a split-surface candidate, while two cases
+are still true preservation failures under the current direct predicate palette.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/operational_lifecycle_invariant_replay_compile_summary_20260515.md`
+- `docs/data/compile_surface_stability/operational_lifecycle_invariant_replay_compile_summary_20260515.json`
+- `docs/data/compile_surface_stability/operational_lifecycle_invariant_replay_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_lifecycle_invariant_replay_stability_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_compile_surface_stability.py -q` -> `5 passed`
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_compile_surface_stability.py -q` -> `35 passed`
+
+Lesson:
+
+This is exactly why the stamp should wait. A broad internal rescan right now
+would mix a known preservation-contract issue with the baseline score. The
+architecture has not learned fixture vocabulary, but it has exposed a real
+compile-surface weakness: operational status timelines are sometimes preserved
+as nearby fragments instead of durable, slot-complete direct rows.
+
+Next pressure:
+
+Do not add helpers. Split-surface cases may belong to a strict deterministic
+normalizer if subject/date/state rows are joinable without guessing. The
+warehouse and water cases need profile-palette or compile-invariant pressure
+because the date slot is absent from the status/result surfaces. The next small
+job should inspect candidate predicate palette selection for those two shapes
+and decide whether a generic `record_lifecycle_event` / `record_status_phase`
+surface should be required whenever source lifecycle lines are repeated.

@@ -384,7 +384,7 @@ def _operational_lifecycle_contract(*, source_texts: list[str], direct_rows: lis
         for text in source_texts
         if _has_lifecycle_marker(text) and _has_temporal_or_state_marker(text)
     ]
-    complete_units, partial_units = _operational_lifecycle_direct_units(direct_rows)
+    complete_units, partial_units, split_units = _operational_lifecycle_direct_units(direct_rows)
     return _contract_status(
         contract="operational_lifecycle_preservation",
         source_signal_count=len(source_mentions),
@@ -394,24 +394,42 @@ def _operational_lifecycle_contract(*, source_texts: list[str], direct_rows: lis
             "source_text_mention_count": len(source_mentions),
             "direct_complete_count": len(complete_units),
             "direct_partial_count": len(partial_units),
+            "direct_split_count": len(split_units),
         },
     )
 
 
-def _operational_lifecycle_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]]]:
+def _operational_lifecycle_direct_units(
+    direct_rows: list[dict[str, Any]],
+) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]], set[tuple[str, ...]]]:
     complete: set[tuple[str, ...]] = set()
     partial: set[tuple[str, ...]] = set()
+    date_by_subject: dict[str, set[tuple[str, ...]]] = {}
+    state_by_subject: dict[str, set[tuple[str, ...]]] = {}
     for index, row in enumerate(direct_rows):
         predicate = str(row.get("predicate") or "").lower()
         args = [str(arg).strip().lower() for arg in row.get("args", [])]
         if not _has_lifecycle_marker(predicate):
             continue
         key = (predicate, str(index), *(args[:3]))
-        if len(args) >= 3 and (_has_temporal_or_state_marker(" ".join(args)) or _has_lifecycle_marker(" ".join(args))):
+        joined_args = " ".join(args)
+        has_temporal = _has_temporal_marker(joined_args)
+        has_state = _has_state_marker(joined_args) or _has_lifecycle_marker(joined_args)
+        if len(args) >= 2:
+            subject = args[0]
+            if subject:
+                if has_temporal:
+                    date_by_subject.setdefault(subject, set()).add(key)
+                if has_state:
+                    state_by_subject.setdefault(subject, set()).add(key)
+        if len(args) >= 3 and (has_temporal or has_state):
             complete.add(key)
         elif len(args) >= 2:
             partial.add(key)
-    return complete, partial
+    split: set[tuple[str, ...]] = set()
+    for subject in sorted(set(date_by_subject) & set(state_by_subject)):
+        split.add(("split_lifecycle_surface", subject))
+    return complete, partial, split
 
 
 def _has_lifecycle_marker(text: str) -> bool:
@@ -439,7 +457,15 @@ def _has_lifecycle_marker(text: str) -> bool:
 
 
 def _has_temporal_or_state_marker(text: str) -> bool:
-    return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", text)) or any(
+    return _has_temporal_marker(text) or _has_state_marker(text)
+
+
+def _has_temporal_marker(text: str) -> bool:
+    return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", text))
+
+
+def _has_state_marker(text: str) -> bool:
+    return any(
         marker in text
         for marker in (
             "pending",
@@ -529,8 +555,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append("")
         lines.extend(
             [
-                "| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |",
-                "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+                "| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial | Split |",
+                "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
             ]
         )
         for draw in fixture["draws"]:
@@ -549,6 +575,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                             str(contract["direct_surface_count"]),
                             str(contract.get("direct_complete_count", "")),
                             str(contract.get("direct_partial_count", "")),
+                            str(contract.get("direct_split_count", "")),
                         ]
                     )
                     + " |"

@@ -147,3 +147,23 @@ def test_operational_lifecycle_contract_scores_complete_status_surfaces(tmp_path
     assert first_contracts["operational_lifecycle_preservation"]["direct_partial_count"] == 1
     assert second_contracts["operational_lifecycle_preservation"]["status"] == "pass"
     assert second_contracts["operational_lifecycle_preservation"]["direct_complete_count"] == 2
+
+
+def test_operational_lifecycle_contract_reports_split_surfaces_without_passing(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, on_2026_05_01_record_a_was_received_with_status_pending).",
+            "source_record_text_atom(src_line_2, on_2026_05_02_record_a_was_closed_as_approved).",
+            "record_status(record_a, pending).",
+            "record_status_changed_on(record_a, 2026_05_01).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["contract"] == "operational_lifecycle_preservation"
+    assert contract["status"] == "ledger_only"
+    assert contract["direct_complete_count"] == 0
+    assert contract["direct_split_count"] == 1
