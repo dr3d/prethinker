@@ -1229,3 +1229,69 @@ whether the remaining misses are still the two compile-surface classes from
 TD-011: interval-scoped flat status and initial status not admitted. Do not
 repair assignment scope until a focused profile-palette probe shows the scope
 slot can be admitted generically.
+
+## TD-013 - Temporal Return Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does the return-to-state companion close the actual unlike temporal-status miss
+without increasing helper delivery?
+
+Before:
+
+The machine uptime temporal probe previously scored `5 / 0 / 1`. The miss was
+the return-to-state row classified in TD-011 as
+`return_to_state_requires_intervening_end`.
+
+Prediction:
+
+If TD-012 is a real query-layer repair, replaying only that fixture against the
+same compile artifact should move the fixture to exact while keeping helper
+rows at zero.
+
+Intervention:
+
+Replayed the single temporal-status fixture with no helper companion delivery
+and no cache:
+
+`python scripts\run_domain_bootstrap_qa_batch.py --dataset-root experiments\lens_vocabulary_audits\temporal_status_v1 --fixture machine_uptime_log --compile-root tmp\lens_vocab_temporal_status_compile_20260515 --out-root tmp\lens_vocab_temporal_status_return_replay_20260515 --model qwen/qwen3.6-35b-a3b --lanes 1 --timeout 420 --no-cache --helper-companion-row-limit 0 --out-json docs\data\lens_vocabulary_audit\temporal_status_return_replay_qa_summary_20260515.json --out-md docs\data\lens_vocabulary_audit\temporal_status_return_replay_qa_summary_20260515.md`
+
+After:
+
+- questions=`6`
+- exact/partial/miss=`6 / 0 / 0`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposals=`0`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/temporal_status_return_replay_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/temporal_status_return_replay_qa_summary_20260515.json`
+
+Verification:
+
+- QA replay completed with `failure_surface_counts={"not_applicable": 6}`.
+
+Lesson:
+
+The return-to-state miss was not a compile-surface problem and did not require
+helper delivery. It was a query-resolution problem over already-admitted
+transition rows. This strengthens the emerging layer split:
+
+- query-resolution companions handle admitted transition joins;
+- compile-surface probes handle missing answer-bearing slots;
+- helper delivery stays retired unless a reusable surface proves it needs to
+exist.
+
+Next pressure:
+
+The remaining temporal/operational misses are not ready for the same repair.
+The active queue is now two focused compile-surface probes:
+
+- interval-scoped status binding, where flat status plus boundaries need a
+  status-to-interval contract;
+- initial status admission, where a source record states an initial status but
+  no direct status fact is emitted.
