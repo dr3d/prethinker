@@ -298,3 +298,212 @@ Do not run a broad no-helper internal QA yet. First isolate the custody/control
 compile gap: source addressability, object/item id admission, temporal event
 rows, and custody/possession/recall surfaces are still weak. The next repair
 should target admission of those generic surfaces, not a helper resurrection.
+
+## CSS-004 - Focused-Pass Repair For Custody/Control Surface
+
+Date: 2026-05-14
+
+Before:
+
+The invariant-guided three-probe recompile improved the broad helper-residue
+picture, but the custody/control probe still had only `12` direct facts and
+carried `2` candidate-only plus `1` ledger-only invariant families. The model
+had proposed useful profile predicates, but the broad compile did not emit
+enough admitted operations for item identity, custody, access, chronology, and
+temporal state.
+
+Prediction:
+
+If the weakness is pass coverage rather than missing architecture, then a
+focused flat-plus-plan compile should acquire the missing direct surfaces
+without adding native helper adapters or local vocabulary rules.
+
+Intervention:
+
+Reran the custody/control probe using the existing flat skeleton plus focused
+`source_pass_ops_v1` machinery, with the compile invariant guidance active.
+This did not add a helper. It changed the compile route from one broad pass to
+an operations-only focused-pass union.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/focused_probate_invariant_audit_20260514.json`
+- `docs/data/compile_surface_stability/focused_probate_invariant_audit_20260514.md`
+
+After:
+
+The focused-pass compile admitted `233` operations and produced `162` direct
+non-source-record facts. The invariant audit moved the custody/control probe
+to:
+
+```text
+pass: 5
+partial: 2
+candidate_only: 0
+ledger_only: 0
+fail: 0
+```
+
+Remaining weak families:
+
+```text
+source_addressability_surface: partial, missing chronology_coordinate
+measure_count_surface: partial, missing measurement_value
+```
+
+Verification:
+
+```powershell
+python scripts\run_domain_bootstrap_file.py --text-file datasets\story_worlds\probate_storage_access_register\source.md --out-dir tmp\compile_surface_invariant_focused_probate_20260514\probate_storage_access_register --timeout 900 --max-tokens 12000 --compile-source --compile-flat-plus-plan-passes --focused-pass-ops-schema --max-plan-passes 8 --focused-pass-operation-target 64 --focused-retry-operation-target 32 --source-entity-ledger --archival-identifier-ledger --source-record-ledger --source-record-ledger-facts --review-profile --profile-review-retry
+python scripts\audit_compile_surface_invariants.py --compile-json tmp\compile_surface_invariant_focused_probate_20260514\probate_storage_access_register --out-json docs\data\compile_surface_stability\focused_probate_invariant_audit_20260514.json --out-md docs\data\compile_surface_stability\focused_probate_invariant_audit_20260514.md
+```
+
+Lesson:
+
+This is the first strong helper-retirement shape in the new lane. The repair
+was not "add a custody helper"; it was "use the focused compile substrate so
+the direct item/custody/access/title/order surfaces actually enter the package."
+The architecture moves upward: helper pressure becomes a compile-routing and
+surface-admission question.
+
+Next pressure:
+
+Run QA on the focused custody/control compile with helpers quarantined or
+strictly budgeted. If QA holds, the helper-retirement path is: invariant audit
+first, focused compile route second, helper deletion third.
+
+## CSS-005 - Focused Custody/Control No-Helper QA
+
+Date: 2026-05-14
+
+Before:
+
+CSS-004 proved that the focused-pass route could acquire direct
+custody/control surfaces: `5` invariant families passed, `2` were partial, and
+there were no `candidate_only` or `ledger_only` families. The open question was
+whether that direct-surface health was enough to replace helper delivery in QA.
+
+Prediction:
+
+If direct surface acquisition is sufficient, no-helper QA should approach the
+older frozen no-helper baseline for this probe (`33/0/6` over `40`) while using
+zero helper rows. If it falls materially below that, the invariant audit is
+necessary but not sufficient: query planning or predicate-palette stability is
+still weak.
+
+Intervention:
+
+Ran the focused custody/control compile against the full `40`-question QA file
+with helper companions suppressed and legacy native helper adapters left off.
+The answer key was supplied from `oracle.jsonl`; a first run without the oracle
+was discarded as judge plumbing, not science.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/focused_probate_no_helper_qa_20260514.json`
+- `docs/data/compile_surface_stability/focused_probate_no_helper_qa_20260514.md`
+
+After:
+
+```text
+exact: 26
+partial: 4
+miss: 10
+helper rows: 0
+runtime load errors: 0
+write proposal rows: 0
+failure surfaces: compile_surface_gap 9, query_surface_gap 3, hybrid_join_gap 2
+```
+
+This is worse than the older frozen no-helper baseline despite a healthier
+invariant audit. The focused compile emitted many useful direct facts, but the
+profile/predicate palette shifted: some QA queries looked for older or sibling
+predicate surfaces, and several source-specific details remained only in source
+records or coarse labels.
+
+Verification:
+
+```powershell
+python scripts\run_domain_bootstrap_qa.py --run-json tmp\compile_surface_invariant_focused_probate_20260514\probate_storage_access_register\domain_bootstrap_file_20260515T023857493498Z_source_qwen-qwen3-6-35b-a3b.json --qa-file datasets\story_worlds\probate_storage_access_register\qa.md --oracle-jsonl datasets\story_worlds\probate_storage_access_register\oracle.jsonl --out-dir tmp\compile_surface_invariant_focused_probate_qa_limit0_oracle_20260514\probate_storage_access_register --timeout 900 --max-tokens 6000 --helper-companion-row-limit 0 --judge-reference-answers --classify-failure-surfaces --no-cache
+```
+
+Lesson:
+
+Invariant health is a readiness gate, not an answer guarantee. The next layer is
+predicate-palette stability: a compile can contain the right kind of information
+while naming it on a surface the query planner does not reliably choose. Helper
+retirement therefore has three gates, not two:
+
+1. direct-surface invariant audit;
+2. stable predicate palette / query surface alignment;
+3. no-helper QA replay.
+
+Next pressure:
+
+Build a predicate-palette drift audit for the focused compile versus the frozen
+no-helper baseline. It should name reusable surface aliases such as item id,
+external id, physical custodian, title status, access authorization, source
+authority, order date/effect, assertion status, and chronology event without
+encoding local row vocabulary. The repair target is stable surface alignment,
+not returning to native helpers.
+
+## CSS-006 - Predicate-Palette Drift Audit
+
+Date: 2026-05-14
+
+Before:
+
+CSS-005 showed the awkward result: invariant health improved, helper rows were
+zero, but QA fell to `26/4/10`. The non-exact rows were not simply "missing
+helpers." Many queries targeted a surface name from one compile while the
+focused compile had emitted a sibling surface name or a decomposed row family.
+
+Prediction:
+
+If predicate-palette drift is the real blocker, comparing the focused compile
+with the older frozen no-helper baseline should show semantic-equivalent
+surface families under different predicate names or packing choices.
+
+Intervention:
+
+Compared direct non-source-record predicate counts from the frozen baseline and
+the focused invariant-guided compile, then grouped the drift into reusable
+surface families rather than local row language.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/focused_probate_predicate_palette_drift_20260514.json`
+- `docs/data/compile_surface_stability/focused_probate_predicate_palette_drift_20260514.md`
+
+After:
+
+The drift audit named seven surface families:
+
+| Surface | Frozen palette | Focused palette |
+| --- | --- | --- |
+| `item_identifier` | `item_id/2` | `asset_id/1 + asset_description/2` |
+| `external_identifier` | `external_id/2` | `external_reference/2` |
+| `title_or_contestation_status` | `title_status/2` | `title_contested_by/2` |
+| `access_authorization` | `access_authorized/4` | `authorized_party/3 + access_authority_source/2` |
+| `court_order` | `court_order/3` | `order_id/1 + order_date/2 + order_effect/2` |
+| `chronology_event` | `chronological_event/3` | `event_occurred_before/2 + event_occurred_after/2` |
+| `source_claim_or_assertion` | `source_claim/3 + dispute_claim/3 + dispute_objection/3` | `assertion_recorded/3 + assertion_made_by/2 + dispute_*` |
+
+This explains the QA mismatch. The focused compile is not empty; it is speaking
+a different predicate dialect. Some focused surfaces are arguably better
+normalized, but the query planner is not yet dialect-stable.
+
+Lesson:
+
+The next architecture layer is not more helper compression. It is stable
+surface contracts. A profile may decompose a packed row, but it must preserve a
+query-plannable equivalence class: item identifier, external identifier, title
+status, access authorization, court order, chronology event, and source
+assertion should be recognizable across palette variants.
+
+Next pressure:
+
+Add a small predicate-surface alias inventory or query planner normalization
+step for these generic families. It should let QA search equivalent surfaces
+without forcing compiles back to one frozen predicate vocabulary and without
+adding native helper adapters.

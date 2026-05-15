@@ -1,0 +1,243 @@
+﻿{
+    "schema_version":  "predicate_palette_drift_audit_v1",
+    "baseline_compile":  "C:\\prethinker_tmp_archive\\tmp_sweep_20260514\\instrument_stamp_20260514_story_worlds_draw1_compile\\probate_storage_access_register\\domain_bootstrap_file_20260514T120039442828Z_source_qwen-qwen3-6-35b-a3b.json",
+    "focused_compile":  "C:\\prethinker\\tmp\\compile_surface_invariant_focused_probate_20260514\\probate_storage_access_register\\domain_bootstrap_file_20260515T023857493498Z_source_qwen-qwen3-6-35b-a3b.json",
+    "predicate_counts":  [
+                             {
+                                 "predicate":  "access_authority_source",
+                                 "frozen":  0,
+                                 "focused":  9,
+                                 "delta":  9
+                             },
+                             {
+                                 "predicate":  "access_authorized",
+                                 "frozen":  17,
+                                 "focused":  0,
+                                 "delta":  -17
+                             },
+                             {
+                                 "predicate":  "assertion_made_by",
+                                 "frozen":  0,
+                                 "focused":  3,
+                                 "delta":  3
+                             },
+                             {
+                                 "predicate":  "assertion_recorded",
+                                 "frozen":  0,
+                                 "focused":  7,
+                                 "delta":  7
+                             },
+                             {
+                                 "predicate":  "asset_description",
+                                 "frozen":  0,
+                                 "focused":  11,
+                                 "delta":  11
+                             },
+                             {
+                                 "predicate":  "asset_id",
+                                 "frozen":  0,
+                                 "focused":  13,
+                                 "delta":  13
+                             },
+                             {
+                                 "predicate":  "authorized_party",
+                                 "frozen":  0,
+                                 "focused":  14,
+                                 "delta":  14
+                             },
+                             {
+                                 "predicate":  "chronological_event",
+                                 "frozen":  18,
+                                 "focused":  0,
+                                 "delta":  -18
+                             },
+                             {
+                                 "predicate":  "court_order",
+                                 "frozen":  5,
+                                 "focused":  0,
+                                 "delta":  -5
+                             },
+                             {
+                                 "predicate":  "dispute_claim",
+                                 "frozen":  7,
+                                 "focused":  0,
+                                 "delta":  -7
+                             },
+                             {
+                                 "predicate":  "dispute_claimant",
+                                 "frozen":  0,
+                                 "focused":  2,
+                                 "delta":  2
+                             },
+                             {
+                                 "predicate":  "dispute_ground",
+                                 "frozen":  0,
+                                 "focused":  4,
+                                 "delta":  4
+                             },
+                             {
+                                 "predicate":  "dispute_objection",
+                                 "frozen":  3,
+                                 "focused":  0,
+                                 "delta":  -3
+                             },
+                             {
+                                 "predicate":  "dispute_status",
+                                 "frozen":  0,
+                                 "focused":  3,
+                                 "delta":  3
+                             },
+                             {
+                                 "predicate":  "dispute_subject",
+                                 "frozen":  0,
+                                 "focused":  3,
+                                 "delta":  3
+                             },
+                             {
+                                 "predicate":  "event_occurred_after",
+                                 "frozen":  0,
+                                 "focused":  1,
+                                 "delta":  1
+                             },
+                             {
+                                 "predicate":  "event_occurred_before",
+                                 "frozen":  0,
+                                 "focused":  18,
+                                 "delta":  18
+                             },
+                             {
+                                 "predicate":  "evidence_status",
+                                 "frozen":  1,
+                                 "focused":  0,
+                                 "delta":  -1
+                             },
+                             {
+                                 "predicate":  "external_id",
+                                 "frozen":  9,
+                                 "focused":  0,
+                                 "delta":  -9
+                             },
+                             {
+                                 "predicate":  "external_reference",
+                                 "frozen":  0,
+                                 "focused":  8,
+                                 "delta":  8
+                             },
+                             {
+                                 "predicate":  "item_id",
+                                 "frozen":  12,
+                                 "focused":  0,
+                                 "delta":  -12
+                             },
+                             {
+                                 "predicate":  "no_access_authority",
+                                 "frozen":  0,
+                                 "focused":  3,
+                                 "delta":  3
+                             },
+                             {
+                                 "predicate":  "order_date",
+                                 "frozen":  0,
+                                 "focused":  5,
+                                 "delta":  5
+                             },
+                             {
+                                 "predicate":  "order_effect",
+                                 "frozen":  0,
+                                 "focused":  5,
+                                 "delta":  5
+                             },
+                             {
+                                 "predicate":  "order_id",
+                                 "frozen":  0,
+                                 "focused":  5,
+                                 "delta":  5
+                             },
+                             {
+                                 "predicate":  "party_counsel",
+                                 "frozen":  0,
+                                 "focused":  2,
+                                 "delta":  2
+                             },
+                             {
+                                 "predicate":  "party_role",
+                                 "frozen":  1,
+                                 "focused":  15,
+                                 "delta":  14
+                             },
+                             {
+                                 "predicate":  "physical_custodian",
+                                 "frozen":  12,
+                                 "focused":  11,
+                                 "delta":  -1
+                             },
+                             {
+                                 "predicate":  "source_claim",
+                                 "frozen":  5,
+                                 "focused":  0,
+                                 "delta":  -5
+                             },
+                             {
+                                 "predicate":  "title_contested_by",
+                                 "frozen":  0,
+                                 "focused":  10,
+                                 "delta":  10
+                             },
+                             {
+                                 "predicate":  "title_recorded_as",
+                                 "frozen":  12,
+                                 "focused":  10,
+                                 "delta":  -2
+                             },
+                             {
+                                 "predicate":  "title_status",
+                                 "frozen":  12,
+                                 "focused":  0,
+                                 "delta":  -12
+                             }
+                         ],
+    "surface_families":  [
+                             {
+                                 "surface":  "item_identifier",
+                                 "frozen":  "item_id/2",
+                                 "focused":  "asset_id/1 + asset_description/2",
+                                 "note":  "Focused compile split id from description; query planner still often expects item_id/external_id style."
+                             },
+                             {
+                                 "surface":  "external_identifier",
+                                 "frozen":  "external_id/2",
+                                 "focused":  "external_reference/2",
+                                 "note":  "Same semantic surface, different predicate name."
+                             },
+                             {
+                                 "surface":  "title_or_contestation_status",
+                                 "frozen":  "title_status/2",
+                                 "focused":  "title_contested_by/2",
+                                 "note":  "Focused name implies party but often stores status labels."
+                             },
+                             {
+                                 "surface":  "access_authorization",
+                                 "frozen":  "access_authorized/4",
+                                 "focused":  "authorized_party/3 + access_authority_source/2",
+                                 "note":  "Focused compile decomposed source basis from authorization row."
+                             },
+                             {
+                                 "surface":  "court_order",
+                                 "frozen":  "court_order/3",
+                                 "focused":  "order_id/1 + order_date/2 + order_effect/2",
+                                 "note":  "Focused compile decomposed order rows; query planner must join rather than expect a packed row."
+                             },
+                             {
+                                 "surface":  "chronology_event",
+                                 "frozen":  "chronological_event/3",
+                                 "focused":  "event_occurred_before/2 + event_occurred_after/2",
+                                 "note":  "Focused compile preserved ordering but lost event text/date payloads used by QA."
+                             },
+                             {
+                                 "surface":  "source_claim_or_assertion",
+                                 "frozen":  "source_claim/3 + dispute_claim/3 + dispute_objection/3",
+                                 "focused":  "assertion_recorded/3 + assertion_made_by/2 + dispute_*",
+                                 "note":  "Focused compile better separates assertions, but query planning needs the new assertion surface."
+                             }
+                         ]
+}
