@@ -1,5 +1,6 @@
 from scripts.run_domain_bootstrap_file import (
     COMPETITION_ROLE_ALIAS_CONTEXT_V1,
+    COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
     FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1,
     NARRATIVE_SOURCE_COMPILER_CONTEXT_V1,
     OPERATIONAL_RECORD_STATUS_CONTEXT_V1,
@@ -362,6 +363,66 @@ def test_source_pass_ops_guidance_preserves_explicit_negative_surfaces(monkeypat
     assert "positive assertion on a compatible prohibition/forbidden/exempt/outside-scope/lacks-authority predicate" in user_message["content"]
     assert "Target-anchor preservation rule" in user_message["content"]
     assert "Object-vs-actor attachment rule" in user_message["content"]
+
+
+def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_call(**kwargs):
+        captured["messages"] = kwargs["messages"]
+        return {
+            "content": json.dumps(
+                {
+                    "schema_version": "source_pass_ops_v1",
+                    "pass_id": "pass_1",
+                    "decision": "commit",
+                    "candidate_operations": [],
+                    "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+                }
+            )
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_call_lmstudio_json_schema", fake_call)
+    args = type(
+        "Args",
+        (),
+        {
+            "base_url": "http://example.invalid/v1",
+            "model": "test-model",
+            "timeout": 30,
+            "temperature": 0.0,
+            "top_p": 1.0,
+            "max_tokens": 4000,
+            "domain_hint": "",
+            "focused_pass_operation_target": 8,
+            "focused_retry_operation_target": 4,
+        },
+    )()
+
+    result = _compile_source_pass_ops(
+        source_text="Section 4 says the recorder logged two corrected sensor readings.",
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "section_title/2", "args": ["section", "title"]},
+                {"signature": "corrected_reading/4", "args": ["sensor", "time", "value", "recorder"]},
+            ]
+        },
+        intake_plan={},
+        args=args,
+        pass_id="pass_1",
+        purpose="surface invariant",
+        focus="source addressability and corrected readings",
+        completion="preserve direct surfaces",
+        predicates="section_title/2, corrected_reading/4",
+        coverage_goals="direct source coordinates and measurement correction rows",
+    )
+
+    assert result["ok"] is True
+    assert "compile_surface_invariant_strategy_v1" in "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+    user_message = next(item for item in captured["messages"] if item["role"] == "user")
+    assert "compile_surface_invariant_strategy_v1" in user_message["content"]
+    assert "source addressability as queryable rows" in user_message["content"]
+    assert "Candidate predicate names are not enough" in user_message["content"]
 
 
 def test_pass_surface_contribution_counts_unique_rows_in_order() -> None:

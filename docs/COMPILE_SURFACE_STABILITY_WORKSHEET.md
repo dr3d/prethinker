@@ -144,3 +144,77 @@ candidate admission failure, or direct-surface acquisition debt. The next
 architectural move should strengthen compile guidance for surfaces that are
 already visible in the source ledger, especially source addressability,
 identity/role binding, temporal/event state, and custody/control state.
+
+## CSS-002 - Add Fixture-Free Compile Invariant Guidance
+
+Date: 2026-05-14
+
+Before:
+
+CSS-001 could identify weak direct surfaces after a compile, but it did not
+change the compiler's behavior. The risk was turning the audit into a report
+that explains helper residue after the fact while future compiles continue to
+emit candidate predicate names without enough admitted direct fact operations.
+
+Prediction:
+
+A small global compile-context nudge should be safer than adding another native
+helper adapter. If the nudge is phrased as generic surface families rather than
+local source names, it can push future compiles toward direct rows for the same
+surfaces the audit measures.
+
+Intervention:
+
+Added `COMPILE_SURFACE_INVARIANT_CONTEXT_V1` to the source compiler guidance in
+`scripts/run_domain_bootstrap_file.py`. The context is injected into both
+whole-source Semantic IR compiles and focused `source_pass_ops_v1` compiles.
+It asks the model to propose concrete operations for recurring answer-bearing
+surfaces when compatible predicates exist:
+
+- identity and role-bound relations;
+- source addressability;
+- rule/policy requirements and exceptions;
+- object, device, system, model, and inventory identifiers;
+- temporal anchors, corrections, intervals, windows, and transitions;
+- counts, totals, thresholds, durations, ratios, units, and formula components;
+- custody, possession, access, ownership, recall, return, and control state.
+
+After:
+
+The compiler now receives the same invariant vocabulary that the audit checks.
+This does not admit new truth by itself; the mapper still validates predicate
+contracts and source authority. It should reduce the specific bad state where
+the profile proposes a useful predicate surface but no fact operations are
+emitted for it.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_domain_bootstrap_file.py`
+
+Verification:
+
+```powershell
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\audit_compile_surface_invariants.py
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q
+```
+
+Result:
+
+```text
+30 passed
+```
+
+Lesson:
+
+The right replacement for helper bridges is not another bridge. It is a shared
+compile-surface contract that says which source-ledger surfaces deserve direct
+rows when the profile can express them. That moves the architecture one layer
+up: helper pressure becomes compile guidance plus post-compile invariant audit.
+
+Next pressure:
+
+Run a small recompile on the three helper-residue probes with the invariant
+context active, then compare the new invariant audit against CSS-001. A useful
+gain is fewer `candidate_only`/`ledger_only` families without adding fixture
+vocabulary, not merely a higher direct fact count.

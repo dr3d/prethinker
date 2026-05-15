@@ -473,6 +473,18 @@ PROCEDURAL_MISCONDUCT_SOURCE_COMPILER_CONTEXT_V1 = [
     "Procedural misconduct title-alias rule: honorifics and titles such as Dr, Prof, Professor, RIO, Provost, Chair, Dean, and General Counsel are roles or aliases, not person-atom prefixes. If the same person appears as Dr. Samuel Achebe and Samuel Achebe, use samuel_achebe everywhere and emit person_role(samuel_achebe, postdoc) plus person_role(samuel_achebe, complainant) when both are source-stated.",
 ]
 
+COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
+    "compile_surface_invariant_strategy_v1: Source-record ledgers preserve fidelity, but recurring answer-bearing surfaces should also be proposed as direct candidate_operations when the allowed profile has compatible predicates.",
+    "Compile surface invariant rule: if the source states people or organizations in roles, preserve the role-bound relation directly. Keep recorder, operator, holder, claimant, approver, recommender, witness, owner, and authority roles distinct when compatible predicates exist.",
+    "Compile surface invariant rule: if the source has sections, titles, headings, chronology labels, basis language, or explicit absence/negative-inference statements, preserve source addressability as queryable rows rather than only source_record text.",
+    "Compile surface invariant rule: if the source states rules, procedures, clauses, requirements, thresholds, exceptions, exclusions, or applicability limits, preserve those as direct rule/policy surfaces before summarizing outcomes.",
+    "Compile surface invariant rule: if the source names objects, devices, systems, inventory ids, vendor/model values, samples, or item labels, preserve identifiers and descriptive attributes separately from broad event rows.",
+    "Compile surface invariant rule: if the source states events, raw/corrected times, superseded values, intervals, windows, deadlines, or transitions, preserve the temporal anchors and correction relation directly.",
+    "Compile surface invariant rule: if the source states counts, totals, limits, durations, percentages, ratios, units, or formula components, preserve the numeric component rows directly. Do not hide them inside prose labels or summary atoms.",
+    "Compile surface invariant rule: if the source states custody, possession, access, location, ownership, title, recall, return, or control state, preserve each stated control surface separately. Do not collapse them into a generic status label.",
+    "Candidate predicate names are not enough. When an invariant surface is present in the source and supported by the allowed profile, propose the concrete fact operations needed to make it queryable.",
+]
+
 from src.profile_bootstrap import (  # noqa: E402
     PROFILE_BOOTSTRAP_JSON_SCHEMA,
     PROFILE_BOOTSTRAP_REVIEW_JSON_SCHEMA,
@@ -1456,6 +1468,7 @@ def _compile_source_with_draft_profile(
             context=[
                 *plan_context,
                 *source_compiler_context,
+                *COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
                 *(extra_context or []),
                 "Compile the raw source text using the draft profile proposed by profile_bootstrap_v1.",
                 "Treat intake_plan_v1.pass_plan as the coverage checklist for this compile. Allocate candidate_operations across the planned passes instead of spending the whole operation budget on the first repeated structure you encounter.",
@@ -1596,6 +1609,7 @@ def _compile_source_pass_ops(
         "guidance_context": [
             *intake_plan_context(intake_plan),
             *source_compiler_context,
+            *COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
             *(extra_context or []),
             "This compact schema is for one bounded source pass. Follow current_pass.focus: broad skeleton passes should cover source-wide stable structure, while focused passes should not compile unrelated source sections.",
             "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
