@@ -156,3 +156,100 @@ Add a slot-contract audit for evidence provenance terms. Start with
 `prepared`, `presented`, `commissioned`, `relied_on`, `corrected`, and
 `located`; each should define the minimum direct-row slots that make the term
 structural rather than shallow.
+
+## LV-002 - Evidence Provenance Slot Contracts
+
+Date: 2026-05-15
+
+Before:
+
+LV-001 exposed the central risk in vocabulary audits: a term can appear in a
+direct predicate without preserving the roles needed by the lens. In the
+community-lab probe, `presented` appeared through `presented_to/2`, but the
+presenter was missing. That is not fixture-shape leakage, but it is still a
+resolution failure.
+
+Prediction:
+
+If the audit distinguishes token presence from role completeness, the evidence
+provenance readout should become sharper:
+
+- terms with enough slots remain `structural`;
+- terms with a direct term token but too few slots become
+  `shallow_structural`;
+- terms visible only in source-record text remain `source_only`.
+
+Intervention:
+
+Extended `scripts/audit_lens_vocabulary_transfer.py` with minimum slot
+contracts per term. The first pass is deliberately simple: it requires direct
+rows for each term to meet a minimum arity before receiving `structural`
+credit. Evidence-provenance terms now have these initial minima:
+
+| Term | Minimum direct slots | Rationale |
+| --- | ---: | --- |
+| `prepared` | 2 | artifact + actor/source |
+| `presented` | 3 | artifact + presenter + recipient/context |
+| `dated` | 2 | artifact + date |
+| `admitted` | 2 | artifact + record/context |
+| `relied_on` | 2 | relying actor/body + evidence |
+| `commissioned` | 3 | commissioning actor + commissioned actor/body + artifact/task |
+| `corrected` | 2 | artifact/detail + correcting actor or correction value |
+| `located` | 2 | artifact + location |
+
+Added a regression test proving `presented_to(summary_a, circle).` is
+`shallow_structural`, not structural.
+
+Artifacts:
+
+- `scripts/audit_lens_vocabulary_transfer.py`
+- `tests/test_lens_vocabulary_transfer.py`
+- `docs/data/lens_vocabulary_audit/evidence_provenance_v1_slot_contract_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/evidence_provenance_v1_slot_contract_audit_20260515.md`
+
+After:
+
+Slot-contract audit over the same three compiles:
+
+- compiles=`3`
+- `structural=14`
+- `shallow_structural=2`
+- `source_only=2`
+- `not_applicable=6`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | N/A | Reading |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `admitted` | 2 | 0 | 0 | 1 | Stable where present. |
+| `commissioned` | 2 | 0 | 0 | 1 | Stable outside legal prose. |
+| `corrected` | 2 | 0 | 0 | 1 | Stable through correction/amendment rows. |
+| `dated` | 1 | 0 | 0 | 2 | Stable where explicit. |
+| `located` | 3 | 0 | 0 | 0 | Strong transfer. |
+| `prepared` | 1 | 0 | 2 | 0 | Weak; often source-only or expressed as adjacent creation/tester rows. |
+| `presented` | 0 | 2 | 0 | 1 | Fires shallowly; presenter/context slot contract not yet stable. |
+| `relied_on` | 3 | 0 | 0 | 0 | Strong transfer. |
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `3 passed`
+
+Lesson:
+
+This is the right audit granularity. A lens vocabulary term is not proven by
+token transfer. It must carry the structural slots that make it answer-bearing.
+`presented` is currently a real lens word but a weak slot contract: the compiler
+often preserves the artifact and recipient/context while dropping the
+presenting actor. `prepared` is a vocabulary-normalization issue: the structure
+is often present as `created_by`, `commissioned_test`, or role rows, but not as
+the `prepared` family.
+
+Next pressure:
+
+Decide whether to normalize equivalent creation/preparation predicates under
+the evidence-provenance lens, or simply document `prepared` as a broader
+artifact-creation slot family. For `presented`, the stronger next move is
+compile guidance: when a source states that someone presented/submitted/filed a
+document to a body, preserve presenter, artifact, recipient/body, and date or
+context when stated.

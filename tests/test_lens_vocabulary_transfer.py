@@ -22,7 +22,7 @@ def test_lens_vocabulary_audit_classifies_structural_and_source_only_terms(tmp_p
         tmp_path / "compile.json",
         [
             "source_record_text_atom(src_1, report_commissioned_and_later_revised).",
-            "report_commissioned_by(report_a, board).",
+            "report_commissioned_by(report_a, board, 2026_04_02).",
             "report_date(report_a, 2026_04_02).",
         ],
     )
@@ -33,6 +33,21 @@ def test_lens_vocabulary_audit_classifies_structural_and_source_only_terms(tmp_p
     assert rows["commissioned"] == "structural"
     assert rows["dated"] == "structural"
     assert rows["corrected"] == "source_only"
+
+
+def test_lens_vocabulary_audit_marks_shallow_structural_when_slots_are_missing(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, summary_presented_by_mina_to_circle).",
+            "presented_to(summary_a, circle).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="evidence_provenance", terms=EVIDENCE_PROVENANCE_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["presented"] == "shallow_structural"
 
 
 def test_lens_vocabulary_summary_counts_terms(tmp_path: Path) -> None:

@@ -25,17 +25,18 @@ TOKEN_RE = re.compile(r"[a-z0-9]+")
 class LensTerm:
     term: str
     tokens: tuple[str, ...]
+    min_arity: int = 2
 
 
 EVIDENCE_PROVENANCE_TERMS: tuple[LensTerm, ...] = (
-    LensTerm("prepared", ("prepared", "preparer", "drafted", "wrote", "written")),
-    LensTerm("presented", ("presented", "submitted", "filed", "introduced")),
-    LensTerm("dated", ("dated", "date")),
-    LensTerm("admitted", ("admitted", "entered")),
-    LensTerm("relied_on", ("relied", "relies", "basis", "cited")),
-    LensTerm("commissioned", ("commissioned", "requested", "ordered")),
-    LensTerm("corrected", ("corrected", "correction", "revised", "amended")),
-    LensTerm("located", ("located", "found", "stored", "held")),
+    LensTerm("prepared", ("prepared", "preparer", "drafted", "wrote", "written"), 2),
+    LensTerm("presented", ("presented", "submitted", "filed", "introduced"), 3),
+    LensTerm("dated", ("dated", "date"), 2),
+    LensTerm("admitted", ("admitted", "entered"), 2),
+    LensTerm("relied_on", ("relied", "relies", "basis", "cited"), 2),
+    LensTerm("commissioned", ("commissioned", "requested", "ordered"), 3),
+    LensTerm("corrected", ("corrected", "correction", "revised", "amended"), 2),
+    LensTerm("located", ("located", "found", "stored", "held"), 2),
 )
 
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
@@ -102,9 +103,13 @@ def audit_compile(path: Path, *, lens: str, terms: tuple[LensTerm, ...]) -> dict
     facts = _facts_from_compile(data)
     source_facts = [fact for fact in facts if _predicate_name(fact).startswith("source_record")]
     direct_facts = [fact for fact in facts if not _predicate_name(fact).startswith("source_record")]
+    direct_rows = _fact_rows(direct_facts)
     source_tokens = _tokens_for_facts(source_facts)
     direct_tokens = _tokens_for_facts(direct_facts)
-    term_rows = [_audit_term(term, source_tokens=source_tokens, direct_tokens=direct_tokens) for term in terms]
+    term_rows = [
+        _audit_term(term, source_tokens=source_tokens, direct_tokens=direct_tokens, direct_rows=direct_rows)
+        for term in terms
+    ]
     return {
         "lens": lens,
         "compile_json": str(path),
@@ -118,11 +123,18 @@ def audit_compile(path: Path, *, lens: str, terms: tuple[LensTerm, ...]) -> dict
     }
 
 
-def _audit_term(term: LensTerm, *, source_tokens: set[str], direct_tokens: set[str]) -> dict[str, Any]:
+def _audit_term(
+    term: LensTerm,
+    *,
+    source_tokens: set[str],
+    direct_tokens: set[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
     source_hits = [token for token in term.tokens if token in source_tokens]
     direct_hits = [token for token in term.tokens if token in direct_tokens]
+    slot_rows = _slot_rows_for_term(term, direct_rows)
     if direct_hits:
-        status = "structural"
+        status = "structural" if slot_rows else "shallow_structural"
     elif source_hits:
         status = "source_only"
     else:
@@ -130,8 +142,10 @@ def _audit_term(term: LensTerm, *, source_tokens: set[str], direct_tokens: set[s
     return {
         "term": term.term,
         "status": status,
+        "min_arity": term.min_arity,
         "source_hits": source_hits,
         "direct_hits": direct_hits,
+        "slot_rows": slot_rows[:5],
     }
 
 
@@ -150,6 +164,61 @@ def _facts_from_compile(data: dict[str, Any]) -> list[str]:
 def _predicate_name(fact: str) -> str:
     match = FACT_RE.match(str(fact))
     return match.group(1) if match else ""
+
+
+def _fact_rows(facts: list[str]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for fact in facts:
+        match = FACT_RE.match(fact)
+        if not match:
+            continue
+        rows.append({"predicate": match.group(1), "args": _split_fact_args(match.group(2)), "fact": fact})
+    return rows
+
+
+def _split_fact_args(raw_args: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    in_quote = False
+    escape = False
+    depth = 0
+    for char in raw_args:
+        if escape:
+            current.append(char)
+            escape = False
+            continue
+        if char == "\\":
+            current.append(char)
+            escape = True
+            continue
+        if char == '"':
+            current.append(char)
+            in_quote = not in_quote
+            continue
+        if not in_quote and char == "(":
+            depth += 1
+        elif not in_quote and char == ")" and depth:
+            depth -= 1
+        if char == "," and not in_quote and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if current or raw_args.strip():
+        args.append("".join(current).strip())
+    return args
+
+
+def _slot_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    for row in direct_rows:
+        predicate_tokens = set(TOKEN_RE.findall(str(row["predicate"]).lower()))
+        arg_count = len(row["args"])
+        if arg_count < term.min_arity:
+            continue
+        if any(token in predicate_tokens for token in term.tokens):
+            out.append(str(row["fact"]))
+    return out
 
 
 def _tokens_for_facts(facts: list[str]) -> set[str]:
@@ -190,40 +259,44 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "",
         "## Term Summary",
         "",
-        "| Term | Structural | Source-only | N/A |",
-        "| --- | ---: | ---: | ---: |",
+        "| Term | Structural | Shallow | Source-only | N/A |",
+        "| --- | ---: | ---: | ---: | ---: |",
     ]
     for term, counts in payload["summary"]["term_status_counts"].items():
         lines.append(
-            f"| `{term}` | {counts.get('structural', 0)} | {counts.get('source_only', 0)} | {counts.get('not_applicable', 0)} |"
+            f"| `{term}` | {counts.get('structural', 0)} | {counts.get('shallow_structural', 0)} | {counts.get('source_only', 0)} | {counts.get('not_applicable', 0)} |"
         )
     lines.extend(
         [
             "",
             "## Fixture Summary",
             "",
-            "| Run | Fixture | Direct facts | Source-record facts | Structural | Source-only | N/A |",
-            "| --- | --- | ---: | ---: | ---: | ---: | ---: |",
+            "| Run | Fixture | Direct facts | Source-record facts | Structural | Shallow | Source-only | N/A |",
+            "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for report in payload["reports"]:
         summary = report["summary"]
         lines.append(
-            "| {run} | {fixture} | {direct} | {source} | {structural} | {source_only} | {na} |".format(
+            "| {run} | {fixture} | {direct} | {source} | {structural} | {shallow} | {source_only} | {na} |".format(
                 run=f"`{report['run']}`",
                 fixture=f"`{report['fixture']}`",
                 direct=report["direct_fact_count"],
                 source=report["source_record_fact_count"],
                 structural=summary.get("structural", 0),
+                shallow=summary.get("shallow_structural", 0),
                 source_only=summary.get("source_only", 0),
                 na=summary.get("not_applicable", 0),
             )
         )
-    lines.extend(["", "## Source-Only Terms", ""])
+    lines.extend(["", "## Shallow Or Source-Only Terms", ""])
     for report in payload["reports"]:
+        shallow = [row["term"] for row in report["terms"] if row["status"] == "shallow_structural"]
         source_only = [row["term"] for row in report["terms"] if row["status"] == "source_only"]
+        if shallow:
+            lines.append(f"- `{report['fixture']}` shallow: {', '.join(f'`{term}`' for term in shallow)}")
         if source_only:
-            lines.append(f"- `{report['fixture']}`: {', '.join(f'`{term}`' for term in source_only)}")
+            lines.append(f"- `{report['fixture']}` source-only: {', '.join(f'`{term}`' for term in source_only)}")
     return "\n".join(lines).rstrip() + "\n"
 
 

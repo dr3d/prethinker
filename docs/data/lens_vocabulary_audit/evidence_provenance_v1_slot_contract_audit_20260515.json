@@ -1,0 +1,383 @@
+{
+  "compile_count": 3,
+  "lens": "evidence_provenance",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\community_lab_notice\\domain_bootstrap_file_20260515T102010701669Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 18,
+      "fixture": "community_lab_notice",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 67,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "prepared"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "prepared_by(freezer_incident_summary, jae_morton)."
+          ],
+          "source_hits": [
+            "prepared"
+          ],
+          "status": "structural",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [
+            "presented"
+          ],
+          "min_arity": 3,
+          "slot_rows": [],
+          "source_hits": [
+            "presented"
+          ],
+          "status": "shallow_structural",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "relied_on(maintenance_circle, freezer_incident_summary)."
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [
+            "corrected"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "corrected_by(freezer_incident_summary, mina_okafor).",
+            "corrected_by(freezer_incident_summary_draft, mina_okafor)."
+          ],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "located"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "located_in(cl_8, blue_binder_beside_freezer_b).",
+            "located_in(cl_8, blue_binder)."
+          ],
+          "source_hits": [
+            "found"
+          ],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\craft_fair_review\\domain_bootstrap_file_20260515T102122309286Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 16,
+      "fixture": "craft_fair_review",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 65,
+      "summary": {
+        "not_applicable": 3,
+        "source_only": 1,
+        "structural": 4
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [
+            "wrote"
+          ],
+          "status": "source_only",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 3,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [
+            "entered"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "entered_into(safety_note, fair_committee, review_packet)."
+          ],
+          "source_hits": [
+            "entered"
+          ],
+          "status": "structural",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "relied_on(fair_committee, safety_note, moved_second_demonstration_outdoors).",
+            "relied_on(fair_committee, safety_note, second_demonstration)."
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [
+            "requested"
+          ],
+          "min_arity": 3,
+          "slot_rows": [
+            "requested(laila_chen, rowan_hale, write_safety_note)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "stored"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "stored_in(review_packet, folder_k, behind_the_vendor_map)."
+          ],
+          "source_hits": [
+            "stored"
+          ],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_evidence_provenance_compile_20260515\\garden_water_log\\domain_bootstrap_file_20260515T102240476349Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 23,
+      "fixture": "garden_water_log",
+      "lens": "evidence_provenance",
+      "parsed_ok": true,
+      "run": "lens_vocab_evidence_provenance_compile_20260515",
+      "source_record_fact_count": 81,
+      "summary": {
+        "shallow_structural": 1,
+        "source_only": 1,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "slot_rows": [],
+          "source_hits": [
+            "prepared"
+          ],
+          "status": "source_only",
+          "term": "prepared"
+        },
+        {
+          "direct_hits": [
+            "submitted"
+          ],
+          "min_arity": 3,
+          "slot_rows": [],
+          "source_hits": [
+            "submitted"
+          ],
+          "status": "shallow_structural",
+          "term": "presented"
+        },
+        {
+          "direct_hits": [
+            "date"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "test_date(soil_moisture_test_card, 2026_05_01)."
+          ],
+          "source_hits": [
+            "dated"
+          ],
+          "status": "structural",
+          "term": "dated"
+        },
+        {
+          "direct_hits": [
+            "admitted"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "admitted_into(soil_moisture_test_card, water_log_wl_3)."
+          ],
+          "source_hits": [
+            "admitted"
+          ],
+          "status": "structural",
+          "term": "admitted"
+        },
+        {
+          "direct_hits": [
+            "relied"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "relied_on(north_lot_garden_board, soil_moisture_test_card).",
+            "relied_on(watering_turns_assignment, soil_moisture_test_card)."
+          ],
+          "source_hits": [
+            "relied"
+          ],
+          "status": "structural",
+          "term": "relied_on"
+        },
+        {
+          "direct_hits": [
+            "commissioned"
+          ],
+          "min_arity": 3,
+          "slot_rows": [
+            "commissioned_test(theo_park, samira_das, soil_moisture_test_card)."
+          ],
+          "source_hits": [
+            "commissioned"
+          ],
+          "status": "structural",
+          "term": "commissioned"
+        },
+        {
+          "direct_hits": [
+            "amended"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "amended_label(soil_moisture_test_card, e_7, e_1)."
+          ],
+          "source_hits": [
+            "amended"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "held"
+          ],
+          "min_arity": 2,
+          "slot_rows": [
+            "held_in(soil_moisture_test_card, lockbox)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "located"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 6,
+      "shallow_structural": 2,
+      "source_only": 2,
+      "structural": 14
+    },
+    "term_status_counts": {
+      "admitted": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "commissioned": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "corrected": {
+        "not_applicable": 1,
+        "structural": 2
+      },
+      "dated": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "located": {
+        "structural": 3
+      },
+      "prepared": {
+        "source_only": 2,
+        "structural": 1
+      },
+      "presented": {
+        "not_applicable": 1,
+        "shallow_structural": 2
+      },
+      "relied_on": {
+        "structural": 3
+      }
+    }
+  }
+}
