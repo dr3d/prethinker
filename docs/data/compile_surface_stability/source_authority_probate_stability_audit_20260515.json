@@ -17,8 +17,10 @@
             },
             {
               "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 9,
+              "direct_partial_count": 0,
               "direct_surface_count": 9,
-              "source_signal_count": 12,
+              "source_signal_count": 11,
               "status": "partial"
             }
           ],
@@ -44,8 +46,10 @@
             },
             {
               "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
               "direct_surface_count": 0,
-              "source_signal_count": 12,
+              "source_signal_count": 11,
               "status": "ledger_only"
             }
           ],
@@ -69,9 +73,11 @@
             },
             {
               "contract": "source_authority_pair_preservation",
-              "direct_surface_count": 13,
-              "source_signal_count": 12,
-              "status": "pass"
+              "direct_complete_count": 8,
+              "direct_partial_count": 0,
+              "direct_surface_count": 8,
+              "source_signal_count": 11,
+              "status": "partial"
             }
           ],
           "direct_fact_count": 127,
@@ -95,9 +101,11 @@
             },
             {
               "contract": "source_authority_pair_preservation",
-              "direct_surface_count": 5,
-              "source_signal_count": 12,
-              "status": "partial"
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_signal_count": 11,
+              "status": "ledger_only"
             }
           ],
           "direct_fact_count": 61,
@@ -120,9 +128,11 @@
             },
             {
               "contract": "source_authority_pair_preservation",
-              "direct_surface_count": 13,
-              "source_signal_count": 12,
-              "status": "pass"
+              "direct_complete_count": 8,
+              "direct_partial_count": 0,
+              "direct_surface_count": 8,
+              "source_signal_count": 11,
+              "status": "partial"
             }
           ],
           "direct_fact_count": 133,

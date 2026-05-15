@@ -62,3 +62,34 @@ def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: P
     assert first_contracts["parallel_assignment_event_preservation"]["status"] == "partial"
     assert second_contracts["parallel_assignment_event_preservation"]["status"] == "pass"
     assert report["summary"]["unstable_fixture_count"] == 1
+
+
+def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:
+    draw1 = _write_compile(
+        tmp_path / "draw1" / "fixture_b" / "domain_bootstrap_file_a.json",
+        [
+            "access_authorized_to(item_a, reader_one, physical).",
+            "access_source(item_a, reader_two, policy_a).",
+            "court_order(order_1, 2026_01_01).",
+            "source_record_text_atom(src_1, policy_authorized_access_for_item_a_party_reader_one).",
+        ],
+    )
+    draw2 = _write_compile(
+        tmp_path / "draw2" / "fixture_b" / "domain_bootstrap_file_b.json",
+        [
+            "access_authorized_to(item_a, reader_one, physical).",
+            "access_source(item_a, reader_one, policy_a).",
+            "source_record_text_atom(src_1, policy_authorized_access_for_item_a_party_reader_one).",
+        ],
+    )
+
+    report = audit_paths([draw1, draw2])
+
+    fixture = report["fixtures"][0]
+    first_contracts = {row["contract"]: row for row in fixture["draws"][0]["contracts"]}
+    second_contracts = {row["contract"]: row for row in fixture["draws"][1]["contracts"]}
+    assert first_contracts["source_authority_pair_preservation"]["status"] == "ledger_only"
+    assert first_contracts["source_authority_pair_preservation"]["direct_complete_count"] == 0
+    assert first_contracts["source_authority_pair_preservation"]["direct_partial_count"] == 2
+    assert second_contracts["source_authority_pair_preservation"]["status"] == "pass"
+    assert second_contracts["source_authority_pair_preservation"]["direct_complete_count"] == 1

@@ -264,29 +264,75 @@ def _source_authority_pair_contract(*, source_texts: list[str], direct_rows: lis
     source_mentions = [
         text
         for text in source_texts
-        if any(marker in text for marker in ("authority", "authorized", "court_order", "policy", "source", "governing"))
-        and any(marker in text for marker in ("access", "finding", "status", "action", "subject", "item"))
+        if any(marker in text for marker in ("authority", "authorized", "authoriz", "court_order", "policy", "governing"))
+        and any(marker in text for marker in ("access", "finding", "status", "action", "subject", "item", "party"))
     ]
-    direct_rows_found = [
-        row
-        for row in direct_rows
-        if row["predicate"]
-        in {
-            "access_authority_source",
-            "access_source",
-            "source_authority",
-            "authority_source",
-            "authorized_by",
-            "governing_source",
-            "court_order",
-        }
-    ]
+    complete_units, partial_units = _source_authority_direct_units(direct_rows)
     return _contract_status(
         contract="source_authority_pair_preservation",
         source_signal_count=len(source_mentions),
-        direct_surface_count=len(direct_rows_found),
+        direct_surface_count=len(complete_units),
         required_when_source_count_at_least=1,
+        extra={
+            "direct_complete_count": len(complete_units),
+            "direct_partial_count": len(partial_units),
+        },
     )
+
+
+def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]]]:
+    by_predicate: dict[str, list[list[str]]] = {}
+    for row in direct_rows:
+        by_predicate.setdefault(str(row.get("predicate") or ""), []).append([str(arg).strip() for arg in row.get("args", [])])
+
+    complete: set[tuple[str, ...]] = set()
+    partial: set[tuple[str, ...]] = set()
+
+    authorized_keys = {
+        (args[0], args[1])
+        for args in by_predicate.get("access_authorized_to", [])
+        if len(args) >= 3 and args[0] and args[1] and args[2]
+    }
+    source_keys = {
+        (args[0], args[1])
+        for args in by_predicate.get("access_source", [])
+        if len(args) >= 3 and args[0] and args[1] and args[2]
+    }
+    for key in sorted(authorized_keys & source_keys):
+        complete.add(("access_pair", *key))
+    for key in sorted((authorized_keys | source_keys) - (authorized_keys & source_keys)):
+        partial.add(("access_pair", *key))
+
+    source_by_subject = {
+        args[0]
+        for args in by_predicate.get("access_authority_source", [])
+        if len(args) >= 2 and args[0] and args[1]
+    }
+    party_by_subject = {
+        args[0]
+        for args in by_predicate.get("authorized_party", [])
+        if len(args) >= 2 and args[0] and args[1]
+    }
+    for subject in sorted(source_by_subject & party_by_subject):
+        complete.add(("packed_access_authority", subject))
+    for subject in sorted((source_by_subject | party_by_subject) - (source_by_subject & party_by_subject)):
+        partial.add(("packed_access_authority", subject))
+
+    for predicate in (
+        "source_authority",
+        "authority_source",
+        "authorized_by",
+        "governing_source",
+        "authority_for",
+        "source_for_authority",
+    ):
+        for args in by_predicate.get(predicate, []):
+            if len(args) >= 3 and args[0] and args[1] and args[2]:
+                complete.add((predicate, args[0], args[1]))
+            elif len(args) >= 2 and args[0] and args[1]:
+                partial.add((predicate, args[0], args[1]))
+
+    return complete, partial
 
 
 def _contract_status(
@@ -295,6 +341,7 @@ def _contract_status(
     source_signal_count: int,
     direct_surface_count: int,
     required_when_source_count_at_least: int,
+    extra: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if source_signal_count < required_when_source_count_at_least:
         status = "not_applicable"
@@ -304,12 +351,15 @@ def _contract_status(
         status = "partial"
     else:
         status = "ledger_only"
-    return {
+    report = {
         "contract": contract,
         "status": status,
         "source_signal_count": source_signal_count,
         "direct_surface_count": direct_surface_count,
     }
+    if extra:
+        report.update(extra)
+    return report
 
 
 def _surface_counts(facts: list[str]) -> dict[str, int]:
@@ -358,7 +408,12 @@ def render_markdown(report: dict[str, Any]) -> str:
             for row in fixture["surface_drift"]:
                 lines.append(f"| `{row['surface']}` | `{row['counts']}` | {row['delta']} |")
             lines.append("")
-        lines.extend(["| Draw | Contract | Status | Source signals | Direct surfaces |", "| --- | --- | --- | ---: | ---: |"])
+        lines.extend(
+            [
+                "| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |",
+                "| --- | --- | --- | ---: | ---: | ---: | ---: |",
+            ]
+        )
         for draw in fixture["draws"]:
             draw_name = Path(draw["compile_json"]).parent.parent.name
             for contract in draw["contracts"]:
@@ -371,6 +426,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                             f"`{contract['status']}`",
                             str(contract["source_signal_count"]),
                             str(contract["direct_surface_count"]),
+                            str(contract.get("direct_complete_count", "")),
+                            str(contract.get("direct_partial_count", "")),
                         ]
                     )
                     + " |"

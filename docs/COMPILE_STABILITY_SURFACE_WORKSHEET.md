@@ -358,3 +358,92 @@ Harden the source-authority pair recognizer so it scores governed subject,
 recipient/action, and authority/source slots rather than broad source tokens.
 Then use the recognizer to decide whether source-authority stability needs a
 compile contract, a profile-palette constraint, or multi-draw consensus.
+
+## CS-005 - Source-Authority Slot Contract Hardening
+
+Date: 2026-05-15
+
+Question:
+
+Can the source-authority stability recognizer distinguish complete
+governed-subject/recipient/source pairs from shallow source-authority rows?
+
+Before:
+
+CS-004 counted broad source-authority-ish rows. That was useful as a first
+proxy, but too permissive: a lone `court_order(...)`, an authority/source row
+without recipient, or mismatched access/source recipients could look like
+direct preservation.
+
+Prediction:
+
+A hardened recognizer should:
+
+- count a decomposed access authority pair only when `access_authorized_to` and
+  `access_source` share governed subject and recipient;
+- count packed access-authority rows only when source and authorized party are
+  both present for the subject;
+- count generic authority/source predicates only when they expose at least
+  three slots;
+- track complete and partial direct units separately.
+
+Intervention:
+
+Updated `scripts/audit_compile_surface_stability.py`:
+
+- added `_source_authority_direct_units()`;
+- made `source_authority_pair_preservation` count complete direct units rather
+  than broad source-like rows;
+- added `direct_complete_count` and `direct_partial_count` to contract reports;
+- expanded markdown output to show complete and partial counts.
+
+Added a unit test proving that:
+
+- `access_authorized_to(item, reader_one, ...)` plus
+  `access_source(item, reader_two, source)` is not complete;
+- the same subject and same recipient is complete;
+- `court_order(...)` alone does not satisfy the contract.
+
+After:
+
+Probate/source-authority redraw under the hardened recognizer:
+
+- `compile_surface_invariant_focused_probate_20260514`: partial,
+  source signals=`11`, complete direct units=`9`
+- `compile_surface_invariant_recompile_20260514`: ledger-only,
+  source signals=`11`, complete direct units=`0`
+- `source_authority_density_probate_compile_local_20260515`: partial,
+  source signals=`11`, complete direct units=`8`
+- `source_authority_invariant_probate_compile_20260514`: ledger-only,
+  source signals=`11`, complete direct units=`0`
+- `source_authority_invariant_probate_compile_local_20260514`: partial,
+  source signals=`11`, complete direct units=`8`
+
+No draw passes after slot hardening. This is a stronger and more honest result
+than the earlier broad recognizer.
+
+Artifacts:
+
+- `scripts/audit_compile_surface_stability.py`
+- `tests/test_compile_surface_stability.py`
+- regenerated stability reports in `docs/data/compile_surface_stability/`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_surface_stability.py`
+- `python -m pytest tests\test_compile_surface_stability.py -q` -> `2 passed`
+
+Lesson:
+
+Source-authority stability is not solved by merely emitting authority-flavored
+rows. The contract needs a governed subject, an actor/recipient/action surface,
+and an authority/source companion that can be joined without guessing. Under
+that stricter reading, the probate evidence is still partial at best.
+
+Next pressure:
+
+Do not repair from this recognizer alone. First make the source signal count
+less approximate by extracting candidate governed-subject/recipient/source
+mentions from source-record text or from source-ledger rows. Then decide
+whether the repair belongs to compile guidance, profile-palette constraints, or
+multi-draw consensus.

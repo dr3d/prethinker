@@ -17,6 +17,8 @@
             },
             {
               "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
               "direct_surface_count": 0,
               "source_signal_count": 0,
               "status": "not_applicable"
@@ -45,6 +47,8 @@
             },
             {
               "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
               "direct_surface_count": 0,
               "source_signal_count": 0,
               "status": "not_applicable"
