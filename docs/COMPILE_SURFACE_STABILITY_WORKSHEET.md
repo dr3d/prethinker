@@ -507,3 +507,154 @@ Add a small predicate-surface alias inventory or query planner normalization
 step for these generic families. It should let QA search equivalent surfaces
 without forcing compiles back to one frozen predicate vocabulary and without
 adding native helper adapters.
+
+## CSS-007 - Surface Alias Inventory Is Not Enough
+
+Date: 2026-05-14
+
+Before:
+
+CSS-006 showed that the focused compile had a different predicate dialect from
+the frozen no-helper baseline. The immediate low-risk repair was to expose a
+compact alias inventory to the query planner: item identifier, external
+identifier, access authorization, court order/effect, chronology event, source
+assertion, and related surface families already present in the compiled KB.
+
+Prediction:
+
+If predicate-palette drift was the dominant blocker, the no-helper QA replay
+should improve from `26/4/10` without adding helper rows, because the planner
+could search sibling/decomposed predicates before falling back to source-record
+text.
+
+Intervention:
+
+Added `surface_alias_inventory` to `compiled_kb_inventory` and exposed it in
+QA context packs and evidence-bundle planning. The inventory is derived from
+compiled predicate names only; it does not inspect fixture prose, row ids, or
+answer strings. A unit test now checks the trigger surface for terse predicate
+forms such as `item_id`, `asset_id`, `external_reference`, `authorized_party`,
+`order_effect`, `event_occurred_before`, and `assertion_recorded`.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/surface_alias_inventory_probate_qa_20260514.json`
+- `docs/data/compile_surface_stability/surface_alias_inventory_probate_qa_20260514.md`
+
+After:
+
+The replay fell to `24/3/13` with `0` helper rows:
+
+- exact=`24`
+- partial=`3`
+- miss=`13`
+- failure surfaces: `query_surface_gap=5`, `compile_surface_gap=11`,
+  `not_applicable=24`
+
+The negative result was useful. Several misses queried the right general
+neighborhood but returned only a source address or a broad relaxed row. The
+planner could see surface families, but the answer-bearing value was often
+still hidden in the bound query term or missing from the direct compile
+surface.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q` -> `163 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `193 passed`
+- no-helper QA replay: exact=`24` partial=`3` miss=`13`, helper rows=`0`
+
+Lesson:
+
+An alias inventory is a map, not a bridge. It helps the planner recognize
+palette variants, but it does not make bound constants visible as evidence and
+does not create direct facts that the compiler failed to emit. The architecture
+needs answer-bearing evidence visibility before more helper retirement can be
+trusted.
+
+Next pressure:
+
+Expose successful bound query constants as evidence rows. This should repair
+only the class where the model asks a valid query with a concrete answer atom
+and the runtime returns a row id but hides the bound value from the answerer and
+judge. It must not create helper rows or admit new facts.
+
+## CSS-008 - Bound Query Constants As Evidence
+
+Date: 2026-05-14
+
+Before:
+
+CSS-007 showed that a successful query like
+`source_record_text_atom(X, court_berwick_county_probate_court)` could still
+judge as a miss because the returned row exposed only `X=src_line_0004`; the
+confirmed bound constant stayed inside the query string. That is not a compile
+fact gap. It is evidence visibility debt.
+
+Prediction:
+
+Making bound query constants visible in successful query results should restore
+answers whose support is a confirmed source-record atom or other concrete bound
+argument. It should not repair true compile gaps, missing joins, or broad count
+questions.
+
+Intervention:
+
+Added a generic result augmentation step in `run_query_plan`: when a query
+succeeds, any non-variable bound arguments are added as `bound_query_constants`
+metadata and as `BoundArgN` / `BoundArgNDisplay` fields on returned rows. This
+does not change the KB, write facts, or add helper rows. It only makes already
+confirmed query constants visible to downstream answer synthesis and judging.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/bound_query_constants_probate_qa_20260514.json`
+- `docs/data/compile_surface_stability/bound_query_constants_probate_qa_20260514.md`
+
+After:
+
+The replay returned to the earlier focused no-helper baseline:
+
+- exact=`26`
+- partial=`4`
+- miss=`10`
+- helper rows=`0`
+- failure surfaces: `compile_surface_gap=9`, `query_surface_gap=3`,
+  `hybrid_join_gap=1`, `judge_uncertain=1`, `not_applicable=26`
+
+Concrete movement versus CSS-007 included source-text constant cases becoming
+exact, such as jurisdiction/court and death-date answers. The result did not
+exceed the CSS-005 baseline; new stochastic losses appeared elsewhere, which
+means the intervention repaired one visibility class but did not solve the
+remaining no-helper ceiling.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q` -> `164 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `194 passed`
+- no-helper QA replay: exact=`26` partial=`4` miss=`10`, helper rows=`0`
+
+Lesson:
+
+Zero-helper QA can recover source-record constant answers when the runtime
+exposes the evidence it already proved. But the remaining misses are mostly
+compile-surface coverage and query choice: registrar identity, motion numbers,
+court-order/source authority, count filters, interval joins, and source
+authority distinctions. More native helper rows are not the right repair.
+
+Next pressure:
+
+Split the remaining no-helper misses into two queues:
+
+1. compile coverage: direct facts that the focused compile should emit if it
+   sees recurring answer-bearing surfaces;
+2. query choice: cases where the needed facts exist but the planner binds a
+   placeholder, chooses a broad relaxed query, or stops before the answer slot.
+
+Only the first queue should influence compile-surface invariant guidance. The
+second should become query-planning tests, not helper adapters.

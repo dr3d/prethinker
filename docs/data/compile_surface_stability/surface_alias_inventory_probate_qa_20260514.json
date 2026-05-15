@@ -1,0 +1,22 @@
+{
+  "schema": "compile_surface_stability_qa_summary_v1",
+  "experiment": "surface_alias_inventory_probate_qa_limit0_oracle",
+  "date": "2026-05-14",
+  "fixture": "probate_storage_access_register",
+  "questions": 40,
+  "reference_judge": {
+    "exact": 24,
+    "partial": 3,
+    "miss": 13
+  },
+  "failure_surfaces": {
+    "query_surface_gap": 5,
+    "not_applicable": 24,
+    "compile_surface_gap": 11
+  },
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "artifact": "tmp/compile_surface_alias_inventory_probate_qa_limit0_oracle_20260514/probate_storage_access_register/domain_bootstrap_qa_20260515T031422082550Z_qa_qwen-qwen3-6-35b-a3b.json",
+  "lesson": "A predicate-family alias inventory is useful context, but by itself it does not solve answer-bearing query surface alignment. Some successful queries still returned only source addresses while the value was hidden in the bound query term."
+}

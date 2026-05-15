@@ -1,0 +1,24 @@
+{
+  "schema": "compile_surface_stability_qa_summary_v1",
+  "experiment": "bound_query_constants_probate_qa_limit0_oracle",
+  "date": "2026-05-14",
+  "fixture": "probate_storage_access_register",
+  "questions": 40,
+  "reference_judge": {
+    "exact": 26,
+    "partial": 4,
+    "miss": 10
+  },
+  "failure_surfaces": {
+    "not_applicable": 26,
+    "compile_surface_gap": 9,
+    "judge_uncertain": 1,
+    "query_surface_gap": 3,
+    "hybrid_join_gap": 1
+  },
+  "helper_rows": 0,
+  "runtime_load_errors": 0,
+  "write_proposal_rows": 0,
+  "artifact": "tmp/bound_query_constants_probate_qa_limit0_oracle_20260514/probate_storage_access_register/domain_bootstrap_qa_20260515T032939442860Z_qa_qwen-qwen3-6-35b-a3b.json",
+  "lesson": "Exposing bound query constants restored source-text constant evidence rows such as court and date answers, but did not exceed the earlier no-helper baseline. The remaining gap is mostly compile-surface coverage and query choice, not helper volume."
+}
