@@ -255,3 +255,27 @@ def test_rule_composition_audit_leaves_rank_only_override_link_shallow(tmp_path:
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["override"] == "shallow_structural"
+
+
+def test_rule_composition_audit_accepts_current_generic_rule_palette(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, base_rule_exception_threshold_and_vote_requirements).",
+            "rule_condition(base_rule, eligibility, recipient_on_waitlist).",
+            "rule_consequence(base_rule, action, allow_transfer).",
+            "requires_count(hardship_rule, missed_shift, 2, calendar_month).",
+            "requires_vote(hardship_rule, two_thirds, five_members_present).",
+            "exception_for(hardship_exception, base_rule).",
+            "exception_condition(hardship_exception, evidence, medical_note).",
+            "rule_consequence(hardship_exception, action, allow_transfer_with_one_workday).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["base_rule"] == "structural"
+    assert rows["threshold"] == "structural"
+    assert rows["vote_requirement"] == "structural"
+    assert rows["exception"] == "structural"

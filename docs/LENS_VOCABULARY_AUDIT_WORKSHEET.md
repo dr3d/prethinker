@@ -628,6 +628,85 @@ condition/action pair for the two-slot override links. The focused replay now
 shows the target state: activation, exception, and override can all become
 structural when the compiler emits the linked generic contracts.
 
+Post-contract three-fixture replay:
+
+After the activation, pairwise, exception-link, and override-scope contracts
+landed, the three rule-composition probes were freshly recompiled. This was a
+score-stamp replay, not a new repair pass.
+
+Post-contract artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_calibrated_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_calibrated_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_post_contract_qa_summary_20260515.json`
+- `tmp/lens_vocab_rule_composition_post_contract_compile_20260515`
+- `tmp/lens_vocab_rule_composition_post_contract_qa_20260515`
+
+Fresh compile:
+
+- compiles=`3`
+- parsed_ok=`3`
+- admitted/skipped=`98 / 0`
+- candidate predicates=`44`
+
+Initial post-contract audit:
+
+- `structural=11`
+- `shallow_structural=14`
+- `source_only=1`
+- `not_applicable=4`
+
+This first readout exposed an audit-calibration issue rather than a compile
+failure. The fresh compiles used current generic predicate names such as
+`rule_consequence/3`, `requires_count/4`, `requires_vote/3`, and
+`exception_for/2`. Those are fixture-free rule surfaces, but the audit still
+knew mostly the earlier predicate palette.
+
+Calibrated post-contract audit:
+
+- `structural=15`
+- `shallow_structural=11`
+- `source_only=0`
+- `not_applicable=4`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | N/A | Reading |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `activation_condition` | 1 | 2 | 0 | 0 | Improved but still often under-specified. |
+| `base_rule` | 3 | 0 | 0 | 0 | Stable under the current generic condition/consequence palette. |
+| `eligibility_condition` | 1 | 2 | 0 | 0 | Still shallow where condition rows lack enough role/context typing. |
+| `exception` | 2 | 1 | 0 | 0 | Mostly structural; one exception still lacks full linked effect/scope. |
+| `expiration` | 2 | 0 | 0 | 1 | Stable where present. |
+| `fallback_rule` | 3 | 0 | 0 | 0 | Stable. |
+| `override` | 0 | 3 | 0 | 0 | Main remaining weakness. |
+| `precedence` | 0 | 3 | 0 | 0 | Main remaining weakness; rank/pair scope still thin. |
+| `threshold` | 2 | 0 | 0 | 1 | Stable after accepting `requires_count/4`. |
+| `vote_requirement` | 1 | 0 | 0 | 2 | Stable where present after accepting `requires_vote/3`. |
+
+QA:
+
+- questions=`25`
+- exact/partial/miss=`25 / 0 / 0`
+- helper rows=`0`
+
+Reading:
+
+The post-contract replay affirms the architecture is holding together. Compile
+health improved sharply (`98 admitted / 0 skipped`) and QA is perfect without
+helper rows. The lens audit remains stricter than the answer score, which is
+the intended behavior. The remaining shallow pressure is no longer broad rule
+composition; it is concentrated in `override` and `precedence`, with smaller
+activation/eligibility resolution issues. There is no source-only residue left
+in this replay.
+
+Verification:
+
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `15 passed`
+
 Lesson:
 
 Rule composition confirms the value of slot contracts more strongly than
@@ -644,3 +723,9 @@ but it is now mostly rank-only precedence and older compiles that never emitted
 the linked contracts. Rule composition has reached the point where the next
 useful move is either a fresh three-fixture replay under the tightened audit, or
 switching to the next lens vocabulary: authority/custody.
+
+Decision:
+
+Rule composition is calibrated enough for this pass. The next lens vocabulary
+audit should move to authority/custody rather than continuing to chase the last
+rank-only precedence cases in this same probe set.

@@ -58,7 +58,7 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
         ("base", "default", "standard", "normal"),
         2,
         ("base_rule", "default_rule", "standard_rule", "rule_text", "rule_scope"),
-        (("rule_condition",), ("rule_action", "rule_outcome")),
+        (("rule_condition",), ("rule_action", "rule_outcome", "rule_consequence")),
     ),
     LensTerm(
         "exception",
@@ -71,7 +71,7 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
         "threshold",
         ("threshold", "minimum", "maximum", "cap", "limit"),
         3,
-        (".*_threshold", "threshold", "rule_threshold", "limit_rule", "cap_rule"),
+        (".*_threshold", "threshold", "rule_threshold", "limit_rule", "cap_rule", "requires_count"),
         (("threshold_measure", "threshold_subject"), ("threshold_value", "threshold_amount", "threshold_limit")),
     ),
     LensTerm(
@@ -79,13 +79,13 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
         ("activates", "activation", "triggered", "when"),
         3,
         ("activation_condition", "trigger_condition", "applies_when", "rule_activation"),
-        (("rule_condition", "trigger_condition", "applies_when"), ("rule_action", "rule_outcome")),
+        (("rule_condition", "trigger_condition", "applies_when"), ("rule_action", "rule_outcome", "rule_consequence")),
     ),
     LensTerm(
         "eligibility_condition",
         ("eligible", "eligibility", "qualifies", "qualify", "required"),
         3,
-        ("eligibility_condition", "qualifies_when", "required_condition", "requirement_condition"),
+        ("eligibility_condition", "qualifies_when", "required_condition", "requirement_condition", "rule_condition"),
     ),
     LensTerm(
         "override",
@@ -109,7 +109,7 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
         "vote_requirement",
         ("vote", "votes", "majority", "quorum"),
         3,
-        ("vote_requirement", "required_vote", "approval_vote", "quorum_requirement"),
+        ("vote_requirement", "required_vote", "approval_vote", "quorum_requirement", "requires_vote"),
     ),
     LensTerm(
         "fallback_rule",
@@ -379,7 +379,7 @@ def _matching_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -
 def _rule_exception_link_contract_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
     links = _rule_exception_links(direct_rows)
     condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "exception_condition", "waiver_condition"))
-    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "exception_effect", "waiver_effect"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "rule_consequence", "exception_effect", "waiver_effect"))
     for exception_id, link_fact in links.items():
         if condition_rows.get(exception_id) and effect_rows.get(exception_id):
             return [link_fact, condition_rows[exception_id][0], effect_rows[exception_id][0]]
@@ -391,7 +391,7 @@ def _partial_rule_exception_link_rows(direct_rows: list[dict[str, Any]]) -> list
     if not links:
         return []
     condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "exception_condition", "waiver_condition"))
-    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "exception_effect", "waiver_effect"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "rule_consequence", "exception_effect", "waiver_effect"))
     out: list[str] = []
     for exception_id, link_fact in links.items():
         rows = [link_fact, *condition_rows.get(exception_id, [])[:1], *effect_rows.get(exception_id, [])[:1]]
@@ -403,16 +403,17 @@ def _partial_rule_exception_link_rows(direct_rows: list[dict[str, Any]]) -> list
 def _rule_exception_links(direct_rows: list[dict[str, Any]]) -> dict[str, str]:
     links: dict[str, str] = {}
     for row in direct_rows:
-        if str(row["predicate"]).lower() != "rule_exception" or len(row["args"]) < 2:
+        if str(row["predicate"]).lower() not in {"rule_exception", "exception_for"} or len(row["args"]) < 2:
             continue
-        links[str(row["args"][1])] = str(row["fact"])
+        exception_arg = 1 if str(row["predicate"]).lower() == "rule_exception" else 0
+        links[str(row["args"][exception_arg])] = str(row["fact"])
     return links
 
 
 def _rule_override_link_contract_rows(direct_rows: list[dict[str, Any]]) -> list[str]:
     links = _rule_override_links(direct_rows)
     condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "override_condition", "trigger_condition"))
-    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "override_effect"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "rule_consequence", "override_effect"))
     for higher_rule, link_fact in links.items():
         if condition_rows.get(higher_rule) and effect_rows.get(higher_rule):
             return [link_fact, condition_rows[higher_rule][0], effect_rows[higher_rule][0]]
@@ -424,7 +425,7 @@ def _partial_rule_override_link_rows(direct_rows: list[dict[str, Any]]) -> list[
     if not links:
         return []
     condition_rows = _rows_by_anchor(direct_rows, ("rule_condition", "override_condition", "trigger_condition"))
-    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "override_effect"))
+    effect_rows = _rows_by_anchor(direct_rows, ("rule_action", "rule_outcome", "rule_consequence", "override_effect"))
     out: list[str] = []
     for higher_rule, link_fact in links.items():
         rows = [link_fact, *condition_rows.get(higher_rule, [])[:1], *effect_rows.get(higher_rule, [])[:1]]
@@ -437,7 +438,7 @@ def _rule_override_links(direct_rows: list[dict[str, Any]]) -> dict[str, str]:
     links: dict[str, str] = {}
     for row in direct_rows:
         predicate = str(row["predicate"]).lower()
-        if predicate not in {"rule_precedence", "override_rule", "rule_override"} or len(row["args"]) < 2:
+        if predicate not in {"rule_precedence", "override_rule", "rule_override", "overrides"} or len(row["args"]) < 2:
             continue
         if len(row["args"]) >= 3:
             continue
