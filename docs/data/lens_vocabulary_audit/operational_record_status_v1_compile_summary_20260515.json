@@ -1,0 +1,123 @@
+{
+  "generated": "2026-05-15T13:38:12.243939+00:00",
+  "lanes": 6,
+  "base_timeout": 900,
+  "effective_timeout": 5400,
+  "fixture_count": 6,
+  "parsed_ok_count": 6,
+  "totals": {
+    "candidate_predicates": 81,
+    "compile_admitted": 378,
+    "compile_skipped": 18
+  },
+  "results": [
+    {
+      "fixture": "clinic_intake_corrections",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.079799+00:00",
+      "finished": "2026-05-15T13:34:45.384352+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\clinic_intake_corrections",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T133445359341Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 17,
+        "compile_admitted": 80,
+        "compile_skipped": 3,
+        "rough_score": 0.889,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T133445359341Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\clinic_intake_corrections\\domain_bootstrap_file_20260515T133445359341Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 17, \"compile_admitted\": 80, \"compile_skipped\": 3, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 17, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "grant_review_queue",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.079799+00:00",
+      "finished": "2026-05-15T13:34:15.079625+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\grant_review_queue",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T133415056595Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 9,
+        "compile_admitted": 43,
+        "compile_skipped": 8,
+        "rough_score": 0.889,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T133415056595Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\grant_review_queue\\domain_bootstrap_file_20260515T133415056595Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 9, \"compile_admitted\": 43, \"compile_skipped\": 8, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 9, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "library_preservation_queue",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.080799+00:00",
+      "finished": "2026-05-15T13:34:22.097798+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\library_preservation_queue",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T133422071796Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 17,
+        "compile_admitted": 65,
+        "compile_skipped": 0,
+        "rough_score": 0.855,
+        "risk_count": 3
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T133422071796Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\library_preservation_queue\\domain_bootstrap_file_20260515T133422071796Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 17, \"compile_admitted\": 65, \"compile_skipped\": 0, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 4, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 1, \"predicate_count\": 17, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 3, \"rough_score\": 0.855, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "permit_renewal_docket",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.080799+00:00",
+      "finished": "2026-05-15T13:33:38.346336+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\permit_renewal_docket",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T133338320343Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 12,
+        "compile_admitted": 73,
+        "compile_skipped": 7,
+        "rough_score": 0.88,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T133338320343Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\permit_renewal_docket\\domain_bootstrap_file_20260515T133338320343Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 12, \"compile_admitted\": 73, \"compile_skipped\": 7, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 5, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 1, \"predicate_count\": 12, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.88, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "warehouse_repair_log",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.080799+00:00",
+      "finished": "2026-05-15T13:38:12.243939+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\warehouse_repair_log",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T133812222411Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 10,
+        "compile_admitted": 26,
+        "compile_skipped": 0,
+        "rough_score": 0.917,
+        "risk_count": 3
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T133812222411Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T133812222411Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 10, \"compile_admitted\": 26, \"compile_skipped\": 0, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 4, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 10, \"repeated_structure_count\": 1, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 3, \"rough_score\": 0.917, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "water_sample_docket",
+      "returncode": 0,
+      "started": "2026-05-15T13:31:37.080799+00:00",
+      "finished": "2026-05-15T13:34:53.060487+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\water_sample_docket",
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T133453034488Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 16,
+        "compile_admitted": 91,
+        "compile_skipped": 0,
+        "rough_score": 0.833,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T133453034488Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\lens_vocab_operational_record_status_compile_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T133453034488Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 16, \"compile_admitted\": 91, \"compile_skipped\": 0, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 16, \"repeated_structure_count\": 1, \"repeated_structure_id_only_record_refs\": [\"event_id/1\"], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.833, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

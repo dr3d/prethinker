@@ -182,9 +182,26 @@ AUTHORITY_CUSTODY_TERMS: tuple[LensTerm, ...] = (
     ),
 )
 
+OPERATIONAL_RECORD_STATUS_TERMS: tuple[LensTerm, ...] = (
+    LensTerm("received", ("received", "intake", "submitted"), 3, ("received_by", "received_at", "intake_received", "submission_received")),
+    LensTerm("filed", ("filed", "logged", "entered"), 3, ("filed_by", "filed_record", "logged_by", "record_entry", "entered_by")),
+    LensTerm("assigned", ("assigned", "routed", "referred"), 3, ("assigned_to", "routed_to", "referred_to", "owner_assigned")),
+    LensTerm("approved", ("approved", "granted", "accepted"), 3, ("approved_by", "approval_decision", "decision_approved", "granted_by")),
+    LensTerm("denied", ("denied", "rejected", "refused"), 3, ("denied_by", "denial_decision", "decision_denied", "rejected_by")),
+    LensTerm("withdrawn", ("withdrawn", "retracted", "cancelled"), 3, ("withdrawn_by", "withdrawn_on", "status_withdrawn", "retracted_by")),
+    LensTerm("pending", ("pending", "unresolved", "deferred"), 2, ("pending_item", "unresolved_item", "deferred_item", "current_status")),
+    LensTerm("corrected", ("corrected", "amended", "revised"), 3, ("corrected_by", "correction_.*", "amended_by", "revised_by")),
+    LensTerm("superseded", ("superseded", "replaced", "overridden"), 2, ("superseded_by", "replaced_by", "overridden_by")),
+    LensTerm("reopened", ("reopened", "reinstated", "resumed"), 3, ("reopened_by", "reinstated_by", "status_reopened", "resumed_on")),
+    LensTerm("closed", ("closed", "completed", "final"), 3, ("closed_by", "completed_by", "final_status", "closure_record")),
+    LensTerm("current_status", ("current", "final", "active"), 2, ("current_status", "final_status", "active_status", "status_at")),
+    LensTerm("status_transition", ("transition", "before", "after"), 4, ("status_transition", "status_changed", "state_transition", "status_before_after")),
+)
+
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
     "authority_custody": AUTHORITY_CUSTODY_TERMS,
     "evidence_provenance": EVIDENCE_PROVENANCE_TERMS,
+    "operational_record_status": OPERATIONAL_RECORD_STATUS_TERMS,
     "rule_composition": RULE_COMPOSITION_TERMS,
 }
 
@@ -398,6 +415,10 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
         special = _authority_record_contract_rows(term, direct_rows)
         if special:
             return special
+    if term.term in OPERATIONAL_RECORD_TERM_NAMES:
+        special = _operational_record_contract_rows(term, direct_rows)
+        if special:
+            return special
     if term.term == "exception":
         special = _rule_exception_link_contract_rows(direct_rows)
         if special:
@@ -422,6 +443,10 @@ def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, 
             return special
     if term.term in AUTHORITY_CUSTODY_TERM_NAMES:
         special = _partial_authority_record_rows(term, direct_rows)
+        if special:
+            return special
+    if term.term in OPERATIONAL_RECORD_TERM_NAMES:
+        special = _partial_operational_record_rows(term, direct_rows)
         if special:
             return special
     if term.term == "exception":
@@ -710,6 +735,91 @@ def _value_has_any_token(value: str, tokens: set[str]) -> bool:
     normalized = str(value).lower()
     value_tokens = set(TOKEN_RE.findall(normalized))
     return normalized in tokens or bool(value_tokens & tokens)
+
+
+OPERATIONAL_RECORD_TERM_NAMES = {term.term for term in OPERATIONAL_RECORD_STATUS_TERMS}
+OPERATIONAL_RECORD_PREDICATES = {"record_entry", "event_record", "docket_entry", "log_entry", "case_entry"}
+OPERATIONAL_DETAIL_PREDICATES = {"record_detail", "event_detail", "status_detail", "docket_detail", "log_detail"}
+OPERATIONAL_STATUS_PREDICATES = {
+    "status",
+    "record_status",
+    "current_status",
+    "final_status",
+    "status_at",
+    "event_status",
+    "decision_status",
+    "application_status",
+    "item_status",
+}
+
+
+def _operational_record_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    detail_rows = _operational_detail_rows_for_term(term, direct_rows)
+    if detail_rows:
+        return detail_rows[:3]
+    status_rows = _operational_status_rows_for_term(term, direct_rows)
+    if status_rows:
+        return status_rows[:3]
+    return []
+
+
+def _partial_operational_record_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    record_anchors = _operational_record_anchors(direct_rows)
+    term_tokens = set(term.tokens)
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in OPERATIONAL_RECORD_PREDICATES or not row["args"]:
+            continue
+        if not _row_has_any_token(row, term_tokens):
+            continue
+        anchor = str(row["args"][0])
+        if anchor in record_anchors:
+            out.append(str(row["fact"]))
+    return out
+
+
+def _operational_detail_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    record_anchors = _operational_record_anchors(direct_rows)
+    term_tokens = set(term.tokens)
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in OPERATIONAL_DETAIL_PREDICATES or len(row["args"]) < 3:
+            continue
+        anchor = str(row["args"][0])
+        if anchor not in record_anchors:
+            continue
+        if _row_has_any_token(row, term_tokens):
+            out.append(str(row["fact"]))
+    return out
+
+
+def _operational_status_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    term_tokens = set(term.tokens)
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in OPERATIONAL_STATUS_PREDICATES:
+            continue
+        if len(row["args"]) < term.min_arity:
+            continue
+        if _row_has_any_token(row, term_tokens):
+            out.append(str(row["fact"]))
+    return out
+
+
+def _operational_record_anchors(direct_rows: list[dict[str, Any]]) -> set[str]:
+    anchors: set[str] = set()
+    for row in direct_rows:
+        if str(row["predicate"]).lower() in OPERATIONAL_RECORD_PREDICATES and row["args"]:
+            anchors.add(str(row["args"][0]))
+    return anchors
+
+
+def _row_has_any_token(row: dict[str, Any], tokens: set[str]) -> bool:
+    row_tokens = set(TOKEN_RE.findall(str(row.get("fact", "")).lower()))
+    return bool(row_tokens & tokens)
 
 
 def _predicate_matches(term: LensTerm, predicate: str, predicate_tokens: set[str]) -> bool:

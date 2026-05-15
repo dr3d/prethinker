@@ -950,3 +950,213 @@ level for more generic palettes, especially official-register and copied-source
 reason rows, then run a two-draw replay only if the contract change is clearly
 generic. Otherwise switch to operational record status as the next lens and
 return to authority/custody with a larger transfer set.
+
+## LV-007 - Operational Record Status Initial Six-Probe Audit
+
+Date: 2026-05-15
+
+Question:
+
+Does the operational record/status vocabulary transfer on a larger first cycle
+than the earlier three-probe lens audits?
+
+Before:
+
+Operational record/status had strong compile guidance but no lens vocabulary
+admission audit. The expected vocabulary includes received/filed, assigned,
+approved, denied, withdrawn, pending, corrected, superseded, reopened, closed,
+current status, and status transition. Because status vocabularies are
+transition-heavy and palette-sensitive, this pass used six unlike probes rather
+than three.
+
+Prediction:
+
+The answer score should remain strong without helpers, but the vocabulary audit
+should be noisier than evidence provenance, rule composition, or
+authority/custody. A status word alone should not be enough. Structural credit
+requires the record/event id, subject/item/application, actor/body,
+timestamp/turn, before/after state when stated, authority/source, and
+reason/correction detail when stated.
+
+Intervention:
+
+- Added `operational_record_status` to
+  `scripts/audit_lens_vocabulary_transfer.py`.
+- Added generic audit contracts for direct status predicates and
+  `record_entry`/`record_detail` style linked rows.
+- Added operational slot-contract guidance to
+  `scripts/run_domain_bootstrap_file.py`.
+- Built six unlike probes:
+  `permit_renewal_docket`, `clinic_intake_corrections`,
+  `warehouse_repair_log`, `water_sample_docket`, `grant_review_queue`, and
+  `library_preservation_queue`.
+
+After:
+
+Compile:
+
+- fixtures=`6`
+- parsed_ok=`6`
+- candidate predicates=`81`
+- admitted/skipped=`378 / 18`
+
+Lens audit:
+
+- `structural=15`
+- `shallow_structural=41`
+- `source_only=14`
+- `not_applicable=8`
+
+Term readout:
+
+| Term | Structural | Shallow | Source-only | N/A | Reading |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `superseded` | 4 | 2 | 0 | 0 | Strongest transfer term. Replacement relations are often explicit. |
+| `approved` | 2 | 4 | 0 | 0 | Answerable, but often label-level rather than slot-complete. |
+| `corrected` | 2 | 3 | 1 | 0 | Correction details sometimes stay in source text. |
+| `current_status` | 2 | 1 | 3 | 0 | Current status is queryable in some compiles, source-only in others. |
+| `received` | 0 | 4 | 2 | 0 | Weak: received actor/object often not bound together. |
+| `filed` | 0 | 3 | 3 | 0 | Weak: filing events often stay metadata/source-only. |
+| `closed` | 0 | 6 | 0 | 0 | Universal but shallow; closure label needs actor/date/outcome slots. |
+| `reopened` | 0 | 3 | 0 | 3 | Present in only half the probes and shallow where present. |
+
+QA:
+
+- questions=`48`
+- exact/partial/miss=`46 / 0 / 2`
+- helper rows=`0`
+
+Misses:
+
+- `permit_renewal_docket q001`: receiving clerk identity stayed in source text;
+  structured row answered `applicant` instead of clerk Erin Moss.
+- `warehouse_repair_log q006`: withdrawn request returned an internal ticket id
+  without the descriptive request content `scanner-replacement request`.
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_slot_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_slot_contract_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/operational_record_status_v1_qa_summary_20260515.json`
+- `experiments/lens_vocabulary_audits/operational_record_status_v1/`
+- `tmp/lens_vocab_operational_record_status_compile_20260515`
+- `tmp/lens_vocab_operational_record_status_qa_20260515`
+
+Lesson:
+
+The larger initial probe set mattered. Operational status looks much more
+palette-sensitive than the earlier lenses. QA is strong at `95.83%` with zero
+helpers, but the audit shows the compile often preserves status labels without
+binding the actor, governed subject, status transition, and descriptive content
+in the same queryable structure. The next repair should target received/filed
+actor binding and withdrawn-request descriptive content, not broad helper rows.
+
+Next pressure:
+
+Strengthen operational record compile guidance for two generic surfaces:
+received/filed actor-object records and withdrawn/retracted request content.
+Then replay the same six probes. Do not add fixture-specific predicates for
+permit clerks or scanner requests.
+
+## LV-008 - Authority/Custody Expanded Six-Probe Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does the authority/custody vocabulary hold when expanded from three unlike
+probes to six?
+
+Before:
+
+LV-005 and LV-006 showed perfect QA on three probes but exposed shallow
+authority ladder terms. The expanded pass added three unlike probes:
+`transit_lost_property_release`, `makerspace_tool_lockout`, and
+`community_garden_gate_key`.
+
+Prediction:
+
+Adding more samples should keep answer quality high but make the vocabulary
+audit less flattering. Stable terms should be direct state surfaces such as
+custody holder and access control. Ladder terms such as staff note, draft
+recommendation, controlling finding, court order, and noncontrolling source
+should remain shallow unless source/detail/scope/reason slots are linked.
+
+Intervention:
+
+- Added three authority/custody probes for lost-property release, machine
+  lockout, and gate-key custody.
+- Recompiled all six authority/custody fixtures in one OpenRouter six-lane
+  batch under the current record-detail guidance.
+- Re-ran the authority/custody lens audit and QA over the full six-fixture set.
+
+After:
+
+Compile:
+
+- fixtures=`6`
+- parsed_ok=`6`
+- candidate predicates=`107`
+- admitted/skipped=`805 / 39`
+
+Lens audit:
+
+- prior three-fixture pre-repair readout=`18 structural / 11 shallow / 1 source-only`
+- prior three-fixture record-detail replay=`16 structural / 13 shallow / 1 source-only`
+- expanded six-fixture replay=`19 structural / 41 shallow / 0 source-only`
+
+Term readout:
+
+| Term | Structural | Shallow | Reading |
+| --- | ---: | ---: | --- |
+| `access_control` | 6 | 0 | Stable across all six. |
+| `custody_holder` | 5 | 1 | Mostly stable; one compile preserved custody as metadata. |
+| `board_vote` | 3 | 3 | Half structural, half label-level. |
+| `governing_rule` | 3 | 3 | Half structural, half label-level. |
+| `court_order` | 1 | 5 | Court/order labels usually lack governed action/scope rows. |
+| `official_record` | 1 | 5 | Official-register labels often lack governed content. |
+| `staff_note` | 0 | 6 | Notes are consistently typed but not slot-complete. |
+| `draft_recommendation` | 0 | 6 | Draft recommendations are consistently shallow. |
+| `controlling_finding` | 0 | 6 | Controlling status reaches the KB, but finding content/scope often does not. |
+| `noncontrolling_source` | 0 | 6 | Noncontrol status is present, reason/source-of-copy is thin. |
+
+QA:
+
+- questions=`54`
+- exact/partial/miss=`54 / 0 / 0`
+- helper rows=`0`
+
+Artifacts:
+
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/authority_custody_v1_expanded_qa_summary_20260515.json`
+- `experiments/lens_vocabulary_audits/authority_custody_v1/`
+- `tmp/lens_vocab_authority_custody_expanded_compile_20260515`
+- `tmp/lens_vocab_authority_custody_expanded_qa_20260515`
+
+Lesson:
+
+The expanded replay confirms the earlier warning. Authority/custody is highly
+answerable but not yet slot-stable. The direct state terms transfer. The
+authority ladder terms mostly do not: the compiler can answer from source
+records and nearby facts, but the lens audit is correctly refusing to count
+typed documents as structural authority unless governed action, scope, content,
+or reason slots are linked. This is a compile-resolution problem, not a helper
+problem.
+
+Next pressure:
+
+The next authority/custody repair should focus on one generic linked-record
+contract: if a source is typed as `staff_note`, `draft_recommendation`,
+`controlling_finding`, or `noncontrolling_source`, preserve a same-anchor
+content/effect/scope/reason row. But operational record/status has the more
+actionable immediate misses, so the next implementation slice should repair
+operational received/filed actor binding and withdrawn-request descriptive
+content first.

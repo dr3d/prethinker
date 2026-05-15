@@ -4,6 +4,7 @@ from pathlib import Path
 from scripts.audit_lens_vocabulary_transfer import (
     AUTHORITY_CUSTODY_TERMS,
     EVIDENCE_PROVENANCE_TERMS,
+    OPERATIONAL_RECORD_STATUS_TERMS,
     RULE_COMPOSITION_TERMS,
     audit_compile,
     summarize_reports,
@@ -391,3 +392,67 @@ def test_authority_custody_audit_accepts_is_noncontrolling_with_reason_detail(tm
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["noncontrolling_source"] == "structural"
+
+
+def test_operational_record_audit_accepts_record_detail_status_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, intake_record_was_received_and_assigned).",
+            "record_entry(intake_9, intake_record, clerk, 2026_04_01).",
+            "record_detail(intake_9, received_by, clerk).",
+            "record_detail(intake_9, assigned_to, review_team).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="operational_record_status", terms=OPERATIONAL_RECORD_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["received"] == "structural"
+    assert rows["assigned"] == "structural"
+
+
+def test_operational_record_audit_accepts_current_status_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, work_order_current_status_pending).",
+            "current_status(work_order_7, pending).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="operational_record_status", terms=OPERATIONAL_RECORD_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["pending"] == "structural"
+    assert rows["current_status"] == "structural"
+
+
+def test_operational_record_audit_marks_label_only_record_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, record_entry_only_says_denial_record).",
+            "record_entry(denial_4, denied_record, clerk, 2026_04_02).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="operational_record_status", terms=OPERATIONAL_RECORD_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["denied"] == "shallow_structural"
+
+
+def test_operational_record_audit_accepts_status_transition_slots(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, item_status_changed_from_pending_to_approved).",
+            "status_transition(case_2, pending, approved, 2026_04_03).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="operational_record_status", terms=OPERATIONAL_RECORD_STATUS_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["status_transition"] == "structural"

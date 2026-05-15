@@ -50,6 +50,9 @@ def test_operational_record_context_guards_status_corrections_and_unresolved_ite
     assert "status before/after" in context
     assert "original/superseded value" in context
     assert "pending, unresolved, referred, deferred" in context
+    assert "Operational record slot contract" in context
+    assert "status before and after when stated" in context
+    assert "record type or status word alone is shallow metadata" in context
 
 
 def test_source_compiler_context_selects_operational_record_lens_from_domain_hint() -> None:
@@ -166,6 +169,15 @@ def test_compile_surface_invariants_keep_authority_custody_ladder_slots() -> Non
     assert "custody/access control with holder or access actor" in context
     assert "authority/custody record metadata is not enough by itself" in context
     assert "same-anchor content/effect/scope/condition/decision/governed-subject/reason rows" in context
+
+
+def test_compile_surface_invariants_keep_operational_record_slots() -> None:
+    context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+
+    assert "operational record/status events" in context
+    assert "event or record id, governed subject/item/application" in context
+    assert "status before and after when stated" in context
+    assert "Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition" in context
 
 
 def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:

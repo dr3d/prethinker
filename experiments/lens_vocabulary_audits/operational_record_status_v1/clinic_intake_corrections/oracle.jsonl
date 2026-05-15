@@ -1,0 +1,8 @@
+{"category":"operational_record_status_vocabulary","id":"q001","source_id":"q001","reference_answer":"Intake aide Mara Chen received referral R-44."}
+{"category":"operational_record_status_vocabulary","id":"q002","source_id":"q002","reference_answer":"CI-44 was filed with status pending triage."}
+{"category":"operational_record_status_vocabulary","id":"q003","source_id":"q003","reference_answer":"CI-44 was routed to orthopedic review."}
+{"category":"operational_record_status_vocabulary","id":"q004","source_id":"q004","reference_answer":"Immediate scheduling was denied because the referral lacked a mobility score."}
+{"category":"operational_record_status_vocabulary","id":"q005","source_id":"q005","reference_answer":"Pending nurse review superseded the denied scheduling status after mobility score MS-9 was added."}
+{"category":"operational_record_status_vocabulary","id":"q006","source_id":"q006","reference_answer":"The patient withdrew the request for a morning-only appointment window."}
+{"category":"operational_record_status_vocabulary","id":"q007","source_id":"q007","reference_answer":"CI-44 was reopened to add the scheduling preference note."}
+{"category":"operational_record_status_vocabulary","id":"q008","source_id":"q008","reference_answer":"The current status is scheduled."}
