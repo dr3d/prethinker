@@ -608,3 +608,50 @@ def test_epistemic_uncertainty_audit_marks_bare_stance_shallow(tmp_path: Path) -
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["disputed"] == "shallow_structural"
+
+
+def test_epistemic_uncertainty_audit_accepts_source_recorded_stance(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, review_confirmed_the_delivery).",
+            "source_recorded(review_4, delivery_to_bed_b9, confirmed).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="epistemic_uncertainty", terms=EPISTEMIC_UNCERTAINTY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["confirmed"] == "structural"
+
+
+def test_epistemic_uncertainty_audit_accepts_status_with_evidence_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, cash_claim_unsupported_without_receipt).",
+            "epistemic_status(claim_cash, unsupported).",
+            "evidence_for(claim_cash, no_deposit_receipt).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="epistemic_uncertainty", terms=EPISTEMIC_UNCERTAINTY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["unsupported"] == "structural"
+
+
+def test_epistemic_uncertainty_audit_accepts_missing_field_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, owner_name_unstated_for_locker_l_22).",
+            "attribute_missing(locker_l22, owner_name).",
+            "field_unstated(locker_l22, assignment_end_date).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="epistemic_uncertainty", terms=EPISTEMIC_UNCERTAINTY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["unstated"] == "structural"

@@ -439,6 +439,10 @@ def _contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, Any]]) -
         special = _operational_record_contract_rows(term, direct_rows)
         if special:
             return special
+    if term.term in EPISTEMIC_UNCERTAINTY_TERM_NAMES:
+        special = _epistemic_uncertainty_contract_rows(term, direct_rows)
+        if special:
+            return special
     if term.term == "exception":
         special = _rule_exception_link_contract_rows(direct_rows)
         if special:
@@ -467,6 +471,10 @@ def _partial_contract_rows_for_term(term: LensTerm, direct_rows: list[dict[str, 
             return special
     if term.term in OPERATIONAL_RECORD_TERM_NAMES:
         special = _partial_operational_record_rows(term, direct_rows)
+        if special:
+            return special
+    if term.term in EPISTEMIC_UNCERTAINTY_TERM_NAMES:
+        special = _partial_epistemic_uncertainty_rows(term, direct_rows)
         if special:
             return special
     if term.term == "exception":
@@ -579,6 +587,130 @@ def _rows_by_anchor(direct_rows: list[dict[str, Any]], predicates: tuple[str, ..
         if predicate not in predicate_set or not row["args"]:
             continue
         out.setdefault(str(row["args"][0]), []).append(str(row["fact"]))
+    return out
+
+
+EPISTEMIC_UNCERTAINTY_TERM_NAMES = {term.term for term in EPISTEMIC_UNCERTAINTY_TERMS}
+EPISTEMIC_STATUS_TOKENS: dict[str, set[str]] = {
+    "confirmed": {"confirmed", "verified", "established"},
+    "corrected": {"corrected", "correction", "revised", "amended"},
+    "disputed": {"disputed", "contested", "challenged"},
+    "pending": {"pending", "unresolved", "awaiting"},
+    "provisional": {"provisional", "temporary", "interim"},
+    "resolved_negative": {"resolved_negative", "ruled_out", "excluded", "absent", "negative"},
+    "retracted": {"retracted", "withdrawn", "rescinded"},
+    "superseded": {"superseded", "replaced", "overridden"},
+    "unknown": {"unknown", "unclear", "undetermined"},
+    "unstated": {"unstated", "not_stated", "omitted", "unmentioned"},
+    "unsupported": {"unsupported", "unverified", "uncorroborated"},
+}
+EPISTEMIC_DIRECT_PREDICATES: dict[str, set[str]] = {
+    "confirmed": {"confirmed", "verified_by", "source_confirms"},
+    "corrected": {"corrected_by", "corrected_value", "field_corrected", "amended_from_to", "revised_by"},
+    "disputed": {"disputed_by", "contested_by", "challenged_by", "dispute_record"},
+    "inferred": {"inferred", "inferred_fact", "inferred_from", "inferred_conclusion", "implied_by", "deduced_from", "inference_basis"},
+    "pending": {"pending_item", "pending_approval_by", "unresolved_comparison", "awaiting_result"},
+    "provisional": {"is_provisional", "provisional_fact", "provisional_hold", "temporary_status", "interim_status"},
+    "resolved_negative": {"resolved_negative", "ruled_out", "is_ruled_out", "confirmed_absent", "excluded_by", "exclusion_verified"},
+    "retracted": {"retracted", "retracted_claim", "claim_rescinded", "withdrawn", "withdrawn_claim", "rescinded_by", "record_retracted"},
+    "superseded": {"superseded_by", "status_superseded", "replaced_by", "estimate_superseded_by", "schedule_replaced"},
+    "unknown": {"unknown_value", "status_unknown", "is_unknown", "undetermined"},
+    "unstated": {"field_unstated", "attribute_missing", "actor_unstated", "not_stated", "source_omits", "unstated"},
+    "unsupported": {"unsupported", "unsupported_claim", "claim_unsupported", "lacks_evidence_for", "insufficient_for", "unsupported_by"},
+}
+EPISTEMIC_STATUS_PREDICATES = {"epistemic_status", "source_epistemic_label"}
+EPISTEMIC_SUPPORT_PREDICATES = {"claim_source", "evidence_for", "lacks_evidence_for", "insufficient_for", "supported_by_evidence"}
+
+
+def _epistemic_uncertainty_contract_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term == "inferred":
+        return []
+    rows: list[str] = []
+    status_rows = _epistemic_status_rows(term, direct_rows)
+    if status_rows:
+        rows.extend(status_rows)
+    source_rows = _epistemic_source_recorded_rows(term, direct_rows)
+    if source_rows:
+        rows.extend(source_rows)
+    direct_rows_for_term = _epistemic_direct_rows(term, direct_rows)
+    if direct_rows_for_term:
+        rows.extend(direct_rows_for_term)
+    return rows[:5]
+
+
+def _partial_epistemic_uncertainty_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    if term.term not in {"disputed", "unsupported"}:
+        return []
+    out: list[str] = []
+    tokens = EPISTEMIC_STATUS_TOKENS.get(term.term, set())
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in EPISTEMIC_STATUS_PREDICATES or len(row["args"]) < 2:
+            continue
+        if _value_has_any_token(str(row["args"][1]), tokens) and not _epistemic_support_rows(str(row["args"][0]), direct_rows):
+            out.append(str(row["fact"]))
+    return out
+
+
+def _epistemic_status_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    tokens = EPISTEMIC_STATUS_TOKENS.get(term.term, set())
+    if not tokens:
+        return []
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in EPISTEMIC_STATUS_PREDICATES or len(row["args"]) < 2:
+            continue
+        if not _value_has_any_token(str(row["args"][1]), tokens):
+            continue
+        if term.term in {"disputed", "unsupported"}:
+            support_rows = _epistemic_support_rows(str(row["args"][0]), direct_rows)
+            if not support_rows:
+                continue
+            out.extend([str(row["fact"]), *support_rows[:2]])
+        else:
+            out.append(str(row["fact"]))
+    return out
+
+
+def _epistemic_source_recorded_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    tokens = EPISTEMIC_STATUS_TOKENS.get(term.term, set())
+    if not tokens:
+        return []
+    out: list[str] = []
+    for row in direct_rows:
+        if str(row["predicate"]).lower() != "source_recorded" or len(row["args"]) < 3:
+            continue
+        if _value_has_any_token(str(row["args"][2]), tokens):
+            out.append(str(row["fact"]))
+    return out
+
+
+def _epistemic_direct_rows(term: LensTerm, direct_rows: list[dict[str, Any]]) -> list[str]:
+    predicates = EPISTEMIC_DIRECT_PREDICATES.get(term.term, set())
+    if not predicates:
+        return []
+    out: list[str] = []
+    for row in direct_rows:
+        predicate = str(row["predicate"]).lower()
+        if predicate not in predicates:
+            continue
+        if predicate in {"actor_unstated", "is_provisional", "withdrawn"}:
+            if row["args"]:
+                out.append(str(row["fact"]))
+            continue
+        if len(row["args"]) >= 2:
+            out.append(str(row["fact"]))
+    return out
+
+
+def _epistemic_support_rows(anchor: str, direct_rows: list[dict[str, Any]]) -> list[str]:
+    out: list[str] = []
+    for row in direct_rows:
+        if str(row["predicate"]).lower() not in EPISTEMIC_SUPPORT_PREDICATES:
+            continue
+        if row["args"] and str(row["args"][0]) == anchor:
+            out.append(str(row["fact"]))
     return out
 
 

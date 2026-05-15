@@ -1863,3 +1863,138 @@ before changing guidance: negative resolution with explicit evidence, unstated
 field bound to a named object, and unsupported claim with missing support type.
 If those remain answerable but shallow, the next layer is epistemic slot
 contracts, not helper delivery.
+
+## LV-016 - Epistemic Hard Cases And Slot Contracts
+
+Date: 2026-05-15
+
+Question:
+
+Do epistemic hard cases fail because the answers are unavailable, or because
+the audit vocabulary does not yet recognize the generic stance contracts the
+compiler already emits?
+
+Before:
+
+LV-015 showed perfect no-helper QA on simple epistemic probes:
+
+- QA=`29 / 0 / 0`
+- helper rows=`0`
+- audit=`18 structural / 6 shallow / 3 source-only / 9 N/A`
+
+The weak terms were `resolved_negative`, `unstated`, and `unsupported`.
+
+Prediction:
+
+If the weak terms are genuinely missing compile surfaces, hard-case QA should
+drop or the audit should stay prose-bound. If they are contract-recognition
+gaps, hard cases should remain answerable while the direct facts show reusable
+epistemic shapes such as `ruled_out/2`, `field_unstated/2`,
+`attribute_missing/2`, `epistemic_status/2`, and `lacks_evidence_for/2`.
+
+Intervention:
+
+Added three hard-case epistemic probes:
+
+- `inventory_absence_resolution`: evidence-backed negative resolution,
+  unknown return time, object-bound unstated field, unsupported claim, and
+  superseded status.
+- `locker_metadata_gap`: verified opening, object-bound missing owner/end-date
+  fields, disputed claim, unsupported claim, exclusion evidence, provisional
+  hold, correction, and replacement status.
+- `community_claim_support`: unsupported claim with missing support types,
+  ruled-out cause, unknown reading, unstated actor, amendment, withdrawal,
+  provisional ranking, and superseded label.
+
+Ran compile and no-helper QA with OpenRouter at six lanes. Then strengthened the
+audit recognizer for generic epistemic contracts without changing compile
+guidance:
+
+- `source_recorded(Source, Proposition, Stance)` counts as structural when the
+  stance value matches the term.
+- `epistemic_status(Claim, unsupported|disputed)` counts as structural only
+  when linked support rows such as `claim_source/2`, `evidence_for/2`,
+  `lacks_evidence_for/2`, or `insufficient_for/2` exist.
+- object-bound absence rows such as `field_unstated/2`,
+  `attribute_missing/2`, and `actor_unstated/1` are recognized as epistemic
+  missing-field contracts.
+- explicit negative and lack-of-support predicates such as `ruled_out/2`,
+  `is_ruled_out/2`, `exclusion_verified/2`, `claim_unsupported/2`, and
+  `lacks_evidence_for/2` are recognized as epistemic stance rows.
+
+After:
+
+Hard-case compile:
+
+- fixtures=`3`
+- parsed OK=`3`
+- candidate predicates=`48`
+- admitted/skipped=`143 / 1`
+
+Hard-case no-helper QA:
+
+- questions=`28`
+- exact/partial/miss=`28 / 0 / 0`
+- helper rows=`0`
+
+Hard-case audit before contract recognition:
+
+- `12 structural / 7 shallow / 3 source-only / 14 N/A`
+
+Hard-case audit after contract recognition:
+
+- `21 structural / 1 shallow / 1 source-only / 13 N/A`
+
+Simple-probe reaudit also improved:
+
+- before=`18 structural / 6 shallow / 3 source-only / 9 N/A`
+- after=`22 structural / 3 shallow / 3 source-only / 8 N/A`
+
+The remaining hard-case audit residue is narrow:
+
+- `pending` remains shallow on `locker_metadata_gap`;
+- `superseded` remains source-only on `locker_metadata_gap`.
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/epistemic_uncertainty_v1/inventory_absence_resolution/`
+- `experiments/lens_vocabulary_audits/epistemic_uncertainty_v1/locker_metadata_gap/`
+- `experiments/lens_vocabulary_audits/epistemic_uncertainty_v1/community_claim_support/`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_audit_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_contract_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_contract_reaudit_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_contract_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_hardcases_contract_reaudit_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `38 passed`
+- `python -m pytest tests -q` -> `1235 passed, 2 subtests passed`
+
+Lesson:
+
+The epistemic hard cases did not expose a helper need. They exposed an audit
+layer need. The compiler already emits reusable epistemic contracts for many
+hard cases; the audit had to learn those contract shapes before it could
+distinguish structural transfer from shallow vocabulary hits. This is the same
+architecture pattern seen in operational lifecycle: answerability, compile
+surface, and vocabulary admission are distinct layers.
+
+The biggest scientific win is that `resolved_negative` moved from weak in
+simple probes to fully structural in hard cases once the source explicitly
+bound the rejected alternative and evidence. That means negative resolution is
+not missing from the architecture. It needs explicit evidence/alternative
+coordinates.
+
+Next pressure:
+
+Do not broaden epistemic compile guidance yet. First add one small replay for
+pending/superseded epistemic lifecycle rows, because those are the only
+remaining hard-case residues. After that, move the same audit framework to the
+next roster facet instead of overfitting this lens.
