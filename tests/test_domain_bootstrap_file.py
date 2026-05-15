@@ -160,6 +160,8 @@ def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:
     assert "fallback rules need trigger and fallback action" in context
     assert "Activation-condition anchoring rule" in context
     assert "governed rule, trigger/context, and governed subject or action" in context
+    assert "Pairwise rule-relation rule" in context
+    assert "higher/overriding rule, lower/overridden rule" in context
 
     selected = "\n".join(
         _source_compiler_context(
@@ -461,6 +463,8 @@ def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatc
     assert "Unanchored condition-only, priority-only, quorum-only" in user_message["content"]
     assert "preserve the activation anchor directly" in user_message["content"]
     assert "A rule label that merely contains the trigger words is not enough" in user_message["content"]
+    assert "preserve the pairwise relation directly" in user_message["content"]
+    assert "Rank-only priority labels are shallow" in user_message["content"]
     assert "Candidate predicate names are not enough" in user_message["content"]
 
 

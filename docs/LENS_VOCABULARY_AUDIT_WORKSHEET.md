@@ -531,6 +531,38 @@ condition/action pair as a structural activation contract. That is not a
 fixture-specific synonym: it is the minimum transferable shape for "this rule
 activates under this condition and has this governed action."
 
+Pairwise relation follow-on:
+
+The next narrow repair added a pairwise rule-relation contract to rule-ingestion
+guidance and the global compile-surface invariants. It also taught the audit
+that `rule_precedence(HigherRule, LowerRule, ConflictOrScope)` can satisfy the
+`override` term when the source says one rule overrides or controls another.
+Two-arity `rule_precedence/2`, `precedence_level/2`, and rank-only rows remain
+shallow.
+
+Pairwise artifacts:
+
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_pairwise_relation_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_pairwise_relation_reaudit_20260515.json`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_pairwise_reaudit_20260515.md`
+- `docs/data/lens_vocabulary_audit/rule_composition_v1_activation_pairwise_reaudit_20260515.json`
+
+Pairwise replay readout over the three-fixture guidance replay:
+
+- `structural=13`
+- `shallow_structural=9`
+- `source_only=4`
+- `not_applicable=4`
+
+Delta from the prior guidance replay:
+
+- `override`: `0 structural / 3 shallow / 0 source-only` -> `1 structural / 2 shallow / 0 source-only`
+- total: `12 structural / 10 shallow` -> `13 structural / 9 shallow`
+
+This is intentionally modest. The repair does not pretend every precedence
+surface is structural. It only recognizes the pairwise three-slot form as
+architecture and leaves rank-only rows as pressure.
+
 Lesson:
 
 Rule composition confirms the value of slot contracts more strongly than
@@ -542,7 +574,8 @@ not helper rows and not fixture-specific rule names.
 
 Next pressure:
 
-The remaining weak rule-composition surface is partner/scope resolution for
-`override`, `precedence`, and `exception`. The next repair should target
-pairwise rule relations: preserve higher rule, lower rule, conflict/scope, and
-effect without relying on rank-only rows such as `precedence_level(rule, high)`.
+The remaining weak rule-composition surface is still partner/scope resolution,
+but it is now narrower: rank-only precedence and two-slot override/exception
+links. The next repair should focus on avoiding `precedence_level(rule, high)`
+when the source names the compared rule, and avoiding `rule_exception(Base,
+Exception)` without also preserving the exception condition and effect/scope.

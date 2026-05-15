@@ -174,3 +174,19 @@ def test_rule_composition_audit_accepts_condition_action_activation_contract(tmp
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["activation_condition"] == "structural"
     assert rows["base_rule"] == "structural"
+
+
+def test_rule_composition_audit_accepts_rule_precedence_as_override_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, emergency_closure_overrides_the_normal_booking_rule).",
+            "rule_precedence(emergency_closure_rule, normal_booking_rule, conflict).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="rule_composition", terms=RULE_COMPOSITION_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["override"] == "structural"
+    assert rows["precedence"] == "structural"

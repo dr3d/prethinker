@@ -91,7 +91,7 @@ RULE_COMPOSITION_TERMS: tuple[LensTerm, ...] = (
         "override",
         ("override", "overrides", "supersede", "supersedes"),
         3,
-        ("override", "overrides", "rule_override", "supersedes"),
+        ("override", "overrides", "rule_override", "supersedes", "rule_precedence"),
     ),
     LensTerm(
         "precedence",
