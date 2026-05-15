@@ -13038,7 +13038,9 @@ def _token_subset_filter_relaxed_rows(
                 break
             spec_tokens = set(spec["tokens"])
             row_token_set = set(row_tokens)
-            if not (spec_tokens <= row_token_set or row_token_set <= spec_tokens):
+            overlap = spec_tokens & row_token_set
+            distinctive_overlap = len(overlap) >= 2
+            if not (spec_tokens <= row_token_set or row_token_set <= spec_tokens or distinctive_overlap):
                 matched_all = False
                 break
         if matched_all:

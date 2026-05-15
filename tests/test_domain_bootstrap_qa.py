@@ -2053,6 +2053,26 @@ def test_relaxed_constant_query_filters_token_subset_matches() -> None:
     assert relaxed["result"]["rows"] == [{"Item": "ex_001", "Relaxed2": "safestore_vault"}]
 
 
+def test_relaxed_constant_query_filters_distinctive_token_overlap() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "physical_custodian(ex_001, safestore_vault_box_v_401).",
+        "physical_custodian(ex_002, safestore_vault_box_v_402).",
+        "physical_custodian(ex_003, estate_warehouse_bay_4).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    relaxed = _relaxed_constant_query(runtime, query="physical_custodian(Item, safestore_vault_services).")
+
+    assert relaxed is not None
+    assert relaxed["result"]["reasoning_basis"]["token_subset_filter"] is True
+    assert relaxed["result"]["reasoning_basis"]["unfiltered_num_rows"] == 3
+    assert relaxed["result"]["rows"] == [
+        {"Item": "ex_001", "Relaxed2": "safestore_vault_box_v_401"},
+        {"Item": "ex_002", "Relaxed2": "safestore_vault_box_v_402"},
+    ]
+
+
 def test_run_query_plan_derives_recall_classification_at_date() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
