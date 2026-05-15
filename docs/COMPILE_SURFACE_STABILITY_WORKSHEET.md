@@ -218,3 +218,83 @@ Run a small recompile on the three helper-residue probes with the invariant
 context active, then compare the new invariant audit against CSS-001. A useful
 gain is fewer `candidate_only`/`ledger_only` families without adding fixture
 vocabulary, not merely a higher direct fact count.
+
+## CSS-003 - Invariant-Guided Three-Probe Recompile
+
+Date: 2026-05-14
+
+Before:
+
+CSS-001 showed that the older direct-surface recompile could look clean while
+collapsing an entire probe to `0` direct facts. CSS-002 added generic compile
+guidance, but it had not yet been tested against the same helper-residue
+probes.
+
+Prediction:
+
+If the invariant guidance is useful, it should reduce `candidate_only` and
+`ledger_only` families without increasing fixture-specific prompt surface. It
+does not need to beat the frozen stamp in one draw, but it should avoid the
+worst "candidate names with no admitted facts" failure mode.
+
+Intervention:
+
+Recompiled the same three helper-residue probes through OpenRouter at three
+lanes, with source-record facts enabled and the new invariant guidance active.
+Then reran the invariant audit against the new compile artifacts.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/invariant_guided_recompile_audit_20260514.json`
+- `docs/data/compile_surface_stability/invariant_guided_recompile_audit_20260514.md`
+
+After:
+
+The invariant-guided run produced:
+
+```text
+compiles: 3
+pass: 3
+partial: 13
+candidate_only: 2
+ledger_only: 2
+not_applicable: 1
+fail: 0
+```
+
+Fixture-level summary:
+
+```text
+count/roster: direct facts 297, pass 2, partial 4, candidate_only 0, ledger_only 0
+sensor/correction: direct facts 38, pass 1, partial 5, candidate_only 0, ledger_only 1
+custody/control: direct facts 12, pass 0, partial 4, candidate_only 2, ledger_only 1
+```
+
+Compared with the older direct-surface recompile, the bad surface debt dropped
+from `7` candidate-only and `4` ledger-only families to `2` and `2`. The sensor
+probe no longer collapsed to zero direct facts. The custody/control probe is
+still weak: it moved from broad ledger/candidate debt into a small direct
+surface, but it remains below the frozen stamp and is not ready for helper-free
+confidence.
+
+Verification:
+
+```powershell
+python scripts\run_domain_bootstrap_file_batch.py --dataset-root datasets\story_worlds --out-root tmp\compile_surface_invariant_recompile_20260514 --fixture count_composition_roster --fixture industrial_sensor_clock_correction --fixture probate_storage_access_register --lanes 3 --timeout 900 --compile-source --source-entity-ledger --archival-identifier-ledger --source-record-ledger --source-record-ledger-facts --review-profile --profile-review-retry
+python scripts\audit_compile_surface_invariants.py --compile-json tmp\compile_surface_invariant_recompile_20260514\count_composition_roster --compile-json tmp\compile_surface_invariant_recompile_20260514\industrial_sensor_clock_correction --compile-json tmp\compile_surface_invariant_recompile_20260514\probate_storage_access_register --out-json docs\data\compile_surface_stability\invariant_guided_recompile_audit_20260514.json --out-md docs\data\compile_surface_stability\invariant_guided_recompile_audit_20260514.md
+```
+
+Lesson:
+
+The invariant guidance helped, but the architecture has not "solved helpers" by
+prompt text. The result is exactly the useful middle state: fewer mirage
+surfaces, better direct sensor acquisition, and a clearly named remaining
+custody/control compile-surface gap. This keeps helper retirement empirical
+instead of ideological.
+
+Next pressure:
+
+Do not run a broad no-helper internal QA yet. First isolate the custody/control
+compile gap: source addressability, object/item id admission, temporal event
+rows, and custody/possession/recall surfaces are still weak. The next repair
+should target admission of those generic surfaces, not a helper resurrection.
