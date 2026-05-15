@@ -447,3 +447,98 @@ less approximate by extracting candidate governed-subject/recipient/source
 mentions from source-record text or from source-ledger rows. Then decide
 whether the repair belongs to compile guidance, profile-palette constraints, or
 multi-draw consensus.
+
+## CS-006 - Field-Bound Source Units And Operational Lifecycle Contract
+
+Date: 2026-05-15
+
+Question:
+
+Can the stability audit move one step closer to pre-stamp measurement by making
+source-authority source signals field-bound and adding an operational lifecycle
+preservation contract?
+
+Before:
+
+CS-005 hardened the direct source-authority side, but the source side still
+used authority-flavored text mentions. The operational/status report also had
+only assignment and source-authority contracts, so its largest drift surface was
+visible only as predicate/surface churn rather than as a preservation claim.
+
+Prediction:
+
+Two measurement-only refinements should improve the audit without changing the
+instrument:
+
+- source-authority source signals should prefer `source_record_field` rows that
+  bind a subject/object, an access/party field, and an authority/source field on
+  the same source record;
+- operational lifecycle should count source text lines with lifecycle/status
+  plus temporal/state markers and compare them to direct lifecycle/status facts
+  with enough slots to bind event, subject/status, and time/state.
+
+Intervention:
+
+Updated `scripts/audit_compile_surface_stability.py`:
+
+- added field-bound source units for `source_authority_pair_preservation`;
+- kept text mention counts visible as provenance rather than primary source
+  counts when structured source rows exist;
+- added `operational_lifecycle_preservation`;
+- expanded contract markdown columns so reports show source field units, source
+  text mentions, direct surfaces, complete direct units, and partial direct
+  units.
+
+Added unit tests for:
+
+- structured source-authority field units;
+- operational lifecycle source text vs direct status/lifecycle surfaces.
+
+After:
+
+Source-authority/probate:
+
+- structured source units=`12`;
+- text mentions=`11`;
+- best direct complete units remain `9` and `8`;
+- two draws remain ledger-only at `0`;
+- no source-authority draw passes under the stricter field-bound source count.
+
+Operational/status:
+
+- compiles=`18`, fixtures=`6`;
+- preservation statuses: pass=`11`, partial=`5`, ledger-only=`2`;
+- ledger-only cases: one grant-review draw and one water-sample palette draw;
+- partial cases preserve some lifecycle surfaces but miss enough direct units to
+  stay below the source signal count.
+
+This turns the operational drift from a large undifferentiated predicate table
+into a contract-level reading: most draws preserve the lifecycle surface, but
+the same fixture family still has regime-specific collapses.
+
+Artifacts:
+
+- `scripts/audit_compile_surface_stability.py`
+- `tests/test_compile_surface_stability.py`
+- regenerated stability reports in `docs/data/compile_surface_stability/`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_surface_stability.py`
+- `python -m pytest tests\test_compile_surface_stability.py -q` -> `4 passed`
+
+Lesson:
+
+The preservation layer is becoming useful enough to gate a future stamp. It
+does not repair compile variance; it names which source-exposed contract is
+preserved, partial, ledger-only, or not applicable. That separation keeps the
+future internal re-stamp from mixing architecture movement with measurement
+language that is still settling.
+
+Next pressure:
+
+Run the audit-focused suite and commit this measurement layer. Then inspect the
+two operational ledger-only rows and the five partial rows qualitatively before
+any repair. If those failures are profile-palette omissions, repair belongs
+there; if they are stochastic compile drops, they belong in multi-draw consensus
+or stamp variance accounting.

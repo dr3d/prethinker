@@ -20,8 +20,19 @@
               "direct_complete_count": 9,
               "direct_partial_count": 0,
               "direct_surface_count": 9,
-              "source_signal_count": 11,
+              "source_field_unit_count": 12,
+              "source_signal_count": 12,
+              "source_text_mention_count": 11,
               "status": "partial"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 3,
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
             }
           ],
           "direct_fact_count": 162,
@@ -49,8 +60,19 @@
               "direct_complete_count": 0,
               "direct_partial_count": 0,
               "direct_surface_count": 0,
-              "source_signal_count": 11,
+              "source_field_unit_count": 12,
+              "source_signal_count": 12,
+              "source_text_mention_count": 11,
               "status": "ledger_only"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
             }
           ],
           "direct_fact_count": 12,
@@ -76,8 +98,19 @@
               "direct_complete_count": 8,
               "direct_partial_count": 0,
               "direct_surface_count": 8,
-              "source_signal_count": 11,
+              "source_field_unit_count": 12,
+              "source_signal_count": 12,
+              "source_text_mention_count": 11,
               "status": "partial"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 10,
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
             }
           ],
           "direct_fact_count": 127,
@@ -104,8 +137,19 @@
               "direct_complete_count": 0,
               "direct_partial_count": 0,
               "direct_surface_count": 0,
-              "source_signal_count": 11,
+              "source_field_unit_count": 12,
+              "source_signal_count": 12,
+              "source_text_mention_count": 11,
               "status": "ledger_only"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
             }
           ],
           "direct_fact_count": 61,
@@ -131,8 +175,19 @@
               "direct_complete_count": 8,
               "direct_partial_count": 0,
               "direct_surface_count": 8,
-              "source_signal_count": 11,
+              "source_field_unit_count": 12,
+              "source_signal_count": 12,
+              "source_text_mention_count": 11,
               "status": "partial"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 10,
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
             }
           ],
           "direct_fact_count": 133,

@@ -1,8 +1,8 @@
 # Compile Surface Stability Audit
 
-- Compiles: `2`
-- Fixtures: `1`
-- Stable fixtures: `0`
+- Compiles: `4`
+- Fixtures: `3`
+- Stable fixtures: `2`
 - Unstable fixtures: `1`
 - Unstable direct facts: `41`
 - Predicate drift rows: `17`
@@ -44,12 +44,14 @@
 | `status_phase_surface` | `[3, 4]` | 1 |
 | `task_scope_surface` | `[5, 8]` | 3 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `assignment_scope_v1_compile_20260515` | `parallel_assignment_event_preservation` | `partial` | 2 | 1 |  |  |
-| `assignment_scope_v1_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `assignment_scope_v1_equipment_redraw_compile_20260515` | `parallel_assignment_event_preservation` | `pass` | 2 | 2 |  |  |
-| `assignment_scope_v1_equipment_redraw_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `assignment_scope_v1_compile_20260515` | `parallel_assignment_event_preservation` | `partial` | 2 |  |  | 1 |  |  |
+| `assignment_scope_v1_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `assignment_scope_v1_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 2 |  | 2 | 1 | 1 | 1 |
+| `assignment_scope_v1_equipment_redraw_compile_20260515` | `parallel_assignment_event_preservation` | `pass` | 2 |  |  | 2 |  |  |
+| `assignment_scope_v1_equipment_redraw_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `assignment_scope_v1_equipment_redraw_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 2 |  | 2 | 3 | 3 | 6 |
 
 ### Missing From `assignment_scope_v1_compile_20260515`
 
@@ -98,3 +100,29 @@
 - `task_dependency(sr_44, pending_signoff_until_both_assignments_were_marked_complete).`
 - `task_type(fuel_line_inspection, fuel_line_inspection).`
 - `task_type(voltage_output_testing, voltage_output_testing).`
+
+## `museum_loan_intake`
+
+- Draws: `1`
+- Stable: `True`
+- Common / union direct facts: `12 / 12`
+- Unstable direct facts: `0`
+
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `assignment_scope_v1_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `assignment_scope_v1_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `assignment_scope_v1_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 2 |  | 2 | 5 | 5 | 0 |
+
+## `research_sample_review`
+
+- Draws: `1`
+- Stable: `True`
+- Common / union direct facts: `20 / 20`
+- Unstable direct facts: `0`
+
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `assignment_scope_v1_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `assignment_scope_v1_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `assignment_scope_v1_compile_20260515` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 4 | 4 | 5 |

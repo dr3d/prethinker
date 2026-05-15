@@ -59,14 +59,17 @@
 | `status_phase_surface` | `[6, 15, 15]` | 9 |
 | `task_scope_surface` | `[2, 10, 5]` | 8 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 6 |  | 6 | 7 | 7 | 2 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 6 |  | 6 | 5 | 5 | 7 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 6 |  | 6 | 35 | 35 | 2 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -200,14 +203,17 @@
 | `status_phase_surface` | `[31, 5, 5]` | 26 |
 | `task_scope_surface` | `[10, 7, 2]` | 8 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 2 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 2 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 5 |  | 5 | 28 | 28 | 10 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 5 |  | 5 | 0 | 0 | 2 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 5 |  | 5 | 13 | 13 | 1 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -353,14 +359,17 @@
 | `status_phase_surface` | `[5, 4, 4]` | 1 |
 | `task_scope_surface` | `[3, 3, 1]` | 2 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 1 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 4 |  | 4 | 3 | 3 | 7 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 4 |  | 4 | 9 | 9 | 3 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 1 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 4 |  | 4 | 8 | 8 | 0 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -499,14 +508,17 @@
 | `status_phase_surface` | `[13, 12, 8]` | 5 |
 | `task_scope_surface` | `[3, 5, 2]` | 3 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 1 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 5 |  | 5 | 9 | 9 | 3 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 1 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 5 |  | 5 | 6 | 6 | 8 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 5 |  | 5 | 7 | 7 | 2 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -638,14 +650,17 @@
 | `status_phase_surface` | `[10, 4, 3]` | 7 |
 | `task_scope_surface` | `[2, 1, 1]` | 1 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 1 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 6 |  | 6 | 9 | 9 | 2 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 6 |  | 6 | 3 | 3 | 5 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 1 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 6 |  | 6 | 5 | 5 | 1 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 
@@ -784,14 +799,17 @@
 | `status_phase_surface` | `[3, 9, 9]` | 6 |
 | `task_scope_surface` | `[5, 0, 2]` | 5 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 0 |  |  |
-| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 | 2 |  |  |
-| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_actor_content_compile_20260515` | `operational_lifecycle_preservation` | `pass` | 6 |  | 6 | 8 | 8 | 2 |
+| `lens_vocab_operational_record_status_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |
+| `lens_vocab_operational_record_status_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_compile_20260515` | `operational_lifecycle_preservation` | `partial` | 6 |  | 6 | 5 | 5 | 4 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 2 |  |  |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |
+| `lens_vocab_operational_record_status_palette_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 6 |  | 6 | 0 | 0 | 8 |
 
 ### Missing From `lens_vocab_operational_record_status_actor_content_compile_20260515`
 

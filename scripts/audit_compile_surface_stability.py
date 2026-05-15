@@ -68,6 +68,7 @@ def _load_draw(path: Path) -> dict[str, Any]:
     direct_facts = sorted(fact for fact in facts if not _predicate_name(fact).startswith("source_record"))
     source_facts = sorted(fact for fact in facts if _predicate_name(fact).startswith("source_record"))
     direct_rows = _fact_rows(direct_facts)
+    source_rows = _fact_rows(source_facts)
     source_texts = _source_text_atoms(source_facts)
     predicate_counts: dict[str, int] = {}
     for fact in direct_facts:
@@ -84,7 +85,7 @@ def _load_draw(path: Path) -> dict[str, Any]:
         "direct_facts": direct_facts,
         "predicate_counts": dict(sorted(predicate_counts.items())),
         "surface_counts": _surface_counts(direct_facts),
-        "contracts": _contract_reports(source_texts=source_texts, direct_rows=direct_rows),
+        "contracts": _contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
     }
 
 
@@ -225,10 +226,13 @@ def _source_text_atoms(source_facts: list[str]) -> list[str]:
     return texts
 
 
-def _contract_reports(*, source_texts: list[str], direct_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _contract_reports(
+    *, source_texts: list[str], source_rows: list[dict[str, Any]], direct_rows: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     return [
         _parallel_assignment_contract(source_texts=source_texts, direct_rows=direct_rows),
-        _source_authority_pair_contract(source_texts=source_texts, direct_rows=direct_rows),
+        _source_authority_pair_contract(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
+        _operational_lifecycle_contract(source_texts=source_texts, direct_rows=direct_rows),
     ]
 
 
@@ -260,24 +264,63 @@ def _parallel_assignment_contract(*, source_texts: list[str], direct_rows: list[
     )
 
 
-def _source_authority_pair_contract(*, source_texts: list[str], direct_rows: list[dict[str, Any]]) -> dict[str, Any]:
+def _source_authority_pair_contract(
+    *, source_texts: list[str], source_rows: list[dict[str, Any]], direct_rows: list[dict[str, Any]]
+) -> dict[str, Any]:
     source_mentions = [
         text
         for text in source_texts
         if any(marker in text for marker in ("authority", "authorized", "authoriz", "court_order", "policy", "governing"))
         and any(marker in text for marker in ("access", "finding", "status", "action", "subject", "item", "party"))
     ]
+    source_units = _source_authority_source_units(source_rows)
     complete_units, partial_units = _source_authority_direct_units(direct_rows)
     return _contract_status(
         contract="source_authority_pair_preservation",
-        source_signal_count=len(source_mentions),
+        source_signal_count=len(source_units) or len(source_mentions),
         direct_surface_count=len(complete_units),
         required_when_source_count_at_least=1,
         extra={
+            "source_field_unit_count": len(source_units),
+            "source_text_mention_count": len(source_mentions),
             "direct_complete_count": len(complete_units),
             "direct_partial_count": len(partial_units),
         },
     )
+
+
+def _source_authority_source_units(source_rows: list[dict[str, Any]]) -> set[tuple[str, str]]:
+    fields_by_record: dict[str, dict[str, set[str]]] = {}
+    for row in source_rows:
+        if row["predicate"] != "source_record_field" or len(row["args"]) < 3:
+            continue
+        record, field, value = (str(row["args"][0]), str(row["args"][1]).lower(), str(row["args"][2]).lower())
+        fields_by_record.setdefault(record, {}).setdefault(field, set()).add(value)
+
+    source_units: set[tuple[str, str]] = set()
+    for record, fields in fields_by_record.items():
+        subject_values = _field_values(fields, ("subject", "item", "object", "record", "entity", "case", "file"))
+        actor_values = _field_values(fields, ("authorized", "authorised", "party", "access", "recipient", "actor", "holder"))
+        source_values = _field_values(fields, ("source", "authority", "authorizing", "authorising", "governing", "basis", "rule", "policy", "order"))
+        if not subject_values or not actor_values or not source_values:
+            continue
+        if all(_negative_source_value(value) for value in actor_values | source_values):
+            continue
+        for subject in subject_values:
+            source_units.add((record, subject))
+    return source_units
+
+
+def _field_values(fields: dict[str, set[str]], markers: tuple[str, ...]) -> set[str]:
+    values: set[str] = set()
+    for field, field_values in fields.items():
+        if any(marker in field for marker in markers):
+            values.update(value for value in field_values if value)
+    return values
+
+
+def _negative_source_value(value: str) -> bool:
+    return any(marker in value for marker in ("no_", "none", "not_applicable", "n_a"))
 
 
 def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]]]:
@@ -333,6 +376,82 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
                 partial.add((predicate, args[0], args[1]))
 
     return complete, partial
+
+
+def _operational_lifecycle_contract(*, source_texts: list[str], direct_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    source_mentions = [
+        text
+        for text in source_texts
+        if _has_lifecycle_marker(text) and _has_temporal_or_state_marker(text)
+    ]
+    complete_units, partial_units = _operational_lifecycle_direct_units(direct_rows)
+    return _contract_status(
+        contract="operational_lifecycle_preservation",
+        source_signal_count=len(source_mentions),
+        direct_surface_count=len(complete_units),
+        required_when_source_count_at_least=2,
+        extra={
+            "source_text_mention_count": len(source_mentions),
+            "direct_complete_count": len(complete_units),
+            "direct_partial_count": len(partial_units),
+        },
+    )
+
+
+def _operational_lifecycle_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]]]:
+    complete: set[tuple[str, ...]] = set()
+    partial: set[tuple[str, ...]] = set()
+    for index, row in enumerate(direct_rows):
+        predicate = str(row.get("predicate") or "").lower()
+        args = [str(arg).strip().lower() for arg in row.get("args", [])]
+        if not _has_lifecycle_marker(predicate):
+            continue
+        key = (predicate, str(index), *(args[:3]))
+        if len(args) >= 3 and (_has_temporal_or_state_marker(" ".join(args)) or _has_lifecycle_marker(" ".join(args))):
+            complete.add(key)
+        elif len(args) >= 2:
+            partial.add(key)
+    return complete, partial
+
+
+def _has_lifecycle_marker(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "status",
+            "state",
+            "phase",
+            "transition",
+            "lifecycle",
+            "received",
+            "filed",
+            "assigned",
+            "approved",
+            "denied",
+            "withdrawn",
+            "closed",
+            "reopened",
+            "supersed",
+            "corrected",
+            "completed",
+        )
+    )
+
+
+def _has_temporal_or_state_marker(text: str) -> bool:
+    return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", text)) or any(
+        marker in text
+        for marker in (
+            "pending",
+            "approved",
+            "denied",
+            "withdrawn",
+            "closed",
+            "reopened",
+            "completed",
+            "supersed",
+        )
+    )
 
 
 def _contract_status(
@@ -410,8 +529,8 @@ def render_markdown(report: dict[str, Any]) -> str:
             lines.append("")
         lines.extend(
             [
-                "| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |",
-                "| --- | --- | --- | ---: | ---: | ---: | ---: |",
+                "| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |",
+                "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
             ]
         )
         for draw in fixture["draws"]:
@@ -425,6 +544,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                             f"`{contract['contract']}`",
                             f"`{contract['status']}`",
                             str(contract["source_signal_count"]),
+                            str(contract.get("source_field_unit_count", "")),
+                            str(contract.get("source_text_mention_count", "")),
                             str(contract["direct_surface_count"]),
                             str(contract.get("direct_complete_count", "")),
                             str(contract.get("direct_partial_count", "")),

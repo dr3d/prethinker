@@ -63,18 +63,23 @@
 | `status_phase_surface` | `[7, 0, 11, 0, 11]` | 11 |
 | `task_scope_surface` | `[11, 0, 0, 0, 0]` | 11 |
 
-| Draw | Contract | Status | Source signals | Direct surfaces | Complete | Partial |
-| --- | --- | --- | ---: | ---: | ---: | ---: |
-| `compile_surface_invariant_focused_probate_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `compile_surface_invariant_focused_probate_20260514` | `source_authority_pair_preservation` | `partial` | 11 | 9 | 9 | 0 |
-| `compile_surface_invariant_recompile_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `compile_surface_invariant_recompile_20260514` | `source_authority_pair_preservation` | `ledger_only` | 11 | 0 | 0 | 0 |
-| `source_authority_density_probate_compile_local_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `source_authority_density_probate_compile_local_20260515` | `source_authority_pair_preservation` | `partial` | 11 | 8 | 8 | 0 |
-| `source_authority_invariant_probate_compile_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `source_authority_invariant_probate_compile_20260514` | `source_authority_pair_preservation` | `ledger_only` | 11 | 0 | 0 | 0 |
-| `source_authority_invariant_probate_compile_local_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 | 0 |  |  |
-| `source_authority_invariant_probate_compile_local_20260514` | `source_authority_pair_preservation` | `partial` | 11 | 8 | 8 | 0 |
+| Draw | Contract | Status | Source signals | Source fields | Source text | Direct surfaces | Complete | Partial |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `compile_surface_invariant_focused_probate_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `compile_surface_invariant_focused_probate_20260514` | `source_authority_pair_preservation` | `partial` | 12 | 12 | 11 | 9 | 9 | 0 |
+| `compile_surface_invariant_focused_probate_20260514` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 0 | 0 | 3 |
+| `compile_surface_invariant_recompile_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `compile_surface_invariant_recompile_20260514` | `source_authority_pair_preservation` | `ledger_only` | 12 | 12 | 11 | 0 | 0 | 0 |
+| `compile_surface_invariant_recompile_20260514` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 0 | 0 | 0 |
+| `source_authority_density_probate_compile_local_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `source_authority_density_probate_compile_local_20260515` | `source_authority_pair_preservation` | `partial` | 12 | 12 | 11 | 8 | 8 | 0 |
+| `source_authority_density_probate_compile_local_20260515` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 0 | 0 | 10 |
+| `source_authority_invariant_probate_compile_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `source_authority_invariant_probate_compile_20260514` | `source_authority_pair_preservation` | `ledger_only` | 12 | 12 | 11 | 0 | 0 | 0 |
+| `source_authority_invariant_probate_compile_20260514` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 0 | 0 | 0 |
+| `source_authority_invariant_probate_compile_local_20260514` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |
+| `source_authority_invariant_probate_compile_local_20260514` | `source_authority_pair_preservation` | `partial` | 12 | 12 | 11 | 8 | 8 | 0 |
+| `source_authority_invariant_probate_compile_local_20260514` | `operational_lifecycle_preservation` | `not_applicable` | 0 |  | 0 | 0 | 0 | 10 |
 
 ### Missing From `compile_surface_invariant_focused_probate_20260514`
 
