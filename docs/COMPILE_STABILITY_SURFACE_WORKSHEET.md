@@ -542,3 +542,147 @@ two operational ledger-only rows and the five partial rows qualitatively before
 any repair. If those failures are profile-palette omissions, repair belongs
 there; if they are stochastic compile drops, they belong in multi-draw consensus
 or stamp variance accounting.
+
+## CS-007 - Operational Lifecycle Failure Shape
+
+Date: 2026-05-15
+
+Question:
+
+Do the operational lifecycle partial and ledger-only rows point to a recognizer
+bug, profile-palette omission, stochastic compile drop, or a need for helper
+resurrection?
+
+Before:
+
+CS-006 added `operational_lifecycle_preservation` and found:
+
+- pass=`11`
+- partial=`5`
+- ledger-only=`2`
+
+The raw result was not enough to decide a repair layer.
+
+Inspection:
+
+The seven not-pass rows are:
+
+| Fixture | Draw regime | Status | Source | Direct complete | Reading |
+| --- | --- | --- | ---: | ---: | --- |
+| `clinic_intake_corrections` | base status compile | partial | 6 | 5 | Mostly preserved; one source lifecycle line lacks a complete direct peer. |
+| `grant_review_queue` | base status compile | ledger-only | 5 | 0 | Emits fragments such as supersession/closed/withdrawn without date-bound lifecycle/status units. |
+| `library_preservation_queue` | actor/content compile | partial | 4 | 3 | Mostly preserved; one lifecycle line is not carried as a complete unit. |
+| `warehouse_repair_log` | base status compile | partial | 6 | 3 | Uses domain-shaped predicates such as ticket/request rows; some are partial because date/state slots are absent. |
+| `warehouse_repair_log` | palette compile | partial | 6 | 5 | Palette mostly works; one lifecycle line still lacks a complete direct unit. |
+| `water_sample_docket` | base status compile | partial | 6 | 5 | Date/status surfaces exist, but one source lifecycle line is not preserved. |
+| `water_sample_docket` | palette compile | ledger-only | 6 | 0 | Collapses to supersession/status fragments without complete lifecycle units. |
+
+Interpretation:
+
+This is not a helper problem. The source has lifecycle/status pressure and the
+compiles usually see it. The problem is preservation shape:
+
+- some regimes emit stable, complete lifecycle/status surfaces;
+- some regimes emit nearby fragments without the slot set needed for queryable
+  lifecycle resolution;
+- some partial cases may also expose recognizer strictness around domain-shaped
+  predicates, but the missing date/state slots are real enough that loosening
+  the recognizer would blur the measurement.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/operational_record_status_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_record_status_stability_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_compile_surface_stability.py tests\test_compile_surface_invariants.py tests\test_lens_vocabulary_transfer.py tests\test_transition_delta_normalizer.py tests\test_query_transition_resolution_audit.py tests\test_operational_lifecycle_palette_audit.py tests\test_audit_helper_classes.py tests\test_audit_helper_usage.py tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_qa_batch.py -q` -> `286 passed`
+
+Lesson:
+
+The preservation contract is doing the right kind of work: it separates
+source-visible lifecycle pressure from direct-surface preservation. The next
+architecture move should not add helpers. It should either strengthen the
+compile/profile requirement that operational records preserve complete
+lifecycle units, or record these regime differences as stamp variance if the
+instrument is otherwise frozen.
+
+Next pressure:
+
+Add one small compile/profile invariant, not a helper: when source text exposes
+a repeated operational lifecycle with dates/statuses, at least one direct
+surface family must preserve event or status units with subject, lifecycle
+state/action, and temporal slot. Then rerun only the six operational probes
+before considering any internal corpus stamp.
+
+## CS-008 - Operational Parallel Lifecycle Invariant
+
+Date: 2026-05-15
+
+Question:
+
+Can the operational lifecycle repair pressure be expressed as a small
+compile/profile invariant rather than as a helper or fixture-specific patch?
+
+Before:
+
+CS-007 showed that the operational failures were mostly preservation-shape
+failures. The source exposed repeated dated lifecycle/status lines, while some
+draws preserved only fragments: supersession rows, closed/withdrawn labels, or
+record ids without a complete subject/action-or-status/date unit.
+
+Prediction:
+
+The next instruction should be a compile-surface invariant, not a runtime
+helper:
+
+> Repeated lifecycle/status source lines require parallel preservation. For
+> each stated dated lifecycle/status line, emit at least one complete direct
+> unit that keeps subject, lifecycle state/action, and date/turn joinable.
+
+That phrasing is fixture-free and applies to any permit, intake, docket, queue,
+sample, ticket, accession, repair, or similar operational record source.
+
+Intervention:
+
+Updated `scripts/run_domain_bootstrap_file.py`:
+
+- added an operational lifecycle preservation rule to
+  `OPERATIONAL_RECORD_STATUS_CONTEXT_V1`;
+- added a matching compile-surface invariant to
+  `COMPILE_SURFACE_INVARIANT_CONTEXT_V1`;
+- did not add helpers or new query-time repair logic.
+
+Updated `tests/test_domain_bootstrap_file.py` so the invariant stays pinned in
+both contexts.
+
+After:
+
+The architecture now has explicit language for the failure CS-007 exposed:
+parallel source lifecycle lines should survive as parallel queryable direct
+units, not as a bag of nearby status vocabulary.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_domain_bootstrap_file.py`
+
+Verification:
+
+- `python -m pytest tests\test_domain_bootstrap_file.py tests\test_compile_surface_stability.py -q` -> `34 passed`
+
+Lesson:
+
+This is the kind of pre-stamp movement that should land before a baseline run:
+it clarifies the instrument's contract without changing evaluation, adding
+fixtures, or creating a helper bridge. A future stamp should include this
+invariant because otherwise internal scores would mix real architecture state
+with a known unexpressed preservation expectation.
+
+Next pressure:
+
+Rerun the six operational probes under the updated invariant when using OR or
+local compile capacity is worthwhile. Compare only the preservation-contract
+statuses first. If ledger-only/partial rows persist, classify them as remaining
+compile variance or profile-palette limitations before broad internal
+restamping.

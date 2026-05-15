@@ -56,6 +56,8 @@ def test_operational_record_context_guards_status_corrections_and_unresolved_ite
     assert "Operational record slot contract" in context
     assert "Operational received/filing actor rule" in context
     assert "Operational withdrawn-request content rule" in context
+    assert "repeated dated lifecycle/status list" in context
+    assert "subject, lifecycle state/action, and date/turn remain queryable together" in context
     assert "status before and after when stated" in context
     assert "record type or status word alone is shallow metadata" in context
     assert "Do not substitute the submitter/applicant/source actor" in context
@@ -189,6 +191,8 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
     assert "operational lifecycle compiles should prefer stable phase and event surfaces" in context
+    assert "repeated lifecycle/status source lines require parallel preservation" in context
+    assert "subject, lifecycle state/action, and date/turn joinable" in context
     assert "record_superseded_by/4" in context
     assert "Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition" in context
     assert "preserve the receiving or filing actor separately from the submitter/source actor" in context
