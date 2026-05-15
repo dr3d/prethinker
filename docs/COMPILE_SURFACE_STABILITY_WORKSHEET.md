@@ -1016,3 +1016,162 @@ when a source says a source document, report, correspondence, court order, or
 policy is the authority for a claim/status/access/finding, preserve the
 source-document id, author/source actor, date when stated, governed subject, and
 authority role in direct rows.
+
+## CSS-014 - Source Authority Density Contract
+
+Date: 2026-05-15
+
+Before:
+
+CSS-013 showed the clean layer handoff. The planner queried `access_source/3`
+for authority questions, but the compile did not preserve every governed
+item/source row and did not expose source/correspondence authority densely
+enough for all findings.
+
+Prediction:
+
+If this is a compile-surface problem, the next useful move is not another
+helper or a broader relaxed-query rule. It is a compile invariant that says
+source documents, reports, correspondence, orders, policies, catalogs, and
+register sections must preserve source document id, actor/author, date,
+governed subject, and authority/evidence role when those slots are stated and
+the profile supports them.
+
+Intervention:
+
+Added source-authority density guidance to the compiler contexts:
+
+- Probate/custody profile guidance now includes a paired-authority rule: when
+  one authority governs multiple named subjects/actions, emit a row for every
+  named governed subject/action.
+- Source-authority audit guidance now names source document id, source
+  actor/author, source date, governed subject/item/claim/action, and
+  authority/evidence role as direct surfaces.
+- Global compile-surface invariants now include the same source-authority
+  contract without probate vocabulary.
+
+Added `source_authority_surface` to the compile invariant audit, plus a narrow
+relation contract for `access_authorized_to/3` and `access_source/3` key-pair
+coverage.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_file.py`
+- `scripts/audit_compile_surface_invariants.py`
+- `tests/test_domain_bootstrap_file.py`
+- `tests/test_compile_surface_invariants.py`
+- `docs/data/compile_surface_stability/source_authority_density_probate_local_audit_20260515.json`
+- `docs/data/compile_surface_stability/source_authority_density_probate_local_audit_20260515.md`
+
+After:
+
+Unit and cheap broader tests passed. A focused local recompile completed:
+
+- admitted=`173`
+- skipped=`15`
+- parsed_ok=`true`
+- direct facts=`127`
+- source-record facts=`2380`
+- invariant audit: pass=`5`, partial=`3`, candidate_only=`0`,
+  ledger_only=`0`
+- `access_authority_source_pair`: `pass`, required keys=`8`,
+  companion keys=`8`, missing keys=`[]`
+
+The recompile repeated the previous omission: the row pair for the second
+governed access item was absent from both `access_authorized_to/3` and
+`access_source/3`. That means key-pair completeness is necessary but not
+sufficient. The unresolved boundary is multi-subject authority coverage from
+the source statement into rows.
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_surface_invariants.py scripts\run_domain_bootstrap_file.py`
+- `python -m pytest tests\test_compile_surface_invariants.py tests\test_domain_bootstrap_file.py -q` -> `33 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `198 passed`
+
+Lesson:
+
+Generic source-authority vocabulary is still not enough. The audit can now see
+whether authority companion rows line up with emitted access rows, but it does
+not yet prove that every governed subject named in a source statement became a
+direct row. The next compile-audit level is subject coverage, not vocabulary
+presence.
+
+Next pressure:
+
+Keep the helper limit at zero. Separate two remaining pressures: multi-subject
+authority coverage on the compile side, and lowercase evidence/source slot
+labels on the query side.
+
+## CSS-015 - Evidence Slot Placeholder Repair
+
+Date: 2026-05-15
+
+Before:
+
+The focused source-authority recompile still missed the governed-item coverage
+case. A three-question QA slice also showed one query-layer failure: the
+planner emitted lowercase slot labels such as `evidencetype` and
+`evidencesource` as constants rather than variables.
+
+Prediction:
+
+Repairing generic evidence/source placeholder labels should improve only rows
+whose failure is query-slot binding. It should not mask compile gaps where the
+source surface itself is missing.
+
+Intervention:
+
+Extended the existing generic placeholder set with evidence/source and
+finding-source slot labels such as `evidence`, `evidence_type`,
+`evidencetype`, `evidence_source`, `evidencesource`, `finding`, and
+`finding_source`. Added a unit test proving
+`claim_evidence(claim, evidencetype, evidencesource).` becomes
+`claim_evidence(Claim, Evidencetype, Evidencesource).`
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/compile_surface_stability/evidence_placeholder_repair_probate_slice_20260515.json`
+- `docs/data/compile_surface_stability/evidence_placeholder_repair_probate_slice_20260515.md`
+
+After:
+
+Reran the same no-helper three-question slice against the same compile:
+
+- exact=`1`
+- partial=`0`
+- miss=`2`
+- helper rows=`0`
+- runtime load errors=`0`
+- write proposal rows=`0`
+- failure surfaces: `compile_surface_gap=2`, `not_applicable=1`
+
+Movement:
+
+- `q039` became exact by using source-record evidence plus existing
+  access/source rows.
+- `q031` remains a compile gap: the second governed item is absent from both
+  access and source rows.
+- `q040` remains a compile gap: claim evidence is visible, but the compile
+  still lacks a direct authoritative-source-for-finding surface.
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\run_domain_bootstrap_file.py scripts\audit_compile_surface_invariants.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_file.py tests\test_compile_surface_invariants.py -q` -> `199 passed`
+
+Lesson:
+
+The placeholder repair is query architecture, not fixture learning. It treats
+generic evidence/source slot labels as variables across domains. It also made
+the remaining boundary cleaner: the two misses are now compile-surface
+coverage, not helper absence or broad query confusion.
+
+Next pressure:
+
+Do not add a helper. Build a small unlike multi-subject authority probe and a
+compile audit that can detect when a source sentence governs multiple named
+subjects but the admitted rows cover only one. Keep business logic out of the
+audit; the transferable shape is source-stated multi-subject coverage.

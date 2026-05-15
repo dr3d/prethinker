@@ -27,6 +27,16 @@ class InvariantSpec:
     groups: dict[str, tuple[str, ...]]
 
 
+@dataclass(frozen=True)
+class RelationContractSpec:
+    contract: str
+    description: str
+    required_predicate: str
+    companion_predicate: str
+    required_key_indexes: tuple[int, ...]
+    companion_key_indexes: tuple[int, ...]
+
+
 INVARIANTS: tuple[InvariantSpec, ...] = (
     InvariantSpec(
         family="identity_role_surface",
@@ -49,6 +59,52 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
             "chronology_coordinate": ("chronology", "timeline", "sequence"),
             "negative_inference_coordinate": ("inference", "available", "unavailable", "not", "absence"),
             "basis_coordinate": ("basis", "reason", "ground", "corroborated"),
+        },
+    ),
+    InvariantSpec(
+        family="source_authority_surface",
+        description="source documents, authority/evidence roles, source actors or dates, and governed subjects",
+        groups={
+            "source_document_or_correspondence": (
+                "document",
+                "correspondence",
+                "letter",
+                "report",
+                "catalog",
+                "register",
+                "policy",
+                "order",
+                "source",
+            ),
+            "authority_or_evidence_role": (
+                "authority",
+                "authorized",
+                "governs",
+                "governed",
+                "evidence",
+                "finding",
+                "basis",
+            ),
+            "source_actor_or_date": (
+                "actor",
+                "author",
+                "dated",
+                "date",
+                "registrar",
+                "court",
+                "reporter",
+                "prepared",
+            ),
+            "governed_subject_or_item": (
+                "subject",
+                "item",
+                "object",
+                "claim",
+                "access",
+                "status",
+                "finding",
+                "action",
+            ),
         },
     ),
     InvariantSpec(
@@ -99,6 +155,18 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
             "access_or_location": ("access", "location", "storage", "room"),
             "recall_or_return": ("recall", "return", "loan", "retrieve"),
         },
+    ),
+)
+
+
+RELATION_CONTRACTS: tuple[RelationContractSpec, ...] = (
+    RelationContractSpec(
+        contract="access_authority_source_pair",
+        description="authorized access item/party pairs should expose the source or authority companion row",
+        required_predicate="access_authorized_to",
+        companion_predicate="access_source",
+        required_key_indexes=(0, 1),
+        companion_key_indexes=(0, 1),
     ),
 )
 
@@ -159,6 +227,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
     facts = _facts_from_compile(data)
     source_facts = [fact for fact in facts if _predicate_name(fact).startswith("source_record")]
     direct_facts = [fact for fact in facts if not _predicate_name(fact).startswith("source_record")]
+    direct_rows = _fact_rows(direct_facts)
     source_tokens = _tokens_for_facts(source_facts)
     direct_tokens = _tokens_for_facts(direct_facts)
     source_record_tokens = _tokens_for_facts(source_facts)
@@ -186,6 +255,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "candidate_predicate_count": len(candidate_predicates),
         "direct_predicates": direct_predicates,
         "families": families,
+        "relation_contracts": [_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
         "summary": _summarize_families(families),
     }
 
@@ -302,6 +372,99 @@ def _predicate_name(fact: str) -> str:
     return match.group(1) if match else ""
 
 
+def _fact_rows(facts: list[str]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for fact in facts:
+        match = FACT_RE.match(fact)
+        if not match:
+            continue
+        rows.append({"predicate": match.group(1), "args": _split_fact_args(match.group(2))})
+    return rows
+
+
+def _split_fact_args(raw_args: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    in_quote = False
+    escape = False
+    depth = 0
+    for char in raw_args:
+        if escape:
+            current.append(char)
+            escape = False
+            continue
+        if char == "\\":
+            current.append(char)
+            escape = True
+            continue
+        if char == '"':
+            current.append(char)
+            in_quote = not in_quote
+            continue
+        if not in_quote and char == "(":
+            depth += 1
+        elif not in_quote and char == ")" and depth:
+            depth -= 1
+        if char == "," and not in_quote and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if current or raw_args.strip():
+        args.append("".join(current).strip())
+    return args
+
+
+def _audit_relation_contract(spec: RelationContractSpec, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    required_keys = {
+        _key_for_indexes(row["args"], spec.required_key_indexes)
+        for row in rows
+        if row["predicate"] == spec.required_predicate and _has_indexes(row["args"], spec.required_key_indexes)
+    }
+    companion_keys = {
+        _key_for_indexes(row["args"], spec.companion_key_indexes)
+        for row in rows
+        if row["predicate"] == spec.companion_predicate and _has_indexes(row["args"], spec.companion_key_indexes)
+    }
+    required_keys.discard(())
+    companion_keys.discard(())
+    missing_keys = sorted(required_keys - companion_keys)
+    if not required_keys and not companion_keys:
+        status = "not_applicable"
+    elif not required_keys:
+        status = "companion_only"
+    elif not missing_keys:
+        status = "pass"
+    elif companion_keys:
+        status = "partial"
+    else:
+        status = "missing_companion"
+    return {
+        "contract": spec.contract,
+        "description": spec.description,
+        "status": status,
+        "required_predicate": spec.required_predicate,
+        "companion_predicate": spec.companion_predicate,
+        "required_key_count": len(required_keys),
+        "companion_key_count": len(companion_keys),
+        "missing_keys": missing_keys,
+    }
+
+
+def _has_indexes(args: list[str], indexes: tuple[int, ...]) -> bool:
+    return all(index < len(args) for index in indexes)
+
+
+def _key_for_indexes(args: list[str], indexes: tuple[int, ...]) -> tuple[str, ...]:
+    if not _has_indexes(args, indexes):
+        return ()
+    return tuple(_normalize_arg(args[index]) for index in indexes)
+
+
+def _normalize_arg(value: str) -> str:
+    return value.strip().strip('"').strip("'").lower()
+
+
 def _tokens_for_facts(facts: list[str]) -> set[str]:
     return set(TOKEN_RE.findall(" ".join(facts).lower()))
 
@@ -338,13 +501,20 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(["", "## Missing Or Weak Families", ""])
     for report in payload["reports"]:
         weak = [row for row in report["families"] if row["status"] not in {"pass", "not_applicable"}]
-        if not weak:
+        weak_contracts = [
+            row for row in report.get("relation_contracts", []) if row["status"] not in {"pass", "not_applicable"}
+        ]
+        if not weak and not weak_contracts:
             continue
         lines.append(f"### `{report['run']}` / `{report['fixture']}`")
         lines.append("")
         for family in weak:
             lines.append(
                 f"- `{family['family']}`: `{family['status']}`; missing `{family['missing_groups']}`"
+            )
+        for contract in weak_contracts:
+            lines.append(
+                f"- `{contract['contract']}`: `{contract['status']}`; missing keys `{contract['missing_keys']}`"
             )
         lines.append("")
     return "\n".join(lines).rstrip() + "\n"

@@ -1605,6 +1605,18 @@ def test_placeholder_repair_promotes_lowercase_event_slots() -> None:
     assert repaired["query"] == "badge_usage(bdg_44217, Ingressevent)."
 
 
+def test_placeholder_repair_promotes_lowercase_evidence_slots() -> None:
+    repaired = _placeholder_repaired_query("claim_evidence(claim, evidencetype, evidencesource).")
+
+    assert repaired is not None
+    assert repaired["query"] == "claim_evidence(Claim, Evidencetype, Evidencesource)."
+    assert repaired["repairs"] == [
+        {"index": 1, "from": "claim", "to": "Claim"},
+        {"index": 2, "from": "evidencetype", "to": "Evidencetype"},
+        {"index": 3, "from": "evidencesource", "to": "Evidencesource"},
+    ]
+
+
 def test_source_record_field_repair_joins_sibling_event_field() -> None:
     repaired = _source_record_field_sibling_repaired_query(
         "source_record_field(IngressEvent, description, lab_entry)."

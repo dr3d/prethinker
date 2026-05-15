@@ -92,6 +92,7 @@ def test_probate_property_context_separates_ownership_possession_and_status() ->
     assert "disputed, provisional, deferred, potential" in context
     assert "gift cards, bills of sale, solicitor advice" in context
     assert "balances, payments, seasonal values, totals" in context
+    assert "row for every named governed subject/action" in context
 
     selected = "\n".join(
         _source_compiler_context(
@@ -130,6 +131,9 @@ def test_source_authority_audit_context_keeps_claim_source_and_correction_status
     assert "copied text is not independent confirmation" in context
     assert "drafted, installed, rejected, queued" in context
     assert "Authority override" in context
+    assert "source document id" in context
+    assert "source actor/author" in context
+    assert "governed subject/item/claim/action" in context
 
     selected = "\n".join(
         _source_compiler_context(
@@ -424,6 +428,7 @@ def test_source_pass_ops_guidance_includes_compile_surface_invariants(monkeypatc
     assert "source addressability as queryable rows" in user_message["content"]
     assert "relation between the subject id and the section/source coordinate" in user_message["content"]
     assert "authority/source relation separately from the party receiving permission" in user_message["content"]
+    assert "source document id, source actor/author" in user_message["content"]
     assert "Candidate predicate names are not enough" in user_message["content"]
 
 
