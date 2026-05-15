@@ -313,3 +313,102 @@ recurring absence of direct old/new/supersession rows. The current observed gap
 was query binding over existing surfaces, so the next architectural pass should
 continue auditing transition/delta surfaces before promoting a new compile
 invariant.
+
+## TD-004 - Policy Threshold Revision Replay
+
+Date: 2026-05-15
+
+Question:
+
+Does an unlike policy-threshold revision expose a missing transition/delta
+compile surface, or does the modern compiler already emit direct old/new,
+added/removed, and supersession rows without helper support?
+
+Before:
+
+TD-001 through TD-003 covered role/membership transitions, status transitions,
+document field snapshots, absence persistence, and generic query placeholder
+repair. The remaining uncertainty was whether explicit policy/rule revisions
+would need a new normalized transition-delta invariant.
+
+Prediction:
+
+If transition/delta is genuinely inside the current compile surface, a compact
+policy revision should emit direct rows for supersession, old/new threshold,
+removed requirement, added check, and stable context. If it is not inside, QA
+should fall back to source text or miss threshold/removal/addition questions.
+
+Intervention:
+
+Added `policy_threshold_revision`, an unlike probe with:
+
+- a memo superseding a bulletin;
+- a numeric threshold raised from one value to another;
+- one removed requirement;
+- one added check;
+- unchanged approving body and intake desk.
+
+Ran compile and no-helper QA with OpenRouter at six lanes.
+
+After:
+
+Compile:
+
+- fixtures=`1`
+- parsed OK=`1`
+- candidate predicates=`9`
+- admitted/skipped=`20 / 0`
+- rough score=`0.833`
+
+No-helper QA:
+
+- questions=`9`
+- exact/partial/miss=`9 / 0 / 0`
+- helper rows=`0`
+- write proposals=`0`
+
+Surface inspection:
+
+- direct `supersedes/2`;
+- direct `policy_field_changed/4` for the threshold old/new value;
+- direct `policy_field_removed/3`;
+- direct `policy_field_added/3`;
+- direct old/new state rows for the removed and added requirements;
+- stable context rows for approving body and intake desk.
+
+Artifacts:
+
+- `experiments/transition_delta_contract_v1/policy_threshold_revision/`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_td004_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_td004_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_td004_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_td004_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/transition_delta_contract_v1_td004_surface_inspection_20260515.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py ... --fixture policy_threshold_revision ...` ->
+  parsed OK, admitted/skipped=`20 / 0`
+- `python scripts\run_domain_bootstrap_qa_batch.py ... --fixture policy_threshold_revision ...` ->
+  `9 / 0 / 0`, helpers=`0`
+- `python -m pytest tests -q` -> `1241 passed, 2 subtests passed`
+
+Lesson:
+
+Transition/delta is looking less like a missing compile surface and more like a
+normalization family. Explicitly stated revisions already compile into
+answer-bearing surfaces across role, status, document, and policy threshold
+shapes.
+
+The remaining architectural question is not "can the compiler see deltas?" It
+is "do we want a deterministic normalization layer that maps equivalent
+old/new, added/removed, superseded, and unchanged surfaces into one audit
+grammar after compile?" That should be treated as a layer decision, not a
+fixture repair.
+
+Next pressure:
+
+Pause broad transition/delta repair. Either design a small deterministic
+normalization sketch for transition/delta rows, or return to the lens audit
+queue and apply the same evidence to the next unsettled vocabulary. Do not add
+compile guidance unless a future unlike replay shows a true absent coordinate.
