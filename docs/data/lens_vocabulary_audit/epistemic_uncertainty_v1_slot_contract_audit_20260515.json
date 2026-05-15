@@ -1,0 +1,590 @@
+{
+  "compile_count": 3,
+  "lens": "epistemic_uncertainty",
+  "reports": [
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_epistemic_uncertainty_compile_20260515\\field_trial_notes\\domain_bootstrap_file_20260515T180222889749Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 36,
+      "fixture": "field_trial_notes",
+      "lens": "epistemic_uncertainty",
+      "parsed_ok": true,
+      "run": "lens_vocab_epistemic_uncertainty_compile_20260515",
+      "source_record_fact_count": 118,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 2,
+        "structural": 7
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "confirmed"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "confirmed"
+          ],
+          "status": "shallow_structural",
+          "term": "confirmed"
+        },
+        {
+          "direct_hits": [
+            "corrected",
+            "correction"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "corrected_value(germination_count, 18, 16).",
+            "correction_reason(germination_count, two_volunteer_entries_were_matched_to_the_same_tray)."
+          ],
+          "source_hits": [
+            "corrected"
+          ],
+          "status": "structural",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "disputed"
+        },
+        {
+          "direct_hits": [
+            "inferred"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "inferred_conclusion(low_water_did_not_reduce_germination_in_plot_c, treatment_log_and_corrected_count).",
+            "inferred_conclusion(low_water_no_reduction_in_plot_c, treatment_log_and_corrected_count).",
+            "inference_basis(low_water_no_reduction_in_plot_c, treatment_log).",
+            "inference_basis(low_water_no_reduction_in_plot_c, corrected_count)."
+          ],
+          "source_hits": [
+            "inferred"
+          ],
+          "status": "structural",
+          "term": "inferred"
+        },
+        {
+          "direct_hits": [
+            "pending",
+            "unresolved"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "unresolved_comparison(compost_comparison, second_soil_test_returns).",
+            "unresolved_comparison(compost_comparison, pending_second_soil_test)."
+          ],
+          "source_hits": [
+            "unresolved"
+          ],
+          "status": "structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "provisional"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "provisional_fact(yield_ranking, north_bed_had_not_been_harvested).",
+            "provisional_fact(yield_ranking, north_bed_unharvested)."
+          ],
+          "source_hits": [
+            "provisional"
+          ],
+          "status": "structural",
+          "term": "provisional"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "resolved_negative"
+        },
+        {
+          "direct_hits": [
+            "rescinded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "claim_rescinded(seed_source_claim, packet_label_was_found).",
+            "claim_rescinded(seed_source_claim, packet_label_found)."
+          ],
+          "source_hits": [
+            "rescinded"
+          ],
+          "status": "structural",
+          "term": "retracted"
+        },
+        {
+          "direct_hits": [
+            "replaced"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "schedule_replaced(earlier_watering_schedule, ws_3)."
+          ],
+          "source_hits": [
+            "replaced"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [
+            "unclear"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "unclear"
+          ],
+          "status": "shallow_structural",
+          "term": "unknown"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "unstated"
+        },
+        {
+          "direct_hits": [
+            "unsupported"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "claim_unsupported(pest_damage_claim, leaf_photos_show_wind_tear_instead).",
+            "claim_unsupported(pest_damage_claim, leaf_photos_show_wind_tear)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "unsupported"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_epistemic_uncertainty_compile_20260515\\route_change_notice\\domain_bootstrap_file_20260515T180220825089Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 41,
+      "fixture": "route_change_notice",
+      "lens": "epistemic_uncertainty",
+      "parsed_ok": true,
+      "run": "lens_vocab_epistemic_uncertainty_compile_20260515",
+      "source_record_fact_count": 100,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 3,
+        "structural": 6
+      },
+      "terms": [
+        {
+          "direct_hits": [
+            "verified"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "verified_by(pine_square_closed, rn_22).",
+            "verified_by(fact_001, rn_22)."
+          ],
+          "source_hits": [
+            "verified"
+          ],
+          "status": "structural",
+          "term": "confirmed"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [
+            "disputed"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "disputed_by(driver_report, dispatch_radio_log).",
+            "disputed_by(source_driver_report, source_dispatch_radio_log)."
+          ],
+          "source_hits": [
+            "disputed"
+          ],
+          "status": "structural",
+          "term": "disputed"
+        },
+        {
+          "direct_hits": [
+            "inferred"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "inferred_alternative_stop(pine_square, oak_terrace).",
+            "inferred_from(oak_terrace_inferred, stop_list_and_closed_stop_notice).",
+            "inferred_from(fact_005, stop_list).",
+            "inferred_from(fact_005, closed_stop_notice)."
+          ],
+          "source_hits": [
+            "inferred"
+          ],
+          "status": "structural",
+          "term": "inferred"
+        },
+        {
+          "direct_hits": [
+            "pending"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "pending_approval_by(weekend_service, operations_committee)."
+          ],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "structural",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [
+            "provisional"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "provisional"
+          ],
+          "status": "shallow_structural",
+          "term": "provisional"
+        },
+        {
+          "direct_hits": [
+            "ruled"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "resolved_negative"
+        },
+        {
+          "direct_hits": [
+            "retracted"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "record_retracted(passenger_count_table_1, duplicate_clipboard_entries).",
+            "record_retracted(passenger_count_table, duplicate_clipboard_entries)."
+          ],
+          "source_hits": [],
+          "status": "structural",
+          "term": "retracted"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "superseded_by(rain_delay_warning, operations_bulletin)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "unknown"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "unstated"
+        },
+        {
+          "direct_hits": [
+            "unsupported"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "unsupported"
+          ],
+          "status": "shallow_structural",
+          "term": "unsupported"
+        }
+      ]
+    },
+    {
+      "compile_json": "C:\\prethinker\\tmp\\lens_vocab_epistemic_uncertainty_compile_20260515\\tool_checkout_review\\domain_bootstrap_file_20260515T180234269879Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 28,
+      "fixture": "tool_checkout_review",
+      "lens": "epistemic_uncertainty",
+      "parsed_ok": true,
+      "run": "lens_vocab_epistemic_uncertainty_compile_20260515",
+      "source_record_fact_count": 111,
+      "summary": {
+        "not_applicable": 3,
+        "shallow_structural": 1,
+        "source_only": 3,
+        "structural": 5
+      },
+      "terms": [
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "confirmed"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "revised"
+          ],
+          "status": "source_only",
+          "term": "corrected"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "disputed"
+        },
+        {
+          "direct_hits": [
+            "inferred"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "inferred_fact(inference_001, drill_kit_d_14_stayed_on_the_west_workbench_overnight).",
+            "inferred_fact(inference_01, d_14_stayed_on_the_west_workbench_overnight)."
+          ],
+          "source_hits": [
+            "inferred"
+          ],
+          "status": "structural",
+          "term": "inferred"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "pending"
+          ],
+          "status": "source_only",
+          "term": "pending"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "not_applicable",
+          "term": "provisional"
+        },
+        {
+          "direct_hits": [
+            "ruled"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [],
+          "status": "shallow_structural",
+          "term": "resolved_negative"
+        },
+        {
+          "direct_hits": [
+            "retracted"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "retracted_claim(claim_bit_bent_at_checkout, drill_bit_was_bent).",
+            "retracted_claim(claim_bent_bit_initial, drill_bit_was_bent)."
+          ],
+          "source_hits": [
+            "retracted"
+          ],
+          "status": "structural",
+          "term": "retracted"
+        },
+        {
+          "direct_hits": [
+            "superseded"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "estimate_superseded_by(early_repair_estimate, re_9).",
+            "estimate_superseded_by(early_estimate, re_9)."
+          ],
+          "source_hits": [
+            "superseded"
+          ],
+          "status": "structural",
+          "term": "superseded"
+        },
+        {
+          "direct_hits": [
+            "unknown"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "unknown_value(return_time, drill_kit_d_14).",
+            "unknown_value(final_storage_shelf, drill_kit_d_14).",
+            "unknown_value(return_time, d_14)."
+          ],
+          "source_hits": [
+            "unknown"
+          ],
+          "status": "structural",
+          "term": "unknown"
+        },
+        {
+          "direct_hits": [],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [],
+          "source_hits": [
+            "unstated"
+          ],
+          "status": "source_only",
+          "term": "unstated"
+        },
+        {
+          "direct_hits": [
+            "unsupported"
+          ],
+          "min_arity": 2,
+          "shallow_rows": [],
+          "slot_rows": [
+            "unsupported_claim(rumor_overheating, kit_overheating)."
+          ],
+          "source_hits": [
+            "unsupported"
+          ],
+          "status": "structural",
+          "term": "unsupported"
+        }
+      ]
+    }
+  ],
+  "schema": "lens_vocabulary_transfer_audit_v1",
+  "summary": {
+    "status_counts": {
+      "not_applicable": 9,
+      "shallow_structural": 6,
+      "source_only": 3,
+      "structural": 18
+    },
+    "term_status_counts": {
+      "confirmed": {
+        "not_applicable": 1,
+        "shallow_structural": 1,
+        "structural": 1
+      },
+      "corrected": {
+        "not_applicable": 1,
+        "source_only": 1,
+        "structural": 1
+      },
+      "disputed": {
+        "not_applicable": 2,
+        "structural": 1
+      },
+      "inferred": {
+        "structural": 3
+      },
+      "pending": {
+        "source_only": 1,
+        "structural": 2
+      },
+      "provisional": {
+        "not_applicable": 1,
+        "shallow_structural": 1,
+        "structural": 1
+      },
+      "resolved_negative": {
+        "not_applicable": 1,
+        "shallow_structural": 2
+      },
+      "retracted": {
+        "structural": 3
+      },
+      "superseded": {
+        "structural": 3
+      },
+      "unknown": {
+        "not_applicable": 1,
+        "shallow_structural": 1,
+        "structural": 1
+      },
+      "unstated": {
+        "not_applicable": 2,
+        "source_only": 1
+      },
+      "unsupported": {
+        "shallow_structural": 1,
+        "structural": 2
+      }
+    }
+  }
+}

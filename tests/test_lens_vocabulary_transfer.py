@@ -4,6 +4,7 @@ from pathlib import Path
 from scripts.audit_lens_vocabulary_transfer import (
     AUTHORITY_CUSTODY_TERMS,
     EVIDENCE_PROVENANCE_TERMS,
+    EPISTEMIC_UNCERTAINTY_TERMS,
     OPERATIONAL_RECORD_STATUS_TERMS,
     RULE_COMPOSITION_TERMS,
     audit_compile,
@@ -571,3 +572,39 @@ def test_operational_record_audit_accepts_status_transition_slots(tmp_path: Path
 
     rows = {row["term"]: row["status"] for row in report["terms"]}
     assert rows["status_transition"] == "structural"
+
+
+def test_epistemic_uncertainty_audit_accepts_stance_rows(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, note_confirmed_measurement_but_retracted_old_claim).",
+            "confirmed(measurement_m4, scale_log).",
+            "retracted(old_claim, supervisor_note).",
+            "pending_item(inspection_file, battery_check).",
+            "resolved_negative(camera_log, visitor_entry).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="epistemic_uncertainty", terms=EPISTEMIC_UNCERTAINTY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["confirmed"] == "structural"
+    assert rows["retracted"] == "structural"
+    assert rows["pending"] == "structural"
+    assert rows["resolved_negative"] == "structural"
+
+
+def test_epistemic_uncertainty_audit_marks_bare_stance_shallow(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_1, statement_was_disputed_but_no_target_was_preserved).",
+            "disputed(statement_4).",
+        ],
+    )
+
+    report = audit_compile(compile_json, lens="epistemic_uncertainty", terms=EPISTEMIC_UNCERTAINTY_TERMS)
+
+    rows = {row["term"]: row["status"] for row in report["terms"]}
+    assert rows["disputed"] == "shallow_structural"

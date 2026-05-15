@@ -198,9 +198,25 @@ OPERATIONAL_RECORD_STATUS_TERMS: tuple[LensTerm, ...] = (
     LensTerm("status_transition", ("transition", "before", "after"), 4, ("status_transition", "status_changed", "state_transition", "status_before_after")),
 )
 
+EPISTEMIC_UNCERTAINTY_TERMS: tuple[LensTerm, ...] = (
+    LensTerm("confirmed", ("confirmed", "verified", "established"), 2, ("confirmed", "verified", "established_fact", "source_confirms")),
+    LensTerm("corrected", ("corrected", "correction", "revised", "amended"), 2, ("corrected_by", "correction_.*", "revised_by", "amended_.*")),
+    LensTerm("disputed", ("disputed", "contested", "challenged"), 2, ("disputed", "contested_by", "challenged_by", "dispute_record")),
+    LensTerm("inferred", ("inferred", "implied", "deduced"), 2, ("inferred", "implied_by", "deduced_from", "inference_basis")),
+    LensTerm("pending", ("pending", "unresolved", "awaiting"), 2, ("pending", "pending_item", "unresolved_item", "awaiting_.*")),
+    LensTerm("provisional", ("provisional", "temporary", "interim"), 2, ("provisional", "temporary_status", "interim_status", "provisional_assignment")),
+    LensTerm("resolved_negative", ("absent", "excluded", "ruled", "negative"), 2, ("resolved_negative", "ruled_out", "confirmed_absent", "excluded_by")),
+    LensTerm("retracted", ("retracted", "withdrawn", "rescinded"), 2, ("retracted", "withdrawn_claim", "rescinded_by", "retraction_record")),
+    LensTerm("superseded", ("superseded", "replaced", "overridden"), 2, ("superseded_by", "replaced_by", "overridden_by")),
+    LensTerm("unknown", ("unknown", "unclear", "undetermined"), 2, ("unknown", "unknown_value", "undetermined", "unclear_status")),
+    LensTerm("unstated", ("unstated", "omitted", "unmentioned"), 2, ("unstated", "not_stated", "source_omits", "omitted_from")),
+    LensTerm("unsupported", ("unsupported", "unverified", "uncorroborated"), 2, ("unsupported", "unverified_claim", "uncorroborated", "unsupported_by")),
+)
+
 LENS_TERMS: dict[str, tuple[LensTerm, ...]] = {
     "authority_custody": AUTHORITY_CUSTODY_TERMS,
     "evidence_provenance": EVIDENCE_PROVENANCE_TERMS,
+    "epistemic_uncertainty": EPISTEMIC_UNCERTAINTY_TERMS,
     "operational_record_status": OPERATIONAL_RECORD_STATUS_TERMS,
     "rule_composition": RULE_COMPOSITION_TERMS,
 }

@@ -1736,3 +1736,130 @@ and a small query/profile pass for assignment joins and initial/current status
 selection. In parallel, the lens audit framework is ready to move to the next
 remaining vocabulary, using the same rule: unlike probes first, slot contracts
 second, repair only after the audit shape is visible.
+
+## LV-015 - Epistemic Uncertainty Initial Vocabulary Audit
+
+Date: 2026-05-15
+
+Question:
+
+Can the lens-vocabulary audit framework move beyond the four worked lenses and
+measure epistemic uncertainty on unlike documents without turning stance words
+into fixture-shaped architecture?
+
+Before:
+
+The lens audit framework had been applied to:
+
+- evidence provenance;
+- rule composition;
+- authority/custody;
+- operational record/status.
+
+The semantic roster also names epistemic uncertainty as a first-class facet,
+but it had no vocabulary audit yet. The risk was that words like `pending`,
+`unsupported`, `inferred`, or `unknown` might be answerable in QA while still
+remaining unstructured source prose.
+
+Prediction:
+
+Simple unlike probes should answer well if source-record text is healthy. The
+audit should still expose which epistemic terms are structurally earned and
+which are only preserved as prose or shallow local rows.
+
+Intervention:
+
+Added `epistemic_uncertainty` to the lens audit with 12 terms:
+
+- `confirmed`
+- `corrected`
+- `disputed`
+- `inferred`
+- `pending`
+- `provisional`
+- `resolved_negative`
+- `retracted`
+- `superseded`
+- `unknown`
+- `unstated`
+- `unsupported`
+
+Added three unlike probe fixtures:
+
+- `tool_checkout_review`
+- `route_change_notice`
+- `field_trial_notes`
+
+These cover tool checkout, transit operations, and garden trial notes rather
+than any native fixture domain.
+
+After:
+
+Compile replay:
+
+- fixtures=`3`
+- parsed OK=`3`
+- candidate predicates=`49`
+- admitted/skipped=`132 / 4`
+
+No-helper QA replay:
+
+- questions=`29`
+- exact/partial/miss=`29 / 0 / 0`
+- exact rate=`100%`
+- helper rows=`0`
+
+Lens vocabulary audit:
+
+- `18 structural / 6 shallow / 3 source-only / 9 N/A`
+
+Term-level shape:
+
+| Term | Structural | Shallow | Source-only | N/A |
+| --- | ---: | ---: | ---: | ---: |
+| `confirmed` | 1 | 1 | 0 | 1 |
+| `corrected` | 1 | 0 | 1 | 1 |
+| `disputed` | 1 | 0 | 0 | 2 |
+| `inferred` | 3 | 0 | 0 | 0 |
+| `pending` | 2 | 0 | 1 | 0 |
+| `provisional` | 1 | 1 | 0 | 1 |
+| `resolved_negative` | 0 | 2 | 0 | 1 |
+| `retracted` | 3 | 0 | 0 | 0 |
+| `superseded` | 3 | 0 | 0 | 0 |
+| `unknown` | 1 | 1 | 0 | 1 |
+| `unstated` | 0 | 0 | 1 | 2 |
+| `unsupported` | 2 | 1 | 0 | 0 |
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/epistemic_uncertainty_v1/`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_slot_contract_audit_20260515.md`
+- `docs/data/lens_vocabulary_audit/epistemic_uncertainty_v1_slot_contract_audit_20260515.json`
+
+Verification:
+
+- `python -m py_compile scripts\audit_lens_vocabulary_transfer.py`
+- `python -m pytest tests\test_lens_vocabulary_transfer.py -q` -> `35 passed`
+- `python -m pytest tests -q` -> `1232 passed, 2 subtests passed`
+
+Lesson:
+
+The audit framework transferred to a fifth lens cleanly. Epistemic uncertainty
+is already highly answerable without helpers on simple unlike documents, but it
+is not uniformly structural. `inferred`, `retracted`, and `superseded` surfaced
+well across the probes. `resolved_negative` is the weakest structural term:
+the answers were exact, but the audit saw no full slot-bearing row. `unstated`
+also tends to remain source-only, which may be acceptable for absence claims
+unless the source explicitly binds the missing field to an object.
+
+Next pressure:
+
+Do not repair from this three-probe run. Add a small epistemic hard-case replay
+before changing guidance: negative resolution with explicit evidence, unstated
+field bound to a named object, and unsupported claim with missing support type.
+If those remain answerable but shallow, the next layer is epistemic slot
+contracts, not helper delivery.
