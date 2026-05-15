@@ -1553,3 +1553,92 @@ Next pressure:
 Do not repair from the old misses alone. Continue the lens audit to the next
 family, carrying this new rule of thumb: a not-exact internal row only becomes
 architecture work after an unlike hard probe reproduces the failure.
+
+## TD-017 - Assignment Scope Probe
+
+Date: 2026-05-15
+
+Question:
+
+Should assignment scope be the next query/transition repair target?
+
+Before:
+
+TD-011 left one assignment-scope row open: an assignee was admitted, but the
+record did not bind the assignment's task/scope strongly enough for the judge to
+accept the full role+person+task answer.
+
+Prediction:
+
+If assignment scope is missing architecture, unlike probes with multiple
+assignees and distinct task scopes should fail without helper delivery. If the
+probes mostly pass, assignment scope is present and the old miss is either
+compile variance or a denser local surface.
+
+Intervention:
+
+Added three unlike probes:
+
+- `equipment_service_queue`
+- `research_sample_review`
+- `museum_loan_intake`
+
+Each probe contains multiple assignees and distinct task scopes. Ran OpenRouter
+compile and no-helper QA.
+
+After:
+
+Initial compile:
+
+- fixtures=`3`
+- parsed OK=`3`
+- candidate predicates=`25`
+- admitted/skipped=`80 / 6`
+
+Initial QA:
+
+- questions=`15`
+- exact/partial/miss=`14 / 0 / 1`
+- helper rows=`0`
+
+The single miss was a second-assignment omission in the equipment probe: the
+first assignment was bound structurally, but the second assignee-task link was
+not emitted even though the source text and task vocabulary contained it.
+
+Redraw:
+
+- recompiled the equipment probe once;
+- the redraw emitted `task_assigned_to(...)` rows for both assignees;
+- no-helper QA moved to `5 / 0 / 0`.
+
+Artifacts:
+
+- `experiments/lens_vocabulary_audits/assignment_scope_v1/`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_equipment_redraw_compile_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_equipment_redraw_compile_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_equipment_redraw_qa_summary_20260515.md`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_equipment_redraw_qa_summary_20260515.json`
+- `docs/data/lens_vocabulary_audit/assignment_scope_v1_findings_20260515.md`
+
+Verification:
+
+- OpenRouter compile completed for all three probes.
+- OpenRouter QA completed with zero helper rows.
+- Redraw replay closed the only miss.
+
+Lesson:
+
+Assignment scope is inside the current instrument when the compile emits the
+assignee-task surface. The only reproduced pressure is compile stability for
+parallel assignments, not a query helper gap. The invariant is not
+"assignment-scope helper"; it is "each assignment event should bind assignee,
+task/scope, and time when the source exposes them."
+
+Next pressure:
+
+Do not add assignment-scope helpers. Carry this as a compile-surface stability
+watch item while continuing the lens audit to another family.

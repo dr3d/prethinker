@@ -1,0 +1,69 @@
+{
+  "generated": "2026-05-15T21:49:05.312372+00:00",
+  "lanes": 3,
+  "base_timeout": 900,
+  "effective_timeout": 2700,
+  "fixture_count": 3,
+  "parsed_ok_count": 3,
+  "totals": {
+    "candidate_predicates": 25,
+    "compile_admitted": 80,
+    "compile_skipped": 6
+  },
+  "results": [
+    {
+      "fixture": "equipment_service_queue",
+      "returncode": 0,
+      "started": "2026-05-15T21:47:47.017382+00:00",
+      "finished": "2026-05-15T21:49:05.312372+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue",
+      "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T214905290127Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 10,
+        "compile_admitted": 28,
+        "compile_skipped": 6,
+        "rough_score": 0.861,
+        "risk_count": 3
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T214905290127Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\equipment_service_queue\\domain_bootstrap_file_20260515T214905290127Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 10, \"compile_admitted\": 28, \"compile_skipped\": 6, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 5, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 10, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 3, \"rough_score\": 0.861, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "museum_loan_intake",
+      "returncode": 0,
+      "started": "2026-05-15T21:47:47.018385+00:00",
+      "finished": "2026-05-15T21:48:47.824908+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\museum_loan_intake",
+      "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\museum_loan_intake\\domain_bootstrap_file_20260515T214847802909Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 7,
+        "compile_admitted": 19,
+        "compile_skipped": 0,
+        "rough_score": 0.889,
+        "risk_count": 4
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\museum_loan_intake\\domain_bootstrap_file_20260515T214847802909Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\museum_loan_intake\\domain_bootstrap_file_20260515T214847802909Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 7, \"compile_admitted\": 19, \"compile_skipped\": 0, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 5, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 7, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 4, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "research_sample_review",
+      "returncode": 0,
+      "started": "2026-05-15T21:47:47.018385+00:00",
+      "finished": "2026-05-15T21:48:50.230447+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\research_sample_review",
+      "compile_json": "C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\research_sample_review\\domain_bootstrap_file_20260515T214850208446Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 8,
+        "compile_admitted": 33,
+        "compile_skipped": 0,
+        "rough_score": 0.833,
+        "risk_count": 3
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\research_sample_review\\domain_bootstrap_file_20260515T214850208446Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\assignment_scope_v1_compile_20260515\\research_sample_review\\domain_bootstrap_file_20260515T214850208446Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 8, \"compile_admitted\": 33, \"compile_skipped\": 0, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 3, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 8, \"repeated_structure_count\": 0, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 3, \"rough_score\": 0.833, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ]
+}
