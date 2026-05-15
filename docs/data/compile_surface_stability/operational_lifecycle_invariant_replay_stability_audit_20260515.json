@@ -278,7 +278,7 @@
             {
               "contract": "operational_lifecycle_preservation",
               "direct_complete_count": 0,
-              "direct_partial_count": 7,
+              "direct_partial_count": 23,
               "direct_split_count": 0,
               "direct_surface_count": 0,
               "source_signal_count": 6,
@@ -341,7 +341,7 @@
             {
               "contract": "operational_lifecycle_preservation",
               "direct_complete_count": 0,
-              "direct_partial_count": 2,
+              "direct_partial_count": 15,
               "direct_split_count": 0,
               "direct_surface_count": 0,
               "source_signal_count": 6,

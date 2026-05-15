@@ -1,0 +1,140 @@
+{
+  "compile_count": 2,
+  "fixture_count": 2,
+  "fixtures": [
+    {
+      "common_fact_count": 61,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_lifecycle_two_miss_palette_replay_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T223323495243Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 0,
+              "source_signal_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 29,
+              "direct_split_count": 2,
+              "direct_surface_count": 0,
+              "source_signal_count": 6,
+              "source_text_mention_count": 6,
+              "status": "ledger_only"
+            }
+          ],
+          "direct_fact_count": 61,
+          "direct_predicate_count": 16,
+          "parsed_ok": true,
+          "run": "operational_lifecycle_two_miss_palette_replay_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 6,
+            "completion_transition_surface": 6,
+            "identity_role_surface": 16,
+            "object_record_surface": 28,
+            "status_phase_surface": 15,
+            "task_scope_surface": 7
+          }
+        }
+      ],
+      "fixture": "warehouse_repair_log",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_lifecycle_two_miss_palette_replay_20260515\\warehouse_repair_log\\domain_bootstrap_file_20260515T223323495243Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_lifecycle_two_miss_palette_replay_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 61,
+      "unstable_fact_count": 0
+    },
+    {
+      "common_fact_count": 49,
+      "draw_count": 1,
+      "draws": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_lifecycle_two_miss_palette_replay_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T223334786357Z_source_qwen-qwen3-6-35b-a3b.json",
+          "contracts": [
+            {
+              "contract": "parallel_assignment_event_preservation",
+              "direct_surface_count": 1,
+              "source_signal_count": 1,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "source_authority_pair_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 0,
+              "direct_surface_count": 0,
+              "source_field_unit_count": 0,
+              "source_signal_count": 0,
+              "source_text_mention_count": 0,
+              "status": "not_applicable"
+            },
+            {
+              "contract": "operational_lifecycle_preservation",
+              "direct_complete_count": 0,
+              "direct_partial_count": 24,
+              "direct_split_count": 0,
+              "direct_surface_count": 0,
+              "source_signal_count": 6,
+              "source_text_mention_count": 6,
+              "status": "ledger_only"
+            }
+          ],
+          "direct_fact_count": 49,
+          "direct_predicate_count": 16,
+          "parsed_ok": true,
+          "run": "operational_lifecycle_two_miss_palette_replay_20260515",
+          "surface_counts": {
+            "assignment_binding_surface": 3,
+            "completion_transition_surface": 4,
+            "identity_role_surface": 11,
+            "object_record_surface": 12,
+            "status_phase_surface": 13,
+            "task_scope_surface": 7
+          }
+        }
+      ],
+      "fixture": "water_sample_docket",
+      "missing_by_draw": [
+        {
+          "compile_json": "C:\\prethinker\\tmp\\operational_lifecycle_two_miss_palette_replay_20260515\\water_sample_docket\\domain_bootstrap_file_20260515T223334786357Z_source_qwen-qwen3-6-35b-a3b.json",
+          "missing_union_fact_count": 0,
+          "missing_union_facts": [],
+          "run": "operational_lifecycle_two_miss_palette_replay_20260515"
+        }
+      ],
+      "predicate_drift": [],
+      "stable": true,
+      "surface_drift": [],
+      "union_fact_count": 49,
+      "unstable_fact_count": 0
+    }
+  ],
+  "schema_version": "compile_surface_stability_audit_v1",
+  "summary": {
+    "predicate_drift_count": 0,
+    "stable_fixture_count": 2,
+    "surface_drift_count": 0,
+    "unstable_fact_count": 0,
+    "unstable_fixture_count": 0
+  }
+}

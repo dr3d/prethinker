@@ -736,8 +736,8 @@ The replay compiled all six probes successfully.
 | `grant_review_queue` | ledger-only | 5 | 0 | 15 | 2 | Date and state partially survive as split surfaces; this is a normalization/preservation pressure, not a helper need. |
 | `library_preservation_queue` | pass | 4 | 8 | 2 | 2 | Complete units exist despite nearby split fragments. |
 | `permit_renewal_docket` | pass | 5 | 6 | 1 | 1 | Complete units exist. |
-| `warehouse_repair_log` | ledger-only | 6 | 0 | 7 | 0 | Status fragments survive, but date/turn is not preserved with them. |
-| `water_sample_docket` | ledger-only | 6 | 0 | 2 | 0 | Result/status fragments survive, but not as dated lifecycle units. |
+| `warehouse_repair_log` | ledger-only | 6 | 0 | 23 | 0 | Event dates and status fragments survive, but the audit finds no same-subject date/state join. |
+| `water_sample_docket` | ledger-only | 6 | 0 | 15 | 0 | Event dates and result/status fragments survive, but not as dated lifecycle units. |
 
 So the invariant did not close the operational lifecycle pressure. It made the
 pressure more legible: one case is a split-surface candidate, while two cases
@@ -772,3 +772,88 @@ because the date slot is absent from the status/result surfaces. The next small
 job should inspect candidate predicate palette selection for those two shapes
 and decide whether a generic `record_lifecycle_event` / `record_status_phase`
 surface should be required whenever source lifecycle lines are repeated.
+
+## CS-010 - Two-Miss Palette Loophole Replay
+
+Date: 2026-05-15
+
+Question:
+
+Were the two remaining operational misses caused by a prompt loophole where a
+domain-specific status/result predicate was treated as equivalent to the
+canonical lifecycle palette even though it dropped the temporal/event slot?
+
+Before:
+
+CS-009 showed two true preservation misses after the invariant replay. Both had
+nearby date/event rows and nearby status/result rows, but no complete
+subject/state-or-action/date unit.
+
+Prediction:
+
+If the loophole is mostly wording, then telling the compiler that a
+domain-specific two-slot status/result predicate is not stricter when it drops
+date/event/actor/governed-subject slots should push the two probes toward
+canonical complete rows. If not, the issue belongs below prompt wording: profile
+palette enforcement, candidate predicate admission, or deterministic
+normalization over strictly joinable split surfaces.
+
+Intervention:
+
+Updated compile guidance only:
+
+- the operational lifecycle palette construction rule now says a
+  domain-specific status/result predicate is not stricter if it drops a stated
+  date, event, actor, or governed-subject slot;
+- the compile-surface invariant now rejects two-slot status/result predicates
+  as satisfying repeated lifecycle/status lines when they omit the date/event
+  join.
+
+The audit recognizer was also refined to report split lifecycle evidence when a
+generic temporal carrier such as `event_date` shares a subject with a state row.
+This still does not pass the contract; it only separates split-but-joinable
+evidence from true missing preservation.
+
+After:
+
+Ran a two-fixture OpenRouter replay for the two true misses.
+
+| Probe | Candidate predicates | Contract status | Complete | Partial | Split | Reading |
+| --- | ---: | --- | ---: | ---: | ---: | --- |
+| `warehouse_repair_log` | 16 | ledger-only | 0 | 29 | 2 | Some date/state rows share subject, but the compiler still chose split domain predicates instead of complete lifecycle units. |
+| `water_sample_docket` | 16 | ledger-only | 0 | 24 | 0 | The compiler kept event/result/status surfaces separated with no same-subject lifecycle unit. |
+
+The wording improvement did not close the pressure. It increased nearby
+fragments and made the shape clearer: warehouse has a possible deterministic
+split-normalization path, while water remains a stronger palette/admission
+failure.
+
+Artifacts:
+
+- `docs/data/compile_surface_stability/operational_lifecycle_two_miss_palette_replay_compile_summary_20260515.md`
+- `docs/data/compile_surface_stability/operational_lifecycle_two_miss_palette_replay_compile_summary_20260515.json`
+- `docs/data/compile_surface_stability/operational_lifecycle_two_miss_palette_replay_stability_audit_20260515.md`
+- `docs/data/compile_surface_stability/operational_lifecycle_two_miss_palette_replay_stability_audit_20260515.json`
+
+Verification:
+
+- `python -m pytest tests\test_compile_surface_stability.py tests\test_domain_bootstrap_file.py -q` -> `36 passed`
+
+Lesson:
+
+This is no longer a helper-removal issue and no longer simple prompt polish.
+The architecture needs a clearer layer boundary:
+
+- deterministic normalization may compose split date/state rows only when the
+  join is explicit and subject-preserving;
+- compile/profile admission should require canonical lifecycle surfaces when
+  the source states repeated dated statuses and the proposed domain predicates
+  do not preserve the slot contract.
+
+Next pressure:
+
+Design the smallest profile/admission check that can mark a candidate predicate
+palette as shallow when repeated lifecycle source lines are present but no
+allowed predicate can carry subject, state/action, and date/event together. Do
+not broaden QA helpers to patch this. The failure is upstream of query-time
+support.

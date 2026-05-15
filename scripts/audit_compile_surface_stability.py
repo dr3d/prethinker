@@ -409,12 +409,14 @@ def _operational_lifecycle_direct_units(
     for index, row in enumerate(direct_rows):
         predicate = str(row.get("predicate") or "").lower()
         args = [str(arg).strip().lower() for arg in row.get("args", [])]
-        if not _has_lifecycle_marker(predicate):
+        lifecycle_predicate = _has_lifecycle_marker(predicate)
+        date_carrier_predicate = _has_temporal_carrier_marker(predicate)
+        if not lifecycle_predicate and not date_carrier_predicate:
             continue
         key = (predicate, str(index), *(args[:3]))
         joined_args = " ".join(args)
         has_temporal = _has_temporal_marker(joined_args)
-        has_state = _has_state_marker(joined_args) or _has_lifecycle_marker(joined_args)
+        has_state = lifecycle_predicate and (_has_state_marker(joined_args) or _has_lifecycle_marker(joined_args))
         if len(args) >= 2:
             subject = args[0]
             if subject:
@@ -422,7 +424,7 @@ def _operational_lifecycle_direct_units(
                     date_by_subject.setdefault(subject, set()).add(key)
                 if has_state:
                     state_by_subject.setdefault(subject, set()).add(key)
-        if len(args) >= 3 and (has_temporal or has_state):
+        if lifecycle_predicate and len(args) >= 3 and (has_temporal or has_state):
             complete.add(key)
         elif len(args) >= 2:
             partial.add(key)
@@ -462,6 +464,10 @@ def _has_temporal_or_state_marker(text: str) -> bool:
 
 def _has_temporal_marker(text: str) -> bool:
     return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", text))
+
+
+def _has_temporal_carrier_marker(text: str) -> bool:
+    return any(marker in text for marker in ("date", "dated", "timestamp", "time", "turn"))
 
 
 def _has_state_marker(text: str) -> bool:

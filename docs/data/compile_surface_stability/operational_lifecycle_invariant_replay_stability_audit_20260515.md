@@ -71,7 +71,7 @@
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `operational_lifecycle_invariant_replay_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 0 |  |  | 0 |  |  |  |
 | `operational_lifecycle_invariant_replay_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |  |
-| `operational_lifecycle_invariant_replay_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 6 |  | 6 | 0 | 0 | 7 | 0 |
+| `operational_lifecycle_invariant_replay_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 6 |  | 6 | 0 | 0 | 23 | 0 |
 
 ## `water_sample_docket`
 
@@ -84,4 +84,4 @@
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | `operational_lifecycle_invariant_replay_compile_20260515` | `parallel_assignment_event_preservation` | `not_applicable` | 1 |  |  | 0 |  |  |  |
 | `operational_lifecycle_invariant_replay_compile_20260515` | `source_authority_pair_preservation` | `not_applicable` | 0 | 0 | 0 | 0 | 0 | 0 |  |
-| `operational_lifecycle_invariant_replay_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 6 |  | 6 | 0 | 0 | 2 | 0 |
+| `operational_lifecycle_invariant_replay_compile_20260515` | `operational_lifecycle_preservation` | `ledger_only` | 6 |  | 6 | 0 | 0 | 15 | 0 |

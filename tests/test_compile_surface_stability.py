@@ -167,3 +167,22 @@ def test_operational_lifecycle_contract_reports_split_surfaces_without_passing(t
     assert contract["status"] == "ledger_only"
     assert contract["direct_complete_count"] == 0
     assert contract["direct_split_count"] == 1
+
+
+def test_operational_lifecycle_contract_reports_event_date_split_surfaces(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, on_2026_05_01_record_a_status_was_pending).",
+            "source_record_text_atom(src_line_2, on_2026_05_02_record_a_was_closed_as_approved).",
+            "record_status(record_a, pending).",
+            "event_date(record_a, logged, 2026_05_01).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["status"] == "ledger_only"
+    assert contract["direct_complete_count"] == 0
+    assert contract["direct_split_count"] == 1
