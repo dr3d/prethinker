@@ -243,6 +243,8 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("record id too early" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-owned record predicates" in item for item in strategy["arity_and_variable_policy"])
     assert any("institution, ledger, record, or source questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("source-of-access questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("access_source" in item and "authorized_party" in item for item in strategy["arity_and_variable_policy"])
     assert any("who-reported or reporter questions" in item for item in strategy["arity_and_variable_policy"])
     assert any("longer normalized atom" in item for item in strategy["arity_and_variable_policy"])
     assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
