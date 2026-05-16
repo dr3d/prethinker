@@ -1,0 +1,411 @@
+{
+  "schema_version": "compile_surface_guarded_detail_large_slice_rollup_v1",
+  "baseline": {
+    "fixtures": 7,
+    "questions": 280,
+    "exact": 192,
+    "partial": 27,
+    "miss": 61,
+    "helper_rows": 0,
+    "surfaces": {
+      "compile_surface_gap": 72,
+      "hybrid_join_gap": 8,
+      "not_applicable": 192,
+      "judge_uncertain": 1,
+      "query_surface_gap": 7
+    },
+    "per_fixture": [
+      {
+        "fixture": "ridgeline_fire",
+        "exact": 24,
+        "partial": 4,
+        "miss": 12,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 15,
+          "hybrid_join_gap": 1,
+          "not_applicable": 24
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire\\domain_bootstrap_qa_20260516T160736915569Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "thornfield_variance",
+        "exact": 26,
+        "partial": 3,
+        "miss": 11,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 13,
+          "judge_uncertain": 1,
+          "not_applicable": 26
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance\\domain_bootstrap_qa_20260516T162233534987Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "dulse_ledger",
+        "exact": 27,
+        "partial": 7,
+        "miss": 6,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 6,
+          "hybrid_join_gap": 4,
+          "not_applicable": 27,
+          "query_surface_gap": 3
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger\\domain_bootstrap_qa_20260516T153902830200Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "sable_creek_budget",
+        "exact": 27,
+        "partial": 5,
+        "miss": 8,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 12,
+          "hybrid_join_gap": 1,
+          "not_applicable": 27
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget\\domain_bootstrap_qa_20260516T161111740134Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "school_activity_roster_reconciliation",
+        "exact": 28,
+        "partial": 1,
+        "miss": 11,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 10,
+          "hybrid_join_gap": 1,
+          "not_applicable": 28,
+          "query_surface_gap": 1
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_crash_retry_or\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T164214133050Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "tournament_borrowed_names",
+        "exact": 30,
+        "partial": 2,
+        "miss": 8,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 8,
+          "hybrid_join_gap": 1,
+          "not_applicable": 30,
+          "query_surface_gap": 1
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T161933761690Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "larkspur_clockwork_fair",
+        "exact": 30,
+        "partial": 5,
+        "miss": 5,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 8,
+          "not_applicable": 30,
+          "query_surface_gap": 2
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T155024850808Z_qa_qwen-qwen3-6-35b-a3b.json"
+      }
+    ],
+    "exact_rate": 0.6857
+  },
+  "guarded": {
+    "fixtures": 7,
+    "questions": 280,
+    "exact": 219,
+    "partial": 21,
+    "miss": 40,
+    "helper_rows": 0,
+    "surfaces": {
+      "compile_surface_gap": 47,
+      "not_applicable": 219,
+      "query_surface_gap": 5,
+      "hybrid_join_gap": 8,
+      "judge_uncertain": 1
+    },
+    "per_fixture": [
+      {
+        "fixture": "ridgeline_fire",
+        "exact": 29,
+        "partial": 3,
+        "miss": 8,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 9,
+          "not_applicable": 29,
+          "query_surface_gap": 2
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\ridgeline_fire\\domain_bootstrap_qa_20260516T211645527967Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "thornfield_variance",
+        "exact": 29,
+        "partial": 2,
+        "miss": 9,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 9,
+          "hybrid_join_gap": 2,
+          "not_applicable": 29
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\thornfield_variance\\domain_bootstrap_qa_20260516T211536455867Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "dulse_ledger",
+        "exact": 33,
+        "partial": 7,
+        "miss": 0,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 4,
+          "hybrid_join_gap": 1,
+          "not_applicable": 33,
+          "query_surface_gap": 2
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\dulse_ledger\\domain_bootstrap_qa_20260516T211514018820Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "sable_creek_budget",
+        "exact": 33,
+        "partial": 3,
+        "miss": 4,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 7,
+          "not_applicable": 33
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\sable_creek_budget\\domain_bootstrap_qa_20260516T211547141799Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "school_activity_roster_reconciliation",
+        "exact": 27,
+        "partial": 1,
+        "miss": 12,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 9,
+          "hybrid_join_gap": 2,
+          "judge_uncertain": 1,
+          "not_applicable": 27,
+          "query_surface_gap": 1
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T211312728590Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "tournament_borrowed_names",
+        "exact": 34,
+        "partial": 2,
+        "miss": 4,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 4,
+          "hybrid_join_gap": 2,
+          "not_applicable": 34
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T211221807752Z_qa_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "larkspur_clockwork_fair",
+        "exact": 34,
+        "partial": 3,
+        "miss": 3,
+        "questions": 40,
+        "surfaces": {
+          "compile_surface_gap": 5,
+          "hybrid_join_gap": 1,
+          "not_applicable": 34
+        },
+        "helper_rows": 0,
+        "qa_json": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T212407482560Z_qa_qwen-qwen3-6-35b-a3b.json"
+      }
+    ],
+    "exact_rate": 0.7821
+  },
+  "compile_gate": {
+    "schema_version": "compile_quality_gate_v1",
+    "min_rough_score": 0.775,
+    "max_risk_count": 5,
+    "passed": false,
+    "pass_count": 7,
+    "hold_count": 1,
+    "rows": [
+      {
+        "fixture": "dulse_ledger",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.778,
+        "risk_count": 4,
+        "compile_admitted": 124,
+        "compile_skipped": 19,
+        "compile_skipped_share": 0.1329,
+        "candidate_predicates": 20,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\dulse_ledger\\domain_bootstrap_file_20260516T205625419451Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "industrial_sensor_clock_correction",
+        "passed": false,
+        "decision": "hold",
+        "reasons": [
+          "detail_wrapper_drift:location_backbone_missing_with_wrapper:event_description",
+          "detail_wrapper_drift:quantity_backbone_missing_with_wrapper:event_description"
+        ],
+        "rough_score": 0.778,
+        "risk_count": 5,
+        "compile_admitted": 71,
+        "compile_skipped": 9,
+        "compile_skipped_share": 0.1125,
+        "candidate_predicates": 18,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\industrial_sensor_clock_correction\\domain_bootstrap_file_20260516T205946248721Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": [
+          "location_backbone_missing_with_wrapper:event_description",
+          "quantity_backbone_missing_with_wrapper:event_description"
+        ]
+      },
+      {
+        "fixture": "larkspur_clockwork_fair",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.995,
+        "risk_count": 5,
+        "compile_admitted": 138,
+        "compile_skipped": 49,
+        "compile_skipped_share": 0.262,
+        "candidate_predicates": 21,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\larkspur_clockwork_fair\\domain_bootstrap_file_20260516T210047386276Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "ridgeline_fire",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.778,
+        "risk_count": 5,
+        "compile_admitted": 245,
+        "compile_skipped": 36,
+        "compile_skipped_share": 0.1281,
+        "candidate_predicates": 32,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\ridgeline_fire\\domain_bootstrap_file_20260516T205746460025Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "sable_creek_budget",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "compile_admitted": 89,
+        "compile_skipped": 4,
+        "compile_skipped_share": 0.043,
+        "candidate_predicates": 21,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\sable_creek_budget\\domain_bootstrap_file_20260516T205700392577Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "school_activity_roster_reconciliation",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "compile_admitted": 197,
+        "compile_skipped": 9,
+        "compile_skipped_share": 0.0437,
+        "candidate_predicates": 18,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T205637430463Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "thornfield_variance",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 1.0,
+        "risk_count": 5,
+        "compile_admitted": 129,
+        "compile_skipped": 12,
+        "compile_skipped_share": 0.0851,
+        "candidate_predicates": 20,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\thornfield_variance\\domain_bootstrap_file_20260516T205558805650Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      },
+      {
+        "fixture": "tournament_borrowed_names",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 1.0,
+        "risk_count": 4,
+        "compile_admitted": 173,
+        "compile_skipped": 2,
+        "compile_skipped_share": 0.0114,
+        "candidate_predicates": 15,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\tournament_borrowed_names\\domain_bootstrap_file_20260516T210048679688Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      }
+    ]
+  },
+  "held_compile_fixtures": [
+    {
+      "fixture": "industrial_sensor_clock_correction",
+      "passed": false,
+      "decision": "hold",
+      "reasons": [
+        "detail_wrapper_drift:location_backbone_missing_with_wrapper:event_description",
+        "detail_wrapper_drift:quantity_backbone_missing_with_wrapper:event_description"
+      ],
+      "rough_score": 0.778,
+      "risk_count": 5,
+      "compile_admitted": 71,
+      "compile_skipped": 9,
+      "compile_skipped_share": 0.1125,
+      "candidate_predicates": 18,
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_large_slice_20260516_compile\\industrial_sensor_clock_correction\\domain_bootstrap_file_20260516T205946248721Z_source_qwen-qwen3-6-35b-a3b.json",
+      "detail_wrapper_drift_flags": [
+        "location_backbone_missing_with_wrapper:event_description",
+        "quantity_backbone_missing_with_wrapper:event_description"
+      ]
+    }
+  ],
+  "artifacts": {
+    "baseline": {
+      "ridgeline_fire": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire\\domain_bootstrap_qa_20260516T160736915569Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "thornfield_variance": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance\\domain_bootstrap_qa_20260516T162233534987Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "dulse_ledger": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger\\domain_bootstrap_qa_20260516T153902830200Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "sable_creek_budget": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget\\domain_bootstrap_qa_20260516T161111740134Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "school_activity_roster_reconciliation": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_crash_retry_or\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T164214133050Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "tournament_borrowed_names": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T161933761690Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "larkspur_clockwork_fair": "tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T155024850808Z_qa_qwen-qwen3-6-35b-a3b.json"
+    },
+    "guarded": {
+      "ridgeline_fire": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\ridgeline_fire\\domain_bootstrap_qa_20260516T211645527967Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "thornfield_variance": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\thornfield_variance\\domain_bootstrap_qa_20260516T211536455867Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "dulse_ledger": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\dulse_ledger\\domain_bootstrap_qa_20260516T211514018820Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "sable_creek_budget": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\sable_creek_budget\\domain_bootstrap_qa_20260516T211547141799Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "school_activity_roster_reconciliation": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T211312728590Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "tournament_borrowed_names": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T211221807752Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "larkspur_clockwork_fair": "tmp\\compile_surface_detail_guarded_large_slice_20260516_qa_pass7\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T212407482560Z_qa_qwen-qwen3-6-35b-a3b.json"
+    },
+    "compile_gate": "docs/data/compile_surface_stability/detail_surface_guarded_large_slice_compile_regated_20260516.json"
+  }
+}

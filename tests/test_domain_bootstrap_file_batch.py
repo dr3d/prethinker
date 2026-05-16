@@ -29,6 +29,48 @@ def test_compile_batch_summary_extracts_quality_gate_signals() -> None:
     assert summary["risk_count"] == 3
     assert summary["repeated_structure_id_only_record_refs"] == ["record_id/1"]
     assert summary["frontier_unknown_positive_predicate_count"] == 0
+    assert summary["detail_wrapper_drift_flags"] == []
+
+
+def test_compile_batch_summary_flags_detail_wrapper_without_backbone() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {"candidate_predicates": [{"signature": "context/2"}]},
+            "source_compile": {
+                "facts": [
+                    "source_record_field(src_line_001, record_id, rec_07).",
+                    "source_record_field(src_line_001, departure_time, v_06_30).",
+                    "context(rec_07, departure_context).",
+                ],
+            },
+            "score": {"rough_score": 0.9, "risk_count": 2},
+        }
+    )
+
+    assert any(flag.startswith("identity_backbone_missing_with_wrapper:") for flag in summary["detail_wrapper_drift_flags"])
+    assert any(flag.startswith("date_time_backbone_missing_with_wrapper:") for flag in summary["detail_wrapper_drift_flags"])
+
+
+def test_compile_batch_summary_allows_detail_wrapper_with_backbone() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {"candidate_predicates": [{"signature": "context/2"}]},
+            "source_compile": {
+                "facts": [
+                    "source_record_field(src_line_001, record_id, rec_07).",
+                    "source_record_field(src_line_001, departure_time, v_06_30).",
+                    "record_id(rec_07).",
+                    "departure_time(rec_07, v_06_30).",
+                    "context(rec_07, departure_context).",
+                ],
+            },
+            "score": {"rough_score": 0.9, "risk_count": 2},
+        }
+    )
+
+    assert summary["detail_wrapper_drift_flags"] == []
 
 
 def test_compile_quality_gate_passes_accepted_draw_shape() -> None:
@@ -73,6 +115,29 @@ def test_compile_quality_gate_holds_high_risk_draw() -> None:
     assert gate["passed"] is False
     assert gate["decision"] == "hold"
     assert gate["reasons"] == ["risk_count>5"]
+
+
+def test_compile_quality_gate_holds_detail_wrapper_drift() -> None:
+    result = {
+        "fixture": "fixture_detail",
+        "returncode": 0,
+        "compile_json": "compile.json",
+        "summary": {
+            "parsed_ok": True,
+            "rough_score": 0.9,
+            "risk_count": 2,
+            "candidate_predicates": 12,
+            "compile_admitted": 30,
+            "compile_skipped": 0,
+            "detail_wrapper_drift_flags": ["identity_backbone_missing_with_wrapper:context"],
+        },
+    }
+
+    gate = _quality_gate_result(result, min_rough_score=0.775, max_risk_count=5)
+
+    assert gate["passed"] is False
+    assert gate["decision"] == "hold"
+    assert gate["reasons"] == ["detail_wrapper_drift:identity_backbone_missing_with_wrapper:context"]
 
 
 def test_compile_batch_quality_gate_renders_markdown() -> None:

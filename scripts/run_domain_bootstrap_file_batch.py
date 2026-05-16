@@ -12,6 +12,7 @@ import argparse
 import concurrent.futures
 import json
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -29,6 +30,37 @@ if str(REPO_ROOT) not in sys.path:
 from src.semantic_ir import bootstrap_env_local  # noqa: E402
 
 bootstrap_env_local()
+
+FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
+TOKEN_RE = re.compile(r"[a-z0-9]+")
+VAGUE_DETAIL_WRAPPER_PREDICATES = {
+    "amendment_event",
+    "context",
+    "detail",
+    "event",
+    "event_description",
+    "event_detail",
+    "event_note",
+    "event_record",
+    "explanation",
+    "fact_detail",
+    "fact_note",
+    "general_event",
+    "note",
+    "record_event",
+    "record_note",
+    "source_detail",
+    "summary",
+    "type",
+}
+BACKBONE_SURFACE_SLOT_GROUPS: dict[str, tuple[str, ...]] = {
+    "identity": ("id", "identifier", "key", "record", "document", "source"),
+    "date_time": ("date", "time", "timestamp", "deadline", "duration", "interval", "start", "end"),
+    "quantity": ("count", "total", "amount", "quantity", "value", "rate", "ratio", "threshold", "limit", "offset"),
+    "state": ("status", "state", "result", "outcome", "phase", "decision", "finding", "classification"),
+    "role": ("role", "authority", "actor", "owner", "issuer", "approver", "recorder", "reporter", "compiler"),
+    "location": ("location", "place", "site", "room", "address"),
+}
 
 
 @dataclass(frozen=True)
@@ -290,7 +322,94 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "frontier_unknown_positive_predicate_count": score.get("frontier_unknown_positive_predicate_count"),
         "frontier_unknown_positive_predicate_refs": score.get("frontier_unknown_positive_predicate_refs", []),
         "generic_predicate_count": score.get("generic_predicate_count"),
+        "detail_wrapper_drift_flags": _detail_wrapper_drift_flags(payload),
     }
+
+
+def _detail_wrapper_drift_flags(payload: dict[str, Any]) -> list[str]:
+    source_compile = payload.get("source_compile", {}) if isinstance(payload.get("source_compile"), dict) else {}
+    facts = source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []
+    source_facts = [str(fact) for fact in facts if _predicate_name(str(fact)).startswith("source_record")]
+    direct_facts = [str(fact) for fact in facts if not _predicate_name(str(fact)).startswith("source_record")]
+    direct_predicates = {_predicate_name(fact) for fact in direct_facts if _predicate_name(fact)}
+    backbone_facts = [fact for fact in direct_facts if _predicate_name(fact) not in VAGUE_DETAIL_WRAPPER_PREDICATES]
+    candidate_predicates = _candidate_predicate_names(payload)
+    wrapper_hits = sorted((direct_predicates | candidate_predicates) & VAGUE_DETAIL_WRAPPER_PREDICATES)
+    if not wrapper_hits:
+        return []
+    source_groups = _source_record_slot_groups(source_facts)
+    direct_groups = _fact_slot_groups(backbone_facts)
+    flags: list[str] = []
+    for group in sorted(source_groups):
+        if group in direct_groups:
+            continue
+        flags.append(f"{group}_backbone_missing_with_wrapper:{','.join(wrapper_hits[:4])}")
+    return flags
+
+
+def _predicate_name(fact: str) -> str:
+    match = FACT_RE.match(str(fact).strip())
+    return match.group(1) if match else ""
+
+
+def _fact_args(fact: str) -> list[str]:
+    match = FACT_RE.match(str(fact).strip())
+    if not match:
+        return []
+    return [part.strip().strip("'\"") for part in match.group(2).split(",")]
+
+
+def _tokens(text: str) -> set[str]:
+    return set(TOKEN_RE.findall(str(text).casefold().replace("_", " ")))
+
+
+def _slot_groups_for_text(text: str) -> set[str]:
+    tokens = _tokens(text)
+    groups: set[str] = set()
+    for group, markers in BACKBONE_SURFACE_SLOT_GROUPS.items():
+        if tokens.intersection(markers):
+            groups.add(group)
+    return groups
+
+
+def _source_record_slot_groups(source_facts: list[str]) -> set[str]:
+    groups: set[str] = set()
+    for fact in source_facts:
+        predicate = _predicate_name(fact)
+        args = _fact_args(fact)
+        if predicate == "source_record_field" and len(args) >= 2:
+            groups.update(_slot_groups_for_text(args[1]))
+        elif predicate == "source_record_cell" and len(args) >= 3:
+            groups.update(_slot_groups_for_text(args[2]))
+        elif predicate == "source_record_label" and len(args) >= 2:
+            groups.update(_slot_groups_for_text(args[1]))
+    return groups
+
+
+def _fact_slot_groups(facts: list[str]) -> set[str]:
+    groups: set[str] = set()
+    for fact in facts:
+        groups.update(_slot_groups_for_text(_predicate_name(fact)))
+        for arg in _fact_args(fact):
+            groups.update(_slot_groups_for_text(arg))
+    return groups
+
+
+def _candidate_predicate_names(payload: dict[str, Any]) -> set[str]:
+    parsed = payload.get("parsed", {}) if isinstance(payload.get("parsed"), dict) else {}
+    rows = parsed.get("candidate_predicates")
+    names: set[str] = set()
+    if not isinstance(rows, list):
+        return names
+    for row in rows:
+        if isinstance(row, dict):
+            raw = str(row.get("name") or row.get("predicate") or row.get("signature") or "")
+        else:
+            raw = str(row)
+        name = raw.split("/", 1)[0].strip()
+        if name:
+            names.add(name)
+    return names
 
 
 def _optional_int(value: Any) -> int | None:
@@ -334,6 +453,13 @@ def _quality_gate_result(
         reasons.append("risk_count_missing")
     elif risk_count > max_risk_count:
         reasons.append(f"risk_count>{max_risk_count}")
+    detail_wrapper_flags = [
+        str(flag)
+        for flag in item.get("detail_wrapper_drift_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("detail_wrapper_drift_flags"), list) else []
+    if detail_wrapper_flags:
+        reasons.extend(f"detail_wrapper_drift:{flag}" for flag in detail_wrapper_flags)
     admitted = _optional_int(item.get("compile_admitted")) or 0
     skipped = _optional_int(item.get("compile_skipped")) or 0
     if admitted <= 0:
@@ -350,6 +476,7 @@ def _quality_gate_result(
         "compile_skipped_share": round(skipped / max(1, admitted + skipped), 4),
         "candidate_predicates": _optional_int(item.get("candidate_predicates")) or 0,
         "compile_json": str(result.get("compile_json", "")),
+        "detail_wrapper_drift_flags": detail_wrapper_flags,
     }
 
 

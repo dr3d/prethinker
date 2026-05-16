@@ -1450,3 +1450,124 @@ Next pressure:
   wrappers when they appear without preserving concrete backbone surfaces.
 - Follow the shifted hybrid-join cases only after the compile-surface lift is
   confirmed on more fixtures.
+
+## CSS-019 - Large Native Slice Detail-Surface Expansion
+
+Date: 2026-05-16
+
+Before:
+
+CSS-018 proved the guarded answer-detail invariant on a three-fixture slice:
+`96/120 -> 99/120` exact, compile gaps `16 -> 11`, helper rows `0`. The open
+risk was whether that was a lucky local draw, and whether vague detail/event
+wrappers would reappear when the slice widened.
+
+Prediction:
+
+If the invariant is transferable, a larger native slice selected from the
+highest compile-gap coordinates should improve exact answers and reduce compile
+gaps without helper rows. If the wrapper-drift risk is real, at least one
+compile should be held before QA rather than silently scored.
+
+Intervention:
+
+- Added `detail_wrapper_drift_flags` to compile batch summaries.
+- Added a compile quality-gate hold reason for vague detail/event wrappers when
+  the source states concrete backbone surfaces but the non-wrapper direct facts
+  do not preserve them.
+- Audited the first drift detector for fixture-shaped leakage. The initial
+  source-text trigger list included document-family words such as sensor-like
+  device names and role/location examples; that was rejected. The live detector
+  now reads generic source-record slot labels (`id`, `date`, `time`, `amount`,
+  `status`, `role`, `location`, etc.) and non-wrapper predicate/argument slots
+  rather than raw fixture prose.
+- Kept broad event/detail wrappers such as `event`, `event_record`, and
+  `event_description` in the drift detector, but stopped treating
+  `source_recorded_event` as vague. It is provenance/linkage, not a substitute
+  detail wrapper.
+- Recompiled an eight-fixture native slice selected from the largest native
+  compile-gap coordinates.
+- QA ran only on the seven compiles that passed the new gate. The held fixture
+  was treated as compile-quality evidence, not as a QA failure.
+
+After:
+
+Compile quality gate:
+
+| Decision | Count |
+| --- | ---: |
+| pass | 7 |
+| hold | 1 |
+
+Held compile:
+
+| Fixture | Reason |
+| --- | --- |
+| `industrial_sensor_clock_correction` | `detail_wrapper_drift:location_backbone_missing_with_wrapper:event_description`; `detail_wrapper_drift:quantity_backbone_missing_with_wrapper:event_description` |
+
+QA movement on the seven passed compiles:
+
+| Scope | Fixtures | Questions | Exact | Partial | Miss | Exact rate | Helper rows | Compile gaps | Hybrid gaps | Query gaps |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Native stamp baseline | 7 | 280 | 192 | 27 | 61 | 68.57% | 0 | 72 | 8 | 7 |
+| Guarded detail invariant | 7 | 280 | 219 | 21 | 40 | 78.21% | 0 | 47 | 8 | 5 |
+
+Per-fixture movement:
+
+| Fixture | Baseline | Guarded | Movement |
+| --- | ---: | ---: | --- |
+| `ridgeline_fire` | 24/4/12 | 29/3/8 | +5 exact; compile gaps `15 -> 9` |
+| `thornfield_variance` | 26/3/11 | 29/2/9 | +3 exact; compile gaps `13 -> 9` |
+| `dulse_ledger` | 27/7/6 | 33/7/0 | +6 exact; misses `6 -> 0` |
+| `sable_creek_budget` | 27/5/8 | 33/3/4 | +6 exact; compile gaps `12 -> 7` |
+| `school_activity_roster_reconciliation` | 28/1/11 | 27/1/12 | -1 exact; still a regression coordinate |
+| `tournament_borrowed_names` | 30/2/8 | 34/2/4 | +4 exact; compile gaps `8 -> 4` |
+| `larkspur_clockwork_fair` | 30/5/5 | 34/3/3 | +4 exact; compile gaps `8 -> 5` |
+
+Artifacts:
+
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_compile_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_compile_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_compile_regated_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_compile_regated_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_qa_pass7_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_qa_pass7_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_invariant_audit_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_invariant_audit_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_rollup_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_large_slice_rollup_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts/run_domain_bootstrap_file_batch.py scripts/run_domain_bootstrap_file.py scripts/audit_compile_surface_invariants.py`
+- `python -m pytest tests/test_domain_bootstrap_file_batch.py tests/test_compile_surface_invariants.py tests/test_domain_bootstrap_file.py -q` -> `50 passed`
+
+Lesson:
+
+The guarded answer-detail invariant transfers beyond the initial slice. The
+large-slice gain is not subtle: +27 exact answers and -25 compile gaps across
+seven no-helper QA fixtures.
+
+The quality-gate audit also caught itself. A first implementation detected the
+right kind of failure but used raw source/prose tokens that were too close to
+fixture vocabulary. The corrected gate makes the same class of claim at the
+slot-contract level: if source-record structure exposes location or quantity
+slots, a broad event/detail predicate is not enough unless concrete non-wrapper
+rows preserve those backbone surfaces. That is the architectural version of the
+lesson; the fixture id remains only an artifact/reporting coordinate.
+
+The invariant is not finished. One roster/status fixture regressed by one exact,
+so a broad native restamp would be premature. The next useful work is targeted:
+inspect the held wrapper-drift compile and the single regression coordinate,
+then decide whether the gate needs stronger backbone-slot specificity or the
+query planner needs to consume the newly exposed detail rows better.
+
+Next pressure:
+
+- Inspect `industrial_sensor_clock_correction` under the new hold reason and
+  determine whether the repair belongs in compile guidance, profile admission,
+  or the gate.
+- Inspect the `school_activity_roster_reconciliation` regression row movement
+  before expanding again.
+- If both are bounded, run a second larger slice or redraw the held compile; do
+  not stamp the full native corpus yet.
