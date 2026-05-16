@@ -1031,3 +1031,92 @@ Next pressure:
   addressability, or a deterministic line-bound join.
 - Use unlike probes before changing guidance so probate-specific section names
   do not become architecture.
+
+## HR-013 - Line-Bound Join Candidate Rejected
+
+Date: 2026-05-16
+
+Before:
+
+- HR-012 left `5` non-exact rows in the default no-helper smoke:
+  - `3` probate compile-surface gaps,
+  - `1` probate hybrid-join gap,
+  - `1` sensor hybrid-join gap.
+- The apparently reusable repair candidate was a line-bound source-record join:
+  after a query identifies a source row for an entity, a later broad
+  `source_record_numeric_token/2` query should be joined back to the same row
+  and expose sibling fields from that row.
+
+Prediction:
+
+- If the candidate is a safe generic repair, it should improve the item
+  title/year miss while preserving the other `19` exact rows and keeping helper
+  rows at `0`.
+- If it adds too much row surface or catches only a local query shape, the
+  smoke should show score regression or surface drift. In that case the repair
+  should be rejected rather than promoted.
+
+Intervention:
+
+- Temporarily added a row-context join candidate in `run_query_plan`:
+  source row lookup plus same-row `source_record_field/3` and
+  `source_record_numeric_token/2`.
+- Added a focused unlike unit test proving the primitive can work on a small
+  two-row source table.
+- Replayed the same default-path no-helper smoke:
+  `3` native pressure fixtures, `24` questions, `3` lanes, no cache, helper
+  default untouched.
+
+After:
+
+| Run | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| HR-012 default no-helper | 24 | 19 | 0 | 5 | 0 |
+| Join candidate replay | 24 | 18 | 1 | 5 | 0 |
+
+Per-fixture movement:
+
+| Fixture | HR-012 | Join candidate | Movement |
+| --- | ---: | ---: | --- |
+| `count_composition_roster` | `8 / 0 / 0` | `7 / 0 / 1` | regression |
+| `industrial_sensor_clock_correction` | `7 / 0 / 1` | `6 / 0 / 2` | regression |
+| `probate_storage_access_register` | `4 / 0 / 4` | `5 / 1 / 2` | local improvement |
+
+Artifacts:
+
+- `docs/data/helper_residue/default_retired_smoke_join_repair_20260516.json`
+- `docs/data/helper_residue/default_retired_smoke_join_repair_20260516.md`
+- `tmp/helper_default_retired_smoke_join_repair_20260516`
+
+Verification:
+
+- Focused unit tests for the candidate passed before replay.
+- Replay completed with runtime load errors=`0`, write proposal rows=`0`,
+  helper rows=`0`.
+- The candidate code was removed after the replay; it is not current
+  architecture.
+
+Lesson:
+
+- The primitive is real but too blunt as a default query repair. It can expose
+  useful same-row evidence, but adding broad row-context material changes the
+  evidence surface enough to destabilize unrelated exact rows.
+- The decision point is clear: do not promote broad line-bound joins from this
+  evidence. The next layer must be more selective, probably at query planning
+  or profile-palette level, and it must be tested on unlike fixtures before
+  returning to probate density.
+- The helper-retirement claim still holds. Both runs reported exactly `0`
+  helper rows. The remaining work is query/surface precision, not helper
+  restoration.
+
+Next pressure:
+
+- Build a diagnostic, not a repair, for the five non-exact coordinates:
+  - direct role/person surface missing,
+  - section/addressability missing,
+  - source-row field/value join needed,
+  - unsupported/prose-like query operation,
+  - over-specific source-record constants.
+- Use that diagnostic to choose between query-planner guidance, deterministic
+  normalization, or a focused unlike probe. Do not reintroduce helper companion
+  delivery.
