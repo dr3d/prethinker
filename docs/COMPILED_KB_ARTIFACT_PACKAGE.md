@@ -1,6 +1,6 @@
 # Compiled KB Artifact Package
 
-Last updated: 2026-05-06
+Last updated: 2026-05-16
 
 ## The Core Doctrine
 
@@ -23,7 +23,8 @@ plus structured metadata:
 compiled_source/
   world.pl          admitted source state
   epistemic.pl      source commitment, claims, corrections, uncertainty
-  helpers.pl        generic deterministic query helpers
+  ledgers.pl        deterministic source addressability and exact fields
+  query_policy.json no-helper/direct-surface policy and selector settings
   manifest.json     compiler/run/schema/lens metadata
   diagnostics.json  skipped/blocked/zombie/coverage notes, not truth
 ```
@@ -68,20 +69,25 @@ If uncertainty exists only as a model feeling, self-check note, or skipped
 diagnostic, it is not durable answer state. If later Q&A should use that
 uncertainty, the compiler must admit it as structured epistemic state.
 
-## Helpers
+## Ledgers And Query Policy
 
-`helpers.pl` contains reusable deterministic machinery rather than
-source-specific truth:
+`ledgers.pl` contains deterministic source-addressability rather than
+source-specific semantic inference:
 
-- date arithmetic;
-- interval lookup;
-- deadline-family helpers;
-- status-at-date support;
-- safe aggregation helpers;
-- transparent query companions.
+- line numbers, headings, and section labels;
+- table rows, table cells, and printed field names;
+- exact identifiers, numeric tokens, dates, and timestamps;
+- blockquote metadata such as `From`, `To`, `Date`, and `Re`;
+- exact text atoms and stable source keys.
 
-Helpers may expose support paths, but they should not smuggle source prose or
-LLM guesses into answers.
+Ledgers do not assert source truth. They preserve the printed structure that
+lets compile and QA recover the exact source coordinate without asking the model
+to remember or paraphrase it.
+
+`query_policy.json` records how Q&A was allowed to answer. The current default
+is no-helper: admitted predicates, deterministic ledgers, direct compile
+surfaces, selectors, and guards are in-bounds; legacy native helper adapters are
+only enabled by explicit forensic/compatibility settings.
 
 ## Manifest
 
@@ -169,7 +175,7 @@ Prethinker compiles natural language into durable symbolic state. The useful
 
 - world state;
 - epistemic state;
-- deterministic helpers;
+- deterministic ledgers and query policy;
 - reproducibility manifest;
 - non-truth diagnostics.
 

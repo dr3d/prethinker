@@ -10,7 +10,7 @@ The core bet is simple: **the model may propose, but deterministic code decides 
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
-Current center: artifact-first semantic parallax over compiled KB packages. Prethinker compiles source material into governed `world.pl` / `epistemic.pl` state, then tests row-level QA encounters through a pegboard of measured lenses, selectors, guards, and helpers. The live `ui_gateway` console still demonstrates the same authority boundary, but the active research work is now the harness learning which semantic surface to trust for each question without giving the model write authority or answer keys.
+Current center: artifact-first semantic parallax over compiled KB packages. Prethinker compiles source material into governed `world.pl` / `epistemic.pl` state, then tests row-level QA encounters through measured lenses, deterministic source ledgers, direct compile surfaces, selectors, and guards. The live `ui_gateway` console still demonstrates the same authority boundary, but the active research work is now the harness learning which admitted surface to trust for each question without giving the model write authority or answer keys.
 
 ```text
 compiled KB = durable state
@@ -35,10 +35,10 @@ propagation = visible recomputation, not hidden belief
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
 - [CTO architecture brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - the current operating doctrine for new high-context collaborators.
 - [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
-- [Boundary hunt worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - the live workbench for wide-corpus boundary coordinates, probe backlog, and helper/source cleanup.
+- [Boundary hunt worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - the live workbench for wide-corpus boundary coordinates, probe backlog, and direct compile-surface repairs.
 - [Dataset transfer worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md) - external MRC/domain-transfer intake, first RACE smoke results, and transfer-pressure backlog.
-- [Helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - current helper-row delivery budget and cleanup evidence.
-- [Compile surface stability worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md) - invariant audit for replacing legacy helper adapters with direct compile surfaces.
+- [Compile surface stability worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md) - invariant audit for proving reusable direct compile surfaces.
+- [Helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - legacy/forensic history for the helper-retirement migration.
 - [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
 - [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
@@ -52,7 +52,7 @@ propagation = visible recomputation, not hidden belief
 
 The active frontier is **row-gated semantic parallax**. One compile is one
 viewpoint, and one broader prompt is rarely the answer. Prethinker now treats
-each lens, registry scaffold, query helper, and selector policy as a measured
+each lens, registry scaffold, deterministic ledger, query surface, and selector policy as a measured
 candidate surface over frozen artifacts.
 
 Rows are not where truth lives. Truth lives in the compiled KB. A row is the
@@ -63,7 +63,7 @@ are the rumble strips that stop tempting but wrong surfaces from winning.
 The newest hard problem is no longer "can we add another lens?" It is where
 the current semantic interior gets blurry on unlike source shapes. Guard
 compression is archived; boundary hunt is active. The current work separates
-compile-surface gaps from helper, selector, query, and answer-surface gaps, then
+compile-surface gaps from selector, query, answer-surface, and legacy adapter gaps, then
 extends the system only with generic repairs that survive replay on unlike rows.
 
 For the freshest orientation, read the
@@ -72,12 +72,12 @@ and then the
 [boundary hunt worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md).
 External transfer samples and RACE/CUAD-style dataset work are tracked in the
 [dataset transfer worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md).
-The helper-row cleanup lane is tracked in the
-[helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md).
-The successor lane for helper retirement is tracked in the
+The active replacement lane is tracked in the
 [compile surface stability worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md):
 source-record ledgers preserve fidelity, but recurring answer-bearing surfaces
-should become direct admitted compile facts before helper adapters disappear.
+should become direct admitted compile facts. The
+[helper residue audit worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
+is retained as legacy/forensic history for adapter retirement.
 
 ## Current State
 
@@ -87,7 +87,7 @@ The short version:
 
 - `process_utterance()` is the canonical live runtime entrypoint.
 - The UI is a manual demonstration cockpit, not a marketing page.
-- Source-document research is artifact-first: compile once, freeze the KB package, then run row-level QA, selector, helper, and repair experiments against that package.
+- Source-document research is artifact-first: compile once, freeze the KB package, then run row-level QA, selector, direct-surface, and repair experiments against that package.
 - `semantic_ir_v1` remains the live architecture pivot: stronger model semantics before deterministic admission.
 - The console defaults to the current LM Studio `qwen/qwen3.6-35b-a3b` Semantic IR lane for manual research runs.
 - `medical@v0` is the main bounded domain profile.
@@ -114,8 +114,8 @@ The short version:
 - [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current research headline and newest public framing.
 - [docs/BOUNDARY_HUNT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - live CTO workbench for boundary coordinates and transferable repairs.
 - [docs/DATASET_TRANSFER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md) - external dataset intake and transfer smoke evidence.
-- [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - helper-row delivery budget and residue audit.
-- [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md) - direct compile-surface invariant audit for helper retirement.
+- [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md) - direct compile-surface invariant audit for the no-helper instrument.
+- [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - legacy/forensic history for retired helper-row delivery.
 - [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public instrument spec for lenses, guards, uncertainty states, and calibration evidence.
 - [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the twelve reader/control lenses.
 - [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax and safe-surface accumulation.
@@ -146,7 +146,7 @@ python -m pytest
 # 996 passed, 2 subtests passed
 ```
 
-Current focused local verification for the newest helper/guard work:
+Current focused local verification for the newest compile-surface and guard work:
 
 ```powershell
 python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_qa_mode_selector.py tests\test_selector_guard_families.py -q
@@ -162,7 +162,7 @@ Current high-signal evidence:
 - Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
 - Anaplan Polaris enterprise-guidance fixture: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss` on a 43-question post-ingestion QA battery, with `0` runtime load errors and `0` QA write proposals.
 - Sable Creek Budget rule replay: a narrow rule lens plus admitted-fact signature support produced the first fresh-fixture promotion-ready public-hearing rule without gold KBs, answer keys, or Python prose interpretation.
-- Avalon Grant Committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while helper-composed matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
+- Avalon Grant Committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while body-supported matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
 - Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
 - Cold generalization evidence: the 2026-05-07 sealed 10-fixture story batch has a row-gated high-water of `361 exact / 16 partial / 23 miss` across `400` QA rows (`90.25%`), with zero QA write proposals in the contributing runs.
 - Incoming-6 full-40 evidence: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.

@@ -1,12 +1,12 @@
 # Current Utterance And Document Pipeline
 
-Last updated: 2026-05-10
+Last updated: 2026-05-16
 
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language
 proposes meaning, deterministic admission decides what becomes durable state,
-and query helpers make admitted state retrievable without granting the model
-write authority.
+and no-helper query planning tries to retrieve admitted state without granting
+the model write authority.
 
 The project now has two closely related paths:
 
@@ -21,7 +21,7 @@ document source
   -> intake/profile/bootstrap passes
   -> semantic compile candidates
   -> mapper-admitted KB artifact
-  -> query helpers + selector/guards during QA
+  -> no-helper QA over direct compile surfaces + selector/guards
 ```
 
 The LLM is still a stenographer and semantic instrument. It reads language,
@@ -33,14 +33,14 @@ that decides what the KB believes.
 For document work, the evaluated artifact is:
 
 ```text
-source + lens set + deterministic ledgers + admitted predicates + helper set
+source + lens set + deterministic ledgers + admitted predicates + query policy
 ```
 
-Helpers are part of the instrument's epistemic surface, not invisible plumbing.
-Two runs over the same source can have different answerable surfaces if they use
-different lens sets or helper sets. The helper classification and reporting
-discipline live in
-[`ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`](https://github.com/dr3d/prethinker/blob/main/docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md).
+The current default query policy is no-helper: `--helper-companion-row-limit 0`.
+Legacy helper adapters remain available only for forensic replay and old
+artifact compatibility. Two runs over the same source can still differ if they
+use different lens sets, ledgers, admitted predicate contracts, or query
+policies, so those settings must be named in reports.
 
 ## Architecture In Five Lines
 
@@ -67,15 +67,15 @@ The instrument currently distinguishes several kinds of moving parts:
 | Domain profile | Predicate palette, contracts, validators, and profile context for a domain. |
 | Lens | LLM-driven reading strategy for a specific semantic surface. Current roster is treated as 13 active/candidate lenses. |
 | Pre-compile ledger | Deterministic source-address extraction before LLM compile: line numbers, headings, table rows, fields, labels, IDs, and exact row text. |
-| Helper/companion | Query-only substrate that joins admitted facts and source-record rows into answerable support tables. |
+| Query policy | Determines whether QA answers only from admitted/direct surfaces or also enables legacy forensic adapters. |
 | Selector | Row-level choice among available candidate artifacts or query surfaces. |
 | Guard | Named selector-time warning that prevents a broad but wrong surface from beating a narrow correct one. Current guard rollup has 4 active families with 0 unclassified. |
 | Constraint propagation | Deterministic narrowing of known state and degrees of freedom after admission. |
 
 Lenses propose semantic surfaces. Pre-compile ledgers preserve lexical and
-structural addressability. Helpers make admitted state computable and
-queryable. Guards and selectors decide which already-built surface should answer
-one row.
+structural addressability. The current compile-surface work pushes recurring
+answer-bearing joins into admitted facts or deterministic ledgers. Guards and
+selectors decide which already-built surface should answer one row.
 
 ## Live Utterance Path
 
@@ -129,10 +129,10 @@ flowchart TD
   E --> F["mapper-admitted source_compile facts and rules"]
   F --> G["compiled KB artifact"]
   G --> H["QA query planning"]
-  H --> I["query helpers and source-record companions"]
+  H --> I["direct query surfaces and deterministic ledgers"]
   I --> J["selector and guards"]
   J --> K["reference judge verdict"]
-  K --> L["progress journal + guard/helper ledgers"]
+  K --> L["progress journal + guard/direct-surface ledgers"]
 ```
 
 The compile output is the research object: Prolog/JSON state, admitted facts,
@@ -158,7 +158,7 @@ interpreting meaning:
 
 These facts are source addressability only. They do not assert ownership,
 authority, causality, counts, status, or truth. They let the compiler and QA
-helpers point at exact printed rows and preserve exact strings such as document
+query planning point at exact printed rows and preserve exact strings such as document
 IDs, appeal IDs, memo IDs, catalog IDs, roster sections, timestamps, and source
 labels.
 
@@ -166,93 +166,36 @@ The archival identifier ledger/pinboard is the same design pattern at the
 lexical layer: deterministic extraction of exact identifiers before the LLM can
 paraphrase or normalize them.
 
-## Query Helpers And Companions
+## Query Surfaces And Legacy Adapters
 
-Helpers are query-only substrate over admitted state. They do not read source
-prose directly and do not mutate the KB. Current active examples include:
+The live measurement path is now no-helper by default. QA should first ask:
 
-- `roster_state_support`: derives group membership, roster versions, counted
-  adults, excluded adults, adult manifest totals, compliance-log status, temporary
-  assignments, and group counts from admitted roster predicates plus
-  source-record rows. Its emitted rows carry `HelperClass`: admitted-predicate
-  joins and generic source-record adult/compliance rows are `clean-helper`, while
-  school-roster source-record student assignment parsing remains
-  `candidate-helper`. That parser now handles both fresh transfer rows shaped
-  like `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###`, and sibling
-  homeroom-table rows shaped like `v1_0/v1_3`, `7_a`, and `STU-####`. A new
-  deterministic pre-compile ledger fact, `explicit_table_membership/4`, now
-  captures explicit grouping/member table rows before the helper runs. The
-  helper may consume those explicit rows as clean structural memory, while
-  section/prose roster parsing stays candidate-helper. QA planning still
-  supports legacy roster predicates for old artifacts, but new architecture
-  should prefer `explicit_table_membership/4`, `explicit_table_member_label/5`,
-  and `explicit_table_member_alias/2`. Printed member labels survive without
-  becoming duplicate members. `explicit_table_count_support` then derives entry
-  counts, distinct normalized member counts, duplicate members, and group counts
-  from those deterministic table rows.
-- `grant_award_support`: derives award totals, eligible application sets,
-  cap-applied applications, appeal pending status, recusal records, committee
-  recusal vote counts, and corrected-score support from admitted grant facts and
-  source-record fields. Its emitted rows carry `HelperClass`: award, cap,
-  eligibility, field-recusal, appeal-window, committee-recusal vote-count,
-  score-correction operational status, and appeal-pending status rows are
-  `clean-helper` on the current transfer batch.
-- `industrial_sensor_support`: derives sensor-register facts, raw-event-log
-  counts, per-system event composition, corrected timeline intervals,
-  maintenance tickets, lab sample logistics, packet IDs, and packet-scope
-  exclusions from admitted source-record rows. Its emitted rows carry
-  `HelperClass`: field/ledger-derived event, timestamp, computed-duration,
-  packet-id, data-loss, lab-sample logistics, and system clock-authority rows
-  are `clean-helper`. Refreshed artifacts whose source-record ledger preserves
-  the root-cause refusal and operator-origin prose classify those rows as
-  `clean-helper`; stale artifacts keep them candidate-labeled. Stated-duration
-  exact-prose recognizers were retired when they duplicated computed-duration
-  rows or overclaimed from truncated source atoms.
-- `clinic_recall_support`: derives clinic abbreviations, manufacturer liaison
-  identity, failure rates, cabinet/seal/key custody, verification procedure
-  support, full device serial displays, pending-determination correspondence,
-  and medical-director authority from admitted source-record rows. Its emitted
-  rows carry `HelperClass`: source-record-field device/serial rows plus generic
-  manufacturer-liaison, verification-procedure, acronym-derived clinic
-  abbreviations, explicit glossary abbreviations, cabinet/seal range,
-  failure-rate atoms, and visit-date ranges are `clean-helper` when the
-  required source-record rows are present. Key-retainer identity and named
-  medical-director authority are `clean-helper` on refreshed artifacts whose
-  source-record ledger preserves blockquoted memo sender lines; stale artifacts
-  keep those rows candidate-labeled.
-- `source_record_packet_metadata_support`: surfaces exact packet IDs, policy
-  IDs, appeal IDs, score correction memo IDs, recusal memo IDs, and device IDs.
-  Its emitted rows now carry `HelperClass`: generic identifier/metadata rows are
-  `clean-helper`, while packet-family facts such as physical retention
-  locations, pending packet items, and role-scope notes remain
-  `candidate-helper`.
-- `source_record_section_display`: renders normalized section atoms such as
-  `v_9_2_fall_2026_cycle_carryover` into human section labels.
-- authority/custody helpers: join possession, legal title, access, custody, and
-  source-record location rows. Their emitted rows carry `HelperClass`: generic
-  object-custody, access-log, authorization, and recall-right joins are
-  `clean-helper`, while older family-specific source-cell/text recognizers are
-  `candidate-helper`.
-- temporal helpers: expose clock-sync, pause-aware intervals, deadline-family
-  siblings, and admitted timestamp support. `source_record_clock_sync_support`
-  is labeled `clean-helper` because it derives exact last-successful sync dates
-  from admitted source-record text/numeric rows without domain constants.
-  `clear_sample_clock_pause_support` is also labeled `clean-helper` because it
-  joins admitted counted segments, sampler-offline intervals, and rule
-  exceptions without source-prose recognition.
-- constraint propagation: narrows numeric and date-time domains with
-  `less_than`, `less_equal`, `greater_than`, `greater_equal`, `before`,
-  `before_or_equal`, `after`, `after_or_equal`, `at_or_before`, and
-  `at_or_after`.
+- did the compile emit the answer-bearing distinction as admitted state?
+- did the deterministic ledger preserve the exact source coordinate, label,
+  identifier, count, or table field needed to query it?
+- did query planning bind the right admitted surfaces without rereading source
+  prose?
+- did selector/guard logic choose the right surface for this row?
 
-The key lesson from the May transfer fixtures is that many misses are not new
-semantic lenses. They are cases where the KB already contains the material, but
-the query layer needs a deterministic companion to compose it.
+Legacy helper adapters still exist in code for old artifact replay and forensic
+comparison, but they are opt-in:
 
-The newer helper audit adds an important constraint: helper-assisted scores must
-name the helper class. Generic helpers and declared lens companions are part of
-the architecture. Fixture-shaped helpers are candidate scars until rewritten
-generically or transfer-proven on fresh sibling fixtures.
+```text
+--helper-companion-row-limit 0
+--include-legacy-native-helper-adapters  # explicit forensic/compatibility mode
+```
+
+Those adapters are marked `legacy_native_compatibility_adapter` and
+`default_delivery=disabled`. Their historical evidence and retirement trail live
+in `docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md`. New architecture should prefer
+direct admitted predicates and deterministic ledger surfaces such as
+`explicit_table_membership/4`, `explicit_table_member_label/5`,
+`source_record_field/3`, source/authority predicates, temporal/status rows, and
+role/assignment/statement predicates that are emitted by the compiler.
+
+The active replacement lane is compile-surface stability: when a recurring
+query-time join matters, the preferred repair is to make the compiler or ledger
+emit a reusable, fixture-free surface directly.
 
 ## Selector And Guard Discipline
 
@@ -266,7 +209,7 @@ Every guard should answer:
 ```text
 What question/evidence mismatch does this prevent?
 Can it transfer across fixtures?
-Can a better compile surface or helper retire it?
+Can a better compile surface or deterministic ledger retire it?
 ```
 
 The current guard audit buckets are:
@@ -275,8 +218,8 @@ The current guard audit buckets are:
 - candidate guards: helped one surface, transfer pending
 - scar guards: local repairs that should retire when upstream substrate improves
 
-The healthy long-term motion is not infinite guard growth. It is helper and
-ledger improvements retiring downstream selector scars.
+The healthy long-term motion is not infinite guard growth. It is direct
+compile-surface and ledger improvements retiring downstream selector scars.
 
 ## OpenRouter And Environment
 
@@ -307,29 +250,19 @@ Recent transfer work supports the current direction:
 
 - Six fresh transfer fixtures cold on OpenRouter scored `177 / 10 / 53`
   over 240 rows, or 73.75% exact.
-- `school_activity_roster_reconciliation` moved from `21 / 3 / 16` to
-  a `candidate-helper` replay of `40 / 0 / 0` through deterministic
-  roster/source-record helpers, not a new lens.
+- `school_activity_roster_reconciliation` exposed why legacy helper evidence
+  had to become compile-surface work: the high-water was reachable, but the
+  forward repair is direct assignment/table surfaces, not helper delivery.
 - `count_composition_roster` now has a clean six-mode memory package with a
   `40 / 0 / 0` row-gated ceiling. Adding question-shape selector risk gates
   moved guarded selection from `31 / 3 / 6` to `40 / 0 / 0`, proving the
   residual was surface routing rather than missing compiled state.
-- `grant_exception_cap_matrix` targeted replay moved its known miss set to
-  exact after grant award/source-record helpers; this is mixed
-  `candidate-helper` evidence, and full replays exposed remaining OpenRouter
-  parse/judge variance to keep watching.
-- `industrial_sensor_clock_correction` moved from `30 / 2 / 8` cold to
-  a `candidate-helper` replay of `39 / 1 / 0` through
-  `industrial_sensor_support`, showing that corrected intervals, exact sensor
-  IDs, maintenance tickets, and packet-scope exclusions were already present as
-  durable source-record memory but needed a queryable helper surface.
-- `clinic_device_recall_field_packet` moved from `31 / 0 / 9` cold to
-  a `candidate-helper` replay of `40 / 0 / 0` through refreshed source-record
-  facts plus `clinic_recall_support`, another proof that exact official row
-  details can be durable and inspectable without adding a new semantic lens.
-- The main weak surface is no longer “can the model understand the document?”
-  It is often “did the admitted state become addressable, composable, and
-  queryable at the exact row shape the question demands?”
+- Grant, sensor, clinic, probate, and roster helper-era replays are now treated
+  as archaeology: they show which distinctions were reachable, then CSS work
+  decides which ones deserve direct compile or ledger surfaces.
+- The main weak surface is no longer "can the model understand the document?"
+  It is often "did the admitted state become addressable, composable, and
+  queryable at the exact row shape the question demands?"
 
 This is the refocus: compile natural language into sharp durable memory, then
 make that memory inspectable and queryable.
@@ -350,7 +283,7 @@ make that memory inspectable and queryable.
 | Unsafe implication | Skip, quarantine, reject, or clarify |
 | Projection-blocked proposal | Preserve in scoped diagnostics, not domain truth |
 | Deterministic source-record row | Admit only as source addressability |
-| Helper-derived support row | Query evidence only; no KB mutation |
+| Legacy adapter-derived support row | Forensic query evidence only; no KB mutation |
 | General negative fact | Skip until negation semantics are explicit |
 | Rule candidate | Admit only through explicit rule path and policy checks |
 | Ambiguous referent | Clarify or quarantine |
@@ -359,8 +292,9 @@ make that memory inspectable and queryable.
 
 - Cold acquisition improvements: preserve more exact official row structure
   before semantic compile.
-- Helper depth: temporal intervals, supersession, count/composition, authority
-  joins, grant/cap arithmetic, roster state, and source-reliability scoping.
+- Direct compile-surface depth: temporal intervals, supersession,
+  count/composition, authority joins, grant/cap arithmetic, assignment state,
+  and source-reliability scoping.
 - Constraint propagation: turn known state and degrees of freedom into
   spreadsheet-like deterministic narrowing.
 - Selector discrimination: close the gap between available candidate ceiling
@@ -376,7 +310,7 @@ The architectural line stays the same:
 language proposes
 admission governs
 state records
-helpers may compute
+legacy adapters may compare
 selectors choose surfaces
 dependencies stay visible
 ```

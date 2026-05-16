@@ -4076,6 +4076,7 @@ def _domain_companion_queries(
             "roster_version_status",
             "source_record_label",
             "student_group_assignment",
+            "group_assignment",
             "student_in_homeroom",
             "supervises",
             "supervision_assignment",
@@ -4384,6 +4385,7 @@ def _source_record_packet_metadata_companion(
         "has_role",
         "order",
         "staff_statement",
+        "recorded_statement",
         "system_event",
         "system_log_event",
         "telemetry_reading",
@@ -4409,6 +4411,10 @@ def _source_record_packet_metadata_companion(
     access_authority_rows = _runtime_rows(runtime, "access_authority(Item, Party, SourceId).")
     court_order_rows = _runtime_rows(runtime, "court_order(OrderId, OrderDate, OrderContent).")
     staff_statement_rows = _runtime_rows(runtime, "staff_statement(StatementId, Speaker, Content).")
+    recorded_statement_rows = _runtime_rows(runtime, "recorded_statement(StatementId, Speaker, Content).")
+    for row in recorded_statement_rows:
+        row.setdefault("SupportKind", "recorded_statement")
+    staff_statement_rows.extend(recorded_statement_rows)
     if not text_rows and not label_rows:
         return None
 
@@ -5122,6 +5128,7 @@ def _scope_source_record_packet_metadata_rows(
         "has_role": {"source_record_role_routing_note", "source_record_clock_event_note"},
         "order": {"source_record_order_identifier_note", "source_record_order_authority_note"},
         "staff_statement": {"source_record_statement_filing_note"},
+        "recorded_statement": {"source_record_statement_filing_note"},
         "system_event": {
             "source_record_clock_event_note",
             "source_record_item_event_identifier_note",
@@ -5247,6 +5254,7 @@ def _scope_source_record_packet_metadata_rows(
         "has_role",
         "order",
         "staff_statement",
+        "recorded_statement",
         "system_event",
         "system_log_event",
         "lab_result",
@@ -5261,6 +5269,7 @@ def _scope_source_record_packet_metadata_rows(
             "party_role",
             "physical_custodian",
             "staff_statement",
+            "recorded_statement",
             "system_event",
             "system_log_event",
             "lab_result",
@@ -9244,6 +9253,7 @@ def _roster_state_companion(
         "group_member",
         "group_membership",
         "homeroom_member",
+        "group_assignment",
         "policy_requirement",
         "role_counts_towards_ratio",
         "roster_version",
@@ -9265,6 +9275,7 @@ def _roster_state_companion(
     ratio_rows = _runtime_rows(runtime, "role_counts_towards_ratio(Role, Counts).")
     ratio_count_rows = _runtime_rows(runtime, "ratio_count_status(Person, Counts).")
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
+    generic_assignment_rows = _runtime_rows(runtime, "group_assignment(Person, Version, Group).")
     student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
     roster_table_member_rows = _explicit_table_membership_rows(runtime)
     roster_table_label_rows = _explicit_table_member_label_rows(runtime)
@@ -9456,6 +9467,24 @@ def _roster_state_companion(
                 "HelperClass": "clean-helper",
             }
         )
+    for row in generic_assignment_rows:
+        person = str(row.get("Person", "")).strip()
+        version, group = _normalize_roster_assignment_version_group(
+            str(row.get("Version", "")).strip(),
+            str(row.get("Group", "")).strip(),
+        )
+        if not person or not group:
+            continue
+        out_rows.append(
+            {
+                "SupportKind": "group_assignment",
+                "Person": person,
+                "Group": group,
+                "Version": version,
+                "RoleHint": _role_hint_from_group(group),
+                "HelperClass": "clean-helper",
+            }
+        )
     for row in student_homeroom_rows:
         person = str(row.get("Student", "")).strip()
         version = str(row.get("Version", "")).strip()
@@ -9548,6 +9577,7 @@ def _roster_state_companion(
         if str(row.get("SupportKind")) not in {
             "group_member",
             "group_membership",
+            "group_assignment",
             "explicit_table_group_assignment",
             "roster_table_student_group_assignment",
             "source_record_student_group_assignment",
@@ -9626,6 +9656,7 @@ def _roster_state_companion(
             "group_member(Group, Person, Interval).",
             "group_membership(Person, Group, Start, End).",
             "student_group_assignment(Student, Version, Group).",
+            "group_assignment(Person, Version, Group).",
             "explicit_table_membership(SourceRow, Version, Group, Member).",
             "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
             "supervises(Supervisor, Target, Interval).",
@@ -9680,7 +9711,7 @@ def _prioritize_roster_state_rows(
         return is_requested(value, normalized_requested_version(requested))
 
     broad_student_assignment_version_scan = (
-        predicate == "student_group_assignment"
+        predicate in {"student_group_assignment", "group_assignment"}
         and len(args) >= 3
         and requested_is_wildcard(0)
         and requested_is_wildcard(1)
@@ -9697,7 +9728,7 @@ def _prioritize_roster_state_rows(
         priority = 50
         version_priority = _roster_version_rank(version)
 
-        if predicate == "student_group_assignment" and len(args) >= 3:
+        if predicate in {"student_group_assignment", "group_assignment"} and len(args) >= 3:
             version_arg = args[1]
             group_arg = args[2]
             version_in_third_slot = requested_is_wildcard(1) and normalized_requested_version(args[2]) != str(args[2]).strip()
@@ -9712,7 +9743,7 @@ def _prioritize_roster_state_rows(
             elif person_ok and version_ok and group_ok:
                 priority = (
                     0
-                    if support_kind in {"explicit_table_group_assignment", "roster_table_student_group_assignment"}
+                    if support_kind in {"explicit_table_group_assignment", "roster_table_student_group_assignment", "group_assignment"}
                     else 1
                     if support_kind == "source_record_student_group_assignment"
                     else 2
@@ -9796,6 +9827,7 @@ def _prioritize_roster_state_rows(
                 version_priority = -version_priority
         elif support_kind in {
             "explicit_table_group_assignment",
+            "group_assignment",
             "group_count",
             "roster_table_student_group_assignment",
             "source_record_student_group_assignment",

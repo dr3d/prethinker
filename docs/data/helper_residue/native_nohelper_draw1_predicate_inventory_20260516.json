@@ -21,7 +21,21 @@
       "unique_admitted_predicate_count": 25,
       "admitted_count": 145,
       "skipped_count": 27,
-      "rough_score": 0.833
+      "rough_score": 0.833,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 91,
+        "deterministic_ledger": 333
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 17,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "arts_grant_panel_reconsideration",
@@ -33,7 +47,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 181,
       "skipped_count": 7,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 160,
+        "deterministic_ledger": 1180
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 17,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "ashgrove_permit",
@@ -45,7 +73,21 @@
       "unique_admitted_predicate_count": 27,
       "admitted_count": 106,
       "skipped_count": 0,
-      "rough_score": 0.722
+      "rough_score": 0.722,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 19
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 19
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 60,
+        "deterministic_ledger": 923
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "authority_possession_custody_packet",
@@ -57,7 +99,21 @@
       "unique_admitted_predicate_count": 32,
       "admitted_count": 186,
       "skipped_count": 50,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 174,
+        "deterministic_ledger": 1267
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 20,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "avalon_grant_committee",
@@ -69,7 +125,21 @@
       "unique_admitted_predicate_count": 46,
       "admitted_count": 113,
       "skipped_count": 2,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 43
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 43
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 113,
+        "deterministic_ledger": 1751
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 38,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "black_lantern_maze",
@@ -81,7 +151,21 @@
       "unique_admitted_predicate_count": 23,
       "admitted_count": 269,
       "skipped_count": 13,
-      "rough_score": 0.994
+      "rough_score": 0.994,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 216,
+        "deterministic_ledger": 1452
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 15,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "building_access_reliability_packet",
@@ -93,7 +177,21 @@
       "unique_admitted_predicate_count": 40,
       "admitted_count": 185,
       "skipped_count": 4,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 120,
+        "deterministic_ledger": 2055
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 28
+      }
     },
     {
       "fixture": "census_reconciliation",
@@ -105,7 +203,21 @@
       "unique_admitted_predicate_count": 28,
       "admitted_count": 55,
       "skipped_count": 5,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 48,
+        "deterministic_ledger": 636
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "clinic_device_recall_field_packet",
@@ -117,7 +229,21 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 123,
       "skipped_count": 20,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 83,
+        "deterministic_ledger": 2146
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 14,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "clockmakers_three_ledgers",
@@ -129,7 +255,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 244,
       "skipped_count": 23,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 196,
+        "deterministic_ledger": 391
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 21,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "contradictory_evidence_packet",
@@ -141,7 +281,21 @@
       "unique_admitted_predicate_count": 31,
       "admitted_count": 141,
       "skipped_count": 33,
-      "rough_score": 0.833
+      "rough_score": 0.833,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 112,
+        "deterministic_ledger": 1268
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "copperfall_deadline_docket",
@@ -153,7 +307,21 @@
       "unique_admitted_predicate_count": 31,
       "admitted_count": 132,
       "skipped_count": 0,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 112,
+        "deterministic_ledger": 620
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 23
+      }
     },
     {
       "fixture": "count_composition_roster",
@@ -165,7 +333,25 @@
       "unique_admitted_predicate_count": 41,
       "admitted_count": 229,
       "skipped_count": 12,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "legacy_compatibility_alias": 4
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "legacy_compatibility_alias": 4
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 64,
+        "legacy_compatibility_alias": 360,
+        "deterministic_ledger": 1498
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "legacy_compatibility_alias": 10,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "deadline_cascade_docket",
@@ -177,7 +363,21 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 136,
       "skipped_count": 9,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 120,
+        "deterministic_ledger": 392
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "draft_within_draft",
@@ -189,7 +389,21 @@
       "unique_admitted_predicate_count": 37,
       "admitted_count": 75,
       "skipped_count": 11,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 56,
+        "deterministic_ledger": 494
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 27,
+        "deterministic_ledger": 10
+      }
     },
     {
       "fixture": "dream_library_index",
@@ -201,7 +415,21 @@
       "unique_admitted_predicate_count": 35,
       "admitted_count": 189,
       "skipped_count": 11,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 141,
+        "deterministic_ledger": 283
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 27,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "dulse_ledger",
@@ -213,7 +441,21 @@
       "unique_admitted_predicate_count": 27,
       "admitted_count": 82,
       "skipped_count": 0,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 66,
+        "deterministic_ledger": 1049
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "estate_archive_access_dispute",
@@ -225,7 +467,21 @@
       "unique_admitted_predicate_count": 35,
       "admitted_count": 139,
       "skipped_count": 2,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 108,
+        "deterministic_ledger": 802
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 27,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "fenmore_seedbank",
@@ -237,7 +493,21 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 157,
       "skipped_count": 20,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 29
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 100,
+        "deterministic_ledger": 1048
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "festival_permit_maze",
@@ -249,7 +519,21 @@
       "unique_admitted_predicate_count": 25,
       "admitted_count": 126,
       "skipped_count": 0,
-      "rough_score": 0.833
+      "rough_score": 0.833,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 106,
+        "deterministic_ledger": 467
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 17
+      }
     },
     {
       "fixture": "grant_exception_cap_matrix",
@@ -261,7 +545,21 @@
       "unique_admitted_predicate_count": 35,
       "admitted_count": 197,
       "skipped_count": 2,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 146,
+        "deterministic_ledger": 2287
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 23,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "greenhouse_quarantine",
@@ -273,7 +571,21 @@
       "unique_admitted_predicate_count": 20,
       "admitted_count": 91,
       "skipped_count": 21,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 10
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 10
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 84,
+        "deterministic_ledger": 647
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 8,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "greywell_pipeline",
@@ -285,7 +597,21 @@
       "unique_admitted_predicate_count": 24,
       "admitted_count": 162,
       "skipped_count": 12,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 145,
+        "deterministic_ledger": 720
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "harbor_collision_reports",
@@ -297,7 +623,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 119,
       "skipped_count": 12,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 96,
+        "deterministic_ledger": 425
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 26,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "harrowgate_witness_file",
@@ -309,7 +649,21 @@
       "unique_admitted_predicate_count": 22,
       "admitted_count": 83,
       "skipped_count": 4,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 62,
+        "deterministic_ledger": 360
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 14
+      }
     },
     {
       "fixture": "heronvale_arts",
@@ -321,7 +675,21 @@
       "unique_admitted_predicate_count": 24,
       "admitted_count": 96,
       "skipped_count": 0,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 66,
+        "deterministic_ledger": 1137
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "hospital_shift_exception_log",
@@ -333,7 +701,21 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 102,
       "skipped_count": 71,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 79,
+        "deterministic_ledger": 794
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "identifier_ledger_torture",
@@ -345,7 +727,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 173,
       "skipped_count": 1,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 117,
+        "deterministic_ledger": 1501
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 22,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "industrial_sensor_clock_correction",
@@ -357,7 +753,21 @@
       "unique_admitted_predicate_count": 36,
       "admitted_count": 160,
       "skipped_count": 3,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 28
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 28
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 121,
+        "deterministic_ledger": 2383
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 24
+      }
     },
     {
       "fixture": "lantern_school_field_trip",
@@ -369,7 +779,25 @@
       "unique_admitted_predicate_count": 17,
       "admitted_count": 211,
       "skipped_count": 9,
-      "rough_score": 0.881
+      "rough_score": 0.881,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 13,
+        "legacy_compatibility_alias": 1
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 13,
+        "legacy_compatibility_alias": 1
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 95,
+        "legacy_compatibility_alias": 83,
+        "deterministic_ledger": 308
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 8,
+        "legacy_compatibility_alias": 1,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "larkspur_clockwork_fair",
@@ -381,7 +809,21 @@
       "unique_admitted_predicate_count": 24,
       "admitted_count": 142,
       "skipped_count": 73,
-      "rough_score": 0.879
+      "rough_score": 0.879,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 109,
+        "deterministic_ledger": 334
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "ledger_at_calders_reach",
@@ -393,7 +835,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 283,
       "skipped_count": 57,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 264,
+        "deterministic_ledger": 417
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 26,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "maritime_salvage_sensor_packet",
@@ -405,7 +861,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 65,
       "skipped_count": 12,
-      "rough_score": 0.884
+      "rough_score": 0.884,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 22
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 22
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 64,
+        "deterministic_ledger": 994
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 21,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "meridian_permit_board",
@@ -417,7 +887,21 @@
       "unique_admitted_predicate_count": 38,
       "admitted_count": 198,
       "skipped_count": 6,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 159,
+        "deterministic_ledger": 608
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 30,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "municipal_tree_permit_amendment",
@@ -429,7 +913,21 @@
       "unique_admitted_predicate_count": 25,
       "admitted_count": 142,
       "skipped_count": 6,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 13
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 13
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 100,
+        "deterministic_ledger": 1081
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 13
+      }
     },
     {
       "fixture": "museum_mislabelled_rooms",
@@ -441,7 +939,21 @@
       "unique_admitted_predicate_count": 18,
       "admitted_count": 122,
       "skipped_count": 16,
-      "rough_score": 0.833
+      "rough_score": 0.833,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 12
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 12
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 90,
+        "deterministic_ledger": 399
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 10,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "nested_puppet_court",
@@ -453,7 +965,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 90,
       "skipped_count": 4,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 72,
+        "deterministic_ledger": 305
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 26,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "northbridge_authority_packet",
@@ -465,7 +991,21 @@
       "unique_admitted_predicate_count": 24,
       "admitted_count": 132,
       "skipped_count": 5,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 14
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 14
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 99,
+        "deterministic_ledger": 504
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 14
+      }
     },
     {
       "fixture": "orchard_inheritance_game",
@@ -477,7 +1017,21 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 100,
       "skipped_count": 1,
-      "rough_score": 0.885
+      "rough_score": 0.885,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 31
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 86,
+        "deterministic_ledger": 243
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 18
+      }
     },
     {
       "fixture": "oxalis_recall",
@@ -489,7 +1043,21 @@
       "unique_admitted_predicate_count": 31,
       "admitted_count": 164,
       "skipped_count": 2,
-      "rough_score": 0.722
+      "rough_score": 0.722,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 132,
+        "deterministic_ledger": 1432
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 23,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "probate_storage_access_register",
@@ -501,7 +1069,21 @@
       "unique_admitted_predicate_count": 28,
       "admitted_count": 180,
       "skipped_count": 29,
-      "rough_score": 0.833
+      "rough_score": 0.833,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 17
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 176,
+        "deterministic_ledger": 2380
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "ridgeline_fire",
@@ -513,7 +1095,21 @@
       "unique_admitted_predicate_count": 33,
       "admitted_count": 244,
       "skipped_count": 96,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 242,
+        "deterministic_ledger": 1605
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 23
+      }
     },
     {
       "fixture": "rotating_chair_authority",
@@ -525,7 +1121,21 @@
       "unique_admitted_predicate_count": 21,
       "admitted_count": 91,
       "skipped_count": 8,
-      "rough_score": 0.722
+      "rough_score": 0.722,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 13
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 13
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 78,
+        "deterministic_ledger": 452
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 13
+      }
     },
     {
       "fixture": "rule_activation_exception_matrix",
@@ -537,7 +1147,21 @@
       "unique_admitted_predicate_count": 39,
       "admitted_count": 64,
       "skipped_count": 5,
-      "rough_score": 0.722
+      "rough_score": 0.722,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 25
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 63,
+        "deterministic_ledger": 1726
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 14,
+        "semantic_compile_surface": 25
+      }
     },
     {
       "fixture": "sable_creek_budget",
@@ -549,7 +1173,21 @@
       "unique_admitted_predicate_count": 19,
       "admitted_count": 18,
       "skipped_count": 4,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 21
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 1542
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 11
+      }
     },
     {
       "fixture": "salvage_bell_dispute",
@@ -561,7 +1199,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 146,
       "skipped_count": 18,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 23
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 130,
+        "deterministic_ledger": 276
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 21,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "school_activity_roster_reconciliation",
@@ -573,7 +1225,25 @@
       "unique_admitted_predicate_count": 28,
       "admitted_count": 208,
       "skipped_count": 9,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "legacy_compatibility_alias": 2,
+        "semantic_compile_surface": 20
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 20,
+        "legacy_compatibility_alias": 2
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 147,
+        "legacy_compatibility_alias": 43,
+        "deterministic_ledger": 2217
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 14,
+        "legacy_compatibility_alias": 2
+      }
     },
     {
       "fixture": "school_trip_bus_roster_split",
@@ -585,7 +1255,25 @@
       "unique_admitted_predicate_count": 26,
       "admitted_count": 176,
       "skipped_count": 26,
-      "rough_score": 0.994
+      "rough_score": 0.994,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "legacy_compatibility_alias": 2
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 18,
+        "legacy_compatibility_alias": 2
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 73,
+        "legacy_compatibility_alias": 54,
+        "deterministic_ledger": 1150
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 12,
+        "deterministic_ledger": 12,
+        "legacy_compatibility_alias": 2
+      }
     },
     {
       "fixture": "temporal_state_ledger",
@@ -597,7 +1285,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 182,
       "skipped_count": 16,
-      "rough_score": 0.778
+      "rough_score": 0.778,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 123,
+        "deterministic_ledger": 1483
+      },
+      "unique_admitted_bucket_counts": {
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 22
+      }
     },
     {
       "fixture": "thornfield_variance",
@@ -609,7 +1311,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 124,
       "skipped_count": 2,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 20
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 122,
+        "deterministic_ledger": 1704
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 10
+      }
     },
     {
       "fixture": "three_moles_moon_marmalade_machine",
@@ -621,7 +1337,21 @@
       "unique_admitted_predicate_count": 20,
       "admitted_count": 249,
       "skipped_count": 0,
-      "rough_score": 0.694
+      "rough_score": 0.694,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 14
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 14
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 233,
+        "deterministic_ledger": 509
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 7
+      }
     },
     {
       "fixture": "tournament_borrowed_names",
@@ -633,7 +1363,21 @@
       "unique_admitted_predicate_count": 25,
       "admitted_count": 84,
       "skipped_count": 11,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 15
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 70,
+        "deterministic_ledger": 1087
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "university_lab_sample_chain",
@@ -645,7 +1389,21 @@
       "unique_admitted_predicate_count": 22,
       "admitted_count": 47,
       "skipped_count": 39,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 16
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 40,
+        "deterministic_ledger": 897
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 10,
+        "deterministic_ledger": 12
+      }
     },
     {
       "fixture": "veridia9_supply_chain_patent_dispute",
@@ -657,7 +1415,21 @@
       "unique_admitted_predicate_count": 29,
       "admitted_count": 78,
       "skipped_count": 9,
-      "rough_score": 0.772
+      "rough_score": 0.772,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 19
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 19
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 62,
+        "deterministic_ledger": 308
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 10
+      }
     },
     {
       "fixture": "veridia_intake",
@@ -669,7 +1441,21 @@
       "unique_admitted_predicate_count": 34,
       "admitted_count": 175,
       "skipped_count": 5,
-      "rough_score": 1.0
+      "rough_score": 1.0,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 26
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 138,
+        "deterministic_ledger": 382
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 26,
+        "deterministic_ledger": 8
+      }
     },
     {
       "fixture": "wildfire_evacuation_revision_order",
@@ -681,7 +1467,21 @@
       "unique_admitted_predicate_count": 38,
       "admitted_count": 142,
       "skipped_count": 1,
-      "rough_score": 0.889
+      "rough_score": 0.889,
+      "candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "unique_candidate_bucket_counts": {
+        "semantic_compile_surface": 27
+      },
+      "admitted_bucket_counts": {
+        "semantic_compile_surface": 100,
+        "deterministic_ledger": 932
+      },
+      "unique_admitted_bucket_counts": {
+        "semantic_compile_surface": 24,
+        "deterministic_ledger": 14
+      }
     }
   ],
   "candidate_predicates": [
@@ -11026,6 +11826,440 @@
       "predicate": "unresolved_item/2",
       "occurrences": 1,
       "fixtures": 1
+    }
+  ],
+  "candidate_buckets": [
+    {
+      "bucket": "semantic_compile_surface",
+      "mentions": 1221,
+      "unique_predicates": 1077,
+      "fixtures": 56,
+      "top_predicates": [
+        {
+          "predicate": "person_role/3",
+          "occurrences": 14,
+          "fixtures": 14
+        },
+        {
+          "predicate": "document_type/2",
+          "occurrences": 7,
+          "fixtures": 7
+        },
+        {
+          "predicate": "recorded_in/3",
+          "occurrences": 6,
+          "fixtures": 6
+        },
+        {
+          "predicate": "person_role/2",
+          "occurrences": 5,
+          "fixtures": 5
+        },
+        {
+          "predicate": "item_attribute/3",
+          "occurrences": 5,
+          "fixtures": 5
+        },
+        {
+          "predicate": "rule_id/1",
+          "occurrences": 5,
+          "fixtures": 5
+        },
+        {
+          "predicate": "rule_text/2",
+          "occurrences": 5,
+          "fixtures": 5
+        },
+        {
+          "predicate": "rule_condition/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "event_occurred/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "correction_applied/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "compiled_by/2",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "event_location/2",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "person/1",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "party_role/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "source_supports/4",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "fact_source/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "assertion_source/3",
+          "occurrences": 4,
+          "fixtures": 4
+        },
+        {
+          "predicate": "application_id/1",
+          "occurrences": 3,
+          "fixtures": 3
+        },
+        {
+          "predicate": "correction_id/1",
+          "occurrences": 3,
+          "fixtures": 3
+        },
+        {
+          "predicate": "event_type/2",
+          "occurrences": 3,
+          "fixtures": 3
+        }
+      ]
+    },
+    {
+      "bucket": "legacy_compatibility_alias",
+      "mentions": 9,
+      "unique_predicates": 9,
+      "fixtures": 4,
+      "top_predicates": [
+        {
+          "predicate": "student_in_version/3",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_withdrawn/2",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_added/2",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "homeroom_reassigned/3",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "initial_group_assignment/3",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_id/1",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "adult_role/2",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_member/4",
+          "occurrences": 1,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_swap/4",
+          "occurrences": 1,
+          "fixtures": 1
+        }
+      ]
+    }
+  ],
+  "admitted_buckets": [
+    {
+      "bucket": "deterministic_ledger",
+      "mentions": 55584,
+      "unique_predicates": 14,
+      "fixtures": 56,
+      "top_predicates": [
+        {
+          "predicate": "source_record_numeric_token/2",
+          "occurrences": 8400,
+          "fixtures": 55
+        },
+        {
+          "predicate": "source_record_row/5",
+          "occurrences": 5739,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_kind/2",
+          "occurrences": 5739,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_line/2",
+          "occurrences": 5739,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_section/2",
+          "occurrences": 5739,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_text_key/2",
+          "occurrences": 5739,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_label/2",
+          "occurrences": 5676,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_text_atom/2",
+          "occurrences": 5673,
+          "fixtures": 56
+        },
+        {
+          "predicate": "source_record_cell/3",
+          "occurrences": 1906,
+          "fixtures": 20
+        },
+        {
+          "predicate": "source_record_cell_text_key/3",
+          "occurrences": 1906,
+          "fixtures": 20
+        },
+        {
+          "predicate": "source_record_cell_header/3",
+          "occurrences": 1649,
+          "fixtures": 20
+        },
+        {
+          "predicate": "source_record_field/3",
+          "occurrences": 1649,
+          "fixtures": 20
+        },
+        {
+          "predicate": "source_record_alias/3",
+          "occurrences": 20,
+          "fixtures": 7
+        },
+        {
+          "predicate": "source_record_parenthetical_alias/3",
+          "occurrences": 10,
+          "fixtures": 7
+        }
+      ]
+    },
+    {
+      "bucket": "semantic_compile_surface",
+      "mentions": 6247,
+      "unique_predicates": 953,
+      "fixtures": 56,
+      "top_predicates": [
+        {
+          "predicate": "person_role/3",
+          "occurrences": 105,
+          "fixtures": 13
+        },
+        {
+          "predicate": "person_id/2",
+          "occurrences": 95,
+          "fixtures": 2
+        },
+        {
+          "predicate": "event/5",
+          "occurrences": 60,
+          "fixtures": 1
+        },
+        {
+          "predicate": "person/1",
+          "occurrences": 59,
+          "fixtures": 4
+        },
+        {
+          "predicate": "rule_text/2",
+          "occurrences": 57,
+          "fixtures": 5
+        },
+        {
+          "predicate": "event_id/1",
+          "occurrences": 56,
+          "fixtures": 3
+        },
+        {
+          "predicate": "score_entry/5",
+          "occurrences": 53,
+          "fixtures": 1
+        },
+        {
+          "predicate": "rule_id/1",
+          "occurrences": 53,
+          "fixtures": 5
+        },
+        {
+          "predicate": "statement_by/3",
+          "occurrences": 44,
+          "fixtures": 2
+        },
+        {
+          "predicate": "held_role/3",
+          "occurrences": 44,
+          "fixtures": 1
+        },
+        {
+          "predicate": "recorded_in/4",
+          "occurrences": 44,
+          "fixtures": 1
+        },
+        {
+          "predicate": "rule_condition/3",
+          "occurrences": 41,
+          "fixtures": 4
+        },
+        {
+          "predicate": "party_role/3",
+          "occurrences": 41,
+          "fixtures": 4
+        },
+        {
+          "predicate": "correction_applied/3",
+          "occurrences": 40,
+          "fixtures": 3
+        },
+        {
+          "predicate": "event_location/2",
+          "occurrences": 40,
+          "fixtures": 3
+        },
+        {
+          "predicate": "assigned_to_room/2",
+          "occurrences": 40,
+          "fixtures": 1
+        },
+        {
+          "predicate": "state_changed/3",
+          "occurrences": 39,
+          "fixtures": 1
+        },
+        {
+          "predicate": "assertion_source/3",
+          "occurrences": 37,
+          "fixtures": 4
+        },
+        {
+          "predicate": "event_type/2",
+          "occurrences": 36,
+          "fixtures": 3
+        },
+        {
+          "predicate": "docket_entry/4",
+          "occurrences": 35,
+          "fixtures": 1
+        }
+      ]
+    },
+    {
+      "bucket": "legacy_compatibility_alias",
+      "mentions": 540,
+      "unique_predicates": 15,
+      "fixtures": 4,
+      "top_predicates": [
+        {
+          "predicate": "student_in_version/3",
+          "occurrences": 121,
+          "fixtures": 1
+        },
+        {
+          "predicate": "initial_group_assignment/3",
+          "occurrences": 83,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_member/4",
+          "occurrences": 77,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_member_label/5",
+          "occurrences": 77,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_member/4",
+          "occurrences": 52,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_member_alias/2",
+          "occurrences": 40,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_id/1",
+          "occurrences": 35,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_member_header/2",
+          "occurrences": 12,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_scope/2",
+          "occurrences": 12,
+          "fixtures": 1
+        },
+        {
+          "predicate": "roster_table_version/2",
+          "occurrences": 12,
+          "fixtures": 1
+        },
+        {
+          "predicate": "adult_role/2",
+          "occurrences": 8,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_withdrawn/2",
+          "occurrences": 3,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_added/2",
+          "occurrences": 3,
+          "fixtures": 1
+        },
+        {
+          "predicate": "homeroom_reassigned/3",
+          "occurrences": 3,
+          "fixtures": 1
+        },
+        {
+          "predicate": "student_swap/4",
+          "occurrences": 2,
+          "fixtures": 1
+        }
+      ]
     }
   ],
   "top_candidate_predicates": [

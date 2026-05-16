@@ -9,6 +9,25 @@
 - Candidate predicates not admitted anywhere: `124`
 - Admitted predicates not listed as candidates anywhere: `20`
 
+## Predicate Buckets
+
+These buckets are a first-pass layer map, not a promotion decision.
+
+### Admitted
+
+| Bucket | Clause mentions | Unique predicates | Fixtures | Top predicates |
+| --- | ---: | ---: | ---: | --- |
+| `deterministic_ledger` | 55584 | 14 | 56 | `source_record_numeric_token/2` (8400), `source_record_row/5` (5739), `source_record_kind/2` (5739), `source_record_line/2` (5739), `source_record_section/2` (5739), `source_record_text_key/2` (5739) |
+| `semantic_compile_surface` | 6247 | 953 | 56 | `person_role/3` (105), `person_id/2` (95), `event/5` (60), `person/1` (59), `rule_text/2` (57), `event_id/1` (56) |
+| `legacy_compatibility_alias` | 540 | 15 | 4 | `student_in_version/3` (121), `initial_group_assignment/3` (83), `roster_table_member/4` (77), `roster_table_member_label/5` (77), `roster_member/4` (52), `roster_table_member_alias/2` (40) |
+
+### Candidates
+
+| Bucket | Mentions | Unique predicates | Fixtures | Top predicates |
+| --- | ---: | ---: | ---: | --- |
+| `semantic_compile_surface` | 1221 | 1077 | 56 | `person_role/3` (14), `document_type/2` (7), `recorded_in/3` (6), `person_role/2` (5), `item_attribute/3` (5), `rule_id/1` (5) |
+| `legacy_compatibility_alias` | 9 | 9 | 4 | `student_in_version/3` (1), `student_withdrawn/2` (1), `student_added/2` (1), `homeroom_reassigned/3` (1), `initial_group_assignment/3` (1), `student_id/1` (1) |
+
 ## Top Admitted Predicates
 
 | Predicate | Clause mentions | Fixtures |

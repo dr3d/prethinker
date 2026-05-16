@@ -3103,6 +3103,34 @@ def test_adult_role_query_drops_generic_roster_assignments_when_role_rows_match(
     )
 
 
+def test_group_assignment_query_uses_generic_assignment_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "group_assignment(person_alpha, v1, cohort_red).",
+        "group_assignment(person_beta, v1, cohort_red).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["group_assignment(Person, v1, cohort_red)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "roster_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("SupportKind") == "group_assignment"
+        and row.get("Person") == "person_alpha"
+        and row.get("Group") == "cohort_red"
+        and row.get("Version") == "v1"
+        for row in result_rows
+    )
+    assert any(
+        row.get("SupportKind") == "group_count"
+        and row.get("Group") == "cohort_red"
+        and row.get("Version") == "v1"
+        and row.get("Count") == "2"
+        for row in result_rows
+    )
+
+
 def test_roster_version_query_keeps_version_level_support_not_member_roster_volume() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -3554,6 +3582,35 @@ def test_source_record_packet_metadata_surfaces_statement_filing_notes_without_f
         and row.get("StatementId") == "stmt_001"
         and row.get("StatementContent") == "checked_device_status"
         and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+
+
+def test_source_record_packet_metadata_accepts_generic_recorded_statement() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "recorded_statement(stmt_001, person_alpha, checked_device_status).",
+        "source_record_row(src_line_0012, labeled_line, 12, statements_section, person_alpha_rn_statement_filed_16_02).",
+        "source_record_section(src_line_0012, statements_section).",
+        "source_record_line(src_line_0012, 12).",
+        "source_record_text_atom(src_line_0012, person_alpha_rn_statement_filed_16_02).",
+        "source_record_numeric_token(src_line_0012, v_16_02).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["recorded_statement(StatementId, Speaker, Content)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_statement_filing_note"
+        and row.get("Speaker") == "person_alpha"
+        and row.get("FiledTime") == "v_16_02"
+        and row.get("StatementRole") == "rn"
+        and row.get("StatementId") == "stmt_001"
+        and row.get("StatementContent") == "checked_device_status"
         for row in result_rows
     )
 

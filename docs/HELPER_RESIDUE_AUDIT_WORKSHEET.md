@@ -2685,3 +2685,108 @@ Next pressure:
   architecture rather than default-disabled compatibility.
 - Re-run this leak audit after each helper-retirement or compile-guidance
   change.
+
+## HR-031 - Current Docs And Generic Compatibility Readers
+
+Date: 2026-05-16
+
+Before:
+
+- Current-facing docs still mixed the old artifact formula
+  `source + lens set + deterministic ledgers + admitted predicates + helper set`
+  with the new no-helper policy.
+- `docs/CURRENT_HARNESS_INSTRUMENT.md` carried hundreds of lines of helper-era
+  archaeology even though the active instrument default is no-helper.
+- Predicate inventory totals were repeatable but not layered: `982` unique
+  admitted predicates did not distinguish deterministic ledger volume from
+  semantic compile surface or legacy compatibility residue.
+- Query compatibility still gave old school/staff-shaped predicates first-class
+  reader paths without generic equivalents.
+
+Prediction:
+
+- Moving current docs to no-helper language should reduce context drift for new
+  agents without losing the helper history, because git history and
+  `HELPER_RESIDUE_AUDIT_WORKSHEET.md` preserve the old path.
+- Bucketing the predicate inventory should show that most admitted predicate
+  mentions are deterministic ledger rows, not a thousand competing semantic
+  concepts.
+- Tiny generic readers for `group_assignment/3` and `recorded_statement/3`
+  should preserve old compatibility behavior while giving future compiles a
+  non-fixture vocabulary.
+
+Intervention:
+
+- Rewrote current-facing docs to foreground the live artifact unit:
+  `source + lens set + deterministic ledgers + admitted predicates + query policy`.
+- Reframed helper material as legacy/forensic history in:
+  - `README.md`
+  - `docs/CURRENT_UTTERANCE_PIPELINE.md`
+  - `docs/CURRENT_HARNESS_INSTRUMENT.md`
+  - `docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`
+  - `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`
+  - `docs/index.html`
+- Added predicate-layer buckets to
+  `scripts/audit_compile_predicate_inventory.py`:
+  - `deterministic_ledger`
+  - `semantic_compile_surface`
+  - `legacy_compatibility_alias`
+  - `legacy_support_surface`
+- Re-ran the native no-helper draw-1 predicate inventory.
+- Added generic compatibility reader paths:
+  - `group_assignment(Person, Version, Group)` now feeds assignment support and
+    group counts without requiring `student_group_assignment/3`.
+  - `recorded_statement(StatementId, Speaker, Content)` now feeds statement
+    filing notes without requiring `staff_statement/3`.
+
+After:
+
+Native no-helper draw-1 admitted predicate buckets:
+
+| Bucket | Mentions | Unique predicates | Fixtures |
+| --- | ---: | ---: | ---: |
+| `deterministic_ledger` | `55584` | `14` | `56` |
+| `semantic_compile_surface` | `6247` | `953` | `56` |
+| `legacy_compatibility_alias` | `540` | `15` | `4` |
+
+Candidate predicate buckets:
+
+| Bucket | Mentions | Unique predicates | Fixtures |
+| --- | ---: | ---: | ---: |
+| `semantic_compile_surface` | `1221` | `1077` | `56` |
+| `legacy_compatibility_alias` | `9` | `9` | `4` |
+
+Artifacts:
+
+- `scripts/audit_compile_predicate_inventory.py`
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\audit_fixture_vocabulary_leaks.py scripts\audit_compile_predicate_inventory.py scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_group_assignment_query_uses_generic_assignment_surface tests\test_domain_bootstrap_qa.py::test_source_record_packet_metadata_accepts_generic_recorded_statement tests\test_domain_bootstrap_qa.py::test_source_record_packet_metadata_surfaces_statement_filing_notes_without_fixture_terms -q`
+  - `3 passed`
+- `python -m pytest tests\test_source_record_ledger.py tests\test_domain_bootstrap_qa.py::test_explicit_table_member_alias_support_maps_generic_printed_labels tests\test_domain_bootstrap_qa.py::test_group_assignment_query_uses_generic_assignment_surface tests\test_domain_bootstrap_qa.py::test_source_record_packet_metadata_accepts_generic_recorded_statement -q`
+  - `22 passed`
+
+Lesson:
+
+The 62,371 admitted predicate mentions are not mostly semantic vocabulary
+sprawl. They are mostly deterministic source ledgers. The actual semantic
+surface is smaller in mention volume but broad in predicate diversity; that is
+where the next naming audits should focus. Legacy compatibility aliases are
+visible and bounded: 540 admitted mentions, 15 signatures, 4 fixtures. That is
+small enough to quarantine deliberately instead of carrying helper-era language
+as architecture.
+
+Next pressure:
+
+- Use the bucketed inventory to rank the most common semantic compile
+  predicates by fixture spread and naming risk.
+- Continue replacing fixture-shaped compatibility readers with generic
+  equivalents only when an unlike vocabulary can exercise the same structural
+  contract.
+- Re-run leak audit after the next compile-surface or query-policy change.

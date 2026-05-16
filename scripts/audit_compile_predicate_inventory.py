@@ -14,6 +14,20 @@ from typing import Any
 PREDICATE_RE = re.compile(r"^\s*(?P<name>[a-z][A-Za-z0-9_]*)\s*\((?P<args>.*)\)\s*\.?\s*$")
 
 
+LEGACY_COMPAT_PREFIXES = (
+    "roster_table_",
+    "student_",
+    "school_",
+    "homeroom_",
+)
+
+LEGACY_COMPAT_NAMES = {
+    "adult_role",
+    "initial_group_assignment",
+    "roster_member",
+}
+
+
 def iter_compile_jsons(paths: list[str]) -> list[Path]:
     out: list[Path] = []
     for raw in paths:
@@ -75,6 +89,31 @@ def normalize_candidate(value: Any) -> str:
     return ""
 
 
+def predicate_name(signature: str) -> str:
+    return str(signature or "").split("/", 1)[0].strip()
+
+
+def predicate_bucket(signature: str) -> str:
+    """Classify predicate signatures by instrument layer.
+
+    This is intentionally conservative. A bucket is not a promotion decision;
+    it is a repeatable first-pass map for seeing how much of a compile is
+    deterministic ledger, current semantic surface, or legacy compatibility
+    residue.
+    """
+
+    name = predicate_name(signature)
+    if not name:
+        return "unparsed"
+    if name.startswith("source_record_") or name.startswith("explicit_table_"):
+        return "deterministic_ledger"
+    if name.endswith("_support") or name.endswith("_helper") or name.endswith("_companion"):
+        return "legacy_support_surface"
+    if name in LEGACY_COMPAT_NAMES or any(name.startswith(prefix) for prefix in LEGACY_COMPAT_PREFIXES):
+        return "legacy_compatibility_alias"
+    return "semantic_compile_surface"
+
+
 def fixture_name(path: Path, payload: dict[str, Any]) -> str:
     text_file = str(payload.get("text_file") or "")
     if text_file:
@@ -130,6 +169,10 @@ def summarize(paths: list[str]) -> dict[str, Any]:
                 "admitted_count": source_compile.get("admitted_count"),
                 "skipped_count": source_compile.get("skipped_count"),
                 "rough_score": (payload.get("score") or {}).get("rough_score") if isinstance(payload.get("score"), dict) else None,
+                "candidate_bucket_counts": dict(Counter(predicate_bucket(sig) for sig in candidates)),
+                "unique_candidate_bucket_counts": dict(Counter(predicate_bucket(sig) for sig in set(candidates))),
+                "admitted_bucket_counts": dict(Counter(predicate_bucket(sig) for sig in admitted)),
+                "unique_admitted_bucket_counts": dict(Counter(predicate_bucket(sig) for sig in set(admitted))),
             }
         )
 
@@ -148,6 +191,28 @@ def summarize(paths: list[str]) -> dict[str, Any]:
 
     unique_candidate = set(candidate_counter)
     unique_admitted = set(admitted_counter)
+
+    def bucket_summary(counter: Counter[str], fixture_sets: dict[str, set[str]]) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        all_buckets = sorted({predicate_bucket(sig) for sig in counter})
+        for bucket in all_buckets:
+            bucket_counter = Counter({sig: count for sig, count in counter.items() if predicate_bucket(sig) == bucket})
+            fixtures = {
+                fixture
+                for fixture, sigs in fixture_sets.items()
+                if any(predicate_bucket(sig) == bucket for sig in sigs)
+            }
+            rows.append(
+                {
+                    "bucket": bucket,
+                    "mentions": sum(bucket_counter.values()),
+                    "unique_predicates": len(bucket_counter),
+                    "fixtures": len(fixtures),
+                    "top_predicates": top_rows(bucket_counter, Counter({sig: sum(1 for fs in fixture_sets.values() if sig in fs) for sig in bucket_counter}), 20),
+                }
+            )
+        return sorted(rows, key=lambda row: (-row["mentions"], row["bucket"]))
+
     return {
         "artifact_count": len(compile_paths),
         "parsed_artifact_count": len(fixture_rows),
@@ -163,6 +228,8 @@ def summarize(paths: list[str]) -> dict[str, Any]:
         "fixtures": sorted(fixture_rows, key=lambda row: row["fixture"]),
         "candidate_predicates": top_rows(candidate_counter, candidate_fixture_counts, len(candidate_counter)),
         "admitted_predicates": top_rows(admitted_counter, admitted_fixture_counts, len(admitted_counter)),
+        "candidate_buckets": bucket_summary(candidate_counter, fixture_candidate_sets),
+        "admitted_buckets": bucket_summary(admitted_counter, fixture_admitted_sets),
         "top_candidate_predicates": top_rows(candidate_counter, candidate_fixture_counts, 80),
         "top_admitted_predicates": top_rows(admitted_counter, admitted_fixture_counts, 120),
         "candidate_not_admitted": sorted(unique_candidate - unique_admitted),
@@ -184,11 +251,39 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Candidate predicates not admitted anywhere: `{totals['candidate_not_admitted_unique']}`",
         f"- Admitted predicates not listed as candidates anywhere: `{totals['admitted_not_candidate_unique']}`",
         "",
+        "## Predicate Buckets",
+        "",
+        "These buckets are a first-pass layer map, not a promotion decision.",
+        "",
+        "### Admitted",
+        "",
+        "| Bucket | Clause mentions | Unique predicates | Fixtures | Top predicates |",
+        "| --- | ---: | ---: | ---: | --- |",
+    ]
+    for row in payload.get("admitted_buckets", []):
+        top = ", ".join(f"`{item['predicate']}` ({item['occurrences']})" for item in row.get("top_predicates", [])[:6])
+        lines.append(f"| `{row['bucket']}` | {row['mentions']} | {row['unique_predicates']} | {row['fixtures']} | {top} |")
+    lines.extend(
+        [
+            "",
+            "### Candidates",
+            "",
+            "| Bucket | Mentions | Unique predicates | Fixtures | Top predicates |",
+            "| --- | ---: | ---: | ---: | --- |",
+        ]
+    )
+    for row in payload.get("candidate_buckets", []):
+        top = ", ".join(f"`{item['predicate']}` ({item['occurrences']})" for item in row.get("top_predicates", [])[:6])
+        lines.append(f"| `{row['bucket']}` | {row['mentions']} | {row['unique_predicates']} | {row['fixtures']} | {top} |")
+    lines.extend(
+        [
+            "",
         "## Top Admitted Predicates",
         "",
         "| Predicate | Clause mentions | Fixtures |",
         "| --- | ---: | ---: |",
-    ]
+        ]
+    )
     for row in payload["top_admitted_predicates"][:40]:
         lines.append(f"| `{row['predicate']}` | {row['occurrences']} | {row['fixtures']} |")
     lines.extend(["", "## Top Candidate Predicates", "", "| Predicate | Mentions | Fixtures |", "| --- | ---: | ---: |"])
