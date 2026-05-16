@@ -3369,3 +3369,93 @@ Next pressure:
   replay proves a structural family.
 - Run a native no-helper QA slice after this matcher hardening to check whether
   safer alias coverage preserves or improves routing without helper revival.
+
+## HR-039 - Native No-Helper Low-Six Alias-Hardened QA Slice
+
+Date: 2026-05-16
+
+Before:
+
+- HR-038 made alias-family matching safer by moving from substring triggers to
+  token-aware triggers.
+- The risk was that safer matching might reduce query-routing help enough to
+  regress native no-helper QA, especially on the weakest internal fixtures.
+
+Prediction:
+
+- If alias families are acting as safe routing hints rather than helper
+  substitutes, a low-performing native slice should hold roughly steady with
+  helpers still at zero.
+- If the prior substring coverage was carrying hidden performance, the slice
+  should regress sharply.
+
+Intervention:
+
+- Re-ran six low-performing native no-helper fixtures through OpenRouter.
+- Helpers remained genuinely off:
+  - `--helper-companion-row-limit 0`
+  - no legacy native helper adapter opt-in
+  - no cache
+- Fixtures:
+  - `ridgeline_fire`
+  - `thornfield_variance`
+  - `dulse_ledger`
+  - `sable_creek_budget`
+  - `school_activity_roster_reconciliation`
+  - `industrial_sensor_clock_correction`
+
+After:
+
+| Fixture | Prior E/P/M | Alias-hardened E/P/M | Exact delta |
+| --- | ---: | ---: | ---: |
+| `dulse_ledger` | `27/7/6` | `28/7/5` | `+1` |
+| `industrial_sensor_clock_correction` | `31/1/8` | `31/0/9` | `0` |
+| `ridgeline_fire` | `24/4/12` | `23/7/10` | `-1` |
+| `sable_creek_budget` | `27/5/8` | `31/3/6` | `+4` |
+| `school_activity_roster_reconciliation` | `28/1/11` | `29/1/10` | `+1` |
+| `thornfield_variance` | `26/3/11` | `24/4/12` | `-2` |
+
+Totals:
+
+- Prior: `163 / 21 / 56` over `240` questions.
+- Alias-hardened: `166 / 22 / 52` over `240` questions.
+- Exact rate: `0.6917`
+- Helper rows: `0`
+- Runtime load errors: `0`
+- Write proposal rows: `0`
+
+Failure-surface counts on the alias-hardened slice:
+
+| Surface | Count |
+| --- | ---: |
+| `not_applicable` | `166` |
+| `compile_surface_gap` | `58` |
+| `hybrid_join_gap` | `8` |
+| `query_surface_gap` | `4` |
+| `judge_uncertain` | `3` |
+| `answer_surface_gap` | `1` |
+
+Artifacts:
+
+- `docs/data/helper_residue/native_nohelper_alias_hardened_low6_qa_20260516.json`
+- `docs/data/helper_residue/native_nohelper_alias_hardened_low6_qa_20260516.md`
+- `tmp/native_nohelper_alias_hardened_low6_20260516_qa/`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\story_worlds --compile-root tmp\native_nohelper_story_worlds_draw1_20260516_compile --out-root tmp\native_nohelper_alias_hardened_low6_20260516_qa --fixture ridgeline_fire --fixture thornfield_variance --fixture dulse_ledger --fixture sable_creek_budget --fixture school_activity_roster_reconciliation --fixture industrial_sensor_clock_correction --model qwen/qwen3.6-35b-a3b --base-url $env:PRETHINKER_BASE_URL --lanes 6 --limit 40 --timeout 600 --no-cache --helper-companion-row-limit 0 --out-json docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.json --out-md docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.md`
+
+Lesson:
+
+Token-aware alias hardening did not cause the weak native slice to collapse.
+The movement is small and within expected QA variance, but it points in the
+right direction while preserving the important invariant: helper rows remain
+zero. The dominant residual is still compile-surface gap, not missing helper
+delivery.
+
+Next pressure:
+
+- Inspect the alias-hardened slice's compile-surface gaps and choose one
+  generic compile-surface invariant, not a helper replacement.
+- Keep the remaining explicit domain predicate names quarantined unless unlike
+  replay proves a broader structural family.
