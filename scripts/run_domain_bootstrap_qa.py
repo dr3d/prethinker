@@ -969,6 +969,25 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
     }
 
 
+def _predicate_alias_tokens(predicate: str) -> set[str]:
+    return {
+        token
+        for token in re.split(r"[^a-z0-9]+", predicate.casefold())
+        if token
+    }
+
+
+def _alias_pattern_matches(tokens: set[str], pattern: str) -> bool:
+    if pattern.endswith("*"):
+        stem = pattern[:-1]
+        return bool(stem) and any(token.startswith(stem) for token in tokens)
+    return pattern in tokens
+
+
+def _alias_any_pattern_matches(tokens: set[str], patterns: tuple[str, ...]) -> bool:
+    return any(_alias_pattern_matches(tokens, pattern) for pattern in patterns)
+
+
 def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, Any]]:
     """Group present predicates into generic query-planning surface families.
 
@@ -997,6 +1016,12 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
             ("external", "reference"),
         ),
         (
+            "entity_catalog_surface",
+            "declared entities, entity classes, document kinds, and compilation/source catalog metadata",
+            ("entity", "person", "organization", "document", "type", "compiled", "catalog"),
+            ("entity", "person", "organization", "document", "compiled"),
+        ),
+        (
             "custody_location_surface",
             "physical custody, holder, location, storage, and custodian rows",
             ("custody", "custodian", "holder", "held", "physical", "location", "storage"),
@@ -1011,8 +1036,8 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
         (
             "access_authorization_surface",
             "access permission, access denial, authorization, and authority source rows",
-            ("access", "authoriz", "authority", "party", "no", "source"),
-            ("access", "authoriz", "authority", "party"),
+            ("access", "authoriz*", "authority", "party", "no", "source"),
+            ("access", "authoriz*", "authority", "party"),
         ),
         (
             "order_effect_surface",
@@ -1023,20 +1048,20 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
         (
             "chronology_event_surface",
             "chronology events, event ordering, before/after anchors, and dated events",
-            ("chronolog", "event", "before", "after", "occurred", "date"),
+            ("chronolog*", "event", "before", "after", "occurred", "date"),
             ("event", "chronology"),
         ),
         (
             "source_assertion_surface",
             "source claims, assertions, disputes, objections, grounds, and status",
-            ("claim", "assert", "dispute", "objection", "ground", "status", "source"),
-            ("claim", "assert", "dispute"),
+            ("claim", "assert*", "dispute", "objection", "ground", "status", "source"),
+            ("claim", "assert*", "dispute"),
         ),
         (
             "assignment_allocation_surface",
             "entities assigned or allocated to groups, rooms, seats, vehicles, tasks, or other containers",
-            ("assign", "allocation", "allocated", "group", "room", "seat", "vehicle", "unit", "task"),
-            ("assign", "allocation", "allocated"),
+            ("assign*", "allocat*", "group", "room", "seat", "vehicle", "unit", "task"),
+            ("assign*", "allocat*"),
         ),
         (
             "versioned_membership_surface",
@@ -1053,20 +1078,26 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
         (
             "score_measurement_surface",
             "scores, ratings, measurements, criteria, dimensions, and measured values",
-            ("score", "rating", "measure", "metric", "criterion", "criteria", "value", "dimension"),
-            ("score", "rating", "measure", "metric"),
+            ("score", "rating", "measure*", "metric", "criterion", "criteria", "value", "dimension"),
+            ("score", "rating", "measure*", "metric"),
         ),
         (
             "record_provenance_surface",
             "records, docket entries, catalog entries, source filing, and recorded-in provenance",
-            ("record", "recorded", "docket", "entry", "filed", "filing", "catalog", "source"),
-            ("record", "recorded", "docket", "filed", "filing", "catalog", "source"),
+            ("record*", "docket", "entry", "filed", "filing", "catalog", "source"),
+            ("record*", "docket", "filed", "filing", "catalog", "source"),
         ),
         (
             "state_transition_surface",
             "state changes, status transitions, old/new values, supersession, and lifecycle movement",
-            ("state", "status", "changed", "change", "transition", "supersed", "prior", "new", "old"),
-            ("state", "status", "changed", "transition", "supersed"),
+            ("state", "status", "changed", "change", "transition", "supersed*", "prior", "new", "old"),
+            ("state", "status", "changed", "transition", "supersed*"),
+        ),
+        (
+            "correction_revision_surface",
+            "corrections, revisions, amendments, adjustments, and errata that alter or repair a record",
+            ("correct*", "revis*", "amendment", "adjustment", "errata"),
+            ("correct*", "revis*", "amendment", "adjustment"),
         ),
         (
             "attribute_value_surface",
@@ -1083,20 +1114,20 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
         (
             "ownership_interest_surface",
             "ownership, control, possession interests, and owned-by relationships",
-            ("own", "owned", "owner", "ownership", "control", "interest", "possession"),
-            ("own", "owned", "owner", "ownership"),
+            ("own", "owns", "owned", "owner", "ownership", "control", "interest", "possession"),
+            ("own", "owns", "owned", "owner", "ownership"),
         ),
         (
             "evidence_consistency_surface",
             "consistency, corroboration, contradiction, match, and evidentiary comparison",
-            ("consistent", "corroborat", "contradict", "match", "conflict", "evidence"),
-            ("consistent", "corroborat", "contradict", "match", "conflict"),
+            ("consistent", "corroborat*", "contradict*", "match", "conflict", "evidence"),
+            ("consistent", "corroborat*", "contradict*", "match", "conflict"),
         ),
         (
             "actor_participation_surface",
             "actors, participants, involvement, attendance, and event participation",
-            ("actor", "participant", "participation", "involved", "attended", "party"),
-            ("actor", "participant", "involved", "attended"),
+            ("actor", "participant", "participation", "involve*", "attend*", "party"),
+            ("actor", "participant", "involve*", "attend*"),
         ),
         (
             "rule_outcome_surface",
@@ -1118,10 +1149,10 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
             if "/" not in str(signature):
                 continue
             predicate = str(signature).split("/", 1)[0]
-            lowered = predicate.casefold()
-            if not any(token in lowered for token in anchor_tokens):
+            tokens = _predicate_alias_tokens(predicate)
+            if not _alias_any_pattern_matches(tokens, anchor_tokens):
                 continue
-            if any(token in lowered for token in any_tokens):
+            if _alias_any_pattern_matches(tokens, any_tokens):
                 matches.append(str(signature))
         if matches:
             out.append(

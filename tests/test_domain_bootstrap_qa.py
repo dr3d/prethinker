@@ -220,6 +220,10 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
         "rule_consequence(rule_1, threshold_applies, procedural).",
         "log_turn(turn_1, user_corrected_prior_claim).",
         "ambiguous_utterance(utt_1, she_approved_it).",
+        "entity_type(entity_1, organization).",
+        "document_type(doc_1, policy_memo).",
+        "compiled_by(doc_1, analyst_1, 2026_01_01).",
+        "correction_applied(record_1, correction_1, 2026_01_01).",
     ]
 
     inventory = compiled_kb_inventory(facts=facts, rules=[])
@@ -277,6 +281,12 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
     assert {"log_turn/2", "ambiguous_utterance/2"}.issubset(
         set(families["conversation_utterance_surface"]["signatures"])
     )
+    assert "entity_catalog_surface" in families
+    assert {"entity_type/2", "document_type/2", "compiled_by/3"}.issubset(
+        set(families["entity_catalog_surface"]["signatures"])
+    )
+    assert "correction_revision_surface" in families
+    assert "correction_applied/3" in families["correction_revision_surface"]["signatures"]
     assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
 
 

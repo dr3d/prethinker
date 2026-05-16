@@ -3284,3 +3284,88 @@ Next pressure:
   small generic metadata layer or should remain ordinary compile vocabulary.
 - Keep explicit sensor, grant, patient, and chaperone rows out of architecture
   until unlike probes show a structural surface that is not just domain wording.
+
+## HR-038 - Token-Aware Alias Matching And Metadata Surfaces
+
+Date: 2026-05-16
+
+Before:
+
+- HR-037 expanded generic alias coverage, but inspection exposed a matcher
+  flaw: alias-family membership was based on raw substring checks.
+- That could silently promote false matches such as `person` inside
+  `personal`, or `id` inside a longer unrelated token.
+- The remaining transferred no-family rows were mostly catalog/provenance-like
+  (`person/1`, `organization/1`, `document_type/2`, `entity_type/2`,
+  `compiled_by/*`) plus correction/revision rows (`correction_applied/3`).
+
+Prediction:
+
+- A token-aware matcher should lower any inflated coverage but make the alias
+  layer safer.
+- A small `entity_catalog_surface` and `correction_revision_surface` should
+  absorb broad transferred metadata without blessing fixture or domain nouns.
+
+Intervention:
+
+- Added token-aware alias helpers:
+  - `_predicate_alias_tokens()`
+  - `_alias_pattern_matches()`
+  - `_alias_any_pattern_matches()`
+- Replaced raw substring checks with exact token matching plus explicit
+  stem markers such as `assign*`, `record*`, `correct*`, and `authoriz*`.
+- Added:
+  - `entity_catalog_surface`
+  - `correction_revision_surface`
+- Extended the alias-family test to cover entity/catalog metadata and
+  correction/revision rows.
+
+After:
+
+- Non-ledger unique predicates: `968`
+- Non-ledger predicates with at least one generic alias family: `521`
+- `entity_catalog_surface`: `42` predicates
+- `correction_revision_surface`: `43` predicates
+- Checked false-positive examples:
+  - `is_personal_correspondence/1` has no alias-family match.
+  - `candidate_answer/2` has no alias-family match.
+  - `alternative_candidate/3` has no alias-family match.
+
+Remaining priority no-family rows:
+
+- low-volume explicit domain terms: `sensor_*`, `grant_*`, `patient_*`,
+  `bus_chaperone/2`, `chaperone_substitution/3`, `standby_chaperone/2`;
+- `conservation_engagement/4`, still a high-volume singleton with no generic
+  home;
+- `unresolved_question/2`, intentionally left ungrouped because `question`
+  vocabulary may be source content or QA-shaped residue and needs a separate
+  audit before promotion.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\audit_compile_predicate_inventory.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_inventory_groups_present_surface_alias_families tests\test_domain_bootstrap_qa.py::test_compiled_kb_contracts_name_role_and_generic_replacement_slots -q`
+  - `2 passed`
+- `python scripts\audit_compile_predicate_inventory.py tmp\native_nohelper_story_worlds_draw1_20260516_compile --out-json docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.json --out-md docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Lesson:
+
+Alias families are only safe if their triggers are as generic as their names.
+Substring matching was too permissive for architecture work because common
+English fragments can masquerade as structural terms. Token-aware matching
+turns the alias layer into a safer query-planning aid rather than a quiet path
+for fixture or corpus vocabulary to become substrate.
+
+Next pressure:
+
+- Treat the remaining no-family priority rows as quarantine unless unlike
+  replay proves a structural family.
+- Run a native no-helper QA slice after this matcher hardening to check whether
+  safer alias coverage preserves or improves routing without helper revival.

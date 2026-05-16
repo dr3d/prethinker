@@ -33,8 +33,8 @@
         "deterministic_ledger": 333
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 17
+        "semantic_compile_surface": 17,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -137,8 +137,8 @@
         "deterministic_ledger": 1751
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 38
+        "semantic_compile_surface": 38,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -189,8 +189,8 @@
         "deterministic_ledger": 2055
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 28
+        "semantic_compile_surface": 28,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -241,8 +241,8 @@
         "deterministic_ledger": 2146
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 14,
-        "deterministic_ledger": 12
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 14
       }
     },
     {
@@ -267,8 +267,8 @@
         "deterministic_ledger": 391
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 21
+        "semantic_compile_surface": 21,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -339,8 +339,8 @@
         "legacy_compatibility_alias": 4
       },
       "unique_candidate_bucket_counts": {
-        "semantic_compile_surface": 19,
-        "legacy_compatibility_alias": 4
+        "legacy_compatibility_alias": 4,
+        "semantic_compile_surface": 19
       },
       "admitted_bucket_counts": {
         "semantic_compile_surface": 64,
@@ -348,9 +348,9 @@
         "deterministic_ledger": 1498
       },
       "unique_admitted_bucket_counts": {
+        "legacy_compatibility_alias": 10,
         "deterministic_ledger": 12,
-        "semantic_compile_surface": 19,
-        "legacy_compatibility_alias": 10
+        "semantic_compile_surface": 19
       }
     },
     {
@@ -453,8 +453,8 @@
         "deterministic_ledger": 1049
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 19,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 19
       }
     },
     {
@@ -505,8 +505,8 @@
         "deterministic_ledger": 1048
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 18
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -531,8 +531,8 @@
         "deterministic_ledger": 467
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 17
+        "semantic_compile_surface": 17,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -609,8 +609,8 @@
         "deterministic_ledger": 720
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 16,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 16
       }
     },
     {
@@ -661,8 +661,8 @@
         "deterministic_ledger": 360
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 14
+        "semantic_compile_surface": 14,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -873,8 +873,8 @@
         "deterministic_ledger": 994
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 21
+        "semantic_compile_surface": 21,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -925,8 +925,8 @@
         "deterministic_ledger": 1081
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 13,
-        "deterministic_ledger": 12
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 13
       }
     },
     {
@@ -1029,8 +1029,8 @@
         "deterministic_ledger": 243
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 18,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 18
       }
     },
     {
@@ -1133,8 +1133,8 @@
         "deterministic_ledger": 452
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 13
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -1159,8 +1159,8 @@
         "deterministic_ledger": 1726
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 25,
-        "deterministic_ledger": 14
+        "deterministic_ledger": 14,
+        "semantic_compile_surface": 25
       }
     },
     {
@@ -1185,8 +1185,8 @@
         "deterministic_ledger": 1542
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 11
+        "semantic_compile_surface": 11,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -1240,8 +1240,8 @@
         "deterministic_ledger": 2217
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
         "semantic_compile_surface": 14,
+        "deterministic_ledger": 12,
         "legacy_compatibility_alias": 2
       }
     },
@@ -1323,8 +1323,8 @@
         "deterministic_ledger": 1704
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 10,
-        "semantic_compile_surface": 19
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 10
       }
     },
     {
@@ -1349,8 +1349,8 @@
         "deterministic_ledger": 509
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 7,
-        "semantic_compile_surface": 13
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 7
       }
     },
     {
@@ -1375,8 +1375,8 @@
         "deterministic_ledger": 1087
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 13,
-        "deterministic_ledger": 12
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 13
       }
     },
     {
@@ -1401,8 +1401,8 @@
         "deterministic_ledger": 897
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 10
+        "semantic_compile_surface": 10,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -1427,8 +1427,8 @@
         "deterministic_ledger": 308
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 19,
-        "deterministic_ledger": 10
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 19
       }
     },
     {
@@ -12508,9 +12508,7 @@
       "flagged_tokens": [
         "grant"
       ],
-      "alias_families": [
-        "conversation_utterance_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "grant_return_status/2",
@@ -12523,7 +12521,6 @@
         "grant"
       ],
       "alias_families": [
-        "conversation_utterance_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -12780,9 +12777,7 @@
       "flagged_tokens": [
         "homeroom"
       ],
-      "alias_families": [
-        "assignment_allocation_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "student_added/2",
@@ -12949,8 +12944,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "item_identifier_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -12974,6 +12968,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -13024,6 +13019,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -13268,6 +13264,7 @@
       "fixtures": 13,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -13279,7 +13276,9 @@
       "occurrences": 59,
       "fixtures": 4,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "rule_text/2",
@@ -13352,7 +13351,9 @@
       "occurrences": 40,
       "fixtures": 3,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "event_location/2",
@@ -13400,7 +13401,9 @@
       "occurrences": 33,
       "fixtures": 7,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "location/1",
@@ -13448,6 +13451,7 @@
       "fixtures": 5,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -13469,7 +13473,9 @@
       "occurrences": 17,
       "fixtures": 3,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "asset_attribute/3",
@@ -13492,7 +13498,9 @@
       "occurrences": 13,
       "fixtures": 3,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "correction_id/1",
@@ -13503,6 +13511,7 @@
       "fixtures": 3,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "item_identifier_surface"
       ]
     },
@@ -13526,7 +13535,9 @@
       "occurrences": 5,
       "fixtures": 4,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "compiled_by/3",
@@ -13536,7 +13547,9 @@
       "occurrences": 5,
       "fixtures": 3,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "person_id/2",
@@ -13547,6 +13560,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "item_identifier_surface"
       ]
     },
@@ -13559,8 +13573,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -13572,6 +13585,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "item_identifier_surface"
       ]
     },
@@ -13583,7 +13597,9 @@
       "occurrences": 32,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "event_date/3",
@@ -13674,7 +13690,9 @@
       "occurrences": 18,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "event_actor/3",
@@ -13756,8 +13774,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
-        "state_transition_surface"
+        "item_identifier_surface"
       ]
     },
     {
@@ -13862,7 +13879,9 @@
       "occurrences": 16,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "entry_author/2",
@@ -13883,7 +13902,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface"
+        "chronology_event_surface",
+        "entity_catalog_surface"
       ]
     },
     {
@@ -14013,6 +14033,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -14064,7 +14085,9 @@
       "occurrences": 15,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "accession_vault/2",
@@ -14074,9 +14097,7 @@
       "occurrences": 14,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "action_actor/3",
@@ -14141,7 +14162,9 @@
       "occurrences": 14,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "epistemic_weight/2",
@@ -14257,8 +14280,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -14371,9 +14393,7 @@
       "occurrences": 13,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "action_decision_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "access_authority/2",
@@ -14396,6 +14416,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "item_identifier_surface"
       ]
     },
@@ -14408,7 +14429,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "order_effect_surface"
+        "correction_revision_surface"
       ]
     },
     {
@@ -14460,7 +14481,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface"
+        "chronology_event_surface",
+        "correction_revision_surface"
       ]
     },
     {
@@ -14472,7 +14494,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -14625,8 +14646,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -14647,7 +14667,9 @@
       "occurrences": 11,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "banner_holder/3",
@@ -14668,6 +14690,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -14816,6 +14839,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "item_identifier_surface"
       ]
     },
@@ -14850,7 +14874,9 @@
       "occurrences": 10,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "marginal_note/3",
@@ -14962,7 +14988,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -15023,7 +15048,9 @@
       "occurrences": 9,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "document_exhibit/3",
@@ -15033,7 +15060,9 @@
       "occurrences": 9,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "document_id/2",
@@ -15044,6 +15073,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "item_identifier_surface"
       ]
     },
@@ -15056,7 +15086,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -15137,9 +15166,7 @@
       "occurrences": 9,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "score_total/3",
@@ -15200,9 +15227,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "accession_date/2",
@@ -15212,9 +15237,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "accession_id/1",
@@ -15225,7 +15248,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface",
         "item_identifier_surface"
       ]
     },
@@ -15237,9 +15259,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "accession_site/2",
@@ -15249,9 +15269,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "accession_species/2",
@@ -15261,9 +15279,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "access_authorization_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "alert_sent/3",
@@ -15283,9 +15299,7 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "applicant_name/2",
@@ -15436,6 +15450,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface"
       ]
     },
@@ -15517,7 +15532,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface"
+        "access_authorization_surface",
+        "correction_revision_surface"
       ]
     },
     {
@@ -15709,9 +15725,7 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "count_requirement_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "instrument_execution_date/2",
@@ -15789,7 +15803,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "pending_action/2",
@@ -15812,7 +15828,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "actor_participation_surface"
+        "actor_participation_surface",
+        "entity_catalog_surface"
       ]
     },
     {
@@ -15835,9 +15852,7 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "requested_amount/2",
@@ -15905,8 +15920,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -15940,6 +15954,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "item_identifier_surface"
       ]
     },
@@ -15951,7 +15966,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "asserts_speed/3",
@@ -16040,6 +16057,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -16052,6 +16070,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -16361,9 +16380,7 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "person_belongs_to/2",
@@ -16373,7 +16390,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "person_name/2",
@@ -16383,7 +16402,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "person_name_variant/3",
@@ -16393,7 +16414,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "policy_condition/3",
@@ -16509,7 +16532,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -16532,8 +16554,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -16545,8 +16566,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -16558,8 +16578,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -16571,8 +16590,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -16702,7 +16720,9 @@
       "occurrences": 5,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "custody_state_at_date/3",
@@ -16759,7 +16779,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "evidence_record_date/2",
@@ -16770,7 +16792,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -16796,7 +16817,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -16869,8 +16889,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "actor_participation_surface",
-        "item_identifier_surface"
+        "actor_participation_surface"
       ]
     },
     {
@@ -16881,9 +16900,7 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "incident_status/2",
@@ -16894,7 +16911,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -17197,8 +17213,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -17329,10 +17344,7 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "evidence_consistency_surface",
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "corrected_event_id/2",
@@ -17344,6 +17356,7 @@
       "flagged_tokens": [],
       "alias_families": [
         "chronology_event_surface",
+        "correction_revision_surface",
         "item_identifier_surface"
       ]
     },
@@ -17355,7 +17368,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "correction_event/5",
@@ -17366,7 +17381,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface"
+        "chronology_event_surface",
+        "correction_revision_surface"
       ]
     },
     {
@@ -17377,7 +17393,9 @@
       "occurrences": 4,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "correction_new_value/2",
@@ -17387,7 +17405,9 @@
       "occurrences": 4,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "correction_old_value/2",
@@ -17397,7 +17417,9 @@
       "occurrences": 4,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "counsel_opinion/2",
@@ -17439,7 +17461,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "decision_made/3",
@@ -17475,7 +17499,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "document_status/3",
@@ -17486,6 +17512,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -17523,9 +17550,7 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "expert_finding/5",
@@ -17583,8 +17608,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "assignment_allocation_surface",
-        "custody_location_surface"
+        "assignment_allocation_surface"
       ]
     },
     {
@@ -17615,9 +17639,7 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "hypothesis_proposed/4",
@@ -17638,8 +17660,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
-        "custody_location_surface",
-        "item_identifier_surface"
+        "custody_location_surface"
       ]
     },
     {
@@ -17840,6 +17861,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "identity_role_surface",
         "record_provenance_surface"
       ]
@@ -17930,9 +17952,7 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "ruling_with_condition/4",
@@ -18233,8 +18253,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "evidence_consistency_surface",
-        "item_identifier_surface"
+        "evidence_consistency_surface"
       ]
     },
     {
@@ -18245,7 +18264,9 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "corrects/2",
@@ -18255,7 +18276,9 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "deadline_tolled/2",
@@ -18300,7 +18323,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface"
+        "entity_catalog_surface"
       ]
     },
     {
@@ -18344,7 +18367,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface"
+        "chronology_event_surface",
+        "correction_revision_surface"
       ]
     },
     {
@@ -18541,9 +18565,7 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "ledger/1",
@@ -18607,9 +18629,7 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "objects_to_codicil/4",
@@ -18619,9 +18639,7 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "open_item_description/2",
@@ -18774,7 +18792,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "versioned_membership_surface"
       ]
     },
@@ -18918,8 +18935,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -18931,8 +18947,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -18997,9 +19012,7 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "vote_record/4",
@@ -19041,7 +19054,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "amendment_outcome/3",
@@ -19052,6 +19067,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "rule_outcome_surface"
       ]
     },
@@ -19198,7 +19214,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "authority_exclusion/3",
@@ -19220,9 +19238,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "board_decision/2",
@@ -19289,8 +19305,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -19442,10 +19457,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "evidence_consistency_surface",
-        "record_provenance_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "contamination_advisory/2",
@@ -19465,7 +19477,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "corrected_statement/2",
@@ -19477,7 +19491,7 @@
       "flagged_tokens": [],
       "alias_families": [
         "conversation_utterance_surface",
-        "state_transition_surface"
+        "correction_revision_surface"
       ]
     },
     {
@@ -19488,7 +19502,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "correction_accession/2",
@@ -19499,7 +19515,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface"
+        "correction_revision_surface"
       ]
     },
     {
@@ -19510,7 +19526,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "cost_estimate/3",
@@ -19680,9 +19698,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "source_assertion_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "disqualified_from/2",
@@ -19768,9 +19784,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "evidence_gap/3",
@@ -19780,9 +19794,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "evidence_item/2",
@@ -19804,9 +19816,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "evidence_supports/3",
@@ -19816,9 +19826,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "exception_applied/3",
@@ -19892,7 +19900,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "firmware_inquiry/3",
@@ -19989,9 +19999,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "incident_value/2",
@@ -20001,9 +20009,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "injury_report/2",
@@ -20078,7 +20084,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "is_sole_proprietorship/2",
@@ -20190,9 +20198,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "mitigation_recommended/2",
@@ -20310,7 +20316,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface",
         "record_provenance_surface"
       ]
     },
@@ -20426,8 +20431,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "assignment_allocation_surface",
-        "custody_location_surface"
+        "assignment_allocation_surface"
       ]
     },
     {
@@ -20462,7 +20466,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "custody_location_surface"
+        "custody_location_surface",
+        "entity_catalog_surface"
       ]
     },
     {
@@ -20618,6 +20623,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -20684,7 +20690,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "reported_by/3",
@@ -20714,9 +20722,7 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "source_assertion_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "restriction_imposed/4",
@@ -20849,6 +20855,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -20862,8 +20869,7 @@
       "flagged_tokens": [],
       "alias_families": [
         "conversation_utterance_surface",
-        "source_assertion_surface",
-        "state_transition_surface"
+        "source_assertion_surface"
       ]
     },
     {
@@ -21028,8 +21034,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface",
-        "versioned_membership_surface"
+        "chronology_event_surface"
       ]
     },
     {
@@ -21041,8 +21046,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "attribute_value_surface",
-        "ownership_interest_surface"
+        "attribute_value_surface"
       ]
     },
     {
@@ -21205,8 +21209,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -21321,7 +21324,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "board_composition_rule/3",
@@ -21423,7 +21428,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "cause_status/2",
@@ -21446,7 +21453,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "certificate_of_occupancy/2",
@@ -21515,9 +21524,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "source_assertion_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "clock_drift/3",
@@ -21660,7 +21667,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "chronology_event_surface"
+        "chronology_event_surface",
+        "correction_revision_surface"
       ]
     },
     {
@@ -21671,7 +21679,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "council_vote/6",
@@ -21886,6 +21896,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "item_identifier_surface"
       ]
     },
@@ -21897,7 +21908,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "document_version/2",
@@ -21908,6 +21921,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "versioned_membership_surface"
       ]
     },
@@ -21920,7 +21934,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface"
+        "entity_catalog_surface"
       ]
     },
     {
@@ -21931,7 +21945,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "entity_catalog_surface"
+      ]
     },
     {
       "predicate": "entry_status/2",
@@ -21964,9 +21980,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "excluded_contribution/3",
@@ -22006,9 +22020,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "filed_report/3",
@@ -22063,6 +22075,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "record_provenance_surface"
       ]
     },
@@ -22129,9 +22142,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "incident_time/2",
@@ -22141,9 +22152,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "inscription_fragment/2",
@@ -22282,9 +22291,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "source_assertion_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "loss_amount_disputed/3",
@@ -22294,9 +22301,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "source_assertion_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "lot_dimensions/3",
@@ -22362,8 +22367,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "conversation_utterance_surface",
-        "state_transition_surface"
+        "conversation_utterance_surface"
       ]
     },
     {
@@ -22636,9 +22640,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "count_requirement_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "procedure_requirement/2",
@@ -22843,9 +22845,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "custody_location_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "review_decision/3",
@@ -22878,6 +22878,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "identity_role_surface"
       ]
     },
@@ -22938,7 +22939,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "correction_revision_surface"
+      ]
     },
     {
       "predicate": "score_correction/5",
@@ -22949,6 +22952,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "correction_revision_surface",
         "score_measurement_surface"
       ]
     },
@@ -23003,6 +23007,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "entity_catalog_surface",
         "record_provenance_surface"
       ]
     },
@@ -23035,7 +23040,6 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "action_decision_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -23147,9 +23151,7 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": [
-        "item_identifier_surface"
-      ]
+      "alias_families": []
     },
     {
       "predicate": "trip_conclusion/1",
@@ -24395,28 +24397,19 @@
   ],
   "alias_family_coverage": {
     "non_ledger_unique_predicates": 968,
-    "non_ledger_with_alias_family": 519,
+    "non_ledger_with_alias_family": 521,
     "families": {
       "access_authorization_surface": [
         "access_agreement/3",
         "access_authority/2",
         "access_event/5",
         "access_event_authorization/2",
-        "accession_collector/2",
-        "accession_date/2",
-        "accession_id/1",
-        "accession_initial_condition/2",
-        "accession_site/2",
-        "accession_species/2",
-        "accession_status/2",
-        "accession_vault/2",
         "amendment_authorizer/2",
         "authority_exclusion/3",
         "authority_level/2",
         "authority_question/3",
         "authorization_rule/4",
         "case_party/3",
-        "correction_accession/2",
         "decision_authority/2",
         "docket_party_role/4",
         "emergency_authorization/4",
@@ -24454,18 +24447,18 @@
         "pending_action/3",
         "pending_external_action/3",
         "review_decision/3",
-        "status_inaction/2",
-        "termination_decision/3",
-        "transaction/5"
+        "termination_decision/3"
       ],
       "actor_participation_surface": [
         "action_actor/3",
         "event_actor/2",
         "event_actor/3",
         "event_actor_role/4",
+        "hearing_attendance/3",
         "hearing_participant/2",
         "incident_actor/2",
         "involved_actor/2",
+        "meeting_attendee/3",
         "person_involved_in/3",
         "rule_actor_restriction/2",
         "source_actor_role/4"
@@ -24476,7 +24469,6 @@
         "assigned_to_room/2",
         "bus_assignment/3",
         "funding_allocation/3",
-        "homeroom_reassigned/3",
         "initial_group_assignment/3",
         "liability_assignment/3",
         "parking_allocation/3",
@@ -24549,8 +24541,6 @@
         "ambiguous_utterance/2",
         "capacity_statement/3",
         "corrected_statement/2",
-        "grant_return_amount/2",
-        "grant_return_status/2",
         "log_turn/2",
         "moral_statement/2",
         "said/3",
@@ -24568,6 +24558,51 @@
         "witness_statement/3",
         "witness_statement/4"
       ],
+      "correction_revision_surface": [
+        "amendment_authorizer/2",
+        "amendment_description/2",
+        "amendment_effective_date/2",
+        "amendment_id/1",
+        "amendment_introduced/4",
+        "amendment_lease/2",
+        "amendment_outcome/3",
+        "amendment_type/2",
+        "barcode_corrected_from_to/3",
+        "case_number_corrected_from_to/3",
+        "corrected_event_id/2",
+        "corrected_field/3",
+        "corrected_statement/2",
+        "corrected_value/2",
+        "corrected_value/4",
+        "correction_accession/2",
+        "correction_applied/3",
+        "correction_applied/4",
+        "correction_date/1",
+        "correction_date/2",
+        "correction_event/4",
+        "correction_event/5",
+        "correction_field/2",
+        "correction_id/1",
+        "correction_new_value/2",
+        "correction_notice/1",
+        "correction_notice/2",
+        "correction_old_value/2",
+        "correction_record/4",
+        "correction_source/3",
+        "correction_source_record/3",
+        "corrects/2",
+        "date_correction/3",
+        "event_corrected/3",
+        "event_corrected_timestamp/2",
+        "fact_corrected_by/3",
+        "gis_correction_filed/1",
+        "record_correction/4",
+        "report_correction/4",
+        "role_correction/3",
+        "scan_corrected/2",
+        "score_correction/5",
+        "source_correction/4"
+      ],
       "count_requirement_surface": [
         "approval_threshold/2",
         "base_unit_count/3",
@@ -24576,8 +24611,6 @@
         "excluded_from_count/2",
         "fte_count/2",
         "funding_threshold/2",
-        "headcount_confirmed_by/2",
-        "prior_county_incorporation/2",
         "proposal_unit_count/2",
         "qualifying_chaperone_count/2",
         "required_chaperones/2",
@@ -24595,7 +24628,6 @@
         "custody_transfer/4",
         "easement_location/4",
         "event_location/2",
-        "funding_allocation/3",
         "has_physical_custody/3",
         "hearing_location/1",
         "incident_location/2",
@@ -24603,20 +24635,60 @@
         "location/1",
         "location_coordinates/2",
         "object_location/3",
-        "parking_allocation/3",
         "permit_location/2",
         "person_location/2",
         "physical_custody/2",
-        "relocation_date/2",
         "source_custodian/2"
+      ],
+      "entity_catalog_surface": [
+        "audit_packet_compiled_on/2",
+        "ceqa_document_type/2",
+        "compiled_by/2",
+        "compiled_by/3",
+        "document/1",
+        "document_alias/2",
+        "document_clause/3",
+        "document_contains/3",
+        "document_evidence/3",
+        "document_exhibit/3",
+        "document_id/1",
+        "document_id/2",
+        "document_issued_on/2",
+        "document_status/3",
+        "document_tendered/3",
+        "document_type/2",
+        "document_version/2",
+        "document_voided/1",
+        "document_withdrawn/3",
+        "entity_id/2",
+        "entity_name/2",
+        "entity_role/2",
+        "entity_role/3",
+        "entity_role_in_context/4",
+        "entity_type/2",
+        "event_document/3",
+        "is_same_person/2",
+        "organization/1",
+        "organization_member/2",
+        "person/1",
+        "person_belongs_to/2",
+        "person_id/1",
+        "person_id/2",
+        "person_involved_in/3",
+        "person_location/2",
+        "person_name/2",
+        "person_name_variant/3",
+        "person_role/2",
+        "person_role/3",
+        "person_role_in_context/3",
+        "person_role_in_source/3",
+        "source_document/2"
       ],
       "evidence_consistency_surface": [
         "conflict_disclosed/3",
         "conflict_referral/4",
         "conflict_resolved/2",
         "conflict_unresolved/2",
-        "conflicting_evidence/2",
-        "conflicting_sources/2",
         "consistent_with/2",
         "consistent_with/3",
         "contradiction_identified/3",
@@ -24659,7 +24731,6 @@
       ],
       "item_identifier_surface": [
         "accession_id/1",
-        "alternative_candidate/3",
         "amendment_description/2",
         "amendment_id/1",
         "applicant_id/1",
@@ -24675,55 +24746,29 @@
         "asset_location/2",
         "asset_relation/3",
         "asset_status/3",
-        "bid_amount/3",
         "boundary_error_description/1",
         "bus_id/1",
         "case_id/1",
         "condition_description/2",
-        "conflicting_evidence/2",
-        "contradiction_identified/3",
         "corrected_event_id/2",
         "correction_id/1",
         "determination_id/1",
         "device_id/1",
         "docket_id/1",
-        "document_evidence/3",
         "document_id/1",
         "document_id/2",
-        "document_voided/1",
         "entity_id/2",
         "estate_asset/2",
         "event_description/2",
         "event_id/1",
-        "evidence_admitted/2",
-        "evidence_depicts/2",
-        "evidence_gap/3",
         "evidence_item/2",
-        "evidence_record/4",
-        "evidence_record_date/2",
         "evidence_record_id/1",
-        "evidence_record_type/2",
-        "evidence_source/2",
-        "evidence_struck/2",
-        "evidence_supports/3",
-        "evidence_type/2",
         "exception_affects_item/2",
         "exhibit_id/1",
-        "fee_paid/1",
         "fictional_event_description/2",
         "fictional_event_id/1",
-        "holiday/2",
-        "identity_unresolved/1",
-        "incident_actor/2",
-        "incident_date/2",
         "incident_description/2",
         "incident_id/1",
-        "incident_location/2",
-        "incident_report/4",
-        "incident_status/2",
-        "incident_summary/1",
-        "incident_time/2",
-        "incident_value/2",
         "instrument_id/1",
         "interpretation_id/1",
         "item/1",
@@ -24738,15 +24783,11 @@
         "item_title_recorded/3",
         "lease_id/1",
         "lot_id/1",
-        "missing_evidence/2",
         "notice_id/1",
         "novel_id/1",
         "object/1",
         "object_in_room/2",
         "object_location/3",
-        "objection/3",
-        "objection_filed/3",
-        "objects_to_codicil/4",
         "open_item_description/2",
         "open_item_detail/4",
         "open_item_expected_resolution/2",
@@ -24755,33 +24796,23 @@
         "order_id/1",
         "parcel_id/2",
         "permit_id/2",
-        "permit_validity_period/3",
         "person_id/1",
         "person_id/2",
-        "policy_version_valid/3",
-        "presiding_officer/3",
         "prior_grant_id/1",
         "project_asset/2",
         "proposal_description/2",
-        "resided_at/3",
-        "residency_start/2",
         "rule_id/1",
         "rule_id/2",
-        "said/3",
         "sensor_id/1",
         "session_id/1",
         "source_id/1",
-        "source_identifier/2",
         "structure_id/1",
         "student_id/1",
         "system_id/1",
-        "transit_corridor_definition/2",
         "unresolved_item/2",
-        "vessel_id/3",
-        "voided_value/2"
+        "vessel_id/3"
       ],
       "order_effect_surface": [
-        "amendment_effective_date/2",
         "funding_order_rule/2",
         "issued_order/4",
         "order_date/2",
@@ -24810,7 +24841,6 @@
         "owns/2",
         "owns/3",
         "parcel_owner/2",
-        "unknown_attribute/2",
         "vessel_owner/2"
       ],
       "record_provenance_surface": [
@@ -24819,7 +24849,6 @@
         "assertion_source/3",
         "assertion_source/4",
         "claim_source/3",
-        "conflicting_sources/2",
         "correction_record/4",
         "correction_source/3",
         "correction_source_record/3",
@@ -24978,18 +25007,13 @@
         "claim_settlement/4",
         "claim_source/3",
         "claim_type/2",
-        "claimed_agreement/3",
         "conditional_claim/3",
         "dispute_initiated/3",
         "dispute_position/3",
         "dispute_status/3",
-        "disputed_classification/3",
         "filed_dispute/3",
         "liability_claim_status/2",
-        "loss_amount_claimed/3",
-        "loss_amount_disputed/3",
         "party_claim/3",
-        "reservation_scope_disputed/2",
         "safety_claim/3",
         "statement_is_claim/2",
         "subrogation_claim/3",
@@ -24997,7 +25021,6 @@
       ],
       "state_transition_surface": [
         "accession_status/2",
-        "advisory_statement/2",
         "appeal_status/2",
         "application_status/2",
         "application_status_at/3",
@@ -25005,12 +25028,10 @@
         "asserts_anchor_ball_status/3",
         "asset_status/3",
         "award_status/2",
-        "capacity_statement/3",
         "case_status/3",
         "cause_status/2",
         "compliance_status/3",
         "conditional_status/4",
-        "corrected_statement/2",
         "custody_state_at_date/3",
         "custody_status/2",
         "custody_status/3",
@@ -25018,7 +25039,6 @@
         "dispute_status/3",
         "document_status/3",
         "entry_status/2",
-        "estate_asset/2",
         "exhibition_status/2",
         "finding_status/3",
         "grant_return_status/2",
@@ -25035,7 +25055,6 @@
         "liability_claim_status/2",
         "lot_status_change/4",
         "mdm_wipe_status/2",
-        "moral_statement/2",
         "notice_status/2",
         "ntp_sync_status/2",
         "open_item_status/2",
@@ -25054,24 +25073,12 @@
         "record_status_at/3",
         "registry_status/3",
         "state_changed/3",
-        "statement_by/2",
-        "statement_by/3",
-        "statement_content/2",
-        "statement_is_claim/2",
-        "statement_language/2",
-        "statement_made/4",
-        "statement_made_by/3",
-        "statement_original/2",
-        "statement_translation/2",
         "status_inaction/2",
         "status_negated/3",
         "supersedes/2",
-        "testimony_statement/3",
         "tree_protection_status/3",
         "vacancy_status/3",
         "vendor_status/3",
-        "witness_statement/3",
-        "witness_statement/4",
         "zone_order_status/3"
       ],
       "title_status_surface": [
@@ -25145,8 +25152,7 @@
         "roster_version/1",
         "roster_version/3",
         "roster_version_date/2",
-        "student_in_version/3",
-        "unit_conversion_event/5"
+        "student_in_version/3"
       ]
     }
   }
