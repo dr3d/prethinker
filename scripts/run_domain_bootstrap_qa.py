@@ -359,6 +359,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For witness count, language-count, or source-language questions, query witness_statement(Speaker, Language, Topic, Role) when available. Use witness_claim/4 only as a fallback content surface; it usually does not preserve source-language metadata.",
         "For questions explicitly asking how many rows, entries, devices, systems, events, or applications are listed in a table, inventory, raw event log, source section, or list, include a broad source_record_row(SourceRow, table_row, Line, SectionAtom, Label) query when source_record_row/5 exists. This is structural addressability evidence; do not use it for semantic counts that ask for eligible, active, approved, failed, or scoped items unless a table/list wording is present.",
         "For source_record_field(Row, Field, Value) surfaces, the first argument is the source row or line id, not the event/entity id. To retrieve fields about an event/entity value, first bind the row with source_record_field(Row, event, Event) or source_record_field(Row, identifier, Entity), then query sibling fields with the same Row, such as source_record_field(Row, description, Description). Do not query source_record_field(Event, key, Value).",
+        "For packet headers, signed lines, source notes, and other one-line key/value metadata, source_record_field/3 may not split every key. If source_record_text_atom/2 exists, include source_record_text_atom(Row, TextAtom) for the same source row or a broad source-record text query before declaring the field absent.",
         "For item-description questions, treat evidence_item(Item, Description) as an equivalent descriptive surface to item_description(Item, Description) when both predicates appear in the inventory. Query whichever predicate exists, and prefer broad variables when the question names the item in natural language.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
         "For prior-concern or October-2025 notice questions, query prior_complaint/4, prior_complaint_subject/2, prior_complaint_action/2, prior_complaint_disputed/2, unresolved_question/2, unresolved_question_detail/2, unresolved_question_status/2, and unresolved_question_referred/2 before falling back to broad proceeding_event rows.",
@@ -1246,6 +1247,32 @@ def _source_record_field_sibling_repaired_query(query: str) -> dict[str, Any] | 
     }
 
 
+def _source_record_field_text_atom_fallback_query(query: str) -> dict[str, Any] | None:
+    goals = parse_prolog_query_goals(query)
+    if len(goals) != 1:
+        return None
+    predicate, args = goals[0]
+    if predicate != "source_record_field" or len(args) != 3:
+        return None
+    row_arg = str(args[0] or "").strip()
+    if not row_arg or _is_prolog_variable(row_arg):
+        return None
+    if not _source_record_field_arg_is_row_like(row_arg):
+        return None
+    text_var = "SourceTextAtom"
+    fallback_query = f"source_record_text_atom({row_arg}, {text_var})."
+    return {
+        "query": fallback_query,
+        "repairs": [
+            {
+                "from": format_prolog_query(predicate, args),
+                "to": fallback_query,
+                "reason": "source-record line metadata may be preserved as normalized source text when no structured field was split",
+            }
+        ],
+    }
+
+
 def _source_record_field_sibling_repair_goal(
     predicate: str,
     args: list[str],
@@ -1979,6 +2006,39 @@ def run_query_plan(
                 )
                 effective_query = repaired_query
                 last_result = repaired_result
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
+            source_text_fallback = _source_record_field_text_atom_fallback_query(effective_query)
+            if source_text_fallback:
+                fallback_query = str(source_text_fallback.get("query", "")).strip()
+                fallback_result = runtime.query_rows(fallback_query)
+                if fallback_result.get("status") == "success":
+                    results.append(
+                        {
+                            "query": fallback_query,
+                            "result": {
+                                **fallback_result,
+                                "reasoning_basis": {
+                                    "kind": "core-local",
+                                    "note": (
+                                        "source-record field text fallback retrieved the normalized text atom "
+                                        "for the same source row after a structured source_record_field query missed"
+                                    ),
+                                    "original_query": effective_query,
+                                    "repairs": source_text_fallback.get("repairs", []),
+                                },
+                            },
+                            "derived_from_queries": [effective_query],
+                        }
+                    )
+                    effective_query = fallback_query
+                    last_result = fallback_result
+        item_description_detail = (
+            _item_description_detail_core_query(runtime, query=effective_query)
+            if not helper_companions_enabled
+            else None
+        )
+        if item_description_detail and item_description_detail not in results:
+            results.append(item_description_detail)
         if helper_companions_enabled and isinstance(last_result, dict) and last_result.get("status") != "success":
             compact_interval = _compact_interval_duration_companion(results=results[:-1], query=effective_query)
             if compact_interval:
@@ -4738,12 +4798,27 @@ def _source_record_packet_metadata_companion(
     }
 
 
+def _item_description_detail_core_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    goals = parse_prolog_query_goals(query)
+    if len(goals) != 1:
+        return None
+    predicate, args = goals[0]
+    return _item_description_detail_companion(
+        runtime,
+        predicate=predicate,
+        args=args,
+        query=query,
+        helper_class_rows=False,
+    )
+
+
 def _item_description_detail_companion(
     runtime: CorePrologRuntime,
     *,
     predicate: str,
     args: list[str],
     query: str,
+    helper_class_rows: bool = True,
 ) -> dict[str, Any] | None:
     if predicate not in {"item_description", "evidence_item"}:
         return None
@@ -4767,16 +4842,16 @@ def _item_description_detail_companion(
                 continue
             seen.add(key)
             year = _year_from_atom(description)
-            rows.append(
-                {
-                    "Item": item,
-                    "Description": description,
-                    "DisplayDescription": _display_item_description_atom(description),
-                    "Year": year,
-                    "SourcePredicate": source_predicate,
-                    "HelperClass": "clean-helper",
-                }
-            )
+            support_row = {
+                "Item": item,
+                "Description": description,
+                "DisplayDescription": _display_item_description_atom(description),
+                "Year": year,
+                "SourcePredicate": source_predicate,
+            }
+            if helper_class_rows:
+                support_row["HelperClass"] = "clean-helper"
+            rows.append(support_row)
     if not rows:
         return None
     return {
@@ -4787,10 +4862,17 @@ def _item_description_detail_companion(
             "prolog_query": "item_description_detail_support(Item, Description, DisplayDescription, Year, SourcePredicate).",
             "result_type": "table",
             "num_rows": len(rows),
-            "variables": ["Item", "Description", "DisplayDescription", "Year", "SourcePredicate", "HelperClass"],
+            "variables": [
+                "Item",
+                "Description",
+                "DisplayDescription",
+                "Year",
+                "SourcePredicate",
+                *(['HelperClass'] if helper_class_rows else []),
+            ],
             "rows": rows[:80],
             "reasoning_basis": {
-                "kind": "query-only-companion",
+                "kind": "query-only-companion" if helper_class_rows else "core-local",
                 "note": "derived display title and trailing year from admitted item-description predicates",
                 "trigger_predicate": predicate,
                 "original_query": query,

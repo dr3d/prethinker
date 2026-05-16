@@ -1304,3 +1304,212 @@ Next pressure:
 - If the dense unlike variant still passes, return to the native miss
   coordinates as corpus-specific density and inspect compile variance before
   changing architecture.
+
+## HR-016 - Dense Unlike Source-Addressability Still Holds
+
+Date: 2026-05-16
+
+Before:
+
+- HR-015 proved clean unlike source-addressability at `12 / 0 / 0`, helper
+  rows=`0`.
+- That result showed the primitive is available in the current architecture,
+  but it did not prove the primitive survives density:
+  - repeated nearby roles,
+  - decoy timeline sections,
+  - multiple basis/corroboration pairs,
+  - legal-title language near object-title language,
+  - equipment service rows near vendor/model rows.
+
+Prediction:
+
+- If source-addressability only works in clean toy packets, the dense unlike
+  fixture should reproduce the native failure shape.
+- If the native pressure is more likely stale compile draw or native-corpus
+  density rather than missing architecture, the dense unlike fixture should
+  still score exact with helper rows=`0`.
+
+Intervention:
+
+- Added `dense_source_addressability_collision` under
+  `experiments/boundary_probes/helper_residue_stage1`.
+- The fixture contains `12` questions covering vendor/model, object title/year,
+  repeated role-bearing notices, chronology-vs-budget section selection,
+  two basis sections, two corroborating source notes, and legal-title vs
+  possession-basis distinction.
+- Compiled on OpenRouter with source-record ledger facts enabled.
+- Ran QA with the default no-helper path.
+
+After:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `dense_source_addressability_collision` | 12 | 12 | 0 | 0 | 0 |
+
+Compile notes:
+
+- Parsed ok.
+- Admitted rows=`141`.
+- Skipped rows=`1`.
+- Rough compile score=`0.889`.
+- Profile audit warned on `person_role_at/3` repeated-structure role mismatch,
+  but the behavioral QA did not fail.
+
+Artifacts:
+
+- `experiments/boundary_probes/helper_residue_stage1/dense_source_addressability_collision`
+- `docs/data/helper_residue/dense_source_addressability_probe_qa_20260516.json`
+- `docs/data/helper_residue/dense_source_addressability_probe_qa_20260516.md`
+- `tmp/helper_residue_dense_source_addressability_compile_20260516`
+- `tmp/helper_residue_dense_source_addressability_qa_20260516`
+
+Verification:
+
+- Compile return code=`0`.
+- QA completed with:
+  - runtime load errors=`0`,
+  - write proposal rows=`0`,
+  - helper rows=`0`,
+  - cache hits=`0`.
+- Dense unlike QA score was `12 / 0 / 0`.
+
+Lesson:
+
+- Source-addressability is not merely inside on clean probes; it also holds
+  under a moderate density probe with decoy sections and semantic collisions.
+- This strengthens the helper-retirement claim. The current architecture can
+  carry source-section, role-bearing source line, basis/corroboration,
+  vendor/model, and object-title/year questions without helper companion rows.
+- The remaining native failures should now be treated as one of:
+  - stale compile draw from the earlier compile root,
+  - native-corpus density beyond the probe,
+  - planner selection against a specific native predicate palette.
+  None of those are evidence for restoring helper delivery.
+
+Next pressure:
+
+- Recompile the two native pressure fixtures with the current instrument:
+  `industrial_sensor_clock_correction` and `probate_storage_access_register`.
+- Run the same first-8 no-helper QA slice against the fresh compile root.
+- If the fresh native draw clears or improves the misses, journal them as stale
+  compile/variance evidence. If the same misses persist, inspect those compile
+  surfaces directly and repair only the smallest transferable planner or
+  preservation rule.
+
+## HR-017 - Native Pressure Slice Repaired Without Helper Return
+
+Date: 2026-05-16
+
+Before:
+
+- HR-016 showed clean and dense unlike source-addressability probes inside the
+  no-helper set:
+  - clean unlike probes=`24 / 0 / 0` total across three probe fixtures,
+  - helper rows=`0`.
+- The open risk was native density. The same first-8 native pressure slice had
+  previously scored:
+  - HR-012 old compile root: `11 / 0 / 5` across the two pressure fixtures,
+  - fresh recompile before repair: `11 / 0 / 5`, but with different misses.
+
+Prediction:
+
+- If the helper-retirement path is right, the remaining pressure should respond
+  to small source-surface/query-normalization repairs while helper rows stay at
+  `0`.
+- If the old helpers were still structurally needed, no-helper replay should
+  stay flat or require broad companion delivery to improve.
+
+Intervention:
+
+Accepted:
+
+- Added a no-helper `source_record_field` to same-row
+  `source_record_text_atom` fallback for unsplit source/header lines.
+- Strengthened compile guidance for source-role/source-basis preservation:
+  source/header/signature/correspondence roles and basis/corroboration source
+  coordinates should be direct candidate surfaces when compatible predicates
+  exist.
+- Promoted the existing item-description title/year normalizer into the
+  no-helper query path as `core-local` support, without `HelperClass`, so it
+  does not count as helper companion delivery.
+
+Rejected:
+
+- Tried a stronger role-subject compile nudge that said person-plus-role lines
+  must bind the person as role holder. It made probate compile denser and
+  regressed QA, so the added wording was removed.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Decision |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Fresh native recompile | two fixtures, first 8 | 11 | 0 | 5 | 0 | baseline |
+| Source-text fallback | same compile root | 12 | 1 | 3 | 0 | accepted |
+| Source-role/source-basis compile contract | fresh compile | 14 | 0 | 2 | 0 | accepted |
+| No-helper item-detail core projection | same compile root | 15 | 0 | 1 | 0 | accepted |
+| Strong role-subject nudge | probate only | 5 | 0 | 3 | 0 | rejected |
+
+Best accepted native pressure result:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `industrial_sensor_clock_correction` | 8 | 8 | 0 | 0 | 0 |
+| `probate_storage_access_register` | 8 | 7 | 0 | 1 | 0 |
+| Total | 16 | 15 | 0 | 1 | 0 |
+
+Artifacts:
+
+- `docs/data/helper_residue/native_pressure_recompile_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_recompile_qa_20260516.md`
+- `docs/data/helper_residue/native_pressure_text_fallback_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_text_fallback_qa_20260516.md`
+- `docs/data/helper_residue/native_pressure_source_role_contract_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_source_role_contract_qa_20260516.md`
+- `docs/data/helper_residue/native_pressure_item_detail_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_item_detail_qa_20260516.md`
+- `docs/data/helper_residue/native_pressure_role_subject_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_role_subject_qa_20260516.md`
+- `tmp/helper_residue_native_pressure_recompile_20260516`
+- `tmp/helper_residue_native_pressure_recompile_qa_20260516`
+- `tmp/helper_residue_native_pressure_text_fallback_qa_20260516`
+- `tmp/helper_residue_native_pressure_source_role_contract_compile_20260516`
+- `tmp/helper_residue_native_pressure_source_role_contract_qa_20260516`
+- `tmp/helper_residue_native_pressure_item_detail_qa_20260516`
+- `tmp/helper_residue_native_pressure_role_subject_compile_20260516`
+- `tmp/helper_residue_native_pressure_role_subject_qa_20260516`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+  - `174 passed`
+- Behavioral replay completed with:
+  - runtime load errors=`0`,
+  - write proposal rows=`0`,
+  - helper rows=`0`.
+
+Lesson:
+
+- Helper retirement survived the pressure test. The native pressure slice moved
+  from `11 / 0 / 5` to `15 / 0 / 1` without restoring helper companion rows.
+- The successful repairs are structural:
+  - exact source-line text fallback for unsplit source metadata,
+  - direct source-role/source-basis compile contracts,
+  - item-description title/year normalization as core query support.
+- The rejected role-subject nudge is important evidence. More insistent compile
+  prose can make a dense native fixture worse by changing the predicate palette.
+  The last residual should not be attacked with broader wording.
+- The remaining miss is a source-text role extraction case: the answer is
+  visible in source-record text, but the compile still does not expose a stable
+  person-role row for that source line. That is a narrow role-line extraction
+  issue, not a helper-delivery issue.
+
+Next pressure:
+
+- Stop broad helper-residue repair here. The accepted result is a strong
+  decision point: `15 / 0 / 1`, helper rows=`0`.
+- For the final registrar/source-role residual, design a separate narrow
+  role-line extraction audit with unlike source lines before changing compile
+  guidance again. Do not use the native role noun as architecture.
+- Once that is done, replay the three fixture smoke and then consider a larger
+  native no-helper scan.

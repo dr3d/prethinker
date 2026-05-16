@@ -1685,6 +1685,27 @@ def test_run_query_plan_adds_source_record_sibling_repair_even_when_direct_query
     assert repaired[0]["result"]["rows"][0]["Event"] == "event_a"
 
 
+def test_run_query_plan_falls_back_to_source_record_text_for_unsplit_line_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert (
+        runtime.assert_fact(
+            "source_record_text_atom(src_line_0006, compiled_by_s_aurelio_plant_engineering_lead)."
+        ).get("status")
+        == "success"
+    )
+
+    rows = run_query_plan(runtime, ["source_record_field(src_line_0006, compiled_by, CompiledBy)."])
+
+    fallback = [
+        item
+        for item in rows
+        if item.get("query") == "source_record_text_atom(src_line_0006, SourceTextAtom)."
+    ]
+    assert fallback
+    assert fallback[0]["result"]["rows"][0]["SourceTextAtom"] == "compiled_by_s_aurelio_plant_engineering_lead"
+    assert "source-record field text fallback" in fallback[0]["result"]["reasoning_basis"]["note"]
+
+
 def test_run_query_plan_keeps_placeholder_repairs_before_relaxed_temporal_join() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -3969,6 +3990,30 @@ def test_item_description_detail_companion_accepts_evidence_item_surface() -> No
             "Year": "",
             "SourcePredicate": "evidence_item",
             "HelperClass": "clean-helper",
+        }
+    ]
+
+
+def test_run_query_plan_derives_item_description_detail_without_helper_rows_when_disabled() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("item_description(ex_001, painting_three_apples_in_saucer_1987).").get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["item_description(ex_001, Description)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    detail = next(item for item in rows if item["result"].get("predicate") == "item_description_detail_support")
+    assert detail["result"]["reasoning_basis"]["kind"] == "core-local"
+    assert detail["result"]["rows"] == [
+        {
+            "Item": "ex_001",
+            "Description": "painting_three_apples_in_saucer_1987",
+            "DisplayDescription": "Painting Three Apples in Saucer",
+            "Year": "1987",
+            "SourcePredicate": "item_description",
         }
     ]
 
