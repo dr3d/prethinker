@@ -696,3 +696,100 @@ Next pressure:
 - Decide whether the native corpus needs `N=3` despite its high runtime cost, or
   whether one full native draw plus `N=3` external transfer stamps is the right
   characterization package for the current paper-facing stamp.
+
+## IS-008 - No-Helper Fresh External Draw 1
+
+Date: 2026-05-15
+
+Before:
+
+- The first stamp established a frozen-instrument external reading, but several
+  runs still permitted bounded helper delivery or reused earlier compile
+  artifacts.
+- The native corpus draw exposed high helper volume (`7281` helper rows), raising
+  a stricter question: whether transfer performance survives when helpers are
+  genuinely absent rather than merely quiet.
+- The operating constraint was measurement only: do not repair anomalies inside
+  the freeze window.
+
+Prediction:
+
+- SQuAD and PrivacyQA should mostly hold without helpers because recent external
+  transfer runs already showed sparse helper use.
+- RACE should remain lower than SQuAD because MCQ option semantics add
+  categorical and inference pressure, but direct option selection should still
+  work through existing KB evaluation.
+- Contract corpora may show wider variance because MAUD and CUAD differ sharply
+  in question shape and clause-role semantics.
+
+Intervention:
+
+- Ran one fresh compile-plus-QA draw for five external transfer corpora under
+  tag `instrument-freeze-20260515-r1`.
+- Forced helpers genuinely off in QA with `--helper-companion-row-limit 0`,
+  `--no-cache`, and no legacy native helper adapter flag.
+- Used OpenRouter for broad SQuAD, PrivacyQA, and RACE work, and POWER/local
+  5090 for MAUD and CUAD once local capacity was available.
+- Kept the run clean: no prompt edits, code edits, or repair attempts after the
+  freeze tag while the stamp was running.
+
+After:
+
+| Corpus | Questions | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `PrivacyQA-30` | 30 | 27 | 0 | 3 | 90.00% | 0 |
+| `MAUD-10` | 40 | 17 | 2 | 21 | 42.50% | 0 |
+| `SQuAD-30` | 171 | 165 | 1 | 5 | 96.49% | 0 |
+| `CUAD-10` | 40 | 30 | 6 | 4 | 75.00% | 0 |
+| `RACE-50-options` | 177 | 151 | 1 | 25 | 85.31% | 0 |
+| **Aggregate** | **458** | **390** | **10** | **58** | **85.15%** | **0** |
+
+Stamp summary:
+
+- Runtime load errors: `0`.
+- Write proposal rows: `0`.
+- Helper pressure label: `no_helper_rows` across every QA summary.
+- Aggregate helper rows per exact: `0.0`.
+
+Artifacts:
+
+- `docs\data\instrument_stamp\nohelper_fresh_draw1_rollup_20260515.json`
+- `docs\data\instrument_stamp\nohelper_fresh_draw1_rollup_20260515.md`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw1_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw1_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw1_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw1_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw1_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw1_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw1_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw1_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw1_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw1_qa_or`
+
+Verification:
+
+- All five fresh compile batches completed their target fixture counts.
+- All five QA batches completed their target question counts.
+- Every QA summary reported `0` helper rows, `0` runtime load errors, and `0`
+  write proposal rows.
+
+Lesson:
+
+- Helper retirement is plausible for the external transfer layer: SQuAD,
+  PrivacyQA, and RACE remain respectable to strong with no helper rows at all.
+- CUAD's lower fresh no-helper result shows that the earlier contract headline
+  was compile/helper/draw sensitive. This is an observed stamp property, not a
+  mid-freeze repair target.
+- MAUD remains the sharpest external boundary: its low score is not caused by
+  helper delivery, and should be treated as categorical/clause-role pressure.
+- The current instrument can be stamped in a true zero-helper mode for external
+  transfer, but the native corpus still needs a separate helper-retirement pass
+  before its helper-heavy baseline can be compared fairly.
+
+Next pressure:
+
+- Produce a native-corpus no-helper measurement only after deciding whether to
+  reuse the current compile artifacts or pay for a fresh compile draw.
+- If the next phase resumes architecture work, focus on helper replacement by
+  compile-surface invariants and direct predicate emission rather than restoring
+  helper adapters.
