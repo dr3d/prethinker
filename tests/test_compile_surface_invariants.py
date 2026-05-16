@@ -94,6 +94,44 @@ def test_audit_compile_surface_invariants_detects_answer_detail_ledger_only(tmp_
     assert "commitment_or_future_action" in detail["covered_groups"]
 
 
+def test_audit_compile_surface_invariants_detects_incomplete_event_backbone(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_entry_7_dated_2026_04_02_operator_system_a_sample_4_status_settled).",
+            "event(event_7).",
+            "event_date(event_7, 2026_04_02).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    backbone = next(row for row in report["families"] if row["family"] == "event_backbone_unit_surface")
+    assert backbone["status"] == "partial"
+    assert "participant_or_system" in backbone["missing_groups"]
+    assert "subject_or_object" in backbone["missing_groups"]
+    assert "outcome_or_state" in backbone["missing_groups"]
+
+
+def test_audit_compile_surface_invariants_passes_event_backbone_unit(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_entry_7_dated_2026_04_02_operator_system_a_sample_4_status_settled).",
+            "event(event_7).",
+            "event_date(event_7, 2026_04_02).",
+            "event_actor(event_7, system_a).",
+            "event_subject(event_7, sample_4).",
+            "event_status(event_7, settled).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    backbone = next(row for row in report["families"] if row["family"] == "event_backbone_unit_surface")
+    assert backbone["status"] == "pass"
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

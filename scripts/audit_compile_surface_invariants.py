@@ -174,6 +174,17 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
         },
     ),
     InvariantSpec(
+        family="event_backbone_unit_surface",
+        description="event rows whose identity, temporal anchor, participant, governed subject, and outcome remain joinable",
+        groups={
+            "event_identity": ("event", "entry", "record", "incident", "log"),
+            "temporal_anchor": ("timestamp", "time", "date", "dated", "chronological", "order"),
+            "participant_or_system": ("actor", "operator", "system", "party", "participant", "originated"),
+            "subject_or_object": ("subject", "object", "item", "sample", "request", "proposal", "debt"),
+            "outcome_or_state": ("status", "outcome", "result", "state", "settled", "void", "issued"),
+        },
+    ),
+    InvariantSpec(
         family="measure_count_surface",
         description="explicit counts, thresholds, durations, percentages, and computed requirements",
         groups={

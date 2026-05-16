@@ -3459,3 +3459,85 @@ Next pressure:
   generic compile-surface invariant, not a helper replacement.
 - Keep the remaining explicit domain predicate names quarantined unless unlike
   replay proves a broader structural family.
+
+## HR-040 - Event Backbone Compile-Surface Invariant
+
+Date: 2026-05-16
+
+Before:
+
+- HR-039 showed the weak no-helper slice held after alias hardening, but the
+  residual failures were still dominated by compile-surface gaps.
+- A manual diagnostic over the `58` compile-surface gaps found the largest
+  recurring class was temporal/event resolution:
+  - temporal/event surface: `33`
+  - rationale/basis surface: `7`
+  - quantity/measure surface: `7`
+  - other compile surface: `6`
+  - actor/role surface: `2`
+  - location/scope surface: `2`
+  - state/revision surface: `1`
+
+Prediction:
+
+- The right repair target is not a helper and not a fixture predicate. It is a
+  compile-surface invariant for complete event backbone units: event identity,
+  temporal anchor, participant/system, governed subject/object, and
+  outcome/state must remain joinable when the profile can carry them.
+
+Intervention:
+
+- Added `event_backbone_unit_surface` to the compile-surface invariant audit.
+- Added compiler guidance requiring chronological/event-list sources to
+  preserve event id or entry label, date/time/order, actor/party/system,
+  governed subject/object, and outcome/status/action as joinable rows.
+- Added unit tests for both incomplete and complete event-backbone units.
+- Ran the invariant audit over the same six weak native no-helper compiles.
+
+After:
+
+Event-backbone audit over the six weak fixtures:
+
+| Fixture | Status | Missing groups |
+| --- | --- | --- |
+| `dulse_ledger` | `partial` | `temporal_anchor` |
+| `industrial_sensor_clock_correction` | `partial` | `subject_or_object` |
+| `ridgeline_fire` | `pass` | n/a |
+| `sable_creek_budget` | `partial` | `event_identity`, `subject_or_object`, `temporal_anchor` |
+| `school_activity_roster_reconciliation` | `candidate_only` | `event_identity`, `outcome_or_state`, `participant_or_system`, `subject_or_object`, `temporal_anchor` |
+| `thornfield_variance` | `partial` | `participant_or_system`, `temporal_anchor` |
+
+Summary:
+
+- `event_backbone_unit_surface`: `1` pass, `4` partial, `1` candidate-only.
+- This matches the QA failure shape: the weak slice is not primarily missing
+  helper delivery; it is missing joinable event units in the compiled surface.
+
+Artifacts:
+
+- `scripts/audit_compile_surface_invariants.py`
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_compile_surface_invariants.py`
+- `tests/test_domain_bootstrap_file.py`
+- `docs/data/helper_residue/native_nohelper_low6_event_backbone_audit_20260516.json`
+- `docs/data/helper_residue/native_nohelper_low6_event_backbone_audit_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py scripts\audit_compile_surface_invariants.py`
+- `python -m pytest tests\test_compile_surface_invariants.py tests\test_domain_bootstrap_file.py::test_compile_surface_invariants_keep_operational_record_slots -q`
+  - `10 passed`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\ridgeline_fire --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\thornfield_variance --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\dulse_ledger --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\sable_creek_budget --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\school_activity_roster_reconciliation --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\industrial_sensor_clock_correction --out-json docs\data\helper_residue\native_nohelper_low6_event_backbone_audit_20260516.json --out-md docs\data\helper_residue\native_nohelper_low6_event_backbone_audit_20260516.md`
+
+Lesson:
+
+The helper-retirement path is now pointing cleanly into compile-surface
+architecture. No-helper QA can hold only if the compiler emits complete direct
+units for repeated events and timelines. Ledger fidelity is necessary, but an
+event answer should not have to be reconstructed from source text, vague event
+wrappers, and unrelated date/status rows.
+
+Next pressure:
+
+- Recompile one weak event-heavy fixture with the new invariant and run QA with
+  helpers off. Use the result as a focused probe before broader native redraws.

@@ -192,6 +192,9 @@ def test_compile_surface_invariants_keep_authority_custody_ladder_slots() -> Non
 def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
 
+    assert "chronological/event-list sources need complete event backbone units" in context
+    assert "event id or entry label, date/time/order, actor/party/system" in context
+    assert "vague event wrapper" in context
     assert "operational record/status events" in context
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
