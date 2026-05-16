@@ -1,0 +1,94 @@
+{
+  "generated": "2026-05-16",
+  "source_run": "docs/data/helper_residue/default_retired_smoke_20260516.json",
+  "baseline": {
+    "questions": 24,
+    "exact": 19,
+    "partial": 0,
+    "miss": 5,
+    "helper_rows": 0
+  },
+  "decision": {
+    "restore_helpers": false,
+    "rerun_full_native_now": false,
+    "next_layer": "focused_source_addressability_and_role_basis_probe"
+  },
+  "coordinates": [
+    {
+      "fixture": "industrial_sensor_clock_correction",
+      "coordinate": "q004",
+      "question_shape": "vendor and model for an identified system",
+      "reference_shape": "vendor plus model",
+      "existing_surface": "hybrid_join_gap",
+      "diagnostic_class": [
+        "unsupported_text_membership_operation",
+        "entity_labeled_source_text_not_planned"
+      ],
+      "evidence_shape": "The compile preserved an entity-labeled source text row containing vendor and model text, but QA planned unsupported text membership and did not query the labeled source text directly.",
+      "recommended_layer": "query_planner_or_profile_palette",
+      "do_not_promote": "Do not add a broad same-row join from this coordinate alone."
+    },
+    {
+      "fixture": "probate_storage_access_register",
+      "coordinate": "q005",
+      "question_shape": "person identified by role at an institution",
+      "reference_shape": "person name plus alias",
+      "existing_surface": "compile_surface_gap",
+      "diagnostic_class": [
+        "direct_role_surface_missing",
+        "wrong_source_row_anchor"
+      ],
+      "evidence_shape": "The answer-bearing row is a correspondence/signature role row, while the planned query anchored on a different party row and the compile did not expose a reusable person-role surface for the registrar role.",
+      "recommended_layer": "compile_surface_invariant",
+      "do_not_promote": "Do not hard-code registrar, institution names, or local section labels."
+    },
+    {
+      "fixture": "probate_storage_access_register",
+      "coordinate": "q006",
+      "question_shape": "which section contains a named chronology",
+      "reference_shape": "section identifier plus section title",
+      "existing_surface": "compile_surface_gap",
+      "diagnostic_class": [
+        "section_addressability_missing",
+        "late_section_not_indexed"
+      ],
+      "evidence_shape": "The compile/query surface indexed earlier source sections but did not preserve the answer-bearing section as a queryable section coordinate.",
+      "recommended_layer": "source_section_preservation_invariant",
+      "do_not_promote": "Do not teach a specific section title; preserve all source headings that carry retrievable roles."
+    },
+    {
+      "fixture": "probate_storage_access_register",
+      "coordinate": "q007",
+      "question_shape": "which section sets out the basis for possession or custody",
+      "reference_shape": "basis section plus corroborating source",
+      "existing_surface": "compile_surface_gap",
+      "diagnostic_class": [
+        "explanatory_basis_section_missing",
+        "multi_source_basis_missing"
+      ],
+      "evidence_shape": "The compile exposes possession/custody state but not the source section that explains the basis, nor the corroborating source section as addressable evidence.",
+      "recommended_layer": "source_basis_provenance_surface",
+      "do_not_promote": "Do not collapse basis evidence into custody state; keep state and source-basis addressability separate."
+    },
+    {
+      "fixture": "probate_storage_access_register",
+      "coordinate": "q008",
+      "question_shape": "object title and year for an identified item",
+      "reference_shape": "object title plus year",
+      "existing_surface": "hybrid_join_gap",
+      "diagnostic_class": [
+        "predicate_semantics_collision",
+        "row_bound_field_numeric_join_needed"
+      ],
+      "evidence_shape": "A direct title-looking predicate refers to a legal/ownership title, while the object title and year live in a source-row description and same-row numeric token.",
+      "recommended_layer": "selective_query_planner_guidance",
+      "do_not_promote": "Do not promote broad row-context joins; distinguish object-title questions from legal-title predicates."
+    }
+  ],
+  "summary": {
+    "compile_surface_or_source_preservation": 3,
+    "query_planner_or_palette": 2,
+    "helper_restoration": 0,
+    "broad_join_candidate": "rejected_by_hr_013"
+  }
+}

@@ -1120,3 +1120,187 @@ Next pressure:
 - Use that diagnostic to choose between query-planner guidance, deterministic
   normalization, or a focused unlike probe. Do not reintroduce helper companion
   delivery.
+
+## HR-014 - No-Helper Miss Coordinate Diagnostic
+
+Date: 2026-05-16
+
+Before:
+
+- HR-012 established the default no-helper smoke at `19 / 0 / 5` with
+  helper rows=`0`.
+- HR-013 rejected the broad line-bound join candidate: it improved one local
+  area but regressed unrelated exact rows, moving the smoke to `18 / 1 / 5`.
+- The open decision was whether the remaining five native coordinates point
+  back toward helpers, toward a generic row join, or toward a narrower
+  source-surface/query-planning layer.
+
+Prediction:
+
+- If helper retirement is structurally sound, the remaining misses should
+  classify as direct compile-surface/source-addressability gaps or selective
+  query-planning gaps, not as missing helper companion delivery.
+- If the broad join candidate was merely under-scoped, multiple coordinates
+  should require the same row-context repair.
+
+Intervention:
+
+- Inspected the five non-exact rows from
+  `docs/data/helper_residue/default_retired_smoke_20260516.json`.
+- Compared the planned queries and failure-surface rationales against the
+  compile/source-record evidence where needed.
+- Wrote a coordinate diagnostic instead of changing code.
+
+After:
+
+| Coordinate | Existing surface | Diagnostic class | Recommended next layer |
+| --- | --- | --- | --- |
+| sensor vendor/model | `hybrid_join_gap` | unsupported text membership; entity-labeled source text not planned | query planner or profile palette |
+| registrar role | `compile_surface_gap` | direct role surface missing; wrong source row anchor | compile-surface invariant |
+| chronology section | `compile_surface_gap` | section addressability missing; late section not indexed | source-section preservation invariant |
+| possession basis section | `compile_surface_gap` | explanatory basis section missing; multi-source basis missing | source-basis provenance surface |
+| item title/year | `hybrid_join_gap` | predicate semantics collision; row-bound field/numeric need | selective query planner guidance |
+
+Totals:
+
+- compile-surface or source-preservation pressure=`3`
+- query-planner or profile-palette pressure=`2`
+- helper restoration pressure=`0`
+- broad row-context join pressure=`0` as a default repair, because HR-013
+  already rejected that promotion path
+
+Artifacts:
+
+- `docs/data/helper_residue/no_helper_miss_coordinate_diagnostic_20260516.json`
+- `docs/data/helper_residue/no_helper_miss_coordinate_diagnostic_20260516.md`
+
+Verification:
+
+- No code changes in this entry.
+- The diagnostic uses the same baseline run as HR-012 and the rejected replay
+  evidence from HR-013.
+
+Lesson:
+
+- The no-helper native pressure is not a helper problem. It is mostly
+  source-addressability: answer-bearing sections, role-bearing source rows, and
+  basis/corroboration rows need to survive compile as queryable coordinates.
+- The two hybrid rows are not permission for a broad row join. One needs
+  entity-labeled source text planning; the other needs a semantic distinction
+  between object titles and legal/ownership title predicates plus a selective
+  row-bound field/numeric plan.
+- The next repair should be probe-first: build unlike documents that contain
+  source sections, correspondence roles, basis/corroboration, and
+  entity-labeled vendor/model or object-title rows without using this fixture's
+  vocabulary.
+
+Next pressure:
+
+- Build a focused source-addressability probe suite with unlike documents:
+  - section heading preservation,
+  - person-role rows from correspondence/signature/source lines,
+  - state plus basis/corroborating source separation,
+  - entity-labeled source text carrying attributes such as vendor/model or
+    object title/year.
+- Use the probe to decide whether the repair belongs in compile-surface
+  invariants, profile palette selection, or query planning. Do not run the full
+  native corpus again until this layer is sharper.
+
+## HR-015 - Unlike Source-Addressability Probe Is Inside
+
+Date: 2026-05-16
+
+Before:
+
+- HR-014 classified the five no-helper smoke misses:
+  - `3` source-preservation/addressability coordinates,
+  - `2` query-planner/profile-palette coordinates,
+  - `0` helper-restoration coordinates.
+- The unresolved question was whether the source-addressability shapes are
+  generally hard without helpers, or whether the modern compile can handle them
+  on clean unlike documents and only slips under native density.
+
+Prediction:
+
+- If the architecture already has the primitive, fresh unlike fixtures should
+  answer section, role, basis/corroboration, vendor/model, and object-title/year
+  questions with helper rows=`0`.
+- If helper retirement removed needed substrate, the same shapes should miss
+  even on clean unlike documents.
+
+Intervention:
+
+- Added two unlike probe fixtures under
+  `experiments/boundary_probes/helper_residue_stage1`:
+  - `municipal_lab_source_addressability`
+  - `river_terminal_source_addressability`
+- Each fixture contains:
+  - equipment vendor/model rows,
+  - object title/year rows,
+  - a signed role-bearing source line,
+  - a basis section,
+  - a chronology section,
+  - a corroborating source note.
+- Compiled both fixtures on OpenRouter with source-record ledger facts enabled.
+- Ran QA with the default no-helper path; no helper row limit flag was passed to
+  override the new default.
+
+After:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `municipal_lab_source_addressability` | 6 | 6 | 0 | 0 | 0 |
+| `river_terminal_source_addressability` | 6 | 6 | 0 | 0 | 0 |
+| Total | 12 | 12 | 0 | 0 | 0 |
+
+Compile notes:
+
+- `municipal_lab_source_addressability`: parsed ok, `73` admitted rows,
+  rough compile score `0.833`.
+- `river_terminal_source_addressability`: parsed ok, `60` admitted rows,
+  rough compile score `0.778`.
+
+Artifacts:
+
+- `experiments/boundary_probes/helper_residue_stage1/municipal_lab_source_addressability`
+- `experiments/boundary_probes/helper_residue_stage1/river_terminal_source_addressability`
+- `docs/data/helper_residue/source_addressability_probe_qa_20260516.json`
+- `docs/data/helper_residue/source_addressability_probe_qa_20260516.md`
+- `tmp/helper_residue_source_addressability_compile_20260516`
+- `tmp/helper_residue_source_addressability_qa_20260516`
+
+Verification:
+
+- Compile completed for both probe fixtures with return code `0`.
+- QA completed with:
+  - runtime load errors=`0`,
+  - write proposal rows=`0`,
+  - helper rows=`0`,
+  - cache hits=`0`.
+- The QA score was `12 / 0 / 0`.
+
+Lesson:
+
+- Clean unlike source-addressability is inside the current no-helper set. The
+  system can answer source-section, role-bearing notice, basis/corroboration,
+  vendor/model, and object title/year questions without helper companions.
+- The native misses are therefore not evidence that helper rows should return.
+  They point at density and stability: under larger native packets the compile
+  sometimes fails to preserve all answer-bearing source coordinates, and the
+  planner sometimes chooses a nearby but semantically wrong predicate.
+- This narrows the next architecture target. The useful work is not a broad
+  helper or row-join repair; it is a density replay: make native-like dense
+  packets preserve the same source coordinates that clean unlike packets already
+  preserve.
+
+Next pressure:
+
+- Build a dense unlike variant of this probe, not a native-fixture patch:
+  multiple source sections, repeated roles, more than one basis/corroboration
+  pair, and nearby legal/ownership title language beside object-title language.
+- If the dense unlike variant fails, repair at compile-surface preservation or
+  query-planner selection level and replay both clean probes plus the native
+  no-helper smoke.
+- If the dense unlike variant still passes, return to the native miss
+  coordinates as corpus-specific density and inspect compile variance before
+  changing architecture.
