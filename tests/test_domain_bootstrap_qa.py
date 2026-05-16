@@ -4068,6 +4068,22 @@ def test_source_record_packet_metadata_surfaces_asserted_event_dates() -> None:
     )
 
 
+def test_source_record_field_text_atom_fallback_declines_unparseable_query() -> None:
+    assert qa_module._source_record_field_text_atom_fallback_query("not a valid prolog query") is None
+
+
+def test_item_description_detail_core_query_declines_unparseable_query() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+
+    assert (
+        qa_module._item_description_detail_core_query(
+            runtime,
+            query="not a valid prolog query",
+        )
+        is None
+    )
+
+
 def test_item_description_detail_companion_derives_year_from_description_atom() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     assert runtime.assert_fact("item_description(ex_001, painting_three_apples_in_saucer_1987).").get("status") == "success"

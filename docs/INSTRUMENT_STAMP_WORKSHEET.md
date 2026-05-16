@@ -988,3 +988,130 @@ Next pressure:
   replace legacy helper delivery with compile-surface invariants and direct
   predicate emission, then decide whether the native corpus deserves its own
   no-helper fresh stamp.
+
+## IS-011 - Native Source No-Helper Draw 1 Stamp Prep
+
+Date: 2026-05-16
+
+Before:
+
+- External no-helper transfer had been stamped at N=3 with `84.21%` pooled exact
+  across `1374` questions and helper rows exactly `0`.
+- The native corpus still carried the largest historical helper burden, so the
+  open question was whether internal fixtures still needed helper delivery or
+  whether modern compile surfaces could answer them directly.
+- The stamp discipline still applied: no legacy native helper adapters, no QA
+  cache, helper companion row limit `0`, and no fixture-specific repair during
+  the measurement.
+
+Prediction:
+
+- Native exact rate should remain respectable without helper rows if helper
+  delivery was mostly fixture-era over-delivery rather than essential answer
+  machinery.
+- Remaining misses should concentrate in compile-surface and hybrid-join gaps,
+  not in a distinct "helper absence" class.
+- Some source fixtures should be held before QA because poor compile quality
+  should be measured as compile instability rather than silently converted into
+  bad QA evidence.
+
+Intervention:
+
+- Ran a source-fixture compile draw over `datasets\story_worlds` with source
+  ledger facts, flat-plus-plan passes, focused pass ops schema, review profile,
+  profile retry, and the compile quality gate.
+- Kept the compile gate strict: `40` of `56` source-backed fixtures passed on
+  the first draw; `15` were held for rough-score or risk-count reasons; one
+  fixture failed from OpenRouter transport and passed on a one-fixture retry.
+- Ran QA on the effective `41` compile-gated fixtures with
+  `--helper-companion-row-limit 0`, `--no-cache`, and no
+  `--include-legacy-native-helper-adapters`.
+- Fixed one generic QA fallback crash class discovered during the run:
+  unparseable planner fallback queries now decline cleanly instead of calling
+  `len()` on `None`. The fix is query-parser null safety, not fixture tuning.
+- Retried the three crashed QA fixtures under the same no-helper mode.
+
+After:
+
+| Scope | Fixtures | Questions | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Initial QA successes | 38 | 1473 | 1233 | 80 | 160 | 83.71% | 0 |
+| Crash retry after generic null-safety fix | 3 | 105 | 79 | 5 | 21 | 75.24% | 0 |
+| **Combined compile-gated native draw** | **41** | **1578** | **1312** | **85** | **181** | **83.14%** | **0** |
+
+Compile-gate scope:
+
+| Corpus view | Count |
+| --- | ---: |
+| Story-world directories visible in the repo | 61 |
+| Source-backed fixtures compiled by the source runner | 56 |
+| Compile-gated QA-eligible fixtures after transport retry | 41 |
+| Quality-held source-backed fixtures | 15 |
+| Older story-only directories outside this source-runner stamp | 5 |
+
+Failure surfaces over the combined QA draw:
+
+| Surface | Count |
+| --- | ---: |
+| `compile_surface_gap` | 181 |
+| `hybrid_join_gap` | 52 |
+| `query_surface_gap` | 29 |
+| `answer_surface_gap` | 2 |
+| `judge_uncertain` | 2 |
+
+Lowest exact-rate fixtures:
+
+| Fixture | Exact | Partial | Miss | Questions | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `ridgeline_fire` | 24 | 4 | 12 | 40 | 60.00% | 0 |
+| `thornfield_variance` | 26 | 3 | 11 | 40 | 65.00% | 0 |
+| `dulse_ledger` | 27 | 7 | 6 | 40 | 67.50% | 0 |
+| `sable_creek_budget` | 27 | 5 | 8 | 40 | 67.50% | 0 |
+| `school_activity_roster_reconciliation` | 28 | 1 | 11 | 40 | 70.00% | 0 |
+| `avalon_grant_committee` | 29 | 4 | 7 | 40 | 72.50% | 0 |
+
+Artifacts:
+
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_compile_gate.json`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_compile_gate.md`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_estate_retry_gate.json`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_estate_retry_gate.md`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or.json`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or.md`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_crash_retry_or.json`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_crash_retry_or.md`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_combined.json`
+- `docs\data\instrument_stamp\native_nohelper_story_worlds_draw1_20260516_qa_combined.md`
+
+Verification:
+
+- `python -m pytest tests/test_domain_bootstrap_qa.py::test_source_record_field_text_atom_fallback_declines_unparseable_query tests/test_domain_bootstrap_qa.py::test_item_description_detail_core_query_declines_unparseable_query -q`
+- The focused QA/file-batch suite passed after the null-safety patch:
+  `python -m pytest tests/test_domain_bootstrap_qa.py tests/test_domain_bootstrap_file_batch.py -q`
+  reported `188 passed`.
+- All retry workers exited before the combined rollup was written.
+- The combined rollup reports helper rows `0`, runtime load errors `0`, and
+  write proposal rows `0`.
+
+Lesson:
+
+- The native corpus no longer demonstrates a need to restore legacy helper
+  delivery. With helpers genuinely off, the compile-gated source fixtures still
+  answer `83.14%` exactly across `1578` questions.
+- The old native helper burden was mostly context over-delivery and compatibility
+  scaffolding, not the primary answer substrate for the modern instrument.
+- The remaining native pressure is now legible: compile-surface gaps dominate,
+  followed by hybrid joins and a smaller query-surface tail.
+- The compile quality gate matters. Held fixtures should be redrawn or audited
+  as compile-quality cases, not folded into the QA score as if they had clean
+  source surfaces.
+- Generic runtime robustness is stamp hygiene. The null-safety fix protects the
+  fallback machinery without teaching the harness any fixture vocabulary.
+
+Next pressure:
+
+- Commit the stamp artifacts and runtime guard.
+- Decide whether the `15` held source-backed fixtures deserve redraw-only
+  measurement, compile-quality audit, or post-freeze compile-surface repairs.
+- Do not reintroduce legacy helper rows. Future native improvement should target
+  compile-surface invariants, hybrid-join planning, and source-quality gates.

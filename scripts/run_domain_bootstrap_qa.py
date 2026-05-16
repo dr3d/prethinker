@@ -1252,6 +1252,8 @@ def _source_record_field_sibling_repaired_query(query: str) -> dict[str, Any] | 
 
 def _source_record_field_text_atom_fallback_query(query: str) -> dict[str, Any] | None:
     goals = parse_prolog_query_goals(query)
+    if not goals:
+        return None
     if len(goals) != 1:
         return None
     predicate, args = goals[0]
@@ -4882,6 +4884,8 @@ def _source_record_packet_metadata_companion(
 
 def _item_description_detail_core_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
     goals = parse_prolog_query_goals(query)
+    if not goals:
+        return None
     if len(goals) != 1:
         return None
     predicate, args = goals[0]

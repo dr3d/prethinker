@@ -1,0 +1,1556 @@
+{
+  "generated": "2026-05-16T16:22:33.666500+00:00",
+  "lanes": 6,
+  "base_timeout": 600,
+  "effective_timeout": 3600,
+  "totals": {
+    "question_count": 1473,
+    "judge_exact": 1233,
+    "judge_partial": 80,
+    "judge_miss": 160,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0,
+    "exact_rate": 0.8371
+  },
+  "helper_pressure_summary": {
+    "row_count": 0,
+    "helper_class_counts": {},
+    "companion_row_totals": {},
+    "answer_surface_summary": {
+      "question_count": 1473,
+      "judge_rows": 1473,
+      "judge_exact": 1233,
+      "judge_partial": 80,
+      "judge_miss": 160
+    },
+    "candidate_helper_share": 0.0,
+    "clean_helper_share": 0.0,
+    "exact_rate": 0.8371,
+    "helper_rows_per_exact": 0.0,
+    "helper_rows_per_question": 0.0,
+    "pressure_label": "no_helper_rows"
+  },
+  "results": [
+    {
+      "fixture": "amended_lease_register",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.431355+00:00",
+      "finished": "2026-05-16T15:14:52.959652+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\amended_lease_register",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\amended_lease_register\\domain_bootstrap_qa_20260516T151452903383Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 825302,
+        "failure_surface_counts": {
+          "compile_surface_gap": 5,
+          "not_applicable": 35
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 4,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 39,
+        "query_rows": 39,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\amended_lease_register\\domain_bootstrap_qa_20260516T151452903383Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\amended_lease_register\\domain_bootstrap_qa_20260516T151452903383Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 825302, \"failure_surface_counts\": {\"compile_surface_gap\": 5, \"not_applicable\": 35}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 4, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 39, \"query_rows\": 39, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "arts_grant_panel_reconsideration",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.431355+00:00",
+      "finished": "2026-05-16T15:14:13.408196+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\arts_grant_panel_reconsideration",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\arts_grant_panel_reconsideration\\domain_bootstrap_qa_20260516T151413337197Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 785667,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 4,
+          "not_applicable": 33,
+          "query_surface_gap": 2
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 33,
+        "judge_miss": 4,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\arts_grant_panel_reconsideration\\domain_bootstrap_qa_20260516T151413337197Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\arts_grant_panel_reconsideration\\domain_bootstrap_qa_20260516T151413337197Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 785667, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 4, \"not_applicable\": 33, \"query_surface_gap\": 2}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 33, \"judge_miss\": 4, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "avalon_grant_committee",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.431355+00:00",
+      "finished": "2026-05-16T15:13:56.182800+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\avalon_grant_committee",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\avalon_grant_committee\\domain_bootstrap_qa_20260516T151356106949Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 768382,
+        "failure_surface_counts": {
+          "compile_surface_gap": 8,
+          "hybrid_join_gap": 3,
+          "not_applicable": 29
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 29,
+        "judge_miss": 7,
+        "judge_partial": 4,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\avalon_grant_committee\\domain_bootstrap_qa_20260516T151356106949Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\avalon_grant_committee\\domain_bootstrap_qa_20260516T151356106949Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 768382, \"failure_surface_counts\": {\"compile_surface_gap\": 8, \"hybrid_join_gap\": 3, \"not_applicable\": 29}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 29, \"judge_miss\": 7, \"judge_partial\": 4, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "black_lantern_maze",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.431355+00:00",
+      "finished": "2026-05-16T15:14:08.015135+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\black_lantern_maze",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\black_lantern_maze\\domain_bootstrap_qa_20260516T151407926693Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 780219,
+        "failure_surface_counts": {
+          "compile_surface_gap": 4,
+          "not_applicable": 34,
+          "query_surface_gap": 2
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 34,
+        "judge_miss": 3,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\black_lantern_maze\\domain_bootstrap_qa_20260516T151407926693Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\black_lantern_maze\\domain_bootstrap_qa_20260516T151407926693Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 780219, \"failure_surface_counts\": {\"compile_surface_gap\": 4, \"not_applicable\": 34, \"query_surface_gap\": 2}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 34, \"judge_miss\": 3, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "census_reconciliation",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.432355+00:00",
+      "finished": "2026-05-16T15:12:21.438232+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\census_reconciliation",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\census_reconciliation\\domain_bootstrap_qa_20260516T151221386221Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 673764,
+        "failure_surface_counts": {
+          "compile_surface_gap": 7,
+          "hybrid_join_gap": 1,
+          "not_applicable": 32
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 32,
+        "judge_miss": 7,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\census_reconciliation\\domain_bootstrap_qa_20260516T151221386221Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\census_reconciliation\\domain_bootstrap_qa_20260516T151221386221Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 673764, \"failure_surface_counts\": {\"compile_surface_gap\": 7, \"hybrid_join_gap\": 1, \"not_applicable\": 32}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 32, \"judge_miss\": 7, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "clinic_device_recall_field_packet",
+      "returncode": 0,
+      "started": "2026-05-16T15:01:07.432355+00:00",
+      "finished": "2026-05-16T15:13:11.396583+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\clinic_device_recall_field_packet",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\clinic_device_recall_field_packet\\domain_bootstrap_qa_20260516T151311288131Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 723511,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "hybrid_join_gap": 1,
+          "not_applicable": 37
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 37,
+        "judge_miss": 2,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\clinic_device_recall_field_packet\\domain_bootstrap_qa_20260516T151311288131Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\clinic_device_recall_field_packet\\domain_bootstrap_qa_20260516T151311288131Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 723511, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"hybrid_join_gap\": 1, \"not_applicable\": 37}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 37, \"judge_miss\": 2, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "contradictory_evidence_packet",
+      "returncode": 0,
+      "started": "2026-05-16T15:12:21.438232+00:00",
+      "finished": "2026-05-16T15:25:26.477024+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\contradictory_evidence_packet",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\contradictory_evidence_packet\\domain_bootstrap_qa_20260516T152526408952Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 784745,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "hybrid_join_gap": 2,
+          "not_applicable": 36
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 36,
+        "judge_miss": 2,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\contradictory_evidence_packet\\domain_bootstrap_qa_20260516T152526408952Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\contradictory_evidence_packet\\domain_bootstrap_qa_20260516T152526408952Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 784745, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"hybrid_join_gap\": 2, \"not_applicable\": 36}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 36, \"judge_miss\": 2, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "copperfall_deadline_docket",
+      "returncode": 0,
+      "started": "2026-05-16T15:13:11.397570+00:00",
+      "finished": "2026-05-16T15:25:36.618632+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\copperfall_deadline_docket",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\copperfall_deadline_docket\\domain_bootstrap_qa_20260516T152536565086Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 744991,
+        "failure_surface_counts": {
+          "compile_surface_gap": 3,
+          "not_applicable": 32,
+          "query_surface_gap": 5
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 32,
+        "judge_miss": 5,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\copperfall_deadline_docket\\domain_bootstrap_qa_20260516T152536565086Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\copperfall_deadline_docket\\domain_bootstrap_qa_20260516T152536565086Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 744991, \"failure_surface_counts\": {\"compile_surface_gap\": 3, \"not_applicable\": 32, \"query_surface_gap\": 5}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 32, \"judge_miss\": 5, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "count_composition_roster",
+      "returncode": 0,
+      "started": "2026-05-16T15:13:56.182800+00:00",
+      "finished": "2026-05-16T15:25:06.996758+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\count_composition_roster",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\count_composition_roster\\domain_bootstrap_qa_20260516T152506916684Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 670456,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "not_applicable": 37,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 37,
+        "judge_miss": 2,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\count_composition_roster\\domain_bootstrap_qa_20260516T152506916684Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\count_composition_roster\\domain_bootstrap_qa_20260516T152506916684Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 670456, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"not_applicable\": 37, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 37, \"judge_miss\": 2, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "deadline_cascade_docket",
+      "returncode": 0,
+      "started": "2026-05-16T15:14:08.016121+00:00",
+      "finished": "2026-05-16T15:26:02.086737+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\deadline_cascade_docket",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\deadline_cascade_docket\\domain_bootstrap_qa_20260516T152602024237Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 713842,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 1,
+          "not_applicable": 38
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 2,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\deadline_cascade_docket\\domain_bootstrap_qa_20260516T152602024237Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\deadline_cascade_docket\\domain_bootstrap_qa_20260516T152602024237Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 713842, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 1, \"not_applicable\": 38}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 2, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "draft_within_draft",
+      "returncode": 0,
+      "started": "2026-05-16T15:14:13.409199+00:00",
+      "finished": "2026-05-16T15:25:17.307174+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\draft_within_draft",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\draft_within_draft\\domain_bootstrap_qa_20260516T152517261368Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 663690,
+        "failure_surface_counts": {
+          "compile_surface_gap": 4,
+          "not_applicable": 35,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 5,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\draft_within_draft\\domain_bootstrap_qa_20260516T152517261368Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\draft_within_draft\\domain_bootstrap_qa_20260516T152517261368Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 663690, \"failure_surface_counts\": {\"compile_surface_gap\": 4, \"not_applicable\": 35, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 5, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "dream_library_index",
+      "returncode": 0,
+      "started": "2026-05-16T15:14:52.959652+00:00",
+      "finished": "2026-05-16T15:26:20.196892+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dream_library_index",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dream_library_index\\domain_bootstrap_qa_20260516T152620138384Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 687019,
+        "failure_surface_counts": {
+          "compile_surface_gap": 3,
+          "not_applicable": 36,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 36,
+        "judge_miss": 4,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dream_library_index\\domain_bootstrap_qa_20260516T152620138384Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dream_library_index\\domain_bootstrap_qa_20260516T152620138384Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 687019, \"failure_surface_counts\": {\"compile_surface_gap\": 3, \"not_applicable\": 36, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 36, \"judge_miss\": 4, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "dulse_ledger",
+      "returncode": 0,
+      "started": "2026-05-16T15:25:06.997757+00:00",
+      "finished": "2026-05-16T15:39:02.910725+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger\\domain_bootstrap_qa_20260516T153902830200Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 835633,
+        "failure_surface_counts": {
+          "compile_surface_gap": 6,
+          "hybrid_join_gap": 4,
+          "not_applicable": 27,
+          "query_surface_gap": 3
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 27,
+        "judge_miss": 6,
+        "judge_partial": 7,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger\\domain_bootstrap_qa_20260516T153902830200Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\dulse_ledger\\domain_bootstrap_qa_20260516T153902830200Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 835633, \"failure_surface_counts\": {\"compile_surface_gap\": 6, \"hybrid_join_gap\": 4, \"not_applicable\": 27, \"query_surface_gap\": 3}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 27, \"judge_miss\": 6, \"judge_partial\": 7, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "estate_archive_access_dispute",
+      "returncode": 0,
+      "started": "2026-05-16T15:25:17.307174+00:00",
+      "finished": "2026-05-16T15:37:40.165957+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\estate_archive_access_dispute",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\estate_archive_access_dispute\\domain_bootstrap_qa_20260516T153740093849Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 742600,
+        "failure_surface_counts": {
+          "compile_surface_gap": 4,
+          "hybrid_join_gap": 3,
+          "not_applicable": 33
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 33,
+        "judge_miss": 4,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\estate_archive_access_dispute\\domain_bootstrap_qa_20260516T153740093849Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\estate_archive_access_dispute\\domain_bootstrap_qa_20260516T153740093849Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 742600, \"failure_surface_counts\": {\"compile_surface_gap\": 4, \"hybrid_join_gap\": 3, \"not_applicable\": 33}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 33, \"judge_miss\": 4, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "fenmore_seedbank",
+      "returncode": 1,
+      "started": "2026-05-16T15:25:26.478021+00:00",
+      "finished": "2026-05-16T15:27:12.042821+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\fenmore_seedbank",
+      "qa_json": "",
+      "summary": {},
+      "stdout_tail": "",
+      "stderr_tail": "Traceback (most recent call last):\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 14252, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 694, in main\n    row = run_one_question(\n          ^^^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 1576, in run_one_question\n    query_results = run_query_plan(\n                    ^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 2085, in run_query_plan\n    source_text_fallback = _source_record_field_text_atom_fallback_query(effective_query)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 1255, in _source_record_field_text_atom_fallback_query\n    if len(goals) != 1:\n       ^^^^^^^^^^\nTypeError: object of type 'NoneType' has no len()\n"
+    },
+    {
+      "fixture": "festival_permit_maze",
+      "returncode": 0,
+      "started": "2026-05-16T15:25:36.618632+00:00",
+      "finished": "2026-05-16T15:37:10.319597+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\festival_permit_maze",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\festival_permit_maze\\domain_bootstrap_qa_20260516T153710263843Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 693476,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "hybrid_join_gap": 3,
+          "not_applicable": 35
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 3,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\festival_permit_maze\\domain_bootstrap_qa_20260516T153710263843Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\festival_permit_maze\\domain_bootstrap_qa_20260516T153710263843Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 693476, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"hybrid_join_gap\": 3, \"not_applicable\": 35}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 3, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "grant_exception_cap_matrix",
+      "returncode": 0,
+      "started": "2026-05-16T15:26:02.086737+00:00",
+      "finished": "2026-05-16T15:34:54.727126+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\grant_exception_cap_matrix",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\grant_exception_cap_matrix\\domain_bootstrap_qa_20260516T153454621602Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 532178,
+        "failure_surface_counts": {
+          "compile_surface_gap": 3,
+          "hybrid_join_gap": 2,
+          "not_applicable": 35
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 5,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\grant_exception_cap_matrix\\domain_bootstrap_qa_20260516T153454621602Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\grant_exception_cap_matrix\\domain_bootstrap_qa_20260516T153454621602Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 532178, \"failure_surface_counts\": {\"compile_surface_gap\": 3, \"hybrid_join_gap\": 2, \"not_applicable\": 35}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 5, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "greenhouse_quarantine",
+      "returncode": 1,
+      "started": "2026-05-16T15:26:20.197893+00:00",
+      "finished": "2026-05-16T15:30:50.929402+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\greenhouse_quarantine",
+      "qa_json": "",
+      "summary": {},
+      "stdout_tail": "",
+      "stderr_tail": "Traceback (most recent call last):\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 14252, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 694, in main\n    row = run_one_question(\n          ^^^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 1576, in run_one_question\n    query_results = run_query_plan(\n                    ^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 2111, in run_query_plan\n    _item_description_detail_core_query(runtime, query=effective_query)\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 4885, in _item_description_detail_core_query\n    if len(goals) != 1:\n       ^^^^^^^^^^\nTypeError: object of type 'NoneType' has no len()\n"
+    },
+    {
+      "fixture": "greywell_pipeline",
+      "returncode": 0,
+      "started": "2026-05-16T15:27:12.042821+00:00",
+      "finished": "2026-05-16T15:35:00.451962+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\greywell_pipeline",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\greywell_pipeline\\domain_bootstrap_qa_20260516T153500393439Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 25,
+        "elapsed_ms": 468168,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 1,
+          "not_applicable": 23
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 23,
+        "judge_miss": 1,
+        "judge_partial": 1,
+        "judge_rows": 25,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 25,
+        "query_rows": 25,
+        "question_count": 25,
+        "reference_answer_rows": 25,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\greywell_pipeline\\domain_bootstrap_qa_20260516T153500393439Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\greywell_pipeline\\domain_bootstrap_qa_20260516T153500393439Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 25, \"elapsed_ms\": 468168, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 1, \"not_applicable\": 23}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 23, \"judge_miss\": 1, \"judge_partial\": 1, \"judge_rows\": 25, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 25, \"query_rows\": 25, \"question_count\": 25, \"reference_answer_rows\": 25, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "harbor_collision_reports",
+      "returncode": 0,
+      "started": "2026-05-16T15:30:50.929402+00:00",
+      "finished": "2026-05-16T15:40:25.188824+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harbor_collision_reports",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harbor_collision_reports\\domain_bootstrap_qa_20260516T154025128814Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 574035,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 1,
+          "not_applicable": 38
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 0,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harbor_collision_reports\\domain_bootstrap_qa_20260516T154025128814Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harbor_collision_reports\\domain_bootstrap_qa_20260516T154025128814Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 574035, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 1, \"not_applicable\": 38}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 0, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "harrowgate_witness_file",
+      "returncode": 0,
+      "started": "2026-05-16T15:34:54.728128+00:00",
+      "finished": "2026-05-16T15:45:23.539131+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harrowgate_witness_file",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harrowgate_witness_file\\domain_bootstrap_qa_20260516T154523485405Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 628592,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "not_applicable": 38
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 0,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harrowgate_witness_file\\domain_bootstrap_qa_20260516T154523485405Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\harrowgate_witness_file\\domain_bootstrap_qa_20260516T154523485405Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 628592, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"not_applicable\": 38}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 0, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "heronvale_arts",
+      "returncode": 0,
+      "started": "2026-05-16T15:35:00.452965+00:00",
+      "finished": "2026-05-16T15:42:11.656717+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\heronvale_arts",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\heronvale_arts\\domain_bootstrap_qa_20260516T154211607323Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 25,
+        "elapsed_ms": 430939,
+        "failure_surface_counts": {
+          "compile_surface_gap": 5,
+          "hybrid_join_gap": 1,
+          "not_applicable": 19
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 19,
+        "judge_miss": 4,
+        "judge_partial": 2,
+        "judge_rows": 25,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 25,
+        "query_rows": 25,
+        "question_count": 25,
+        "reference_answer_rows": 25,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\heronvale_arts\\domain_bootstrap_qa_20260516T154211607323Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\heronvale_arts\\domain_bootstrap_qa_20260516T154211607323Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 25, \"elapsed_ms\": 430939, \"failure_surface_counts\": {\"compile_surface_gap\": 5, \"hybrid_join_gap\": 1, \"not_applicable\": 19}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 19, \"judge_miss\": 4, \"judge_partial\": 2, \"judge_rows\": 25, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 25, \"query_rows\": 25, \"question_count\": 25, \"reference_answer_rows\": 25, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "industrial_sensor_clock_correction",
+      "returncode": 0,
+      "started": "2026-05-16T15:37:10.320637+00:00",
+      "finished": "2026-05-16T15:48:15.024268+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\industrial_sensor_clock_correction",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\industrial_sensor_clock_correction\\domain_bootstrap_qa_20260516T154814931589Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 664243,
+        "failure_surface_counts": {
+          "compile_surface_gap": 8,
+          "hybrid_join_gap": 1,
+          "not_applicable": 31
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 31,
+        "judge_miss": 8,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\industrial_sensor_clock_correction\\domain_bootstrap_qa_20260516T154814931589Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\industrial_sensor_clock_correction\\domain_bootstrap_qa_20260516T154814931589Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 664243, \"failure_surface_counts\": {\"compile_surface_gap\": 8, \"hybrid_join_gap\": 1, \"not_applicable\": 31}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 31, \"judge_miss\": 8, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "lantern_school_field_trip",
+      "returncode": 0,
+      "started": "2026-05-16T15:37:40.166958+00:00",
+      "finished": "2026-05-16T15:48:53.991368+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\lantern_school_field_trip",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\lantern_school_field_trip\\domain_bootstrap_qa_20260516T154853933365Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 673600,
+        "failure_surface_counts": {
+          "compile_surface_gap": 3,
+          "hybrid_join_gap": 1,
+          "judge_uncertain": 1,
+          "not_applicable": 34,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 34,
+        "judge_miss": 4,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\lantern_school_field_trip\\domain_bootstrap_qa_20260516T154853933365Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\lantern_school_field_trip\\domain_bootstrap_qa_20260516T154853933365Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 673600, \"failure_surface_counts\": {\"compile_surface_gap\": 3, \"hybrid_join_gap\": 1, \"judge_uncertain\": 1, \"not_applicable\": 34, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 34, \"judge_miss\": 4, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "larkspur_clockwork_fair",
+      "returncode": 0,
+      "started": "2026-05-16T15:39:02.911716+00:00",
+      "finished": "2026-05-16T15:50:24.908738+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T155024850808Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 681770,
+        "failure_surface_counts": {
+          "compile_surface_gap": 8,
+          "not_applicable": 30,
+          "query_surface_gap": 2
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 30,
+        "judge_miss": 5,
+        "judge_partial": 5,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T155024850808Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\larkspur_clockwork_fair\\domain_bootstrap_qa_20260516T155024850808Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 681770, \"failure_surface_counts\": {\"compile_surface_gap\": 8, \"not_applicable\": 30, \"query_surface_gap\": 2}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 30, \"judge_miss\": 5, \"judge_partial\": 5, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "ledger_at_calders_reach",
+      "returncode": 0,
+      "started": "2026-05-16T15:40:25.189712+00:00",
+      "finished": "2026-05-16T15:52:00.544455+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ledger_at_calders_reach",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ledger_at_calders_reach\\domain_bootstrap_qa_20260516T155200488454Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 695118,
+        "failure_surface_counts": {
+          "compile_surface_gap": 6,
+          "hybrid_join_gap": 1,
+          "not_applicable": 33
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 33,
+        "judge_miss": 7,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ledger_at_calders_reach\\domain_bootstrap_qa_20260516T155200488454Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ledger_at_calders_reach\\domain_bootstrap_qa_20260516T155200488454Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 695118, \"failure_surface_counts\": {\"compile_surface_gap\": 6, \"hybrid_join_gap\": 1, \"not_applicable\": 33}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 33, \"judge_miss\": 7, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "meridian_permit_board",
+      "returncode": 0,
+      "started": "2026-05-16T15:42:11.657751+00:00",
+      "finished": "2026-05-16T15:55:14.800915+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\meridian_permit_board",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\meridian_permit_board\\domain_bootstrap_qa_20260516T155514726397Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 782886,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 1,
+          "not_applicable": 38
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 1,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\meridian_permit_board\\domain_bootstrap_qa_20260516T155514726397Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\meridian_permit_board\\domain_bootstrap_qa_20260516T155514726397Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 782886, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 1, \"not_applicable\": 38}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 1, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "municipal_tree_permit_amendment",
+      "returncode": 0,
+      "started": "2026-05-16T15:45:23.540161+00:00",
+      "finished": "2026-05-16T15:56:47.691644+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\municipal_tree_permit_amendment",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\municipal_tree_permit_amendment\\domain_bootstrap_qa_20260516T155647599561Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 683856,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "hybrid_join_gap": 1,
+          "not_applicable": 37,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 37,
+        "judge_miss": 1,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\municipal_tree_permit_amendment\\domain_bootstrap_qa_20260516T155647599561Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\municipal_tree_permit_amendment\\domain_bootstrap_qa_20260516T155647599561Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 683856, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"hybrid_join_gap\": 1, \"not_applicable\": 37, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 37, \"judge_miss\": 1, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "museum_mislabelled_rooms",
+      "returncode": 0,
+      "started": "2026-05-16T15:48:15.025268+00:00",
+      "finished": "2026-05-16T16:00:14.468823+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\museum_mislabelled_rooms",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\museum_mislabelled_rooms\\domain_bootstrap_qa_20260516T160014395824Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 719203,
+        "failure_surface_counts": {
+          "compile_surface_gap": 3,
+          "hybrid_join_gap": 2,
+          "not_applicable": 35
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 3,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\museum_mislabelled_rooms\\domain_bootstrap_qa_20260516T160014395824Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\museum_mislabelled_rooms\\domain_bootstrap_qa_20260516T160014395824Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 719203, \"failure_surface_counts\": {\"compile_surface_gap\": 3, \"hybrid_join_gap\": 2, \"not_applicable\": 35}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 3, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "northbridge_authority_packet",
+      "returncode": 0,
+      "started": "2026-05-16T15:48:53.991368+00:00",
+      "finished": "2026-05-16T16:00:18.734741+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\northbridge_authority_packet",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\northbridge_authority_packet\\domain_bootstrap_qa_20260516T160018670943Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 684509,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "not_applicable": 38
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 0,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\northbridge_authority_packet\\domain_bootstrap_qa_20260516T160018670943Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\northbridge_authority_packet\\domain_bootstrap_qa_20260516T160018670943Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 684509, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"not_applicable\": 38}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 0, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "orchard_inheritance_game",
+      "returncode": 0,
+      "started": "2026-05-16T15:50:24.908738+00:00",
+      "finished": "2026-05-16T16:03:43.403972+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\orchard_inheritance_game",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\orchard_inheritance_game\\domain_bootstrap_qa_20260516T160343349335Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 798283,
+        "failure_surface_counts": {
+          "answer_surface_gap": 1,
+          "compile_surface_gap": 4,
+          "hybrid_join_gap": 1,
+          "not_applicable": 34
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 34,
+        "judge_miss": 4,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\orchard_inheritance_game\\domain_bootstrap_qa_20260516T160343349335Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\orchard_inheritance_game\\domain_bootstrap_qa_20260516T160343349335Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 798283, \"failure_surface_counts\": {\"answer_surface_gap\": 1, \"compile_surface_gap\": 4, \"hybrid_join_gap\": 1, \"not_applicable\": 34}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 34, \"judge_miss\": 4, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "ridgeline_fire",
+      "returncode": 0,
+      "started": "2026-05-16T15:52:00.544455+00:00",
+      "finished": "2026-05-16T16:07:36.994786+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire\\domain_bootstrap_qa_20260516T160736915569Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 936091,
+        "failure_surface_counts": {
+          "compile_surface_gap": 15,
+          "hybrid_join_gap": 1,
+          "not_applicable": 24
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 24,
+        "judge_miss": 12,
+        "judge_partial": 4,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire\\domain_bootstrap_qa_20260516T160736915569Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\ridgeline_fire\\domain_bootstrap_qa_20260516T160736915569Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 936091, \"failure_surface_counts\": {\"compile_surface_gap\": 15, \"hybrid_join_gap\": 1, \"not_applicable\": 24}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 24, \"judge_miss\": 12, \"judge_partial\": 4, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "sable_creek_budget",
+      "returncode": 0,
+      "started": "2026-05-16T15:55:14.801916+00:00",
+      "finished": "2026-05-16T16:11:11.867508+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget\\domain_bootstrap_qa_20260516T161111740134Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 956699,
+        "failure_surface_counts": {
+          "compile_surface_gap": 12,
+          "hybrid_join_gap": 1,
+          "not_applicable": 27
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 27,
+        "judge_miss": 8,
+        "judge_partial": 5,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget\\domain_bootstrap_qa_20260516T161111740134Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\sable_creek_budget\\domain_bootstrap_qa_20260516T161111740134Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 956699, \"failure_surface_counts\": {\"compile_surface_gap\": 12, \"hybrid_join_gap\": 1, \"not_applicable\": 27}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 27, \"judge_miss\": 8, \"judge_partial\": 5, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "salvage_bell_dispute",
+      "returncode": 0,
+      "started": "2026-05-16T15:56:47.692643+00:00",
+      "finished": "2026-05-16T16:08:06.918546+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\salvage_bell_dispute",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\salvage_bell_dispute\\domain_bootstrap_qa_20260516T160806865546Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 679011,
+        "failure_surface_counts": {
+          "compile_surface_gap": 1,
+          "not_applicable": 38,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 38,
+        "judge_miss": 2,
+        "judge_partial": 0,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\salvage_bell_dispute\\domain_bootstrap_qa_20260516T160806865546Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\salvage_bell_dispute\\domain_bootstrap_qa_20260516T160806865546Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 679011, \"failure_surface_counts\": {\"compile_surface_gap\": 1, \"not_applicable\": 38, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 38, \"judge_miss\": 2, \"judge_partial\": 0, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "school_activity_roster_reconciliation",
+      "returncode": 1,
+      "started": "2026-05-16T16:00:14.469819+00:00",
+      "finished": "2026-05-16T16:07:19.579018+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\school_activity_roster_reconciliation",
+      "qa_json": "",
+      "summary": {},
+      "stdout_tail": "",
+      "stderr_tail": "Traceback (most recent call last):\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 14252, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 694, in main\n    row = run_one_question(\n          ^^^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 1576, in run_one_question\n    query_results = run_query_plan(\n                    ^^^^^^^^^^^^^^^\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 2111, in run_query_plan\n    _item_description_detail_core_query(runtime, query=effective_query)\n  File \"C:\\prethinker\\scripts\\run_domain_bootstrap_qa.py\", line 4885, in _item_description_detail_core_query\n    if len(goals) != 1:\n       ^^^^^^^^^^\nTypeError: object of type 'NoneType' has no len()\n"
+    },
+    {
+      "fixture": "school_trip_bus_roster_split",
+      "returncode": 0,
+      "started": "2026-05-16T16:00:18.735737+00:00",
+      "finished": "2026-05-16T16:12:05.473087+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\school_trip_bus_roster_split",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\school_trip_bus_roster_split\\domain_bootstrap_qa_20260516T161205377940Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 706429,
+        "failure_surface_counts": {
+          "compile_surface_gap": 5,
+          "hybrid_join_gap": 3,
+          "not_applicable": 31,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 31,
+        "judge_miss": 7,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\school_trip_bus_roster_split\\domain_bootstrap_qa_20260516T161205377940Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\school_trip_bus_roster_split\\domain_bootstrap_qa_20260516T161205377940Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 706429, \"failure_surface_counts\": {\"compile_surface_gap\": 5, \"hybrid_join_gap\": 3, \"not_applicable\": 31, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 31, \"judge_miss\": 7, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "temporal_state_ledger",
+      "returncode": 0,
+      "started": "2026-05-16T16:03:43.404927+00:00",
+      "finished": "2026-05-16T16:16:35.836787+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\temporal_state_ledger",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\temporal_state_ledger\\domain_bootstrap_qa_20260516T161635774219Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 772123,
+        "failure_surface_counts": {
+          "compile_surface_gap": 5,
+          "hybrid_join_gap": 4,
+          "not_applicable": 31
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 31,
+        "judge_miss": 6,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\temporal_state_ledger\\domain_bootstrap_qa_20260516T161635774219Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\temporal_state_ledger\\domain_bootstrap_qa_20260516T161635774219Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 772123, \"failure_surface_counts\": {\"compile_surface_gap\": 5, \"hybrid_join_gap\": 4, \"not_applicable\": 31}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 31, \"judge_miss\": 6, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "thornfield_variance",
+      "returncode": 0,
+      "started": "2026-05-16T16:07:19.580003+00:00",
+      "finished": "2026-05-16T16:22:33.664692+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance\\domain_bootstrap_qa_20260516T162233534987Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 913679,
+        "failure_surface_counts": {
+          "compile_surface_gap": 13,
+          "judge_uncertain": 1,
+          "not_applicable": 26
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 26,
+        "judge_miss": 11,
+        "judge_partial": 3,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance\\domain_bootstrap_qa_20260516T162233534987Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\thornfield_variance\\domain_bootstrap_qa_20260516T162233534987Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 913679, \"failure_surface_counts\": {\"compile_surface_gap\": 13, \"judge_uncertain\": 1, \"not_applicable\": 26}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 26, \"judge_miss\": 11, \"judge_partial\": 3, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "tournament_borrowed_names",
+      "returncode": 0,
+      "started": "2026-05-16T16:07:36.995792+00:00",
+      "finished": "2026-05-16T16:19:33.816217+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T161933761690Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 716565,
+        "failure_surface_counts": {
+          "compile_surface_gap": 8,
+          "hybrid_join_gap": 1,
+          "not_applicable": 30,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 30,
+        "judge_miss": 8,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T161933761690Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\tournament_borrowed_names\\domain_bootstrap_qa_20260516T161933761690Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 716565, \"failure_surface_counts\": {\"compile_surface_gap\": 8, \"hybrid_join_gap\": 1, \"not_applicable\": 30, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 30, \"judge_miss\": 8, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "university_lab_sample_chain",
+      "returncode": 0,
+      "started": "2026-05-16T16:08:06.919548+00:00",
+      "finished": "2026-05-16T16:22:32.923549+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\university_lab_sample_chain",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\university_lab_sample_chain\\domain_bootstrap_qa_20260516T162232840588Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 865732,
+        "failure_surface_counts": {
+          "answer_surface_gap": 1,
+          "compile_surface_gap": 2,
+          "hybrid_join_gap": 1,
+          "not_applicable": 32,
+          "query_surface_gap": 4
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 32,
+        "judge_miss": 3,
+        "judge_partial": 5,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\university_lab_sample_chain\\domain_bootstrap_qa_20260516T162232840588Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\university_lab_sample_chain\\domain_bootstrap_qa_20260516T162232840588Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 865732, \"failure_surface_counts\": {\"answer_surface_gap\": 1, \"compile_surface_gap\": 2, \"hybrid_join_gap\": 1, \"not_applicable\": 32, \"query_surface_gap\": 4}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 32, \"judge_miss\": 3, \"judge_partial\": 5, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "veridia_intake",
+      "returncode": 0,
+      "started": "2026-05-16T16:11:11.869498+00:00",
+      "finished": "2026-05-16T16:19:00.014498+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\veridia_intake",
+      "qa_json": "C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\veridia_intake\\domain_bootstrap_qa_20260516T161859973499Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 23,
+        "elapsed_ms": 467938,
+        "failure_surface_counts": {
+          "not_applicable": 22,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 22,
+        "judge_miss": 0,
+        "judge_partial": 1,
+        "judge_rows": 23,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 23,
+        "query_rows": 23,
+        "question_count": 23,
+        "reference_answer_rows": 23,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\veridia_intake\\domain_bootstrap_qa_20260516T161859973499Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\native_nohelper_story_worlds_draw1_20260516_qa_pass41_or\\veridia_intake\\domain_bootstrap_qa_20260516T161859973499Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 23, \"elapsed_ms\": 467938, \"failure_surface_counts\": {\"not_applicable\": 22, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 22, \"judge_miss\": 0, \"judge_partial\": 1, \"judge_rows\": 23, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 23, \"query_rows\": 23, \"question_count\": 23, \"reference_answer_rows\": 23, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    }
+  ]
+}
