@@ -31,21 +31,27 @@ These buckets are a first-pass layer map, not a promotion decision.
 ## Alias Family Coverage
 
 - Non-ledger unique predicates: `968`
-- Non-ledger predicates with at least one generic alias family: `434`
+- Non-ledger predicates with at least one generic alias family: `519`
 
 | Family | Predicates covered | Examples |
 | --- | ---: | --- |
 | `access_authorization_surface` | 37 | `access_agreement/3`, `access_authority/2`, `access_event/5`, `access_event_authorization/2`, `accession_collector/2`, `accession_date/2`, `accession_id/1`, `accession_initial_condition/2` |
+| `action_decision_surface` | 20 | `action_actor/3`, `action_by_role/4`, `action_recommended/3`, `administrative_action/5`, `approval_threshold/2`, `board_decision/2`, `board_decision/3`, `decision_authority/2` |
+| `actor_participation_surface` | 10 | `action_actor/3`, `event_actor/2`, `event_actor/3`, `event_actor_role/4`, `hearing_participant/2`, `incident_actor/2`, `involved_actor/2`, `person_involved_in/3` |
 | `assignment_allocation_surface` | 10 | `assigned_to_bus/3`, `assigned_to_group/2`, `assigned_to_room/2`, `bus_assignment/3`, `funding_allocation/3`, `homeroom_reassigned/3`, `initial_group_assignment/3`, `liability_assignment/3` |
 | `attribute_value_surface` | 14 | `applicant_attribute/3`, `asset_attribute/3`, `cycle_parameter/2`, `has_property/2`, `item_attribute/3`, `item_attribute_source/3`, `project_attribute/3`, `project_parameter/4` |
 | `chronology_event_surface` | 44 | `absence_of_event/3`, `access_event/5`, `access_event_authorization/2`, `adverse_event/3`, `annexation_event/4`, `collision_event/1`, `corrected_event_id/2`, `correction_event/4` |
+| `conversation_utterance_surface` | 22 | `advisory_statement/2`, `ambiguous_utterance/2`, `capacity_statement/3`, `corrected_statement/2`, `grant_return_amount/2`, `grant_return_status/2`, `log_turn/2`, `moral_statement/2` |
 | `count_requirement_surface` | 15 | `approval_threshold/2`, `base_unit_count/3`, `clarification_required/2`, `distinct_student_count/2`, `excluded_from_count/2`, `fte_count/2`, `funding_threshold/2`, `headcount_confirmed_by/2` |
 | `custody_location_surface` | 23 | `asset_location/2`, `chain_of_custody/2`, `custody_of/3`, `custody_state_at_date/3`, `custody_status/2`, `custody_status/3`, `custody_transfer/4`, `easement_location/4` |
+| `evidence_consistency_surface` | 12 | `conflict_disclosed/3`, `conflict_referral/4`, `conflict_resolved/2`, `conflict_unresolved/2`, `conflicting_evidence/2`, `conflicting_sources/2`, `consistent_with/2`, `consistent_with/3` |
 | `external_identifier_surface` | 4 | `exhibit_reference/2`, `item_external_id/3`, `pending_external_action/3`, `policy_reference/2` |
 | `identity_role_surface` | 25 | `action_by_role/4`, `adult_role/2`, `case_party/3`, `case_role/3`, `docket_party_role/4`, `entity_role/2`, `entity_role/3`, `entity_role_in_context/4` |
 | `item_identifier_surface` | 121 | `accession_id/1`, `alternative_candidate/3`, `amendment_description/2`, `amendment_id/1`, `applicant_id/1`, `application_id/1`, `application_id/2`, `asset_attribute/3` |
 | `order_effect_surface` | 17 | `amendment_effective_date/2`, `funding_order_rule/2`, `issued_order/4`, `order_date/2`, `order_id/1`, `order_issued_at/2`, `order_issued_by/2`, `order_outcome/2` |
+| `ownership_interest_surface` | 12 | `current_owner/3`, `not_owned_by/3`, `owned_by/2`, `owned_by/3`, `owner/2`, `owner_status/3`, `ownership_status/2`, `owns/2` |
 | `record_provenance_surface` | 70 | `appeal_filed/3`, `appeal_filed/4`, `assertion_source/3`, `assertion_source/4`, `claim_source/3`, `conflicting_sources/2`, `correction_record/4`, `correction_source/3` |
+| `rule_outcome_surface` | 55 | `amendment_outcome/3`, `appeal_outcome/2`, `audit_finding/3`, `authorization_rule/4`, `board_composition_rule/3`, `board_finding/2`, `bonus_eligibility/2`, `conditional_rule/3` |
 | `score_measurement_surface` | 10 | `composite_score/3`, `measured_value/5`, `measurement_accuracy/3`, `measurement_recorded/4`, `recorded_score/4`, `reviewer_score/4`, `score_correction/5`, `score_entry/5` |
 | `source_assertion_surface` | 39 | `adverse_possession_claim/2`, `application_claim/4`, `asserted_boundary_position/3`, `asserted_by/2`, `assertion_source/3`, `assertion_source/4`, `asserts_anchor_ball_status/3`, `asserts_claim/4` |
 | `state_transition_surface` | 77 | `accession_status/2`, `advisory_statement/2`, `appeal_status/2`, `application_status/2`, `application_status_at/3`, `arbitration_status/2`, `asserts_anchor_ball_status/3`, `asset_status/3` |
@@ -74,8 +80,8 @@ These buckets are a first-pass layer map, not a promotion decision.
 | `grant_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `grant` | domain-shaped vocabulary with little transfer evidence |
 | `grant_disbursement_date/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `grant` | domain-shaped vocabulary with little transfer evidence |
 | `grant_fiscal_year/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `grant` | domain-shaped vocabulary with little transfer evidence |
-| `grant_return_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `grant` | domain-shaped vocabulary with little transfer evidence |
-| `grant_return_status/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `state_transition_surface`, `title_status_surface` | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_return_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `conversation_utterance_surface` | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_return_status/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `conversation_utterance_surface`, `state_transition_surface`, `title_status_surface` | `grant` | domain-shaped vocabulary with little transfer evidence |
 | `prior_grant_id/1` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `item_identifier_surface` | `grant` | domain-shaped vocabulary with little transfer evidence |
 | `sensor_next_calibration_due/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `sensor` | domain-shaped vocabulary with little transfer evidence |
 | `sensor_not_certified_for/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 |  | `sensor` | domain-shaped vocabulary with little transfer evidence |
@@ -109,32 +115,32 @@ These buckets are a first-pass layer map, not a promotion decision.
 | `docket_entry/4` | `high_volume_single_fixture_surface` | 35 | 1 | `record_provenance_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `seat_row_assignment/3` | `high_volume_single_fixture_surface` | 35 | 1 | `assignment_allocation_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `object/1` | `high_volume_single_fixture_surface` | 33 | 1 | `item_identifier_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `said/3` | `high_volume_single_fixture_surface` | 33 | 1 | `item_identifier_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `administrative_action/5` | `high_volume_single_fixture_surface` | 32 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `said/3` | `high_volume_single_fixture_surface` | 33 | 1 | `conversation_utterance_surface`, `item_identifier_surface` |  | large local surface; check whether this is structure or corpus residue |
+| `administrative_action/5` | `high_volume_single_fixture_surface` | 32 | 1 | `action_decision_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `correction_source_record/3` | `high_volume_single_fixture_surface` | 32 | 1 | `record_provenance_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `item_attribute_source/3` | `high_volume_single_fixture_surface` | 30 | 1 | `attribute_value_surface`, `item_identifier_surface`, `record_provenance_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `owns/3` | `high_volume_single_fixture_surface` | 30 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `owns/3` | `high_volume_single_fixture_surface` | 30 | 1 | `ownership_interest_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `project_parameter/4` | `high_volume_single_fixture_surface` | 30 | 1 | `attribute_value_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `entity_role_in_context/4` | `high_volume_single_fixture_surface` | 28 | 1 | `identity_role_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `consistent_with/3` | `high_volume_single_fixture_surface` | 26 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `consistent_with/3` | `high_volume_single_fixture_surface` | 26 | 1 | `evidence_consistency_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `has_physical_custody/3` | `high_volume_single_fixture_surface` | 24 | 1 | `custody_location_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `item_internal_id/2` | `high_volume_single_fixture_surface` | 24 | 1 | `item_identifier_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `item_title_recorded/3` | `high_volume_single_fixture_surface` | 24 | 1 | `item_identifier_surface`, `record_provenance_surface`, `title_status_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `owned_by/2` | `high_volume_single_fixture_surface` | 24 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `owned_by/2` | `high_volume_single_fixture_surface` | 24 | 1 | `ownership_interest_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `assigned_to_group/2` | `high_volume_single_fixture_surface` | 23 | 1 | `assignment_allocation_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `log_turn/2` | `high_volume_single_fixture_surface` | 23 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `log_turn/2` | `high_volume_single_fixture_surface` | 23 | 1 | `conversation_utterance_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `date_event_anchor/3` | `high_volume_single_fixture_surface` | 22 | 1 | `chronology_event_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `docket_event/4` | `high_volume_single_fixture_surface` | 22 | 1 | `chronology_event_surface`, `record_provenance_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `event/1` | `high_volume_single_fixture_surface` | 22 | 1 | `chronology_event_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `involved_actor/2` | `high_volume_single_fixture_surface` | 22 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `involved_actor/2` | `high_volume_single_fixture_surface` | 22 | 1 | `actor_participation_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `structure_attribute/4` | `high_volume_single_fixture_surface` | 22 | 1 | `attribute_value_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `event_actor/2` | `high_volume_single_fixture_surface` | 21 | 1 | `chronology_event_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `event_actor_role/4` | `high_volume_single_fixture_surface` | 21 | 1 | `chronology_event_surface`, `identity_role_surface` |  | large local surface; check whether this is structure or corpus residue |
+| `event_actor/2` | `high_volume_single_fixture_surface` | 21 | 1 | `actor_participation_surface`, `chronology_event_surface` |  | large local surface; check whether this is structure or corpus residue |
+| `event_actor_role/4` | `high_volume_single_fixture_surface` | 21 | 1 | `actor_participation_surface`, `chronology_event_surface`, `identity_role_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `project_attribute/3` | `high_volume_single_fixture_surface` | 21 | 1 | `attribute_value_surface` |  | large local surface; check whether this is structure or corpus residue |
-| `ambiguous_utterance/2` | `high_volume_single_fixture_surface` | 20 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `ambiguous_utterance/2` | `high_volume_single_fixture_surface` | 20 | 1 | `conversation_utterance_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `conservation_engagement/4` | `high_volume_single_fixture_surface` | 20 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
-| `eligibility_finding/3` | `high_volume_single_fixture_surface` | 20 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
-| `rule_consequence/3` | `high_volume_single_fixture_surface` | 20 | 1 |  |  | large local surface; check whether this is structure or corpus residue |
+| `eligibility_finding/3` | `high_volume_single_fixture_surface` | 20 | 1 | `rule_outcome_surface` |  | large local surface; check whether this is structure or corpus residue |
+| `rule_consequence/3` | `high_volume_single_fixture_surface` | 20 | 1 | `rule_outcome_surface` |  | large local surface; check whether this is structure or corpus residue |
 | `person_role/3` | `broad_structural_candidate` | 105 | 13 | `identity_role_surface` |  | broad fixture spread; likely structural, still subject to slot-contract audit |
 
 ## Top Admitted Predicates

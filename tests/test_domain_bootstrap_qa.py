@@ -213,6 +213,13 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
         "docket_entry(entry_1, case_1, 2026_01_01, filed).",
         "state_changed(item_1, active, event_1).",
         "applicant_attribute(app_1, region, north).",
+        "administrative_action(action_1, quarantine_hold, lot_1, inspector_1, 2026_01_01).",
+        "owns(person_1, item_1, 2026).",
+        "consistent_with(fragment_1, candidate_1, report_1).",
+        "involved_actor(event_1, actor_1).",
+        "rule_consequence(rule_1, threshold_applies, procedural).",
+        "log_turn(turn_1, user_corrected_prior_claim).",
+        "ambiguous_utterance(utt_1, she_approved_it).",
     ]
 
     inventory = compiled_kb_inventory(facts=facts, rules=[])
@@ -256,6 +263,20 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
     assert "state_changed/3" in families["state_transition_surface"]["signatures"]
     assert "attribute_value_surface" in families
     assert "applicant_attribute/3" in families["attribute_value_surface"]["signatures"]
+    assert "action_decision_surface" in families
+    assert "administrative_action/5" in families["action_decision_surface"]["signatures"]
+    assert "ownership_interest_surface" in families
+    assert "owns/3" in families["ownership_interest_surface"]["signatures"]
+    assert "evidence_consistency_surface" in families
+    assert "consistent_with/3" in families["evidence_consistency_surface"]["signatures"]
+    assert "actor_participation_surface" in families
+    assert "involved_actor/2" in families["actor_participation_surface"]["signatures"]
+    assert "rule_outcome_surface" in families
+    assert "rule_consequence/3" in families["rule_outcome_surface"]["signatures"]
+    assert "conversation_utterance_surface" in families
+    assert {"log_turn/2", "ambiguous_utterance/2"}.issubset(
+        set(families["conversation_utterance_surface"]["signatures"])
+    )
     assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
 
 

@@ -1074,6 +1074,42 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
             ("attribute", "property", "parameter", "field", "dimension", "value"),
             ("attribute", "property", "parameter"),
         ),
+        (
+            "action_decision_surface",
+            "administrative actions, decisions, approvals, orders, and operative acts",
+            ("action", "decision", "approval", "approved", "order", "ordered", "act"),
+            ("action", "decision", "approval", "approved"),
+        ),
+        (
+            "ownership_interest_surface",
+            "ownership, control, possession interests, and owned-by relationships",
+            ("own", "owned", "owner", "ownership", "control", "interest", "possession"),
+            ("own", "owned", "owner", "ownership"),
+        ),
+        (
+            "evidence_consistency_surface",
+            "consistency, corroboration, contradiction, match, and evidentiary comparison",
+            ("consistent", "corroborat", "contradict", "match", "conflict", "evidence"),
+            ("consistent", "corroborat", "contradict", "match", "conflict"),
+        ),
+        (
+            "actor_participation_surface",
+            "actors, participants, involvement, attendance, and event participation",
+            ("actor", "participant", "participation", "involved", "attended", "party"),
+            ("actor", "participant", "involved", "attended"),
+        ),
+        (
+            "rule_outcome_surface",
+            "rule consequences, conditions, eligibility findings, outcomes, and effects",
+            ("rule", "condition", "consequence", "eligibility", "finding", "outcome", "effect"),
+            ("rule", "consequence", "eligibility", "finding", "outcome"),
+        ),
+        (
+            "conversation_utterance_surface",
+            "utterances, turns, statements, dialogue records, and said-content rows",
+            ("utterance", "turn", "said", "statement", "dialogue", "conversation"),
+            ("utterance", "turn", "said", "statement"),
+        ),
     )
     out: list[dict[str, Any]] = []
     for family, purpose, any_tokens, anchor_tokens in family_specs:

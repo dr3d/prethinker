@@ -33,8 +33,8 @@
         "deterministic_ledger": 333
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 17,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 17
       }
     },
     {
@@ -85,8 +85,8 @@
         "deterministic_ledger": 923
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 19
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -111,8 +111,8 @@
         "deterministic_ledger": 1267
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 20
+        "semantic_compile_surface": 20,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -137,8 +137,8 @@
         "deterministic_ledger": 1751
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 38,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 38
       }
     },
     {
@@ -215,8 +215,8 @@
         "deterministic_ledger": 636
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 16
+        "semantic_compile_surface": 16,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -267,8 +267,8 @@
         "deterministic_ledger": 391
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 21,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 21
       }
     },
     {
@@ -339,8 +339,8 @@
         "legacy_compatibility_alias": 4
       },
       "unique_candidate_bucket_counts": {
-        "legacy_compatibility_alias": 4,
-        "semantic_compile_surface": 19
+        "semantic_compile_surface": 19,
+        "legacy_compatibility_alias": 4
       },
       "admitted_bucket_counts": {
         "semantic_compile_surface": 64,
@@ -349,8 +349,8 @@
       },
       "unique_admitted_bucket_counts": {
         "deterministic_ledger": 12,
-        "legacy_compatibility_alias": 10,
-        "semantic_compile_surface": 19
+        "semantic_compile_surface": 19,
+        "legacy_compatibility_alias": 10
       }
     },
     {
@@ -453,8 +453,8 @@
         "deterministic_ledger": 1049
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 19
+        "semantic_compile_surface": 19,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -479,8 +479,8 @@
         "deterministic_ledger": 802
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 27
+        "semantic_compile_surface": 27,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -505,8 +505,8 @@
         "deterministic_ledger": 1048
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 18,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 18
       }
     },
     {
@@ -531,8 +531,8 @@
         "deterministic_ledger": 467
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 17,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 17
       }
     },
     {
@@ -557,8 +557,8 @@
         "deterministic_ledger": 2287
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 23
+        "semantic_compile_surface": 23,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -873,8 +873,8 @@
         "deterministic_ledger": 994
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 21,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 21
       }
     },
     {
@@ -899,8 +899,8 @@
         "deterministic_ledger": 608
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 30,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 30
       }
     },
     {
@@ -925,8 +925,8 @@
         "deterministic_ledger": 1081
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 13
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -951,8 +951,8 @@
         "deterministic_ledger": 399
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 10
+        "semantic_compile_surface": 10,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -1003,8 +1003,8 @@
         "deterministic_ledger": 504
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 14,
-        "deterministic_ledger": 10
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 14
       }
     },
     {
@@ -1029,8 +1029,8 @@
         "deterministic_ledger": 243
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 8,
-        "semantic_compile_surface": 18
+        "semantic_compile_surface": 18,
+        "deterministic_ledger": 8
       }
     },
     {
@@ -1055,8 +1055,8 @@
         "deterministic_ledger": 1432
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 23,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 23
       }
     },
     {
@@ -1081,8 +1081,8 @@
         "deterministic_ledger": 2380
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 16,
-        "deterministic_ledger": 12
+        "deterministic_ledger": 12,
+        "semantic_compile_surface": 16
       }
     },
     {
@@ -1107,8 +1107,8 @@
         "deterministic_ledger": 1605
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 23,
-        "deterministic_ledger": 10
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 23
       }
     },
     {
@@ -1133,8 +1133,8 @@
         "deterministic_ledger": 452
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 13,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 13
       }
     },
     {
@@ -1159,8 +1159,8 @@
         "deterministic_ledger": 1726
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 14,
-        "semantic_compile_surface": 25
+        "semantic_compile_surface": 25,
+        "deterministic_ledger": 14
       }
     },
     {
@@ -1185,8 +1185,8 @@
         "deterministic_ledger": 1542
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 11,
-        "deterministic_ledger": 8
+        "deterministic_ledger": 8,
+        "semantic_compile_surface": 11
       }
     },
     {
@@ -1231,8 +1231,8 @@
         "semantic_compile_surface": 20
       },
       "unique_candidate_bucket_counts": {
-        "legacy_compatibility_alias": 2,
-        "semantic_compile_surface": 20
+        "semantic_compile_surface": 20,
+        "legacy_compatibility_alias": 2
       },
       "admitted_bucket_counts": {
         "semantic_compile_surface": 147,
@@ -1240,9 +1240,9 @@
         "deterministic_ledger": 2217
       },
       "unique_admitted_bucket_counts": {
-        "legacy_compatibility_alias": 2,
         "deterministic_ledger": 12,
-        "semantic_compile_surface": 14
+        "semantic_compile_surface": 14,
+        "legacy_compatibility_alias": 2
       }
     },
     {
@@ -1270,8 +1270,8 @@
         "deterministic_ledger": 1150
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
         "semantic_compile_surface": 12,
+        "deterministic_ledger": 12,
         "legacy_compatibility_alias": 2
       }
     },
@@ -1297,8 +1297,8 @@
         "deterministic_ledger": 1483
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 22
+        "semantic_compile_surface": 22,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -1323,8 +1323,8 @@
         "deterministic_ledger": 1704
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 19,
-        "deterministic_ledger": 10
+        "deterministic_ledger": 10,
+        "semantic_compile_surface": 19
       }
     },
     {
@@ -1349,8 +1349,8 @@
         "deterministic_ledger": 509
       },
       "unique_admitted_bucket_counts": {
-        "semantic_compile_surface": 13,
-        "deterministic_ledger": 7
+        "deterministic_ledger": 7,
+        "semantic_compile_surface": 13
       }
     },
     {
@@ -1375,8 +1375,8 @@
         "deterministic_ledger": 1087
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 12,
-        "semantic_compile_surface": 13
+        "semantic_compile_surface": 13,
+        "deterministic_ledger": 12
       }
     },
     {
@@ -1479,8 +1479,8 @@
         "deterministic_ledger": 932
       },
       "unique_admitted_bucket_counts": {
-        "deterministic_ledger": 14,
-        "semantic_compile_surface": 24
+        "semantic_compile_surface": 24,
+        "deterministic_ledger": 14
       }
     }
   ],
@@ -12508,7 +12508,9 @@
       "flagged_tokens": [
         "grant"
       ],
-      "alias_families": []
+      "alias_families": [
+        "conversation_utterance_surface"
+      ]
     },
     {
       "predicate": "grant_return_status/2",
@@ -12521,6 +12523,7 @@
         "grant"
       ],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -12946,6 +12949,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "item_identifier_surface"
       ]
     },
@@ -12957,7 +12961,9 @@
       "occurrences": 32,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "correction_source_record/3",
@@ -12993,7 +12999,9 @@
       "occurrences": 30,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "project_parameter/4",
@@ -13027,7 +13035,9 @@
       "occurrences": 26,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "has_physical_custody/3",
@@ -13075,7 +13085,9 @@
       "occurrences": 24,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "assigned_to_group/2",
@@ -13097,7 +13109,9 @@
       "occurrences": 23,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "conversation_utterance_surface"
+      ]
     },
     {
       "predicate": "date_event_anchor/3",
@@ -13144,7 +13158,9 @@
       "occurrences": 22,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "structure_attribute/4",
@@ -13167,6 +13183,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "actor_participation_surface",
         "chronology_event_surface"
       ]
     },
@@ -13179,6 +13196,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "actor_participation_surface",
         "chronology_event_surface",
         "identity_role_surface"
       ]
@@ -13203,7 +13221,9 @@
       "occurrences": 20,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "conversation_utterance_surface"
+      ]
     },
     {
       "predicate": "conservation_engagement/4",
@@ -13223,7 +13243,9 @@
       "occurrences": 20,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_consequence/3",
@@ -13233,7 +13255,9 @@
       "occurrences": 20,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "person_role/3",
@@ -13265,7 +13289,9 @@
       "occurrences": 57,
       "fixtures": 5,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "event_id/1",
@@ -13289,7 +13315,8 @@
       "fixtures": 5,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface"
+        "item_identifier_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -13313,7 +13340,9 @@
       "occurrences": 41,
       "fixtures": 4,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "correction_applied/3",
@@ -13530,6 +13559,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -13655,6 +13685,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "actor_participation_surface",
         "chronology_event_surface"
       ]
     },
@@ -13700,7 +13731,9 @@
       "occurrences": 18,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "turn_supports/3",
@@ -13710,7 +13743,9 @@
       "occurrences": 18,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "conversation_utterance_surface"
+      ]
     },
     {
       "predicate": "estate_asset/2",
@@ -13768,7 +13803,8 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
-        "record_provenance_surface"
+        "record_provenance_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -13954,7 +13990,9 @@
       "occurrences": 15,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "device_component/3",
@@ -14048,7 +14086,10 @@
       "occurrences": 14,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface",
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "application_claim/4",
@@ -14153,7 +14194,9 @@
       "occurrences": 14,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule/2",
@@ -14163,7 +14206,9 @@
       "occurrences": 14,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_authority/2",
@@ -14174,7 +14219,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface"
+        "access_authorization_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -14211,6 +14257,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -14324,7 +14371,9 @@
       "occurrences": 13,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "access_authority/2",
@@ -14448,6 +14497,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "rule_outcome_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -14550,7 +14600,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "order_effect_surface"
+        "order_effect_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -14561,7 +14612,9 @@
       "occurrences": 12,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "statement_language/2",
@@ -14572,6 +14625,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -14625,7 +14679,9 @@
       "occurrences": 11,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "legal_title/2",
@@ -14699,7 +14755,9 @@
       "occurrences": 10,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "case_role/3",
@@ -14812,7 +14870,9 @@
       "occurrences": 10,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "payment_status/3",
@@ -14866,6 +14926,7 @@
       "fixtures": 2,
       "flagged_tokens": [],
       "alias_families": [
+        "actor_participation_surface",
         "identity_role_surface",
         "record_provenance_surface"
       ]
@@ -14888,7 +14949,9 @@
       "occurrences": 10,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "accession_status/2",
@@ -15394,7 +15457,9 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_scope/2",
@@ -15404,7 +15469,9 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "variance_finding/3",
@@ -15414,7 +15481,9 @@
       "occurrences": 8,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "vote_result/5",
@@ -15528,7 +15597,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "claim_made_by/3",
@@ -15728,7 +15799,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "person_involved_in/3",
@@ -15738,7 +15811,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "physical_custody/2",
@@ -15782,7 +15857,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_id/2",
@@ -15793,7 +15870,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "item_identifier_surface"
+        "item_identifier_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -15804,7 +15882,9 @@
       "occurrences": 7,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "staff_analysis_of/2",
@@ -15825,6 +15905,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -15846,7 +15927,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "amendment_id/1",
@@ -15980,7 +16063,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "determination_date/2",
@@ -16020,7 +16105,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "email_message/4",
@@ -16050,7 +16137,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "hold_interval/4",
@@ -16137,7 +16226,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "match_result/5",
@@ -16147,7 +16238,9 @@
       "occurrences": 6,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "no_publication_authority/2",
@@ -16439,6 +16532,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -16451,6 +16545,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -16463,6 +16558,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -16475,6 +16571,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -16640,7 +16737,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "disambiguates/3",
@@ -16735,7 +16834,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "order_effect_surface"
+        "order_effect_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -16746,7 +16846,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface"
+      ]
     },
     {
       "predicate": "historical_winner/3",
@@ -16767,6 +16869,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "actor_participation_surface",
         "item_identifier_surface"
       ]
     },
@@ -16894,7 +16997,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "non_voter/2",
@@ -16936,7 +17041,9 @@
       "occurrences": 5,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "permit_instance/2",
@@ -17033,7 +17140,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_condition/2",
@@ -17043,7 +17152,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_penalty/2",
@@ -17053,7 +17164,9 @@
       "occurrences": 5,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "test_germination_rate/2",
@@ -17084,6 +17197,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -17171,7 +17285,9 @@
       "occurrences": 4,
       "fixtures": 2,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "bonus_eligible/3",
@@ -17214,6 +17330,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "evidence_consistency_surface",
         "item_identifier_surface"
       ]
     },
@@ -17332,7 +17449,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "dispute_status/3",
@@ -17416,7 +17535,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "filed_dispute/3",
@@ -17668,7 +17789,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "order_outcome/2",
@@ -17679,7 +17802,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "order_effect_surface"
+        "order_effect_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -17690,7 +17814,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "party_position/4",
@@ -17746,7 +17872,9 @@
       "occurrences": 4,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "public_comment/4",
@@ -18024,7 +18152,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface"
+        "access_authorization_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -18091,7 +18220,9 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "contradiction_identified/3",
@@ -18102,6 +18233,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "evidence_consistency_surface",
         "item_identifier_surface"
       ]
     },
@@ -18297,7 +18429,9 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "finding_source/3",
@@ -18308,7 +18442,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "record_provenance_surface"
+        "record_provenance_surface",
+        "rule_outcome_surface"
       ]
     },
     {
@@ -18559,6 +18694,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "ownership_interest_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -18749,7 +18885,9 @@
       "occurrences": 3,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "scoring_criterion/2",
@@ -18780,6 +18918,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -18792,6 +18931,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -18911,7 +19051,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "annexation_event/4",
@@ -18970,6 +19112,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "action_decision_surface",
         "count_requirement_surface"
       ]
     },
@@ -19043,7 +19186,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "audit_packet_compiled_on/2",
@@ -19087,7 +19232,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "boundary_error_description/1",
@@ -19142,6 +19289,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -19272,7 +19420,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "confirmed_by/3",
@@ -19293,6 +19443,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "evidence_consistency_surface",
         "record_provenance_surface"
       ]
     },
@@ -19325,6 +19476,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -19438,7 +19590,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "decision_pending/2",
@@ -19448,7 +19602,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "decision_reversed/2",
@@ -19458,7 +19614,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "deferred_action/2",
@@ -19468,7 +19626,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "denial_reason/3",
@@ -19678,7 +19838,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "excluded_from_analysis/3",
@@ -20060,7 +20222,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "notice_id/1",
@@ -20215,7 +20379,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "packet_filed_under_case/2",
@@ -20237,7 +20403,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "parcel_zone_membership/3",
@@ -20335,7 +20503,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "policy_transfer_minimum/3",
@@ -20588,7 +20758,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_violated/2",
@@ -20598,7 +20770,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "session_date/1",
@@ -20687,6 +20861,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "source_assertion_surface",
         "state_transition_surface"
       ]
@@ -20805,7 +20980,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "termination_request/2",
@@ -20864,7 +21041,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "attribute_value_surface"
+        "attribute_value_surface",
+        "ownership_interest_surface"
       ]
     },
     {
@@ -20897,7 +21075,9 @@
       "occurrences": 2,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "vote_margin/2",
@@ -20990,6 +21170,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "action_decision_surface",
         "identity_role_surface"
       ]
     },
@@ -21024,6 +21205,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -21045,7 +21227,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "appeal_status/2",
@@ -21147,7 +21331,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "board_rationale/2",
@@ -21405,7 +21591,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "conflict_referral/4",
@@ -21415,7 +21603,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "conflict_resolved/2",
@@ -21425,7 +21615,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "conflict_unresolved/2",
@@ -21435,7 +21627,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "evidence_consistency_surface"
+      ]
     },
     {
       "predicate": "continuous_harvest_interval/4",
@@ -21602,7 +21796,8 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
-        "access_authorization_surface"
+        "access_authorization_surface",
+        "action_decision_surface"
       ]
     },
     {
@@ -22167,6 +22362,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "conversation_utterance_surface",
         "state_transition_surface"
       ]
     },
@@ -22256,6 +22452,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "ownership_interest_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -22268,7 +22465,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "ownership_interest_surface"
+      ]
     },
     {
       "predicate": "parent_concern/2",
@@ -22302,6 +22501,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "action_decision_surface",
         "external_identifier_surface"
       ]
     },
@@ -22414,7 +22614,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "policy_test_window_days/2",
@@ -22653,7 +22855,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "action_decision_surface"
+      ]
     },
     {
       "predicate": "right_retracted/2",
@@ -22685,7 +22889,10 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "actor_participation_surface",
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_affected/2",
@@ -22695,7 +22902,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "rule_exception/3",
@@ -22705,7 +22914,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "safety_claim/3",
@@ -22824,6 +23035,7 @@
       "fixtures": 1,
       "flagged_tokens": [],
       "alias_families": [
+        "action_decision_surface",
         "state_transition_surface",
         "title_status_surface"
       ]
@@ -22992,7 +23204,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "voting_eligibility_summary/2",
@@ -23002,7 +23216,9 @@
       "occurrences": 1,
       "fixtures": 1,
       "flagged_tokens": [],
-      "alias_families": []
+      "alias_families": [
+        "rule_outcome_surface"
+      ]
     },
     {
       "predicate": "zoning_district/2",
@@ -24179,7 +24395,7 @@
   ],
   "alias_family_coverage": {
     "non_ledger_unique_predicates": 968,
-    "non_ledger_with_alias_family": 434,
+    "non_ledger_with_alias_family": 519,
     "families": {
       "access_authorization_surface": [
         "access_agreement/3",
@@ -24219,6 +24435,40 @@
         "party_role/3",
         "publication_authority/2",
         "rule_authority/2"
+      ],
+      "action_decision_surface": [
+        "action_actor/3",
+        "action_by_role/4",
+        "action_recommended/3",
+        "administrative_action/5",
+        "approval_threshold/2",
+        "board_decision/2",
+        "board_decision/3",
+        "decision_authority/2",
+        "decision_made/3",
+        "decision_made/4",
+        "decision_pending/2",
+        "decision_reversed/2",
+        "deferred_action/2",
+        "pending_action/2",
+        "pending_action/3",
+        "pending_external_action/3",
+        "review_decision/3",
+        "status_inaction/2",
+        "termination_decision/3",
+        "transaction/5"
+      ],
+      "actor_participation_surface": [
+        "action_actor/3",
+        "event_actor/2",
+        "event_actor/3",
+        "event_actor_role/4",
+        "hearing_participant/2",
+        "incident_actor/2",
+        "involved_actor/2",
+        "person_involved_in/3",
+        "rule_actor_restriction/2",
+        "source_actor_role/4"
       ],
       "assignment_allocation_surface": [
         "assigned_to_bus/3",
@@ -24294,6 +24544,30 @@
         "transfer_event/5",
         "unit_conversion_event/5"
       ],
+      "conversation_utterance_surface": [
+        "advisory_statement/2",
+        "ambiguous_utterance/2",
+        "capacity_statement/3",
+        "corrected_statement/2",
+        "grant_return_amount/2",
+        "grant_return_status/2",
+        "log_turn/2",
+        "moral_statement/2",
+        "said/3",
+        "statement_by/2",
+        "statement_by/3",
+        "statement_content/2",
+        "statement_is_claim/2",
+        "statement_language/2",
+        "statement_made/4",
+        "statement_made_by/3",
+        "statement_original/2",
+        "statement_translation/2",
+        "testimony_statement/3",
+        "turn_supports/3",
+        "witness_statement/3",
+        "witness_statement/4"
+      ],
       "count_requirement_surface": [
         "approval_threshold/2",
         "base_unit_count/3",
@@ -24335,6 +24609,20 @@
         "physical_custody/2",
         "relocation_date/2",
         "source_custodian/2"
+      ],
+      "evidence_consistency_surface": [
+        "conflict_disclosed/3",
+        "conflict_referral/4",
+        "conflict_resolved/2",
+        "conflict_unresolved/2",
+        "conflicting_evidence/2",
+        "conflicting_sources/2",
+        "consistent_with/2",
+        "consistent_with/3",
+        "contradiction_identified/3",
+        "match_component/4",
+        "match_result/5",
+        "metallurgical_consistent_with/2"
       ],
       "external_identifier_surface": [
         "exhibit_reference/2",
@@ -24511,6 +24799,20 @@
         "verbal_order/3",
         "zone_order_status/3"
       ],
+      "ownership_interest_surface": [
+        "current_owner/3",
+        "not_owned_by/3",
+        "owned_by/2",
+        "owned_by/3",
+        "owner/2",
+        "owner_status/3",
+        "ownership_status/2",
+        "owns/2",
+        "owns/3",
+        "parcel_owner/2",
+        "unknown_attribute/2",
+        "vessel_owner/2"
+      ],
       "record_provenance_surface": [
         "appeal_filed/3",
         "appeal_filed/4",
@@ -24582,6 +24884,63 @@
         "system_time_source/2",
         "traffic_study_source/2",
         "vote_record/4"
+      ],
+      "rule_outcome_surface": [
+        "amendment_outcome/3",
+        "appeal_outcome/2",
+        "audit_finding/3",
+        "authorization_rule/4",
+        "board_composition_rule/3",
+        "board_finding/2",
+        "bonus_eligibility/2",
+        "conditional_rule/3",
+        "custom_rule/1",
+        "deadline_rule/4",
+        "eligibility_finding/3",
+        "eligibility_rule/3",
+        "exception_rule/3",
+        "expert_finding/5",
+        "finding/4",
+        "finding_caveat/2",
+        "finding_content/2",
+        "finding_source/3",
+        "finding_status/3",
+        "funding_order_rule/2",
+        "official_finding/3",
+        "order_outcome/2",
+        "ordinance_rule/3",
+        "policy_rule/2",
+        "policy_rule/3",
+        "preliminary_finding/2",
+        "protest_outcome/2",
+        "rule/2",
+        "rule_actor_restriction/2",
+        "rule_affected/2",
+        "rule_applicable_to/4",
+        "rule_applied/2",
+        "rule_authority/2",
+        "rule_condition/2",
+        "rule_condition/3",
+        "rule_consequence/3",
+        "rule_deadline/4",
+        "rule_deadline_minutes/2",
+        "rule_effect/3",
+        "rule_exception/3",
+        "rule_id/1",
+        "rule_id/2",
+        "rule_penalty/2",
+        "rule_priority/2",
+        "rule_prohibition/2",
+        "rule_scope/2",
+        "rule_section/2",
+        "rule_source/3",
+        "rule_text/2",
+        "rule_violated/2",
+        "rule_violation_determination/4",
+        "variance_finding/3",
+        "verification_outcome/3",
+        "vote_outcome/3",
+        "voting_eligibility_summary/2"
       ],
       "score_measurement_surface": [
         "composite_score/3",

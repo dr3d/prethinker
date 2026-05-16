@@ -3193,3 +3193,94 @@ Next pressure:
   generic families or should remain ungrouped local compile vocabulary.
 - Then use the same machinery during the next native no-helper QA rerun to see
   whether alias-family coverage improves routing without restoring helpers.
+
+## HR-037 - Generic Homes For High-Volume No-Family Predicates
+
+Date: 2026-05-16
+
+Before:
+
+- HR-036 made alias-family coverage visible, but several high-volume singleton
+  predicates still had no structural home in the inventory.
+- The risky queue mixed genuinely generic surfaces with names that should stay
+  local until unlike transfer earns them a slot.
+
+Prediction:
+
+- Adding only broad, fixture-free families should absorb high-volume predicates
+  whose structure is obvious across domains without legitimizing local domain
+  vocabulary.
+- Residue with explicit domain words should remain unhomed rather than being
+  papered over by a vague family.
+
+Intervention:
+
+- Added six generic alias families:
+  - `action_decision_surface`
+  - `ownership_interest_surface`
+  - `evidence_consistency_surface`
+  - `actor_participation_surface`
+  - `rule_outcome_surface`
+  - `conversation_utterance_surface`
+- Extended the inventory grouping test with unlike generic predicate examples
+  for each new family.
+- Re-ran the native no-helper draw-1 predicate inventory.
+
+After:
+
+- Non-ledger unique predicates: `968`
+- Non-ledger predicates with at least one generic alias family: `519`
+- Delta from HR-036: `+85` newly grouped non-ledger predicate signatures.
+
+Representative high-volume rows now have structural homes:
+
+| Predicate | Family |
+| --- | --- |
+| `administrative_action/5` | `action_decision_surface` |
+| `owns/3` | `ownership_interest_surface` |
+| `owned_by/2` | `ownership_interest_surface` |
+| `consistent_with/3` | `evidence_consistency_surface` |
+| `log_turn/2` | `conversation_utterance_surface` |
+| `ambiguous_utterance/2` | `conversation_utterance_surface` |
+| `involved_actor/2` | `actor_participation_surface` |
+| `eligibility_finding/3` | `rule_outcome_surface` |
+| `rule_consequence/3` | `rule_outcome_surface` |
+
+Priority no-family residue is now smaller and clearer:
+
+- explicit low-volume domain terms: `sensor_*`, `grant_*`, `patient_*`,
+  `bus_chaperone/2`, `chaperone_substitution/3`, `standby_chaperone/2`;
+- one high-volume singleton, `conservation_engagement/4`, whose domain shape
+  should not be promoted without unlike replay;
+- transferred but still ungrouped general rows such as `person/1`,
+  `document_type/2`, `entity_type/2`, and `compiled_by/*`, which need a
+  separate metadata/entity-layer decision rather than an ad hoc helper revival.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\audit_compile_predicate_inventory.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_inventory_groups_present_surface_alias_families tests\test_domain_bootstrap_qa.py::test_compiled_kb_contracts_name_role_and_generic_replacement_slots -q`
+  - `2 passed`
+- `python scripts\audit_compile_predicate_inventory.py tmp\native_nohelper_story_worlds_draw1_20260516_compile --out-json docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.json --out-md docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Lesson:
+
+The right move is not to rename every suspicious predicate into a pleasant
+generic phrase. A structural family earns a slot only when the predicate's role
+is transferable without repeating fixture or domain vocabulary. This pass moved
+obvious cross-domain surfaces into generic homes and made the remaining local
+vocabulary easier to quarantine.
+
+Next pressure:
+
+- Decide whether the ungrouped transferred metadata/entity rows deserve a
+  small generic metadata layer or should remain ordinary compile vocabulary.
+- Keep explicit sensor, grant, patient, and chaperone rows out of architecture
+  until unlike probes show a structural surface that is not just domain wording.
