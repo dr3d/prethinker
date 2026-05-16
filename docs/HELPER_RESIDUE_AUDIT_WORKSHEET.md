@@ -951,3 +951,83 @@ Next pressure:
   compile-surface evidence. Misses should be routed to direct predicate
   preservation, source-fidelity invariants, or query planning, not back to
   native helper delivery.
+
+## HR-012 - Default-Path No-Helper Native Smoke
+
+Date: 2026-05-16
+
+Before:
+
+- HR-011 changed the runtime default, but the first proof was unit-level: direct
+  `run_query_plan` calls and batch command construction.
+- The next risk was operational drift: a real batch QA run might still deliver
+  helper rows through evidence-bundle execution, source-text repair, or cached
+  artifacts.
+
+Prediction:
+
+- A replay using the batch wrapper defaults, with no helper flag passed at the
+  batch level, should still execute child QA jobs with
+  `--helper-companion-row-limit 0`.
+- Helper rows should remain exactly `0` across primary query, evidence-bundle,
+  and source-text repair paths.
+- Any misses should classify as compile/query surface work, not helper pressure.
+
+Intervention:
+
+- Replayed the established three-fixture native pressure smoke against the
+  invariant-guided compile root:
+  - `count_composition_roster`
+  - `industrial_sensor_clock_correction`
+  - `probate_storage_access_register`
+- Ran `8` questions per fixture, local model, `3` lanes, QA cache disabled.
+- Did not pass `--helper-companion-row-limit` to the batch command; the wrapper
+  default supplied the child-level `0` helper setting.
+
+After:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows | Failure surfaces |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `count_composition_roster` | 8 | 8 | 0 | 0 | 0 | `not_applicable=8` |
+| `industrial_sensor_clock_correction` | 8 | 7 | 0 | 1 | 0 | `hybrid_join_gap=1`, `not_applicable=7` |
+| `probate_storage_access_register` | 8 | 4 | 0 | 4 | 0 | `compile_surface_gap=3`, `hybrid_join_gap=1`, `not_applicable=4` |
+| Total | 24 | 19 | 0 | 5 | 0 | `compile_surface_gap=3`, `hybrid_join_gap=2`, `not_applicable=19` |
+
+Artifacts:
+
+- `docs/data/helper_residue/default_retired_smoke_20260516.json`
+- `docs/data/helper_residue/default_retired_smoke_20260516.md`
+- `tmp/helper_default_retired_smoke_20260516`
+
+Verification:
+
+- Dry-run confirmed the batch wrapper generated child commands containing
+  `--helper-companion-row-limit 0` while the batch command itself relied on the
+  default.
+- Real QA completed with:
+  - runtime load errors=`0`
+  - write proposal rows=`0`
+  - helper rows=`0`
+  - cache hits=`0`
+- Wall-clock runtime was about `10.5` minutes for `24` questions on `3` local
+  lanes.
+
+Lesson:
+
+- Helper retirement holds through the real batch path. The feared helper bulk is
+  no longer a default runtime surface.
+- The remaining native pressure is now properly exposed: roster is inside the
+  no-helper set; sensor needs a bounded line/value join; probate still has
+  source-fidelity and section/addressability compile gaps plus one line-bound
+  numeric/title join.
+- This is the architecture moving in the right direction. The next repair layer
+  should strengthen direct compile surfaces and query joins; it should not
+  restore helper companion delivery.
+
+Next pressure:
+
+- Build a small compile/query surface diagnostic for the five non-exact rows:
+  classify whether each needs direct role/section preservation, grouped source
+  addressability, or a deterministic line-bound join.
+- Use unlike probes before changing guidance so probate-specific section names
+  do not become architecture.
