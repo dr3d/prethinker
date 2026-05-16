@@ -196,6 +196,17 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
         },
     ),
     InvariantSpec(
+        family="financial_baseline_surface",
+        description="financial or numeric-state baselines, adjustments, scenarios, resulting values, and thresholds",
+        groups={
+            "baseline_value": ("baseline", "starting", "initial", "current", "balance", "reserve"),
+            "adjustment_value": ("adjustment", "debit", "credit", "subtraction", "addition", "minus", "expenditure", "appropriation"),
+            "scenario_or_actuality": ("actual", "hypothetical", "counterfactual", "would", "if", "after", "before"),
+            "resulting_value": ("result", "resulting", "remaining", "new", "final", "post"),
+            "constraint_or_threshold": ("minimum", "maximum", "threshold", "limit", "policy", "breach"),
+        },
+    ),
+    InvariantSpec(
         family="custody_control_surface",
         description="custody, access, ownership, recall/return, and control state",
         groups={
@@ -304,7 +315,10 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "candidate_predicate_count": len(candidate_predicates),
         "direct_predicates": direct_predicates,
         "families": families,
-        "relation_contracts": [_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
+        "relation_contracts": [
+            *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
+            _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
+        ],
         "summary": _summarize_families(families),
     }
 
@@ -498,6 +512,111 @@ def _audit_relation_contract(spec: RelationContractSpec, rows: list[dict[str, An
         "companion_key_count": len(companion_keys),
         "missing_keys": missing_keys,
     }
+
+
+def _audit_financial_baseline_derivation_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Check that arithmetic state changes are slot-bound, not just mentioned.
+
+    The token family can tell us that balance, adjustment, result, and policy
+    words all appeared somewhere. This contract asks whether the admitted
+    structural rows keep a derivation surface with a baseline/previous value,
+    adjustment, resulting value, scenario or basis, and constraint.
+    """
+
+    source_tokens = _tokens_for_facts(source_facts)
+    trigger_groups = {
+        "financial_state": {"balance", "reserve", "fund", "value"},
+        "adjustment": {"adjustment", "debit", "credit", "expenditure", "appropriation", "subtraction", "addition"},
+        "result": {"result", "resulting", "remaining", "new", "final", "post", "reduce", "reduced"},
+    }
+    triggered = {
+        name: sorted(tokens & source_tokens)
+        for name, tokens in trigger_groups.items()
+        if tokens & source_tokens
+    }
+    if set(triggered) != set(trigger_groups):
+        return {
+            "contract": "financial_baseline_derivation_contract",
+            "description": "numeric-state changes should bind baseline, adjustment, result, scenario or basis, and constraint in structural rows",
+            "status": "not_applicable",
+            "required_key_count": 0,
+            "companion_key_count": 0,
+            "missing_keys": [],
+            "triggered_groups": triggered,
+            "covered_slots": {},
+        }
+
+    structural_rows = [
+        row
+        for row in direct_rows
+        if _is_financial_structural_row(row) and row["predicate"] not in {"source_recorded_assertion"}
+    ]
+    structural_parts: list[str] = []
+    for row in structural_rows:
+        structural_parts.append(str(row["predicate"]))
+        structural_parts.extend(str(arg) for arg in row["args"])
+    structural_text = " ".join(structural_parts).lower()
+    structural_tokens = set(TOKEN_RE.findall(structural_text))
+
+    covered_slots: dict[str, list[str]] = {}
+    slot_terms = {
+        "baseline_or_previous_value": ("baseline", "starting", "initial", "current", "previous", "prior", "balance"),
+        "adjustment_value": ("adjustment", "adjustments", "debit", "credit", "expenditure", "appropriation", "subtraction", "addition"),
+        "resulting_value": ("result", "resulting", "remaining", "new", "final", "post", "balance"),
+        "scenario_or_basis": ("actual", "hypothetical", "counterfactual", "scenario", "assumption", "if", "would", "basis", "after", "before"),
+        "constraint_or_threshold": ("constraint", "threshold", "minimum", "maximum", "limit", "policy", "requirement"),
+    }
+    for slot, terms in slot_terms.items():
+        hits = [term for term in terms if term in structural_tokens]
+        if hits:
+            covered_slots[slot] = hits
+
+    missing_slots = sorted(set(slot_terms) - set(covered_slots))
+    if not structural_rows:
+        status = "missing_structural_surface"
+    elif not missing_slots:
+        status = "pass"
+    elif covered_slots:
+        status = "partial"
+    else:
+        status = "fail"
+    return {
+        "contract": "financial_baseline_derivation_contract",
+        "description": "numeric-state changes should bind baseline, adjustment, result, scenario or basis, and constraint in structural rows",
+        "status": status,
+        "required_key_count": len(slot_terms),
+        "companion_key_count": len(covered_slots),
+        "missing_keys": missing_slots,
+        "triggered_groups": triggered,
+        "covered_slots": covered_slots,
+        "structural_row_count": len(structural_rows),
+        "structural_predicates": sorted({str(row["predicate"]) for row in structural_rows}),
+    }
+
+
+def _is_financial_structural_row(row: dict[str, Any]) -> bool:
+    text = " ".join([str(row["predicate"]), *[str(arg) for arg in row["args"]]]).lower()
+    tokens = set(TOKEN_RE.findall(text))
+    financial_terms = {"fund", "balance", "reserve", "financial", "fiscal", "amount", "value"}
+    arithmetic_terms = {
+        "derivation",
+        "transaction",
+        "adjustment",
+        "expenditure",
+        "appropriation",
+        "threshold",
+        "constraint",
+        "minimum",
+        "maximum",
+        "policy",
+        "scenario",
+        "assumption",
+    }
+    predicate = str(row["predicate"])
+    return bool((financial_terms & tokens) or (arithmetic_terms & tokens) or "balance" in predicate)
 
 
 def _has_indexes(args: list[str], indexes: tuple[int, ...]) -> bool:

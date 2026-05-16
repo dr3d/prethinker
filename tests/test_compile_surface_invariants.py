@@ -132,6 +132,53 @@ def test_audit_compile_surface_invariants_passes_event_backbone_unit(tmp_path: P
     assert backbone["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_detects_financial_baseline_gap(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, starting_balance_420000_after_actual_expenditure_22000_resulting_balance_398000_minimum_policy_200000).",
+            "fund_balance(fund_1, 398000).",
+            "policy_threshold(fund_1, minimum, 200000).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    finance = next(row for row in report["families"] if row["family"] == "financial_baseline_surface")
+    assert finance["status"] == "partial"
+    assert "adjustment_value" in finance["missing_groups"]
+    assert "scenario_or_actuality" in finance["missing_groups"]
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "financial_baseline_derivation_contract"
+    )
+    assert contract["status"] == "partial"
+    assert "adjustment_value" in contract["missing_keys"]
+    assert "scenario_or_basis" in contract["missing_keys"]
+
+
+def test_audit_compile_surface_invariants_passes_financial_baseline_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, starting_balance_420000_after_actual_expenditure_22000_resulting_balance_398000_minimum_policy_200000).",
+            "baseline_balance(fund_1, starting, 420000).",
+            "balance_adjustment(fund_1, actual_expenditure, 22000).",
+            "scenario_assumption(actual, after_expenditure).",
+            "resulting_balance(fund_1, actual_after_expenditure, 398000).",
+            "policy_threshold(fund_1, minimum, 200000).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    finance = next(row for row in report["families"] if row["family"] == "financial_baseline_surface")
+    assert finance["status"] == "pass"
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "financial_baseline_derivation_contract"
+    )
+    assert contract["status"] == "pass"
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

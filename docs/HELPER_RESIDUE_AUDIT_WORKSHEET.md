@@ -3637,3 +3637,76 @@ Next pressure:
   transition joins, procedure-step requirements, or nonbinding advisory source
   classification.
 - Do not add a `sable` or budget-specific rule.
+
+## HR-042 - Financial Baseline Slot Contract
+
+Date: 2026-05-16
+
+Before:
+
+- HR-041 improved `sable_creek_budget` from `27 / 5 / 8` to `34 / 3 / 3`
+  with helper rows still at zero.
+- The remaining misses exposed a financial/counterfactual surface: actual
+  balance rows were present, but the KB still under-bound the original
+  baseline, later actual state, hypothetical scenario, resulting value, and
+  policy threshold as a single queryable derivation surface.
+
+Prediction:
+
+- A token-level compile-surface invariant would be too weak for this class.
+  Arithmetic and counterfactual questions need slot binding: previous value,
+  adjustment, new value, scenario/basis, and constraint must be joinable.
+
+Intervention:
+
+- Added `financial_baseline_surface` as a visible invariant family.
+- Added `financial_baseline_derivation_contract` as a relation/slot contract
+  over admitted structural rows.
+- Strengthened compiler guidance so financial or numeric-state derivations
+  preserve a scenario or basis slot, preventing actual, hypothetical, before,
+  and after states from overwriting one another.
+- Kept source assertions out of the contract satisfaction path: prose-like
+  `source_recorded_assertion` rows can provide provenance, but they do not by
+  themselves satisfy the structural derivation contract.
+
+After:
+
+- The first token-only audit incorrectly treated the Sable financial surface as
+  acceptable.
+- The slot contract now classifies the same compile as `partial`:
+  - covered: `baseline_or_previous_value`, `adjustment_value`,
+    `resulting_value`, `constraint_or_threshold`
+  - missing: `scenario_or_basis`
+- This matches the QA failure shape: the KB can state actual balances, but
+  counterfactual reserve questions still lack a scenario-bound derivation row.
+
+Artifacts:
+
+- `scripts/audit_compile_surface_invariants.py`
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_compile_surface_invariants.py`
+- `tests/test_domain_bootstrap_file.py`
+- `docs/data/helper_residue/financial_baseline_sable_pre_repair_audit_20260516.json`
+- `docs/data/helper_residue/financial_baseline_sable_pre_repair_audit_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py scripts\audit_compile_surface_invariants.py`
+- `python -m pytest tests\test_compile_surface_invariants.py tests\test_domain_bootstrap_file.py::test_compile_surface_invariants_keep_operational_record_slots -q`
+  - `12 passed`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\event_backbone_sable_recompile_20260516\sable_creek_budget --out-json docs\data\helper_residue\financial_baseline_sable_pre_repair_audit_20260516.json --out-md docs\data\helper_residue\financial_baseline_sable_pre_repair_audit_20260516.md`
+
+Lesson:
+
+Token coverage is not enough for arithmetic, financial, and counterfactual
+surfaces. The compile can mention every relevant word and still lose the
+answer-bearing relation if scenario and basis are not structural slots. This
+is a compile-surface contract, not a helper resurrection and not a
+budget-fixture rule.
+
+Next pressure:
+
+- Recompile the focused fixture with the strengthened financial-baseline
+  contract guidance and rerun no-helper QA.
+- If the miss class improves, expand the contract audit to the larger weak
+  native slice before attempting another native stamp.

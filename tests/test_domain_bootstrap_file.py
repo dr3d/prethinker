@@ -195,6 +195,10 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "chronological/event-list sources need complete event backbone units" in context
     assert "event id or entry label, date/time/order, actor/party/system" in context
     assert "vague event wrapper" in context
+    assert "financial or numeric-state calculations need baseline preservation" in context
+    assert "actual versus hypothetical scenario assumptions" in context
+    assert "Derivation rows need a scenario or basis slot" in context
+    assert "Do not overwrite an initial baseline with a later actual value" in context
     assert "operational record/status events" in context
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
