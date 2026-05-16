@@ -66,6 +66,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--intake-registry-context", action="store_true")
     parser.add_argument("--review-profile", action="store_true")
     parser.add_argument("--profile-review-retry", action="store_true")
+    parser.add_argument("--quality-gate", action="store_true", help="Annotate compile summaries with stamp-readiness quality decisions.")
+    parser.add_argument("--quality-gate-fail-on-hold", action="store_true", help="Return nonzero when --quality-gate holds any fixture.")
+    parser.add_argument("--quality-min-rough-score", type=float, default=0.775)
+    parser.add_argument("--quality-max-risk-count", type=int, default=5)
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing compile artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -116,7 +120,15 @@ def main() -> int:
                 print(json.dumps(result, ensure_ascii=False, sort_keys=True))
 
     results.sort(key=lambda item: str(item.get("fixture", "")))
-    summary = _summarize(results, lanes=lanes, base_timeout=int(args.timeout), effective_timeout=effective_timeout)
+    summary = _summarize(
+        results,
+        lanes=lanes,
+        base_timeout=int(args.timeout),
+        effective_timeout=effective_timeout,
+        quality_gate=bool(args.quality_gate),
+        quality_min_rough_score=float(args.quality_min_rough_score),
+        quality_max_risk_count=int(args.quality_max_risk_count),
+    )
     out_json = _abs(args.out_json) if args.out_json else out_root / "compile_batch_summary.json"
     out_md = _abs(args.out_md) if args.out_md else out_root / "compile_batch_summary.md"
     out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -124,7 +136,12 @@ def main() -> int:
     out_md.write_text(_render_md(summary), encoding="utf-8")
     print(f"Wrote {out_json}")
     print(f"Wrote {out_md}")
-    return 0 if all(int(item.get("returncode", 1)) == 0 for item in results) else 1
+    if not all(int(item.get("returncode", 1)) == 0 for item in results):
+        return 1
+    quality = summary.get("quality_gate", {})
+    if bool(args.quality_gate_fail_on_hold) and isinstance(quality, dict) and not bool(quality.get("passed")):
+        return 2
+    return 0
 
 
 def _abs(path: Path | None) -> Path:
@@ -267,6 +284,12 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "compile_skipped": compile_skipped,
         "rough_score": score.get("rough_score"),
         "risk_count": score.get("risk_count"),
+        "repeated_structure_count": score.get("repeated_structure_count"),
+        "repeated_structure_id_only_record_refs": score.get("repeated_structure_id_only_record_refs", []),
+        "repeated_structure_role_mismatch_refs": score.get("repeated_structure_role_mismatch_refs", []),
+        "frontier_unknown_positive_predicate_count": score.get("frontier_unknown_positive_predicate_count"),
+        "frontier_unknown_positive_predicate_refs": score.get("frontier_unknown_positive_predicate_refs", []),
+        "generic_predicate_count": score.get("generic_predicate_count"),
     }
 
 
@@ -279,7 +302,67 @@ def _optional_int(value: Any) -> int | None:
         return None
 
 
-def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, effective_timeout: int) -> dict[str, Any]:
+def _optional_float(value: Any) -> float | None:
+    try:
+        if value is None:
+            return None
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _quality_gate_result(
+    result: dict[str, Any],
+    *,
+    min_rough_score: float,
+    max_risk_count: int,
+) -> dict[str, Any]:
+    item = result.get("summary", {}) if isinstance(result, dict) else {}
+    reasons: list[str] = []
+    returncode = result.get("returncode")
+    if returncode != 0:
+        reasons.append(f"returncode={returncode}")
+    if not bool(item.get("parsed_ok")):
+        reasons.append("parsed_ok=false")
+    rough_score = _optional_float(item.get("rough_score"))
+    if rough_score is None:
+        reasons.append("rough_score_missing")
+    elif rough_score < min_rough_score:
+        reasons.append(f"rough_score<{min_rough_score:g}")
+    risk_count = _optional_int(item.get("risk_count"))
+    if risk_count is None:
+        reasons.append("risk_count_missing")
+    elif risk_count > max_risk_count:
+        reasons.append(f"risk_count>{max_risk_count}")
+    admitted = _optional_int(item.get("compile_admitted")) or 0
+    skipped = _optional_int(item.get("compile_skipped")) or 0
+    if admitted <= 0:
+        reasons.append("compile_admitted<=0")
+    return {
+        "fixture": str(result.get("fixture", "")),
+        "passed": not reasons,
+        "decision": "pass" if not reasons else "hold",
+        "reasons": reasons,
+        "rough_score": rough_score,
+        "risk_count": risk_count,
+        "compile_admitted": admitted,
+        "compile_skipped": skipped,
+        "compile_skipped_share": round(skipped / max(1, admitted + skipped), 4),
+        "candidate_predicates": _optional_int(item.get("candidate_predicates")) or 0,
+        "compile_json": str(result.get("compile_json", "")),
+    }
+
+
+def _summarize(
+    results: list[dict[str, Any]],
+    *,
+    lanes: int,
+    base_timeout: int,
+    effective_timeout: int,
+    quality_gate: bool = False,
+    quality_min_rough_score: float = 0.775,
+    quality_max_risk_count: int = 5,
+) -> dict[str, Any]:
     totals = {
         "candidate_predicates": 0,
         "compile_admitted": 0,
@@ -293,7 +376,7 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
         parsed_ok_count += 1 if bool(summary.get("parsed_ok")) else 0
         for key in totals:
             totals[key] += int(summary.get(key, 0) or 0)
-    return {
+    summary = {
         "generated": datetime.now(timezone.utc).isoformat(),
         "lanes": lanes,
         "base_timeout": base_timeout,
@@ -303,6 +386,25 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
         "totals": totals,
         "results": results,
     }
+    if quality_gate:
+        gate_rows = [
+            _quality_gate_result(
+                result,
+                min_rough_score=quality_min_rough_score,
+                max_risk_count=quality_max_risk_count,
+            )
+            for result in results
+        ]
+        summary["quality_gate"] = {
+            "schema_version": "compile_quality_gate_v1",
+            "min_rough_score": quality_min_rough_score,
+            "max_risk_count": quality_max_risk_count,
+            "passed": all(row["passed"] for row in gate_rows),
+            "pass_count": sum(1 for row in gate_rows if row["passed"]),
+            "hold_count": sum(1 for row in gate_rows if not row["passed"]),
+            "rows": gate_rows,
+        }
+    return summary
 
 
 def _render_md(summary: dict[str, Any]) -> str:
@@ -337,6 +439,38 @@ def _render_md(summary: dict[str, Any]) -> str:
             )
         )
     lines.append("")
+    quality_gate = summary.get("quality_gate", {})
+    if isinstance(quality_gate, dict):
+        lines.extend(
+            [
+                "## Compile Quality Gate",
+                "",
+                f"- Decision: `{'pass' if quality_gate.get('passed') else 'hold'}`",
+                f"- Passed / held: `{quality_gate.get('pass_count', 0)} / {quality_gate.get('hold_count', 0)}`",
+                f"- Minimum rough score: `{quality_gate.get('min_rough_score')}`",
+                f"- Maximum risk count: `{quality_gate.get('max_risk_count')}`",
+                "",
+                "| Fixture | Decision | Reasons | Rough | Risk | Admitted | Skipped | Skipped Share |",
+                "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |",
+            ]
+        )
+        for row in quality_gate.get("rows", []):
+            if not isinstance(row, dict):
+                continue
+            reasons = ", ".join(str(item) for item in row.get("reasons", [])) or "n/a"
+            lines.append(
+                "| `{fixture}` | `{decision}` | {reasons} | {rough} | {risk} | {admitted} | {skipped} | {share} |".format(
+                    fixture=row.get("fixture", ""),
+                    decision=row.get("decision", ""),
+                    reasons=reasons,
+                    rough=row.get("rough_score", ""),
+                    risk=row.get("risk_count", ""),
+                    admitted=row.get("compile_admitted", 0),
+                    skipped=row.get("compile_skipped", 0),
+                    share=row.get("compile_skipped_share", 0),
+                )
+            )
+        lines.append("")
     return "\n".join(lines)
 
 

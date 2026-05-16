@@ -2389,3 +2389,92 @@ Next pressure:
   problem: either use a known-good accepted compile root for immediate smoke, or
   design a small compile-quality gate/consensus pass before broader native
   corpus measurement.
+
+## HR-028 - Compile Quality Gate For Native No-Helper Stamp Prep
+
+Date: 2026-05-16
+
+Before:
+
+- HR-027 showed that a fresh compile draw can regress badly even when helpers
+  stay off and the query layer is cleaner.
+- The next broader native no-helper stamp needs a stop/go point between compile
+  and QA, otherwise a weak compile draw can waste QA spend and confuse the
+  empirical baseline.
+
+Prediction:
+
+- A lightweight, fixture-free compile gate can separate accepted/rejected draw
+  shapes using profile/compile health signals already emitted by the compiler:
+  parsed OK, rough score, risk count, admitted rows, skipped-share reporting,
+  and explicit hold reasons.
+- The gate should pass the accepted three-fixture compile root while holding the
+  rejected equipment draw from HR-027.
+
+Intervention:
+
+- Added `--quality-gate` to `scripts/run_domain_bootstrap_file_batch.py`.
+- Added `--quality-gate-fail-on-hold` so stamp automation can stop before QA
+  when any fixture is held.
+- Extended compile summaries to preserve audit signals:
+  - repeated structure count,
+  - id-only record refs,
+  - role-mismatch refs,
+  - frontier unknown positive predicate refs,
+  - generic predicate count.
+- Gate defaults:
+  - minimum rough score `0.775`,
+  - maximum risk count `5`,
+  - parsed OK required,
+  - admitted rows required.
+
+After:
+
+| Compile root | Gate result | Passed | Held | Hold reason |
+| --- | --- | ---: | ---: | --- |
+| accepted three-fixture root | pass | 3 | 0 | n/a |
+| rejected equipment draw | hold | 0 | 1 | `risk_count>5` |
+
+- `--quality-gate-fail-on-hold` returns `0` for the accepted root and `2` for
+  the rejected draw.
+- The gate is intentionally a stamp-readiness gate, not a correctness oracle:
+  a passing compile still needs no-helper QA; a held compile should be reviewed
+  or redrawn rather than patched with helper adapters.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_file_batch.py`
+- `tests/test_domain_bootstrap_file_batch.py`
+- `docs/data/helper_residue/compile_quality_gate_three_fixture_20260516.json`
+- `docs/data/helper_residue/compile_quality_gate_three_fixture_20260516.md`
+- `docs/data/helper_residue/compile_quality_gate_equipment_rejected_20260516.json`
+- `docs/data/helper_residue/compile_quality_gate_equipment_rejected_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file_batch.py`
+- `python -m pytest tests\test_domain_bootstrap_file_batch.py tests\test_domain_bootstrap_qa_batch.py -q`
+  - `8 passed`
+- Accepted root gate:
+  - `python scripts\run_domain_bootstrap_file_batch.py ... --summarize-existing --quality-gate --quality-gate-fail-on-hold`
+  - exit `0`
+- Rejected draw gate:
+  - `python scripts\run_domain_bootstrap_file_batch.py ... --summarize-existing --quality-gate --quality-gate-fail-on-hold`
+  - exit `2`
+
+Lesson:
+
+- Native no-helper stamping needs a two-stage protocol:
+  1. compile and gate the draw;
+  2. only then run no-helper QA.
+- This keeps the stamp from mixing architectural movement with compile-variance
+  wobble. A held draw is evidence, not a repair target.
+
+Next pressure:
+
+- Review this gate, then launch the broader native no-helper stamp with:
+  - compile batch using `--quality-gate --quality-gate-fail-on-hold`,
+  - no-helper QA batch only for passing compile roots,
+  - no helper companion rows,
+  - no legacy native adapters,
+  - no mid-stamp repairs.
