@@ -793,3 +793,96 @@ Next pressure:
 - If the next phase resumes architecture work, focus on helper replacement by
   compile-surface invariants and direct predicate emission rather than restoring
   helper adapters.
+
+## IS-009 - No-Helper Fresh External N=2 Variance
+
+Date: 2026-05-15 / 2026-05-16
+
+Before:
+
+- The no-helper external stamp had one fresh draw across five transfer corpora:
+  `390 / 10 / 58` over `458` questions, `85.15%` exact, helper rows `0`.
+- That was a clean helper-retirement measurement, but still only one stochastic
+  compile-plus-QA draw.
+- The freeze discipline remained unchanged: measure variance under the frozen
+  instrument, do not repair inside the stamp window.
+
+Prediction:
+
+- PrivacyQA and CUAD should be relatively stable if their boundary is mostly
+  query-surface and contract-role difficulty rather than stochastic compile
+  omission.
+- SQuAD and RACE may move modestly because they have broader question variety
+  and option/synthesis pressure.
+- MAUD should be treated as the likely high-variance contract boundary because
+  its first draw was already low and clause-role semantics are dense.
+
+Intervention:
+
+- Ran a second fresh external compile-plus-QA draw under tag
+  `instrument-freeze-20260515-r1`.
+- Kept helpers genuinely off with `--helper-companion-row-limit 0`, `--no-cache`,
+  and no legacy native helper adapter flag.
+- Used OpenRouter for PrivacyQA, SQuAD, and RACE at six hosted lanes total; used
+  POWER/local for MAUD and CUAD.
+- Made no prompt, code, helper, or repair changes during the draw.
+
+After:
+
+| Corpus | Draw 1 | Draw 2 | Mean | Range | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `PrivacyQA-30` | 90.00% (`27/30`) | 90.00% (`27/30`) | 90.00% | 0.00 pts | `0 / 0` |
+| `MAUD-10` | 42.50% (`17/40`) | 35.00% (`14/40`) | 38.75% | 7.50 pts | `0 / 0` |
+| `SQuAD-30` | 96.49% (`165/171`) | 94.15% (`161/171`) | 95.32% | 2.34 pts | `0 / 0` |
+| `CUAD-10` | 75.00% (`30/40`) | 75.00% (`30/40`) | 75.00% | 0.00 pts | `0 / 0` |
+| `RACE-50-options` | 85.31% (`151/177`) | 84.18% (`149/177`) | 84.75% | 1.13 pts | `0 / 0` |
+
+Aggregate:
+
+| Draw | Questions | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `draw1` | 458 | 390 | 10 | 58 | 85.15% | 0 |
+| `draw2` | 458 | 381 | 13 | 64 | 83.19% | 0 |
+| **N=2 pooled** | **916** | **771** | **23** | **122** | **84.17%** | **0** |
+
+Artifacts:
+
+- `docs\data\instrument_stamp\nohelper_external_n2_variance_rollup_20260515.json`
+- `docs\data\instrument_stamp\nohelper_external_n2_variance_rollup_20260515.md`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw2_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw2_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw2_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw2_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw2_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw2_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw2_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw2_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw2_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw2_qa_or`
+
+Verification:
+
+- All five draw-two QA summaries completed their expected question counts.
+- Every draw-two QA summary reported helper rows `0`, runtime load errors `0`,
+  and write proposal rows `0`.
+- Draw-two worker processes had exited before the rollup was written.
+
+Lesson:
+
+- The external no-helper result is not a single lucky draw: pooled N=2 exact is
+  `84.17%` across `916` questions with helper rows still exactly `0`.
+- PrivacyQA and CUAD repeated exactly, so their current boundaries look stable
+  under this two-draw sample.
+- SQuAD and RACE remain high with modest spread; RACE's MCQ option surface does
+  not appear to require helper restoration.
+- MAUD is the clear high-variance, low-score legal-transfer boundary. That is a
+  stamp finding, not a reason to repair during the freeze.
+
+Next pressure:
+
+- If the stamp needs publication-grade variance bands immediately, run N=3 next,
+  with special attention to MAUD because it is the only corpus whose two-draw
+  spread is large enough to alter the qualitative interpretation.
+- If compute time is the constraint, defer universal N=3 and treat the current
+  N=2 rollup as the external no-helper baseline while resuming post-freeze
+  architecture work on helper-free native compile-surface invariants.
