@@ -1686,3 +1686,98 @@ Next pressure:
 - Move the next work to compile-surface preservation for recurring source
   addressability gaps: commercial item attributes, person-role source lines,
   and statement-to-section provenance links.
+
+## HR-020 - Equipment Specification Loss Belongs In Profile Review
+
+Date: 2026-05-16
+
+Before:
+
+- HR-019 left three no-helper misses:
+  - equipment vendor/model not preserved as direct predicates;
+  - person-role source line absent;
+  - statement-to-section provenance link absent.
+- The compile guidance already said to preserve vendor/model-like surfaces, but
+  the sensor profile did not provide an attribute slot, so the compiler could
+  only keep the values in source-record text.
+
+Prediction:
+
+- If the pressure is profile-surface loss, broad compile guidance alone will
+  not reliably recover vendor/model rows.
+- A profile-review audit rule should flag equipment/device/instrument
+  specification fields when the proposed profile only exposes id/status/scope
+  rows.
+
+Intervention:
+
+- Added profile-bootstrap guidance for equipment/device/instrument/product/
+  asset specifications: vendor, manufacturer, model, serial, firmware,
+  capacity, location, calibration scope, and certification scope are
+  query-bearing attributes.
+- First sensor recompile after bootstrap guidance did not produce direct
+  vendor/model predicates. The profile still centered sensor id plus
+  certification rows.
+- Added a profile-review rule for equipment-specification loss. The review then
+  flagged the missing capability and retry guidance added `sensor_vendor/2`,
+  `sensor_model/2`, and related device-specification slots.
+- Recompiled the sensor fixture and ran first-8 no-helper QA.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Movement |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| HR-019 accepted-state sensor slice | first 8 | 7 | 0 | 1 | 0 | vendor/model absent |
+| Bootstrap-only equipment guidance | compile inspection | n/a | n/a | n/a | n/a | profile still omitted vendor/model |
+| Review-hardened equipment guidance | first 8 | 6 | 0 | 2 | 0 | vendor/model fixed; operator attribution exposed |
+
+Resolved coordinate:
+
+- `industrial_sensor_clock_correction` q004 now has direct rows:
+  - `sensor_vendor(hum_d_04, sentec).`
+  - `sensor_model(hum_d_04, sentec_rh_220_plus).`
+- The judge marked the vendor/model question exact.
+
+New/remaining coordinates:
+
+- Section-addressability query still overuses unsupported string/search
+  predicates for human section-title lookup.
+- Operator-console attendance now fails when the compile has event rows from
+  the operator console but does not preserve the named attendant as a direct
+  person-role/source row.
+
+Artifacts:
+
+- `docs/data/helper_residue/equipment_attribute_review_qa_20260516.json`
+- `docs/data/helper_residue/equipment_attribute_review_qa_20260516.md`
+- `tmp/helper_residue_equipment_attribute_compile_20260516`
+- `tmp/helper_residue_equipment_attribute_review_compile_20260516`
+- `tmp/helper_residue_equipment_attribute_review_qa_20260516`
+
+Verification:
+
+- Focused suite:
+  - `python -m py_compile src\profile_bootstrap.py scripts\run_domain_bootstrap_file.py`
+  - `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_story_world_dataset.py -q`
+  - `246 passed`
+
+Lesson:
+
+- Compile-surface preservation starts earlier than the compile. If the profile
+  omits a reusable attribute slot, later guidance can correctly request a
+  surface that the compiler has no clean vocabulary to emit.
+- This is not a sensor-specific repair. The structural rule is:
+  source-stated specifications on devices, equipment, products, inventory
+  items, or assets need a queryable attribute surface before QA has to parse
+  normalized prose.
+- The score did not improve globally on the sensor first-8 slice because the
+  fresh compile exposed an adjacent operator-attribution gap. That is not a
+  reason to restore helpers; it is the next compile-preservation coordinate.
+
+Next pressure:
+
+- Apply the same review/audit shape to source-stated person-role lines:
+  attendant, registrar, reviewer, compiler, recorder, approver, observer, and
+  other role-bearing source lines.
+- Require the profile/review layer to notice when a source names a person plus
+  role but the profile lacks a direct person-role/source slot.
