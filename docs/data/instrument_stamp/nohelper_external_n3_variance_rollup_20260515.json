@@ -1,0 +1,531 @@
+{
+  "stamp": "instrument-freeze-20260515-r1",
+  "mode": "fresh external compile-plus-QA N=3 variance, helpers genuinely off",
+  "helper_config": {
+    "helper_companion_row_limit": 0,
+    "cache": false,
+    "legacy_native_helper_adapters": false
+  },
+  "draws": {
+    "draw1": {
+      "aggregate": {
+        "corpora": 5,
+        "questions": 458,
+        "exact": 390,
+        "partial": 10,
+        "miss": 58,
+        "exact_rate": 0.8515,
+        "helper_rows": 0
+      },
+      "runs": [
+        {
+          "corpus": "PrivacyQA-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw1_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw1_qa_or",
+          "compile_fixtures": 30,
+          "questions": 30,
+          "exact": 27,
+          "partial": 0,
+          "miss": 3,
+          "exact_rate": 0.9,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "MAUD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw1_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw1_qa_power",
+          "compile_fixtures": 10,
+          "questions": 40,
+          "exact": 17,
+          "partial": 2,
+          "miss": 21,
+          "exact_rate": 0.425,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "SQuAD-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw1_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw1_qa_or",
+          "compile_fixtures": 30,
+          "questions": 171,
+          "exact": 165,
+          "partial": 1,
+          "miss": 5,
+          "exact_rate": 0.9649,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "CUAD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw1_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw1_qa_power",
+          "compile_fixtures": 10,
+          "questions": 40,
+          "exact": 30,
+          "partial": 6,
+          "miss": 4,
+          "exact_rate": 0.75,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "RACE-50-options",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw1_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw1_qa_or",
+          "compile_fixtures": 50,
+          "questions": 177,
+          "exact": 151,
+          "partial": 1,
+          "miss": 25,
+          "exact_rate": 0.8531,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        }
+      ]
+    },
+    "draw2": {
+      "aggregate": {
+        "corpora": 5,
+        "questions": 458,
+        "exact": 381,
+        "partial": 13,
+        "miss": 64,
+        "exact_rate": 0.8319,
+        "helper_rows": 0
+      },
+      "runs": [
+        {
+          "corpus": "PrivacyQA-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw2_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw2_qa_or",
+          "compile_fixtures": null,
+          "questions": 30,
+          "exact": 27,
+          "partial": 0,
+          "miss": 3,
+          "exact_rate": 0.9,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "MAUD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw2_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw2_qa_power",
+          "compile_fixtures": null,
+          "questions": 40,
+          "exact": 14,
+          "partial": 2,
+          "miss": 24,
+          "exact_rate": 0.35,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "SQuAD-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw2_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw2_qa_or",
+          "compile_fixtures": null,
+          "questions": 171,
+          "exact": 161,
+          "partial": 3,
+          "miss": 7,
+          "exact_rate": 0.9415,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "CUAD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw2_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw2_qa_power",
+          "compile_fixtures": null,
+          "questions": 40,
+          "exact": 30,
+          "partial": 6,
+          "miss": 4,
+          "exact_rate": 0.75,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "RACE-50-options",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw2_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw2_qa_or",
+          "compile_fixtures": null,
+          "questions": 177,
+          "exact": 149,
+          "partial": 2,
+          "miss": 26,
+          "exact_rate": 0.8418,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        }
+      ]
+    },
+    "draw3": {
+      "aggregate": {
+        "corpora": 5,
+        "questions": 458,
+        "exact": 386,
+        "partial": 10,
+        "miss": 62,
+        "exact_rate": 0.8428,
+        "helper_rows": 0
+      },
+      "runs": [
+        {
+          "corpus": "PrivacyQA-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw3_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_privacyqa30_draw3_qa_or",
+          "compile_fixtures": 30,
+          "questions": 30,
+          "exact": 25,
+          "partial": 3,
+          "miss": 2,
+          "exact_rate": 0.8333,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "MAUD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw3_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_maud10_draw3_qa_power",
+          "compile_fixtures": 10,
+          "questions": 40,
+          "exact": 16,
+          "partial": 0,
+          "miss": 24,
+          "exact_rate": 0.4,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "SQuAD-30",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw3_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_squad30_draw3_qa_or",
+          "compile_fixtures": 30,
+          "questions": 171,
+          "exact": 162,
+          "partial": 1,
+          "miss": 8,
+          "exact_rate": 0.9474,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "CUAD-10",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw3_compile_power",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_cuad10_draw3_qa_power",
+          "compile_fixtures": 10,
+          "questions": 40,
+          "exact": 33,
+          "partial": 3,
+          "miss": 4,
+          "exact_rate": 0.825,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        },
+        {
+          "corpus": "RACE-50-options",
+          "compile_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw3_compile_or",
+          "qa_root": "tmp\\instrument_stamp_20260515_fresh_race50_draw3_qa_or",
+          "compile_fixtures": 50,
+          "questions": 177,
+          "exact": 150,
+          "partial": 3,
+          "miss": 24,
+          "exact_rate": 0.8475,
+          "helper_rows": 0,
+          "helper_pressure_label": "no_helper_rows",
+          "runtime_load_error_count": 0,
+          "write_proposal_rows": 0,
+          "failure_surface_counts": {}
+        }
+      ]
+    }
+  },
+  "n3_variance": {
+    "aggregate": {
+      "draw_exact_rates": {
+        "draw1": 0.8515,
+        "draw2": 0.8319,
+        "draw3": 0.8428
+      },
+      "mean_exact_rate": 0.8421,
+      "min_exact_rate": 0.8319,
+      "max_exact_rate": 0.8515,
+      "range_points": 1.96,
+      "peak_draw": "draw1",
+      "low_draw": "draw2",
+      "pooled_questions": 1374,
+      "pooled_exact": 1157,
+      "pooled_partial": 33,
+      "pooled_miss": 184,
+      "pooled_exact_rate": 0.8421,
+      "pooled_helper_rows": 0
+    },
+    "by_corpus": [
+      {
+        "corpus": "PrivacyQA-30",
+        "questions_per_draw": 30,
+        "draws": [
+          {
+            "draw": "draw1",
+            "exact": 27,
+            "partial": 0,
+            "miss": 3,
+            "exact_rate": 0.9,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw2",
+            "exact": 27,
+            "partial": 0,
+            "miss": 3,
+            "exact_rate": 0.9,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw3",
+            "exact": 25,
+            "partial": 3,
+            "miss": 2,
+            "exact_rate": 0.8333,
+            "helper_rows": 0
+          }
+        ],
+        "mean_exact_rate": 0.8778,
+        "min_exact_rate": 0.8333,
+        "max_exact_rate": 0.9,
+        "range_points": 6.67,
+        "peak_draw": "draw1",
+        "low_draw": "draw3",
+        "pooled_questions": 90,
+        "pooled_exact": 79,
+        "pooled_partial": 3,
+        "pooled_miss": 8,
+        "pooled_exact_rate": 0.8778,
+        "pooled_helper_rows": 0
+      },
+      {
+        "corpus": "MAUD-10",
+        "questions_per_draw": 40,
+        "draws": [
+          {
+            "draw": "draw1",
+            "exact": 17,
+            "partial": 2,
+            "miss": 21,
+            "exact_rate": 0.425,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw2",
+            "exact": 14,
+            "partial": 2,
+            "miss": 24,
+            "exact_rate": 0.35,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw3",
+            "exact": 16,
+            "partial": 0,
+            "miss": 24,
+            "exact_rate": 0.4,
+            "helper_rows": 0
+          }
+        ],
+        "mean_exact_rate": 0.3917,
+        "min_exact_rate": 0.35,
+        "max_exact_rate": 0.425,
+        "range_points": 7.5,
+        "peak_draw": "draw1",
+        "low_draw": "draw2",
+        "pooled_questions": 120,
+        "pooled_exact": 47,
+        "pooled_partial": 4,
+        "pooled_miss": 69,
+        "pooled_exact_rate": 0.3917,
+        "pooled_helper_rows": 0
+      },
+      {
+        "corpus": "SQuAD-30",
+        "questions_per_draw": 171,
+        "draws": [
+          {
+            "draw": "draw1",
+            "exact": 165,
+            "partial": 1,
+            "miss": 5,
+            "exact_rate": 0.9649,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw2",
+            "exact": 161,
+            "partial": 3,
+            "miss": 7,
+            "exact_rate": 0.9415,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw3",
+            "exact": 162,
+            "partial": 1,
+            "miss": 8,
+            "exact_rate": 0.9474,
+            "helper_rows": 0
+          }
+        ],
+        "mean_exact_rate": 0.9513,
+        "min_exact_rate": 0.9415,
+        "max_exact_rate": 0.9649,
+        "range_points": 2.34,
+        "peak_draw": "draw1",
+        "low_draw": "draw2",
+        "pooled_questions": 513,
+        "pooled_exact": 488,
+        "pooled_partial": 5,
+        "pooled_miss": 20,
+        "pooled_exact_rate": 0.9513,
+        "pooled_helper_rows": 0
+      },
+      {
+        "corpus": "CUAD-10",
+        "questions_per_draw": 40,
+        "draws": [
+          {
+            "draw": "draw1",
+            "exact": 30,
+            "partial": 6,
+            "miss": 4,
+            "exact_rate": 0.75,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw2",
+            "exact": 30,
+            "partial": 6,
+            "miss": 4,
+            "exact_rate": 0.75,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw3",
+            "exact": 33,
+            "partial": 3,
+            "miss": 4,
+            "exact_rate": 0.825,
+            "helper_rows": 0
+          }
+        ],
+        "mean_exact_rate": 0.775,
+        "min_exact_rate": 0.75,
+        "max_exact_rate": 0.825,
+        "range_points": 7.5,
+        "peak_draw": "draw3",
+        "low_draw": "draw1",
+        "pooled_questions": 120,
+        "pooled_exact": 93,
+        "pooled_partial": 15,
+        "pooled_miss": 12,
+        "pooled_exact_rate": 0.775,
+        "pooled_helper_rows": 0
+      },
+      {
+        "corpus": "RACE-50-options",
+        "questions_per_draw": 177,
+        "draws": [
+          {
+            "draw": "draw1",
+            "exact": 151,
+            "partial": 1,
+            "miss": 25,
+            "exact_rate": 0.8531,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw2",
+            "exact": 149,
+            "partial": 2,
+            "miss": 26,
+            "exact_rate": 0.8418,
+            "helper_rows": 0
+          },
+          {
+            "draw": "draw3",
+            "exact": 150,
+            "partial": 3,
+            "miss": 24,
+            "exact_rate": 0.8475,
+            "helper_rows": 0
+          }
+        ],
+        "mean_exact_rate": 0.8475,
+        "min_exact_rate": 0.8418,
+        "max_exact_rate": 0.8531,
+        "range_points": 1.13,
+        "peak_draw": "draw1",
+        "low_draw": "draw2",
+        "pooled_questions": 531,
+        "pooled_exact": 450,
+        "pooled_partial": 6,
+        "pooled_miss": 75,
+        "pooled_exact_rate": 0.8475,
+        "pooled_helper_rows": 0
+      }
+    ]
+  },
+  "interpretation": [
+    "The external no-helper stamp is stable at corpus aggregate level: three fresh draws span only 1.96 points.",
+    "SQuAD and RACE form stable high transfer bands without helper rows.",
+    "PrivacyQA is mostly stable but draw3 moved lower, widening its exact-rate range to 6.67 points.",
+    "CUAD repeats 75 percent twice then rises to 82.50 percent on draw3, making contract QA visibly compile-draw sensitive.",
+    "MAUD remains the low legal-transfer boundary with a 35.00-42.50 percent band.",
+    "All three external draws report zero helper rows, zero runtime load errors, and zero write proposal rows."
+  ]
+}

@@ -886,3 +886,105 @@ Next pressure:
 - If compute time is the constraint, defer universal N=3 and treat the current
   N=2 rollup as the external no-helper baseline while resuming post-freeze
   architecture work on helper-free native compile-surface invariants.
+
+## IS-010 - No-Helper Fresh External N=3 Stamp
+
+Date: 2026-05-15 / 2026-05-16
+
+Before:
+
+- The external no-helper stamp had two fresh draws and a pooled exact rate of
+  `84.17%` across `916` questions.
+- Draw-two variance showed a stable aggregate band but left open whether the
+  contract corpora and PrivacyQA were genuinely stable or just under-sampled.
+- The freeze rule still applied: no repairs, no helper restoration, and no
+  prompt/code changes during the measurement window.
+
+Prediction:
+
+- The aggregate exact-rate band should stay narrow if the helper-free transfer
+  instrument is stable.
+- SQuAD and RACE should remain high and relatively tight.
+- MAUD and CUAD may show larger draw sensitivity because contract compiles rely
+  on dense clause-role and exception surfaces.
+
+Intervention:
+
+- Ran a third fresh external compile-plus-QA draw under tag
+  `instrument-freeze-20260515-r1`.
+- Kept helpers genuinely off with `--helper-companion-row-limit 0`, `--no-cache`,
+  and no legacy native helper adapter flag.
+- Used OpenRouter for SQuAD, PrivacyQA, and RACE at six hosted lanes total; used
+  POWER/local for MAUD and CUAD.
+- Added granular OpenRouter titles by phase/corpus/draw for the hosted legs.
+- Let all live workers finish rather than killing slow but progressing phases.
+
+After:
+
+| Corpus | Draw 1 | Draw 2 | Draw 3 | Mean | Range | Pooled | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `PrivacyQA-30` | 90.00% (`27/30`) | 90.00% (`27/30`) | 83.33% (`25/30`) | 87.78% | 6.67 pts | 87.78% (`79/90`) | 0 |
+| `MAUD-10` | 42.50% (`17/40`) | 35.00% (`14/40`) | 40.00% (`16/40`) | 39.17% | 7.50 pts | 39.17% (`47/120`) | 0 |
+| `SQuAD-30` | 96.49% (`165/171`) | 94.15% (`161/171`) | 94.74% (`162/171`) | 95.13% | 2.34 pts | 95.13% (`488/513`) | 0 |
+| `CUAD-10` | 75.00% (`30/40`) | 75.00% (`30/40`) | 82.50% (`33/40`) | 77.50% | 7.50 pts | 77.50% (`93/120`) | 0 |
+| `RACE-50-options` | 85.31% (`151/177`) | 84.18% (`149/177`) | 84.75% (`150/177`) | 84.75% | 1.13 pts | 84.75% (`450/531`) | 0 |
+
+Aggregate:
+
+| Draw | Questions | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `draw1` | 458 | 390 | 10 | 58 | 85.15% | 0 |
+| `draw2` | 458 | 381 | 13 | 64 | 83.19% | 0 |
+| `draw3` | 458 | 386 | 10 | 62 | 84.28% | 0 |
+| **N=3 pooled** | **1374** | **1157** | **33** | **184** | **84.21%** | **0** |
+
+Artifacts:
+
+- `docs\data\instrument_stamp\nohelper_external_n3_variance_rollup_20260515.json`
+- `docs\data\instrument_stamp\nohelper_external_n3_variance_rollup_20260515.md`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw3_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_privacyqa30_draw3_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw3_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_maud10_draw3_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw3_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_squad30_draw3_qa_or`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw3_compile_power`
+- `tmp\instrument_stamp_20260515_fresh_cuad10_draw3_qa_power`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw3_compile_or`
+- `tmp\instrument_stamp_20260515_fresh_race50_draw3_qa_or`
+
+Verification:
+
+- All five draw-three compile batches completed their expected fixture counts.
+- All five draw-three QA batches completed their expected question counts.
+- Every draw-three QA summary reported helper rows `0`, runtime load errors `0`,
+  and write proposal rows `0`.
+- Draw-three workers had exited before the N=3 rollup was written.
+
+Lesson:
+
+- The external helper-free stamp is now a real N=3 band, not a single draw:
+  pooled exact is `84.21%` across `1374` questions, with aggregate draw range
+  only `1.96` points.
+- Helper retirement holds across the external transfer layer: every draw across
+  every corpus reported zero helper rows.
+- SQuAD and RACE are the strongest stable transfer surfaces. RACE's MCQ option
+  form does not require helper restoration when options are visible.
+- PrivacyQA and CUAD are draw-sensitive enough that their exact claims should be
+  reported as bands, not single peaks.
+- MAUD remains the low legal-transfer boundary; its weakness is not helper
+  absence but dense categorical clause-role semantics.
+- The six-lane hosted run was slower than expected in draw three, so provider
+  throughput should be reported operationally and not confused with instrument
+  quality.
+
+Next pressure:
+
+- Treat the external no-helper transfer stamp as frozen and complete for this
+  cycle.
+- Do not run another broad stamp until there is a new instrument tag or a clear
+  post-freeze repair to measure.
+- Resume architecture work outside the freeze on native helper retirement:
+  replace legacy helper delivery with compile-surface invariants and direct
+  predicate emission, then decide whether the native corpus deserves its own
+  no-helper fresh stamp.
