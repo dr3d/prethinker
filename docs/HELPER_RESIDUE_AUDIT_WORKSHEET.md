@@ -1,6 +1,6 @@
 # Helper Residue Audit Worksheet
 
-Last updated: 2026-05-14
+Last updated: 2026-05-16
 
 This worksheet tracks the helper-delivery cleanup lane after the first
 instrument stamp. It is separate from guard compression and boundary hunting:
@@ -12,15 +12,18 @@ Operating rule:
 - Do not delete or weaken compiled facts to make helper volume look smaller.
 - Do not encode fixture nouns, question IDs, answer strings, local people,
   local organizations, or row IDs into helper ranking.
-- Treat helper rows as query-time delivery budget. If a helper is needed, keep
-  the most question-relevant rows; if a forensic run is needed, use the
-  unbounded mode.
+- Treat helper rows as retired query-time compatibility surfaces. The current
+  instrument default is no helper companion delivery; positive budgets are
+  forensic opt-ins for old-run diagnosis.
 
 CLI modes:
 
-- Default: `--helper-companion-row-limit 3`
-- Zero-helper ablation: `--helper-companion-row-limit 0`
+- Default/current instrument: `--helper-companion-row-limit 0`
+- Bounded forensic delivery: `--helper-companion-row-limit N` for positive `N`
 - Unbounded forensic delivery: `--helper-companion-row-limit -1`
+
+When the limit is `0`, helper companion assembly is skipped upstream. This is
+not merely a post-query row filter.
 
 ## HR-001 - Native Helper Pressure Anatomy
 
@@ -206,7 +209,8 @@ Intervention:
 
 - Added `_limit_helper_query_results(...)` as a query-time helper delivery
   filter.
-- Defaulted QA and batch QA to `--helper-companion-row-limit 3`.
+- At that stage, defaulted QA and batch QA to
+  `--helper-companion-row-limit 3`.
 - Added `--helper-companion-row-limit -1` for unbounded forensic delivery.
 - Added unit tests covering relevance ranking and zero-helper suppression.
 
@@ -868,3 +872,82 @@ Next pressure:
   as the only signal.
 - Keep full native replay paused until the three-fixture smoke can repeatedly
   stay near or above the frozen no-legacy baseline without helper rows.
+
+## HR-011 - Retire Helper Companion Delivery By Default
+
+Date: 2026-05-16
+
+Before:
+
+- The original native stamp exposed `7281` delivered helper rows. The ranked
+  cap reduced that to `976`, but that still left a large context surface that
+  external transfer corpora did not need.
+- The external N=3 stamp ran with helpers genuinely off and held at
+  `1157 / 33 / 184` across `1374` questions, exact `84.21%`, helper rows `0`.
+- Unlike helper probes showed that modern documents with roster, custody, and
+  sensor structures answered through direct compiled predicates rather than old
+  native helper triggers.
+
+Prediction:
+
+- The current instrument should default to zero helper companion delivery.
+- If a run requests `--helper-companion-row-limit 0`, the harness should skip
+  helper companion assembly entirely, not assemble helper rows and filter them
+  away after spending query/context budget.
+- Positive helper budgets should remain available only for forensic replay of
+  old native compatibility behavior.
+
+Intervention:
+
+- Changed QA and batch QA defaults to `--helper-companion-row-limit 0`.
+- Added a root `helper_companions_enabled` gate that disables helper companion
+  assembly in:
+  - primary query execution,
+  - evidence-bundle plan execution,
+  - source-text containment repair.
+- Left direct KB queries, query repairs, relaxed fallback, and temporal/status
+  joins available. The retirement target is helper companion delivery, not the
+  core query machinery.
+- Kept positive limits and `-1` as explicit forensic modes for compatibility
+  audits.
+
+After:
+
+- Default batch commands now emit `--helper-companion-row-limit 0`.
+- `run_query_plan(..., helper_companions_enabled=False)` preserves direct query
+  results while proving generic helper companion functions are not called.
+- Legacy native helper adapters remain opt-in behind
+  `--include-legacy-native-helper-adapters`; helper companion delivery itself is
+  now also off by default.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `scripts/run_domain_bootstrap_qa_batch.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa_batch.py`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py scripts\run_domain_bootstrap_qa_batch.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_run_query_plan_can_disable_helper_companion_assembly tests\test_domain_bootstrap_qa.py::test_run_query_plan_suppresses_legacy_native_helpers_when_disabled tests\test_domain_bootstrap_qa.py::test_helper_companion_row_limit_zero_suppresses_helper_results_only tests\test_domain_bootstrap_qa_batch.py -q`
+  -> `7 passed`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_domain_bootstrap_qa_batch.py -q`
+  -> `176 passed`
+
+Lesson:
+
+- The helper lane crossed from compression to retirement. `7281 -> 976` proved
+  the bulk was delivery residue; the helper-free external stamp and unlike
+  probes proved current architecture does not need helper companions as a
+  default substrate.
+- Retiring helpers is cleaner than carrying a low cap because it removes both
+  context load and accidental architectural ambiguity. Any future helper row
+  must be an explicit forensic or compatibility choice.
+
+Next pressure:
+
+- Re-run the focused QA/unit checks and then use native no-helper replays as
+  compile-surface evidence. Misses should be routed to direct predicate
+  preservation, source-fidelity invariants, or query planning, not back to
+  native helper delivery.

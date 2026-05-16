@@ -519,10 +519,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--helper-companion-row-limit",
         type=int,
-        default=3,
+        default=0,
         help=(
-            "Question-level budget for query-only helper companion rows. "
-            "Use 0 to suppress helper companions or -1 for unbounded forensic delivery."
+            "Question-level budget for retired query-only helper companion rows. "
+            "Default 0 disables helper companion assembly; use -1 for unbounded forensic delivery."
         ),
     )
     parser.add_argument(
@@ -1545,6 +1545,7 @@ def run_one_question(
     query_results = run_query_plan(
         runtime,
         queries,
+        helper_companions_enabled=_helper_companions_enabled(helper_companion_row_limit),
         include_legacy_native_helpers=include_legacy_native_helper_adapters,
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
@@ -1553,6 +1554,7 @@ def run_one_question(
             runtime=runtime,
             evidence_plan=evidence_plan,
             kb_inventory=kb_inventory,
+            helper_companions_enabled=_helper_companions_enabled(helper_companion_row_limit),
             include_legacy_native_helpers=include_legacy_native_helper_adapters,
         )
         query_results = [*query_results, *evidence_plan_query_results]
@@ -1872,6 +1874,7 @@ def run_query_plan(
     runtime: CorePrologRuntime,
     queries: list[str],
     *,
+    helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = True,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
@@ -1976,27 +1979,28 @@ def run_query_plan(
                 )
                 effective_query = repaired_query
                 last_result = repaired_result
-        if isinstance(last_result, dict) and last_result.get("status") != "success":
+        if helper_companions_enabled and isinstance(last_result, dict) and last_result.get("status") != "success":
             compact_interval = _compact_interval_duration_companion(results=results[:-1], query=effective_query)
             if compact_interval:
                 append_companion(compact_interval)
                 last_result = compact_interval.get("result", {})
-        if isinstance(last_result, dict) and last_result.get("status") != "success":
+        if helper_companions_enabled and isinstance(last_result, dict) and last_result.get("status") != "success":
             defined_interval = _defined_interval_duration_companion(runtime, query=effective_query)
             if defined_interval:
                 append_companion(defined_interval)
                 last_result = defined_interval.get("result", {})
-        if isinstance(last_result, dict) and last_result.get("status") != "success":
+        if helper_companions_enabled and isinstance(last_result, dict) and last_result.get("status") != "success":
             status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
             if status_interval:
                 append_companion(status_interval)
                 last_result = status_interval.get("result", {})
-        for domain_companion in _domain_companion_queries(
-            runtime,
-            query=effective_query,
-            include_legacy_native_helpers=include_legacy_native_helpers,
-        ):
-            append_companion(domain_companion)
+        if helper_companions_enabled:
+            for domain_companion in _domain_companion_queries(
+                runtime,
+                query=effective_query,
+                include_legacy_native_helpers=include_legacy_native_helpers,
+            ):
+                append_companion(domain_companion)
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
@@ -2004,9 +2008,10 @@ def run_query_plan(
                 effective_query = str(relaxed.get("query", query))
                 used_relaxed_fallback = True
                 last_result = relaxed.get("result", {})
-        companion = _evidence_table_companion_query(runtime, query=effective_query)
-        append_companion(companion)
-        if not used_relaxed_fallback:
+        if helper_companions_enabled:
+            companion = _evidence_table_companion_query(runtime, query=effective_query)
+            append_companion(companion)
+        if helper_companions_enabled and not used_relaxed_fallback:
             for domain_companion in _domain_companion_queries(
                 runtime,
                 query=effective_query,
@@ -2234,6 +2239,14 @@ def _helper_budget_row_score(
         if len(token) >= 4 and token in row_text:
             exact_surface_bonus += 0.25
     return float(value_overlap) + (1.5 * support_overlap) + (0.5 * predicate_overlap) + exact_surface_bonus
+
+
+def _helper_companions_enabled(row_limit: int | None) -> bool:
+    """Return whether retired query-helper companions should be assembled."""
+
+    if row_limit is None:
+        return True
+    return int(row_limit) != 0
 
 
 def _helper_budget_tokens(text: str) -> list[str]:
@@ -12817,6 +12830,7 @@ def run_evidence_bundle_plan_queries(
     runtime: CorePrologRuntime,
     evidence_plan: dict[str, Any],
     kb_inventory: dict[str, Any],
+    helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = True,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
@@ -12845,6 +12859,7 @@ def run_evidence_bundle_plan_queries(
                         filter_spec=source_text_filter,
                         bundle_id=bundle_id,
                         purpose=purpose,
+                        helper_companions_enabled=helper_companions_enabled,
                         include_legacy_native_helpers=include_legacy_native_helpers,
                     )
                 )
@@ -12899,6 +12914,7 @@ def run_evidence_bundle_plan_queries(
     for item in run_query_plan(
         runtime,
         plan_queries,
+        helper_companions_enabled=helper_companions_enabled,
         include_legacy_native_helpers=include_legacy_native_helpers,
     ):
         item = dict(item)
@@ -12961,6 +12977,7 @@ def _run_source_text_contains_filter(
     filter_spec: dict[str, str],
     bundle_id: str,
     purpose: str,
+    helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = True,
 ) -> dict[str, Any]:
     line_var = filter_spec["line_var"]
@@ -12970,6 +12987,7 @@ def _run_source_text_contains_filter(
     item = run_query_plan(
         runtime,
         [repaired_query],
+        helper_companions_enabled=helper_companions_enabled,
         include_legacy_native_helpers=include_legacy_native_helpers,
     )[0]
     result = item.get("result", {}) if isinstance(item, dict) else {}

@@ -472,19 +472,13 @@ ceiling is diagnostic archaeology until the orphan is rebuilt generically or
 replaced by audited live surfaces.
 `docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md` is the current rollup of this audit
 surface: helper delivery, compatibility-adapter quarantine, no-helper replay
-evidence, current read, and next action.
-The broadest helper by fixture spread is
-`source_record_packet_metadata_support`; it appears on three fixtures. Its
-cleanup readout splits the surface into 17 clean identifier/addressability
-support kinds and 10 quarantined content-note kinds. The current decision is to
-keep the helper as identifier metadata substrate and not promote embedded
-content notes such as appeal funding source, observer permission scope, pending
-packet item, role definitions, or transport departure as metadata.
-The clock-sync helper also had a small audit-hygiene pass: its rows now expose
-`SupportKind=last_successful_ntp_sync`, and it triggers on corrected/raw
-timestamp predicates as well as explicit clock-sync predicates. A targeted
-`contradictory_evidence_packet` q011 replay moved from miss to exact with three
-clean helper rows.
+evidence, current read, and next action. The current instrument default is
+`--helper-companion-row-limit 0`: helper companion assembly is skipped upstream,
+legacy native adapters remain opt-in, and any positive helper budget is a
+forensic compatibility mode rather than normal architecture. Earlier helper
+families such as packet metadata or clock-sync support remain useful archaeology
+for diagnosing old native runs, but new performance work should preserve direct
+compile facts and query-planning surfaces instead of restoring helper rows.
 
 ## Extraction Rule
 

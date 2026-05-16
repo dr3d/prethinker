@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-12
+Last updated: 2026-05-16
 
 This page is the short operational map for choosing the next few hours of work.
 It is intentionally stricter than a brainstorm: new ideas belong here only if
@@ -94,9 +94,12 @@ failure geometry, design small probes around one axis at a time, and promote
 only repairs that replay on unlike rows.
 
 The helper-retirement successor job is tracked in
-`docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md`: use source-record ledgers to
-audit whether recurring answer-bearing surfaces also appear as direct admitted
-compile facts before deleting native helper bridges.
+`docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md` and
+`docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md`: helper companion delivery is
+retired by default (`--helper-companion-row-limit 0`) and old native adapters
+are opt-in compatibility surfaces. The active work is to preserve recurring
+answer-bearing surfaces as direct admitted compile facts, not to restore native
+helper bridges.
 
 The older cross-fixture repair-slice report is archived outside the active tree.
 Current boundary growth is tracked by `docs/BOUNDARY_HUNT_WORKSHEET.md` and

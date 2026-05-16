@@ -2298,6 +2298,38 @@ def test_run_query_plan_suppresses_legacy_native_helpers_after_generic_companion
     assert all(item["result"].get("predicate") != "roster_state_support" for item in rows)
 
 
+def test_run_query_plan_can_disable_helper_companion_assembly(monkeypatch) -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("case_status(case_a, closed, 2026_01_02).").get("status") == "success"
+
+    called = False
+
+    def fake_generic_companion(*args, **kwargs):
+        nonlocal called
+        called = True
+        return {
+            "query": "generic_probe.",
+            "result": {
+                "status": "success",
+                "predicate": "status_timeline_summary_support",
+                "rows": [{"HelperClass": "clean-helper", "SupportKind": "status_timeline"}],
+                "num_rows": 1,
+            },
+        }
+
+    monkeypatch.setattr(qa_module, "_status_timeline_summary_companion", fake_generic_companion)
+
+    rows = run_query_plan(
+        runtime,
+        ["case_status(Case, Status, Date)."],
+        helper_companions_enabled=False,
+    )
+
+    assert called is False
+    assert any(item["result"].get("predicate") == "case_status" for item in rows)
+    assert all(item["result"].get("predicate") != "status_timeline_summary_support" for item in rows)
+
+
 def test_run_query_plan_dedupes_repeated_helper_companion_rows() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

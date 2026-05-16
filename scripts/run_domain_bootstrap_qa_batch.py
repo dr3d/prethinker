@@ -64,8 +64,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--helper-companion-row-limit",
         type=int,
-        default=3,
-        help="Question-level budget for query-only helper companion rows. Use 0 to suppress them or -1 for unbounded forensic delivery.",
+        default=0,
+        help=(
+            "Question-level budget for retired query-only helper companion rows. "
+            "Default 0 disables helper companion assembly; use -1 for unbounded forensic delivery."
+        ),
     )
     parser.add_argument(
         "--include-legacy-native-helper-adapters",
@@ -182,7 +185,7 @@ def _build_command(
     evidence_bundle: bool,
     classify_failure_surfaces: bool,
     cache: bool = True,
-    helper_companion_row_limit: int | None = None,
+    helper_companion_row_limit: int | None = 0,
     include_legacy_native_helper_adapters: bool = False,
 ) -> list[str]:
     command = [

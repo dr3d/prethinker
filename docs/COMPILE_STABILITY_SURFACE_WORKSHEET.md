@@ -1198,10 +1198,10 @@ to be held constant so the measurement remains interpretable?
 Before:
 
 The freeze candidate separated helper-era residues from current compile and QA
-machinery, but the QA batch runner still defaults to three generic helper
-companion rows. Legacy native helper adapters are opt-in, but a stamp run that
-silently delivered three helper companions would not be a clean no-helper
-measurement.
+machinery, but at this point the QA batch runner still defaulted to three
+generic helper companion rows. Legacy native helper adapters were opt-in, but a
+stamp run that silently delivered three helper companions would not be a clean
+no-helper measurement.
 
 Prediction:
 
@@ -1250,6 +1250,10 @@ The stamp now has a clear helper state:
 - helper companion rows: off for stamp evidence by setting the row limit to 0;
 - cache: off so old helper-bearing artifacts cannot masquerade as no-helper
   results.
+
+HR-011 later made this stamp protocol the normal runtime default: a row limit
+of `0` now skips helper companion assembly upstream, while positive limits are
+forensic opt-ins.
 
 Corpora decision:
 

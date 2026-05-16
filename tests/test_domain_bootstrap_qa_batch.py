@@ -33,6 +33,8 @@ def test_qa_batch_accepts_markdown_answer_key_without_oracle(tmp_path: Path) -> 
     assert "--judge-reference-answers" in command
     assert "--classify-failure-surfaces" in command
     assert "--no-cache" in command
+    assert "--helper-companion-row-limit" in command
+    assert command[command.index("--helper-companion-row-limit") + 1] == "0"
     assert "--include-legacy-native-helper-adapters" not in command
 
     legacy_command = _build_command(

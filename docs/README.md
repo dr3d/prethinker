@@ -16,7 +16,7 @@ Use this short path if you are new:
 2. [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - current operating doctrine and the next boundary-hunt job.
 3. [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public-facing guide to artifact-first orchestration, lens facets, selector guards, and uncertainty states.
 4. [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) - active workbench for the wide-corpus boundary map, probe backlog, and helper/source cleanup queues.
-5. [Helper Residue Audit Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - helper-row delivery budget and cleanup evidence.
+5. [Helper Residue Audit Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md) - helper-row retirement, no-helper replay evidence, and forensic compatibility notes.
 6. [Compile Surface Stability Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md) - invariant audit for replacing legacy helper adapters with direct compile surfaces.
 7. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - internal doctrine for designing fixtures as boundary probes rather than random ingestion.
 8. [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
