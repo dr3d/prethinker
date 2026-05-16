@@ -2966,3 +2966,69 @@ Next pressure:
   family.
 - Watch whether the generic alias families improve QA routing on future
   no-helper native runs without widening fixture vocabulary.
+
+## HR-034 - `person_role` Slot Contract Clarification
+
+Date: 2026-05-16
+
+Before:
+
+- HR-032 identified `person_role/3` as the only broad structural candidate in
+  the native no-helper draw-1 risk ranking: `105` admitted mentions across
+  `13` fixtures.
+- Direct artifact inspection found `person_role` in `18` fixtures total when
+  including both arities:
+  - `person_role/3`: `105` rows
+  - `person_role/2`: `26` rows
+- The third slot varied by corpus: organization, source entry, date, date
+  interval, location/unit, vessel, project, or incident context.
+
+Prediction:
+
+- `person_role/3` is structural, but the third slot should not be treated as a
+  precise universal type.
+- Naming the third slot as `scope_or_context` is safer than leaving it as
+  anonymous `arg3` or pretending it is always an organization/date.
+
+Intervention:
+
+- Added special compiled KB slot contracts:
+  - `person_role/2`: `person`, `role`
+  - `person_role/3`: `person`, `role`, `scope_or_context`
+  - `group_assignment/3`: `person`, `version_or_context`, `group`
+  - `recorded_statement/3`: `statement_id`, `speaker`, `content`
+- Left the QA rule intact that identity/role is not authorization:
+  `person_role/2` or `person_role/3` can identify a role holder, but authority
+  questions still require governing authority/source/action surfaces.
+
+After:
+
+- The broad role surface now has a clear contract for prompt/query planning.
+- The contract stays intentionally modest: the third slot is a scoping slot,
+  not a universal organization/date assertion.
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_contracts_name_role_and_generic_replacement_slots -q`
+
+Lesson:
+
+Broad fixture spread earns a slot-contract audit, not automatic trust. Here the
+predicate is genuinely useful across domains, but its arity-3 slot is a
+polymorphic scope. The correct architecture is to expose that polymorphism
+honestly so future query planning can bind it when helpful and avoid treating it
+as authority, date, organization, or location unless another predicate says so.
+
+Next pressure:
+
+- Run a small no-helper QA replay or static query check on role-heavy rows later
+  to see whether named slot contracts improve role query stability.
+- Continue semantic risk cleanup with the next high-volume single-fixture
+  generic-looking surfaces: `event/5`, `score_entry/5`, `held_role/3`,
+  `recorded_in/4`, and `state_changed/3`.

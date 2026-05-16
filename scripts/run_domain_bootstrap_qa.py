@@ -1076,13 +1076,19 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
 
 
 def compiled_kb_contracts(signatures: list[str]) -> list[dict[str, Any]]:
+    special_args = {
+        "person_role/2": ["person", "role"],
+        "person_role/3": ["person", "role", "scope_or_context"],
+        "group_assignment/3": ["person", "version_or_context", "group"],
+        "recorded_statement/3": ["statement_id", "speaker", "content"],
+    }
     contracts: list[dict[str, Any]] = []
     for signature in signatures:
         try:
             arity = int(signature.rsplit("/", 1)[1])
         except Exception:
             continue
-        contracts.append({"signature": signature, "args": [f"arg{i}" for i in range(1, arity + 1)]})
+        contracts.append({"signature": signature, "args": special_args.get(signature, [f"arg{i}" for i in range(1, arity + 1)])})
     return contracts
 
 

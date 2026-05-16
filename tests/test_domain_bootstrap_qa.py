@@ -37,6 +37,7 @@ from scripts.run_domain_bootstrap_qa import (
     _vacancy_voting_eligibility_companion,
     cache_key_for_question,
     clause_signature,
+    compiled_kb_contracts,
     compiled_kb_inventory,
     hash_text,
     is_cacheable_row,
@@ -241,6 +242,27 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
         set(families["count_requirement_surface"]["signatures"])
     )
     assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
+
+
+def test_compiled_kb_contracts_name_role_and_generic_replacement_slots() -> None:
+    contracts = {
+        row["signature"]: row["args"]
+        for row in compiled_kb_contracts(
+            [
+                "person_role/2",
+                "person_role/3",
+                "group_assignment/3",
+                "recorded_statement/3",
+                "custom_fact/2",
+            ]
+        )
+    }
+
+    assert contracts["person_role/2"] == ["person", "role"]
+    assert contracts["person_role/3"] == ["person", "role", "scope_or_context"]
+    assert contracts["group_assignment/3"] == ["person", "version_or_context", "group"]
+    assert contracts["recorded_statement/3"] == ["statement_id", "speaker", "content"]
+    assert contracts["custom_fact/2"] == ["arg1", "arg2"]
 
 
 def test_query_strategy_keeps_source_coordinate_queries_variable_first() -> None:
