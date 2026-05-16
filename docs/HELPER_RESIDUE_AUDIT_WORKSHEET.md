@@ -1781,3 +1781,92 @@ Next pressure:
   other role-bearing source lines.
 - Require the profile/review layer to notice when a source names a person plus
   role but the profile lacks a direct person-role/source slot.
+
+## HR-021 - Source-Role Review Without Fixture Vocabulary
+
+Date: 2026-05-16
+
+Before:
+
+- HR-020 showed that profile-review hardening can recover a missing
+  compile-surface slot when the source states a reusable structural attribute.
+- The next residual class was source-stated person-plus-role lines: named
+  people tied to source, attendance, authorship, compilation, review, or other
+  role-bearing contexts.
+- This class is dangerous because examples can easily borrow current fixture
+  vocabulary and turn the audit rule into a recognizer for recent rows.
+
+Prediction:
+
+- A fixture-free source-role review rule should cause profile retry to add a
+  person-role/source-role slot when the source states a named person with a
+  role and context.
+- If the wording smuggles current fixture nouns, the rule should be rewritten
+  before any result is treated as architecture.
+
+Intervention:
+
+- Added a profile-bootstrap/review rule for role-bearing source lines:
+  signatures, headers, attendance notes, correspondence blocks,
+  source-authored notes, office/title labels, and similar person-plus-role
+  lines.
+- Removed current-corpus-flavored role examples from the guidance after a
+  leakage check. The instrument wording now names the contract, not the local
+  fixture role.
+- Verified the patched instrument text with a repository search for current
+  names and row vocabulary.
+- Recompiled the sensor pressure fixture with the cleaned guidance and ran
+  first-8 no-helper QA.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Note |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| HR-020 review-hardened equipment run | sensor first 8 | 6 | 0 | 2 | 0 | vendor/model fixed; person-role absent |
+| HR-021 cleaned source-role run | sensor first 8 | 7 | 0 | 1 | 0 | vendor/model and person-role exact |
+
+Resolved coordinates:
+
+- Equipment specification remained exact through direct vendor/model rows.
+- Source-stated person-role context became queryable through a direct
+  role/context row.
+
+Remaining coordinate:
+
+- Section-title/addressability is now a query-surface gap: the KB has the
+  relevant section atoms, but the query plan still reaches for unsupported
+  string predicates and does not isolate the section-display coordinate.
+
+Artifacts:
+
+- `docs/data/helper_residue/source_role_review_sensor_clean_qa_20260516.json`
+- `docs/data/helper_residue/source_role_review_sensor_clean_qa_20260516.md`
+- `tmp/helper_residue_source_role_review_sensor_compile_20260516`
+- `tmp/helper_residue_source_role_review_sensor_clean_compile_20260516`
+- `tmp/helper_residue_source_role_review_sensor_clean_qa_20260516`
+
+Verification:
+
+- Focused suite:
+  - `python -m py_compile src\profile_bootstrap.py scripts\run_domain_bootstrap_file.py`
+  - `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_story_world_dataset.py -q`
+  - `246 passed`
+
+Lesson:
+
+- Source-role preservation is real, but it must be stated as a slot contract:
+  named person, role, and governed source/context. The instrument should not
+  name the recent fixture role that exposed the gap.
+- The profile-review layer is becoming the right place for this class of work:
+  it catches missing vocabulary before compile has to choose between hiding a
+  person-role line in source text or inventing a brittle local predicate.
+- The remaining sensor miss is no longer helper residue or profile-slot loss.
+  It is section-display/query-surface resolution.
+
+Next pressure:
+
+- Run the cleaned source-role rule on the custody/provenance fixture that still
+  has a person-role residual, then decide whether the rule transfers or needs
+  a stricter source-role slot contract.
+- After that, address section-display/source-addressability as a query-surface
+  problem rather than a helper problem.
