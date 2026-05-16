@@ -1513,3 +1513,85 @@ Next pressure:
   guidance again. Do not use the native role noun as architecture.
 - Once that is done, replay the three fixture smoke and then consider a larger
   native no-helper scan.
+
+## HR-018 - Generic Role-Line Projection Rejected
+
+Date: 2026-05-16
+
+Before:
+
+- HR-017 left one residual in the accepted no-helper native pressure slice:
+  `15 / 0 / 1`, helper rows=`0`.
+- The residual looked tempting: source text contained a person plus role, but
+  the compile did not expose a structured person-role row.
+- Existing legacy helper code already contains registrar-shaped packet metadata
+  recognition. The audit goal was to avoid promoting that fixture-shaped logic.
+
+Prediction:
+
+- A generic deterministic role-line projection might recover person-plus-role
+  source text without restoring helper companions if it:
+  - emits no `HelperClass`,
+  - handles unlike role lines,
+  - avoids table headers, organization names, and negated/non-person phrases,
+  - improves the native pressure slice without disturbing existing exact rows.
+
+Intervention:
+
+- Temporarily added a no-helper `source_record_role_line_support` projection
+  over normalized `source_record_text_atom/2` rows.
+- Tested it on unlike source-line shapes such as records liaison, terminal
+  registrar, and embedded person-plus-role text.
+- First replay showed false positives from organization/header text.
+- Tightened the recognizer to exclude organization suffixes, table-header
+  tokens, and negated/non-person phrases.
+- Replayed the accepted native compile root after both attempts.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Decision |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| HR-017 accepted state | two fixtures, first 8 | 15 | 0 | 1 | 0 | keep |
+| Loose role-line projection | same compile root | 14 | 1 | 1 | 0 | reject |
+| Tight role-line projection | same compile root | 13 | 0 | 3 | 0 | reject |
+
+Artifacts:
+
+- `docs/data/helper_residue/native_pressure_role_line_core_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_role_line_core_qa_20260516.md`
+- `docs/data/helper_residue/native_pressure_role_line_tight_qa_20260516.json`
+- `docs/data/helper_residue/native_pressure_role_line_tight_qa_20260516.md`
+- `tmp/helper_residue_native_pressure_role_line_core_qa_20260516`
+- `tmp/helper_residue_native_pressure_role_line_tight_qa_20260516`
+
+Verification:
+
+- The role-line code and unit test were removed after rejection.
+- Current focused tests are back to:
+  - `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+  - `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+  - `174 passed`
+
+Lesson:
+
+- Deterministic role-line parsing is a real primitive, but this implementation
+  is not stable enough for default architecture. Even after false-positive
+  tightening, it reduced the native pressure score.
+- The failure mode is exactly the guardrail: normalized source text can make
+  organization labels, table headers, negated phrases, and person-role lines
+  look structurally similar. A regex/token recognizer can become fixture-era
+  helper logic in cleaner clothes.
+- The accepted architecture remains HR-017: source-line fallback,
+  source-role/source-basis compile contracts, and item-title/year core
+  projection. The final role residual should be addressed by better compile
+  preservation or a more principled role-line audit layer, not by promoting this
+  recognizer.
+
+Next pressure:
+
+- Keep the accepted `15 / 0 / 1` no-helper state as the current decision point.
+- Do not chase the last native residual inside helper residue. Move to a
+  separate role-line/source-role audit only if it can define stronger admission
+  criteria than adjacent token parsing.
+- The next high-value check is a slightly broader no-helper native smoke using
+  the accepted state, not more local role-line tinkering.
