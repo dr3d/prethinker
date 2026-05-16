@@ -28,6 +28,91 @@ These buckets are a first-pass layer map, not a promotion decision.
 | `semantic_compile_surface` | 1221 | 1077 | 56 | `person_role/3` (14), `document_type/2` (7), `recorded_in/3` (6), `person_role/2` (5), `item_attribute/3` (5), `rule_id/1` (5) |
 | `legacy_compatibility_alias` | 9 | 9 | 4 | `student_in_version/3` (1), `student_withdrawn/2` (1), `student_added/2` (1), `homeroom_reassigned/3` (1), `initial_group_assignment/3` (1), `student_id/1` (1) |
 
+## Admitted Semantic Risk Ranking
+
+| Predicate | Risk | Mentions | Fixtures | Flagged tokens | Reason |
+| --- | --- | ---: | ---: | --- | --- |
+| `assigned_to_bus/3` | `domain_or_fixture_shaped_singleton` | 23 | 1 | `bus` | domain-shaped vocabulary with little transfer evidence |
+| `adult_in_version/3` | `domain_or_fixture_shaped_singleton` | 13 | 1 | `adult` | domain-shaped vocabulary with little transfer evidence |
+| `bus_chaperone/2` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `bus`, `chaperone` | domain-shaped vocabulary with little transfer evidence |
+| `distinct_student_count/2` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `student` | domain-shaped vocabulary with little transfer evidence |
+| `patient_use_exception/5` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `patient` | domain-shaped vocabulary with little transfer evidence |
+| `qualifying_chaperone_count/2` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `chaperone` | domain-shaped vocabulary with little transfer evidence |
+| `roster_version/1` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `roster` | domain-shaped vocabulary with little transfer evidence |
+| `roster_version_date/2` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `roster` | domain-shaped vocabulary with little transfer evidence |
+| `sensor_id/1` | `domain_or_fixture_shaped_singleton` | 4 | 1 | `sensor` | domain-shaped vocabulary with little transfer evidence |
+| `roster_version/3` | `domain_or_fixture_shaped_singleton` | 3 | 1 | `roster` | domain-shaped vocabulary with little transfer evidence |
+| `sensor_calibration_date/2` | `domain_or_fixture_shaped_singleton` | 3 | 1 | `sensor` | domain-shaped vocabulary with little transfer evidence |
+| `sensor_certified_scope/2` | `domain_or_fixture_shaped_singleton` | 3 | 1 | `sensor` | domain-shaped vocabulary with little transfer evidence |
+| `adult_added/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `adult` | domain-shaped vocabulary with little transfer evidence |
+| `bus_id/1` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `bus` | domain-shaped vocabulary with little transfer evidence |
+| `final_grant_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_disbursement_date/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_fiscal_year/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_return_amount/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `grant_return_status/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `prior_grant_id/1` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `grant` | domain-shaped vocabulary with little transfer evidence |
+| `sensor_next_calibration_due/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `sensor` | domain-shaped vocabulary with little transfer evidence |
+| `sensor_not_certified_for/2` | `domain_or_fixture_shaped_singleton` | 2 | 1 | `sensor` | domain-shaped vocabulary with little transfer evidence |
+| `adult_withdrawn/2` | `domain_or_fixture_shaped_singleton` | 1 | 1 | `adult` | domain-shaped vocabulary with little transfer evidence |
+| `bus_assignment/3` | `domain_or_fixture_shaped_singleton` | 1 | 1 | `bus` | domain-shaped vocabulary with little transfer evidence |
+| `chaperone_substitution/3` | `domain_or_fixture_shaped_singleton` | 1 | 1 | `chaperone` | domain-shaped vocabulary with little transfer evidence |
+| `patient_event/4` | `domain_or_fixture_shaped_singleton` | 1 | 1 | `patient` | domain-shaped vocabulary with little transfer evidence |
+| `standby_chaperone/2` | `domain_or_fixture_shaped_singleton` | 1 | 1 | `chaperone` | domain-shaped vocabulary with little transfer evidence |
+| `student_in_version/3` | `legacy_compatibility_alias` | 121 | 1 | `student` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `initial_group_assignment/3` | `legacy_compatibility_alias` | 83 | 1 |  | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_member/4` | `legacy_compatibility_alias` | 77 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_member_label/5` | `legacy_compatibility_alias` | 77 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_member/4` | `legacy_compatibility_alias` | 52 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_member_alias/2` | `legacy_compatibility_alias` | 40 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `student_id/1` | `legacy_compatibility_alias` | 35 | 1 | `student` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_member_header/2` | `legacy_compatibility_alias` | 12 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_scope/2` | `legacy_compatibility_alias` | 12 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `roster_table_version/2` | `legacy_compatibility_alias` | 12 | 1 | `roster` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `adult_role/2` | `legacy_compatibility_alias` | 8 | 1 | `adult` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `homeroom_reassigned/3` | `legacy_compatibility_alias` | 3 | 1 | `homeroom` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `student_added/2` | `legacy_compatibility_alias` | 3 | 1 | `student` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `student_withdrawn/2` | `legacy_compatibility_alias` | 3 | 1 | `student` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `student_swap/4` | `legacy_compatibility_alias` | 2 | 1 | `student` | compatibility alias; keep out of new guidance unless explicitly scoped |
+| `event/5` | `high_volume_single_fixture_surface` | 60 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `score_entry/5` | `high_volume_single_fixture_surface` | 53 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `held_role/3` | `high_volume_single_fixture_surface` | 44 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `recorded_in/4` | `high_volume_single_fixture_surface` | 44 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `assigned_to_room/2` | `high_volume_single_fixture_surface` | 40 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `state_changed/3` | `high_volume_single_fixture_surface` | 39 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `applicant_attribute/3` | `high_volume_single_fixture_surface` | 35 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `docket_entry/4` | `high_volume_single_fixture_surface` | 35 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `seat_row_assignment/3` | `high_volume_single_fixture_surface` | 35 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `object/1` | `high_volume_single_fixture_surface` | 33 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `said/3` | `high_volume_single_fixture_surface` | 33 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `administrative_action/5` | `high_volume_single_fixture_surface` | 32 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `correction_source_record/3` | `high_volume_single_fixture_surface` | 32 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `item_attribute_source/3` | `high_volume_single_fixture_surface` | 30 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `owns/3` | `high_volume_single_fixture_surface` | 30 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `project_parameter/4` | `high_volume_single_fixture_surface` | 30 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `entity_role_in_context/4` | `high_volume_single_fixture_surface` | 28 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `consistent_with/3` | `high_volume_single_fixture_surface` | 26 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `has_physical_custody/3` | `high_volume_single_fixture_surface` | 24 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `item_internal_id/2` | `high_volume_single_fixture_surface` | 24 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `item_title_recorded/3` | `high_volume_single_fixture_surface` | 24 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `owned_by/2` | `high_volume_single_fixture_surface` | 24 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `assigned_to_group/2` | `high_volume_single_fixture_surface` | 23 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `log_turn/2` | `high_volume_single_fixture_surface` | 23 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `date_event_anchor/3` | `high_volume_single_fixture_surface` | 22 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `docket_event/4` | `high_volume_single_fixture_surface` | 22 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `event/1` | `high_volume_single_fixture_surface` | 22 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `involved_actor/2` | `high_volume_single_fixture_surface` | 22 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `structure_attribute/4` | `high_volume_single_fixture_surface` | 22 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `event_actor/2` | `high_volume_single_fixture_surface` | 21 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `event_actor_role/4` | `high_volume_single_fixture_surface` | 21 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `project_attribute/3` | `high_volume_single_fixture_surface` | 21 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `ambiguous_utterance/2` | `high_volume_single_fixture_surface` | 20 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `conservation_engagement/4` | `high_volume_single_fixture_surface` | 20 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `eligibility_finding/3` | `high_volume_single_fixture_surface` | 20 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `rule_consequence/3` | `high_volume_single_fixture_surface` | 20 | 1 |  | large local surface; check whether this is structure or corpus residue |
+| `person_role/3` | `broad_structural_candidate` | 105 | 13 |  | broad fixture spread; likely structural, still subject to slot-contract audit |
+
 ## Top Admitted Predicates
 
 | Predicate | Clause mentions | Fixtures |

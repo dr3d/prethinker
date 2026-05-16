@@ -2790,3 +2790,98 @@ Next pressure:
   equivalents only when an unlike vocabulary can exercise the same structural
   contract.
 - Re-run leak audit after the next compile-surface or query-policy change.
+
+## HR-032 - Semantic Predicate Risk Ranking
+
+Date: 2026-05-16
+
+Before:
+
+- HR-031 separated deterministic ledger volume from semantic compile surface,
+  but the semantic surface still had `953` unique admitted predicate names.
+- The next cleanup question was not "how many predicates exist?" but "which
+  active names are likely to smuggle fixture/domain vocabulary into future
+  guidance?"
+
+Prediction:
+
+- A first-pass risk ranking should pull local domain-shaped names and
+  high-volume single-fixture surfaces to the top.
+- Broad structural names should be rare but important, because they are the
+  right candidates for slot-contract audits rather than retirement.
+
+Intervention:
+
+- Extended `scripts/audit_compile_predicate_inventory.py` with admitted
+  semantic risk rows.
+- Risk classes:
+  - `domain_or_fixture_shaped_singleton`
+  - `legacy_compatibility_alias`
+  - `legacy_support_surface`
+  - `high_volume_single_fixture_surface`
+  - `broad_structural_candidate`
+  - `transfer_observed`
+  - `singleton_low_volume`
+- Re-ran the native no-helper draw-1 predicate inventory.
+
+After:
+
+Risk distribution across non-ledger admitted predicates:
+
+| Risk | Unique predicates |
+| --- | ---: |
+| `singleton_low_volume` | `865` |
+| `high_volume_single_fixture_surface` | `36` |
+| `domain_or_fixture_shaped_singleton` | `28` |
+| `transfer_observed` | `23` |
+| `legacy_compatibility_alias` | `15` |
+| `broad_structural_candidate` | `1` |
+
+Top immediate naming-risk rows:
+
+| Predicate | Risk | Mentions | Fixtures |
+| --- | --- | ---: | ---: |
+| `assigned_to_bus/3` | `domain_or_fixture_shaped_singleton` | `23` | `1` |
+| `adult_in_version/3` | `domain_or_fixture_shaped_singleton` | `13` | `1` |
+| `bus_chaperone/2` | `domain_or_fixture_shaped_singleton` | `4` | `1` |
+| `distinct_student_count/2` | `domain_or_fixture_shaped_singleton` | `4` | `1` |
+| `patient_use_exception/5` | `domain_or_fixture_shaped_singleton` | `4` | `1` |
+| `sensor_id/1` | `domain_or_fixture_shaped_singleton` | `4` | `1` |
+| `student_in_version/3` | `legacy_compatibility_alias` | `121` | `1` |
+| `initial_group_assignment/3` | `legacy_compatibility_alias` | `83` | `1` |
+| `roster_table_member/4` | `legacy_compatibility_alias` | `77` | `1` |
+
+The main broad structural candidate is:
+
+| Predicate | Mentions | Fixtures | Read |
+| --- | ---: | ---: | --- |
+| `person_role/3` | `105` | `13` | likely structural, but needs slot-contract audit |
+
+Artifacts:
+
+- `scripts/audit_compile_predicate_inventory.py`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_predicate_inventory.py`
+
+Lesson:
+
+The active semantic surface is not dominated by broad reusable predicates. It is
+mostly a long tail of low-volume local names plus a smaller set of high-volume
+single-fixture surfaces. That is acceptable for measurement, but dangerous for
+architecture: names should not be copied from the inventory into guidance until
+they earn transfer or collapse into a more generic contract. The first broad
+slot-contract target is `person_role/3`; the first retirement/quarantine target
+family remains assignment/roster/bus/adult naming.
+
+Next pressure:
+
+- Inspect the top domain-shaped singleton family (`assigned_to_bus`,
+  `adult_in_version`, `bus_chaperone`, `qualifying_chaperone_count`) and decide
+  whether it should collapse into generic assignment/role/count predicates or
+  remain fixture-local compile vocabulary.
+- Separately audit `person_role/3` as a broad structural surface: role holder,
+  role label, scope/context/date are the likely slots.

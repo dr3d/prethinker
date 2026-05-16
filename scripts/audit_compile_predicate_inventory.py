@@ -27,6 +27,21 @@ LEGACY_COMPAT_NAMES = {
     "roster_member",
 }
 
+DOMAIN_OR_FIXTURE_TOKENS = {
+    "adult",
+    "bus",
+    "chaperone",
+    "clinic",
+    "grant",
+    "homeroom",
+    "patient",
+    "probate",
+    "roster",
+    "school",
+    "sensor",
+    "student",
+}
+
 
 def iter_compile_jsons(paths: list[str]) -> list[Path]:
     out: list[Path] = []
@@ -112,6 +127,50 @@ def predicate_bucket(signature: str) -> str:
     if name in LEGACY_COMPAT_NAMES or any(name.startswith(prefix) for prefix in LEGACY_COMPAT_PREFIXES):
         return "legacy_compatibility_alias"
     return "semantic_compile_surface"
+
+
+def predicate_risk_row(
+    signature: str,
+    *,
+    occurrences: int,
+    fixtures: int,
+) -> dict[str, Any]:
+    name = predicate_name(signature)
+    bucket = predicate_bucket(signature)
+    tokens = {part for part in re.split(r"_+", name) if part}
+    flagged_tokens = sorted(tokens & DOMAIN_OR_FIXTURE_TOKENS)
+
+    if bucket == "legacy_compatibility_alias":
+        risk = "legacy_compatibility_alias"
+        reason = "compatibility alias; keep out of new guidance unless explicitly scoped"
+    elif bucket == "legacy_support_surface":
+        risk = "legacy_support_surface"
+        reason = "support-style predicate; verify it is not helper-era delivery"
+    elif flagged_tokens and fixtures <= 2:
+        risk = "domain_or_fixture_shaped_singleton"
+        reason = "domain-shaped vocabulary with little transfer evidence"
+    elif fixtures == 1 and occurrences >= 20:
+        risk = "high_volume_single_fixture_surface"
+        reason = "large local surface; check whether this is structure or corpus residue"
+    elif fixtures >= 8:
+        risk = "broad_structural_candidate"
+        reason = "broad fixture spread; likely structural, still subject to slot-contract audit"
+    elif fixtures >= 3:
+        risk = "transfer_observed"
+        reason = "appears in multiple fixtures; audit slot contracts before promotion"
+    else:
+        risk = "singleton_low_volume"
+        reason = "low-volume singleton; usually fixture-local until unlike replay says otherwise"
+
+    return {
+        "predicate": signature,
+        "bucket": bucket,
+        "risk": risk,
+        "reason": reason,
+        "occurrences": occurrences,
+        "fixtures": fixtures,
+        "flagged_tokens": flagged_tokens,
+    }
 
 
 def fixture_name(path: Path, payload: dict[str, Any]) -> str:
@@ -230,6 +289,30 @@ def summarize(paths: list[str]) -> dict[str, Any]:
         "admitted_predicates": top_rows(admitted_counter, admitted_fixture_counts, len(admitted_counter)),
         "candidate_buckets": bucket_summary(candidate_counter, fixture_candidate_sets),
         "admitted_buckets": bucket_summary(admitted_counter, fixture_admitted_sets),
+        "admitted_semantic_risk_rows": sorted(
+            [
+                predicate_risk_row(
+                    pred,
+                    occurrences=count,
+                    fixtures=admitted_fixture_counts.get(pred, 0),
+                )
+                for pred, count in admitted_counter.items()
+                if predicate_bucket(pred) != "deterministic_ledger"
+            ],
+            key=lambda row: (
+                {
+                    "domain_or_fixture_shaped_singleton": 0,
+                    "legacy_compatibility_alias": 1,
+                    "legacy_support_surface": 2,
+                    "high_volume_single_fixture_surface": 3,
+                    "broad_structural_candidate": 4,
+                    "transfer_observed": 5,
+                    "singleton_low_volume": 6,
+                }.get(row["risk"], 9),
+                -int(row["occurrences"]),
+                row["predicate"],
+            ),
+        ),
         "top_candidate_predicates": top_rows(candidate_counter, candidate_fixture_counts, 80),
         "top_admitted_predicates": top_rows(admitted_counter, admitted_fixture_counts, 120),
         "candidate_not_admitted": sorted(unique_candidate - unique_admitted),
@@ -275,6 +358,20 @@ def render_markdown(payload: dict[str, Any]) -> str:
     for row in payload.get("candidate_buckets", []):
         top = ", ".join(f"`{item['predicate']}` ({item['occurrences']})" for item in row.get("top_predicates", [])[:6])
         lines.append(f"| `{row['bucket']}` | {row['mentions']} | {row['unique_predicates']} | {row['fixtures']} | {top} |")
+    lines.extend(
+        [
+            "",
+            "## Admitted Semantic Risk Ranking",
+            "",
+            "| Predicate | Risk | Mentions | Fixtures | Flagged tokens | Reason |",
+            "| --- | --- | ---: | ---: | --- | --- |",
+        ]
+    )
+    for row in payload.get("admitted_semantic_risk_rows", [])[:80]:
+        tokens = ", ".join(f"`{token}`" for token in row.get("flagged_tokens", []))
+        lines.append(
+            f"| `{row['predicate']}` | `{row['risk']}` | {row['occurrences']} | {row['fixtures']} | {tokens} | {row['reason']} |"
+        )
     lines.extend(
         [
             "",
