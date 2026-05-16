@@ -208,6 +208,11 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
         "adult_in_version(v1, person_2, observer).",
         "distinct_student_count(v1, 38).",
         "required_chaperones(v1, 4).",
+        "score_entry(app_1, reviewer_1, quality, 30, original).",
+        "recorded_in(item_1, source_1, raw).",
+        "docket_entry(entry_1, case_1, 2026_01_01, filed).",
+        "state_changed(item_1, active, event_1).",
+        "applicant_attribute(app_1, region, north).",
     ]
 
     inventory = compiled_kb_inventory(facts=facts, rules=[])
@@ -241,6 +246,16 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
     assert {"distinct_student_count/2", "required_chaperones/2"}.issubset(
         set(families["count_requirement_surface"]["signatures"])
     )
+    assert "score_measurement_surface" in families
+    assert "score_entry/5" in families["score_measurement_surface"]["signatures"]
+    assert "record_provenance_surface" in families
+    assert {"recorded_in/3", "docket_entry/4"}.issubset(
+        set(families["record_provenance_surface"]["signatures"])
+    )
+    assert "state_transition_surface" in families
+    assert "state_changed/3" in families["state_transition_surface"]["signatures"]
+    assert "attribute_value_surface" in families
+    assert "applicant_attribute/3" in families["attribute_value_surface"]["signatures"]
     assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
 
 

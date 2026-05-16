@@ -3032,3 +3032,164 @@ Next pressure:
 - Continue semantic risk cleanup with the next high-volume single-fixture
   generic-looking surfaces: `event/5`, `score_entry/5`, `held_role/3`,
   `recorded_in/4`, and `state_changed/3`.
+
+## HR-035 - High-Volume Singleton Alias Families
+
+Date: 2026-05-16
+
+Before:
+
+- After the local assignment/count repair, the next high-volume singleton
+  surfaces were generic-looking but fixture-local:
+  `event/5`, `score_entry/5`, `held_role/3`, `recorded_in/4`,
+  `state_changed/3`, `applicant_attribute/3`, and `docket_entry/4`.
+- Static inspection showed:
+  - `event/5` already mapped to `chronology_event_surface`.
+  - `held_role/3` already mapped to `identity_role_surface`.
+  - `score_entry/5`, `recorded_in/4`, `state_changed/3`,
+    `applicant_attribute/3`, and `docket_entry/4` lacked generic homes.
+
+Prediction:
+
+- These should not become fixture-specific guidance.
+- The reusable classes are measurement, record provenance, state transition,
+  and attribute/value surfaces.
+
+Intervention:
+
+- Added generic alias families:
+  - `score_measurement_surface`
+  - `record_provenance_surface`
+  - `state_transition_surface`
+  - `attribute_value_surface`
+- Tightened `record_provenance_surface` so `score_entry/5` does not get pulled
+  into provenance just because it contains the word `entry`.
+
+After:
+
+Static check on the latest native no-helper compile artifacts:
+
+| Fixture | Predicate | Generic family |
+| --- | --- | --- |
+| `arts_grant_panel_reconsideration` | `score_entry/5` | `score_measurement_surface` |
+| `building_access_reliability_packet` | `recorded_in/3` | `record_provenance_surface` |
+| `copperfall_deadline_docket` | `docket_entry/4` | `record_provenance_surface` |
+| `grant_exception_cap_matrix` | `applicant_attribute/3` | `attribute_value_surface` |
+| `museum_mislabelled_rooms` | `recorded_in/4` | `record_provenance_surface` |
+| `three_moles_moon_marmalade_machine` | `state_changed/3` | `state_transition_surface` |
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_inventory_groups_present_surface_alias_families -q`
+  - `1 passed`
+
+Lesson:
+
+The alias inventory is becoming the right lightweight layer for naming pressure:
+it can recognize structural surfaces in local predicates without telling future
+compiles to emit those local predicate names. This keeps high-volume singleton
+surfaces query-visible while leaving their promotion status unresolved until
+unlike replay or slot-contract audit.
+
+Next pressure:
+
+- Re-run the predicate inventory risk report later with alias-family coverage
+  counts, so the report can distinguish "high-volume singleton with generic
+  home" from "high-volume singleton with no structural home."
+- Continue with compile-surface gaps or a no-helper native QA rerun only after
+  the current naming-risk layer is stable.
+
+## HR-036 - Alias-Family Coverage In Predicate Inventory
+
+Date: 2026-05-16
+
+Before:
+
+- HR-035 added generic families, but the inventory report still listed risky
+  predicates without saying whether each already had a structural home.
+- That made the risk list too blunt: `score_entry/5` with a measurement-family
+  home is different from a high-volume singleton with no family.
+
+Prediction:
+
+- Adding alias-family coverage to the inventory should split the work queue:
+  predicates with a home need slot-contract or replay checks; predicates with
+  no home are candidate family-design targets or quarantine-only surfaces.
+
+Intervention:
+
+- `scripts/audit_compile_predicate_inventory.py` now imports the same
+  `compiled_surface_alias_inventory()` used by QA planning.
+- The report adds:
+  - total non-ledger predicates;
+  - non-ledger predicates with at least one generic alias family;
+  - family coverage table;
+  - per-risk-row alias-family column.
+
+After:
+
+- Non-ledger unique predicates: `968`
+- Non-ledger predicates with at least one generic alias family: `434`
+
+Representative coverage:
+
+| Family | Unique predicates covered |
+| --- | ---: |
+| `item_identifier_surface` | `121` |
+| `state_transition_surface` | `77` |
+| `record_provenance_surface` | `70` |
+| `title_status_surface` | `58` |
+| `chronology_event_surface` | `44` |
+| `source_assertion_surface` | `39` |
+| `access_authorization_surface` | `37` |
+| `identity_role_surface` | `25` |
+| `custody_location_surface` | `23` |
+| `count_requirement_surface` | `15` |
+| `attribute_value_surface` | `14` |
+| `versioned_membership_surface` | `12` |
+| `assignment_allocation_surface` | `10` |
+| `score_measurement_surface` | `10` |
+
+The high-volume singleton rows now show which ones have structural homes:
+
+- `event/5` -> `chronology_event_surface`
+- `score_entry/5` -> `score_measurement_surface`
+- `held_role/3` -> `identity_role_surface`
+- `recorded_in/4` -> `record_provenance_surface`
+- `state_changed/3` -> `state_transition_surface`
+- `applicant_attribute/3` -> `attribute_value_surface`
+- `docket_entry/4` -> `record_provenance_surface`
+
+Artifacts:
+
+- `scripts/audit_compile_predicate_inventory.py`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_predicate_inventory.py scripts\run_domain_bootstrap_qa.py`
+- `python scripts\audit_compile_predicate_inventory.py tmp\native_nohelper_story_worlds_draw1_20260516_compile --out-json docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.json --out-md docs\data\helper_residue\native_nohelper_draw1_predicate_inventory_20260516.md`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_inventory_groups_present_surface_alias_families tests\test_domain_bootstrap_qa.py::test_compiled_kb_contracts_name_role_and_generic_replacement_slots -q`
+  - `2 passed`
+
+Lesson:
+
+The current naming-risk layer is now more surgical. Roughly 45% of non-ledger
+predicate names already have a generic query-planning family. Those are not
+immediate rename targets; they are slot-contract and replay targets. The
+remaining no-family names are the sharper leak queue because the instrument
+cannot yet describe their structural role without repeating the predicate name.
+
+Next pressure:
+
+- Rank no-family high-volume predicates and decide whether they deserve new
+  generic families or should remain ungrouped local compile vocabulary.
+- Then use the same machinery during the next native no-helper QA rerun to see
+  whether alias-family coverage improves routing without restoring helpers.

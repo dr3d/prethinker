@@ -6,9 +6,13 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.run_domain_bootstrap_qa import compiled_surface_alias_inventory
 
 
 PREDICATE_RE = re.compile(r"^\s*(?P<name>[a-z][A-Za-z0-9_]*)\s*\((?P<args>.*)\)\s*\.?\s*$")
@@ -190,6 +194,7 @@ def summarize(paths: list[str]) -> dict[str, Any]:
     admitted_counter: Counter[str] = Counter()
     fixture_candidate_sets: dict[str, set[str]] = {}
     fixture_admitted_sets: dict[str, set[str]] = {}
+    predicate_alias_families: dict[str, set[str]] = defaultdict(set)
     fixture_rows: list[dict[str, Any]] = []
     parse_failures: list[str] = []
 
@@ -216,6 +221,11 @@ def summarize(paths: list[str]) -> dict[str, Any]:
         admitted_counter.update(admitted)
         fixture_candidate_sets[fixture] = set(candidates)
         fixture_admitted_sets[fixture] = set(admitted)
+        for family in compiled_surface_alias_inventory(sorted(set(admitted))):
+            family_name = str(family.get("family", "")).strip()
+            for signature in family.get("signatures", []) or []:
+                if family_name and isinstance(signature, str):
+                    predicate_alias_families[signature].add(family_name)
         fixture_rows.append(
             {
                 "fixture": fixture,
@@ -296,6 +306,7 @@ def summarize(paths: list[str]) -> dict[str, Any]:
                     occurrences=count,
                     fixtures=admitted_fixture_counts.get(pred, 0),
                 )
+                | {"alias_families": sorted(predicate_alias_families.get(pred, set()))}
                 for pred, count in admitted_counter.items()
                 if predicate_bucket(pred) != "deterministic_ledger"
             ],
@@ -317,6 +328,18 @@ def summarize(paths: list[str]) -> dict[str, Any]:
         "top_admitted_predicates": top_rows(admitted_counter, admitted_fixture_counts, 120),
         "candidate_not_admitted": sorted(unique_candidate - unique_admitted),
         "admitted_not_candidate": sorted(unique_admitted - unique_candidate),
+        "alias_family_coverage": {
+            "non_ledger_unique_predicates": len([pred for pred in admitted_counter if predicate_bucket(pred) != "deterministic_ledger"]),
+            "non_ledger_with_alias_family": len([
+                pred
+                for pred in admitted_counter
+                if predicate_bucket(pred) != "deterministic_ledger" and predicate_alias_families.get(pred)
+            ]),
+            "families": {
+                family: sorted(pred for pred, families in predicate_alias_families.items() if family in families)
+                for family in sorted({family for families in predicate_alias_families.values() for family in families})
+            },
+        },
     }
 
 
@@ -358,19 +381,37 @@ def render_markdown(payload: dict[str, Any]) -> str:
     for row in payload.get("candidate_buckets", []):
         top = ", ".join(f"`{item['predicate']}` ({item['occurrences']})" for item in row.get("top_predicates", [])[:6])
         lines.append(f"| `{row['bucket']}` | {row['mentions']} | {row['unique_predicates']} | {row['fixtures']} | {top} |")
+    coverage = payload.get("alias_family_coverage", {})
+    if coverage:
+        lines.extend(
+            [
+                "",
+                "## Alias Family Coverage",
+                "",
+                f"- Non-ledger unique predicates: `{coverage.get('non_ledger_unique_predicates', 0)}`",
+                f"- Non-ledger predicates with at least one generic alias family: `{coverage.get('non_ledger_with_alias_family', 0)}`",
+                "",
+                "| Family | Predicates covered | Examples |",
+                "| --- | ---: | --- |",
+            ]
+        )
+        for family, predicates in sorted((coverage.get("families") or {}).items()):
+            examples = ", ".join(f"`{pred}`" for pred in predicates[:8])
+            lines.append(f"| `{family}` | {len(predicates)} | {examples} |")
     lines.extend(
         [
             "",
             "## Admitted Semantic Risk Ranking",
             "",
-            "| Predicate | Risk | Mentions | Fixtures | Flagged tokens | Reason |",
-            "| --- | --- | ---: | ---: | --- | --- |",
+            "| Predicate | Risk | Mentions | Fixtures | Alias families | Flagged tokens | Reason |",
+            "| --- | --- | ---: | ---: | --- | --- | --- |",
         ]
     )
     for row in payload.get("admitted_semantic_risk_rows", [])[:80]:
         tokens = ", ".join(f"`{token}`" for token in row.get("flagged_tokens", []))
+        families = ", ".join(f"`{family}`" for family in row.get("alias_families", []))
         lines.append(
-            f"| `{row['predicate']}` | `{row['risk']}` | {row['occurrences']} | {row['fixtures']} | {tokens} | {row['reason']} |"
+            f"| `{row['predicate']}` | `{row['risk']}` | {row['occurrences']} | {row['fixtures']} | {families} | {tokens} | {row['reason']} |"
         )
     lines.extend(
         [

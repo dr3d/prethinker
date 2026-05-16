@@ -1050,6 +1050,30 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
             ("count", "total", "required", "threshold", "minimum", "maximum", "distinct", "quantity"),
             ("count", "total", "required", "threshold"),
         ),
+        (
+            "score_measurement_surface",
+            "scores, ratings, measurements, criteria, dimensions, and measured values",
+            ("score", "rating", "measure", "metric", "criterion", "criteria", "value", "dimension"),
+            ("score", "rating", "measure", "metric"),
+        ),
+        (
+            "record_provenance_surface",
+            "records, docket entries, catalog entries, source filing, and recorded-in provenance",
+            ("record", "recorded", "docket", "entry", "filed", "filing", "catalog", "source"),
+            ("record", "recorded", "docket", "filed", "filing", "catalog", "source"),
+        ),
+        (
+            "state_transition_surface",
+            "state changes, status transitions, old/new values, supersession, and lifecycle movement",
+            ("state", "status", "changed", "change", "transition", "supersed", "prior", "new", "old"),
+            ("state", "status", "changed", "transition", "supersed"),
+        ),
+        (
+            "attribute_value_surface",
+            "attributes, properties, parameters, dimensions, and named values attached to an entity",
+            ("attribute", "property", "parameter", "field", "dimension", "value"),
+            ("attribute", "property", "parameter"),
+        ),
     )
     out: list[dict[str, Any]] = []
     for family, purpose, any_tokens, anchor_tokens in family_specs:
