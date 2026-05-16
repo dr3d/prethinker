@@ -1,0 +1,114 @@
+{
+  "generated": "2026-05-16T17:53:42.318077+00:00",
+  "lanes": 2,
+  "base_timeout": 600,
+  "effective_timeout": 1200,
+  "totals": {
+    "question_count": 80,
+    "judge_exact": 65,
+    "judge_partial": 3,
+    "judge_miss": 12,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0,
+    "exact_rate": 0.8125
+  },
+  "helper_pressure_summary": {
+    "row_count": 0,
+    "helper_class_counts": {},
+    "companion_row_totals": {},
+    "answer_surface_summary": {
+      "question_count": 80,
+      "judge_rows": 80,
+      "judge_exact": 65,
+      "judge_partial": 3,
+      "judge_miss": 12
+    },
+    "candidate_helper_share": 0.0,
+    "clean_helper_share": 0.0,
+    "exact_rate": 0.8125,
+    "helper_rows_per_exact": 0.0,
+    "helper_rows_per_question": 0.0,
+    "pressure_label": "no_helper_rows"
+  },
+  "results": [
+    {
+      "fixture": "amended_lease_register",
+      "returncode": 0,
+      "started": "2026-05-16T17:43:05.542273+00:00",
+      "finished": "2026-05-16T17:53:42.317089+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\amended_lease_register",
+      "qa_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\amended_lease_register\\domain_bootstrap_qa_20260516T175342264363Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 636554,
+        "failure_surface_counts": {
+          "compile_surface_gap": 4,
+          "hybrid_join_gap": 1,
+          "not_applicable": 35
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 35,
+        "judge_miss": 4,
+        "judge_partial": 1,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\amended_lease_register\\domain_bootstrap_qa_20260516T175342264363Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\amended_lease_register\\domain_bootstrap_qa_20260516T175342264363Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 636554, \"failure_surface_counts\": {\"compile_surface_gap\": 4, \"hybrid_join_gap\": 1, \"not_applicable\": 35}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 35, \"judge_miss\": 4, \"judge_partial\": 1, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "school_activity_roster_reconciliation",
+      "returncode": 0,
+      "started": "2026-05-16T17:43:05.543273+00:00",
+      "finished": "2026-05-16T17:52:55.802884+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\school_activity_roster_reconciliation",
+      "qa_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T175255718744Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 40,
+        "elapsed_ms": 589828,
+        "failure_surface_counts": {
+          "compile_surface_gap": 6,
+          "hybrid_join_gap": 3,
+          "not_applicable": 30,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 30,
+        "judge_miss": 8,
+        "judge_partial": 2,
+        "judge_rows": 40,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 40,
+        "query_rows": 40,
+        "question_count": 40,
+        "reference_answer_rows": 40,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T175255718744Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_qa\\school_activity_roster_reconciliation\\domain_bootstrap_qa_20260516T175255718744Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 40, \"elapsed_ms\": 589828, \"failure_surface_counts\": {\"compile_surface_gap\": 6, \"hybrid_join_gap\": 3, \"not_applicable\": 30, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 30, \"judge_miss\": 8, \"judge_partial\": 2, \"judge_rows\": 40, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 40, \"query_rows\": 40, \"question_count\": 40, \"reference_answer_rows\": 40, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

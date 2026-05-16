@@ -75,6 +75,25 @@ def test_audit_compile_surface_invariants_detects_source_authority_ledger_only(t
     assert "authority_or_evidence_role" in source_authority["covered_groups"]
 
 
+def test_audit_compile_surface_invariants_detects_answer_detail_ledger_only(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, application_pending_because_commitment_not_available_outside_scope).",
+            "application_status(app_1, pending).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    detail = next(row for row in report["families"] if row["family"] == "answer_detail_surface")
+    assert detail["status"] == "partial"
+    assert "detail_or_explanation" in detail["missing_groups"]
+    assert "availability_or_scope" in detail["missing_groups"]
+    assert "negative_or_exclusion_detail" in detail["missing_groups"]
+    assert "commitment_or_future_action" in detail["covered_groups"]
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

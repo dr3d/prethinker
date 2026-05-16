@@ -1,0 +1,1102 @@
+{
+  "compile_count": 3,
+  "reports": [
+    {
+      "candidate_predicate_count": 23,
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_arts_20260516_compile\\arts_grant_panel_reconsideration\\domain_bootstrap_file_20260516T180029221224Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 48,
+      "direct_predicates": [
+        "application_average",
+        "application_id",
+        "award_amount",
+        "award_status",
+        "awarded_amount",
+        "bylaw_rule",
+        "conflict_referral",
+        "cycle_budget",
+        "docket_scheduled",
+        "event_happened",
+        "funding_rank",
+        "funding_threshold",
+        "note_authored_by",
+        "note_content",
+        "panel_member",
+        "remaining_budget",
+        "score_version"
+      ],
+      "families": [
+        {
+          "candidate_only_groups": {
+            "registrar_or_recorder": [
+              "compiled"
+            ]
+          },
+          "covered_groups": {
+            "legal_or_claim_role": [
+              "counsel"
+            ]
+          },
+          "description": "named people or organizations with answer-bearing roles",
+          "family": "identity_role_surface",
+          "ledger_only_groups": {
+            "custodian_or_holder": [
+              "held"
+            ],
+            "supervisor_or_authority": [
+              "authority"
+            ]
+          },
+          "missing_groups": [
+            "custodian_or_holder",
+            "registrar_or_recorder",
+            "supervisor_or_authority"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "custodian_or_holder": [
+              "held"
+            ],
+            "legal_or_claim_role": [
+              "counsel"
+            ],
+            "registrar_or_recorder": [
+              "compiled"
+            ],
+            "supervisor_or_authority": [
+              "authority"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "negative_inference_coordinate": [
+              "not"
+            ]
+          },
+          "description": "named sections, titles, register parts, and source coordinates",
+          "family": "source_addressability_surface",
+          "ledger_only_groups": {
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          },
+          "missing_groups": [
+            "section_coordinate",
+            "title_or_heading"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "negative_inference_coordinate": [
+              "not"
+            ],
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "governed_subject_or_item": [
+              "status"
+            ],
+            "source_actor_or_date": [
+              "author",
+              "date"
+            ],
+            "source_document_or_correspondence": [
+              "order"
+            ]
+          },
+          "description": "source documents, authority/evidence roles, source actors or dates, and governed subjects",
+          "family": "source_authority_surface",
+          "ledger_only_groups": {
+            "authority_or_evidence_role": [
+              "authority",
+              "governed"
+            ]
+          },
+          "missing_groups": [
+            "authority_or_evidence_role"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "authority_or_evidence_role": [
+              "authority",
+              "governed"
+            ],
+            "governed_subject_or_item": [
+              "subject"
+            ],
+            "source_actor_or_date": [
+              "dated",
+              "date"
+            ],
+            "source_document_or_correspondence": [
+              "letter",
+              "order",
+              "source"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "commitment_or_future_action": [
+              "pending"
+            ],
+            "negative_or_exclusion_detail": [
+              "not",
+              "without"
+            ]
+          },
+          "description": "source-stated answer details, rationales, availability/scope, commitments, and exclusions",
+          "family": "answer_detail_surface",
+          "ledger_only_groups": {
+            "availability_or_scope": [
+              "separate"
+            ]
+          },
+          "missing_groups": [
+            "availability_or_scope"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "availability_or_scope": [
+              "separate"
+            ],
+            "commitment_or_future_action": [
+              "acknowledgment",
+              "will",
+              "pending"
+            ],
+            "negative_or_exclusion_detail": [
+              "not",
+              "without",
+              "unresolved"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "exception_or_exclusion": [
+              "excluding",
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "rule"
+            ],
+            "ratio_or_requirement": [
+              "required"
+            ]
+          },
+          "description": "rules, policies, procedure identifiers, clauses, ratios, and governing sections",
+          "family": "rule_policy_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "section"
+            ],
+            "ratio_or_requirement": [
+              "required"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "objects, devices, systems, vendor/model identifiers, and inventory ids",
+          "family": "object_device_surface",
+          "ledger_only_groups": {
+            "device_or_system": [
+              "system"
+            ]
+          },
+          "missing_groups": [
+            "device_or_system"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "device_or_system": [
+              "system"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "correction_or_supersession": [
+              "corrected",
+              "correction",
+              "original"
+            ],
+            "event_or_action": [
+              "event"
+            ],
+            "timestamp_or_date": [
+              "date"
+            ]
+          },
+          "description": "events, raw/corrected timestamps, effective dates, and transitions",
+          "family": "temporal_event_surface",
+          "ledger_only_groups": {
+            "interval_or_window": [
+              "end"
+            ]
+          },
+          "missing_groups": [
+            "interval_or_window"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "correction_or_supersession": [
+              "corrected",
+              "correction",
+              "original"
+            ],
+            "event_or_action": [
+              "event"
+            ],
+            "interval_or_window": [
+              "end"
+            ],
+            "timestamp_or_date": [
+              "time",
+              "date",
+              "dated"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "threshold_or_limit": [
+              "threshold"
+            ]
+          },
+          "description": "explicit counts, thresholds, durations, percentages, and computed requirements",
+          "family": "measure_count_surface",
+          "ledger_only_groups": {
+            "count_or_total": [
+              "total"
+            ],
+            "measurement_value": [
+              "value"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ]
+          },
+          "missing_groups": [
+            "count_or_total",
+            "measurement_value",
+            "ratio_or_formula"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "count_or_total": [
+              "total"
+            ],
+            "measurement_value": [
+              "value"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ],
+            "threshold_or_limit": [
+              "threshold"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "custody, access, ownership, recall/return, and control state",
+          "family": "custody_control_surface",
+          "ledger_only_groups": {
+            "custody_or_possession": [
+              "held"
+            ]
+          },
+          "missing_groups": [
+            "custody_or_possession"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "custody_or_possession": [
+              "held"
+            ]
+          }
+        }
+      ],
+      "fixture": "arts_grant_panel_reconsideration",
+      "parsed_ok": true,
+      "relation_contracts": [
+        {
+          "companion_key_count": 0,
+          "companion_predicate": "access_source",
+          "contract": "access_authority_source_pair",
+          "description": "authorized access item/party pairs should expose the source or authority companion row",
+          "missing_keys": [],
+          "required_key_count": 0,
+          "required_predicate": "access_authorized_to",
+          "status": "not_applicable"
+        }
+      ],
+      "run": "compile_surface_detail_guarded_arts_20260516_compile",
+      "source_record_fact_count": 1180,
+      "summary": {
+        "ledger_only": 2,
+        "partial": 6,
+        "pass": 1
+      }
+    },
+    {
+      "candidate_predicate_count": 26,
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register\\domain_bootstrap_file_20260516T174222305684Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 111,
+      "direct_predicates": [
+        "amendment_date",
+        "amendment_effective_date",
+        "amendment_type",
+        "authorization_hierarchy_rule",
+        "authorization_limit",
+        "authorized_by",
+        "calculation_basis",
+        "corrects",
+        "current_rent",
+        "included_feature",
+        "lease_expiry",
+        "lease_id",
+        "maintenance_responsibility",
+        "non_binding_item",
+        "original_end_date",
+        "original_rent",
+        "original_start_date",
+        "person_role",
+        "recorded_in",
+        "refund_owed",
+        "retracts",
+        "suite_number",
+        "supersedes",
+        "tenant_name",
+        "termination_fee"
+      ],
+      "families": [
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "supervisor_or_authority": [
+              "authorized"
+            ]
+          },
+          "description": "named people or organizations with answer-bearing roles",
+          "family": "identity_role_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "supervisor_or_authority": [
+              "authorized",
+              "approved"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "basis_coordinate": [
+              "basis"
+            ],
+            "negative_inference_coordinate": [
+              "available",
+              "not"
+            ]
+          },
+          "description": "named sections, titles, register parts, and source coordinates",
+          "family": "source_addressability_surface",
+          "ledger_only_groups": {
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          },
+          "missing_groups": [
+            "section_coordinate",
+            "title_or_heading"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "basis_coordinate": [
+              "reason"
+            ],
+            "negative_inference_coordinate": [
+              "available",
+              "not"
+            ],
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "authority_or_evidence_role": [
+              "authorized",
+              "basis"
+            ],
+            "governed_subject_or_item": [
+              "item"
+            ],
+            "source_actor_or_date": [
+              "author",
+              "date"
+            ],
+            "source_document_or_correspondence": [
+              "letter",
+              "register",
+              "source"
+            ]
+          },
+          "description": "source documents, authority/evidence roles, source actors or dates, and governed subjects",
+          "family": "source_authority_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "authority_or_evidence_role": [
+              "authorized"
+            ],
+            "governed_subject_or_item": [
+              "subject"
+            ],
+            "source_actor_or_date": [
+              "dated",
+              "date",
+              "prepared"
+            ],
+            "source_document_or_correspondence": [
+              "letter",
+              "register",
+              "source"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "availability_or_scope": [
+              "available",
+              "scope",
+              "separate",
+              "agreement"
+            ],
+            "detail_or_explanation": [
+              "basis"
+            ],
+            "negative_or_exclusion_detail": [
+              "not"
+            ]
+          },
+          "description": "source-stated answer details, rationales, availability/scope, commitments, and exclusions",
+          "family": "answer_detail_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "availability_or_scope": [
+              "available",
+              "separate",
+              "agreement"
+            ],
+            "detail_or_explanation": [
+              "reason"
+            ],
+            "negative_or_exclusion_detail": [
+              "not"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "rule"
+            ]
+          },
+          "description": "rules, policies, procedure identifiers, clauses, ratios, and governing sections",
+          "family": "rule_policy_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "clause",
+              "section"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "objects, devices, systems, vendor/model identifiers, and inventory ids",
+          "family": "object_device_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "not_applicable",
+          "triggered_groups": {}
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "correction_or_supersession": [
+              "correction",
+              "original",
+              "superseded"
+            ],
+            "timestamp_or_date": [
+              "date"
+            ]
+          },
+          "description": "events, raw/corrected timestamps, effective dates, and transitions",
+          "family": "temporal_event_surface",
+          "ledger_only_groups": {
+            "event_or_action": [
+              "change"
+            ]
+          },
+          "missing_groups": [
+            "event_or_action"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "correction_or_supersession": [
+              "corrected",
+              "correction",
+              "original",
+              "superseded"
+            ],
+            "event_or_action": [
+              "change"
+            ],
+            "timestamp_or_date": [
+              "time",
+              "date",
+              "dated"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "duration_or_hours": [
+              "day",
+              "days"
+            ]
+          },
+          "description": "explicit counts, thresholds, durations, percentages, and computed requirements",
+          "family": "measure_count_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "duration_or_hours": [
+              "day",
+              "days"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "custody, access, ownership, recall/return, and control state",
+          "family": "custody_control_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "not_applicable",
+          "triggered_groups": {}
+        }
+      ],
+      "fixture": "amended_lease_register",
+      "parsed_ok": true,
+      "relation_contracts": [
+        {
+          "companion_key_count": 0,
+          "companion_predicate": "access_source",
+          "contract": "access_authority_source_pair",
+          "description": "authorized access item/party pairs should expose the source or authority companion row",
+          "missing_keys": [],
+          "required_key_count": 0,
+          "required_predicate": "access_authorized_to",
+          "status": "not_applicable"
+        }
+      ],
+      "run": "compile_surface_detail_guarded_slice_20260516_compile",
+      "source_record_fact_count": 333,
+      "summary": {
+        "not_applicable": 2,
+        "partial": 2,
+        "pass": 5
+      }
+    },
+    {
+      "candidate_predicate_count": 28,
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T174256568452Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 166,
+      "direct_predicates": [
+        "adult_role",
+        "attendance_scan",
+        "bus_assignment",
+        "chaperone_ratio_requirement",
+        "compiled_by",
+        "correction_notice",
+        "document_metadata",
+        "event_schedule",
+        "fact_source",
+        "group_membership",
+        "issued_by",
+        "parent_observer",
+        "policy_cited",
+        "recorded_in",
+        "role_ratio_impact",
+        "roster_version",
+        "student_accommodation",
+        "temporary_event_assignment",
+        "withdrawal_record",
+        "withdrawn_from"
+      ],
+      "families": [
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "clinical_or_safety_role": [
+              "nurse",
+              "medical",
+              "observer"
+            ],
+            "registrar_or_recorder": [
+              "compiled",
+              "recorded"
+            ]
+          },
+          "description": "named people or organizations with answer-bearing roles",
+          "family": "identity_role_surface",
+          "ledger_only_groups": {
+            "supervisor_or_authority": [
+              "authority",
+              "approved"
+            ]
+          },
+          "missing_groups": [
+            "supervisor_or_authority"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "clinical_or_safety_role": [
+              "nurse",
+              "medical",
+              "observer"
+            ],
+            "registrar_or_recorder": [
+              "compiled",
+              "recorded"
+            ],
+            "supervisor_or_authority": [
+              "authority",
+              "approved"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {
+            "section_coordinate": [
+              "part"
+            ]
+          },
+          "covered_groups": {
+            "negative_inference_coordinate": [
+              "not"
+            ]
+          },
+          "description": "named sections, titles, register parts, and source coordinates",
+          "family": "source_addressability_surface",
+          "ledger_only_groups": {
+            "title_or_heading": [
+              "heading"
+            ]
+          },
+          "missing_groups": [
+            "section_coordinate",
+            "title_or_heading"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "negative_inference_coordinate": [
+              "not"
+            ],
+            "section_coordinate": [
+              "section",
+              "part"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "source_document_or_correspondence": [
+              "document",
+              "policy",
+              "source"
+            ]
+          },
+          "description": "source documents, authority/evidence roles, source actors or dates, and governed subjects",
+          "family": "source_authority_surface",
+          "ledger_only_groups": {
+            "authority_or_evidence_role": [
+              "authority"
+            ],
+            "source_actor_or_date": [
+              "prepared"
+            ]
+          },
+          "missing_groups": [
+            "authority_or_evidence_role",
+            "source_actor_or_date"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "authority_or_evidence_role": [
+              "authority"
+            ],
+            "source_actor_or_date": [
+              "prepared"
+            ],
+            "source_document_or_correspondence": [
+              "document",
+              "policy",
+              "source"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {
+            "availability_or_scope": [
+              "scope"
+            ]
+          },
+          "covered_groups": {
+            "negative_or_exclusion_detail": [
+              "not"
+            ]
+          },
+          "description": "source-stated answer details, rationales, availability/scope, commitments, and exclusions",
+          "family": "answer_detail_surface",
+          "ledger_only_groups": {
+            "commitment_or_future_action": [
+              "will",
+              "pending"
+            ],
+            "detail_or_explanation": [
+              "because"
+            ]
+          },
+          "missing_groups": [
+            "availability_or_scope",
+            "commitment_or_future_action",
+            "detail_or_explanation"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "availability_or_scope": [
+              "agreement"
+            ],
+            "commitment_or_future_action": [
+              "will",
+              "pending"
+            ],
+            "detail_or_explanation": [
+              "because"
+            ],
+            "negative_or_exclusion_detail": [
+              "not"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "policy"
+            ],
+            "ratio_or_requirement": [
+              "ratio",
+              "requirement"
+            ]
+          },
+          "description": "rules, policies, procedure identifiers, clauses, ratios, and governing sections",
+          "family": "rule_policy_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "policy",
+              "section"
+            ],
+            "ratio_or_requirement": [
+              "ratio",
+              "minimum"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "objects, devices, systems, vendor/model identifiers, and inventory ids",
+          "family": "object_device_surface",
+          "ledger_only_groups": {
+            "device_or_system": [
+              "system"
+            ],
+            "object_or_item_id": [
+              "id"
+            ]
+          },
+          "missing_groups": [
+            "device_or_system",
+            "object_or_item_id"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "device_or_system": [
+              "system"
+            ],
+            "object_or_item_id": [
+              "id"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "correction_or_supersession": [
+              "corrected",
+              "correction",
+              "raw",
+              "superseded"
+            ],
+            "event_or_action": [
+              "event"
+            ],
+            "interval_or_window": [
+              "end"
+            ]
+          },
+          "description": "events, raw/corrected timestamps, effective dates, and transitions",
+          "family": "temporal_event_surface",
+          "ledger_only_groups": {
+            "timestamp_or_date": [
+              "time"
+            ]
+          },
+          "missing_groups": [
+            "timestamp_or_date"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "correction_or_supersession": [
+              "correction",
+              "original"
+            ],
+            "event_or_action": [
+              "event",
+              "change"
+            ],
+            "interval_or_window": [
+              "end"
+            ],
+            "timestamp_or_date": [
+              "time"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {
+            "duration_or_hours": [
+              "duration"
+            ]
+          },
+          "covered_groups": {
+            "count_or_total": [
+              "total"
+            ],
+            "ratio_or_formula": [
+              "ratio",
+              "per"
+            ]
+          },
+          "description": "explicit counts, thresholds, durations, percentages, and computed requirements",
+          "family": "measure_count_surface",
+          "ledger_only_groups": {
+            "threshold_or_limit": [
+              "minimum"
+            ]
+          },
+          "missing_groups": [
+            "duration_or_hours",
+            "threshold_or_limit"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "count_or_total": [
+              "count",
+              "total"
+            ],
+            "duration_or_hours": [
+              "day"
+            ],
+            "ratio_or_formula": [
+              "ratio",
+              "per"
+            ],
+            "threshold_or_limit": [
+              "minimum"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "custody, access, ownership, recall/return, and control state",
+          "family": "custody_control_surface",
+          "ledger_only_groups": {
+            "access_or_location": [
+              "location",
+              "room"
+            ],
+            "recall_or_return": [
+              "return"
+            ]
+          },
+          "missing_groups": [
+            "access_or_location",
+            "recall_or_return"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "access_or_location": [
+              "location",
+              "room"
+            ],
+            "recall_or_return": [
+              "return"
+            ]
+          }
+        }
+      ],
+      "fixture": "school_activity_roster_reconciliation",
+      "parsed_ok": true,
+      "relation_contracts": [
+        {
+          "companion_key_count": 0,
+          "companion_predicate": "access_source",
+          "contract": "access_authority_source_pair",
+          "description": "authorized access item/party pairs should expose the source or authority companion row",
+          "missing_keys": [],
+          "required_key_count": 0,
+          "required_predicate": "access_authorized_to",
+          "status": "not_applicable"
+        }
+      ],
+      "run": "compile_surface_detail_guarded_slice_20260516_compile",
+      "source_record_fact_count": 2217,
+      "summary": {
+        "ledger_only": 2,
+        "partial": 6,
+        "pass": 1
+      }
+    }
+  ],
+  "schema_version": "compile_surface_invariant_audit_v1",
+  "summary": {
+    "family_status_counts": {
+      "answer_detail_surface": {
+        "partial": 2,
+        "pass": 1
+      },
+      "custody_control_surface": {
+        "ledger_only": 2,
+        "not_applicable": 1
+      },
+      "identity_role_surface": {
+        "partial": 2,
+        "pass": 1
+      },
+      "measure_count_surface": {
+        "partial": 2,
+        "pass": 1
+      },
+      "object_device_surface": {
+        "ledger_only": 2,
+        "not_applicable": 1
+      },
+      "rule_policy_surface": {
+        "pass": 3
+      },
+      "source_addressability_surface": {
+        "partial": 3
+      },
+      "source_authority_surface": {
+        "partial": 2,
+        "pass": 1
+      },
+      "temporal_event_surface": {
+        "partial": 3
+      }
+    },
+    "status_counts": {
+      "ledger_only": 4,
+      "not_applicable": 2,
+      "partial": 14,
+      "pass": 7
+    }
+  }
+}

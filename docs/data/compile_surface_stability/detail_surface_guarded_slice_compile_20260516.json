@@ -1,0 +1,110 @@
+{
+  "generated": "2026-05-16T17:42:56.610095+00:00",
+  "lanes": 2,
+  "base_timeout": 900,
+  "effective_timeout": 1800,
+  "fixture_count": 2,
+  "parsed_ok_count": 2,
+  "totals": {
+    "candidate_predicates": 54,
+    "compile_admitted": 353,
+    "compile_skipped": 29
+  },
+  "results": [
+    {
+      "fixture": "amended_lease_register",
+      "returncode": 0,
+      "started": "2026-05-16T17:36:32.317497+00:00",
+      "finished": "2026-05-16T17:42:22.343742+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register",
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register\\domain_bootstrap_file_20260516T174222305684Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 26,
+        "compile_admitted": 167,
+        "compile_skipped": 18,
+        "rough_score": 0.778,
+        "risk_count": 5,
+        "repeated_structure_count": 2,
+        "repeated_structure_id_only_record_refs": [],
+        "repeated_structure_role_mismatch_refs": [],
+        "frontier_unknown_positive_predicate_count": 8,
+        "frontier_unknown_positive_predicate_refs": [
+          "amendment_effective_date/3",
+          "amendment_event/2",
+          "authorization_limit/4",
+          "authorization_limit/6",
+          "context/2",
+          "non_binding_item/2",
+          "original_rent/3",
+          "type/2"
+        ],
+        "generic_predicate_count": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register\\domain_bootstrap_file_20260516T174222305684Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register\\domain_bootstrap_file_20260516T174222305684Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 26, \"compile_admitted\": 167, \"compile_skipped\": 18, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 4, \"frontier_unknown_positive_predicate_count\": 8, \"frontier_unknown_positive_predicate_refs\": [\"amendment_effective_date/3\", \"amendment_event/2\", \"authorization_limit/4\", \"authorization_limit/6\", \"context/2\", \"non_binding_item/2\", \"original_rent/3\", \"type/2\"], \"generic_predicate_count\": 0, \"predicate_count\": 26, \"repeated_structure_count\": 2, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [\"amendment_event/2\", \"non_binding_item/2\"], \"risk_count\": 5, \"rough_score\": 0.778, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    },
+    {
+      "fixture": "school_activity_roster_reconciliation",
+      "returncode": 0,
+      "started": "2026-05-16T17:36:32.317497+00:00",
+      "finished": "2026-05-16T17:42:56.608976+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation",
+      "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T174256568452Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 28,
+        "compile_admitted": 186,
+        "compile_skipped": 11,
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "repeated_structure_count": 5,
+        "repeated_structure_id_only_record_refs": [],
+        "repeated_structure_role_mismatch_refs": [
+          "role_ratio_impact/2"
+        ],
+        "frontier_unknown_positive_predicate_count": 0,
+        "frontier_unknown_positive_predicate_refs": [],
+        "generic_predicate_count": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T174256568452Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T174256568452Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 28, \"compile_admitted\": 186, \"compile_skipped\": 11, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 8, \"frontier_unknown_positive_predicate_count\": 0, \"frontier_unknown_positive_predicate_refs\": [], \"generic_predicate_count\": 0, \"predicate_count\": 28, \"repeated_structure_count\": 5, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [\"role_ratio_impact/2\"], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 5, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ],
+  "quality_gate": {
+    "schema_version": "compile_quality_gate_v1",
+    "min_rough_score": 0.775,
+    "max_risk_count": 5,
+    "passed": true,
+    "pass_count": 2,
+    "hold_count": 0,
+    "rows": [
+      {
+        "fixture": "amended_lease_register",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.778,
+        "risk_count": 5,
+        "compile_admitted": 167,
+        "compile_skipped": 18,
+        "compile_skipped_share": 0.0973,
+        "candidate_predicates": 26,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\amended_lease_register\\domain_bootstrap_file_20260516T174222305684Z_source_qwen-qwen3-6-35b-a3b.json"
+      },
+      {
+        "fixture": "school_activity_roster_reconciliation",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "compile_admitted": 186,
+        "compile_skipped": 11,
+        "compile_skipped_share": 0.0558,
+        "candidate_predicates": 28,
+        "compile_json": "C:\\prethinker\\tmp\\compile_surface_detail_guarded_slice_20260516_compile\\school_activity_roster_reconciliation\\domain_bootstrap_file_20260516T174256568452Z_source_qwen-qwen3-6-35b-a3b.json"
+      }
+    ]
+  }
+}

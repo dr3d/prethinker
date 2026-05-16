@@ -1360,3 +1360,93 @@ instrument is a source-to-row coverage audit that can compare grouped
 source-stated identifiers to emitted governed-subject rows without naming the
 fixture, or a denser unlike probe with less explicit grouping and competing
 source layers.
+
+## CSS-018 - Guarded Answer-Detail Surface Preservation
+
+Date: 2026-05-16
+
+Before:
+
+The native no-helper stamp left `181` compile-surface gaps across `1578`
+compile-gated source-fixture questions. A row-level diagnostic showed the
+largest repeated class was not a single domain surface such as authority,
+rosters, or dates. It was answer-bearing detail stranded in source text or long
+labels: rationales, availability/scope boundaries, separate arrangements,
+pending commitments, acknowledgments, exclusions, and unresolved items.
+
+Prediction:
+
+If this is a real compile-surface invariant, the compiler should preserve these
+details as additive direct rows without restoring helper rows. But the repair is
+dangerous if phrased broadly: detail rows can crowd out backbone identity,
+status, date/time, count, amount, role, and subject/object rows.
+
+Intervention:
+
+- Added `answer_detail_surface` to the compile invariant audit vocabulary.
+- Tried a broad answer-detail invariant first. It improved some stranded-detail
+  questions but regressed backbone surfaces, so it was rejected as too loose.
+- Tightened the compiler guidance to make answer-detail rows explicitly
+  additive: preserve backbone rows first, then add compatible detail/source
+  rows.
+- Added a second guard against broad generic event/detail wrappers replacing
+  concrete profile rows. If no compatible detail predicate exists, the compiler
+  should preserve the backbone and note the missing detail carrier rather than
+  inventing a vague wrapper.
+- Recompiled and reran no-helper QA on a three-fixture native slice selected
+  from the compile-gap coordinates.
+
+After:
+
+| Scope | Fixtures | Questions | Exact | Partial | Miss | Exact rate | Helper rows | Compile gaps | Hybrid gaps | Query gaps |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Native stamp baseline slice | 3 | 120 | 96 | 5 | 19 | 80.00% | 0 | 16 | 5 | 3 |
+| Guarded detail invariant slice | 3 | 120 | 99 | 6 | 15 | 82.50% | 0 | 11 | 9 | 1 |
+
+Per-fixture movement:
+
+| Fixture | Baseline | Guarded | Movement |
+| --- | ---: | ---: | --- |
+| `amended_lease_register` | 35/1/4 | 35/1/4 | exact held; compile gaps `5 -> 4` |
+| `arts_grant_panel_reconsideration` | 33/3/4 | 34/3/3 | +1 exact; query gaps `2 -> 0` |
+| `school_activity_roster_reconciliation` | 28/1/11 | 30/2/8 | +2 exact; compile gaps `10 -> 6` |
+
+Artifacts:
+
+- `docs\data\compile_surface_stability\native_nohelper_draw1_invariant_audit_20260516.json`
+- `docs\data\compile_surface_stability\native_nohelper_draw1_invariant_audit_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_compile_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_compile_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_arts_compile_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_arts_compile_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_qa_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_qa_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_arts_qa_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_arts_qa_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_invariant_audit_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_invariant_audit_20260516.md`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_rollup_20260516.json`
+- `docs\data\compile_surface_stability\detail_surface_guarded_slice_rollup_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts/run_domain_bootstrap_file.py scripts/audit_compile_surface_invariants.py`
+- `python -m pytest tests/test_compile_surface_invariants.py tests/test_domain_bootstrap_file.py tests/test_domain_bootstrap_file_batch.py -q` -> `47 passed`
+
+Lesson:
+
+Answer-detail preservation is real but must be gated. The broad version
+validated the danger: detail can become a new way to lose backbone facts. The
+guarded version produced a small but real no-helper lift on native fixtures
+while reducing compile gaps. It also moved some failures into hybrid joins,
+which is a healthy boundary shift: the missing detail is increasingly present,
+and the next layer has to join it reliably.
+
+Next pressure:
+
+- Run the guarded detail invariant on a larger native slice before any broad
+  native restamp.
+- Add a compile-quality/admission check that penalizes broad event/detail
+  wrappers when they appear without preserving concrete backbone surfaces.
+- Follow the shifted hybrid-join cases only after the compile-surface lift is
+  confirmed on more fixtures.

@@ -108,6 +108,44 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
         },
     ),
     InvariantSpec(
+        family="answer_detail_surface",
+        description="source-stated answer details, rationales, availability/scope, commitments, and exclusions",
+        groups={
+            "detail_or_explanation": (
+                "detail",
+                "explanation",
+                "reason",
+                "rationale",
+                "basis",
+                "because",
+            ),
+            "availability_or_scope": (
+                "available",
+                "availability",
+                "scope",
+                "separate",
+                "agreement",
+                "outside",
+            ),
+            "commitment_or_future_action": (
+                "promise",
+                "promised",
+                "acknowledgment",
+                "commitment",
+                "will",
+                "pending",
+            ),
+            "negative_or_exclusion_detail": (
+                "not",
+                "excluded",
+                "denied",
+                "rejected",
+                "without",
+                "unresolved",
+            ),
+        },
+    ),
+    InvariantSpec(
         family="rule_policy_surface",
         description="rules, policies, procedure identifiers, clauses, ratios, and governing sections",
         groups={
