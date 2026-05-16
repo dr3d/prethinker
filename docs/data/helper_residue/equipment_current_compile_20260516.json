@@ -1,0 +1,33 @@
+{
+  "generated": "2026-05-16T12:58:22.584259+00:00",
+  "lanes": 1,
+  "base_timeout": 900,
+  "effective_timeout": 900,
+  "fixture_count": 1,
+  "parsed_ok_count": 1,
+  "totals": {
+    "candidate_predicates": 30,
+    "compile_admitted": 176,
+    "compile_skipped": 23
+  },
+  "results": [
+    {
+      "fixture": "industrial_sensor_clock_correction",
+      "returncode": 0,
+      "started": "2026-05-16T12:52:26.316625+00:00",
+      "finished": "2026-05-16T12:58:22.584259+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\helper_residue_equipment_current_compile_20260516\\industrial_sensor_clock_correction",
+      "compile_json": "C:\\prethinker\\tmp\\helper_residue_equipment_current_compile_20260516\\industrial_sensor_clock_correction\\domain_bootstrap_file_20260516T125822542750Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 30,
+        "compile_admitted": 176,
+        "compile_skipped": 23,
+        "rough_score": 0.778,
+        "risk_count": 6
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\helper_residue_equipment_current_compile_20260516\\industrial_sensor_clock_correction\\domain_bootstrap_file_20260516T125822542750Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\helper_residue_equipment_current_compile_20260516\\industrial_sensor_clock_correction\\domain_bootstrap_file_20260516T125822542750Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 30, \"compile_admitted\": 176, \"compile_skipped\": 23, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 6, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 1, \"frontier_unknown_positive_predicate_refs\": [\"operator_note_content/3\"], \"generic_predicate_count\": 0, \"predicate_count\": 30, \"repeated_structure_count\": 3, \"repeated_structure_id_only_record_refs\": [\"event_id/1\", \"interval_type/1\"], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 6, \"rough_score\": 0.778, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

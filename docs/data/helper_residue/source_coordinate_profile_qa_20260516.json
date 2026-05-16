@@ -1,0 +1,74 @@
+{
+  "generated": "2026-05-16T12:13:56.157742+00:00",
+  "lanes": 1,
+  "base_timeout": 420,
+  "effective_timeout": 420,
+  "totals": {
+    "question_count": 8,
+    "judge_exact": 5,
+    "judge_partial": 0,
+    "judge_miss": 3,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0,
+    "exact_rate": 0.625
+  },
+  "helper_pressure_summary": {
+    "row_count": 0,
+    "helper_class_counts": {},
+    "companion_row_totals": {},
+    "answer_surface_summary": {
+      "question_count": 8,
+      "judge_rows": 8,
+      "judge_exact": 5,
+      "judge_partial": 0,
+      "judge_miss": 3
+    },
+    "candidate_helper_share": 0.0,
+    "clean_helper_share": 0.0,
+    "exact_rate": 0.625,
+    "helper_rows_per_exact": 0.0,
+    "helper_rows_per_question": 0.0,
+    "pressure_label": "no_helper_rows"
+  },
+  "results": [
+    {
+      "fixture": "probate_storage_access_register",
+      "returncode": 0,
+      "started": "2026-05-16T12:12:10.690175+00:00",
+      "finished": "2026-05-16T12:13:56.157742+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\helper_residue_source_coordinate_profile_qa_20260516\\probate_storage_access_register",
+      "qa_json": "C:\\prethinker\\tmp\\helper_residue_source_coordinate_profile_qa_20260516\\probate_storage_access_register\\domain_bootstrap_qa_20260516T121356127662Z_qa_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "cache_enabled": false,
+        "cache_hits": 0,
+        "cache_misses": 8,
+        "elapsed_ms": 105065,
+        "failure_surface_counts": {
+          "compile_surface_gap": 2,
+          "not_applicable": 5,
+          "query_surface_gap": 1
+        },
+        "helper_class_summary": {
+          "companion_helper_class_counts": {},
+          "companion_row_totals": {},
+          "helper_class_counts": {},
+          "row_count": 0
+        },
+        "judge_exact": 5,
+        "judge_miss": 3,
+        "judge_partial": 0,
+        "judge_rows": 8,
+        "oracle_match": 0,
+        "oracle_rows": 0,
+        "parsed_ok": 8,
+        "query_rows": 8,
+        "question_count": 8,
+        "reference_answer_rows": 8,
+        "runtime_load_error_count": 0,
+        "write_proposal_rows": 0
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\helper_residue_source_coordinate_profile_qa_20260516\\probate_storage_access_register\\domain_bootstrap_qa_20260516T121356127662Z_qa_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\helper_residue_source_coordinate_profile_qa_20260516\\probate_storage_access_register\\domain_bootstrap_qa_20260516T121356127662Z_qa_qwen-qwen3-6-35b-a3b.md\n{\"cache_enabled\": false, \"cache_hits\": 0, \"cache_misses\": 8, \"elapsed_ms\": 105065, \"failure_surface_counts\": {\"compile_surface_gap\": 2, \"not_applicable\": 5, \"query_surface_gap\": 1}, \"helper_class_summary\": {\"companion_helper_class_counts\": {}, \"companion_row_totals\": {}, \"helper_class_counts\": {}, \"row_count\": 0}, \"judge_exact\": 5, \"judge_miss\": 3, \"judge_partial\": 0, \"judge_rows\": 8, \"oracle_match\": 0, \"oracle_rows\": 0, \"parsed_ok\": 8, \"query_rows\": 8, \"question_count\": 8, \"reference_answer_rows\": 8, \"runtime_load_error_count\": 0, \"write_proposal_rows\": 0}\n",
+      "stderr_tail": ""
+    }
+  ]
+}

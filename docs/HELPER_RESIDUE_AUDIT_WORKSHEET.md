@@ -2101,3 +2101,291 @@ Next pressure:
   starts from a clean instrument surface.
 - Continue toward statement-to-section provenance only if the repair can be
   phrased as a source-coordinate slot contract, not as a local source parser.
+
+## HR-025 - Source-Coordinate Slots Need Query Normalization, Not Helpers
+
+Date: 2026-05-16
+
+Before:
+
+- HR-022 left the accepted probate no-helper slice at `7 / 0 / 1`, helper
+  rows `0`.
+- The remaining residual was source-coordinate provenance: the KB could answer
+  the semantic custody/status question, but the source coordinate that stated
+  the basis was not reliably bound to the answer surface.
+- HR-024 cleaned the current instrument surface before further probe work.
+
+Prediction:
+
+- A generic source-coordinate profile contract should let the compiler preserve
+  the semantic assertion, source coordinate, and support role without reviving
+  helper rows.
+- If the repair is truly structural, the final recovery should come from
+  populated source-coordinate predicates or from deterministic query
+  normalization over existing source-record surfaces, not from a fixture parser.
+
+Intervention:
+
+- Added profile guidance and profile-review guidance for source-coordinate
+  provenance:
+  - preserve the governed semantic assertion,
+  - preserve the source row/section/note/document coordinate,
+  - preserve the support role/status,
+  - avoid invented claim ids that cannot be populated from source-stated slots.
+- Ran two OpenRouter compile/QA probes on the probate source-coordinate slice:
+  - a broad profile contract run,
+  - a tightened source-coordinate slot run.
+- Added generic QA-planner guidance for source-coordinate questions:
+  - discover source rows with variables before binding a section or label,
+  - use source-record text/field rows for source-stated role lines when direct
+    role predicates are absent or organization-level only.
+- Extended deterministic placeholder normalization so lowercase `title` is
+  treated as a slot variable, matching the existing placeholder treatment for
+  `label`, `content`, `value`, `status`, and related slot words.
+- Ran the transfer-safety check suggested by review: when `title` or
+  `description` is a legitimate source value, the runtime must preserve a
+  successful literal query and only normalize placeholder-like lowercase values
+  after the original query misses.
+- Added deterministic source-coordinate hint queries for questions that ask for
+  a source coordinate or source-stated capacity, and extended the existing
+  item-description detail projection to accept descriptive `item_id/2` surfaces
+  without helper rows.
+
+After:
+
+| Run | Questions | Exact | Partial | Miss | Helper rows | Result |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| HR-022 accepted probate slice | 8 | 7 | 0 | 1 | 0 | baseline |
+| Broad source-coordinate profile | 8 | 5 | 0 | 3 | 0 | rejected |
+| Tight source-coordinate profile | 8 | 6 | 0 | 2 | 0 | partial |
+| Tight profile + source-coordinate QA guidance | 8 | 6 | 1 | 1 | 0 | partial |
+| Tight profile + deterministic title normalization | 8 | 8 | 0 | 0 | 0 | provisional; failed literal-value safety check |
+| Literal-safe placeholder normalization | 8 | 6 | 0 | 2 | 0 | rejected; protected literals but lost local recovery |
+| Literal-safe normalization + source-coordinate hints | 8 | 6 | 1 | 1 | 0 | partial |
+| Literal-safe normalization + source hints + `item_id/2` detail projection | 8 | 7 | 0 | 1 | 0 | accepted safe state |
+
+- The broad profile contract over-produced/under-bound and regressed the slice.
+- The tightened slot guidance recovered the basis/source-coordinate row but
+  still depended on query behavior.
+- The `8 / 0 / 0` run was not accepted as architecture after transfer review:
+  preemptive normalization of common words such as `title` could broaden a
+  query where the word was a legitimate data value.
+- The accepted safe state is `7 / 0 / 1`, helper rows `0`: the title/year and
+  source-section residuals are repaired without helpers, while the remaining
+  source-stated capacity row is honestly classified as a compile-surface gap
+  until the compiler emits a direct role-bearing predicate.
+
+Artifacts:
+
+- `src/profile_bootstrap.py`
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_profile_bootstrap.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/data/helper_residue/source_coordinate_profile_compile_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_compile_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_compile_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_compile_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qaguidance_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qaguidance_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qaguidance2_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qaguidance2_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qanorm_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_qanorm_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_safeplaceholder_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_safeplaceholder_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_sourcehints_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_sourcehints_qa_20260516.md`
+- `docs/data/helper_residue/source_coordinate_profile_slot_itemid_sourcehints_qa_20260516.json`
+- `docs/data/helper_residue/source_coordinate_profile_slot_itemid_sourcehints_qa_20260516.md`
+- `tmp/helper_residue_source_coordinate_profile_compile_20260516`
+- `tmp/helper_residue_source_coordinate_profile_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_compile_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_qaguidance_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_qaguidance2_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_qanorm_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_safeplaceholder_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_sourcehints_qa_20260516`
+- `tmp/helper_residue_source_coordinate_profile_slot_itemid_sourcehints_qa_20260516`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py src\profile_bootstrap.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py tests\test_profile_bootstrap.py -q`
+  - `197 passed`
+- `python -m pytest tests -q`
+  - `1281 passed, 2 subtests passed`
+
+Lesson:
+
+- Profile contracts can identify a missing source-coordinate capability, but a
+  proposed predicate is not architecture until the compile populates it and the
+  query layer can retrieve it without over-bound constants.
+- Common English slot words require a literal-value safety rule: first execute
+  the original query, and only promote the word to a variable after the original
+  query misses.
+- The transfer-level repair is not a local parser. It is a source-coordinate
+  slot contract, deterministic source-coordinate discovery, and safe
+  placeholder normalization over structural slot words.
+- Helper retirement is still holding: the accepted safe slice reached `7 / 0 /
+  1` with helper rows `0`, and the remaining residual is a real compile-surface
+  role-bearing capacity gap rather than a reason to revive native helpers.
+
+Next pressure:
+
+- Run the accepted safe no-helper path on the paired pressure slice again, then
+  move toward a broader native corpus no-helper rerun only after confirming this
+  source-coordinate repair does not regress the sensor/equipment side.
+- Keep watching deterministic placeholder expansion: add only structural slot
+  words that recur across domains, not local answer vocabulary.
+
+## HR-026 - Three-Fixture Safe Query Replay Holds Helper Retirement
+
+Date: 2026-05-16
+
+Before:
+
+- HR-025 accepted the safer source-coordinate/query-normalization state after
+  rejecting the preemptive `title` normalization shortcut.
+- The open risk was regression on the paired no-helper pressure slice: source
+  coordinate repairs could help one fixture while adding query noise or losing
+  resolution elsewhere.
+
+Prediction:
+
+- If the new query layer is structural, a three-fixture replay should preserve
+  zero helper rows and recover source-coordinate/title pressure without
+  lowering count/roster or equipment QA.
+- If the new source-coordinate hints are too broad, the replay should show
+  answer drift or judge uncertainty from excessive source-record rows.
+
+Intervention:
+
+- Replayed the accepted three-fixture compile root with:
+  - helper companion row limit at default `0`,
+  - legacy native helper adapters disabled,
+  - literal-safe placeholder normalization,
+  - deterministic source-coordinate hint queries,
+  - core-local item-detail projection over descriptive `item_id/2` rows.
+
+After:
+
+| Fixture | Questions | Exact | Partial | Miss | Helper rows | Failure surface |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| count/roster pressure | 8 | 8 | 0 | 0 | 0 | n/a |
+| equipment/source-fidelity pressure | 8 | 7 | 0 | 1 | 0 | `compile_surface_gap=1` |
+| custody/source-coordinate pressure | 8 | 8 | 0 | 0 | 0 | n/a |
+| Total | 24 | 23 | 0 | 1 | 0 | `compile_surface_gap=1` |
+
+- The source-coordinate/title repair transferred across the replay without
+  helper delivery.
+- The remaining miss is the same structural equipment-specification compile gap:
+  the source states a device specification, but the accepted compile root does
+  not expose a direct specification attribute row.
+
+Artifacts:
+
+- `docs/data/helper_residue/three_fixture_safequery_qa_20260516.json`
+- `docs/data/helper_residue/three_fixture_safequery_qa_20260516.md`
+- `tmp/helper_residue_three_fixture_safequery_qa_20260516`
+
+Verification:
+
+- Batch QA:
+  - `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\story_worlds --compile-root tmp\helper_residue_three_fixture_accepted_compile_20260516 --out-root tmp\helper_residue_three_fixture_safequery_qa_20260516 --fixture count_composition_roster --fixture industrial_sensor_clock_correction --fixture probate_storage_access_register --limit 8 --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 3 --timeout 420 --no-cache --out-json docs\data\helper_residue\three_fixture_safequery_qa_20260516.json --out-md docs\data\helper_residue\three_fixture_safequery_qa_20260516.md`
+  - `23 / 0 / 1`, helper rows `0`, runtime load errors `0`, write proposals `0`.
+
+Lesson:
+
+- The helper-retirement path is no longer "remove helpers and hope." It now has
+  three replacement layers:
+  - compile/profile contracts for source roles, specifications, and source
+    coordinates,
+  - deterministic query normalization with literal-value safety,
+  - small core-local projections for structural item detail surfaces.
+- The remaining work is compile-surface preservation, not helper resurrection:
+  when the source states an attribute but the compile keeps it only inside a
+  text atom, no amount of helper-budget tuning should be treated as the
+  architectural fix.
+
+Next pressure:
+
+- Recompile the equipment/source-fidelity pressure under the current profile and
+  compile-surface invariants, then rerun the three-fixture smoke. If the single
+  residual clears without helper rows, move to a broader native no-helper
+  corpus rerun.
+
+## HR-027 - Fresh Equipment Recompile Rejected As Compile-Variance Evidence
+
+Date: 2026-05-16
+
+Before:
+
+- HR-026 left the three-fixture no-helper replay at `23 / 0 / 1`, helper rows
+  `0`.
+- The only residual was an equipment/source-fidelity compile gap in the accepted
+  compile root: a source-stated specification remained in source text rather
+  than a direct specification/attribute surface.
+
+Prediction:
+
+- If the current profile and compile-surface invariants are sufficient, a fresh
+  equipment recompile should preserve the specification as a direct attribute
+  surface and recover the residual without helper rows.
+- If compile stability is the real pressure, a fresh draw may move sideways or
+  regress even though the query/runtime layer is cleaner.
+
+Intervention:
+
+- Recompiled the equipment/source-fidelity fixture under current profile review,
+  source-record ledger facts, flat+plan passes, and focused pass schema.
+- Ran the first eight QA rows with helper companions disabled by default.
+
+After:
+
+| Run | Questions | Exact | Partial | Miss | Helper rows | Result |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| HR-026 accepted compile root | 8 | 7 | 0 | 1 | 0 | keep |
+| Fresh current recompile | 8 | 4 | 0 | 4 | 0 | reject |
+
+- The fresh compile profile scored `0.778`, with repeated id-only record
+  pressure and four QA misses.
+- This draw is not a candidate for the no-helper native baseline.
+- The failure supports the compile-stability finding: once helpers are off, the
+  bottleneck is whether a single compile draw preserves all expected direct
+  surfaces, not whether the query layer can compensate.
+
+Artifacts:
+
+- `docs/data/helper_residue/equipment_current_compile_20260516.json`
+- `docs/data/helper_residue/equipment_current_compile_20260516.md`
+- `docs/data/helper_residue/equipment_current_qa_20260516.json`
+- `docs/data/helper_residue/equipment_current_qa_20260516.md`
+- `tmp/helper_residue_equipment_current_compile_20260516`
+- `tmp/helper_residue_equipment_current_qa_20260516`
+
+Verification:
+
+- Compile summary: candidate predicates `30`, admitted clauses `176`, skipped
+  clauses `23`, rough score `0.778`.
+- QA summary: `4 / 0 / 4`, helper rows `0`, runtime load errors `0`, write
+  proposals `0`.
+
+Lesson:
+
+- A bad single draw should not be repaired midstream with fixture-specific
+  parsing. It should be rejected as compile-variance evidence.
+- The helper-retirement replacement stack is doing its job when it refuses to
+  hide a poor compile behind compatibility adapters.
+
+Next pressure:
+
+- Commit the safe query/runtime and journal work.
+- Treat the remaining path to native no-helper restamp as a compile-stability
+  problem: either use a known-good accepted compile root for immediate smoke, or
+  design a small compile-quality gate/consensus pass before broader native
+  corpus measurement.

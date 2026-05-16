@@ -29,6 +29,7 @@ from scripts.run_domain_bootstrap_qa import (
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
+    _source_coordinate_hint_queries,
     _source_column_text_hint_queries,
     _source_record_table_count_hint_queries,
     _temporal_join_with_previous,
@@ -228,6 +229,54 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
         set(families["source_assertion_surface"]["signatures"])
     )
     assert all("compiled_predicate_inventory" in row["query_policy"] for row in families.values())
+
+
+def test_query_strategy_keeps_source_coordinate_queries_variable_first() -> None:
+    strategy_text = "\n".join(POST_INGESTION_QA_QUERY_STRATEGY["epistemic_policy"])
+
+    assert "source-coordinate questions" in strategy_text
+    assert "discover the source row with variables before binding a section or label" in strategy_text
+    assert "Do not hardcode a guessed section/label atom" in strategy_text
+    assert "Source-stated role lines are evidence" in strategy_text
+
+
+def test_query_strategy_treats_title_as_slot_label_not_constant() -> None:
+    strategy_text = "\n".join(POST_INGESTION_QA_QUERY_STRATEGY["arity_and_variable_policy"])
+
+    assert "label, title, description, content" in strategy_text
+    assert "Label, Title, Description, Content" in strategy_text
+
+
+def test_source_coordinate_hint_queries_expose_addressability_surfaces() -> None:
+    hints = _source_coordinate_hint_queries(
+        utterance="Which section contains the chronology of custody events?",
+        kb_inventory={
+            "signatures": [
+                "source_record_section/2",
+                "source_record_label/2",
+                "source_record_line/2",
+                "source_record_field/3",
+                "source_record_text_atom/2",
+            ]
+        },
+    )
+
+    assert hints == [
+        "source_record_section(SourceRow, Section).",
+        "source_record_label(SourceRow, Label).",
+        "source_record_line(SourceRow, Line).",
+        "source_record_field(SourceRow, Field, Value).",
+        "source_record_text_atom(SourceRow, TextAtom).",
+    ]
+
+
+def test_source_coordinate_hint_queries_cover_source_stated_capacity_without_role_nouns() -> None:
+    hints = _source_coordinate_hint_queries(
+        utterance="Who is identified as the record contact?",
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+    )
+
+    assert hints == ["source_record_text_atom(SourceRow, TextAtom)."]
 
 
 def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
@@ -1643,6 +1692,51 @@ def test_placeholder_repair_promotes_lowercase_field_slot() -> None:
         {"index": 1, "from": "document", "to": "Document"},
         {"index": 2, "from": "field", "to": "Field"},
     ]
+
+
+def test_placeholder_repair_promotes_lowercase_title_slot() -> None:
+    repaired = _placeholder_repaired_query("item_id(asset_17, title).")
+
+    assert repaired is not None
+    assert repaired["query"] == "item_id(asset_17, Title)."
+    assert repaired["repairs"] == [{"index": 2, "from": "title", "to": "Title"}]
+
+
+def test_run_query_plan_preserves_literal_title_when_original_query_succeeds() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "document_kind(doc_a, title).",
+        "document_kind(doc_b, description).",
+        "document_kind(doc_c, notice).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["document_kind(doc_a, title)."])
+
+    assert rows[0]["query"] == "document_kind(doc_a, title)."
+    assert rows[0]["result"]["status"] == "success"
+    assert rows[0]["result"]["rows"][0]["BoundArg1"] == "doc_a"
+    assert rows[0]["result"]["rows"][0]["BoundArg2"] == "title"
+    assert not any(
+        row.get("query") == "document_kind(doc_a, Title)." and row.get("derived_from_queries") == ["document_kind(doc_a, title)."]
+        for row in rows
+    )
+
+
+def test_run_query_plan_repairs_title_only_after_original_query_misses() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("item_id(asset_17, catalog_entry_alpha).").get("status") == "success"
+
+    rows = run_query_plan(runtime, ["item_id(asset_17, title)."])
+
+    repaired = [
+        row
+        for row in rows
+        if row.get("query") == "item_id(asset_17, Title)."
+        and row.get("derived_from_queries") == ["item_id(asset_17, title)."]
+    ]
+    assert repaired
+    assert repaired[0]["result"]["rows"][0]["Title"] == "catalog_entry_alpha"
 
 
 def test_source_record_field_repair_joins_sibling_event_field() -> None:
@@ -4037,6 +4131,30 @@ def test_run_query_plan_derives_item_description_detail_without_helper_rows_when
             "DisplayDescription": "Painting Three Apples in Saucer",
             "Year": "1987",
             "SourcePredicate": "item_description",
+        }
+    ]
+
+
+def test_item_description_detail_accepts_item_id_surface_without_helper_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact("item_id(asset_17, catalog_entry_alpha_1994).").get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["item_id(asset_17, Title)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    detail = next(item for item in rows if item["result"].get("predicate") == "item_description_detail_support")
+    assert detail["result"]["reasoning_basis"]["kind"] == "core-local"
+    assert detail["result"]["rows"] == [
+        {
+            "Item": "asset_17",
+            "Description": "catalog_entry_alpha_1994",
+            "DisplayDescription": "Catalog Entry Alpha",
+            "Year": "1994",
+            "SourcePredicate": "item_id",
         }
     ]
 

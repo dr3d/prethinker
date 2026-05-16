@@ -61,6 +61,12 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("not only a boolean before/after predicate", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("Flag negative-surface loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("Flag temporal-distance loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("source-coordinate provenance", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("semantic assertion and the source coordinate", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Avoid requiring an invented claim id", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Flag source-coordinate provenance loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("governed semantic subject/assertion and the source coordinate", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("source-stated values", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
 
     def test_document_intake_registries_are_narrow_and_fact_free(self) -> None:
         fixture_dir = Path("datasets/profile_bootstrap/samples/document_intake")

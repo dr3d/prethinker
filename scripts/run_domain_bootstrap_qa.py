@@ -109,6 +109,7 @@ GENERIC_QUERY_PLACEHOLDERS = {
     "time",
     "text",
     "textatom",
+    "title",
     "type",
     "underwriter",
     "underwriter_amount",
@@ -324,7 +325,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For who-is or what-is identity questions about a named official, officer, warden, inspector, director, authority, or role-holder, retrieve both identity rows and authority/action rows when they exist. Name plus role is often only partial support; include predicates such as ruling_by/3, permission_granted/2, certification_status/3, disqualification_reason/2, director_recommendation/2, official_action/3, or equivalent inventory predicates that expose what the role-holder inspects, certifies, authorizes, recommends, or decides.",
         "When a question phrase may be only part of a longer normalized atom, do not bind the phrase as a lowercase constant. Query the whole slot as a variable and let returned rows expose atoms such as infirmary_ledger_recorded_blue_sneezing.",
         "Never use lowercase placeholder constants such as who, what, item, reason, source, or answer when a variable is intended.",
-        "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Content, Value, Status, Authority, or Institution.",
+        "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, title, description, content, value, status, authority, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Title, Description, Content, Value, Status, Authority, or Institution.",
         "If you want all rows for grievance/2, query grievance(Grievance, Label), not grievance(Grievance, grievance_label).",
         "For person/place names that may have alternate atom order or abbreviation, such as Luis Ferreira vs luis_ferreira/ferreira_luis or Pier 7 vs pier_7/pier_7_chlorination_unit, discover rows with variables first. Do not combine a constant copied from one predicate family with another predicate family unless that exact constant appears in that predicate's examples.",
     ],
@@ -360,6 +361,8 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions explicitly asking how many rows, entries, devices, systems, events, or applications are listed in a table, inventory, raw event log, source section, or list, include a broad source_record_row(SourceRow, table_row, Line, SectionAtom, Label) query when source_record_row/5 exists. This is structural addressability evidence; do not use it for semantic counts that ask for eligible, active, approved, failed, or scoped items unless a table/list wording is present.",
         "For source_record_field(Row, Field, Value) surfaces, the first argument is the source row or line id, not the event/entity id. To retrieve fields about an event/entity value, first bind the row with source_record_field(Row, event, Event) or source_record_field(Row, identifier, Entity), then query sibling fields with the same Row, such as source_record_field(Row, description, Description). Do not query source_record_field(Event, key, Value).",
         "For packet headers, signed lines, source notes, and other one-line key/value metadata, source_record_field/3 may not split every key. If source_record_text_atom/2 exists, include source_record_text_atom(Row, TextAtom) for the same source row or a broad source-record text query before declaring the field absent.",
+        "For source-coordinate questions asking which source, section, heading, title, note, or line states, sets out, records, supports, or corroborates a fact, discover the source row with variables before binding a section or label. Query broad surfaces such as source_record_section(SourceRow, Section), source_record_label(SourceRow, Label), source_record_line(SourceRow, Line), source_record_field(SourceRow, Field, Value), and source_record_text_atom(SourceRow, TextAtom). Do not hardcode a guessed section/label atom unless that exact atom was returned by an earlier query or appears verbatim in relevant_clauses.",
+        "For questions asking who is identified by a source as holding a role, title, office, signer position, reporter role, author role, or other source-stated capacity, query direct role predicates when they exist, but also include source-record text/field rows with Person/Actor and Role/Title slots as variables when the direct predicate is absent or returns only an organization-level role. Source-stated role lines are evidence; do not answer from a neighboring organization-role predicate alone.",
         "For item-description questions, treat evidence_item(Item, Description) as an equivalent descriptive surface to item_description(Item, Description) when both predicates appear in the inventory. Query whichever predicate exists, and prefer broad variables when the question names the item in natural language.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
         "For prior-concern or October-2025 notice questions, query prior_complaint/4, prior_complaint_subject/2, prior_complaint_action/2, prior_complaint_disputed/2, unresolved_question/2, unresolved_question_detail/2, unresolved_question_status/2, and unresolved_question_referred/2 before falling back to broad proceeding_event rows.",
@@ -605,7 +608,7 @@ def main() -> int:
         "Role, status, type, and relation labels are lowercase constants when they are named by the question or visible in relevant_clauses. Do not convert a role such as research_integrity_officer, respondent, complainant, provost, chair, college, department, yes, no, final, or preliminary into an uppercase variable.",
         "If the question asks who has a named role, bind the role/status argument to the exact lowercase atom from relevant_clauses when present, for example person_role(Person, research_integrity_officer), not person_role(Person, Research_Integrity_Officer).",
         "For who/what/which/where/when/why questions, leave the requested answer position as a variable. Do not fill that slot with a likely answer from relevant_clauses unless the user question itself names that value.",
-        "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, content, value, status, authority, and institution.",
+        "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, title, description, content, value, status, authority, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "compiled_surface_alias_inventory shows predicate families actually present in this compile. Use it to find sibling or decomposed surfaces before falling back to helpers or source-record text.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
@@ -1553,6 +1556,7 @@ def run_one_question(
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_complementary_relation_hint_queries(
@@ -1855,6 +1859,74 @@ def _source_column_text_hint_queries(
     return ["source_record_text_atom(SourceRow, TextAtom)."]
 
 
+def _source_coordinate_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose source-coordinate rows for source/location/role questions.
+
+    This is a query-evidence hint, not a helper. It does not parse source text or
+    name fixture-local coordinates; it only retrieves compiled source-record
+    addressability surfaces when the question itself asks for a source
+    coordinate or a source-stated role/capacity.
+    """
+
+    text = str(utterance or "").casefold()
+    asks_source_coordinate = any(
+        marker in text
+        for marker in (
+            "which section",
+            "what section",
+            "which source",
+            "what source",
+            "which note",
+            "what note",
+            "which line",
+            "what line",
+            "which heading",
+            "what heading",
+            "where in the",
+            "contains the",
+            "sets out",
+            "set out",
+            "states the",
+            "records the",
+            "corroborates",
+            "basis for",
+        )
+    )
+    asks_source_stated_role = any(
+        marker in text
+        for marker in (
+            "identified as",
+            "named as",
+            "listed as",
+            "shown as",
+            "recorded as",
+            "signed as",
+            "who is the",
+            "who was the",
+        )
+    )
+    if not asks_source_coordinate and not asks_source_stated_role:
+        return []
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "source_record_section/2" in signatures:
+        out.append("source_record_section(SourceRow, Section).")
+    if "source_record_label/2" in signatures:
+        out.append("source_record_label(SourceRow, Label).")
+    if "source_record_line/2" in signatures:
+        out.append("source_record_line(SourceRow, Line).")
+    if "source_record_field/3" in signatures:
+        out.append("source_record_field(SourceRow, Field, Value).")
+    if "source_record_text_atom/2" in signatures:
+        out.append("source_record_text_atom(SourceRow, TextAtom).")
+    return out[:5]
+
+
 def _location_floor_hint_queries(
     *,
     utterance: str,
@@ -1945,28 +2017,31 @@ def run_query_plan(
         else:
             placeholder_repair = _placeholder_repaired_query(query)
             if placeholder_repair:
+                result = runtime.query_rows(query)
                 repaired_query = str(placeholder_repair.get("query", "")).strip()
-                repaired_result = runtime.query_rows(repaired_query)
-                effective_query = repaired_query
-                if repaired_result.get("status") == "success":
-                    results.append(
-                        {
-                            "query": repaired_query,
-                            "result": {
-                                **repaired_result,
-                                "reasoning_basis": {
-                                    "kind": "core-local",
-                                    "note": "placeholder query repair converted generic lowercase slot labels to Prolog variables before execution",
-                                    "original_query": query,
-                                    "repairs": placeholder_repair.get("repairs", []),
-                                },
-                            },
-                            "derived_from_queries": [query],
-                        }
-                    )
-                else:
-                    result = runtime.query_rows(query)
+                if result.get("status") == "success":
                     results.append({"query": query, "result": result})
+                else:
+                    repaired_result = runtime.query_rows(repaired_query)
+                    effective_query = repaired_query
+                    if repaired_result.get("status") == "success":
+                        results.append(
+                            {
+                                "query": repaired_query,
+                                "result": {
+                                    **repaired_result,
+                                    "reasoning_basis": {
+                                        "kind": "core-local",
+                                        "note": "placeholder query repair converted generic lowercase slot labels to Prolog variables after the original placeholder-like query returned no rows",
+                                        "original_query": query,
+                                        "repairs": placeholder_repair.get("repairs", []),
+                                    },
+                                },
+                                "derived_from_queries": [query],
+                            }
+                        )
+                    else:
+                        results.append({"query": query, "result": result})
             else:
                 result = runtime.query_rows(query)
                 results.append({"query": query, "result": result})
@@ -4827,7 +4902,7 @@ def _item_description_detail_companion(
     query: str,
     helper_class_rows: bool = True,
 ) -> dict[str, Any] | None:
-    if predicate not in {"item_description", "evidence_item"}:
+    if predicate not in {"item_description", "evidence_item", "item_id"}:
         return None
     item_arg = str(args[0]).strip() if args else ""
     rows: list[dict[str, str]] = []
@@ -4835,6 +4910,7 @@ def _item_description_detail_companion(
     description_sources = [
         ("item_description", "item_description(Item, Description)."),
         ("evidence_item", "evidence_item(Item, Description)."),
+        ("item_id", "item_id(Item, Description)."),
     ]
     for source_predicate, description_query in description_sources:
         for row in _runtime_rows(runtime, description_query):
