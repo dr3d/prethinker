@@ -372,10 +372,12 @@ def _has_source_anchor(line: str) -> bool:
     ):
         return True
     if re.search(
-        r"\b(?:referenced\s+but\s+not\s+reproduced|not\s+reproduced|reproduction\s+does\s+not\s+constitute|finding\s+of\s+fact|"
-        r"authoritative\s+sources?|not\s+been\s+ruled\s+upon|has\s+not\s+been\s+ruled|court\s+has\s+not\s+found|"
-        r"forensic\s+handwriting|ultimate\s+rulings|named\s+lender|loan\s+period|registrar|directed\s+delivery|"
-        r"codicil\s+dispute|individual\s+access)\b",
+        r"\b(?:referenced\s+but\s+not\s+reproduced|not\s+reproduced|reproduction\s+does\s+not\s+constitute|"
+        r"finding\s+of\s+fact|authoritative\s+sources?|controlling\s+sources?|noncontrolling\s+sources?|"
+        r"not\s+been\s+ruled\s+upon|has\s+not\s+been\s+ruled|has\s+not\s+found|has\s+not\s+determined|"
+        r"recorded\s+but\s+not\s+(?:found|ruled|determined)|source\s+(?:states|records|supports|corroborates)|"
+        r"basis\s+(?:is\s+)?(?:stated|recorded|supported|corroborated)|"
+        r"(?:authorized|governed|controlled|directed|approved|recorded|compiled|filed|signed)\s+by)\b",
         text,
         flags=re.IGNORECASE,
     ):

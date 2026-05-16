@@ -1712,16 +1712,15 @@ Prediction:
 Intervention:
 
 - Added profile-bootstrap guidance for equipment/device/instrument/product/
-  asset specifications: vendor, manufacturer, model, serial, firmware,
-  capacity, location, calibration scope, and certification scope are
-  query-bearing attributes.
-- First sensor recompile after bootstrap guidance did not produce direct
-  vendor/model predicates. The profile still centered sensor id plus
+  asset specifications: source-stated descriptive, identifying, versioning,
+  capacity, location, qualification, or scope attributes are query-bearing.
+- First equipment-pressure recompile after bootstrap guidance did not produce
+  direct vendor/model predicates. The profile still centered device id plus
   certification rows.
 - Added a profile-review rule for equipment-specification loss. The review then
-  flagged the missing capability and retry guidance added `sensor_vendor/2`,
-  `sensor_model/2`, and related device-specification slots.
-- Recompiled the sensor fixture and ran first-8 no-helper QA.
+  flagged the missing capability and retry guidance added domain-owned
+  vendor/model predicates and related device-specification slots.
+- Recompiled the equipment-pressure fixture and ran first-8 no-helper QA.
 
 After:
 
@@ -1733,18 +1732,18 @@ After:
 
 Resolved coordinate:
 
-- `industrial_sensor_clock_correction` q004 now has direct rows:
-  - `sensor_vendor(hum_d_04, sentec).`
-  - `sensor_model(hum_d_04, sentec_rh_220_plus).`
+- The equipment-pressure row now has direct domain-owned vendor/model facts.
+  Exact predicate names and emitted atoms are recorded in the run artifact, but
+  they are not promoted here as reusable architecture vocabulary.
 - The judge marked the vendor/model question exact.
 
 New/remaining coordinates:
 
 - Section-addressability query still overuses unsupported string/search
   predicates for human section-title lookup.
-- Operator-console attendance now fails when the compile has event rows from
-  the operator console but does not preserve the named attendant as a direct
-  person-role/source row.
+- A role-bearing operational source line now fails when the compile has event
+  rows from the role-bearing source context but does not preserve the named
+  person as a direct person-role/source row.
 
 Artifacts:
 
@@ -1776,9 +1775,8 @@ Lesson:
 
 Next pressure:
 
-- Apply the same review/audit shape to source-stated person-role lines:
-  attendant, registrar, reviewer, compiler, recorder, approver, observer, and
-  other role-bearing source lines.
+- Apply the same review/audit shape to source-stated person-plus-role lines
+  without enumerating the observed role vocabulary.
 - Require the profile/review layer to notice when a source names a person plus
   role but the profile lacks a direct person-role/source slot.
 
@@ -1870,3 +1868,236 @@ Next pressure:
   a stricter source-role slot contract.
 - After that, address section-display/source-addressability as a query-surface
   problem rather than a helper problem.
+
+## HR-022 - Source-Role Transfer Check Points To Provenance Links
+
+Date: 2026-05-16
+
+Before:
+
+- HR-021 repaired the sensor source-role coordinate under cleaned,
+  fixture-free source-role guidance.
+- The transfer question was whether the same contract would help a second
+  native fixture with source-stated role language, without adding local role
+  nouns to the instrument.
+
+Prediction:
+
+- If source-role review is structural, the second fixture should either expose
+  a direct role row or give the query planner enough source-record evidence to
+  answer without helper rows.
+- If it is not structural, the role question will remain a compile-surface gap
+  and the next step should be a stricter role-slot contract, not a local parser.
+
+Intervention:
+
+- Recompiled the custody/provenance fixture with the cleaned source-role
+  profile-review guidance.
+- Ran first-8 no-helper QA against the fresh compile.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Note |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| HR-019 accepted-state probate slice | first 8 | 6 | 0 | 2 | 0 | role and provenance residuals |
+| HR-022 source-role transfer check | first 8 | 7 | 0 | 1 | 0 | role row exact; provenance residual remains |
+
+Resolved coordinate:
+
+- The source-stated person-role question was judged exact with no helper rows.
+  The support came through source-record evidence and broad role rows rather
+  than a narrow local helper.
+
+Remaining coordinate:
+
+- The possession-basis question still needs a direct statement-to-section
+  provenance link. The semantic assertion and physical custody rows exist, but
+  the section/source coordinate that states the basis is not bound to the
+  assertion row.
+
+Artifacts:
+
+- `docs/data/helper_residue/source_role_review_probate_qa_20260516.json`
+- `docs/data/helper_residue/source_role_review_probate_qa_20260516.md`
+- `tmp/helper_residue_source_role_review_probate_compile_20260516`
+- `tmp/helper_residue_source_role_review_probate_qa_20260516`
+
+Verification:
+
+- QA summary:
+  - `7 / 0 / 1`
+  - helper rows=`0`
+  - runtime load errors=`0`
+  - write proposal rows=`0`
+
+Lesson:
+
+- The source-role rule transfers enough to keep it, but the second fixture did
+  not prove that every role-bearing source line now emits the ideal direct
+  person-role/source slot. The important result is narrower: no helper return
+  was needed for the role question.
+- The surviving residual is a different class: source provenance binding for a
+  semantic assertion. This should not be repaired by a person-role recognizer.
+
+Next pressure:
+
+- Harden profile/bootstrap review for statement-to-section provenance:
+  when a source states a semantic assertion, custody/access/status fact, basis,
+  rationale, or evidence item in a named section/source coordinate, the profile
+  needs a way to bind the semantic assertion to that source coordinate.
+- Then replay the two remaining provenance/addressability rows before any
+  native corpus rerun.
+
+## HR-023 - Fixture-Language Audit Separates New Guidance From Legacy Adapters
+
+Date: 2026-05-16
+
+Before:
+
+- HR-021 and HR-022 added or exercised profile-review guidance for equipment
+  attributes and source-stated roles.
+- The active risk was whether those repairs had quietly promoted native fixture
+  language into the current instrument.
+
+Prediction:
+
+- If the new guidance is clean, fixture/story nouns should be absent from the
+  profile bootstrap/review wording.
+- If leakage exists, it should show up either as local nouns in the new profile
+  guidance or as older query-time recognizers that are still reachable through
+  normal QA execution.
+
+Intervention:
+
+- Searched `src` and `scripts` for recent native pressure terms, role nouns,
+  local identifiers, and answer-bearing story strings.
+- Inspected the query-companion dispatch path to verify whether legacy native
+  adapters are enabled by default.
+
+After:
+
+- The recent profile guidance in `src/profile_bootstrap.py` does not contain
+  the local fixture names, local people, question IDs, section IDs, or answer
+  strings that exposed the current gaps.
+- Legacy query-helper adapters in `scripts/run_domain_bootstrap_qa.py` still
+  contain fixture-shaped recognizers and display strings for old native corpus
+  compatibility.
+- Those legacy adapters are default-off:
+  - `--helper-companion-row-limit` defaults to `0`, disabling helper companion
+    assembly,
+  - `--include-legacy-native-helper-adapters` is opt-in,
+  - legacy adapter outputs are marked with
+    `adapter_status=legacy_native_compatibility_adapter` and
+    `default_delivery=disabled`.
+- The source-record ledger had one lexical trigger with terms too close to
+  current native pressure examples. It was rewritten in this pass to preserve
+  source-fidelity lines by structural criteria: reproduced/reference status,
+  finding/ruling status, source support/corroboration, basis language, and
+  source-action patterns ending in `by`.
+
+Artifacts:
+
+- Code inspection:
+  - `src/profile_bootstrap.py`
+  - `scripts/run_domain_bootstrap_qa.py`
+  - `src/source_record_ledger.py`
+
+Verification:
+
+- The fixture-shaped query helpers are not active under the current default QA
+  path.
+- The fixture-shaped strings still exist in quarantined legacy adapter code, so
+  the answer to the audit question is not "none"; it is "quarantined legacy
+  code remains, current repairs did not add new fixture vocabulary, and the
+  source-ledger trigger was cleaned."
+
+Lesson:
+
+- Fixture language can leak through three different surfaces:
+  profile/review guidance, query-time adapters, and source-ledger trigger
+  lexicons. The first surface looks clean in this cycle. The second is
+  quarantined but still present. The third was converted from example terms to
+  structural source-fidelity language.
+- Default-off is acceptable for forensic compatibility, but it is not the same
+  as architecture cleanliness. Anything still in live code must be either
+  structural, deleted, or explicitly outside the stamped instrument.
+
+Next pressure:
+
+- Keep legacy native adapters out of normal QA and decide whether to move them
+  into history rather than carrying them in the live script.
+- Only then continue toward the native no-helper smoke and corpus rerun.
+
+## HR-024 - Recent-Addition Leakage Audit Catches Enumeration Drift
+
+Date: 2026-05-16
+
+Before:
+
+- HR-023 separated current profile guidance from quarantined legacy adapters.
+- A follow-up review questioned HR-020 specifically: sensor-specific predicate
+  names, the equipment attribute enumeration, and the role enumeration in the
+  next-pressure text could still make fixture pressure look like architecture.
+
+Prediction:
+
+- If the leak was only in historical artifacts, the current diff should be
+  clean and no instrument edits should be needed.
+- If recent additions drifted toward fixture vocabulary, added-line audit over
+  the last few commits should find the concrete terms.
+
+Intervention:
+
+- Audited added lines from the recent no-helper/helper-residue commits and the
+  current working tree.
+- Rewrote live profile guidance from enumerated equipment attributes to
+  structural categories: descriptive, identifying, versioning, capacity,
+  location, qualification, and scope attributes.
+- Removed sensor-specific predicate examples from profile guidance.
+- Rewrote compile guidance that named a specific record-author role and
+  vendor/model values into structural record-author and source-stated
+  specification language.
+- Rewrote HR-020 so exact emitted predicate names remain in run artifacts, not
+  in the worksheet's architecture claim.
+
+After:
+
+- Current live guidance has no recent sensor-specific predicate names, local
+  identifiers, answer strings, question IDs, or the record-author role noun
+  that exposed the pressure.
+- HR-020 now describes the repair as a reusable equipment/specification
+  attribute contract rather than as a sensor predicate success.
+- Older worksheet entries still mention old coordinates because they are
+  historical observations, not active guidance.
+
+Artifacts:
+
+- `src/profile_bootstrap.py`
+- `scripts/run_domain_bootstrap_file.py`
+- `src/source_record_ledger.py`
+- `docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md`
+
+Verification:
+
+- Added-line audit against the current working tree found no hits for the
+  recent risky phrases in live guidance.
+- Focused suite:
+  - `python -m py_compile src\profile_bootstrap.py src\source_record_ledger.py scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_qa.py`
+  - `python -m pytest tests\test_source_record_ledger.py tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_story_world_dataset.py -q`
+  - `300 passed`
+
+Lesson:
+
+- Generic-looking enumerations can still be corpus-shaped. The safer pattern is
+  to name the slot class and admission contract, then let domain-owned
+  predicates instantiate it.
+- Run artifacts may preserve exact predicate names and emitted atoms. The
+  instrument and methodology worksheet should promote only the transfer-level
+  contract.
+
+Next pressure:
+
+- Commit this cleanup before more probe work, so the no-helper/native rerun
+  starts from a clean instrument surface.
+- Continue toward statement-to-section provenance only if the repair can be
+  phrased as a source-coordinate slot contract, not as a local source parser.
