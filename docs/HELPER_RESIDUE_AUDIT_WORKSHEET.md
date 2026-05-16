@@ -3541,3 +3541,99 @@ Next pressure:
 
 - Recompile one weak event-heavy fixture with the new invariant and run QA with
   helpers off. Use the result as a focused probe before broader native redraws.
+
+## HR-041 - Event Backbone Focused Recompile Probe
+
+Date: 2026-05-16
+
+Before:
+
+- `sable_creek_budget` was one of the weakest no-helper native fixtures.
+- Original no-helper draw-1: `27 / 5 / 8`.
+- Alias-hardened rerun on the old compile: `31 / 3 / 6`.
+- The low-six invariant audit classified its `event_backbone_unit_surface` as
+  `partial`, missing `event_identity`, `subject_or_object`, and
+  `temporal_anchor`.
+
+Prediction:
+
+- A fresh compile with the event-backbone invariant should improve a
+  governance/budget event fixture without helper rows, if the repair is truly
+  compile-surface architecture rather than query-time scaffolding.
+
+Intervention:
+
+- Recompiled `sable_creek_budget` with the new event-backbone invariant.
+- Ran compile quality gate and compile-surface invariant audit.
+- Ran no-helper QA against the fresh compile.
+
+After:
+
+Compile:
+
+- Rough score: `0.882` (prior native draw: `0.778`)
+- Candidate predicates: `16`
+- Admitted / skipped: `116 / 50`
+- Wrapper drift flags: none
+
+Invariant audit:
+
+- `event_backbone_unit_surface`: still `partial`, now only missing
+  `temporal_anchor`.
+- `rule_policy_surface`: `pass`
+- `temporal_event_surface`: `partial`, missing `timestamp_or_date`
+- `measure_count_surface`: `partial`, missing `count_or_total`,
+  `ratio_or_formula`
+- `answer_detail_surface`: `ledger_only`
+
+QA:
+
+| Run | Exact | Partial | Miss | Helper rows | Compile-surface gaps |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Original no-helper draw-1 | `27` | `5` | `8` | `0` | n/a |
+| Alias-hardened old compile | `31` | `3` | `6` | `0` | `9` |
+| Event-backbone recompile | `34` | `3` | `3` | `0` | `4` |
+
+Remaining non-exact pressure:
+
+- financial baseline/counterfactual arithmetic: starting balance/counterfactual
+  reserve rows still disagree or under-bind;
+- vote-change hybrid join: individual vote transitions are not yet preserved
+  cleanly enough;
+- event introduction/proposal/seconding: introduction and recall-procedure
+  steps are under-emitted;
+- nonbinding advisory list: query surface still misses some advisory/evidence
+  classes.
+
+Artifacts:
+
+- `docs/data/helper_residue/event_backbone_sable_recompile_20260516.json`
+- `docs/data/helper_residue/event_backbone_sable_recompile_20260516.md`
+- `docs/data/helper_residue/event_backbone_sable_recompile_audit_20260516.json`
+- `docs/data/helper_residue/event_backbone_sable_recompile_audit_20260516.md`
+- `docs/data/helper_residue/event_backbone_sable_recompile_qa_20260516.json`
+- `docs/data/helper_residue/event_backbone_sable_recompile_qa_20260516.md`
+- `tmp/event_backbone_sable_recompile_20260516/`
+- `tmp/event_backbone_sable_recompile_qa_20260516/`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py ... --fixture sable_creek_budget --compile-source --compile-plan-passes --focused-pass-ops-schema --source-entity-ledger --source-record-ledger --source-record-ledger-facts --intake-registry-context --review-profile --profile-review-retry --quality-gate`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\event_backbone_sable_recompile_20260516\sable_creek_budget --out-json docs\data\helper_residue\event_backbone_sable_recompile_audit_20260516.json --out-md docs\data\helper_residue\event_backbone_sable_recompile_audit_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --compile-root tmp\event_backbone_sable_recompile_20260516 --fixture sable_creek_budget --no-cache --helper-companion-row-limit 0`
+
+Lesson:
+
+This is the clean architectural path away from helpers: improve the compile so
+the KB has better direct surfaces, then query it with helper rows at zero. The
+event-backbone invariant did not fully solve the fixture, but it moved exact
+answers from `27` to `34` and cut misses from `8` to `3` without teaching the
+harness budget-fixture vocabulary.
+
+Next pressure:
+
+- Promote the next invariant from the remaining misses only if it is generic:
+  financial baseline/counterfactual arithmetic, individual vote/choice
+  transition joins, procedure-step requirements, or nonbinding advisory source
+  classification.
+- Do not add a `sable` or budget-specific rule.
