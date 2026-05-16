@@ -2885,3 +2885,84 @@ Next pressure:
   remain fixture-local compile vocabulary.
 - Separately audit `person_role/3` as a broad structural surface: role holder,
   role label, scope/context/date are the likely slots.
+
+## HR-033 - Generic Alias Families For Local Assignment/Count Vocabulary
+
+Date: 2026-05-16
+
+Before:
+
+- HR-032 ranked the top local naming-risk predicates:
+  `assigned_to_bus/3`, `adult_in_version/3`, `bus_chaperone/2`,
+  `qualifying_chaperone_count/2`, and `distinct_student_count/2`.
+- Direct inspection showed these came from two roster/transport-shaped native
+  fixtures, not from broad corpus activation.
+
+Prediction:
+
+- The right repair is not to teach the query layer bus/student/chaperone
+  vocabulary.
+- The reusable surface is structural:
+  assignment/allocation, versioned membership, and count/requirement.
+
+Intervention:
+
+- Extended `compiled_surface_alias_inventory()` with three generic families:
+  - `assignment_allocation_surface`
+  - `versioned_membership_surface`
+  - `count_requirement_surface`
+- The family specs avoid fixture nouns as anchor tokens. For example,
+  `assigned_to_bus/3` is captured because it contains `assign`, not because the
+  instrument knows about buses.
+- Added test coverage proving the risk predicates map through generic families
+  while the QA planner still may only query predicates actually present in the
+  compiled inventory.
+
+After:
+
+On the latest native no-helper compile artifacts:
+
+`count_composition_roster` now groups:
+
+- `assignment_allocation_surface`: `homeroom_reassigned/3`,
+  `bus_assignment/3`
+- `versioned_membership_surface`: `student_in_version/3`,
+  `adult_in_version/3`, `roster_table_version/2`, `roster_version/1`,
+  `roster_version_date/2`, `compliance_version/1`
+- `count_requirement_surface`: `distinct_student_count/2`,
+  `qualifying_chaperone_count/2`, `required_chaperones/2`,
+  `excluded_from_count/2`
+
+`school_activity_roster_reconciliation` now groups:
+
+- `assignment_allocation_surface`: `assigned_to_room/2`,
+  `seat_row_assignment/3`, `assigned_to_bus/3`, `assigned_to_group/2`
+- `versioned_membership_surface`: `roster_version/3`
+
+Artifacts:
+
+- `scripts/run_domain_bootstrap_qa.py`
+- `tests/test_domain_bootstrap_qa.py`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_qa.py`
+- `python -m pytest tests\test_domain_bootstrap_qa.py::test_compiled_kb_inventory_groups_present_surface_alias_families tests\test_domain_bootstrap_qa.py::test_group_assignment_query_uses_generic_assignment_surface -q`
+  - `2 passed`
+
+Lesson:
+
+This is the clean architectural move for local vocabulary: do not deny that
+source-specific predicates exist in a compile, but classify their query-planning
+shape through generic families. The alias inventory does not invent predicates
+and does not promote bus/student/chaperone as architecture. It only tells QA
+that already-present predicates may be assignment, versioned-membership, or
+count/requirement surfaces.
+
+Next pressure:
+
+- Audit `person_role/3` as the first broad structural slot contract. It appears
+  across `13` fixtures and is now more important than the local roster/transport
+  family.
+- Watch whether the generic alias families improve QA routing on future
+  no-helper native runs without widening fixture vocabulary.

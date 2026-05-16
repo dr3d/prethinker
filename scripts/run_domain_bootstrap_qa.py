@@ -1032,6 +1032,24 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
             ("claim", "assert", "dispute", "objection", "ground", "status", "source"),
             ("claim", "assert", "dispute"),
         ),
+        (
+            "assignment_allocation_surface",
+            "entities assigned or allocated to groups, rooms, seats, vehicles, tasks, or other containers",
+            ("assign", "allocation", "allocated", "group", "room", "seat", "vehicle", "unit", "task"),
+            ("assign", "allocation", "allocated"),
+        ),
+        (
+            "versioned_membership_surface",
+            "membership, presence, or status scoped to an explicit version/state snapshot",
+            ("version", "state", "status", "member", "membership", "present", "current"),
+            ("version",),
+        ),
+        (
+            "count_requirement_surface",
+            "explicit counts, distinct counts, required counts, totals, and threshold-like quantities",
+            ("count", "total", "required", "threshold", "minimum", "maximum", "distinct", "quantity"),
+            ("count", "total", "required", "threshold"),
+        ),
     )
     out: list[dict[str, Any]] = []
     for family, purpose, any_tokens, anchor_tokens in family_specs:
