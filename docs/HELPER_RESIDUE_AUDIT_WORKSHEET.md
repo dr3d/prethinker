@@ -2571,3 +2571,117 @@ Next pressure:
   domain-shaped predicate names (`adult_role`, `student_group_assignment`,
   `staff_statement`, and similar) and classify each as:
   structural vocabulary, compatibility alias, or retirement target.
+
+## HR-030 - Fixture Vocabulary Leak Audit And Predicate Inventory
+
+Date: 2026-05-16
+
+Before:
+
+- After HR-029, `explicit_table_*` was clean, but the live repo still contained
+  several school/domain-shaped names:
+  `adult_role`, `student_group_assignment`, `staff_statement`,
+  `student_in_homeroom`, `homeroom_member`, and residual `roster_table_*`
+  support kinds.
+- A raw text search was too noisy because it mixed active architecture, tests,
+  current docs, generated artifacts, and old worksheet strata.
+
+Prediction:
+
+- A useful leak audit should separate where each term lives and classify its
+  current contract:
+  structural, compatibility-only, quarantined candidate helper, or retirement
+  pressure.
+- Predicate-frequency data should show whether suspect names are broad active
+  surfaces or narrow legacy residue in the latest native draw.
+
+Intervention:
+
+- Added `scripts/audit_fixture_vocabulary_leaks.py`.
+  - It scans active code, tests, current docs, worksheets, probes, and artifact
+    data separately.
+  - It records the replacement surface for each suspect term.
+  - It treats old worksheets as history, not live architecture.
+- Added `scripts/audit_compile_predicate_inventory.py`.
+  - It scans compile JSON artifacts for candidate predicate signatures and
+    admitted fact/rule/query predicate signatures.
+  - It reports predicate mentions, unique predicate counts, fixture spread, and
+    per-fixture predicate breadth.
+- Ran the predicate inventory over the native no-helper draw-1 compile root.
+
+After:
+
+Vocabulary leak audit headline:
+
+| Term | Classification | Active-code status |
+| --- | --- | --- |
+| `explicit_table_*` | structural | primary architecture surface |
+| `roster_table_*` | compatibility alias | allowed only for old artifacts or school-roster-shaped IDs |
+| `roster_table_student_group_assignment` | high-risk compatibility alias | keep only when reading old `roster_table_member/4` rows |
+| `source_record_student_group_assignment` | quarantined candidate helper | disabled by default; replace with direct group surfaces |
+| `student_group_assignment` | high-risk compatibility predicate | old compile vocabulary; prefer `group_assignment` / `group_membership` |
+| `student_in_homeroom`, `homeroom_member` | high-risk compatibility predicates | old compile/query vocabulary only |
+| `adult_role` | medium-risk compatibility predicate | prefer `person_role` / `role_assignment` |
+| `source_record_adult_role` | quarantined candidate helper | legacy school-roster parser output |
+| `staff_statement` | medium-risk compatibility predicate | prefer `recorded_statement` |
+| `roster_state_support` | legacy native helper adapter | default-disabled; direct compile surfaces should replace it |
+
+Native no-helper draw-1 predicate inventory:
+
+- Compile artifacts scanned: `56`
+- Candidate predicate mentions: `1230`
+- Unique candidate predicates: `1086`
+- Admitted predicate mentions: `62371`
+- Unique admitted predicates: `982`
+- Candidate predicates not admitted anywhere: `124`
+- Admitted predicates not listed as candidates anywhere: `20`
+
+Relevant suspect-frequency facts from the native draw:
+
+- `person_role/3`: candidate in `14` fixtures, admitted `105` times across
+  `13` fixtures. This is the structural replacement direction for
+  `adult_role`.
+- `adult_role/2`: candidate in `1` fixture, admitted `8` times in `1` fixture.
+  That makes it narrow compatibility residue, not broad architecture.
+- `roster_table_member/4`: admitted `77` times in `1` fixture.
+- `roster_table_member_label/5`: admitted `77` times in `1` fixture.
+- `roster_table_member_alias/2`: admitted `40` times in `1` fixture.
+- `student_group_assignment/3`, `student_in_homeroom/3`, and
+  `staff_statement/3` do not appear as admitted predicates in this native
+  draw. Their risk is mostly code compatibility and old-artifact vocabulary,
+  not current broad corpus activation.
+
+Artifacts:
+
+- `scripts/audit_fixture_vocabulary_leaks.py`
+- `scripts/audit_compile_predicate_inventory.py`
+- `docs/data/helper_residue/fixture_vocabulary_leak_audit_20260516.json`
+- `docs/data/helper_residue/fixture_vocabulary_leak_audit_20260516.md`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.json`
+- `docs/data/helper_residue/native_nohelper_draw1_predicate_inventory_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\audit_fixture_vocabulary_leaks.py scripts\audit_compile_predicate_inventory.py`
+- `python -m pytest tests\test_source_record_ledger.py tests\test_domain_bootstrap_qa.py::test_explicit_table_member_alias_support_maps_generic_printed_labels -q`
+  - `20 passed`
+
+Lesson:
+
+The leak surface is real but bounded. The latest native compile draw already
+prefers generic role vocabulary (`person_role/3`) over the older `adult_role/2`
+surface, and the worst school-shaped predicates are either absent from the
+native draw or isolated to one fixture. The architectural task is therefore not
+a panic rewrite. It is a compatibility quarantine: prevent these names from
+being copied into new guidance, keep legacy adapters default-disabled, and move
+future repairs toward generic role/assignment/statement predicates.
+
+Next pressure:
+
+- Add generic compatibility readers for `group_assignment/3` and
+  `recorded_statement/3` where the query layer currently only knows
+  `student_group_assignment/3` or `staff_statement/3`.
+- Update current docs that still describe roster-state support as forward
+  architecture rather than default-disabled compatibility.
+- Re-run this leak audit after each helper-retirement or compile-guidance
+  change.
