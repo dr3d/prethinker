@@ -2087,6 +2087,8 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         and not asks_count
     ):
         current_roster_predicates = {
+            "explicit_table_member_alias_support",
+            "explicit_table_member_label",
             "homeroom_member_alias_support",
             "roster_table_member_alias_support",
             "roster_table_member_label",
@@ -2097,6 +2099,8 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         if label.startswith("source_record_facts"):
             return 0.0
         alias_table_predicates = {
+            "explicit_table_member_alias_support",
+            "explicit_table_member_label",
             "homeroom_member_alias_support",
             "roster_table_member_alias_support",
             "roster_table_member_label",
@@ -3042,14 +3046,25 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         return 6.0
     if (
         "student identifier" in question
-        and "roster_table_member_label" in predicates
-        and predicates.intersection({"roster_table_member", "roster_table_member_alias_support"})
+        and predicates.intersection({"explicit_table_member_label", "roster_table_member_label"})
+        and predicates.intersection(
+            {
+                "explicit_table_membership",
+                "explicit_table_member_alias_support",
+                "roster_table_member",
+                "roster_table_member_alias_support",
+            }
+        )
     ):
         return 4.0 if label == "count_full" else 2.5
     if (
         "student identifier" in question
-        and predicates.intersection({"roster_table_member_alias", "roster_table_member_label"})
-        == {"roster_table_member_alias", "roster_table_member_label"}
+        and (
+            predicates.intersection({"explicit_table_member_alias", "explicit_table_member_label"})
+            == {"explicit_table_member_alias", "explicit_table_member_label"}
+            or predicates.intersection({"roster_table_member_alias", "roster_table_member_label"})
+            == {"roster_table_member_alias", "roster_table_member_label"}
+        )
     ):
         if label == "alias_full":
             return 6.6
@@ -3178,7 +3193,7 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
                 {"group_count", "source_record_student_group_assignment", "student_group_assignment"}
             ):
                 return 2.5
-        if "roster_table_count_support" in predicates and any(
+        if predicates.intersection({"explicit_table_count_support", "roster_table_count_support"}) and any(
             marker in question for marker in ["distinct student", "distinct students", "registrar", "table"]
         ):
             return 4.0

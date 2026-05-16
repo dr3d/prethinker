@@ -180,18 +180,16 @@ prose directly and do not mutate the KB. Current active examples include:
   `candidate-helper`. That parser now handles both fresh transfer rows shaped
   like `v1/v2/v3`, `group_a/group_b/group_c`, and `s_###`, and sibling
   homeroom-table rows shaped like `v1_0/v1_3`, `7_a`, and `STU-####`. A new
-  deterministic pre-compile ledger fact, `roster_table_member/4`, now captures
-  explicit grouping/member table rows before the helper runs. The helper may
-  consume those explicit rows as clean structural memory, while section/prose
-  roster parsing stays candidate-helper. QA planning now prefers
-  `roster_table_member/4` for homeroom membership/count questions when that
-  predicate exists, but does not broaden the rule to all roster or compliance
-  counts. Printed member labels are preserved separately with
-  `roster_table_member_label/5` and `roster_table_member_alias/2` so exact
-  labels such as `STU-1063 Vinokur` survive without becoming duplicate members.
-  `roster_table_count_support` then derives entry counts, distinct normalized
-  member counts, duplicate members, and group counts from those deterministic
-  table rows.
+  deterministic pre-compile ledger fact, `explicit_table_membership/4`, now
+  captures explicit grouping/member table rows before the helper runs. The
+  helper may consume those explicit rows as clean structural memory, while
+  section/prose roster parsing stays candidate-helper. QA planning still
+  supports legacy roster predicates for old artifacts, but new architecture
+  should prefer `explicit_table_membership/4`, `explicit_table_member_label/5`,
+  and `explicit_table_member_alias/2`. Printed member labels survive without
+  becoming duplicate members. `explicit_table_count_support` then derives entry
+  counts, distinct normalized member counts, duplicate members, and group counts
+  from those deterministic table rows.
 - `grant_award_support`: derives award totals, eligible application sets,
   cap-applied applications, appeal pending status, recusal records, committee
   recusal vote counts, and corrected-score support from admitted grant facts and

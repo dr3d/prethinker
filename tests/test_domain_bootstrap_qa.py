@@ -4744,7 +4744,7 @@ def test_roster_state_support_derives_adult_counts_and_compliance_log() -> None:
     )
 
 
-def test_roster_table_member_alias_support_maps_printed_labels() -> None:
+def test_explicit_table_member_alias_support_maps_legacy_printed_labels() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
         "roster_table_member(src_line_0041, v1_0, 7_a, stu_1063).",
@@ -4756,9 +4756,7 @@ def test_roster_table_member_alias_support_maps_printed_labels() -> None:
 
     rows = run_query_plan(runtime, ["roster_table_member(Row, v1_0, Homeroom, stu_1063_vinokur)."])
 
-    companion = next(
-        item for item in rows if item["result"].get("predicate") == "roster_table_member_alias_support"
-    )
+    companion = next(item for item in rows if item["result"].get("predicate") == "explicit_table_member_alias_support")
     result_rows = companion["result"]["rows"]
 
     assert {
@@ -4768,6 +4766,37 @@ def test_roster_table_member_alias_support_maps_printed_labels() -> None:
         and row.get("Member") == "stu_1063"
         and row.get("PrintedMember") == "stu_1063_vinokur"
     } == {"7_a", "7_b"}
+
+
+def test_explicit_table_member_alias_support_maps_generic_printed_labels() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "explicit_table_membership(src_line_0004, unspecified_version, pump_crew, emp_204).",
+        "explicit_table_membership(src_line_0004, unspecified_version, pump_crew, emp_311).",
+        "explicit_table_member_label(src_line_0004, unspecified_version, pump_crew, emp_204, emp_204_rivera).",
+        "explicit_table_member_label(src_line_0004, unspecified_version, pump_crew, emp_311, emp_311_okafor).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["explicit_table_membership(Row, unspecified_version, Team, emp_204_rivera)."],
+    )
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "explicit_table_member_alias_support")
+    result_rows = companion["result"]["rows"]
+
+    assert result_rows == [
+        {
+            "SupportKind": "explicit_table_member_label",
+            "SourceRow": "src_line_0004",
+            "Version": "unspecified_version",
+            "Group": "pump_crew",
+            "Member": "emp_204",
+            "PrintedMember": "emp_204_rivera",
+            "HelperClass": "clean-helper",
+        }
+    ]
 
 
 def test_homeroom_member_alias_support_prioritizes_latest_printed_label_row() -> None:
@@ -4794,7 +4823,7 @@ def test_homeroom_member_alias_support_prioritizes_latest_printed_label_row() ->
     assert first_row.get("HelperClass") == "clean-helper"
 
 
-def test_roster_table_count_support_distinguishes_entries_from_distinct_members() -> None:
+def test_explicit_table_count_support_distinguishes_legacy_entries_from_distinct_members() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
         "roster_table_member(src_line_0041, v1_0, 7_a, stu_1019).",
@@ -4806,14 +4835,12 @@ def test_roster_table_count_support_distinguishes_entries_from_distinct_members(
 
     rows = run_query_plan(runtime, ["roster_table_member(Row, v1_0, Homeroom, Student)."])
 
-    companion = next(
-        item for item in rows if item["result"].get("predicate") == "roster_table_count_support"
-    )
+    companion = next(item for item in rows if item["result"].get("predicate") == "explicit_table_count_support")
     result_rows = companion["result"]["rows"]
 
     assert result_rows == [
         {
-            "SupportKind": "roster_table_distinct_member_count",
+            "SupportKind": "explicit_table_distinct_member_count",
             "Version": "v1_0",
             "EntryCount": "4",
             "DistinctCount": "3",

@@ -2478,3 +2478,96 @@ Next pressure:
   - no helper companion rows,
   - no legacy native adapters,
   - no mid-stamp repairs.
+
+## HR-029 - Generic Explicit Table Membership Vocabulary
+
+Date: 2026-05-16
+
+Before:
+
+- The live deterministic ledger still exposed explicit table membership through
+  school-shaped predicate names:
+  `roster_table_member/4`, `roster_table_member_label/5`, and
+  `roster_table_count_support`.
+- That was a vocabulary leak even though the underlying operation was
+  structural: "a table has a grouping column and a member column." The term
+  `roster` made a school fixture look like architecture.
+- CSS-020 also showed that new compile-surface names need unlike transfer
+  evidence before they are treated as architecture.
+
+Prediction:
+
+- The clean architecture move is not to delete the capability. It is to rename
+  the structural surface around the operation it actually performs:
+  explicit grouping/member table membership.
+- Legacy roster aliases can remain compatibility output only when the member
+  ids themselves are school-roster shaped. Unlike tables should emit only the
+  generic surface.
+
+Intervention:
+
+- Added `explicit_table_membership/4`,
+  `explicit_table_member_label/5`, `explicit_table_member_alias/2`,
+  `explicit_table_scope/2`, and `explicit_table_version/2` as the primary
+  deterministic source-record ledger facts.
+- Broadened table detection to unlike grouping/member headers such as team,
+  unit, department, committee, members, participants, contributors, staff, and
+  people.
+- Left `roster_table_*` facts as legacy aliases only for `STU-*` / `S-*`
+  member identifiers.
+- Updated query companions and selector scoring to prefer
+  `explicit_table_*` support while still reading legacy roster facts from old
+  artifacts.
+- Updated current architecture docs so new contexts see
+  `explicit_table_membership/4` as the architecture and `roster_table_*` as
+  compatibility vocabulary.
+
+After:
+
+- A school homeroom table emits both generic explicit-table facts and legacy
+  roster aliases for backward compatibility.
+- A novel maintenance crew table:
+
+  `| Team | Members |`
+
+  `| Pump crew | EMP-204 Rivera; EMP-311 Okafor |`
+
+  emits:
+  - `explicit_table_membership(src_line_0004, unspecified_version, pump_crew, emp_204).`
+  - `explicit_table_member_label(src_line_0004, unspecified_version, pump_crew, emp_204, emp_204_rivera).`
+  - no `roster_table_member/4` facts.
+- Generic alias support maps `emp_204_rivera` back to normalized `emp_204`
+  through `explicit_table_member_alias_support`.
+- Legacy roster tests still pass through the generic companion path.
+
+Artifacts:
+
+- `src/source_record_ledger.py`
+- `scripts/run_domain_bootstrap_qa.py`
+- `scripts/select_qa_mode_without_oracle.py`
+- `tests/test_source_record_ledger.py`
+- `tests/test_domain_bootstrap_qa.py`
+- `docs/CURRENT_HARNESS_INSTRUMENT.md`
+- `docs/CURRENT_UTTERANCE_PIPELINE.md`
+
+Verification:
+
+- `python -m py_compile src\source_record_ledger.py scripts\run_domain_bootstrap_qa.py scripts\select_qa_mode_without_oracle.py`
+- Targeted tests:
+  - `tests/test_source_record_ledger.py`
+  - roster/explicit-table QA companion tests
+  - selected roster-table selector compatibility tests
+
+Lesson:
+
+Generic behavior can still carry fixture residue through its predicate names.
+The architecture is the table operation, not the school domain that first
+exposed it. Legacy aliases are acceptable as adapters, but the primary surface
+must be fixture-free and must fire on unlike tables.
+
+Next pressure:
+
+- Continue the recent-addition leak audit for remaining school-shaped or
+  domain-shaped predicate names (`adult_role`, `student_group_assignment`,
+  `staff_statement`, and similar) and classify each as:
+  structural vocabulary, compatibility alias, or retirement target.

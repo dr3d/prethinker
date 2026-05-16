@@ -612,7 +612,7 @@ def main() -> int:
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
         "compiled_surface_alias_inventory shows predicate families actually present in this compile. Use it to find sibling or decomposed surfaces before falling back to helpers or source-record text.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
-        "For homeroom membership or homeroom student-count questions, if compiled_query_templates includes roster_table_member/4, prefer roster_table_member(SourceRow, Version, Group, Student) for explicit table membership before sparse semantic member predicates such as homeroom_member/3.",
+        "For explicit table membership or member-count questions, if compiled_query_templates includes explicit_table_membership/4, prefer explicit_table_membership(SourceRow, Version, Group, Member) for direct grouping/member table evidence before sparse semantic member predicates. Legacy roster_table_member/4 is compatibility-only.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
         "For ledger/record/institution questions, pair the descriptive event predicate with the likely container predicate using the same variable name, such as grievance_method(Grievance, Method) plus grievance_target(Grievance, Institution).",
         "Do not lock onto a single grievance/document id before discovering answer-bearing rows; duplicate compiled records may contain different detail levels.",
@@ -8965,6 +8965,30 @@ def _clear_sample_clock_pause_companion(
     }
 
 
+def _explicit_table_member_label_rows(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    rows = _runtime_rows(runtime, "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    for row in rows:
+        row.setdefault("SupportKind", "explicit_table_member_label")
+    if rows:
+        return rows
+    legacy_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    for row in legacy_rows:
+        row.setdefault("SupportKind", "roster_table_member_label")
+    return legacy_rows
+
+
+def _explicit_table_membership_rows(runtime: CorePrologRuntime) -> list[dict[str, Any]]:
+    rows = _runtime_rows(runtime, "explicit_table_membership(SourceRow, Version, Group, Member).")
+    for row in rows:
+        row.setdefault("SupportKind", "explicit_table_membership")
+    if rows:
+        return rows
+    legacy_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Member).")
+    for row in legacy_rows:
+        row.setdefault("SupportKind", "roster_table_member")
+    return legacy_rows
+
+
 def _roster_table_member_alias_companion(
     runtime: CorePrologRuntime,
     *,
@@ -8972,12 +8996,12 @@ def _roster_table_member_alias_companion(
     args: list[str],
     query: str,
 ) -> dict[str, Any] | None:
-    if predicate != "roster_table_member" or len(args) < 4:
+    if predicate not in {"explicit_table_membership", "roster_table_member"} or len(args) < 4:
         return None
     requested_row, requested_version, requested_group, requested_member = [str(item).strip() for item in args[:4]]
     if not requested_member or _is_prolog_variable(requested_member):
         return None
-    label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    label_rows = _explicit_table_member_label_rows(runtime)
     if not label_rows:
         return None
 
@@ -9006,7 +9030,7 @@ def _roster_table_member_alias_companion(
                 continue
         out_rows.append(
             {
-                "SupportKind": "roster_table_member_label",
+                "SupportKind": str(row.get("SupportKind", "")).strip() or "explicit_table_member_label",
                 "SourceRow": source_row,
                 "Version": version,
                 "Group": group,
@@ -9018,11 +9042,11 @@ def _roster_table_member_alias_companion(
     if not out_rows:
         return None
     return {
-        "query": "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+        "query": "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
         "result": {
             "status": "success",
-            "predicate": "roster_table_member_alias_support",
-            "prolog_query": "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+            "predicate": "explicit_table_member_alias_support",
+            "prolog_query": "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
             "result_type": "table",
             "num_rows": len(out_rows),
             "variables": ["SupportKind", "SourceRow", "Version", "Group", "Member", "PrintedMember", "HelperClass"],
@@ -9030,8 +9054,8 @@ def _roster_table_member_alias_companion(
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only roster table alias companion maps exact printed member labels "
-                    "such as stu_1063_vinokur back to the normalized roster member id stu_1063"
+                    "query-only explicit table alias companion maps exact printed member labels "
+                    "back to normalized explicit table member ids"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -9039,7 +9063,7 @@ def _roster_table_member_alias_companion(
         },
         "derived_from_queries": [
             query,
-            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+            "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
         ],
     }
 
@@ -9056,7 +9080,7 @@ def _homeroom_member_alias_companion(
     requested_student, requested_homeroom, requested_version = [str(item).strip() for item in args[:3]]
     if not requested_student or _is_prolog_variable(requested_student):
         return None
-    label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    label_rows = _explicit_table_member_label_rows(runtime)
     if not label_rows:
         return None
 
@@ -9108,8 +9132,8 @@ def _homeroom_member_alias_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only homeroom alias companion answers a sparse homeroom_member/3 "
-                    "lookup from clean roster_table_member_label/5 rows when the question uses "
-                    "a printed member label such as stu_1063_vinokur"
+                    "lookup from explicit table member labels when the question uses a "
+                    "printed member label such as stu_1063_vinokur"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -9117,7 +9141,7 @@ def _homeroom_member_alias_companion(
         },
         "derived_from_queries": [
             query,
-            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+            "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
         ],
     }
 
@@ -9129,13 +9153,13 @@ def _roster_table_count_companion(
     args: list[str],
     query: str,
 ) -> dict[str, Any] | None:
-    if predicate not in {"roster_table_member", "student_in_homeroom", "homeroom_member"}:
+    if predicate not in {"explicit_table_membership", "roster_table_member", "student_in_homeroom", "homeroom_member"}:
         return None
-    member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Member).")
+    member_rows = _explicit_table_membership_rows(runtime)
     if not member_rows:
         return None
     requested_version = ""
-    if predicate == "roster_table_member" and len(args) >= 2 and not _is_prolog_variable(str(args[1]).strip()):
+    if predicate in {"explicit_table_membership", "roster_table_member"} and len(args) >= 2 and not _is_prolog_variable(str(args[1]).strip()):
         requested_version = str(args[1]).strip()
     elif predicate in {"student_in_homeroom", "homeroom_member"} and len(args) >= 3 and not _is_prolog_variable(str(args[2]).strip()):
         requested_version = str(args[2]).strip()
@@ -9161,7 +9185,7 @@ def _roster_table_count_companion(
             group_counts[group] = group_counts.get(group, 0) + 1
         out_rows.append(
             {
-                "SupportKind": "roster_table_distinct_member_count",
+                "SupportKind": "explicit_table_distinct_member_count",
                 "Version": version,
                 "EntryCount": str(len(entries)),
                 "DistinctCount": str(len(distinct_members)),
@@ -9173,11 +9197,11 @@ def _roster_table_count_companion(
     if not out_rows:
         return None
     return {
-        "query": "roster_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
+        "query": "explicit_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
         "result": {
             "status": "success",
-            "predicate": "roster_table_count_support",
-            "prolog_query": "roster_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
+            "predicate": "explicit_table_count_support",
+            "prolog_query": "explicit_table_count_support(Version, EntryCount, DistinctCount, DuplicateMembers).",
             "result_type": "table",
             "num_rows": len(out_rows),
             "variables": [
@@ -9193,9 +9217,9 @@ def _roster_table_count_companion(
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only roster table count companion derives entry count, distinct "
+                    "query-only explicit table count companion derives entry count, distinct "
                     "normalized member count, duplicate members, and group counts from "
-                    "deterministic roster_table_member/4 rows"
+                    "deterministic explicit_table_membership/4 rows"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -9203,7 +9227,7 @@ def _roster_table_count_companion(
         },
         "derived_from_queries": [
             query,
-            "roster_table_member(SourceRow, Version, Group, Member).",
+            "explicit_table_membership(SourceRow, Version, Group, Member).",
         ],
     }
 
@@ -9242,8 +9266,8 @@ def _roster_state_companion(
     ratio_count_rows = _runtime_rows(runtime, "ratio_count_status(Person, Counts).")
     student_assignment_rows = _runtime_rows(runtime, "student_group_assignment(Student, Version, Group).")
     student_homeroom_rows = _runtime_rows(runtime, "student_in_homeroom(Student, Homeroom, Version).")
-    roster_table_member_rows = _runtime_rows(runtime, "roster_table_member(SourceRow, Version, Group, Student).")
-    roster_table_label_rows = _runtime_rows(runtime, "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).")
+    roster_table_member_rows = _explicit_table_membership_rows(runtime)
+    roster_table_label_rows = _explicit_table_member_label_rows(runtime)
     supervises_rows = _runtime_rows(runtime, "supervises(Supervisor, Target, Interval).")
     supervision_rows = _runtime_rows(runtime, "supervision_assignment(Supervisor, Target, Start, End).")
     temporary_assignment_rows = _runtime_rows(runtime, "temporary_assignment(Person, Group, Event, StartEnd).")
@@ -9450,15 +9474,21 @@ def _roster_state_companion(
         )
     for row in roster_table_member_rows:
         source_row = str(row.get("SourceRow", "")).strip()
-        person = str(row.get("Student", "")).strip()
+        person = str(row.get("Member") or row.get("Student") or "").strip()
         version = str(row.get("Version", "")).strip()
         group = str(row.get("Group", "")).strip()
         if not person or not group:
             continue
         printed_member = printed_member_by_key.get((source_row, version, group, person), "")
+        table_support_kind = str(row.get("SupportKind", "")).strip()
+        assignment_support_kind = (
+            "roster_table_student_group_assignment"
+            if table_support_kind == "roster_table_member"
+            else "explicit_table_group_assignment"
+        )
         out_rows.append(
             {
-                "SupportKind": "roster_table_student_group_assignment",
+                "SupportKind": assignment_support_kind,
                 "Person": person,
                 "PrintedMember": printed_member,
                 "Group": group,
@@ -9518,6 +9548,7 @@ def _roster_state_companion(
         if str(row.get("SupportKind")) not in {
             "group_member",
             "group_membership",
+            "explicit_table_group_assignment",
             "roster_table_student_group_assignment",
             "source_record_student_group_assignment",
             "student_group_assignment",
@@ -9595,8 +9626,8 @@ def _roster_state_companion(
             "group_member(Group, Person, Interval).",
             "group_membership(Person, Group, Start, End).",
             "student_group_assignment(Student, Version, Group).",
-            "roster_table_member(SourceRow, Version, Group, Student).",
-            "roster_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
+            "explicit_table_membership(SourceRow, Version, Group, Member).",
+            "explicit_table_member_label(SourceRow, Version, Group, Member, PrintedMember).",
             "supervises(Supervisor, Target, Interval).",
             "supervision_assignment(Supervisor, Target, Start, End).",
             "adult_role(Adult, Role).",
@@ -9681,7 +9712,7 @@ def _prioritize_roster_state_rows(
             elif person_ok and version_ok and group_ok:
                 priority = (
                     0
-                    if support_kind == "roster_table_student_group_assignment"
+                    if support_kind in {"explicit_table_group_assignment", "roster_table_student_group_assignment"}
                     else 1
                     if support_kind == "source_record_student_group_assignment"
                     else 2
@@ -9697,7 +9728,7 @@ def _prioritize_roster_state_rows(
             if person_ok and version_ok and group_ok:
                 priority = (
                     0
-                    if support_kind == "roster_table_student_group_assignment"
+                    if support_kind in {"explicit_table_group_assignment", "roster_table_student_group_assignment"}
                     else 1
                     if support_kind == "source_record_student_group_assignment"
                     else 2
@@ -9764,6 +9795,7 @@ def _prioritize_roster_state_rows(
             if requested_is_wildcard(0):
                 version_priority = -version_priority
         elif support_kind in {
+            "explicit_table_group_assignment",
             "group_count",
             "roster_table_student_group_assignment",
             "source_record_student_group_assignment",

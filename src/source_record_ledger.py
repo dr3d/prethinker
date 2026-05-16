@@ -195,7 +195,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
         "For markdown tables, it preserves deterministic column headers alongside row cells so table values can be queried as source-record fields without semantic interpretation.",
-        "For explicit roster tables with both a grouping column and a member column, it also emits roster_table_member/4 as structural table membership; it does not infer membership from nearby prose.",
+        "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
         "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, source_record_field, document_identifier, and status-at-row predicates when the profile supports them.",
         "Do not infer ownership, authority, status, causality, or counts from this ledger. It only pins source row addressability and exact row text.",
@@ -269,7 +269,7 @@ def source_record_ledger_facts(
                 cell_key = _text_key(str(cell_raw))
                 if cell_key:
                     facts.append(f"source_record_cell_text_key({row_id}, {index}, {cell_key}).")
-            facts.extend(_roster_table_member_facts(raw, row_id=row_id))
+            facts.extend(_explicit_table_membership_facts(raw, row_id=row_id))
         for token in _numeric_tokens(str(raw.get("exact", ""))):
             facts.append(f"source_record_numeric_token({row_id}, {token}).")
         facts.extend(_parenthetical_alias_facts(str(raw.get("exact", "")), row_id=row_id))
@@ -470,13 +470,14 @@ def _parenthetical_alias_expansion(before: str, abbr: str) -> str:
     return " ".join(phrase_tokens)
 
 
-def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[str]:
+def _explicit_table_membership_facts(raw: dict[str, object], *, row_id: str) -> list[str]:
     """Emit structural membership facts only when a table names the columns.
 
-    This deliberately requires an explicit grouping column such as Homeroom,
-    Group, Team, Cohort, or Bus and an explicit member column such as Students
-    or Student IDs. Nearby prose and section titles may provide a version atom,
-    but they do not create membership by themselves.
+    This deliberately requires an explicit grouping column such as group, team,
+    cohort, unit, department, committee, or bus and an explicit member column
+    such as members, participants, contributors, staff, or student IDs. Nearby
+    prose and section titles may provide a version atom, but they do not create
+    membership by themselves.
     """
 
     headers = raw.get("headers")
@@ -489,12 +490,20 @@ def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[s
     member_indexes = [
         index
         for index, header in enumerate(headers)
-        if re.search(r"\b(?:student(?:s| ids?)?|members?|participants?)\b", str(header), flags=re.IGNORECASE)
+        if re.search(
+            r"\b(?:student(?:s| ids?)?|members?|participants?|contributors?|assignees?|owners?|staff|people|persons?)\b",
+            str(header),
+            flags=re.IGNORECASE,
+        )
     ]
     group_indexes = [
         index
         for index, header in enumerate(headers)
-        if re.search(r"\b(?:homeroom|group|team|cohort|bus)\b", str(header), flags=re.IGNORECASE)
+        if re.search(
+            r"\b(?:homeroom|group|team|cohort|bus|unit|department|committee|workstream|section)\b",
+            str(header),
+            flags=re.IGNORECASE,
+        )
     ]
     if not member_indexes or not group_indexes:
         return []
@@ -511,13 +520,20 @@ def _roster_table_member_facts(raw: dict[str, object], *, row_id: str) -> list[s
             continue
         for member_index in member_indexes:
             member_header = _atom(str(headers[member_index]))
-            for member, printed_member in _roster_member_mentions(str(cells[member_index])):
-                out.append(f"roster_table_member({row_id}, {version}, {group}, {member}).")
-                out.append(f"roster_table_member_header({row_id}, {member_header}).")
-                out.append(f"roster_table_member_label({row_id}, {version}, {group}, {member}, {printed_member}).")
-                out.append(f"roster_table_member_alias({member}, {printed_member}).")
-                out.append(f"roster_table_scope({row_id}, {group}).")
-                out.append(f"roster_table_version({row_id}, {version}).")
+            for member, printed_member, is_legacy_roster in _explicit_table_member_mentions(str(cells[member_index])):
+                out.append(f"explicit_table_membership({row_id}, {version}, {group}, {member}).")
+                out.append(f"explicit_table_member_header({row_id}, {member_header}).")
+                out.append(f"explicit_table_member_label({row_id}, {version}, {group}, {member}, {printed_member}).")
+                out.append(f"explicit_table_member_alias({member}, {printed_member}).")
+                out.append(f"explicit_table_scope({row_id}, {group}).")
+                out.append(f"explicit_table_version({row_id}, {version}).")
+                if is_legacy_roster:
+                    out.append(f"roster_table_member({row_id}, {version}, {group}, {member}).")
+                    out.append(f"roster_table_member_header({row_id}, {member_header}).")
+                    out.append(f"roster_table_member_label({row_id}, {version}, {group}, {member}, {printed_member}).")
+                    out.append(f"roster_table_member_alias({member}, {printed_member}).")
+                    out.append(f"roster_table_scope({row_id}, {group}).")
+                    out.append(f"roster_table_version({row_id}, {version}).")
     return out
 
 
@@ -541,12 +557,12 @@ def _roster_group_atom(value: str) -> str:
 
 
 def _roster_member_atoms(value: str) -> list[str]:
-    return _dedupe(member for member, _printed_member in _roster_member_mentions(value))
+    return _dedupe(member for member, _printed_member, is_legacy in _explicit_table_member_mentions(value) if is_legacy)
 
 
-def _roster_member_mentions(value: str) -> list[tuple[str, str]]:
+def _explicit_table_member_mentions(value: str) -> list[tuple[str, str, bool]]:
     text = str(value or "")
-    out: list[tuple[str, str]] = []
+    out: list[tuple[str, str, bool]] = []
     for chunk in re.split(r"[·,;]+", text):
         match = re.search(
             r"\b(?P<prefix>STU|S)[-_\s]?(?P<num>\d{3,})\b(?:\s+(?P<name>[A-Z][A-Za-z'-]*(?:\s+[A-Z][A-Za-z'-]*)?))?",
@@ -554,6 +570,19 @@ def _roster_member_mentions(value: str) -> list[tuple[str, str]]:
             flags=re.IGNORECASE,
         )
         if not match:
+            generic_match = re.search(
+                r"\b(?P<id>[A-Z][A-Z0-9]{1,11}[-_][A-Z0-9]{2,12})\b(?:\s+(?P<name>[A-Z][A-Za-z'-]*(?:\s+[A-Z][A-Za-z'-]*)?))?",
+                chunk.strip(),
+            )
+            if not generic_match:
+                continue
+            member = _atom(generic_match.group("id"))
+            printed = generic_match.group("id")
+            if generic_match.group("name"):
+                printed = f"{printed} {generic_match.group('name').strip()}"
+            printed_atom = _atom(printed)
+            if member and printed_atom:
+                out.append((member, printed_atom, False))
             continue
         prefix = match.group("prefix").lower()
         num = match.group("num")
@@ -563,7 +592,7 @@ def _roster_member_mentions(value: str) -> list[tuple[str, str]]:
             printed = f"{printed} {match.group('name').strip()}"
         printed_atom = _atom(printed)
         if member and printed_atom:
-            out.append((member, printed_atom))
+            out.append((member, printed_atom, True))
     return _dedupe(out)
 
 

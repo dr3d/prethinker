@@ -175,6 +175,12 @@ def test_source_record_ledger_emits_explicit_roster_table_members() -> None:
 
     facts = source_record_ledger_facts(ledger)
 
+    assert "explicit_table_membership(src_line_0004, v1_3, 7_a, stu_1023)." in facts
+    assert "explicit_table_member_label(src_line_0004, v1_3, 7_a, stu_1023, stu_1023_park)." in facts
+    assert "explicit_table_member_alias(stu_1023, stu_1023_park)." in facts
+    assert "explicit_table_member_header(src_line_0004, student_ids)." in facts
+    assert "explicit_table_scope(src_line_0004, 7_a)." in facts
+    assert "explicit_table_version(src_line_0004, v1_3)." in facts
     assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1023)." in facts
     assert "roster_table_member(src_line_0004, v1_3, 7_a, stu_1041)." in facts
     assert "roster_table_member_label(src_line_0004, v1_3, 7_a, stu_1023, stu_1023_park)." in facts
@@ -182,6 +188,27 @@ def test_source_record_ledger_emits_explicit_roster_table_members() -> None:
     assert "roster_table_member_header(src_line_0004, student_ids)." in facts
     assert "roster_table_scope(src_line_0004, 7_a)." in facts
     assert "roster_table_version(src_line_0004, v1_3)." in facts
+
+
+def test_source_record_ledger_emits_generic_explicit_table_memberships() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "### 4.2 Maintenance crews",
+                "| Team | Members |",
+                "|---|---|",
+                "| Pump crew | EMP-204 Rivera; EMP-311 Okafor |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "explicit_table_membership(src_line_0004, unspecified_version, pump_crew, emp_204)." in facts
+    assert "explicit_table_membership(src_line_0004, unspecified_version, pump_crew, emp_311)." in facts
+    assert "explicit_table_member_label(src_line_0004, unspecified_version, pump_crew, emp_204, emp_204_rivera)." in facts
+    assert "explicit_table_member_header(src_line_0004, members)." in facts
+    assert not any(fact.startswith("roster_table_member(") for fact in facts)
 
 
 def test_source_record_ledger_does_not_infer_roster_members_without_group_column() -> None:

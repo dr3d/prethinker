@@ -1,0 +1,1064 @@
+{
+  "cache": {
+    "dir": "C:\\prethinker\\tmp\\domain_bootstrap_qa_cache",
+    "enabled": false,
+    "hits": 0,
+    "misses": 10,
+    "schema_version": "domain_bootstrap_qa_cache_v1"
+  },
+  "model": "qwen/qwen3.6-35b-a3b",
+  "oracle_present": true,
+  "qa_file": "C:\\prethinker\\experiments\\boundary_probes\\compile_surface_stage1\\answer_detail_surface_transfer\\qa.md",
+  "rows": [
+    {
+      "cache_hit": false,
+      "cache_key": "97971f22e64a09d002bc63bd5ff2861ed34c26b0759bafdf871e4e12b2cb8b6f",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q001",
+      "latency_ms": 3248,
+      "model_decision": "answer",
+      "number": 1,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q001",
+        "reference_answer": "Ticket TK-480 has blocked status.",
+        "source_id": "q001"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "ticket_status(tk_480, X)."
+      ],
+      "query_results": [
+        {
+          "query": "ticket_status(tk_480, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "tk 480",
+                "value": "tk_480"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "ticket_status",
+            "prolog_query": "ticket_status(tk_480, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "tk_480",
+                "BoundArg1Display": "tk 480",
+                "X": "blocked"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "Ticket TK-480 has blocked status.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query result explicitly returns 'blocked' for ticket 'tk_480', which matches the reference answer 'blocked status'.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "Query targets the ticket_status predicate for the specific ticket identifier tk_480. The KB contains a direct fact ticket_status(tk_480, blocked). The query will return 'blocked' as the value for X."
+        ]
+      },
+      "utterance": "What status does ticket TK-480 have?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "f83ac0e212dbb9f060f6753aacf97745d3c17f5644e5727d3e8828072155b764",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q002",
+      "latency_ms": 4846,
+      "model_decision": "answer",
+      "number": 2,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q002",
+        "reference_answer": "TK-480 is blocked because the replacement gasket has not arrived.",
+        "source_id": "q002"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "blocking_reason(tk_480, X)."
+      ],
+      "query_results": [
+        {
+          "query": "blocking_reason(tk_480, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "tk 480",
+                "value": "tk_480"
+              }
+            ],
+            "num_rows": 2,
+            "predicate": "blocking_reason",
+            "prolog_query": "blocking_reason(tk_480, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "tk_480",
+                "BoundArg1Display": "tk 480",
+                "X": "replacement_gasket_has_not_arrived"
+              },
+              {
+                "BoundArg1": "tk_480",
+                "BoundArg1Display": "tk 480",
+                "X": "gasket_not_arrived"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "TK-480 is blocked because the replacement gasket has not arrived.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query results explicitly return 'replacement_gasket_has_not_arrived' as the blocking reason for TK-480, which directly matches the reference answer. The presence of a synonymous row ('gasket_not_arrived') does not contradict the primary match.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "Query targets the blocking_reason predicate for asset tk_480. Relevant clauses show blocking_reason(tk_480, replacement_gasket_has_not_arrived) and blocking_reason(tk_480, gasket_not_arrived). The runtime will return these values."
+        ]
+      },
+      "utterance": "Why is TK-480 blocked?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "27800a0ca4da1245518cd2206d2ad48b663b45a3d0e6d5d7f2c7b7d8ac80566f",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q003",
+      "latency_ms": 5853,
+      "model_decision": "answer",
+      "number": 3,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q003",
+        "reference_answer": "The warehouse promised an arrival update on 2026-06-06.",
+        "source_id": "q003"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "scheduled_date(X, Y)."
+      ],
+      "query_results": [
+        {
+          "query": "scheduled_date(X, Y).",
+          "result": {
+            "num_rows": 5,
+            "predicate": "scheduled_date",
+            "prolog_query": "scheduled_date(X, Y).",
+            "reasoning_basis": {
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "X": "tk_480",
+                "Y": "2026_06_06"
+              },
+              {
+                "X": "img_22",
+                "Y": "2026_07_14"
+              },
+              {
+                "X": "board_accepted_soil_test",
+                "Y": "2026_04_18"
+              },
+              {
+                "X": "gasket_arrival_update",
+                "Y": "2026_06_06"
+              },
+              {
+                "X": "soil_test_acceptance",
+                "Y": "2026_04_18"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X",
+              "Y"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "The warehouse promised an arrival update on 2026-06-06.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query results contain the row {X: 'gasket_arrival_update', Y: '2026_06_06'}, which directly supports the reference answer that the warehouse promised an arrival update on 2026-06-06. The predicate 'gasket_arrival_update' corresponds to 'arrival update' and the date matches exactly (allowing for underscore normalization).",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "The utterance asks for a specific update and date promised by the warehouse. The KB contains `scheduled_date(gasket_arrival_update, 2026_06_06)` and source text indicating the warehouse promised an arrival update on 2026-06-06. The query retrieves the scheduled date for the update."
+        ]
+      },
+      "utterance": "What update did the warehouse promise, and on what date?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "b6f1811a4931c138cb4da287c1eae638ac240b00f6b29d24bfe1d5a6dbd90d8e",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q004",
+      "latency_ms": 5621,
+      "model_decision": "answer",
+      "number": 4,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q004",
+        "reference_answer": "No. The safety lockout review does not clear P-17 for operation because the gasket replacement is still pending.",
+        "source_id": "q004"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "record_covers_asset(safety_lockout_review, p_17).",
+        "action_outcome(safety_lockout_review, X)."
+      ],
+      "query_results": [
+        {
+          "query": "record_covers_asset(safety_lockout_review, p_17).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "safety lockout review",
+                "value": "safety_lockout_review"
+              },
+              {
+                "arg_index": 2,
+                "display": "p 17",
+                "value": "p_17"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "record_covers_asset",
+            "prolog_query": "record_covers_asset(safety_lockout_review, p_17).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "safety_lockout_review",
+                "BoundArg1Display": "safety lockout review",
+                "BoundArg2": "p_17",
+                "BoundArg2Display": "p 17"
+              }
+            ],
+            "status": "success",
+            "variables": []
+          }
+        },
+        {
+          "query": "action_outcome(safety_lockout_review, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "safety lockout review",
+                "value": "safety_lockout_review"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "action_outcome",
+            "prolog_query": "action_outcome(safety_lockout_review, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "safety_lockout_review",
+                "BoundArg1Display": "safety lockout review",
+                "X": "insufficient_for_operation"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "No. The safety lockout review does not clear P-17 for operation because the gasket replacement is still pending.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query results support the reference answer. The first query confirms the safety lockout review covers asset P-17. The second query returns the outcome of the safety lockout review as 'insufficient_for_operation', which directly supports the 'No' verdict in the reference answer that the review does not clear P-17 for operation.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "The query targets the specific action 'safety_lockout_review' covering asset 'p_17'.",
+          "The relevant predicate is 'action_outcome/2'.",
+          "KB context shows 'action_outcome(safety_lockout_review, insufficient_for_operation)' and 'action_outcome(safety_lockout_review_p_17, insufficient_for_operation)'.",
+          "The answer is implicitly 'no' based on the retrieved outcome, but the IR emits the query to retrieve this fact."
+        ]
+      },
+      "utterance": "Does the safety lockout review clear P-17 for operation?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "012d9e7c22e01804a6e067a9b5dcb8caca0c417d24ac6d6fb6652dcff1ef66c4",
+      "failure_surface": {
+        "confidence": 0.95,
+        "rationale": "The compiled KB contains the necessary facts to answer the question: `scheduled_date(img_22, 2026_07_14)` and `asset_location(f_113, lab_room_c)`. The reference answer requires linking the scheduled item (img_22) to its location (Lab Room C). This requires a multi-hop join: `img_22` -> `record_covers_asset` -> `f_113` -> `asset_location` -> `lab_room_c`. The emitted query `scheduled_date(img_22, X)` only retrieves the date and does not perform the necessary join to retrieve the location. The KBs",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "Generate a query plan that joins `scheduled_date/2`, `record_covers_asset/2`, and `asset_location/2` to retrieve both the date and the location for the asset covered by the scheduled item.",
+        "surface": "hybrid_join_gap"
+      },
+      "id": "q005",
+      "latency_ms": 3625,
+      "model_decision": "answer",
+      "number": 5,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q005",
+        "reference_answer": "IMG-22 is scheduled for 2026-07-14 in Lab Room C.",
+        "source_id": "q005"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "scheduled_date(img_22, X)."
+      ],
+      "query_results": [
+        {
+          "query": "scheduled_date(img_22, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "img 22",
+                "value": "img_22"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "scheduled_date",
+            "prolog_query": "scheduled_date(img_22, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "img_22",
+                "BoundArg1Display": "img 22",
+                "X": "2026_07_14"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "IMG-22 is scheduled for 2026-07-14 in Lab Room C.",
+      "reference_judge": {
+        "answer_supported": false,
+        "concise_answer": "The query results only provide the scheduled date (2026-07-14) for IMG-22. The reference answer also specifies the location (Lab Room C), which is not present in the query results. Therefore, the results partially support the reference but miss critical information.",
+        "issues": [
+          "Missing location information in query results compared to reference answer."
+        ],
+        "schema_version": "qa_judge_v1",
+        "verdict": "partial"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "Query targets the scheduled_date predicate for the specific asset img_22. The KB contains a direct fact scheduled_date(img_22, 2026_07_14)."
+        ]
+      },
+      "utterance": "Where is IMG-22 scheduled?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "c41a2139253beb25ba633ee9d56981bf66905f01493a1ef977b6f09e355fd25f",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q006",
+      "latency_ms": 5186,
+      "model_decision": "answer",
+      "number": 6,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q006",
+        "reference_answer": "IMG-22 excludes chemical flattening because the conservation note says the ink is water-sensitive.",
+        "source_id": "q006"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "excluded_service(img_22, X).",
+        "source_record_text_atom(X, Y)."
+      ],
+      "query_results": [
+        {
+          "query": "excluded_service(img_22, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "img 22",
+                "value": "img_22"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "excluded_service",
+            "prolog_query": "excluded_service(img_22, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "img_22",
+                "BoundArg1Display": "img 22",
+                "X": "chemical_flattening"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        },
+        {
+          "query": "source_record_text_atom(X, Y).",
+          "result": {
+            "num_rows": 25,
+            "predicate": "source_record_text_atom",
+            "prolog_query": "source_record_text_atom(X, Y).",
+            "reasoning_basis": {
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "X": "src_line_0001",
+                "Y": "boundary_probe_answer_detail_surface_transfer"
+              },
+              {
+                "X": "src_line_0003",
+                "Y": "probe_a_equipment_service_desk"
+              },
+              {
+                "X": "src_line_0005",
+                "Y": "service_ticket_tk_480_was_opened_on_2026_06_03_for_pump_p_17_at_bay_4_the"
+              },
+              {
+                "X": "src_line_0006",
+                "Y": "ticket_status_is_blocked"
+              },
+              {
+                "X": "src_line_0008",
+                "Y": "the_blocking_reason_is_that_the_replacement_gasket_has_not_arrived_the"
+              },
+              {
+                "X": "src_line_0009",
+                "Y": "warehouse_acknowledged_the_back_order_and_promised_an_arrival_update_on"
+              },
+              {
+                "X": "src_line_0010",
+                "Y": "v_2026_06_06"
+              },
+              {
+                "X": "src_line_0012",
+                "Y": "technician_mara_velasquez_completed_the_safety_lockout_review_for_p_17_on"
+              },
+              {
+                "X": "src_line_0013",
+                "Y": "v_2026_06_03_that_review_does_not_clear_the_pump_for_operation_because_the_gasket"
+              },
+              {
+                "X": "src_line_0014",
+                "Y": "replacement_is_still_pending"
+              },
+              {
+                "X": "src_line_0016",
+                "Y": "probe_b_archive_imaging_queue"
+              },
+              {
+                "X": "src_line_0018",
+                "Y": "imaging_request_img_22_covers_folio_f_113_and_is_scheduled_for_2026_07_14_in"
+              },
+              {
+                "X": "src_line_0019",
+                "Y": "lab_room_c"
+              },
+              {
+                "X": "src_line_0021",
+                "Y": "the_request_is_approved_for_imaging_only_it_excludes_chemical_flattening"
+              },
+              {
+                "X": "src_line_0022",
+                "Y": "because_the_conservation_note_says_the_ink_is_water_sensitive"
+              },
+              {
+                "X": "src_line_0024",
+                "Y": "the_folio_may_be_handled_by_imaging_lead_omar_price_separate_transport_is"
+              },
+              {
+                "X": "src_line_0025",
+                "Y": "required_the_folio_must_not_be_placed_in_the_normal_courier_tray"
+              },
+              {
+                "X": "src_line_0027",
+                "Y": "probe_c_community_garden_allocation"
+              },
+              {
+                "X": "src_line_0029",
+                "Y": "plot_allocation_ga_9_assigns_bed_12_to_the_north_gate_youth_group_for_the_summer"
+              },
+              {
+                "X": "src_line_0030",
+                "Y": "cycle_the_bed_count_is_one_raised_bed"
+              },
+              {
+                "X": "src_line_0032",
+                "Y": "the_allocation_is_conditional_because_the_group_still_needs_to_submit_a_signed"
+              },
+              {
+                "X": "src_line_0033",
+                "Y": "watering_schedule_the_board_accepted_the_soil_test_on_2026_04_18_but_that"
+              },
+              {
+                "X": "src_line_0034",
+                "Y": "acceptance_does_not_waive_the_watering_schedule"
+              },
+              {
+                "X": "src_line_0036",
+                "Y": "if_the_schedule_is_not_submitted_by_2026_04_25_bed_12_returns_to_the_reserve"
+              },
+              {
+                "X": "src_line_0037",
+                "Y": "pool"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X",
+              "Y"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "IMG-22 excludes chemical flattening because the conservation note says the ink is water-sensitive.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query results explicitly support the reference answer. The first query confirms that 'chemical_flattening' is the excluded service for IMG-22. The second query returns source text rows stating that the request excludes chemical flattening because the conservation note says the ink is water-sensitive. Both the 'what' and the 'why' from the reference answer are directly present in the KB data.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "Query targets the excluded_service predicate for img_22 to identify the excluded item.",
+          "Query targets source_record_text_atom to retrieve the causal explanation linked to the exclusion, preserving the 'water-sensitive ink' reasoning as required by domain context."
+        ]
+      },
+      "utterance": "What does IMG-22 exclude, and why?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "9cf79eba7060dd0d97f0e3bd3e225246b8fc72c2c87099e006cd8adcbe6ec1d8",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q007",
+      "latency_ms": 10422,
+      "model_decision": "answer",
+      "number": 7,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q007",
+        "reference_answer": "Separate transport is required for folio F-113; it must not be placed in the normal courier tray.",
+        "source_id": "q007"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "handling_constraint(f_113, X).",
+        "prohibited_action(f_113, X)."
+      ],
+      "query_results": [
+        {
+          "query": "handling_constraint(f_113, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "f 113",
+                "value": "f_113"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "handling_constraint",
+            "prolog_query": "handling_constraint(f_113, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "f_113",
+                "BoundArg1Display": "f 113",
+                "X": "separate_transport_required"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        },
+        {
+          "query": "prohibited_action(f_113, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "f 113",
+                "value": "f_113"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "prohibited_action",
+            "prolog_query": "prohibited_action(f_113, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "f_113",
+                "BoundArg1Display": "f 113",
+                "X": "placed_in_normal_courier_tray"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "Separate transport is required for folio F-113; it must not be placed in the normal courier tray.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query results explicitly support the reference answer. The `handling_constraint` query returns `separate_transport_required` for folio F-113, and the `prohibited_action` query returns `placed_in_normal_courier_tray`, confirming that separate transport is required and it must not be placed in the normal courier tray.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "The utterance asks for the 'separate arrangement' for folio F-113. The KB contains explicit handling constraints and prohibited actions for f_113. The query retrieves these to answer the question. No new writes are proposed."
+        ]
+      },
+      "utterance": "What separate arrangement is required for folio F-113?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "39803704c44c60154e2baf5836fc48adf708a4057fb252af0b709b46bb02f2e5",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q008",
+      "latency_ms": 6286,
+      "model_decision": "answer",
+      "number": 8,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q008",
+        "reference_answer": "GA-9 assigns one raised bed, Bed 12.",
+        "source_id": "q008"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "record_covers_asset(ga_9, X)."
+      ],
+      "query_results": [
+        {
+          "query": "record_covers_asset(ga_9, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "ga 9",
+                "value": "ga_9"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "record_covers_asset",
+            "prolog_query": "record_covers_asset(ga_9, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "ga_9",
+                "BoundArg1Display": "ga 9",
+                "X": "bed_12"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "GA-9 assigns one raised bed, Bed 12.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query result for `record_covers_asset(ga_9, X)` returns `X = bed_12`. The reference answer states that GA-9 assigns Bed 12. The query result directly supports the specific bed assigned by GA-9 as stated in the reference. The reference's mention of 'one raised bed' is descriptive context not contradicted by the query, and the core factual claim (GA-9 -> Bed 12) is fully supported.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "The question asks for a count of beds assigned to GA-9. The KB predicate `record_covers_asset/2` links GA-9 to bed_12. The query retrieves the covered asset. The count is derived from the result set size."
+        ]
+      },
+      "utterance": "How many beds does GA-9 assign?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "f5bb09b49407256314414f914e0488aca1fc5ab14580324495e9437761da0da1",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q009",
+      "latency_ms": 5151,
+      "model_decision": "answer",
+      "number": 9,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q009",
+        "reference_answer": "GA-9 is conditional because the group still needs to submit a signed watering schedule.",
+        "source_id": "q009"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "condition_for(ga_9, Item)."
+      ],
+      "query_results": [
+        {
+          "query": "condition_for(ga_9, Item).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "ga 9",
+                "value": "ga_9"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "condition_for",
+            "prolog_query": "condition_for(ga_9, Item).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "ga_9",
+                "BoundArg1Display": "ga 9",
+                "Item": "signed_watering_schedule"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "Item"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "GA-9 is conditional because the group still needs to submit a signed watering schedule.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query result returns 'signed_watering_schedule' as the condition for ga_9, which directly matches the reference answer's core fact that the group needs to submit a signed watering schedule.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "Query targets the condition_for predicate for asset ga_9. The KB contains a direct fact condition_for(ga_9, signed_watering_schedule). The query will return 'signed_watering_schedule' as the pending item."
+        ]
+      },
+      "utterance": "What pending item makes GA-9 conditional?",
+      "warnings": []
+    },
+    {
+      "cache_hit": false,
+      "cache_key": "902115f1aaa2dc3eef174d9aa03a4ad8530fc97433ba0df85788edca4ac3c2c5",
+      "failure_surface": {
+        "confidence": 1.0,
+        "rationale": "Reference judge marked the row exact.",
+        "schema_version": "qa_failure_surface_v1",
+        "suggested_next_action": "No failure-surface action needed.",
+        "surface": "not_applicable"
+      },
+      "id": "q010",
+      "latency_ms": 5465,
+      "model_decision": "answer",
+      "number": 10,
+      "ok": true,
+      "oracle": {
+        "category": "answer_detail_surface",
+        "id": "q010",
+        "reference_answer": "If the schedule is not submitted by 2026-04-25, Bed 12 returns to the reserve pool.",
+        "source_id": "q010"
+      },
+      "oracle_match": null,
+      "parse_error": "",
+      "phase": "Answer Detail Surface Transfer QA",
+      "projected_decision": "answer",
+      "proposed_facts": [],
+      "proposed_rules": [],
+      "queries": [
+        "consequence_if(signed_watering_schedule, X)."
+      ],
+      "query_results": [
+        {
+          "query": "consequence_if(signed_watering_schedule, X).",
+          "result": {
+            "bound_query_constants": [
+              {
+                "arg_index": 1,
+                "display": "signed watering schedule",
+                "value": "signed_watering_schedule"
+              }
+            ],
+            "num_rows": 1,
+            "predicate": "consequence_if",
+            "prolog_query": "consequence_if(signed_watering_schedule, X).",
+            "reasoning_basis": {
+              "bound_query_constants_visible": true,
+              "kind": "core-local"
+            },
+            "result_type": "table",
+            "rows": [
+              {
+                "BoundArg1": "signed_watering_schedule",
+                "BoundArg1Display": "signed watering schedule",
+                "X": "bed_returns_to_reserve"
+              }
+            ],
+            "status": "success",
+            "variables": [
+              "X"
+            ]
+          }
+        }
+      ],
+      "reference_answer": "If the schedule is not submitted by 2026-04-25, Bed 12 returns to the reserve pool.",
+      "reference_judge": {
+        "answer_supported": true,
+        "concise_answer": "The query result returns 'bed_returns_to_reserve' as the consequence of a signed watering schedule. This directly supports the reference answer that 'Bed 12 returns to the reserve pool' if the schedule is not submitted (implying the condition for the consequence is met or the consequence applies to the bed in question). The KB atom 'bed_returns_to_reserve' semantically matches the reference action.",
+        "issues": [],
+        "schema_version": "qa_judge_v1",
+        "verdict": "exact"
+      },
+      "self_check": {
+        "bad_commit_risk": "low",
+        "missing_slots": [],
+        "notes": [
+          "The question asks for the consequence of a missing deadline. The KB contains a direct consequence_if predicate linking the signed_watering_schedule to the outcome. The query retrieves this outcome."
+        ]
+      },
+      "utterance": "What happens if the watering schedule is not submitted by 2026-04-25?",
+      "warnings": []
+    }
+  ],
+  "run_json": "C:\\prethinker\\tmp\\answer_detail_surface_transfer_compile_20260516\\domain_bootstrap_file_20260516T214242209068Z_source_qwen-qwen3-6-35b-a3b.json",
+  "runtime_load_errors": [],
+  "source_fact_count": 224,
+  "source_rule_count": 0,
+  "summary": {
+    "cache_enabled": false,
+    "cache_hits": 0,
+    "cache_misses": 10,
+    "elapsed_ms": 84183,
+    "failure_surface_counts": {
+      "hybrid_join_gap": 1,
+      "not_applicable": 9
+    },
+    "helper_class_summary": {
+      "companion_helper_class_counts": {},
+      "companion_row_totals": {},
+      "helper_class_counts": {},
+      "row_count": 0
+    },
+    "judge_exact": 9,
+    "judge_miss": 0,
+    "judge_partial": 1,
+    "judge_rows": 10,
+    "oracle_match": 0,
+    "oracle_rows": 0,
+    "parsed_ok": 10,
+    "query_rows": 10,
+    "question_count": 10,
+    "reference_answer_rows": 10,
+    "runtime_load_error_count": 0,
+    "write_proposal_rows": 0
+  },
+  "ts": "2026-05-16T21:44:15+00:00"
+}

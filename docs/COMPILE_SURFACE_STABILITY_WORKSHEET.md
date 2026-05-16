@@ -1571,3 +1571,95 @@ Next pressure:
   before expanding again.
 - If both are bounded, run a second larger slice or redraw the held compile; do
   not stamp the full native corpus yet.
+
+## CSS-020 - Unlike Answer-Detail Surface Transfer Probe
+
+Date: 2026-05-16
+
+Before:
+
+CSS-018 and CSS-019 showed that guarded answer-detail preservation improves
+native no-helper QA, but that is not enough to make `answer_detail_surface`
+architecture. The invariant needed unlike transfer evidence, especially because
+detail surfaces can easily become local vocabulary in disguise.
+
+Prediction:
+
+If the guarded-additive pattern transfers, a fresh unlike probe should preserve
+both concrete backbone rows and answer-bearing details across multiple domains:
+status plus reason, schedule plus place, approval plus exclusion, count plus
+condition, and deadline plus consequence. If it fails, the term remains a native
+repair candidate rather than an architectural invariant.
+
+Intervention:
+
+Added
+`experiments/boundary_probes/compile_surface_stage1/answer_detail_surface_transfer`.
+The probe has three unlike mini-documents:
+
+- an equipment service ticket with blocked status, missing-part rationale,
+  promised future update, and a non-clearing safety review;
+- an archive imaging request with scheduled date/location, approval boundary,
+  exclusion rationale, and separate transport requirement;
+- a community garden allocation with bed count, conditional pending schedule,
+  accepted soil test, and reserve-pool consequence.
+
+Compiled once with source-record ledger facts and the current guarded invariant,
+then ran no-helper QA with reference judging and failure-surface classification.
+
+After:
+
+Compile:
+
+- parsed_ok=`true`
+- admitted=`48`
+- skipped=`0`
+- rough_score=`0.944`
+- risk_count=`5`
+
+Invariant audit:
+
+- `answer_detail_surface`: `partial`
+- missing slot: `commitment_or_future_action`
+- no candidate-only or fail status for the family
+
+No-helper QA:
+
+| Questions | Exact | Partial | Miss | Helper rows | Failure surfaces |
+| ---: | ---: | ---: | ---: | ---: | --- |
+| 10 | 9 | 1 | 0 | 0 | `not_applicable=9`; `hybrid_join_gap=1` |
+
+The one partial was not an answer-detail compile miss. The KB contained the
+scheduled date and location, but QA only queried the date for "Where is IMG-22
+scheduled?" and missed the asset-location join.
+
+Artifacts:
+
+- `experiments/boundary_probes/compile_surface_stage1/answer_detail_surface_transfer/README.md`
+- `experiments/boundary_probes/compile_surface_stage1/answer_detail_surface_transfer/source.md`
+- `experiments/boundary_probes/compile_surface_stage1/answer_detail_surface_transfer/qa.md`
+- `experiments/boundary_probes/compile_surface_stage1/answer_detail_surface_transfer/oracle.jsonl`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_compile_20260516.json`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_compile_20260516.md`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_audit_20260516.json`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_audit_20260516.md`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_qa_20260516.json`
+- `docs/data/compile_surface_stability/answer_detail_surface_transfer_qa_20260516.md`
+
+Lesson:
+
+`answer_detail_surface` now has unlike transfer evidence, but not a blank check.
+The guarded-additive pattern handled rationale, exclusion, pending-condition,
+separate-arrangement, consequence, and backbone rows without helpers. The audit
+still found a weak commitment/future-action slot, so the term should be treated
+as architecture with a named residual rather than as complete. This is the same
+discipline as the multi-subject authority probes: transfer evidence first,
+residual named separately.
+
+Next pressure:
+
+- Do not add native fixture language to answer-detail guidance.
+- If commitment/future-action rows matter for the next native gap, build a
+  denser unlike commitment probe before changing guidance.
+- The immediate QA issue from this probe is hybrid join planning for schedule
+  plus location, not answer-detail preservation.

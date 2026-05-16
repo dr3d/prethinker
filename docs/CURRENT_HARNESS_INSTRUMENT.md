@@ -402,15 +402,17 @@ from admitted semantic predicates or structured roster table fields. Adult and
 compliance source-record rows stay clean because they are narrow deterministic
 parses over explicit row shapes; group counts inherit the clean/candidate class
 of their member rows.
-A narrow roster-table ledger spike now moves one part of that surface into
-deterministic pre-compile memory. `src/source_record_ledger.py` emits
-`roster_table_member(SourceRow, Version, Group, Student)` only when a markdown
-table explicitly contains both a grouping column such as `Homeroom` or `Group`
-and a member column such as `Student IDs` or `Students`. It emits `89` member
-facts on `count_composition_roster` and `0` on the fresh school transfer
-fixture, whose bus tables require section/prose context. That is a deliberate
-boundary: explicit roster table rows become clean structural memory; inferred
-bus or group membership remains candidate-helper work.
+An explicit-table membership ledger spike now moves one part of that surface
+into deterministic pre-compile memory. `src/source_record_ledger.py` emits
+`explicit_table_membership(SourceRow, Version, Group, Member)` only when a
+markdown table explicitly contains both a grouping column such as `Group`,
+`Team`, `Cohort`, `Unit`, `Department`, `Committee`, or `Homeroom` and a member
+column such as `Members`, `Participants`, `Contributors`, `Staff`, or
+`Student IDs`. Legacy `roster_table_member/4` aliases are emitted only for
+school-roster compatibility when the member identifiers themselves are
+school-roster shaped. That is a deliberate boundary: explicit grouping/member
+table rows become clean structural memory; inferred bus or group membership
+from prose remains candidate-helper work.
 With a narrowed QA planning hint for homeroom membership/count questions, the
 table-ledger replay on `count_composition_roster` moves from `28 / 3 / 9` to
 `30 / 3 / 7`. The lift comes from q015 and q016 switching to direct
@@ -418,14 +420,16 @@ table-ledger replay on `count_composition_roster` moves from `28 / 3 / 9` to
 so the remaining gap is row routing and answer-surface normalization, not a
 mandate to infer more roster structure from prose.
 The same ledger now preserves printed member labels with
-`roster_table_member_label/5` and `roster_table_member_alias/2`. This keeps
-`STU-1063 Vinokur` attached to normalized `stu_1063` without treating the
-printed label as a separate member. A q023/q024 probe shows q023 becomes exact,
-and q024 becomes exact once homeroom/roster-table alias support surfaces the
-current `v1_3 -> 7_b` assignment. The full alias replay lands at `29 / 3 / 8`,
-below the narrowed table-guidance replay and the guarded selector, because other
-rows still churn under query planning. That keeps the next frontier at
-selector/answer routing rather than broader roster parsing.
+`explicit_table_member_label/5` and `explicit_table_member_alias/2`. This keeps
+printed identifiers attached to normalized member ids without treating the
+printed label as a separate member. Legacy roster label aliases remain available
+for old artifacts, but new architecture should use the explicit-table names.
+A q023/q024 probe shows q023 becomes exact, and q024 becomes exact once
+homeroom/explicit-table alias support surfaces the current `v1_3 -> 7_b`
+assignment. The full alias replay lands at `29 / 3 / 8`, below the narrowed
+table-guidance replay and the guarded selector, because other rows still churn
+under query planning. That keeps the next frontier at selector/answer routing
+rather than broader roster parsing.
 A row gate over old V2, focused homeroom, adult/compliance, narrow
 table-guidance, and alias surfaces reaches `39 / 1 / 0`; only q012 remains
 partial. That makes the current roster frontier selector discrimination over
@@ -435,9 +439,9 @@ The first guarded selector replay over those five surfaces scores only
 new clean memory surfaces: table/alias modes are valuable when the row is
 homeroom/table/printed-label shaped, but unsafe as broad replacements for older
 source-record or adult/compliance surfaces.
-The residual q012 row is now covered by `roster_table_count_support`, which
+The residual q012 row is now covered by `explicit_table_count_support`, which
 derives entry count, distinct normalized member count, duplicate members, and
-group counts directly from `roster_table_member/4`. With that surface included,
+group counts directly from `explicit_table_membership/4`. With that surface included,
 the artifact row gate reaches `40 / 0 / 0`. The fixture is now fully answerable
 from compiled memory; the runtime issue is choosing the right surface per row.
 The first guarded selector over the six-mode package stayed at `31 / 3 / 6`
@@ -445,7 +449,7 @@ The first guarded selector over the six-mode package stayed at `31 / 3 / 6`
 memory gap. A roster surface risk-gate then moved the same package to
 `40 / 0 / 0` with `40 / 40` selected-best rows. The gate activates table,
 alias, count, adult-role, correction, and compliance surfaces by question
-shape: distinct student counts use `roster_table_count_support`; authoritative
+shape: distinct student counts use `explicit_table_count_support`; authoritative
 homeroom rows use current member alias/table support; correction-notice rows use
 explicit change surfaces; adult-total rows avoid qualifying-chaperone counts;
 and ratio-compliance rows prefer `compliance_status` over roster table volume.
