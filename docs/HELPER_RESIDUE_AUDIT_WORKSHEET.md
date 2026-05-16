@@ -1595,3 +1595,94 @@ Next pressure:
   criteria than adjacent token parsing.
 - The next high-value check is a slightly broader no-helper native smoke using
   the accepted state, not more local role-line tinkering.
+
+## HR-019 - Core Support Surfaces Are Not Helper Rows
+
+Date: 2026-05-16
+
+Before:
+
+- HR-018 rejected role-line projection and kept the HR-017 accepted state:
+  source-line fallback, source-role/source-basis compile contracts, and
+  deterministic item title/year projection.
+- A broader accepted-state replay across three native fixtures was needed to
+  see whether no-helper delivery held outside the two-fixture pressure slice.
+- The old delivery metric treated any predicate ending in `_support` as helper
+  pressure, even when the row was emitted as `core-local` and had no
+  `HelperClass`.
+
+Prediction:
+
+- If the helper-retirement line is real, a core-local deterministic projection
+  should remain visible under a zero-helper budget without counting as helper
+  delivery.
+- If that distinction is only bookkeeping, replay will either restore helper
+  rows or fail to recover the item-detail row.
+
+Intervention:
+
+- Replayed the accepted compile root on three native fixtures:
+  `count_composition_roster`, `industrial_sensor_clock_correction`, and
+  `probate_storage_access_register`.
+- Tightened helper-result detection so `core-local` rows without `HelperClass`
+  are not treated as helper companions merely because the predicate name ends
+  in `_support`.
+- Applied the same detector to helper summary accounting.
+- Did not reintroduce legacy native helper adapters.
+
+After:
+
+| Run | Scope | Exact | Partial | Miss | Helper rows | Note |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| Accepted-state replay, pre-metric fix | three fixtures, first 8 | 19 | 1 | 4 | 0 | item-detail surface generated but support suffix accounting was too blunt |
+| Core-support delivery replay | same compile root | 21 | 0 | 3 | 0 | core-local support survives; legacy helper rows remain absent |
+
+Remaining non-exacts:
+
+| Fixture | Question shape | Surface | Interpretation |
+| --- | --- | --- | --- |
+| `industrial_sensor_clock_correction` | vendor/model for a sensor | compile-surface gap | commercial detail predicates were not preserved in this draw |
+| `probate_storage_access_register` | person named as registrar | compile-surface gap | source-stated person-role row is absent |
+| `probate_storage_access_register` | section basis for possession | compile-surface gap | statement-to-section link for the possession basis is absent |
+
+Artifacts:
+
+- `docs/data/helper_residue/three_fixture_accepted_qa_20260516.json`
+- `docs/data/helper_residue/three_fixture_accepted_qa_20260516.md`
+- `docs/data/helper_residue/three_fixture_core_support_delivery2_qa_20260516.json`
+- `docs/data/helper_residue/three_fixture_core_support_delivery2_qa_20260516.md`
+- `tmp/helper_residue_three_fixture_accepted_compile_20260516`
+- `tmp/helper_residue_three_fixture_accepted_qa_20260516`
+- `tmp/helper_residue_three_fixture_core_support_delivery2_qa_20260516`
+
+Verification:
+
+- Focused unit suite:
+  - `python -m pytest tests\test_domain_bootstrap_qa.py -q`
+  - `174 passed`
+- The final replay reports:
+  - `21 / 0 / 3`
+  - helper rows=`0`
+  - runtime load errors=`0`
+  - write proposal rows=`0`
+
+Lesson:
+
+- Helper retirement requires two separate invariants:
+  - legacy query-only companions must stay out of the delivery path;
+  - deterministic core-local projections must not be erased or counted as
+    helper pressure because their predicate names use support-like vocabulary.
+- The 7,000-plus helper-row problem is not solved by making every support
+  surface disappear. Some support surfaces are now architecture: compact,
+  deterministic, fixture-free, and unlabeled by `HelperClass`.
+- The remaining no-helper native misses are compile-preservation misses. They
+  ask for better direct surfaces, not the return of helper companions.
+
+Next pressure:
+
+- Keep helper companions retired by default.
+- Treat `core-local` support surfaces as part of the deterministic QA layer,
+  not helper residue.
+- Move the next work to compile-surface preservation for recurring source
+  addressability gaps: commercial item attributes, person-role source lines,
+  and statement-to-section provenance links.

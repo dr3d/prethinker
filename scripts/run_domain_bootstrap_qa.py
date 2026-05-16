@@ -2321,13 +2321,20 @@ def _is_helper_query_result(item: dict[str, Any]) -> bool:
     result = item.get("result", {})
     if not isinstance(result, dict):
         return False
+    rows = result.get("rows")
+    reasoning_basis = result.get("reasoning_basis", {})
+    if (
+        isinstance(reasoning_basis, dict)
+        and str(reasoning_basis.get("kind", "")) == "core-local"
+        and isinstance(rows, list)
+        and not any(isinstance(row, dict) and "HelperClass" in row for row in rows)
+    ):
+        return False
     predicate = str(item.get("predicate", "") or result.get("predicate", "") or "")
     if predicate.endswith("_support"):
         return True
-    reasoning_basis = result.get("reasoning_basis", {})
     if isinstance(reasoning_basis, dict) and str(reasoning_basis.get("kind", "")) == "query-only-companion":
         return True
-    rows = result.get("rows")
     return isinstance(rows, list) and any(isinstance(row, dict) and "HelperClass" in row for row in rows)
 
 
@@ -14066,12 +14073,12 @@ def summarize_helper_classes(rows: list[dict[str, Any]]) -> dict[str, Any]:
             result_rows = result.get("rows")
             if not isinstance(result_rows, list):
                 continue
+            if not _is_helper_query_result(query_result):
+                continue
             classes = [
                 str(result_row.get("HelperClass", "") or "unlabeled")
                 for result_row in result_rows
-                if isinstance(result_row, dict) and (
-                    "HelperClass" in result_row or str(result.get("predicate", "")).endswith("_support")
-                )
+                if isinstance(result_row, dict)
             ]
             if not classes:
                 continue

@@ -1052,6 +1052,13 @@ def test_summarize_counts_helper_class_rows_by_companion() -> None:
                         "rows": [{"SupportKind": "legacy"}],
                     }
                 },
+                {
+                    "result": {
+                        "predicate": "item_description_detail_support",
+                        "rows": [{"Item": "ex_001", "Year": "1987"}],
+                        "reasoning_basis": {"kind": "core-local"},
+                    }
+                },
             ],
         }
     ]
@@ -2421,6 +2428,13 @@ def test_helper_companion_row_limit_zero_suppresses_helper_results_only() -> Non
         {"result": {"predicate": "direct_fact", "rows": [{"Value": "kept"}]}},
         {
             "result": {
+                "predicate": "item_description_detail_support",
+                "rows": [{"Item": "ex_001", "Year": "1987"}],
+                "reasoning_basis": {"kind": "core-local"},
+            }
+        },
+        {
+            "result": {
                 "predicate": "source_record_packet_metadata_support",
                 "rows": [{"HelperClass": "clean-helper", "SupportKind": "identifier"}],
             }
@@ -2429,7 +2443,16 @@ def test_helper_companion_row_limit_zero_suppresses_helper_results_only() -> Non
 
     filtered = _limit_helper_query_results(results, 0, utterance="Which identifier?", queries=[])
 
-    assert filtered == [{"result": {"predicate": "direct_fact", "rows": [{"Value": "kept"}]}}]
+    assert filtered == [
+        {"result": {"predicate": "direct_fact", "rows": [{"Value": "kept"}]}},
+        {
+            "result": {
+                "predicate": "item_description_detail_support",
+                "rows": [{"Item": "ex_001", "Year": "1987"}],
+                "reasoning_basis": {"kind": "core-local"},
+            }
+        },
+    ]
 
 
 def test_run_query_plan_summarizes_type_categories_without_counting_instances() -> None:
