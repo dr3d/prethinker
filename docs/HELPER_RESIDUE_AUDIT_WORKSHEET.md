@@ -3710,3 +3710,173 @@ Next pressure:
   contract guidance and rerun no-helper QA.
 - If the miss class improves, expand the contract audit to the larger weak
   native slice before attempting another native stamp.
+
+## HR-043 - Financial Baseline Recompile Replay
+
+Date: 2026-05-16
+
+Before:
+
+- HR-042 showed the prior Sable compile had a shallow financial surface:
+  balance, adjustment, result, and policy rows were present, but no
+  scenario/basis slot bound the derivation.
+- Previous focused no-helper QA after event-backbone repair was `34 / 3 / 3`.
+
+Prediction:
+
+- A fresh compile with the financial-baseline slot guidance should make the
+  actual financial timeline cleaner and may pull the simpler reserve/baseline
+  questions inside.
+- It should not be expected to solve full counterfactual simulation unless the
+  query layer can derive hypothetical worlds from components.
+
+Intervention:
+
+- Recompiled `sable_creek_budget` with the financial-baseline contract guidance.
+- Audited the new compile for invariant-family and relation-contract status.
+- Ran no-helper QA over all 40 questions.
+
+After:
+
+Compile:
+
+- Rough score: `1.0`
+- Candidate predicates: `22`
+- Admitted / skipped: `121 / 22`
+- Wrapper drift flags: none
+
+Invariant audit:
+
+- `financial_baseline_derivation_contract`: `pass`
+- Family status summary: `6` pass, `5` partial, `0` ledger-only
+- The compile now emits structural balances for the initial, intermediate, and
+  final reserve states, including `420000`, `235000`, `300000`, and `213000`.
+
+QA:
+
+| Run | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Event-backbone recompile | `34` | `3` | `3` | `0` |
+| Financial-baseline recompile | `34` | `2` | `3` | `0` |
+
+Residual pressure:
+
+- `q012`: query/judge fragility around corrected vote records.
+- `q029`: speaker statement surface missing for a discussion participant.
+- `q031`: hybrid synthesis over vote counts, absences, and stated objections.
+- `q036`: introduction/procedure events still under-preserved.
+- `q038`: nonbinding/advisory items are not unified across certifications,
+  staff estimates, legal opinions, public comments, and advisory observations.
+- `q040`: true counterfactual simulation gap; the KB has actual financial
+  components, but the query layer does not derive the hypothetical world.
+
+Artifacts:
+
+- `docs/data/helper_residue/financial_baseline_sable_recompile_20260516.json`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_20260516.md`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_audit_20260516.json`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_audit_20260516.md`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_qa_20260516.json`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_qa_20260516.md`
+- `tmp/financial_baseline_sable_recompile_20260516/`
+- `tmp/financial_baseline_sable_recompile_qa_20260516/`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --fixture sable_creek_budget --compile-source --compile-plan-passes --focused-pass-ops-schema --source-entity-ledger --source-record-ledger --source-record-ledger-facts --intake-registry-context --review-profile --profile-review-retry --quality-gate`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\financial_baseline_sable_recompile_20260516\sable_creek_budget --out-json docs\data\helper_residue\financial_baseline_sable_recompile_audit_20260516.json --out-md docs\data\helper_residue\financial_baseline_sable_recompile_audit_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --compile-root tmp\financial_baseline_sable_recompile_20260516 --fixture sable_creek_budget --helper-companion-row-limit 0 --no-cache`
+
+Lesson:
+
+The financial-baseline repair improved compile quality and made the relevant
+surface honest, but it did not move the overall score. That is useful: the
+remaining Sable boundary is no longer primarily "missing reserve components."
+It has split into participant statement preservation, advisory/nonbinding
+classification, procedure-step preservation, query fragility, and true
+counterfactual simulation.
+
+Next pressure:
+
+- Build a generic participant-statement/advisory-status invariant: when a
+  source records who said, advised, estimated, certified, commented, or
+  clarified something, preserve speaker/actor, content/proposition, role or
+  speech act, and binding/advisory status where stated.
+- Keep full counterfactual simulation separate; do not smuggle it into a
+  financial helper.
+
+## HR-044 - Participant Statement Status Contract
+
+Date: 2026-05-16
+
+Before:
+
+- HR-043 split the remaining Sable pressure. Several failures were not finance
+  gaps: they involved participant statements, discussion positions, staff
+  estimates, public comments, legal opinions, certifications, and advisory
+  status.
+- A first token-family audit for `participant_statement_surface` passed on the
+  current Sable compile, even though QA still missed advisory/nonbinding list
+  questions. This repeated the HR-042 lesson: tokens can be green while slot
+  binding is shallow.
+
+Prediction:
+
+- Statement/advisory rows need a companion contract. A statement, opinion,
+  estimate, certification, or comment is not fully queryable for nonbinding
+  questions unless its binding/advisory/informational status is on the row or
+  same-anchored through a stable statement/source id.
+
+Intervention:
+
+- Added `participant_statement_surface` as a visible invariant family.
+- Added `participant_statement_status_contract`, which audits statement-like
+  rows for same-anchor binding/advisory status coverage.
+- Strengthened compile guidance so participant statements preserve speaker,
+  content/position, speech act, source event/date, language/translation when
+  stated, and binding/advisory/informational status where stated.
+- Added tests for participant-statement family coverage and statement-status
+  companion coverage.
+
+After:
+
+- The family-level participant statement surface passes on the current Sable
+  compile.
+- The stricter contract correctly classifies the compile as `partial`.
+- Covered rows:
+  - `legal_opinion`
+- Missing same-anchor status coverage:
+  - `certification_issued`
+  - `public_comment_made`
+  - `staff_estimate`
+
+Artifacts:
+
+- `scripts/audit_compile_surface_invariants.py`
+- `scripts/run_domain_bootstrap_file.py`
+- `tests/test_compile_surface_invariants.py`
+- `tests/test_domain_bootstrap_file.py`
+- `docs/data/helper_residue/participant_statement_sable_pre_repair_audit_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_pre_repair_audit_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\run_domain_bootstrap_file.py scripts\audit_compile_surface_invariants.py`
+- `python -m pytest tests\test_compile_surface_invariants.py tests\test_domain_bootstrap_file.py::test_compile_surface_invariants_keep_operational_record_slots -q`
+  - `16 passed`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\financial_baseline_sable_recompile_20260516\sable_creek_budget --out-json docs\data\helper_residue\participant_statement_sable_pre_repair_audit_20260516.json --out-md docs\data\helper_residue\participant_statement_sable_pre_repair_audit_20260516.md`
+
+Lesson:
+
+Statement vocabulary is another place where fixture-era over-delivery used to
+hide shallow compile surfaces. The modern path is not a helper; it is a
+same-anchor status contract. A public comment, estimate, certification, or
+opinion can be present and still fail an advisory-list question if its
+epistemic status is detached.
+
+Next pressure:
+
+- Recompile the focused fixture with the participant statement/status contract
+  guidance and rerun no-helper QA.
+- If q038 or discussion-position rows improve, expand the statement-status
+  audit to the weak native slice.

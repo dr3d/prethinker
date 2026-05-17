@@ -179,6 +179,76 @@ def test_audit_compile_surface_invariants_passes_financial_baseline_surface(tmp_
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_detects_participant_statement_gap(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, participant_lee_said_the_plan_is_too_costly_as_a_concern_during_the_meeting).",
+            "meeting_event(meeting_1, 2026_01_03).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    surface = next(row for row in report["families"] if row["family"] == "participant_statement_surface")
+    assert surface["status"] == "partial"
+    assert "speaker_or_actor" in surface["missing_groups"]
+    assert "speech_act_or_record_type" in surface["missing_groups"]
+    assert "content_or_position" in surface["missing_groups"]
+
+
+def test_audit_compile_surface_invariants_passes_participant_statement_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, participant_lee_said_the_plan_is_too_costly_as_a_concern_during_the_meeting).",
+            "participant_statement(lee, meeting_1, opposed, plan_cost_too_high, informational).",
+            "statement_context(meeting_1, 2026_01_03, translated).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    surface = next(row for row in report["families"] if row["family"] == "participant_statement_surface")
+    assert surface["status"] == "pass"
+
+
+def test_audit_compile_surface_invariants_detects_statement_status_gap(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, witness_statement_is_advisory_not_binding).",
+            "participant_statement(statement_1, witness_1, hearing_1, content_value).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "participant_statement_status_contract"
+    )
+    assert contract["status"] == "missing_status_companion"
+    assert contract["missing_keys"] == ["participant_statement[1]"]
+
+
+def test_audit_compile_surface_invariants_passes_statement_status_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, witness_statement_is_advisory_not_binding).",
+            "participant_statement(statement_1, witness_1, hearing_1, content_value).",
+            "statement_epistemic_status(statement_1, advisory).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "participant_statement_status_contract"
+    )
+    assert contract["status"] == "pass"
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

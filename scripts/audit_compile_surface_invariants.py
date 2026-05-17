@@ -146,6 +146,70 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
         },
     ),
     InvariantSpec(
+        family="participant_statement_surface",
+        description="speaker/actor statements, advice, estimates, comments, clarifications, content, context, and binding status",
+        groups={
+            "speaker_or_actor": (
+                "speaker",
+                "actor",
+                "author",
+                "commenter",
+                "participant",
+                "staff",
+                "member",
+                "official",
+            ),
+            "speech_act_or_record_type": (
+                "statement",
+                "comment",
+                "advice",
+                "opinion",
+                "estimate",
+                "certification",
+                "clarification",
+                "caveat",
+                "observation",
+                "said",
+                "stated",
+                "suggested",
+                "asked",
+            ),
+            "content_or_position": (
+                "content",
+                "proposition",
+                "position",
+                "concern",
+                "support",
+                "supported",
+                "oppose",
+                "opposed",
+                "agree",
+                "question",
+                "reason",
+            ),
+            "context_or_source_event": (
+                "hearing",
+                "meeting",
+                "discussion",
+                "memo",
+                "record",
+                "source",
+                "date",
+                "translation",
+            ),
+            "binding_or_epistemic_status": (
+                "binding",
+                "advisory",
+                "nonbinding",
+                "non",
+                "not",
+                "informational",
+                "observation",
+                "opinion",
+            ),
+        },
+    ),
+    InvariantSpec(
         family="rule_policy_surface",
         description="rules, policies, procedure identifiers, clauses, ratios, and governing sections",
         groups={
@@ -318,6 +382,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "relation_contracts": [
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
+            _audit_participant_statement_status_contract(source_facts, direct_rows),
         ],
         "summary": _summarize_families(families),
     }
@@ -617,6 +682,126 @@ def _is_financial_structural_row(row: dict[str, Any]) -> bool:
     }
     predicate = str(row["predicate"])
     return bool((financial_terms & tokens) or (arithmetic_terms & tokens) or "balance" in predicate)
+
+
+def _audit_participant_statement_status_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    source_tokens = _tokens_for_facts(source_facts)
+    speech_tokens = {
+        "statement",
+        "comment",
+        "advice",
+        "opinion",
+        "estimate",
+        "certification",
+        "clarification",
+        "caveat",
+        "observation",
+        "said",
+        "stated",
+        "suggested",
+        "asked",
+    }
+    status_tokens = {"binding", "advisory", "nonbinding", "informational", "opinion", "not", "false", "true"}
+    triggered = {
+        "speech_surface": sorted(speech_tokens & source_tokens),
+        "binding_status": sorted(status_tokens & source_tokens),
+    }
+    if not triggered["speech_surface"] or not triggered["binding_status"]:
+        return {
+            "contract": "participant_statement_status_contract",
+            "description": "statement/advice/comment/estimate rows should expose binding or advisory status on the row or a same-anchor companion",
+            "status": "not_applicable",
+            "required_key_count": 0,
+            "companion_key_count": 0,
+            "missing_keys": [],
+            "triggered_groups": triggered,
+            "covered_keys": [],
+        }
+
+    statement_rows = [row for row in direct_rows if _is_statement_structural_row(row)]
+    status_rows = [row for row in direct_rows if _is_statement_status_row(row)]
+    status_anchors = {
+        _normalize_arg(arg)
+        for row in status_rows
+        for arg in row["args"][:2]
+        if str(arg).strip()
+    }
+    missing: list[str] = []
+    covered: list[str] = []
+    for index, row in enumerate(statement_rows, start=1):
+        row_tokens = _tokens_for_row(row)
+        anchors = {_normalize_arg(arg) for arg in row["args"][:2] if str(arg).strip()}
+        key = f"{row['predicate']}[{index}]"
+        if row_tokens & status_tokens:
+            covered.append(key)
+            continue
+        if anchors & status_anchors:
+            covered.append(key)
+            continue
+        missing.append(key)
+
+    if not statement_rows:
+        status = "missing_structural_surface"
+    elif not missing:
+        status = "pass"
+    elif covered:
+        status = "partial"
+    else:
+        status = "missing_status_companion"
+    return {
+        "contract": "participant_statement_status_contract",
+        "description": "statement/advice/comment/estimate rows should expose binding or advisory status on the row or a same-anchor companion",
+        "status": status,
+        "required_key_count": len(statement_rows),
+        "companion_key_count": len(covered),
+        "missing_keys": missing,
+        "triggered_groups": triggered,
+        "covered_keys": covered,
+        "statement_predicates": sorted({str(row["predicate"]) for row in statement_rows}),
+        "status_predicates": sorted({str(row["predicate"]) for row in status_rows}),
+    }
+
+
+def _is_statement_structural_row(row: dict[str, Any]) -> bool:
+    if _is_statement_status_row(row):
+        return False
+    tokens = _tokens_for_row(row)
+    predicate = str(row["predicate"]).lower()
+    if predicate.startswith(("rule_", "policy_", "charter_")):
+        return False
+    return bool(
+        tokens
+        & {
+            "statement",
+            "comment",
+            "opinion",
+            "estimate",
+            "certification",
+            "clarification",
+            "caveat",
+            "observation",
+            "advice",
+        }
+        or any(marker in predicate for marker in ("comment", "opinion", "estimate", "certification", "statement"))
+    )
+
+
+def _is_statement_status_row(row: dict[str, Any]) -> bool:
+    predicate = str(row["predicate"]).lower()
+    tokens = _tokens_for_row(row)
+    return bool(
+        "binding" in predicate
+        or "status" in predicate
+        or "epistemic" in predicate
+        or ({"binding", "advisory", "nonbinding", "informational"} & tokens)
+    )
+
+
+def _tokens_for_row(row: dict[str, Any]) -> set[str]:
+    return set(TOKEN_RE.findall(" ".join([str(row["predicate"]), *[str(arg) for arg in row["args"]]]).lower()))
 
 
 def _has_indexes(args: list[str], indexes: tuple[int, ...]) -> bool:

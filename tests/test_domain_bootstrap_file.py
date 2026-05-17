@@ -199,6 +199,9 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "actual versus hypothetical scenario assumptions" in context
     assert "Derivation rows need a scenario or basis slot" in context
     assert "Do not overwrite an initial baseline with a later actual value" in context
+    assert "participant statements need direct statement surfaces" in context
+    assert "share a stable statement id or source anchor" in context
+    assert "Do not preserve only formal public comments" in context
     assert "operational record/status events" in context
     assert "event or record id, governed subject/item/application" in context
     assert "status before and after when stated" in context
