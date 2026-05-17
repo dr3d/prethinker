@@ -130,6 +130,37 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
 
 
+def test_source_record_ledger_emits_inline_key_value_fields() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Device Register",
+                "",
+                "> **DEV-17** -- Vendor: Northstar; Model: NX-4; Location: Bay 3.",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_inline_field(src_line_0003, vendor, northstar)." in facts
+    assert "source_record_inline_field(src_line_0003, model, nx_4)." in facts
+    assert "source_record_inline_field(src_line_0003, location, bay_3)." in facts
+    assert "source_record_field(src_line_0003, vendor, northstar)." in facts
+    assert "source_record_field(src_line_0003, model, nx_4)." in facts
+    assert "source_record_field(src_line_0003, location, bay_3)." in facts
+
+
+def test_source_record_ledger_does_not_treat_clock_times_as_inline_fields() -> None:
+    ledger = extract_source_record_ledger(
+        "Camera CAM-7 was offline from 2026-04-15 06:00:00 UTC to 2026-04-15 14:00:00 UTC."
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert not any(fact.startswith("source_record_inline_field(") for fact in facts)
+
+
 def test_source_record_exact_round_trips_table_text_with_commas() -> None:
     runtime = CorePrologRuntime()
     fact = (

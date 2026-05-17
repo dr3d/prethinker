@@ -194,7 +194,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
     return [
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
-        "For markdown tables, it preserves deterministic column headers alongside row cells so table values can be queried as source-record fields without semantic interpretation.",
+        "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation.",
         "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
         "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, source_record_field, document_identifier, and status-at-row predicates when the profile supports them.",
@@ -251,6 +251,9 @@ def source_record_ledger_facts(
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
+        for field_name, field_value in _inline_key_value_fields(str(raw.get("exact", ""))):
+            facts.append(f"source_record_inline_field({row_id}, {field_name}, {field_value}).")
+            facts.append(f"source_record_field({row_id}, {field_name}, {field_value}).")
         cells = raw.get("cells")
         if isinstance(cells, list):
             headers = raw.get("headers")
@@ -419,6 +422,38 @@ def _numeric_tokens(text: str) -> list[str]:
     return out
 
 
+def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
+    """Extract literal ``Key: Value`` pairs from one source row.
+
+    This is source addressability only. It preserves printed key/value pairs but
+    does not decide whether a key is semantically true, current, authoritative,
+    or complete.
+    """
+
+    clean = re.sub(r"\*\*([^*]+)\*\*", r"\1", str(text or ""))
+    out: list[tuple[str, str]] = []
+    for segment in re.split(r"[;|]", clean):
+        if ":" not in segment:
+            continue
+        key_raw, value_raw = segment.split(":", 1)
+        key_raw = re.split(r"\s+(?:—|–|--)\s*", key_raw)[-1].strip()
+        value_raw = value_raw.strip(" .")
+        if not key_raw or not value_raw:
+            continue
+        if len(key_raw) > 40 or len(value_raw) > 180:
+            continue
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9 /_-]{0,39}", key_raw):
+            continue
+        if not re.search(r"[A-Za-z0-9]", value_raw):
+            continue
+        key = _atom(key_raw)
+        value = _atom(value_raw)
+        if not key or not value or key == value:
+            continue
+        out.append((key, value))
+    return _dedupe_pairs(out)
+
+
 def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
     """Emit source-local alias surfaces for ``Full Name (ABC)`` patterns.
 
@@ -441,6 +476,17 @@ def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
         out.append(f"source_record_parenthetical_alias({row_id}, {abbr}, {expansion}).")
         out.append(f"source_record_alias({row_id}, {abbr}, {expansion}).")
         out.append(f"source_record_alias({row_id}, {expansion}, {abbr}).")
+    return out
+
+
+def _dedupe_pairs(values: list[tuple[str, str]]) -> list[tuple[str, str]]:
+    seen: set[tuple[str, str]] = set()
+    out: list[tuple[str, str]] = []
+    for item in values:
+        if item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
     return out
 
 

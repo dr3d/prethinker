@@ -144,6 +144,11 @@ Recent no-helper work made this boundary explicit:
   fallback carrier when a stricter profile attribute/detail predicate is absent;
   it must not replace concrete identity, event, status, temporal, count, amount,
   rule, role, or authority rows.
+- Literal `Key: Value` source lines now emit deterministic
+  `source_record_inline_field/3` plus the shared `source_record_field/3`
+  surface used for tables. This is source addressability, not semantic
+  interpretation: it preserves printed keys and values so no-helper query
+  planning can retrieve them when the question names the same key.
 
 ## Selector And Guard Discipline
 

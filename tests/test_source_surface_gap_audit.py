@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from kb_pipeline import CorePrologRuntime
 from scripts.audit_source_surface_gaps import audit_scorecard
-from scripts.run_domain_bootstrap_qa import _source_text_question_token_hint_queries, run_query_plan
+from scripts.run_domain_bootstrap_qa import (
+    compiled_kb_inventory,
+    _source_field_question_key_hint_queries,
+    _source_text_question_token_hint_queries,
+    run_query_plan,
+)
 
 
 def test_source_text_question_token_hints_use_question_tokens_only() -> None:
@@ -22,6 +27,42 @@ def test_source_text_question_token_hints_prioritize_initial_surname() -> None:
     )
 
     assert queries[0] == 'source_record_text_atom(SourceRow, TextAtom), memberchk("r_kim", TextAtom).'
+
+
+def test_source_field_question_key_hints_use_existing_source_field_headers() -> None:
+    queries = _source_field_question_key_hint_queries(
+        utterance="What is the vendor and model number for device QR-17?",
+        kb_inventory={
+            "signatures": ["source_record_field/3"],
+            "examples": {
+                "source_record_field/3": [
+                    "source_record_field(src_line_1, vendor, northstar).",
+                    "source_record_field(src_line_1, model, nx_4).",
+                    "source_record_field(src_line_1, location, bay_3).",
+                ]
+            },
+        },
+    )
+
+    assert "source_record_field(SourceRow, vendor, Value)." in queries
+    assert "source_record_field(SourceRow, model, Value)." in queries
+    assert "source_record_field(SourceRow, location, Value)." not in queries
+
+
+def test_source_field_question_key_hints_use_all_inventory_headers_beyond_examples() -> None:
+    facts = [
+        f"source_record_field(src_line_{index:04d}, filler_{index}, value_{index})."
+        for index in range(12)
+    ]
+    facts.append("source_record_field(src_line_9999, vendor, northstar).")
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+
+    queries = _source_field_question_key_hint_queries(
+        utterance="Which vendor is listed for device QR-17?",
+        kb_inventory=inventory,
+    )
+
+    assert "source_record_field(SourceRow, vendor, Value)." in queries
 
 
 def test_run_query_plan_filters_source_text_memberchk_queries() -> None:

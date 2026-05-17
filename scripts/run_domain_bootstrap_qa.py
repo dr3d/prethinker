@@ -951,6 +951,7 @@ def parse_markdown_answer_key(text: str) -> dict[str, str]:
 def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, Any]:
     counts: dict[str, int] = {}
     examples: dict[str, list[str]] = {}
+    source_record_field_headers: list[str] = []
     for clause in [*facts, *rules]:
         signature = clause_signature(clause)
         if not signature:
@@ -959,11 +960,18 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
         bucket = examples.setdefault(signature, [])
         if len(bucket) < 8:
             bucket.append(str(clause).strip())
+        if signature == "source_record_field/3":
+            parsed = parse_prolog_query(str(clause))
+            if parsed is not None:
+                predicate, args = parsed
+                if predicate == "source_record_field" and len(args) >= 3 and not _is_prolog_variable(args[1]):
+                    source_record_field_headers.append(args[1])
     signatures = sorted(counts, key=lambda item: (-counts[item], item))
     return {
         "signatures": signatures,
         "counts": counts,
         "examples": {signature: examples.get(signature, []) for signature in signatures[:80]},
+        "source_record_field_headers": _ordered_atom_unique(source_record_field_headers),
         "query_templates": [query_template_for_signature(signature) for signature in signatures],
         "surface_alias_inventory": compiled_surface_alias_inventory(signatures),
     }
@@ -1674,6 +1682,7 @@ def run_one_question(
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_text_question_token_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_field_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
@@ -2028,6 +2037,51 @@ def _source_text_question_needles(utterance: str) -> list[str]:
 
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
     return _ordered_atom_unique([*identifier_needles, *phrase_needles, *unigram_needles])
+
+
+def _source_field_question_key_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Query literal source-record fields whose key is named by the question."""
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_field/3" not in signatures:
+        return []
+    question_tokens = set(_query_atom_tokens(utterance))
+    if not question_tokens:
+        return []
+    out: list[str] = []
+    for field in _source_record_field_headers(kb_inventory):
+        field_tokens = set(_query_atom_tokens(field))
+        if not field_tokens or not field_tokens <= question_tokens:
+            continue
+        out.append(f"source_record_field(SourceRow, {field}, Value).")
+    return _ordered_query_unique(out)[:6]
+
+
+def _source_record_field_headers(kb_inventory: dict[str, Any]) -> list[str]:
+    inventory_headers = kb_inventory.get("source_record_field_headers", [])
+    if isinstance(inventory_headers, list):
+        headers = [str(item).strip() for item in inventory_headers if str(item).strip()]
+        if headers:
+            return _ordered_atom_unique(headers)
+    examples = kb_inventory.get("examples", {})
+    if not isinstance(examples, dict):
+        return []
+    fields: list[str] = []
+    for signature, clauses in examples.items():
+        if str(signature).split("/", 1)[0] != "source_record_field" or not isinstance(clauses, list):
+            continue
+        for clause in clauses[:80]:
+            parsed = parse_prolog_query(str(clause))
+            if parsed is None:
+                continue
+            predicate, args = parsed
+            if predicate == "source_record_field" and len(args) >= 3 and not _is_prolog_variable(args[1]):
+                fields.append(args[1])
+    return _ordered_atom_unique(fields)
 
 
 def _source_coordinate_hint_queries(
