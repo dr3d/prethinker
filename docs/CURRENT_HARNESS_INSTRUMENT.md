@@ -2,6 +2,13 @@
 
 Last updated: 2026-05-17
 
+Prethinker compiles documents into governed, queryable KB artifacts and audits
+whether questions can be answered from admitted state alone, without rereading
+source prose. This document describes the harness as a research instrument: how
+it measures compile quality, row delivery, selector behavior, guard pressure,
+and semantic progress. Its purpose is to keep the project hard to fool while
+making every architectural move replayable.
+
 Prethinker's harness is part of the product. It is the research instrument that
 lets the project replay live behavior, capture structural signatures, compare
 candidate extractions, and explain what changed without asking Python to
@@ -56,11 +63,25 @@ harness center.
 
 ## Current Paths
 
+### Clean Surface And Live Surface
+
 The daily-driver surface is `src/kb_pipeline_clean` plus
 `scripts/run_kb_pipeline_clean_harness.py`. The live behavior source remains
 `src/mcp_server.py` until each compiler, gate, apply, or normalization piece has
 been wrapped, replayed, extracted, compared, and only then retired from the
 legacy surface.
+
+In practice, `src/kb_pipeline_clean` is the intended interface for new agents
+and repeatable harness work. `src/mcp_server.py` is still the behavior reservoir
+for pieces that have not completed the migration loop:
+
+```text
+wrap -> replay -> extract -> compare -> retire
+```
+
+That two-surface state is deliberate. New work should prefer the clean surface,
+but old behavior should only disappear after replay evidence shows parity or a
+better replacement.
 
 Document work follows this shape:
 
@@ -73,9 +94,10 @@ source
   -> no-helper QA over direct compile surfaces, ledgers, selectors, and guards
 ```
 
-OpenRouter and POWER are both measurement lanes. Model/provider variation is
-treated as data: durable surfaces should transfer; sensitive surfaces such as
-exact string preservation get deterministic reinforcement.
+POWER, the local workstation with an RTX 5090, and OpenRouter, the cloud lane,
+are both measurement lanes. Model/provider variation is treated as data:
+durable surfaces should transfer; sensitive surfaces such as exact string
+preservation get deterministic reinforcement.
 
 ## Instrument Principles
 
@@ -258,12 +280,3 @@ The current output is `semantic_progress_assessment_v1`:
 
 This is the product behavior: Prethinker should be smart enough to notice when
 it is no longer making semantic progress.
-
-## Extraction Rule
-
-```text
-wrap -> replay -> extract -> compare -> retire
-```
-
-That order keeps the moving platform usable while the workbench becomes easier
-for a human to understand.

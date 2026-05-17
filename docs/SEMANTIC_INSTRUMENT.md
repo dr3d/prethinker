@@ -2,9 +2,19 @@
 
 ## What This Document Is
 
-Prethinker compiles natural language documents into governed knowledge bases. This document describes the *instrument* - the collection of semantic lenses, selector guards, helpers, and uncertainty distinctions that the system uses to read documents from multiple angles and decide what can be answered from admitted state.
+Prethinker compiles natural language documents into governed knowledge bases.
+This document describes the *instrument* - the collection of semantic lenses,
+selector guards, deterministic ledgers, legacy compatibility adapters, and
+uncertainty distinctions that the system uses to read documents from multiple
+angles and decide what can be answered from admitted state.
 
 Think of it as the spec sheet for a scientific instrument. A spectrometer has wavelength ranges, resolution limits, and calibration procedures. Prethinker has semantic lenses, selector guards, and an uncertainty vocabulary. Both instruments get sharper through calibration against known samples.
+
+As of the current no-helper instrument, the active semantic vocabulary is
+organized into thirteen lens facets and roughly 136 typed lens terms. The exact
+term count is calibration telemetry rather than a product promise: terms keep
+their place only when transfer evidence shows they describe a reusable meaning
+surface rather than a development fixture.
 
 ---
 
@@ -41,7 +51,7 @@ The instrument now has a separate deterministic pre-compile layer:
 ```text
 semantic lenses = model-owned meaning proposals
 deterministic ledgers = exact source addressability
-helpers = query-time computation over admitted state
+legacy helpers = opt-in compatibility adapters, not the active architecture
 ```
 
 The deterministic ledgers are not lenses and not guards. They do not interpret
