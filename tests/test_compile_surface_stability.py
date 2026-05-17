@@ -113,6 +113,35 @@ def test_compile_surface_stability_reports_candidate_zero_yield_signatures(tmp_p
     assert report["summary"]["candidate_zero_yield_signature_count"] == 1
 
 
+def test_compile_surface_stability_reports_palette_delivery_contracts(tmp_path: Path) -> None:
+    draw1 = _write_compile(
+        tmp_path / "draw1" / "fixture_contract" / "domain_bootstrap_file_a.json",
+        [
+            "entity_assignment(entity_001, version_a, cohort_a).",
+            "entity_assignment(entity_002, version_a, cohort_b).",
+            "entity_assignment(entity_003, version_a, cohort_c).",
+            "entity_assignment(entity_004, version_a, cohort_d).",
+        ],
+        candidate_predicates=["entity_assignment/3", "status_phase/2"],
+    )
+    draw2 = _write_compile(
+        tmp_path / "draw2" / "fixture_contract" / "domain_bootstrap_file_b.json",
+        [],
+        candidate_predicates=["entity_assignment/3", "entity_assignment/4"],
+    )
+
+    report = audit_paths([draw1, draw2])
+
+    fixture = report["fixtures"][0]
+    assert report["summary"]["palette_delivery_contract_count"] == 1
+    contract = fixture["palette_delivery_contracts"][0]
+    assert contract["signature"] == "entity_assignment/3"
+    assert contract["max_row_count"] == 4
+    assert contract["classification_counts"] == {"arity_drift": 1, "healthy": 1}
+    assert contract["draws"][0]["status"] == "healthy"
+    assert contract["draws"][1]["status"] == "arity_drift"
+
+
 def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_b" / "domain_bootstrap_file_a.json",

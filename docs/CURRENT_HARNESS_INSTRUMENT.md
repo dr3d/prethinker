@@ -202,6 +202,12 @@ Recent transfer work supports the current direction:
   but overly strict name/arity preservation can still lose answer-bearing slots.
   The next repair layer must preserve the structural slots that make the
   surface queryable, not merely freeze predicate labels.
+- Palette delivery contracts are the current stabilization target. The contract
+  asks whether a retained repeated signature actually delivers rows across
+  redraws, classifying each draw as `healthy`, `zero_yield`, `arity_drift`, or
+  `delivery_collapse`. Delivery-contract guidance improved the roster replay
+  from 29/2/9 under strict palette prior to 33/1/6 with helpers still disabled,
+  while reducing palette churn and arity drift.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

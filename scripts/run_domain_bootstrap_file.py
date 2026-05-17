@@ -789,6 +789,11 @@ def main() -> int:
                 "arity, or emit a near-synonym for the same capability. Add a new predicate only when the registry lacks "
                 "a source-required capability, and omit registry predicates not supported by the source."
             )
+            sample["context"].append(
+                "Palette delivery contract: retained registry predicates are not decorative labels. If the source contains "
+                "a repeated row family for a retained signature, keep argument roles that let the compiler emit those rows. "
+                "Do not preserve a predicate name while changing slots so the answer-bearing repeated rows become zero-yield."
+            )
     if expected_signatures:
         sample["target_prolog_signatures_for_calibration"] = expected_signatures
         sample["context"].append(
@@ -1134,6 +1139,8 @@ def main() -> int:
             "parsed": source_record_ledger,
         }
         extra_compile_context.extend(source_record_ledger_context(source_record_ledger))
+    if profile_registry and bool(args.profile_registry_palette_prior) and bool(args.compile_source) and isinstance(parsed, dict):
+        extra_compile_context.extend(_profile_registry_palette_prior_context(profile_registry))
     if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_flat_plus_plan_passes(
             source_text=source_text,
@@ -1556,6 +1563,41 @@ def _profile_registry_palette_report(*, parsed_profile: dict[str, Any], profile_
         "extra_profile_signatures": extra[:120],
         "same_name_changed_arity": same_name_changed_arity,
     }
+
+
+def _profile_registry_palette_prior_context(profile_registry: dict[str, Any]) -> list[str]:
+    signatures = []
+    for item in profile_registry.get("predicates", []) if isinstance(profile_registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = _normalized_signature(str(item.get("signature", "")))
+        if not signature:
+            continue
+        args = [
+            str(arg).strip()
+            for arg in item.get("args", [])
+            if isinstance(item.get("args"), list) and str(arg).strip()
+        ][:5]
+        signatures.append({"signature": signature, "args": args})
+    context = [
+        "profile_palette_prior_v1: The registry is vocabulary-only and does not supply facts, answers, or authority.",
+        (
+            "Palette delivery contract: when the allowed profile retained a registry signature and the source contains "
+            "a repeated row family for that structural capability, emit source-supported rows for that signature. "
+            "Do not leave retained repeated signatures zero-yield while replacing them with adjacent labels or broad wrappers."
+        ),
+        (
+            "Slot-preservation rule: use the retained predicate's argument roles as the row contract. Preserve the "
+            "entity/record, scope/version/time, target/value, role/status, and source/basis slots needed by the retained "
+            "signature instead of changing arity or moving the answer-bearing value into a long atom."
+        ),
+    ]
+    if signatures:
+        context.append(
+            "palette_prior_signatures_v1:\n"
+            + json.dumps(signatures[:60], ensure_ascii=False, sort_keys=True)
+        )
+    return context
 
 
 def _registry_signature_set(registry: dict[str, Any]) -> set[str]:

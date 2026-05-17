@@ -29,6 +29,7 @@ from scripts.run_domain_bootstrap_file import (
     _pass_surface_contribution,
     _profile_from_signature_roster,
     _profile_registry_palette_report,
+    _profile_registry_palette_prior_context,
     _should_build_source_entity_ledger,
     _source_compiler_context,
     _source_entity_ledger_context,
@@ -1012,6 +1013,24 @@ def test_profile_registry_palette_report_counts_signature_and_arity_drift() -> N
             "profile_arities": [4],
         }
     ]
+
+
+def test_profile_registry_palette_prior_context_is_vocabulary_only() -> None:
+    context = _profile_registry_palette_prior_context(
+        {
+            "predicates": [
+                {"signature": "entity_assignment/3", "args": ["entity", "scope", "target"]},
+                {"signature": "bad/9", "args": ["ignored"]},
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "vocabulary-only" in joined
+    assert "does not supply facts" in joined
+    assert "zero-yield" in joined
+    assert "entity_assignment/3" in joined
+    assert "bad/9" not in joined
 
 
 def test_compile_source_with_plan_passes_reports_health(monkeypatch) -> None:
