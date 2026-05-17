@@ -1146,6 +1146,7 @@ def main() -> int:
     ):
         _append_source_record_ledger_facts(record["source_compile"], source_record_ledger)
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
+        _append_source_field_id_facts(record["source_compile"], parsed)
         _append_entity_id_closure_facts(record["source_compile"], parsed)
     if args.expected_prolog:
         record["expected_prolog"] = _compare_expected_prolog(
@@ -2206,6 +2207,46 @@ def _append_entity_id_closure_facts(source_compile: dict[str, Any], parsed_profi
         }
 
 
+def _append_source_field_id_facts(source_compile: dict[str, Any], parsed_profile: dict[str, Any]) -> None:
+    id_predicates = {predicate for predicate, _base in _entity_id_predicate_bases(parsed_profile)}
+    if not id_predicates:
+        source_compile["deterministic_source_field_id_fact_count"] = 0
+        return
+    existing = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    seen = set(existing)
+    appended: list[str] = []
+    for fact in list(existing):
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "source_record_field" or len(args) < 3:
+            continue
+        field_name = args[1]
+        value = args[2]
+        if field_name not in id_predicates or not ENTITY_ID_ATOM_RE.fullmatch(value) or _looks_temporal_atom(value):
+            continue
+        closure_fact = f"{field_name}({value})."
+        if closure_fact in seen:
+            continue
+        seen.add(closure_fact)
+        existing.append(closure_fact)
+        appended.append(closure_fact)
+    source_compile["facts"] = existing
+    source_compile["unique_fact_count"] = len(existing)
+    source_compile["deterministic_source_field_id_fact_count"] = len(appended)
+    if appended:
+        source_compile["deterministic_source_field_id_policy"] = {
+            "schema_version": "deterministic_source_field_id_v1",
+            "authority": "typed_source_field_identifier_only",
+            "not_semantic_interpretation": True,
+            "description": (
+                "Adds unary *_id declarations only when a deterministic source_record_field header exactly matches "
+                "an allowed unary id predicate."
+            ),
+        }
+
+
 def _entity_id_predicate_bases(parsed_profile: dict[str, Any]) -> list[tuple[str, str]]:
     out: list[tuple[str, str]] = []
     for signature in profile_bootstrap_allowed_predicates(parsed_profile):
@@ -2217,6 +2258,10 @@ def _entity_id_predicate_bases(parsed_profile: dict[str, Any]) -> list[tuple[str
             continue
         out.append((predicate, base))
     return out
+
+
+def _looks_temporal_atom(value: str) -> bool:
+    return bool(re.match(r"^(?:v_)?\d{4}[_-]\d{2}[_-]\d{2}(?:$|[_-])", str(value or "")))
 
 
 def _parse_fact_clause(fact: str) -> tuple[str, list[str]] | None:

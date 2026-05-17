@@ -11,6 +11,7 @@ from scripts.run_domain_bootstrap_file import (
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
     _append_entity_id_closure_facts,
+    _append_source_field_id_facts,
     _append_source_record_ledger_facts,
     _call_lmstudio_json_schema,
     _compile_health_summary,
@@ -372,6 +373,33 @@ def test_append_entity_id_closure_facts_from_admitted_direct_rows() -> None:
     assert "system_id(sys_a)." in compile_record["facts"]
     assert compile_record["facts"].count("event_id(ev_10).") == 1
     assert compile_record["deterministic_entity_id_closure_fact_count"] == 3
+    assert compile_record["unique_fact_count"] == len(compile_record["facts"])
+
+
+def test_append_source_field_id_facts_from_exact_allowed_id_header() -> None:
+    compile_record = {
+        "facts": [
+            "source_record_field(src_line_1, event_id, ev_13).",
+            "source_record_field(src_line_2, device_id, dev_scan_07).",
+            "source_record_field(src_line_3, description, ev_14).",
+            "source_record_field(src_line_4, event_id, v_2026_05_01).",
+        ],
+        "unique_fact_count": 4,
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "event_id/1"},
+            {"signature": "device_id/1"},
+        ]
+    }
+
+    _append_source_field_id_facts(compile_record, profile)
+
+    assert "event_id(ev_13)." in compile_record["facts"]
+    assert "device_id(dev_scan_07)." in compile_record["facts"]
+    assert "event_id(ev_14)." not in compile_record["facts"]
+    assert "event_id(v_2026_05_01)." not in compile_record["facts"]
+    assert compile_record["deterministic_source_field_id_fact_count"] == 2
     assert compile_record["unique_fact_count"] == len(compile_record["facts"])
 
 
