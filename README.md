@@ -169,7 +169,7 @@ Current high-signal evidence:
 - Selector guard family rollup: `5` active guard return sites, `5` unique reasons, `4` semantic families, `0` unclassified reasons. The companion ledger preserves the retired/scar history.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
-- Historical Lava stress packs remain under `docs/data/frontier_packs/` as calibration evidence, but they are no longer treated as the active research frontier.
+- Historical Lava stress packs were retired from the public docs tree; Git history preserves the calibration evidence, and the active frontier is tracked in the current worksheets.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 
