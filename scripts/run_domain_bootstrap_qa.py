@@ -2242,6 +2242,20 @@ def run_query_plan(
                 )
             )
             continue
+        post_filter = _single_goal_post_filter_repair(query)
+        if post_filter:
+            results.append(
+                _run_single_goal_post_filter(
+                    runtime=runtime,
+                    original_query=query,
+                    filter_spec=post_filter,
+                    bundle_id="candidate_query_post_filter",
+                    purpose="Apply deterministic post-filters over admitted query rows.",
+                    helper_companions_enabled=helper_companions_enabled,
+                    include_legacy_native_helpers=include_legacy_native_helpers,
+                )
+            )
+            continue
         numeric_token_repair = _source_record_numeric_token_repaired_query(query)
         if numeric_token_repair:
             repaired_query = str(numeric_token_repair.get("query", "")).strip()
@@ -13347,6 +13361,20 @@ def run_evidence_bundle_plan_queries(
                     )
                 )
                 continue
+            post_filter = _single_goal_post_filter_repair(query)
+            if post_filter:
+                results.append(
+                    _run_single_goal_post_filter(
+                        runtime=runtime,
+                        original_query=query,
+                        filter_spec=post_filter,
+                        bundle_id=bundle_id,
+                        purpose=purpose,
+                        helper_companions_enabled=helper_companions_enabled,
+                        include_legacy_native_helpers=include_legacy_native_helpers,
+                    )
+                )
+                continue
             normalized = _normalize_evidence_bundle_query_constraints(query)
             normalized_query = str(normalized.get("query") or query).strip()
             parsed_goals = parse_prolog_query_goals(normalized_query)
@@ -13592,7 +13620,7 @@ def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
 def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
     variable_pattern = re.escape(str(text_var or ""))
     member_match = re.fullmatch(
-        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}\s*\)|string_list\(\s*{variable_pattern}\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
+        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}(?:\s*,\s*['\"][^'\"]*['\"])?\s*\)|string_list\(\s*{variable_pattern}\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
         str(goal or ""),
     )
     if member_match:
@@ -13609,7 +13637,133 @@ def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
     )
     if infix_match:
         return _normalize_text_filter_atom(infix_match.group(1))
+    concat_match = re.fullmatch(
+        rf"\s*(?:string_concat|atom_concat)\(\s*_\s*,\s*['\"]?([^,'\")]+)['\"]?\s*,\s*{variable_pattern}\s*\)\s*\.?\s*",
+        str(goal or ""),
+    )
+    if concat_match and not _is_prolog_variable(concat_match.group(1)):
+        return _normalize_text_filter_atom(concat_match.group(1))
+    prefix_concat_match = re.fullmatch(
+        rf"\s*(?:string_concat|atom_concat)\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*_\s*,\s*{variable_pattern}\s*\)\s*\.?\s*",
+        str(goal or ""),
+    )
+    if prefix_concat_match and not _is_prolog_variable(prefix_concat_match.group(1)):
+        return _normalize_text_filter_atom(prefix_concat_match.group(1))
     return ""
+
+
+def _single_goal_post_filter_repair(query: str) -> dict[str, Any] | None:
+    text = str(query or "").strip()
+    parts = split_top_level_args(text.rstrip(". "))
+    if len(parts) < 2:
+        return None
+    parsed = parse_prolog_query(parts[0])
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    target_vars = [arg for arg in args if _is_prolog_variable(arg)]
+    if not target_vars:
+        return None
+    filters: list[dict[str, Any]] = []
+    for part in parts[1:]:
+        condition = _post_filter_condition(part, target_vars)
+        if condition is None:
+            return None
+        filters.append(condition)
+    if not filters:
+        return None
+    return {"predicate": predicate, "args": args, "filters": filters}
+
+
+def _post_filter_condition(goal: str, target_vars: list[str]) -> dict[str, Any] | None:
+    text = str(goal or "").strip()
+    for target_var in target_vars:
+        needle = _source_text_contains_filter_needle(text, target_var)
+        if needle:
+            return {"kind": "contains", "variable": target_var, "needle": needle}
+        member_match = re.fullmatch(
+            rf"\s*member(?:chk)?\(\s*{re.escape(target_var)}\s*,\s*\[([^\]]+)\]\s*\)\s*\.?\s*",
+            text,
+        )
+        if member_match:
+            values = [
+                _normalize_text_filter_atom(item.strip().strip("'\""))
+                for item in split_top_level_args(member_match.group(1))
+                if _normalize_text_filter_atom(item.strip().strip("'\""))
+            ]
+            if values:
+                return {"kind": "member_of", "variable": target_var, "values": _ordered_atom_unique(values)}
+    return None
+
+
+def _run_single_goal_post_filter(
+    *,
+    runtime: CorePrologRuntime,
+    original_query: str,
+    filter_spec: dict[str, Any],
+    bundle_id: str,
+    purpose: str,
+    helper_companions_enabled: bool = True,
+    include_legacy_native_helpers: bool = True,
+) -> dict[str, Any]:
+    predicate = str(filter_spec["predicate"])
+    args = [str(arg) for arg in filter_spec["args"]]
+    filters = [item for item in filter_spec.get("filters", []) if isinstance(item, dict)]
+    repaired_query = format_prolog_query_goals([(predicate, args)])
+    item = run_query_plan(
+        runtime,
+        [repaired_query],
+        helper_companions_enabled=helper_companions_enabled,
+        include_legacy_native_helpers=include_legacy_native_helpers,
+    )[0]
+    result = item.get("result", {}) if isinstance(item, dict) else {}
+    rows = result.get("rows", []) if isinstance(result, dict) else []
+
+    def row_passes(row: dict[str, Any]) -> bool:
+        for filter_item in filters:
+            variable = str(filter_item.get("variable", ""))
+            normalized_value = _normalize_text_filter_atom(str(row.get(variable, "")))
+            if not normalized_value:
+                return False
+            if filter_item.get("kind") == "contains":
+                needle = _normalize_text_filter_atom(str(filter_item.get("needle", "")))
+                if not needle or needle not in normalized_value:
+                    return False
+            elif filter_item.get("kind") == "member_of":
+                values = [
+                    _normalize_text_filter_atom(str(value))
+                    for value in filter_item.get("values", [])
+                    if _normalize_text_filter_atom(str(value))
+                ]
+                if normalized_value not in values:
+                    return False
+            else:
+                return False
+        return True
+
+    filtered_rows = [row for row in rows if isinstance(row, dict) and row_passes(row)]
+    return {
+        "query": original_query,
+        "result": {
+            "status": "success",
+            "predicate": predicate,
+            "prolog_query": repaired_query,
+            "result_type": "table",
+            "variables": result.get("variables", []) if isinstance(result, dict) else [],
+            "num_rows": len(filtered_rows),
+            "rows": filtered_rows,
+            "reasoning_basis": {
+                "kind": "evidence-bundle-plan",
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "validation": "single_goal_post_filter_repaired",
+                "original_query": original_query,
+                "repaired_query": repaired_query,
+                "filters": filters,
+            },
+        },
+        "derived_from_queries": [repaired_query],
+    }
 
 
 

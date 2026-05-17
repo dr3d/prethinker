@@ -307,6 +307,17 @@ Recent transfer work supports the current direction:
   templates, 13 with hits, and 2 on non-exact rows. It is useful for avoiding
   rejected ledger-column filters, but it is not expected to move the native
   score materially by itself.
+- A final query-layer cleanup before restamp added deterministic post-filter
+  execution for single admitted predicates followed by simple list-membership
+  or concat-as-contains filters. This catches evidence plans such as "query the
+  admitted role/claim rows, then keep rows whose returned value belongs to this
+  list or contains this atom" without inventing new predicates. Local replay
+  found 101 newly executable templates, 58 with hits, including 14 hits on
+  previously non-exact rows. A targeted three-fixture OpenRouter smoke moved
+  +5 exact over 120 rows with helpers still at zero. This is the cutoff for
+  query-layer cleanup before a QA-only native no-helper restamp; the remaining
+  stranded-only compile-surface gaps need direct compile-surface work rather
+  than more runtime normalizers.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

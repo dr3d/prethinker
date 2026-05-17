@@ -790,6 +790,82 @@ def test_evidence_bundle_plan_repairs_source_record_label_memberchk_filter() -> 
     ]
 
 
+def test_evidence_bundle_plan_repairs_single_goal_list_membership_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "holds_role(ana, acting_watch_captain, may_1_to_may_10).",
+        "holds_role(bo, acting_watch_captain, may_11_to_may_20).",
+        "holds_role(cy, acting_watch_captain, june_1_to_june_10).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["holds_role/3"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "role_window_filter",
+                    "purpose": "Filter admitted role rows by a proposed interval list.",
+                    "query_templates": [
+                        "holds_role(Person, acting_watch_captain, TimePeriod), "
+                        "member(TimePeriod, [may_1_to_may_10, may_11_to_may_20])."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "single_goal_post_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {
+            "BoundArg2": "acting_watch_captain",
+            "BoundArg2Display": "acting watch captain",
+            "Person": "ana",
+            "TimePeriod": "may_1_to_may_10",
+        },
+        {
+            "BoundArg2": "acting_watch_captain",
+            "BoundArg2Display": "acting watch captain",
+            "Person": "bo",
+            "TimePeriod": "may_11_to_may_20",
+        },
+    ]
+
+
+def test_evidence_bundle_plan_repairs_single_goal_concat_contains_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "claim_made_by(claim_1, witness_a, blue_crate_not_abandoned).",
+        "claim_made_by(claim_2, witness_b, red_crate_abandoned).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["claim_made_by/3"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "claim_text_filter",
+                    "purpose": "Filter admitted claim rows by a contains-like concat expression.",
+                    "query_templates": [
+                        "claim_made_by(ClaimId, Person, ClaimText), "
+                        "string_concat(_, 'not_abandoned', ClaimText)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "single_goal_post_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"ClaimId": "claim_1", "ClaimText": "blue_crate_not_abandoned", "Person": "witness_a"}
+    ]
+
+
 def test_evidence_bundle_plan_does_not_repair_unbound_source_text_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact("source_record_text_atom(src_1, threshold_and_appeal_window).").get("status") == "success"
