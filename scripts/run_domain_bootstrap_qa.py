@@ -2228,13 +2228,13 @@ def run_query_plan(
     for query in queries:
         effective_query = query
         used_relaxed_fallback = False
-        source_text_filter = _source_text_memberchk_repair(query)
-        if source_text_filter:
+        source_record_filter = _source_record_contains_filter_repair(query)
+        if source_record_filter:
             results.append(
-                _run_source_text_contains_filter(
+                _run_source_record_contains_filter(
                     runtime=runtime,
                     original_query=query,
-                    filter_spec=source_text_filter,
+                    filter_spec=source_record_filter,
                     bundle_id="question_token_source_text_hint",
                     purpose="Retrieve deterministic source text rows matching salient tokens already present in the question.",
                     helper_companions_enabled=helper_companions_enabled,
@@ -13333,13 +13333,13 @@ def run_evidence_bundle_plan_queries(
             if not query or query in seen:
                 continue
             seen.add(query)
-            source_text_filter = _source_text_memberchk_repair(query)
-            if source_text_filter:
+            source_record_filter = _source_record_contains_filter_repair(query)
+            if source_record_filter:
                 results.append(
-                    _run_source_text_contains_filter(
+                    _run_source_record_contains_filter(
                         runtime=runtime,
                         original_query=query,
-                        filter_spec=source_text_filter,
+                        filter_spec=source_record_filter,
                         bundle_id=bundle_id,
                         purpose=purpose,
                         helper_companions_enabled=helper_companions_enabled,
@@ -13538,7 +13538,16 @@ def _parse_simple_equality_goal(text: str) -> tuple[str, str] | None:
     return left, right
 
 
-def _source_text_memberchk_repair(query: str) -> dict[str, Any] | None:
+SOURCE_RECORD_CONTAINS_FILTER_PREDICATES = {
+    "source_record_text_atom",
+    "source_record_field",
+    "source_record_label",
+    "source_record_section",
+    "source_record_text_key",
+}
+
+
+def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
     text = str(query or "").strip()
     parts = split_top_level_args(text.rstrip(". "))
     if len(parts) < 2:
@@ -13547,27 +13556,43 @@ def _source_text_memberchk_repair(query: str) -> dict[str, Any] | None:
     if parsed is None:
         return None
     predicate, args = parsed
-    if predicate != "source_record_text_atom" or len(args) != 2:
+    if predicate not in SOURCE_RECORD_CONTAINS_FILTER_PREDICATES:
         return None
-    line_var, text_var = args
-    if not line_var[:1].isupper() or not text_var[:1].isupper():
+    target_vars = [arg for arg in args if _is_prolog_variable(arg)]
+    if not target_vars:
         return None
+    matched_var = ""
     needles: list[str] = []
     for part in parts[1:]:
-        needle = _source_text_contains_filter_needle(part, text_var)
-        if not needle:
+        matched: tuple[str, str] | None = None
+        for target_var in target_vars:
+            needle = _source_text_contains_filter_needle(part, target_var)
+            if needle:
+                matched = (target_var, needle)
+                break
+        if matched is None:
             return None
+        target_var, needle = matched
+        if matched_var and matched_var != target_var:
+            return None
+        matched_var = target_var
         needles.append(needle)
     needles = _ordered_atom_unique(needles)
-    if not needles:
+    if not matched_var or not needles:
         return None
-    return {"line_var": line_var, "text_var": text_var, "needle": needles[0], "needles": needles}
+    return {
+        "predicate": predicate,
+        "args": args,
+        "text_var": matched_var,
+        "needle": needles[0],
+        "needles": needles,
+    }
 
 
 def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
     variable_pattern = re.escape(str(text_var or ""))
     member_match = re.fullmatch(
-        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\))\s*\)\s*\.?\s*",
+        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}\s*\)|string_list\(\s*{variable_pattern}\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
         str(goal or ""),
     )
     if member_match:
@@ -13588,7 +13613,7 @@ def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
 
 
 
-def _run_source_text_contains_filter(
+def _run_source_record_contains_filter(
     *,
     runtime: CorePrologRuntime,
     original_query: str,
@@ -13598,14 +13623,15 @@ def _run_source_text_contains_filter(
     helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = True,
 ) -> dict[str, Any]:
-    line_var = filter_spec["line_var"]
+    predicate = str(filter_spec["predicate"])
+    args = [str(arg) for arg in filter_spec["args"]]
     text_var = filter_spec["text_var"]
     needles = [
         _normalize_text_filter_atom(str(item))
         for item in filter_spec.get("needles", [filter_spec.get("needle", "")])
         if _normalize_text_filter_atom(str(item))
     ]
-    repaired_query = f"source_record_text_atom({line_var}, {text_var})."
+    repaired_query = format_prolog_query_goals([(predicate, args)])
     item = run_query_plan(
         runtime,
         [repaired_query],
@@ -13625,17 +13651,21 @@ def _run_source_text_contains_filter(
         "query": original_query,
         "result": {
             "status": "success",
-            "predicate": "source_record_text_atom",
+            "predicate": predicate,
             "prolog_query": repaired_query,
             "result_type": "table",
-            "variables": [line_var, text_var],
+            "variables": result.get("variables", []) if isinstance(result, dict) else [],
             "num_rows": len(filtered_rows),
             "rows": filtered_rows,
             "reasoning_basis": {
                 "kind": "evidence-bundle-plan",
                 "bundle_id": bundle_id,
                 "purpose": purpose,
-                "validation": "source_text_contains_filter_repaired",
+                "validation": (
+                    "source_text_contains_filter_repaired"
+                    if predicate == "source_record_text_atom"
+                    else "source_record_contains_filter_repaired"
+                ),
                 "original_query": original_query,
                 "repaired_query": repaired_query,
                 "contains_needles": needles,

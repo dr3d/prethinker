@@ -725,6 +725,71 @@ def test_evidence_bundle_plan_repairs_source_text_string_contains_filter() -> No
     ]
 
 
+def test_evidence_bundle_plan_repairs_source_record_field_contains_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_1, disposition, salt_debt_pending).",
+        "source_record_field(src_2, disposition, salt_debt_repaid_by_receipt).",
+        "source_record_field(src_3, disposition, tool_debt_repaid_by_receipt).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_field/3"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_field_contains",
+                    "purpose": "Find source-record field values containing both requested normalized phrases.",
+                    "query_templates": [
+                        "source_record_field(Line, Field, Value), "
+                        "string_contains(Value, 'salt'), "
+                        "string_contains(Value, 'repaid')."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_record_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"Field": "disposition", "Line": "src_2", "Value": "salt_debt_repaid_by_receipt"}
+    ]
+
+
+def test_evidence_bundle_plan_repairs_source_record_label_memberchk_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_label(src_1, ordinary_notice).",
+        "source_record_label(src_2, formal_compliance_determination).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_label/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_label_contains",
+                    "purpose": "Find source-record labels containing a requested normalized phrase.",
+                    "query_templates": [
+                        "source_record_label(Line, Label), memberchk(formal_compliance, split_atom(Label))."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_record_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"Label": "formal_compliance_determination", "Line": "src_2"}
+    ]
+
+
 def test_evidence_bundle_plan_does_not_repair_unbound_source_text_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact("source_record_text_atom(src_1, threshold_and_appeal_window).").get("status") == "success"

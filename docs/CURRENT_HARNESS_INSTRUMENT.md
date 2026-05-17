@@ -300,6 +300,13 @@ Recent transfer work supports the current direction:
   stayed helper-free and moved two fixtures up by +5 exact combined, while two
   fixtures showed no net score movement and normal stochastic row flips; treat
   this as routing validation, not a stamped baseline.
+- The same bounded filter pattern now covers source-record labels, sections,
+  text keys, and fields when the query first binds one deterministic
+  `source_record_*` surface and then filters a returned variable. Local replay
+  found this is a smaller hygiene layer than source text: 27 newly executable
+  templates, 13 with hits, and 2 on non-exact rows. It is useful for avoiding
+  rejected ledger-column filters, but it is not expected to move the native
+  score materially by itself.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
