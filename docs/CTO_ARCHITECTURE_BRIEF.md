@@ -11,7 +11,7 @@ as the current operating doctrine, not as a research diary.
 LLM proposes.
 Mapper admits.
 KB remembers.
-Helpers compose.
+Ledgers pin source coordinates.
 Selector chooses.
 Answer reports only what support allows.
 ```
@@ -31,8 +31,8 @@ state while preserving the authority boundary.
   quarantine, and diagnostics.
 - The Prolog KB is the durable truth layer.
 - Compiled KB packages are the source-document product: admitted `world.pl`,
-  admitted `epistemic.pl`, helper surfaces, manifests, and non-truth
-  diagnostics.
+  admitted `epistemic.pl`, deterministic ledgers, direct query surfaces,
+  manifests, and non-truth diagnostics.
 - Rows are measurements against frozen artifacts. Rows are not truth.
 
 ## Architecture Map
@@ -44,19 +44,21 @@ source or utterance
   -> deterministic mapper admission
   -> KB mutation, query, clarification, quarantine, or rejection
   -> compiled package / trace / ledger
-  -> row-level QA, selectors, helpers, and guards over frozen state
+  -> row-level QA, selectors, direct surfaces, ledgers, and guards over frozen state
 ```
 
-## Lenses, Ledgers, Helpers, Guards
+## Lenses, Ledgers, Surfaces, Guards
 
 - **Lenses** are model-owned reading strategies. No one lens should do every
   job.
 - **Deterministic ledgers** preserve exact source addressability: IDs, row
   labels, table cells, section names, docket IDs, packet names, and numeric
   tokens. They are substrate, not interpretation.
-- **Helpers** compose admitted facts into reusable counts, intervals, joins,
-  and derived support. They must not read prose or silently choose ambiguous
-  scope.
+- **Direct surfaces** are admitted predicates and deterministic ledger facts
+  that make recurring roles, statuses, quantities, transitions, and authority
+  envelopes queryable without query-time compatibility bridges.
+- **Legacy helper adapters** are forensic replay tools. They are not the
+  preferred repair path.
 - **Selectors** choose the best encounter surface for a question.
 - **Guards** prevent tempting but wrong selector choices. Treat them as
   sensors and bandages, not the desired final architecture.
@@ -100,8 +102,8 @@ people, local organizations, or story nouns, it is probably not architecture
 yet.
 
 Retire a guard only when its replacement is a reusable substrate, compile
-surface, helper, predicate contract, or scoring principle, and replay proves no
-regression on the birth row plus unlike rows.
+surface, deterministic ledger, predicate contract, or scoring principle, and
+replay proves no regression on the birth row plus unlike rows.
 
 The remaining active guards should be treated as source-fidelity,
 baseline-arbitration, or legitimate singleton-sentinel pressure unless a new
@@ -154,8 +156,8 @@ The seed measurement is the 2026-05-12 wide OpenRouter corpus run:
   questions;
 - exact rate was `0.8276`;
 - runtime load errors and write proposal rows were both `0`;
-- helper pressure was `2877` rows, `2.854` rows per exact answer, and
-  `0.1585` candidate-helper share;
+- legacy helper pressure was `2877` rows, `2.854` rows per exact answer, and
+  `0.1585` candidate-helper share in that historical measurement;
 - the 210 not-exact rows are boundary coordinates, not permission for
   fixture-specific tuning.
 
@@ -163,13 +165,13 @@ Start with class-level boundary work:
 
 1. Classify not-exact rows by fixture-free failure geometry, especially
    compile-surface, hybrid-join, query-surface, answer-surface, source-fidelity,
-   helper-volume, and judge-ambiguity pressure.
+   legacy-adapter volume, and judge-ambiguity pressure.
 2. Design small probe fixtures that isolate one tricky axis at a time.
 3. Repair only when the replacement can be stated without fixture names, row
    ids, question ids, answer strings, local people, local organizations, or
    story nouns.
-4. Replay on unlike rows before promoting any helper, predicate, query-plan, or
-   selector principle.
+4. Replay on unlike rows before promoting any direct surface, predicate,
+   deterministic ledger, query plan, or selector principle.
 
 ## Repo Hygiene
 
@@ -193,4 +195,5 @@ Each entry should capture the date, the changed surface, the measured result,
 the artifact path when useful, the tests run, and the architecture lesson. It
 must also show trajectory: the prior pressure, the intervention, the new
 measurement, and the next pressure. Do not journal story nouns as architecture;
-phrase the lesson at the reusable substrate, selector, helper, or ledger level.
+phrase the lesson at the reusable substrate, direct-surface, selector, or
+ledger level.

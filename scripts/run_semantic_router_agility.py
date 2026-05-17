@@ -14,7 +14,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.run_mixed_domain_agility import build_mixed_cases  # noqa: E402
-from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases  # noqa: E402
+from scripts.run_semantic_ir_stress_sweep import load_frontier_pack_cases  # noqa: E402
 from src.domain_profiles import (  # noqa: E402
     load_domain_profile_catalog,
     load_profile_package,
@@ -320,7 +320,7 @@ def _load_requested_cases(args: argparse.Namespace) -> list[dict[str, Any]]:
         return build_mixed_cases()
     path = Path(args.frontier_pack)
     cases = [
-        _router_case_from_lava(case)
+        _router_case_from_stress_case(case)
         for case in load_frontier_pack_cases(path.parent)
         if case.source.endswith(path.stem)
     ]
@@ -337,7 +337,7 @@ def _load_requested_cases(args: argparse.Namespace) -> list[dict[str, Any]]:
     return cases
 
 
-def _router_case_from_lava(case: Any) -> dict[str, Any]:
+def _router_case_from_stress_case(case: Any) -> dict[str, Any]:
     return {
         "id": str(case.id),
         "source": str(case.source),

@@ -235,8 +235,6 @@ def area_for(path: Path) -> str:
         return "active_code"
     if rel.startswith("tests/"):
         return "tests"
-    if rel.startswith("docs/data/"):
-        return "artifact_data"
     if rel.startswith("docs/") and rel.endswith("WORKSHEET.md"):
         return "worksheet"
     if rel.startswith("docs/"):

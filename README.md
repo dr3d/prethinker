@@ -60,9 +60,11 @@ are the rumble strips that stop tempting but wrong surfaces from winning.
 
 The newest hard problem is no longer "can we add another lens?" It is where
 the current semantic interior gets blurry on unlike source shapes. Guard
-compression is archived; boundary hunt is active. The current work separates
-compile-surface gaps from selector, query, answer-surface, and legacy adapter gaps, then
-extends the system only with generic repairs that survive replay on unlike rows.
+compression is archived; boundary probing, no-helper compile-surface
+stability, lens audits, and instrument stamping are the active work. The
+current cycle separates compile-surface gaps from selector, query,
+answer-surface, and legacy adapter gaps, then extends the system only with
+generic repairs that survive replay on unlike rows.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
@@ -166,7 +168,7 @@ Current high-signal evidence:
 - Selector guard family rollup: `5` active guard return sites, `5` unique reasons, `4` semantic families, `0` unclassified reasons. Detailed retired/scar ledger output is generated under `tmp` when needed.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
-- Historical Lava stress packs and detailed research worksheets were retired
+- Historical mixed-domain stress packs and detailed research worksheets were retired
   from the public docs tree; Git history and the local cold archive preserve
   calibration evidence, while the current frontier is summarized in compact
   orientation docs.

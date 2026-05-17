@@ -55,8 +55,9 @@ Date: 2026-05-10
 
 Evidence lane: `candidate_helper_replay`
 
-Helper class: `candidate-helper` under
-`docs/ARTIFACT_UNIT_AND_HELPER_CLASSIFICATION.md`.
+Helper class: historical `candidate-helper`. The detailed helper-era
+classification note has been retired from the public docs tree; Git history and
+the cold archive preserve it.
 
 Artifacts:
 

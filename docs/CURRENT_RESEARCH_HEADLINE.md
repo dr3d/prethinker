@@ -52,15 +52,15 @@ Recent cold fixture work showed why:
 
 The useful candidates now include source-period/deadline scaffolds, evidence
 provenance surfaces, planning/staff-report surfaces, board-recusal conflict
-surface, lease financial-correction surface, deadline/status helpers,
-classification conversion conservation helpers, and the newest incoming-six
-row shapes: source lists, last-confirmed-at, unresolved authority-question
-answer surfaces, rejected-version planning state, and procedural date-event
-anchors. The newest dense-record candidate is `archival_row_ledger_v1`, which
-preserves printed source labels, exhibit IDs, catalog IDs, docket IDs, system
-names, and row addresses as first-class answer surfaces. Some candidates are
-live helpers. Some are temporary registry scaffolds. Most are row-gated until
-transfer proves them.
+surfaces, lease financial-correction surfaces, status intervals,
+classification conversion conservation, and the newest incoming-six row
+shapes: source lists, last-confirmed-at, unresolved authority-question answer
+surfaces, rejected-version planning state, and procedural date-event anchors.
+The newest dense-record candidate is `archival_row_ledger_v1`, which preserves
+printed source labels, exhibit IDs, catalog IDs, docket IDs, system names, and
+row addresses as first-class answer surfaces. Some candidates are direct
+admitted surfaces. Some are temporary registry scaffolds. Most are row-gated
+until transfer proves them.
 
 Guard compression and detailed hunt notebooks are archived; boundary probing is
 active. The latest wide corpus
@@ -103,7 +103,8 @@ Current discipline:
 - distrust a guard that only names a fixture;
 - merge guards before parameterizing them;
 - never hide guard growth inside a parameter bag or private enum table;
-- retire guards when better compile or helper surfaces make them unnecessary;
+- retire guards when better compile surfaces or deterministic ledgers make
+  them unnecessary;
 - replay the rows that gave birth to a guard before merging or deleting it.
 
 Parameterization can wait. The project is still discovering the shape of the
@@ -120,12 +121,12 @@ to hold.
 2. **Promote only transfer-backed surfaces.** A registry scaffold may earn a
    candidate slot after one fixture; it earns a roster slot only after unlike
    transfer and exact-row protection.
-3. **Retire helpers through compile-surface proof.** Temporal slots, deadline
-   families, status intervals, classification conversions, quantity
-   conservation, and financial corrections are helper candidates only when
-   they compose admitted rows. Native adapters that merely bridge legacy source
-   shapes should be quarantined unless the compiler emits the direct surface
-   they point toward.
+3. **Retire helper-era adapters through compile-surface proof.** Temporal
+   slots, deadline families, status intervals, classification conversions,
+   quantity conservation, and financial corrections belong in direct admitted
+   surfaces or deterministic ledgers. Native adapters that merely bridge legacy
+   source shapes should be quarantined unless the compiler emits the direct
+   surface they point toward.
 4. **Run the boundary hunt.** Classify not-exact rows by fixture-free failure
    geometry, design small probes around one axis at a time, and promote only
    repairs that replay on unlike rows.
@@ -141,7 +142,7 @@ to hold.
 - Do not call a selector policy promoted because it matches an oracle overlay.
 - Do not let guard count shrink cosmetically by hiding enumerations inside a
   parameterized family.
-- Do not revive historical Lava-style calibration as the active frontier. Keep
+- Do not revive historical mixed-domain calibration as the active frontier. Keep
   it as useful history, not the center of the story.
 
 ## Read Next

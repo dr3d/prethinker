@@ -23,7 +23,7 @@ CHECK_FILES = [
     "src/semantic_ir.py",
     "src/semantic_router.py",
     "src/mcp_server.py",
-    "scripts/run_semantic_ir_lava_sweep.py",
+    "scripts/run_semantic_ir_stress_sweep.py",
     "scripts/run_semantic_router_agility.py",
     "scripts/run_domain_bootstrap_file.py",
 ]

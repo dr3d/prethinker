@@ -95,7 +95,8 @@ truth-maintenance dependency depth, and safe partial-operation handling.
 
 4. **Noisy and multilingual semantic pressure**
    - Keep Silverton, Harbor, story-world, and raw-document lanes hard.
-   - Preserve Lava packs as historical calibration data, not the active frontier.
+   - Preserve historical mixed-domain calibration packs in Git history, not as
+     the active frontier.
    - Add small batteries for typos, code-switching, foreign fragments, and
      ambiguous initials/pronouns.
    - Score semantic preservation separately from final admission policy.

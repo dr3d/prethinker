@@ -8,10 +8,10 @@ from scripts.run_semantic_router_agility import (
     _known_profile_or_general,
     _profile_predicate_index,
     _router_diagnostics,
-    _router_case_from_lava,
+    _router_case_from_stress_case,
     _router_requests_bootstrap,
 )
-from scripts.run_semantic_ir_lava_sweep import LavaCase
+from scripts.run_semantic_ir_stress_sweep import StressCase
 from scripts.run_multilingual_semantic_ir_probe import MULTILINGUAL_CASES
 from src.domain_profiles import load_domain_profile_catalog, thin_profile_roster
 from src.semantic_router import (
@@ -221,19 +221,19 @@ def test_multilingual_probe_covers_profiles_without_python_translation_layer():
     assert all("utterance" in row and row["utterance"] for row in MULTILINGUAL_CASES)
 
 
-def test_router_agility_can_project_lava_case_shape():
-    case = LavaCase(
-        id="lava2_probe",
-        source="frontier:semantic_ir_lava_pack_v2",
+def test_router_agility_can_project_stress_case_shape():
+    case = StressCase(
+        id="stress_probe",
+        source="frontier:semantic_ir_stress_v2",
         utterance="Priya toma warfarina.",
         context=("Known patient: Priya.",),
         expected_profile="medical@v0",
     )
 
-    row = _router_case_from_lava(case)
+    row = _router_case_from_stress_case(case)
 
-    assert row["id"] == "lava2_probe"
-    assert row["source"] == "frontier:semantic_ir_lava_pack_v2"
+    assert row["id"] == "stress_probe"
+    assert row["source"] == "frontier:semantic_ir_stress_v2"
     assert row["expected_profile"] == "medical@v0"
     assert row["context"] == ["Known patient: Priya."]
 

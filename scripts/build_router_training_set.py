@@ -12,10 +12,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.run_mixed_domain_agility import build_mixed_cases  # noqa: E402
 from scripts.run_multilingual_semantic_ir_probe import MULTILINGUAL_CASES  # noqa: E402
-from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases  # noqa: E402
-
-
-DEFAULT_OUT = REPO_ROOT / "docs" / "data" / "router_training" / "router_training_seed_v1.jsonl"
+DEFAULT_OUT = REPO_ROOT / "tmp" / "router_training" / "router_training_seed_v1.jsonl"
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,20 +35,6 @@ def main() -> int:
 
 def build_router_training_rows() -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
-    for case in load_frontier_pack_cases(REPO_ROOT / "docs" / "data" / "frontier_packs"):
-        if not case.expected_profile:
-            continue
-        rows.append(
-            _row(
-                row_id=case.id,
-                source=case.source,
-                utterance=case.utterance,
-                context=list(case.context),
-                expected_profile=case.expected_profile,
-                expected_decision=case.expected_decision,
-                labels={"frontier_pack": case.source.split(":", 1)[-1]},
-            )
-        )
     for item in MULTILINGUAL_CASES:
         rows.append(
             _row(

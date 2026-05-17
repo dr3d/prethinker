@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a broad Semantic IR "lava" sweep across mixed scenario sources.
+"""Run a broad Semantic IR stress sweep across mixed scenario sources.
 
 This is a research harness, not a locked regression suite. It tries to make the
 Semantic IR compiler uncomfortable by mixing domains, carrying KB state through
@@ -31,8 +31,8 @@ from src.mcp_server import PrologMCPServer  # noqa: E402
 from src.semantic_ir import semantic_ir_to_legacy_parse  # noqa: E402
 
 
-DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "semantic_ir_lava_sweep"
-DEFAULT_FRONTIER_PACK_DIR = REPO_ROOT / "docs" / "data" / "frontier_packs"
+DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "semantic_ir_stress_sweep"
+DEFAULT_FRONTIER_PACK_DIR = REPO_ROOT / "tmp" / "frontier_packs"
 DEFAULT_DATASET_GLOBS = (
     "datasets/courtlistener/samples/*.jsonl",
     "datasets/courtlistener/generated/*.jsonl",
@@ -47,7 +47,7 @@ DEFAULT_KB_SCENARIO_GLOBS = (
 
 
 @dataclass(frozen=True)
-class LavaCase:
+class StressCase:
     id: str
     source: str
     utterance: str
@@ -60,7 +60,7 @@ class LavaCase:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Hammer Semantic IR with a broad mixed-domain lava sweep.")
+    parser = argparse.ArgumentParser(description="Hammer Semantic IR with a broad mixed-domain stress sweep.")
     parser.add_argument("--limit", type=int, default=48, help="Maximum base cases before variants/repeats.")
     parser.add_argument("--repeats", type=int, default=2, help="Repeated temp-0 passes used for variance checks.")
     parser.add_argument(
@@ -86,7 +86,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--source-filter",
         default="",
-        help="Optional case-insensitive substring filter applied to LavaCase.source or id before sampling.",
+        help="Optional case-insensitive substring filter applied to StressCase.source or id before sampling.",
     )
     parser.add_argument(
         "--execute-queries",
@@ -111,20 +111,20 @@ def main() -> int:
     rng = random.Random(int(args.seed))
     variants = [item.strip() for item in str(args.variants).split(",") if item.strip()]
     top_p_values = [float(item.strip()) for item in str(args.top_p_values).split(",") if item.strip()]
-    loaded_cases = filter_lava_cases(
-        load_lava_cases(include_tmp=bool(args.include_tmp)),
+    loaded_cases = filter_stress_cases(
+        load_stress_cases(include_tmp=bool(args.include_tmp)),
         source_filter=str(args.source_filter or ""),
     )
     if not loaded_cases:
-        raise SystemExit(f"No lava cases matched source filter: {args.source_filter!r}")
+        raise SystemExit(f"No stress cases matched source filter: {args.source_filter!r}")
     base_cases = select_base_cases(loaded_cases, limit=int(args.limit), mode=str(args.sample_mode), rng=rng)
     stream = expand_variants(base_cases, variants=variants, rng=rng)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     slug_model = _slug(args.model or ("qwen/qwen3.6-35b-a3b" if args.backend == "lmstudio" else "qwen3.6:35b"))
-    out_jsonl = out_dir / f"semantic_ir_lava_sweep_{stamp}_{slug_model}.jsonl"
-    out_md = out_dir / f"semantic_ir_lava_sweep_{stamp}_{slug_model}.md"
+    out_jsonl = out_dir / f"semantic_ir_stress_sweep_{stamp}_{slug_model}.jsonl"
+    out_md = out_dir / f"semantic_ir_stress_sweep_{stamp}_{slug_model}.md"
 
     all_records: list[dict[str, Any]] = []
     for top_p in top_p_values:
@@ -192,7 +192,7 @@ def make_server(args: argparse.Namespace, *, top_p: float) -> PrologMCPServer:
 def run_case(
     server: PrologMCPServer,
     *,
-    case: LavaCase,
+    case: StressCase,
     index: int,
     repeat: int,
     top_p: float,
@@ -310,8 +310,8 @@ def run_case(
     return record
 
 
-def load_lava_cases(*, include_tmp: bool = False) -> list[LavaCase]:
-    cases: list[LavaCase] = []
+def load_stress_cases(*, include_tmp: bool = False) -> list[StressCase]:
+    cases: list[StressCase] = []
     for row in build_mixed_cases():
         cases.append(case_from_mapping(row, source=str(row.get("source") or "mixed")))
     cases.extend(load_frontier_pack_cases(DEFAULT_FRONTIER_PACK_DIR))
@@ -376,7 +376,7 @@ def apply_mapped_directly(
                     result={
                         "status": "skipped",
                         "result_type": "query_execution_disabled",
-                        "message": "Lava sweep recorded the query but did not execute it.",
+                        "message": "Stress sweep recorded the query but did not execute it.",
                     },
                 )
     elif not operations:
@@ -390,21 +390,21 @@ def apply_mapped_directly(
     }
 
 
-def select_base_cases(cases: list[LavaCase], *, limit: int, mode: str, rng: random.Random) -> list[LavaCase]:
+def select_base_cases(cases: list[StressCase], *, limit: int, mode: str, rng: random.Random) -> list[StressCase]:
     rows = list(cases)
     rng.shuffle(rows)
     if limit <= 0 or limit >= len(rows):
         return rows
     if mode != "balanced":
         return rows[:limit]
-    buckets: dict[str, list[LavaCase]] = defaultdict(list)
+    buckets: dict[str, list[StressCase]] = defaultdict(list)
     for case in rows:
         buckets[source_family(case.source)].append(case)
     for bucket in buckets.values():
         rng.shuffle(bucket)
     families = sorted(buckets)
     rng.shuffle(families)
-    picked: list[LavaCase] = []
+    picked: list[StressCase] = []
     while len(picked) < limit and any(buckets.values()):
         for family in list(families):
             if len(picked) >= limit:
@@ -415,7 +415,7 @@ def select_base_cases(cases: list[LavaCase], *, limit: int, mode: str, rng: rand
     return picked
 
 
-def filter_lava_cases(cases: list[LavaCase], *, source_filter: str = "") -> list[LavaCase]:
+def filter_stress_cases(cases: list[StressCase], *, source_filter: str = "") -> list[StressCase]:
     needle = str(source_filter or "").strip().lower()
     if not needle:
         return list(cases)
@@ -444,10 +444,10 @@ def source_family(source: str) -> str:
     return raw
 
 
-def case_from_mapping(row: dict[str, Any], *, source: str = "") -> LavaCase:
+def case_from_mapping(row: dict[str, Any], *, source: str = "") -> StressCase:
     expect = row.get("expect") if isinstance(row.get("expect"), dict) else {}
     expected_decision = str(row.get("expected_decision") or expect.get("decision") or "")
-    return LavaCase(
+    return StressCase(
         id=str(row.get("id") or _short_hash(str(row.get("utterance") or ""))),
         source=source or str(row.get("source") or row.get("domain") or "unknown"),
         utterance=str(row.get("utterance") or ""),
@@ -460,8 +460,8 @@ def case_from_mapping(row: dict[str, Any], *, source: str = "") -> LavaCase:
     )
 
 
-def load_frontier_pack_cases(root: Path) -> list[LavaCase]:
-    out: list[LavaCase] = []
+def load_frontier_pack_cases(root: Path) -> list[StressCase]:
+    out: list[StressCase] = []
     if not root.exists():
         return out
     for path in sorted(root.glob("*.json")):
@@ -482,8 +482,8 @@ def load_frontier_pack_cases(root: Path) -> list[LavaCase]:
     return out
 
 
-def load_jsonl_cases(pattern: Path) -> list[LavaCase]:
-    out: list[LavaCase] = []
+def load_jsonl_cases(pattern: Path) -> list[StressCase]:
+    out: list[StressCase] = []
     for path in sorted(pattern.parent.glob(pattern.name)):
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
@@ -503,8 +503,8 @@ def load_jsonl_cases(pattern: Path) -> list[LavaCase]:
     return out
 
 
-def load_kb_scenario_cases(pattern: Path) -> list[LavaCase]:
-    out: list[LavaCase] = []
+def load_kb_scenario_cases(pattern: Path) -> list[StressCase]:
+    out: list[StressCase] = []
     for path in sorted(pattern.parent.glob(pattern.name)):
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
@@ -521,13 +521,13 @@ def load_kb_scenario_cases(pattern: Path) -> list[LavaCase]:
             if not utterance:
                 continue
             if len(utterance) > 1800:
-                # Full stories are useful, but for lava sweeps the long-form path
+                # Full stories are useful, but for stress sweeps the long-form path
                 # belongs in dedicated full-story runners.
                 utterance = utterance[:1800].rsplit(" ", 1)[0] + " ..."
             case_id = f"{path.stem}_turn_{idx:03d}"
             profile = profile_for_scenario_name(path.stem, utterance)
             out.append(
-                LavaCase(
+                StressCase(
                     id=case_id,
                     source=f"kb_scenario:{path.stem}",
                     utterance=utterance,
@@ -540,15 +540,15 @@ def load_kb_scenario_cases(pattern: Path) -> list[LavaCase]:
     return out
 
 
-def expand_variants(cases: list[LavaCase], *, variants: list[str], rng: random.Random) -> list[LavaCase]:
-    out: list[LavaCase] = []
+def expand_variants(cases: list[StressCase], *, variants: list[str], rng: random.Random) -> list[StressCase]:
+    out: list[StressCase] = []
     for case in cases:
         for variant in variants:
             out.append(variant_case(case, variant=variant, rng=rng))
     return out
 
 
-def variant_case(case: LavaCase, *, variant: str, rng: random.Random) -> LavaCase:
+def variant_case(case: StressCase, *, variant: str, rng: random.Random) -> StressCase:
     variant = variant.strip().lower() or "original"
     if variant == "original":
         utterance = case.utterance
@@ -575,7 +575,7 @@ def variant_case(case: LavaCase, *, variant: str, rng: random.Random) -> LavaCas
         context = list(case.context)
     expect = dict(case.expect or {})
     expect["variant"] = variant
-    return LavaCase(
+    return StressCase(
         id=f"{case.id}__{variant}",
         source=case.source,
         utterance=utterance,
@@ -653,8 +653,8 @@ def profile_for_scenario_name(name: str, utterance: str) -> str:
     return ""
 
 
-def dedupe_cases(cases: Iterable[LavaCase]) -> list[LavaCase]:
-    out: list[LavaCase] = []
+def dedupe_cases(cases: Iterable[StressCase]) -> list[StressCase]:
+    out: list[StressCase] = []
     seen: set[str] = set()
     for case in cases:
         if not case.utterance.strip():
@@ -667,7 +667,7 @@ def dedupe_cases(cases: Iterable[LavaCase]) -> list[LavaCase]:
     return out
 
 
-def score_expectation(case: LavaCase, record: dict[str, Any], *, ir: dict[str, Any]) -> dict[str, Any]:
+def score_expectation(case: StressCase, record: dict[str, Any], *, ir: dict[str, Any]) -> dict[str, Any]:
     expect = case.expect or {}
     diagnostic_text = json.dumps(
         {
@@ -841,7 +841,7 @@ def summarize_records(
     )[:12]
     unstable_examples = list(unstable.items())[:12]
     lines = [
-        "# Semantic IR Lava Sweep",
+        "# Semantic IR Stress Sweep",
         "",
         f"- Generated: {_utc_now()}",
         f"- Base cases: {base_case_count}",

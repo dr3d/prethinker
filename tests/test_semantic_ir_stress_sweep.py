@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from scripts.run_semantic_ir_lava_sweep import apply_mapped_directly, filter_lava_cases, load_lava_cases, score_expectation, select_base_cases
-from scripts.run_semantic_ir_lava_sweep import load_frontier_pack_cases
-from scripts.run_semantic_ir_lava_sweep import LavaCase
+from scripts.run_semantic_ir_stress_sweep import apply_mapped_directly, filter_stress_cases, load_stress_cases, score_expectation, select_base_cases
+from scripts.run_semantic_ir_stress_sweep import load_frontier_pack_cases
+from scripts.run_semantic_ir_stress_sweep import StressCase
 from src.mcp_server import PrologMCPServer
 
 
-def test_lava_direct_apply_records_but_skips_queries_by_default():
+def test_stress_direct_apply_records_but_skips_queries_by_default():
     server = PrologMCPServer()
     mapped = {
         "intent": "query",
@@ -30,16 +30,16 @@ def test_lava_direct_apply_records_but_skips_queries_by_default():
     assert server.query_rows("ancestor(noel, rhea).")["status"] == "success"
 
 
-def test_lava_balanced_sampling_spreads_source_families():
+def test_stress_balanced_sampling_spreads_source_families():
     cases = [
-        LavaCase(id=f"legacy_{i}", source="kb_scenario:legacy_many", utterance=f"legacy case {i}")
+        StressCase(id=f"legacy_{i}", source="kb_scenario:legacy_many", utterance=f"legacy case {i}")
         for i in range(12)
     ]
     cases.extend(
         [
-            LavaCase(id="medical", source="medical", utterance="Mara's pressure is high."),
-            LavaCase(id="legal", source="dataset:legal_seed", utterance="Court held X."),
-            LavaCase(id="story", source="goldilocks", utterance="Goldilocks found porridge."),
+            StressCase(id="medical", source="medical", utterance="Mara's pressure is high."),
+            StressCase(id="legal", source="dataset:legal_seed", utterance="Court held X."),
+            StressCase(id="story", source="goldilocks", utterance="Goldilocks found porridge."),
         ]
     )
 
@@ -52,113 +52,38 @@ def test_lava_balanced_sampling_spreads_source_families():
     assert {"medical", "dataset", "goldilocks"} <= sources
 
 
-def test_remaining_kb_scenarios_are_mined_by_lava_sweep():
+def test_remaining_kb_scenarios_are_mined_by_stress_sweep():
     from pathlib import Path
 
     scenario_files = {path.stem for path in Path("kb_scenarios").glob("*.json")}
     loaded_sources = {
         case.source.split(":", 1)[1]
-        for case in load_lava_cases(include_tmp=False)
+        for case in load_stress_cases(include_tmp=False)
         if case.source.startswith("kb_scenario:")
     }
 
     assert scenario_files <= loaded_sources
 
 
-def test_lava_pack_v2_loads_with_expected_profile_coverage():
+def test_missing_frontier_pack_dir_is_empty():
     from pathlib import Path
 
+    assert load_frontier_pack_cases(Path("missing/frontier_packs")) == []
+
+
+def test_stress_source_filter_matches_source_or_id():
     cases = [
-        case
-        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
-        if case.source.endswith("semantic_ir_lava_pack_v2")
-    ]
-    profiles = {case.expected_profile for case in cases}
-
-    assert len(cases) == 36
-    assert {
-        "medical@v0",
-        "legal_courtlistener@v0",
-        "sec_contracts@v0",
-        "story_world@v0",
-        "probate@v0",
-    } <= profiles
-    assert all(case.expect and case.expect.get("must") for case in cases)
-
-
-def test_lava_pack_v3_records_calibration_status_with_bootstrap_pressure():
-    import json
-    from pathlib import Path
-
-    path = Path("docs/data/frontier_packs/semantic_ir_lava_pack_v3.json")
-    metadata = json.loads(path.read_text(encoding="utf-8"))
-    cases = [
-        case
-        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
-        if case.source.endswith("semantic_ir_lava_pack_v3")
-    ]
-    profiles = {case.expected_profile for case in cases}
-
-    assert metadata["status"] == "calibration_after_first_held_out_run"
-    assert "First held-out result" in metadata["validation_note"]
-    assert len(cases) >= 16
-    assert {
-        "medical@v0",
-        "legal_courtlistener@v0",
-        "sec_contracts@v0",
-        "story_world@v0",
-        "probate@v0",
-        "bootstrap",
-    } <= profiles
-    assert all(case.expect and case.expect.get("avoid") for case in cases)
-
-
-def test_lava_pack_v4_targets_next_architecture_hazards():
-    import json
-    from pathlib import Path
-
-    path = Path("docs/data/frontier_packs/semantic_ir_lava_pack_v4.json")
-    metadata = json.loads(path.read_text(encoding="utf-8"))
-    cases = [
-        case
-        for case in load_frontier_pack_cases(Path("docs/data/frontier_packs"))
-        if case.source.endswith("semantic_ir_lava_pack_v4")
-    ]
-    profiles = {case.expected_profile for case in cases}
-    hazards = {row.get("hazard") for row in metadata["cases"]}
-
-    assert metadata["status"] == "fresh_held_out_candidate"
-    assert len(cases) == 25
-    assert hazards == {
-        "truth_maintenance_explosion",
-        "predicate_canonicalization_drift",
-        "claim_fact_observation_epistemology",
-        "segmentation_semantics",
-        "multilingual_ontology_pressure",
-    }
-    assert {
-        "medical@v0",
-        "legal_courtlistener@v0",
-        "sec_contracts@v0",
-        "story_world@v0",
-        "probate@v0",
-    } <= profiles
-    assert all(case.expect and case.expect.get("must") and case.expect.get("avoid") for case in cases)
-
-
-def test_lava_source_filter_matches_source_or_id():
-    cases = [
-        LavaCase(id="alpha_case", source="frontier:semantic_ir_lava_pack_v2", utterance="a"),
-        LavaCase(id="beta_special", source="dataset:other", utterance="b"),
-        LavaCase(id="gamma", source="dataset:other", utterance="c"),
+        StressCase(id="alpha_case", source="frontier:semantic_ir_stress_v2", utterance="a"),
+        StressCase(id="beta_special", source="dataset:other", utterance="b"),
+        StressCase(id="gamma", source="dataset:other", utterance="c"),
     ]
 
-    assert [case.id for case in filter_lava_cases(cases, source_filter="lava_pack_v2")] == ["alpha_case"]
-    assert [case.id for case in filter_lava_cases(cases, source_filter="beta")] == ["beta_special"]
+    assert [case.id for case in filter_stress_cases(cases, source_filter="stress_v2")] == ["alpha_case"]
+    assert [case.id for case in filter_stress_cases(cases, source_filter="beta")] == ["beta_special"]
 
 
-def test_lava_expectation_separates_diagnostic_mentions_from_admitted_unsafe_clauses():
-    case = LavaCase(
+def test_stress_expectation_separates_diagnostic_mentions_from_admitted_unsafe_clauses():
+    case = StressCase(
         id="spanish_probate",
         source="frontier:test",
         utterance="x",
@@ -196,8 +121,8 @@ def test_lava_expectation_separates_diagnostic_mentions_from_admitted_unsafe_cla
     assert score["ok"] is True
 
 
-def test_lava_expectation_does_not_treat_queries_as_durable_bad_writes():
-    case = LavaCase(
+def test_stress_expectation_does_not_treat_queries_as_durable_bad_writes():
+    case = StressCase(
         id="access_query",
         source="frontier:test",
         utterance="x",
@@ -230,8 +155,8 @@ def test_lava_expectation_does_not_treat_queries_as_durable_bad_writes():
     assert score["ok"] is True
 
 
-def test_lava_expectation_treats_forbidden_retracts_as_safe_admission():
-    case = LavaCase(
+def test_stress_expectation_treats_forbidden_retracts_as_safe_admission():
+    case = StressCase(
         id="correct_bad_old_fact",
         source="frontier:test",
         utterance="x",
@@ -260,8 +185,8 @@ def test_lava_expectation_treats_forbidden_retracts_as_safe_admission():
     assert score["ok"] is True
 
 
-def test_lava_expectation_matches_symbolic_normalized_surfaces():
-    case = LavaCase(
+def test_stress_expectation_matches_symbolic_normalized_surfaces():
+    case = StressCase(
         id="normalized_surfaces",
         source="frontier:test",
         utterance="x",
