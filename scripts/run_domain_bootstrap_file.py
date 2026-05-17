@@ -30,6 +30,8 @@ if str(REPO_ROOT) not in sys.path:
 
 PROFILE_ADMISSION_TOKEN_RE = re.compile(r"[a-z0-9]+")
 PROFILE_ADMISSION_DATE_RE = re.compile(r"\b(?:v_)?\d{4}[-_]\d{2}[-_]\d{2}\b")
+FACT_CLAUSE_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
+ENTITY_ID_ATOM_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 PROFILE_ADMISSION_DATE_SLOTS = {"date", "dated", "timestamp", "time", "turn", "source"}
 PROFILE_ADMISSION_SUBJECT_SLOTS = {
     "application",
@@ -1143,6 +1145,8 @@ def main() -> int:
         and isinstance(record.get("source_compile"), dict)
     ):
         _append_source_record_ledger_facts(record["source_compile"], source_record_ledger)
+    if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
+        _append_entity_id_closure_facts(record["source_compile"], parsed)
     if args.expected_prolog:
         record["expected_prolog"] = _compare_expected_prolog(
             expected_path=expected_path or (REPO_ROOT / args.expected_prolog).resolve(),
@@ -2156,6 +2160,70 @@ def _append_source_record_ledger_facts(source_compile: dict[str, Any], ledger: d
             "causality, counts, or other semantic conclusions."
         ),
     }
+
+
+def _append_entity_id_closure_facts(source_compile: dict[str, Any], parsed_profile: dict[str, Any]) -> None:
+    id_predicates = _entity_id_predicate_bases(parsed_profile)
+    if not id_predicates:
+        source_compile["deterministic_entity_id_closure_fact_count"] = 0
+        return
+    existing = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    seen = set(existing)
+    appended: list[str] = []
+    for fact in list(existing):
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate.startswith("source_record") or not args:
+            continue
+        for id_predicate, base in id_predicates:
+            if predicate == id_predicate:
+                continue
+            if predicate != base and not predicate.startswith(base + "_"):
+                continue
+            atom = args[0]
+            if not ENTITY_ID_ATOM_RE.fullmatch(atom):
+                continue
+            closure_fact = f"{id_predicate}({atom})."
+            if closure_fact in seen:
+                continue
+            seen.add(closure_fact)
+            existing.append(closure_fact)
+            appended.append(closure_fact)
+    source_compile["facts"] = existing
+    source_compile["unique_fact_count"] = len(existing)
+    source_compile["deterministic_entity_id_closure_fact_count"] = len(appended)
+    if appended:
+        source_compile["deterministic_entity_id_closure_policy"] = {
+            "schema_version": "deterministic_entity_id_closure_v1",
+            "authority": "closure_over_admitted_direct_rows",
+            "not_source_interpretation": True,
+            "description": (
+                "Adds missing unary *_id entity declarations when an admitted direct row already uses the same "
+                "entity as the first argument of a compatible predicate family."
+            ),
+        }
+
+
+def _entity_id_predicate_bases(parsed_profile: dict[str, Any]) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    for signature in profile_bootstrap_allowed_predicates(parsed_profile):
+        predicate, _, arity_text = signature.partition("/")
+        if arity_text != "1" or not predicate.endswith("_id"):
+            continue
+        base = predicate[: -len("_id")]
+        if not base:
+            continue
+        out.append((predicate, base))
+    return out
+
+
+def _parse_fact_clause(fact: str) -> tuple[str, list[str]] | None:
+    match = FACT_CLAUSE_RE.match(str(fact).strip())
+    if not match:
+        return None
+    return match.group(1), [part.strip().strip("'\"") for part in match.group(2).split(",")]
 
 
 def _union_clause_lists(

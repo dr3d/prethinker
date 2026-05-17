@@ -10,6 +10,7 @@ from scripts.run_domain_bootstrap_file import (
     SOURCE_AUTHORITY_AUDIT_CONTEXT_V1,
     SOURCE_ENTITY_LEDGER_SCHEMA,
     SOURCE_PASS_OPS_JSON_SCHEMA,
+    _append_entity_id_closure_facts,
     _append_source_record_ledger_facts,
     _call_lmstudio_json_schema,
     _compile_health_summary,
@@ -343,6 +344,35 @@ def test_append_source_record_ledger_facts_marks_deterministic_policy() -> None:
     assert compile_record["unique_fact_count"] == len(compile_record["facts"])
     assert compile_record["deterministic_source_record_fact_count"] > 0
     assert compile_record["deterministic_source_record_policy"]["not_semantic_truth"] is True
+
+
+def test_append_entity_id_closure_facts_from_admitted_direct_rows() -> None:
+    compile_record = {
+        "facts": [
+            "event_recorded(ev_11, sys_d, 2026_04_22_15_15, operator_note).",
+            "event_type(ev_12, off_spec_flag).",
+            "source_record_field(src_line_1, event_id, ev_13).",
+            "system_time_source(sys_a, internal_rtc).",
+            "event_id(ev_10).",
+        ],
+        "unique_fact_count": 5,
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "event_id/1"},
+            {"signature": "system_id/1"},
+        ]
+    }
+
+    _append_entity_id_closure_facts(compile_record, profile)
+
+    assert "event_id(ev_11)." in compile_record["facts"]
+    assert "event_id(ev_12)." in compile_record["facts"]
+    assert "event_id(ev_13)." not in compile_record["facts"]
+    assert "system_id(sys_a)." in compile_record["facts"]
+    assert compile_record["facts"].count("event_id(ev_10).") == 1
+    assert compile_record["deterministic_entity_id_closure_fact_count"] == 3
+    assert compile_record["unique_fact_count"] == len(compile_record["facts"])
 
 
 def test_openrouter_compile_title_uses_phase_and_fixture_only(monkeypatch) -> None:
