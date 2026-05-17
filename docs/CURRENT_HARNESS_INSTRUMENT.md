@@ -195,6 +195,11 @@ Recent transfer work supports the current direction:
   predicate arity drift across redraws. Recent roster redraws showed high
   palette churn even when QA stayed in the same rough band, which points toward
   profile/palette stabilization before broad native no-helper stamping.
+- Palette registries can now be built from compile artifacts as vocabulary-only
+  scaffolds. Early roster replay showed that a palette prior can reduce churn,
+  but overly strict name/arity preservation can still lose answer-bearing slots.
+  The next repair layer must preserve the structural slots that make the
+  surface queryable, not merely freeze predicate labels.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -213,6 +218,7 @@ python scripts/plan_story_world_fixture_runs.py --fixture copperfall_deadline_do
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_OR_DIR> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/compile_surface_stability.json --out-md tmp/compile_surface_stability.md
+python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
 ```
 
 Generated run JSON can stay under `tmp/`. Durable scorecard lessons and

@@ -28,6 +28,7 @@ from scripts.run_domain_bootstrap_file import (
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
+    _profile_registry_palette_report,
     _should_build_source_entity_ledger,
     _source_compiler_context,
     _source_entity_ledger_context,
@@ -980,6 +981,37 @@ def test_profile_from_signature_roster_uses_generic_args() -> None:
     assert len(profile["candidate_predicates"]) == 1
     assert profile["repeated_structures"][0]["record_predicate"] == "docket_event/4"
     assert "compact_signature_roster_fallback" in profile["self_check"]["notes"]
+
+
+def test_profile_registry_palette_report_counts_signature_and_arity_drift() -> None:
+    report = _profile_registry_palette_report(
+        profile_registry={
+            "predicates": [
+                {"signature": "entity_assignment/3"},
+                {"signature": "status_phase/2"},
+            ]
+        },
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "entity_assignment/4"},
+                {"signature": "status_phase/2"},
+                {"signature": "source_capture/4"},
+            ]
+        },
+    )
+
+    assert report["registry_signature_count"] == 2
+    assert report["profile_signature_count"] == 3
+    assert report["overlap_signatures"] == ["status_phase/2"]
+    assert report["missing_registry_signatures"] == ["entity_assignment/3"]
+    assert report["extra_profile_signatures"] == ["entity_assignment/4", "source_capture/4"]
+    assert report["same_name_changed_arity"] == [
+        {
+            "predicate": "entity_assignment",
+            "registry_arities": [3],
+            "profile_arities": [4],
+        }
+    ]
 
 
 def test_compile_source_with_plan_passes_reports_health(monkeypatch) -> None:

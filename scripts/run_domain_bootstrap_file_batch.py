@@ -95,6 +95,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--profile-registry", type=Path, default=None)
     parser.add_argument("--use-profile-registry-direct", action="store_true")
+    parser.add_argument("--profile-registry-palette-prior", action="store_true")
     parser.add_argument("--compile-source", action="store_true")
     parser.add_argument("--compile-plan-passes", action="store_true")
     parser.add_argument("--compile-flat-plus-plan-passes", action="store_true")
@@ -231,6 +232,8 @@ def _build_command(
         command.extend(["--profile-registry", str(_abs(args.profile_registry))])
     if bool(args.use_profile_registry_direct):
         command.append("--use-profile-registry-direct")
+    if bool(args.profile_registry_palette_prior):
+        command.append("--profile-registry-palette-prior")
     for flag in (
         "compile_source",
         "compile_plan_passes",

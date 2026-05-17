@@ -634,6 +634,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Use --profile-registry directly as the draft profile palette instead of asking the LLM to rediscover it.",
     )
+    parser.add_argument(
+        "--profile-registry-palette-prior",
+        action="store_true",
+        help=(
+            "Treat --profile-registry as a palette-stability prior during normal profile generation. "
+            "This preserves matching predicate names/arities when they fit the source without treating registry rows as facts."
+        ),
+    )
     parser.add_argument("--domain-hint", default="")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
@@ -774,6 +782,13 @@ def main() -> int:
             "and notes only. It is not a gold fact set and it does not authorize writes. Prefer these signatures when "
             "they fit the source and preserve epistemic boundaries; omit registry predicates that the source does not need."
         )
+        if bool(args.profile_registry_palette_prior):
+            sample["context"].append(
+                "Palette-stability prior: when candidate_profile_registry_v1 already contains a predicate name and arity "
+                "that expresses a needed structural capability, use that exact signature. Do not rename it, change its "
+                "arity, or emit a near-synonym for the same capability. Add a new predicate only when the registry lacks "
+                "a source-required capability, and omit registry predicates not supported by the source."
+            )
     if expected_signatures:
         sample["target_prolog_signatures_for_calibration"] = expected_signatures
         sample["context"].append(
@@ -1027,6 +1042,7 @@ def main() -> int:
         "model": str(args.model),
         "profile_registry": str(args.profile_registry or ""),
         "profile_registry_direct": bool(args.use_profile_registry_direct),
+        "profile_registry_palette_prior": bool(args.profile_registry_palette_prior),
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "parsed_ok": isinstance(parsed, dict),
         "parse_error": error,
@@ -1034,6 +1050,11 @@ def main() -> int:
         "parsed": parsed or {},
         "raw_content": str(response.get("content", ""))[:20000],
     }
+    if profile_registry and isinstance(parsed, dict):
+        record["profile_registry_palette_report"] = _profile_registry_palette_report(
+            parsed_profile=parsed,
+            profile_registry=profile_registry,
+        )
     if profile_retry is not None:
         record["profile_retry"] = profile_retry
     if profile_signature_roster_retry is not None:
@@ -1500,6 +1521,71 @@ def _profile_from_registry(registry: dict[str, Any], *, domain_hint: str = "") -
             "notes": ["direct_registry_profile"],
         },
     }
+
+
+def _profile_registry_palette_report(*, parsed_profile: dict[str, Any], profile_registry: dict[str, Any]) -> dict[str, Any]:
+    registry_signatures = _registry_signature_set(profile_registry)
+    profile_signatures = _profile_signature_set(parsed_profile)
+    registry_names = _names_to_arities(registry_signatures)
+    profile_names = _names_to_arities(profile_signatures)
+    same_name_changed_arity = []
+    for name in sorted(set(registry_names) & set(profile_names)):
+        registry_arities = registry_names[name]
+        profile_arities = profile_names[name]
+        if registry_arities != profile_arities:
+            same_name_changed_arity.append(
+                {
+                    "predicate": name,
+                    "registry_arities": sorted(registry_arities),
+                    "profile_arities": sorted(profile_arities),
+                }
+            )
+    overlap = sorted(registry_signatures & profile_signatures)
+    missing = sorted(registry_signatures - profile_signatures)
+    extra = sorted(profile_signatures - registry_signatures)
+    return {
+        "schema_version": "profile_registry_palette_report_v1",
+        "registry_signature_count": len(registry_signatures),
+        "profile_signature_count": len(profile_signatures),
+        "overlap_signature_count": len(overlap),
+        "missing_registry_signature_count": len(missing),
+        "extra_profile_signature_count": len(extra),
+        "same_name_changed_arity_count": len(same_name_changed_arity),
+        "overlap_signatures": overlap[:120],
+        "missing_registry_signatures": missing[:120],
+        "extra_profile_signatures": extra[:120],
+        "same_name_changed_arity": same_name_changed_arity,
+    }
+
+
+def _registry_signature_set(registry: dict[str, Any]) -> set[str]:
+    signatures: set[str] = set()
+    for item in registry.get("predicates", []) if isinstance(registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = _normalized_signature(str(item.get("signature", "")))
+        if signature:
+            signatures.add(signature)
+    return signatures
+
+
+def _profile_signature_set(parsed_profile: dict[str, Any]) -> set[str]:
+    signatures: set[str] = set()
+    for item in parsed_profile.get("candidate_predicates", []) if isinstance(parsed_profile.get("candidate_predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = _normalized_signature(str(item.get("signature", "")))
+        if signature:
+            signatures.add(signature)
+    return signatures
+
+
+def _names_to_arities(signatures: set[str]) -> dict[str, set[int]]:
+    out: dict[str, set[int]] = {}
+    for signature in signatures:
+        name, arity_text = signature.rsplit("/", 1)
+        out.setdefault(name, set()).add(int(arity_text))
+    return out
 
 
 def _compare_expected_prolog(
