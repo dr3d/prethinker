@@ -28,6 +28,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.semantic_ir import bootstrap_env_local  # noqa: E402
+from scripts.audit_compile_surface_stability import (  # noqa: E402
+    _contract_reports as _surface_contract_reports,
+    _fact_rows as _surface_fact_rows,
+    _facts_from_compile as _surface_facts_from_compile,
+    _predicate_name as _surface_predicate_name,
+    _source_text_atoms as _surface_source_text_atoms,
+)
 
 bootstrap_env_local()
 
@@ -323,7 +330,30 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "frontier_unknown_positive_predicate_refs": score.get("frontier_unknown_positive_predicate_refs", []),
         "generic_predicate_count": score.get("generic_predicate_count"),
         "detail_wrapper_drift_flags": _detail_wrapper_drift_flags(payload),
+        "compile_surface_contract_flags": _compile_surface_contract_flags(payload),
     }
+
+
+def _compile_surface_contract_flags(payload: dict[str, Any]) -> list[str]:
+    facts = _surface_facts_from_compile(payload)
+    source_facts = [fact for fact in facts if _surface_predicate_name(fact).startswith("source_record")]
+    direct_facts = [fact for fact in facts if not _surface_predicate_name(fact).startswith("source_record")]
+    if not source_facts or not direct_facts:
+        return []
+
+    source_rows = _surface_fact_rows(source_facts)
+    direct_rows = _surface_fact_rows(direct_facts)
+    source_texts = _surface_source_text_atoms(source_facts)
+    flags: list[str] = []
+    for report in _surface_contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows):
+        status = str(report.get("status") or "")
+        if status in {"pass", "not_applicable"}:
+            continue
+        contract = str(report.get("contract") or "unknown_contract")
+        source_signal_count = _optional_int(report.get("source_signal_count")) or 0
+        direct_surface_count = _optional_int(report.get("direct_surface_count")) or 0
+        flags.append(f"{contract}:{status}:source={source_signal_count}:direct={direct_surface_count}")
+    return flags
 
 
 def _detail_wrapper_drift_flags(payload: dict[str, Any]) -> list[str]:
@@ -460,6 +490,13 @@ def _quality_gate_result(
     ] if isinstance(item.get("detail_wrapper_drift_flags"), list) else []
     if detail_wrapper_flags:
         reasons.extend(f"detail_wrapper_drift:{flag}" for flag in detail_wrapper_flags)
+    contract_flags = [
+        str(flag)
+        for flag in item.get("compile_surface_contract_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("compile_surface_contract_flags"), list) else []
+    if contract_flags:
+        reasons.extend(f"compile_surface_contract:{flag}" for flag in contract_flags)
     admitted = _optional_int(item.get("compile_admitted")) or 0
     skipped = _optional_int(item.get("compile_skipped")) or 0
     if admitted <= 0:
@@ -477,6 +514,7 @@ def _quality_gate_result(
         "candidate_predicates": _optional_int(item.get("candidate_predicates")) or 0,
         "compile_json": str(result.get("compile_json", "")),
         "detail_wrapper_drift_flags": detail_wrapper_flags,
+        "compile_surface_contract_flags": contract_flags,
     }
 
 
