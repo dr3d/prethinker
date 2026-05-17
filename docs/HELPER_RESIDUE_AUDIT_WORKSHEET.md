@@ -4409,3 +4409,152 @@ Next pressure:
 - Apply the merge-preserving replay workflow to one more weak fixture.
 - If it transfers, promote the workflow as the default no-helper improvement
   loop before broader native restamping.
+
+## HR-052 - Merge-Preserving Sable Counterexample
+
+Date: 2026-05-16
+
+Before:
+
+- HR-051 showed merge preservation improved Thornfield no-helper QA.
+- The next check was whether the same workflow transfers to Sable, where the
+  accepted financial-baseline compile had `34 / 2 / 3` and the rejected
+  statement replay had useful advisory-list rows but lost backbone.
+
+Prediction:
+
+- Merging the rejected statement candidate into the accepted financial baseline
+  should pass the structural gate. It might improve advisory-list questions if
+  the query layer can use the added rows without being confused by the larger
+  predicate surface.
+
+Intervention:
+
+- Merged the accepted Sable financial-baseline compile with the statement
+  reroll candidate.
+- Audited the merged compile.
+- Ran the preservation gate against the financial-baseline audit.
+- Ran no-helper QA after the structural gate passed.
+
+After:
+
+Merge/gate:
+
+- Direct facts: `118 -> 199`
+- Gate: `pass`
+- Family regressions: `0`
+- Contract regressions: `0`
+- Lost predicates: `0`
+
+QA:
+
+| Run | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Financial-baseline compile | `34` | `2` | `3` | `0` |
+| Merged Sable replay | `33` | `3` | `4` | `0` |
+
+Observed movement:
+
+- q038 advisory/nonbinding list stayed partial rather than miss, but still
+  missed Soto/Webb.
+- q017 regressed to a miss due to empty support for the emergency-hearing
+  exception.
+- q019 became partial because the query did not retrieve the minimum-reserve
+  threshold.
+- q020/q040 still failed counterfactual reserve questions.
+- One query row was not parsed successfully (`parsed_ok` `39 / 40`).
+
+Artifacts:
+
+- `docs/data/helper_residue/merged_sable_replay_20260516.md`
+- `docs/data/helper_residue/merged_sable_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_sable_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_sable_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_sable_replay_gate_20260516.md`
+- `docs/data/helper_residue/merged_sable_replay_qa_20260516.json`
+- `docs/data/helper_residue/merged_sable_replay_qa_20260516.md`
+
+Verification:
+
+- `python scripts\merge_compile_facts.py --baseline-compile tmp\financial_baseline_sable_recompile_20260516\sable_creek_budget\domain_bootstrap_file_20260516T233818210279Z_source_qwen-qwen3-6-35b-a3b.json --candidate-compile tmp\participant_statement_sable_recompile_reroll_20260516\sable_creek_budget\domain_bootstrap_file_20260517T001355997192Z_source_qwen-qwen3-6-35b-a3b.json --out-json tmp\merged_sable_replay_20260516\sable_creek_budget\domain_bootstrap_file_merged_20260517T001355997192Z_source_qwen-qwen3-6-35b-a3b.json --out-md docs\data\helper_residue\merged_sable_replay_20260516.md`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\merged_sable_replay_20260516\sable_creek_budget --out-json docs\data\helper_residue\merged_sable_replay_audit_20260516.json --out-md docs\data\helper_residue\merged_sable_replay_audit_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\financial_baseline_sable_recompile_audit_20260516.json --candidate-audit docs\data\helper_residue\merged_sable_replay_audit_20260516.json --out-json docs\data\helper_residue\merged_sable_replay_gate_20260516.json --out-md docs\data\helper_residue\merged_sable_replay_gate_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --compile-root tmp\merged_sable_replay_20260516 --fixture sable_creek_budget --helper-companion-row-limit 0 --no-cache`
+
+Lesson:
+
+Structural preservation is necessary but not sufficient. A merged compile can
+keep all backbone rows and still alter query behavior enough to regress QA.
+Promotion needs two gates: preservation gate first, QA non-regression gate
+second. Thornfield passed both; Sable passed only the structural gate.
+
+Next pressure:
+
+- Add a QA comparison gate for accepted/replay runs.
+- Treat merged candidates as promotable only when they preserve structure and
+  do not regress no-helper QA.
+
+## HR-053 - QA Promotion Gate
+
+Date: 2026-05-16
+
+Before:
+
+- HR-051 showed merged Thornfield improved no-helper QA.
+- HR-052 showed merged Sable passed structural preservation but regressed QA.
+- The workflow needed a second deterministic gate after structural preservation.
+
+Intervention:
+
+- Added `scripts/compare_qa_runs.py`.
+- The QA gate compares baseline and candidate QA summaries fixture-by-fixture.
+- A candidate is promotable only when exact answers do not drop and misses do
+  not increase.
+- Added tests for a promotable replay and a regression replay.
+- Ran the QA gate on merged Thornfield and merged Sable.
+
+After:
+
+QA gate outcomes:
+
+| Fixture | Baseline | Candidate | Gate | Delta |
+| --- | --- | --- | --- | --- |
+| `thornfield_variance` | `24 / 4 / 12` | `27 / 5 / 8` | `promotable` | exact `+3`, partial `+1`, miss `-4` |
+| `sable_creek_budget` | `34 / 2 / 3` | `33 / 3 / 4` | `regression` | exact `-1`, partial `+1`, miss `+1` |
+
+Artifacts:
+
+- `scripts/compare_qa_runs.py`
+- `tests/test_compare_qa_runs.py`
+- `docs/data/helper_residue/merged_thornfield_replay_qa_gate_20260516.json`
+- `docs/data/helper_residue/merged_thornfield_replay_qa_gate_20260516.md`
+- `docs/data/helper_residue/merged_sable_replay_qa_gate_20260516.json`
+- `docs/data/helper_residue/merged_sable_replay_qa_gate_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\compare_qa_runs.py`
+- `python -m pytest tests\test_compare_qa_runs.py -q`
+  - `2 passed`
+- `python scripts\compare_qa_runs.py --baseline-qa docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.json --candidate-qa docs\data\helper_residue\merged_thornfield_replay_qa_20260516.json --out-json docs\data\helper_residue\merged_thornfield_replay_qa_gate_20260516.json --out-md docs\data\helper_residue\merged_thornfield_replay_qa_gate_20260516.md`
+- `python scripts\compare_qa_runs.py --baseline-qa docs\data\helper_residue\financial_baseline_sable_recompile_qa_20260516.json --candidate-qa docs\data\helper_residue\merged_sable_replay_qa_20260516.json --out-json docs\data\helper_residue\merged_sable_replay_qa_gate_20260516.json --out-md docs\data\helper_residue\merged_sable_replay_qa_gate_20260516.md`
+
+Lesson:
+
+The no-helper architecture now has a complete replay acceptance loop:
+
+1. generate candidate compile;
+2. merge or preserve baseline rows;
+3. run compile-surface preservation gate;
+4. run no-helper QA;
+5. promote only if QA does not regress.
+
+This is the clean replacement for helper-era rescue rows. It uses deterministic
+acceptance rather than fixture-shaped helpers.
+
+Next pressure:
+
+- Promote Thornfield's merged compile as accepted evidence.
+- Do not promote Sable's merged compile.
+- Apply the two-gate workflow to additional weak fixtures before any native
+  no-helper restamp.

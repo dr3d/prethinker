@@ -1,0 +1,29 @@
+{
+  "comparisons": [
+    {
+      "baseline": {
+        "exact": 34,
+        "miss": 3,
+        "partial": 2
+      },
+      "candidate": {
+        "exact": 33,
+        "miss": 4,
+        "partial": 3
+      },
+      "delta": {
+        "exact": -1,
+        "miss": 1,
+        "partial": 1
+      },
+      "fixture": "sable_creek_budget",
+      "promotion_status": "regression"
+    }
+  ],
+  "schema_version": "qa_run_comparison_v1",
+  "summary": {
+    "fixture_count": 1,
+    "promotable_count": 0,
+    "regression_count": 1
+  }
+}
