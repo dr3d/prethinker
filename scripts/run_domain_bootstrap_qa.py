@@ -13334,7 +13334,9 @@ def run_evidence_bundle_plan_queries(
                     )
                 )
                 continue
-            parsed_goals = parse_prolog_query_goals(query)
+            normalized = _normalize_evidence_bundle_query_constraints(query)
+            normalized_query = str(normalized.get("query") or query).strip()
+            parsed_goals = parse_prolog_query_goals(normalized_query)
             if parsed_goals is None:
                 results.append(
                     {
@@ -13377,8 +13379,19 @@ def run_evidence_bundle_plan_queries(
                     }
                 )
                 continue
-            plan_queries.append(query)
-            query_basis[query] = {"bundle_id": bundle_id, "purpose": purpose}
+            plan_queries.append(normalized_query)
+            query_basis[normalized_query] = {
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                **(
+                    {
+                        "original_query": query,
+                        "repairs": normalized.get("repairs", []),
+                    }
+                    if normalized_query != query
+                    else {}
+                ),
+            }
     if not plan_queries:
         return results
     for item in run_query_plan(
@@ -13424,6 +13437,92 @@ def run_evidence_bundle_plan_queries(
         item["derived_from_queries"] = derived_from
         results.append(item)
     return results
+
+
+def _normalize_evidence_bundle_query_constraints(query: str) -> dict[str, Any]:
+    """Fold simple equality constraints into evidence-bundle predicate goals.
+
+    Evidence-bundle plans are authored by an LLM and often use Prolog-like
+    conjunctions such as ``source_record_label(Row, Label), Label = memo_a``.
+    The runtime query layer is deliberately small and treats raw infix equality
+    poorly. For validation and execution, bind variable=atom constraints into
+    the predicate arguments and collapse variable=variable aliases. This is
+    query routing over an already compiled KB; it does not add facts or infer
+    answers.
+    """
+
+    text = str(query or "").strip()
+    if not text:
+        return {"query": text, "repairs": []}
+    suffix = "." if text.endswith(".") else ""
+    parts = split_top_level_args(text.rstrip(". "))
+    if not parts:
+        return {"query": text, "repairs": []}
+
+    goals: list[tuple[str, list[str]]] = []
+    substitutions: dict[str, str] = {}
+    repairs: list[dict[str, str]] = []
+    has_constant_binding = False
+    for part in parts:
+        parsed = parse_prolog_query(part)
+        if parsed is not None:
+            goals.append(parsed)
+            continue
+        equality = _parse_simple_equality_goal(part)
+        if equality is None:
+            return {"query": text, "repairs": repairs}
+        left, right = equality
+        left_is_var = _is_prolog_variable(left)
+        right_is_var = _is_prolog_variable(right)
+        if left_is_var and right_is_var:
+            substitutions[right] = left
+            repairs.append({"kind": "variable_alias", "from": right, "to": left})
+        elif left_is_var:
+            substitutions[left] = right
+            has_constant_binding = True
+            repairs.append({"kind": "variable_binding", "variable": left, "value": right})
+        elif right_is_var:
+            substitutions[right] = left
+            has_constant_binding = True
+            repairs.append({"kind": "variable_binding", "variable": right, "value": left})
+        elif left == right:
+            repairs.append({"kind": "tautological_equality", "value": left})
+        else:
+            return {"query": text, "repairs": repairs}
+
+    if not repairs:
+        return {"query": text, "repairs": []}
+    if not has_constant_binding:
+        return {"query": text, "repairs": repairs}
+
+    for _ in range(max(1, len(substitutions))):
+        changed = False
+        for key, value in list(substitutions.items()):
+            replacement = substitutions.get(value)
+            if replacement and replacement != value:
+                substitutions[key] = replacement
+                changed = True
+        if not changed:
+            break
+
+    normalized_goals = [
+        (predicate, [substitutions.get(arg, arg) for arg in args])
+        for predicate, args in goals
+    ]
+    return {
+        "query": format_prolog_query_goals(normalized_goals) if normalized_goals else text.rstrip(". ") + suffix,
+        "repairs": repairs,
+    }
+
+
+def _parse_simple_equality_goal(text: str) -> tuple[str, str] | None:
+    match = re.fullmatch(r"\s*([^=,\s][^=,]*?)\s*=\s*([^=,\s][^=,]*?)\s*\.?\s*", str(text or ""))
+    if not match:
+        return None
+    left, right = (item.strip().strip("'\"") for item in match.groups())
+    if not left or not right:
+        return None
+    return left, right
 
 
 def _source_text_memberchk_repair(query: str) -> dict[str, str] | None:

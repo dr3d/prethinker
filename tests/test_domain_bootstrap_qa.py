@@ -567,6 +567,67 @@ def test_evidence_bundle_plan_accepts_conjunctive_source_record_queries() -> Non
     assert results[0]["result"]["rows"][0]["Line"] == "src_1"
 
 
+def test_evidence_bundle_plan_normalizes_simple_equality_constraints() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_label(src_1, correction_notice_a).",
+        "source_record_label(src_2, unrelated_notice).",
+        "source_record_text_atom(src_1, correction_notice_a_reason_adjacent_tenant_complaints).",
+        "source_record_text_atom(src_2, unrelated_notice_reason_staffing).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_label/2", "source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_row_reason",
+                    "purpose": "Retrieve source text for a labeled source row.",
+                    "query_templates": [
+                        "source_record_text_atom(SourceLine, TextAtom), "
+                        "source_record_label(SourceLine, Label), "
+                        "Label = correction_notice_a, TextAtom = ReasonText."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "predicate_and_arity_checked"
+    assert results[0]["result"]["reasoning_basis"]["original_query"].endswith("TextAtom = ReasonText.")
+    assert results[0]["derived_from_queries"] == [
+        "source_record_text_atom(SourceLine, TextAtom), source_record_label(SourceLine, correction_notice_a)."
+    ]
+    assert results[0]["result"]["rows"] == [
+        {"SourceLine": "src_1", "TextAtom": "correction_notice_a_reason_adjacent_tenant_complaints"}
+    ]
+
+
+def test_evidence_bundle_plan_does_not_turn_alias_only_equality_into_broad_scan() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("source_record_text_atom(src_1, unrestricted_source_text).").get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "broad_alias",
+                    "purpose": "This should not become a broad source scan.",
+                    "query_templates": ["source_record_text_atom(Line, Text), Text = OtherText."],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "error"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "rejected"
+
+
 def test_evidence_bundle_plan_repairs_source_text_memberchk_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

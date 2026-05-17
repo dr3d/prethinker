@@ -259,6 +259,18 @@ Recent transfer work supports the current direction:
   judge-uncertain rows, and 2 answer-surface gaps. That keeps the next repair
   pressure on direct admitted surfaces and deterministic ledgers, not on
   restoring helper compatibility rows.
+- The first post-stamp repair targeted evidence-bundle query execution, not
+  fixture content. The source-surface diagnostic found that 84 of the 170
+  compile-surface gaps had strong answer evidence in deterministic
+  `source_record_*` rows, including 67 where the answer was stranded there and
+  absent from direct admitted rows. Evidence-bundle plans were sometimes
+  proposing Prolog-like equality constraints such as `Label = some_source_row`
+  inside otherwise valid source-record joins. The harness now folds simple
+  variable-to-constant equality constraints into predicate arguments before
+  validating and executing the bundle, while rejecting alias-only equality that
+  would become a broad source scan. A no-helper smoke over two affected native
+  fixtures showed the bounded effect: one source-row reason miss became exact,
+  while a separate missing quantity surface remained a compile gap.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
