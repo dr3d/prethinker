@@ -4323,3 +4323,89 @@ Next pressure:
 - Move from candidate selection to merge-preserving compile strategy: retain
   accepted baseline rows while adding newly targeted rows that pass contract
   checks.
+
+## HR-051 - Merge-Preserving Thornfield Replay
+
+Date: 2026-05-16
+
+Before:
+
+- HR-050 showed no stochastic replay candidate was QA-eligible on its own.
+- The best rejected Thornfield replay had useful additions but failed the gate
+  because it lost typed backbone predicates.
+
+Prediction:
+
+- If the candidate's useful direct rows are merged into the accepted baseline
+  instead of replacing it, the result should pass the preservation gate and may
+  improve no-helper QA.
+
+Intervention:
+
+- Added `scripts/merge_compile_facts.py`.
+- The merge keeps the candidate source-record ledger, preserves all baseline
+  direct facts, appends candidate direct facts not already present, and merges
+  candidate-predicate metadata.
+- Merged the accepted Thornfield baseline compile with the best rejected
+  contract-guided candidate.
+- Audited the merged compile, ran the preservation gate, then ran no-helper QA
+  only after the gate passed.
+
+After:
+
+Merge/gate:
+
+- Direct facts: `122 -> 223`
+- Gate: `pass`
+- Family regressions: `0`
+- Contract regressions: `0`
+- Lost predicates: `0`
+
+QA:
+
+| Run | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Thornfield baseline no-helper | `24` | `4` | `12` | `0` |
+| Thornfield merged replay | `27` | `5` | `8` | `0` |
+
+Movement:
+
+- Exact: `+3`
+- Partial: `+1`
+- Miss: `-4`
+
+Artifacts:
+
+- `scripts/merge_compile_facts.py`
+- `tests/test_merge_compile_facts.py`
+- `docs/data/helper_residue/merged_thornfield_replay_20260516.md`
+- `docs/data/helper_residue/merged_thornfield_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_thornfield_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_thornfield_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_thornfield_replay_gate_20260516.md`
+- `docs/data/helper_residue/merged_thornfield_replay_qa_20260516.json`
+- `docs/data/helper_residue/merged_thornfield_replay_qa_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\merge_compile_facts.py`
+- `python -m pytest tests\test_merge_compile_facts.py tests\test_select_compile_candidate.py tests\test_compare_compile_surface_audits.py -q`
+  - `5 passed`
+- `python scripts\merge_compile_facts.py --baseline-compile tmp\native_nohelper_story_worlds_draw1_20260516_compile\thornfield_variance\domain_bootstrap_file_20260516T142444497265Z_source_qwen-qwen3-6-35b-a3b.json --candidate-compile tmp\contract_guided_thornfield_recompile_reroll_20260516\thornfield_variance\domain_bootstrap_file_20260517T004225040522Z_source_qwen-qwen3-6-35b-a3b.json --out-json tmp\merged_thornfield_replay_20260516\thornfield_variance\domain_bootstrap_file_merged_20260517T004225040522Z_source_qwen-qwen3-6-35b-a3b.json --out-md docs\data\helper_residue\merged_thornfield_replay_20260516.md`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\merged_thornfield_replay_20260516\thornfield_variance --out-json docs\data\helper_residue\merged_thornfield_replay_audit_20260516.json --out-md docs\data\helper_residue\merged_thornfield_replay_audit_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --candidate-audit docs\data\helper_residue\merged_thornfield_replay_audit_20260516.json --out-json docs\data\helper_residue\merged_thornfield_replay_gate_20260516.json --out-md docs\data\helper_residue\merged_thornfield_replay_gate_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --compile-root tmp\merged_thornfield_replay_20260516 --fixture thornfield_variance --helper-companion-row-limit 0 --no-cache`
+
+Lesson:
+
+This is the next architecture layer. The compiler can produce useful new rows
+and still forget older surfaces; the merge-preserving path lets us keep the
+accepted backbone while adding contract-targeted rows. It is not a helper
+revival: helper rows remain zero. It is deterministic compile-surface
+preservation.
+
+Next pressure:
+
+- Apply the merge-preserving replay workflow to one more weak fixture.
+- If it transfers, promote the workflow as the default no-helper improvement
+  loop before broader native restamping.

@@ -1,0 +1,44 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 122,
+      "baseline_run": "native_nohelper_story_worlds_draw1_20260516_compile",
+      "candidate_direct_fact_count": 223,
+      "candidate_run": "merged_thornfield_replay_20260516",
+      "contract_regressions": [],
+      "direct_fact_ratio": 1.8279,
+      "direct_fact_regression": false,
+      "family_regressions": [],
+      "fixture": "thornfield_variance",
+      "gained_predicates": [
+        "application_status_at",
+        "board_finding",
+        "code_section",
+        "dissent_record",
+        "legal_question",
+        "notice_defect",
+        "permit_status",
+        "person_role",
+        "property_owner",
+        "source_claim",
+        "structure_spec",
+        "survey_recorded",
+        "variance_condition"
+      ],
+      "gate_status": "pass",
+      "lost_predicates": []
+    }
+  ],
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 0,
+    "direct_fact_regression_count": 0,
+    "family_regression_count": 0,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "pass": 1
+    },
+    "predicate_loss_count": 0
+  }
+}
