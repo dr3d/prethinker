@@ -230,6 +230,14 @@ Recent transfer work supports the current direction:
   `delivery_collapse`. Delivery-contract guidance improved the roster replay
   from 29/2/9 under strict palette prior to 33/1/6 with helpers still disabled,
   while reducing palette churn and arity drift.
+- Transfer validation is mixed and therefore still active. On
+  `sable_creek_budget`, delivery-guided replay preserved the accepted no-helper
+  QA score at 36/1/3 and removed arity drift, but still swapped many
+  row-bearing signatures. On `dulse_ledger`, the same pattern regressed from
+  34/5/1 to 32/5/3 with helpers still disabled, mainly around ledger/detail
+  enumeration, restitution, and rule-consequence joins. The next repair should
+  protect structural slot delivery and detail-bearing ledger surfaces; it
+  should not freeze fixture predicate names or restore legacy helper rows.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
