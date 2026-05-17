@@ -132,6 +132,68 @@ def test_audit_compile_surface_invariants_passes_event_backbone_unit(tmp_path: P
     assert backbone["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_flags_vague_event_wrapper_without_backbone(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_entry_7_dated_2026_04_02_operator_system_a_sample_4_status_settled).",
+            "event(event_7).",
+            "event_detail(event_7, source_line_001).",
+            "event_date(event_7, 2026_04_02).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "vague_wrapper_backbone_contract"
+    )
+    assert contract["status"] == "vague_wrapper_without_backbone"
+    assert contract["wrapper_predicates"] == ["event", "event_detail"]
+    assert "participant_or_system" in contract["missing_keys"]
+
+
+def test_audit_compile_surface_invariants_does_not_treat_specific_detail_predicates_as_vague(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_entry_7_dated_2026_04_02_operator_system_a_sample_4_status_settled_accommodation_detail_ref_17).",
+            "accommodation_detail(student_7, ref_17).",
+            "event_date(event_7, 2026_04_02).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "vague_wrapper_backbone_contract"
+    )
+    assert contract["status"] == "missing_backbone_surface"
+    assert contract["wrapper_predicates"] == []
+
+
+def test_audit_compile_surface_invariants_allows_vague_event_wrapper_when_backbone_passes(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_entry_7_dated_2026_04_02_operator_system_a_sample_4_status_settled).",
+            "event(event_7).",
+            "event_detail(event_7, source_line_001).",
+            "event_date(event_7, 2026_04_02).",
+            "event_actor(event_7, system_a).",
+            "event_subject(event_7, sample_4).",
+            "event_status(event_7, settled).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "vague_wrapper_backbone_contract"
+    )
+    assert contract["status"] == "pass"
+
+
 def test_audit_compile_surface_invariants_detects_financial_baseline_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

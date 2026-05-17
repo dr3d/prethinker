@@ -383,6 +383,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
+            _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
         ],
         "summary": _summarize_families(families),
     }
@@ -763,6 +764,75 @@ def _audit_participant_statement_status_contract(
         "statement_predicates": sorted({str(row["predicate"]) for row in statement_rows}),
         "status_predicates": sorted({str(row["predicate"]) for row in status_rows}),
     }
+
+
+def _audit_vague_wrapper_backbone_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+    families: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Flag generic detail/event wrappers when event backbone slots are thin.
+
+    This is a quality gate, not an extraction repair. Generic wrappers may be
+    useful as additive residue, but they should not be the only surface when the
+    source has event identity, time, participant/system, subject, and outcome
+    coordinates.
+    """
+
+    source_tokens = _tokens_for_facts(source_facts)
+    trigger_terms = {
+        "event_identity": {"event", "entry", "record", "incident", "log"},
+        "temporal_anchor": {"timestamp", "time", "date", "dated", "chronological", "order"},
+        "participant_or_system": {"actor", "operator", "system", "party", "participant", "originated"},
+        "subject_or_object": {"subject", "object", "item", "sample", "request", "proposal", "debt"},
+        "outcome_or_state": {"status", "outcome", "result", "state", "settled", "void", "issued"},
+    }
+    triggered_groups = {
+        name: sorted(tokens & source_tokens)
+        for name, tokens in trigger_terms.items()
+        if tokens & source_tokens
+    }
+    backbone = next((row for row in families if row.get("family") == "event_backbone_unit_surface"), {})
+    backbone_status = str(backbone.get("status") or "")
+    wrapper_rows = [row for row in direct_rows if _is_vague_wrapper_row(row)]
+    wrapper_predicates = sorted({str(row["predicate"]) for row in wrapper_rows})
+
+    if len(triggered_groups) < 3:
+        status = "not_applicable"
+    elif backbone_status == "pass":
+        status = "pass"
+    elif wrapper_rows:
+        status = "vague_wrapper_without_backbone"
+    else:
+        status = "missing_backbone_surface"
+
+    return {
+        "contract": "vague_wrapper_backbone_contract",
+        "description": "generic detail/event wrappers must not substitute for event identity, temporal, participant/system, subject, and outcome backbone rows",
+        "status": status,
+        "required_key_count": len(trigger_terms) if len(triggered_groups) >= 3 else 0,
+        "companion_key_count": len(triggered_groups),
+        "missing_keys": list(backbone.get("missing_groups") or []),
+        "triggered_groups": triggered_groups,
+        "event_backbone_status": backbone_status,
+        "wrapper_row_count": len(wrapper_rows),
+        "wrapper_predicates": wrapper_predicates,
+    }
+
+
+def _is_vague_wrapper_row(row: dict[str, Any]) -> bool:
+    predicate = str(row.get("predicate") or "").lower()
+    if predicate in {
+        "answer_detail",
+        "detail",
+        "event",
+        "event_detail",
+        "record_detail",
+        "source_detail",
+        "source_recorded_assertion",
+    }:
+        return True
+    return False
 
 
 def _is_statement_structural_row(row: dict[str, Any]) -> bool:

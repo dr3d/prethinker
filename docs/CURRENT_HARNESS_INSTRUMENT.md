@@ -182,6 +182,10 @@ Recent transfer work supports the current direction:
 - Predicate inventory is now tracked directly so fixture-shaped names can be
   audited by frequency, scope, and layer rather than discovered by surprise in
   archived notebooks.
+- Compile-surface invariant audits now include a quality contract for generic
+  detail/event wrappers: wrappers may remain as additive residue, but they are
+  flagged when event identity, time, participant/system, subject, and outcome
+  backbone rows are missing.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
