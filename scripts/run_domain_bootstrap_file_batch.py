@@ -93,6 +93,8 @@ def parse_args() -> argparse.Namespace:
         help="Per-call timeout multiplier. Default 0 means max(1, lanes).",
     )
     parser.add_argument("--domain-hint", default="")
+    parser.add_argument("--profile-registry", type=Path, default=None)
+    parser.add_argument("--use-profile-registry-direct", action="store_true")
     parser.add_argument("--compile-source", action="store_true")
     parser.add_argument("--compile-plan-passes", action="store_true")
     parser.add_argument("--compile-flat-plus-plan-passes", action="store_true")
@@ -225,6 +227,10 @@ def _build_command(
     ]
     if str(args.domain_hint or "").strip():
         command.extend(["--domain-hint", str(args.domain_hint).strip()])
+    if args.profile_registry is not None:
+        command.extend(["--profile-registry", str(_abs(args.profile_registry))])
+    if bool(args.use_profile_registry_direct):
+        command.append("--use-profile-registry-direct")
     for flag in (
         "compile_source",
         "compile_plan_passes",
