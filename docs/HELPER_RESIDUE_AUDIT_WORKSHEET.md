@@ -4038,3 +4038,77 @@ Next pressure:
 - Add a compile-quality comparison gate for replay compiles: compare baseline
   and candidate direct fact count, invariant status transitions, contract
   status transitions, and concrete predicate retention before spending QA time.
+
+## HR-047 - Compile Preservation Gate
+
+Date: 2026-05-16
+
+Before:
+
+- HR-045 showed a replay compile could improve one surface while dropping
+  another.
+- HR-046 showed the weak-slice contract pressures are real enough to continue,
+  but future replay compiles need a preservation gate before QA.
+
+Intervention:
+
+- Added `scripts/compare_compile_surface_audits.py`.
+- The comparator checks:
+  - direct fact count ratio;
+  - invariant family status regressions;
+  - relation/slot contract status regressions;
+  - lost and gained direct predicates.
+- Added tests for regression and non-regression comparison cases.
+- Ran the gate against the two Sable statement replay draws, using the
+  financial-baseline compile as the baseline.
+
+After:
+
+Gate result for statement replay reroll:
+
+- Gate: `regression`
+- Direct facts: `118 -> 82` (`0.6949`)
+- Family regressions: `1`
+- Lost predicates: `17`
+- Lost predicates included `event_happened`, `vote_cast`, `fund_balance`,
+  `legal_opinion`, `opinion_is_binding`, `staff_estimate`, `vote_result`, and
+  `rule_threshold`.
+
+Gate result for first bad statement replay draw:
+
+- Gate: `regression`
+- Direct facts: `118 -> 32` (`0.2712`)
+- Family regressions: `5`
+- Contract regressions: `1`
+- Lost predicates: `20`
+
+Artifacts:
+
+- `scripts/compare_compile_surface_audits.py`
+- `tests/test_compare_compile_surface_audits.py`
+- `docs/data/helper_residue/sable_financial_vs_statement_replay_gate_20260516.json`
+- `docs/data/helper_residue/sable_financial_vs_statement_replay_gate_20260516.md`
+- `docs/data/helper_residue/sable_financial_vs_statement_bad_draw_gate_20260516.json`
+- `docs/data/helper_residue/sable_financial_vs_statement_bad_draw_gate_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\compare_compile_surface_audits.py`
+- `python -m pytest tests\test_compare_compile_surface_audits.py tests\test_compile_surface_invariants.py -q`
+  - `18 passed`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\financial_baseline_sable_recompile_audit_20260516.json --candidate-audit docs\data\helper_residue\participant_statement_sable_recompile_reroll_audit_20260516.json --out-json docs\data\helper_residue\sable_financial_vs_statement_replay_gate_20260516.json --out-md docs\data\helper_residue\sable_financial_vs_statement_replay_gate_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\financial_baseline_sable_recompile_audit_20260516.json --candidate-audit docs\data\helper_residue\participant_statement_sable_recompile_audit_20260516.json --out-json docs\data\helper_residue\sable_financial_vs_statement_bad_draw_gate_20260516.json --out-md docs\data\helper_residue\sable_financial_vs_statement_bad_draw_gate_20260516.md`
+
+Lesson:
+
+No-helper progress needs a preservation layer. We cannot judge architectural
+repairs only by whether a newly targeted surface improves; we must reject
+candidate compiles that drop concrete backbone predicates or regress already
+earned contracts. This is the guardrail between real compile-surface
+architecture and stochastic prompt whack-a-mole.
+
+Next pressure:
+
+- Use the gate before any focused QA replay.
+- For the next improvement attempt, target a fixture whose baseline contract
+  pressure is clear but whose replay candidate preserves the existing backbone.

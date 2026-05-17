@@ -1,0 +1,69 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 118,
+      "baseline_run": "financial_baseline_sable_recompile_20260516",
+      "candidate_direct_fact_count": 82,
+      "candidate_run": "participant_statement_sable_recompile_reroll_20260516",
+      "contract_regressions": [],
+      "direct_fact_ratio": 0.6949,
+      "direct_fact_regression": true,
+      "family_regressions": [
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "answer_detail_surface"
+        }
+      ],
+      "fixture": "sable_creek_budget",
+      "gained_predicates": [
+        "advisory_observation",
+        "amendment_introduced",
+        "disclosure_event",
+        "emergency_declaration",
+        "financial_transaction",
+        "fiscal_certification",
+        "legal_advice",
+        "member_vote",
+        "personal_relationship",
+        "public_comment",
+        "public_hearing_notice",
+        "quorum_check",
+        "reserve_balance",
+        "rule_source"
+      ],
+      "gate_status": "regression",
+      "lost_predicates": [
+        "balance_derived_from",
+        "certification_issued",
+        "conflict_of_interest_disclosed",
+        "council_ratified",
+        "emergency_declared",
+        "emergency_expenditure_authorized",
+        "event_happened",
+        "fund_balance",
+        "legal_opinion",
+        "opinion_is_binding",
+        "person_relationship",
+        "public_comment_made",
+        "rule_exception",
+        "rule_threshold",
+        "staff_estimate",
+        "vote_cast",
+        "vote_result"
+      ]
+    }
+  ],
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 0,
+    "direct_fact_regression_count": 1,
+    "family_regression_count": 1,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "regression": 1
+    },
+    "predicate_loss_count": 17
+  }
+}

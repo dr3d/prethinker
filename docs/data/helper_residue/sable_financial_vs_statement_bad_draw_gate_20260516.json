@@ -1,0 +1,94 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 118,
+      "baseline_run": "financial_baseline_sable_recompile_20260516",
+      "candidate_direct_fact_count": 32,
+      "candidate_run": "participant_statement_sable_recompile_20260516",
+      "contract_regressions": [
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "contract": "financial_baseline_derivation_contract"
+        }
+      ],
+      "direct_fact_ratio": 0.2712,
+      "direct_fact_regression": true,
+      "family_regressions": [
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "answer_detail_surface"
+        },
+        {
+          "baseline_status": "partial",
+          "candidate_status": "ledger_only",
+          "family": "custody_control_surface"
+        },
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "financial_baseline_surface"
+        },
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "measure_count_surface"
+        },
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "source_authority_surface"
+        }
+      ],
+      "fixture": "sable_creek_budget",
+      "gained_predicates": [
+        "amendment_introduced",
+        "conflict_disclosed",
+        "fiscal_certification",
+        "individual_vote",
+        "legal_advice",
+        "minimum_reserve_policy",
+        "notice_published",
+        "public_comment",
+        "reserve_balance_at",
+        "staff_assessment"
+      ],
+      "gate_status": "regression",
+      "lost_predicates": [
+        "balance_derived_from",
+        "certification_issued",
+        "charter_rule",
+        "conflict_of_interest_disclosed",
+        "council_ratified",
+        "emergency_declared",
+        "emergency_expenditure_authorized",
+        "event_happened",
+        "fund_balance",
+        "legal_opinion",
+        "opinion_is_binding",
+        "person_relationship",
+        "person_role",
+        "public_comment_made",
+        "record_correction",
+        "rule_exception",
+        "rule_threshold",
+        "staff_estimate",
+        "vote_cast",
+        "vote_result"
+      ]
+    }
+  ],
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 1,
+    "direct_fact_regression_count": 1,
+    "family_regression_count": 5,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "regression": 1
+    },
+    "predicate_loss_count": 20
+  }
+}
