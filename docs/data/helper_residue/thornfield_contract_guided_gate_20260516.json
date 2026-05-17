@@ -1,0 +1,54 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 122,
+      "baseline_run": "native_nohelper_story_worlds_draw1_20260516_compile",
+      "candidate_direct_fact_count": 59,
+      "candidate_run": "contract_guided_thornfield_recompile_20260516",
+      "contract_regressions": [],
+      "direct_fact_ratio": 0.4836,
+      "direct_fact_regression": true,
+      "family_regressions": [],
+      "fixture": "thornfield_variance",
+      "gained_predicates": [
+        "code_section",
+        "lot_line_position",
+        "notice_omission",
+        "procedural_ruling",
+        "setback_measurement",
+        "spatial_distance",
+        "survey_record",
+        "variance_condition",
+        "zoning_requirement"
+      ],
+      "gate_status": "regression",
+      "lost_predicates": [
+        "appeal_filed",
+        "board_composition_rule",
+        "business_use_claim",
+        "hearing_attendance",
+        "lot_line_survey",
+        "notice_requirement",
+        "permit_application",
+        "record_status",
+        "setback_requirement",
+        "survey_measurement",
+        "testimony_statement",
+        "variance_finding",
+        "variance_standard"
+      ]
+    }
+  ],
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 0,
+    "direct_fact_regression_count": 1,
+    "family_regression_count": 0,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "regression": 1
+    },
+    "predicate_loss_count": 13
+  }
+}

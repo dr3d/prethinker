@@ -193,6 +193,9 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
 
     assert "chronological/event-list sources need complete event backbone units" in context
+    assert "Compile surface preservation rule" in context
+    assert "must not replace already-needed concrete typed rows" in context
+    assert "dropping typed backbone predicate families is not acceptable" in context
     assert "event id or entry label, date/time/order, actor/party/system" in context
     assert "vague event wrapper" in context
     assert "financial or numeric-state calculations need baseline preservation" in context

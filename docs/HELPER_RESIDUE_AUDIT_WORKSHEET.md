@@ -4112,3 +4112,84 @@ Next pressure:
 - Use the gate before any focused QA replay.
 - For the next improvement attempt, target a fixture whose baseline contract
   pressure is clear but whose replay candidate preserves the existing backbone.
+
+## HR-048 - Thornfield Preservation-Gated Replay
+
+Date: 2026-05-16
+
+Before:
+
+- HR-046 showed `thornfield_variance` has both financial-derivation pressure
+  and participant statement-status pressure.
+- It was a better next replay target than Sable because its baseline compile
+  was healthier: `122` direct facts.
+- HR-047 provided the gate needed to avoid wasting QA on regressed compiles.
+
+Prediction:
+
+- A candidate replay should only proceed to no-helper QA if it preserves the
+  baseline backbone while improving or holding contracts.
+
+Intervention:
+
+- Ran two contract-guided Thornfield recompiles.
+- Audited both candidates.
+- Compared both candidates against the low-six baseline audit using the new
+  preservation gate.
+
+After:
+
+First candidate:
+
+- Direct facts: `122 -> 59` (`0.4836`)
+- Gate: `regression`
+- Lost predicates: `13`, including `testimony_statement`,
+  `variance_finding`, `setback_requirement`, `notice_requirement`, and
+  `permit_application`.
+
+Second candidate:
+
+- Direct facts: `122 -> 101` (`0.8279`)
+- Gate: `regression`
+- Family regressions: `0`
+- Contract regressions: `0`
+- Lost predicates: `15`, including `testimony_statement`,
+  `variance_finding`, `setback_requirement`, `notice_requirement`,
+  `objection_filed`, and `record_status`.
+
+Artifacts:
+
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_20260516.json`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_20260516.md`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_audit_20260516.md`
+- `docs/data/helper_residue/thornfield_contract_guided_gate_20260516.json`
+- `docs/data/helper_residue/thornfield_contract_guided_gate_20260516.md`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_reroll_20260516.json`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_reroll_20260516.md`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_reroll_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_thornfield_recompile_reroll_audit_20260516.md`
+- `docs/data/helper_residue/thornfield_contract_guided_reroll_gate_20260516.json`
+- `docs/data/helper_residue/thornfield_contract_guided_reroll_gate_20260516.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --fixture thornfield_variance --compile-source --compile-plan-passes --focused-pass-ops-schema --source-entity-ledger --source-record-ledger --source-record-ledger-facts --intake-registry-context --review-profile --profile-review-retry --quality-gate`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\contract_guided_thornfield_recompile_reroll_20260516\thornfield_variance --out-json docs\data\helper_residue\contract_guided_thornfield_recompile_reroll_audit_20260516.json --out-md docs\data\helper_residue\contract_guided_thornfield_recompile_reroll_audit_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --candidate-audit docs\data\helper_residue\contract_guided_thornfield_recompile_reroll_audit_20260516.json --out-json docs\data\helper_residue\thornfield_contract_guided_reroll_gate_20260516.json --out-md docs\data\helper_residue\thornfield_contract_guided_reroll_gate_20260516.md`
+
+Lesson:
+
+The compile-surface work has reached a new layer. We can name missing contracts,
+but single-draw recompiles are not preserving the already-earned backbone
+reliably enough. The correct next move is not another lens-specific invariant;
+it is compile preservation: candidate compiles must keep existing concrete
+predicate families while adding new slots.
+
+Next pressure:
+
+- Strengthen compile guidance around preservation explicitly: new invariant
+  rows are additive and must not replace concrete typed rows for rules,
+  events, measures, source authority, statements, corrections, and domain
+  backbone predicates.
+- Keep the gate as the decision point before any QA replay.
