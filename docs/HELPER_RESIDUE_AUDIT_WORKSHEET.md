@@ -4655,3 +4655,75 @@ Next pressure:
   compile stability can preserve all surfaces in a single draw.
 - Do not restamp the native corpus until promotable no-helper replays are
   consolidated or explicitly rejected.
+
+## HR-055 - Fixture Vocabulary Leak Audit Refresh
+
+Date: 2026-05-16
+
+Before:
+
+- Recent work retired helper delivery by default and moved toward direct
+  compile surfaces.
+- Legacy roster/student/adult and sensor-specific helper paths still existed in
+  active code for compatibility.
+- The audit needed to distinguish live architecture, old compile compatibility,
+  disabled helper adapters, and domain predicates still awaiting transfer
+  evidence.
+
+Prediction:
+
+- Structural terms such as `explicit_table_membership` should remain low-risk.
+- School-shaped terms should concentrate in compatibility/helper paths rather
+  than current docs.
+- Sensor-specific terms should be visible as domain-under-transfer or helper
+  adapter risks, not silently treated as global architecture.
+
+Intervention:
+
+- Reran `scripts/audit_fixture_vocabulary_leaks.py`.
+- Extended the audit policy with sensor-side terms:
+  `industrial_sensor_support`, `_industrial_sensor_companion`, `sensor_id`,
+  `sensor_calibration_date`, `sensor_certified_scope`,
+  `sensor_next_calibration_due`, and `sensor_not_certified_for`.
+- Regenerated the fixture-vocabulary leak audit artifacts.
+
+After:
+
+Key active-code counts:
+
+| Term family | Status | Active-code signal |
+| --- | --- | ---: |
+| `explicit_table_*` | structural | present, low-risk |
+| `roster_table_*` | compatibility aliases | present in old-query compatibility paths |
+| `student_group_assignment` / `student_in_homeroom` / `homeroom_member` | compatibility predicates | present, high-risk if promoted |
+| `source_record_student_group_assignment` / `source_record_adult_role` | quarantined candidate helpers | present only as legacy helper/parser surfaces |
+| `industrial_sensor_support` / `_industrial_sensor_companion` | legacy native helper adapters | present, high-risk if used as normal architecture |
+| `sensor_*` predicates | domain predicates under transfer | present or tracked as vocabulary requiring unlike-device evidence |
+
+Artifacts:
+
+- `scripts/audit_fixture_vocabulary_leaks.py`
+- `docs/data/helper_residue/fixture_vocabulary_leak_audit_20260516.json`
+- `docs/data/helper_residue/fixture_vocabulary_leak_audit_20260516.md`
+
+Verification:
+
+- `python scripts\audit_fixture_vocabulary_leaks.py --out-json docs\data\helper_residue\fixture_vocabulary_leak_audit_20260516.json --out-md docs\data\helper_residue\fixture_vocabulary_leak_audit_20260516.md`
+- `python -m py_compile scripts\audit_fixture_vocabulary_leaks.py`
+
+Lesson:
+
+The current replay machinery is not promoting fixture words by itself. The
+danger remains in compatibility paths and domain predicates whose trigger
+conditions have not transferred yet. Those terms should stay labelled as
+compatibility, helper-adapter, or under-transfer vocabulary until unlike-domain
+evidence promotes a generic replacement.
+
+Next pressure:
+
+- Keep helpers off during QA and stamp work.
+- Prefer direct compile surfaces such as explicit table membership,
+  role/assignment, device/instrument identifiers, calibration events, and
+  certification scope over query-time roster or sensor companions.
+- When a replay depends on a domain predicate, require transfer evidence before
+  describing it as architecture.
