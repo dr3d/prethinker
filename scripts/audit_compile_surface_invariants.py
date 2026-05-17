@@ -384,6 +384,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
+            _audit_repeated_record_detail_delivery_contract(source_facts, direct_rows),
         ],
         "summary": _summarize_families(families),
     }
@@ -818,6 +819,212 @@ def _audit_vague_wrapper_backbone_contract(
         "wrapper_row_count": len(wrapper_rows),
         "wrapper_predicates": wrapper_predicates,
     }
+
+
+def _audit_repeated_record_detail_delivery_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Check that repeated record ledgers keep anchor-level detail rows.
+
+    This is the fixture-free version of the Dulse pressure: if the source has
+    repeated source-owned records and those records mention actions, transfers,
+    status, consequences, or required returns, the compile should not preserve
+    only the rule/status wrapper. Each record anchor should remain joinable to
+    the participants, item/value detail, and outcome/consequence rows that make
+    later questions answerable without rereading prose.
+    """
+
+    source_rows = _source_record_text_rows(source_facts)
+    source_anchor_signals = _source_record_anchor_signals(source_rows)
+    source_anchors = set(source_anchor_signals)
+    source_tokens = _tokens_for_facts(source_facts)
+    transfer_signal = source_tokens & {
+        "trade",
+        "traded",
+        "transfer",
+        "transferred",
+        "provided",
+        "return",
+        "returned",
+        "received",
+        "sold",
+        "bought",
+        "paid",
+        "issued",
+    }
+    outcome_signal = source_tokens & {
+        "void",
+        "invalid",
+        "violation",
+        "violated",
+        "status",
+        "flagged",
+        "disputed",
+        "unresolved",
+        "settled",
+        "consequence",
+        "penalty",
+        "must",
+        "owed",
+    }
+    triggered_groups = {
+        "record_anchors": sorted(source_anchors)[:20],
+        "transfer_or_action_terms": sorted(transfer_signal),
+        "outcome_or_consequence_terms": sorted(outcome_signal),
+    }
+    actionable_anchors = set(source_anchors)
+    if len(actionable_anchors) < 3 or not (transfer_signal or outcome_signal):
+        return {
+            "contract": "repeated_record_detail_delivery_contract",
+            "description": "repeated source-owned records should preserve per-record participant, item/value, and status/consequence detail surfaces",
+            "status": "not_applicable",
+            "required_key_count": 0,
+            "companion_key_count": 0,
+            "missing_keys": [],
+            "triggered_groups": triggered_groups,
+            "record_anchor_count": len(actionable_anchors),
+            "complete_anchor_count": 0,
+            "partial_anchor_count": 0,
+            "direct_anchor_count": 0,
+            "direct_predicates": [],
+        }
+
+    direct_anchors = _direct_anchor_slots(direct_rows)
+    complete: list[str] = []
+    partial: list[str] = []
+    missing: list[str] = []
+    for anchor in sorted(actionable_anchors):
+        slots = direct_anchors.get(anchor, set())
+        required_slots = {"record_identity"}
+        if transfer_signal:
+            required_slots.add("participant")
+            required_slots.add("item_or_value")
+        elif outcome_signal:
+            required_slots.add("status_or_consequence")
+        if required_slots <= slots:
+            complete.append(anchor)
+        elif slots:
+            partial.append(f"{anchor}:{','.join(sorted(required_slots - slots))}")
+        else:
+            missing.append(anchor)
+
+    complete_ratio = (len(complete) / len(actionable_anchors)) if actionable_anchors else 0.0
+    if complete and (not partial and not missing):
+        status = "pass"
+    elif complete_ratio >= 0.65:
+        status = "pass_sparse_tail"
+    elif complete:
+        status = "partial"
+    elif partial:
+        status = "shallow_record_detail_delivery"
+    else:
+        status = "missing_record_detail_delivery"
+
+    return {
+        "contract": "repeated_record_detail_delivery_contract",
+        "description": "repeated source-owned records should preserve per-record participant, item/value, and status/consequence detail surfaces",
+        "status": status,
+        "required_key_count": len(actionable_anchors),
+        "companion_key_count": len(complete),
+        "missing_keys": [*partial[:20], *missing[:20]],
+        "triggered_groups": triggered_groups,
+        "record_anchor_count": len(actionable_anchors),
+        "complete_anchor_count": len(complete),
+        "partial_anchor_count": len(partial),
+        "complete_anchor_ratio": round(complete_ratio, 4),
+        "direct_anchor_count": len(direct_anchors),
+        "direct_predicates": sorted({str(row["predicate"]) for row in direct_rows if _row_record_anchors(row)}),
+    }
+
+
+def _source_record_text_rows(source_facts: list[str]) -> list[str]:
+    rows: list[str] = []
+    for fact in source_facts:
+        predicate = _predicate_name(fact)
+        if predicate not in {"source_record_text_atom", "source_record_label", "source_record_row"}:
+            continue
+        rows.append(str(fact).lower())
+    return rows
+
+
+def _source_record_anchors(source_rows: list[str]) -> set[str]:
+    anchors: set[str] = set()
+    for row in source_rows:
+        for match in re.finditer(
+            r"(?:^|[^a-z0-9])(?P<prefix>entry|record|case|item|filing|transaction|trade|event)[_\s-]+(?P<id>[0-9]+[a-z]?)",
+            row,
+        ):
+            anchors.add(f"{match.group('prefix')}_{match.group('id')}")
+    return anchors
+
+
+def _source_record_anchor_signals(source_rows: list[str]) -> dict[str, set[str]]:
+    signals: dict[str, set[str]] = {}
+    for row in source_rows:
+        row_anchors = _source_record_anchors([row])
+        if not row_anchors:
+            continue
+        row_tokens = set(TOKEN_RE.findall(row.lower()))
+        for anchor in row_anchors:
+            signals.setdefault(anchor, set()).update(row_tokens)
+    return signals
+
+
+def _direct_anchor_slots(direct_rows: list[dict[str, Any]]) -> dict[str, set[str]]:
+    anchors: dict[str, set[str]] = {}
+    for row in direct_rows:
+        row_anchors = _row_record_anchors(row)
+        if not row_anchors:
+            continue
+        slots = _record_detail_slots(row)
+        for anchor in row_anchors:
+            anchors.setdefault(anchor, set()).update(slots)
+    return anchors
+
+
+def _row_record_anchors(row: dict[str, Any]) -> set[str]:
+    anchors: set[str] = set()
+    for raw in row.get("args", []):
+        value = _normalize_arg(str(raw))
+        if re.match(r"^(entry|record|case|item|filing|transaction|trade|event)_[a-z0-9_-]*[0-9][a-z0-9_-]*$", value):
+            anchors.add(value)
+    return anchors
+
+
+def _record_detail_slots(row: dict[str, Any]) -> set[str]:
+    predicate = str(row.get("predicate") or "").lower()
+    tokens = _tokens_for_row(row)
+    slots: set[str] = set()
+    if tokens & {"entry", "record", "ledger", "log", "register", "transaction", "trade"} or any(
+        marker in predicate for marker in ("entry", "record", "ledger", "transaction", "trade")
+    ):
+        slots.add("record_identity")
+    if tokens & {"participant", "party", "actor", "seller", "buyer", "trader", "witness", "from", "to", "recipient", "giver"} or any(
+        marker in predicate for marker in ("participant", "party", "actor", "seller", "buyer", "trader", "witness")
+    ):
+        slots.add("participant")
+    if tokens & {"item", "good", "goods", "amount", "quantity", "unit", "value", "measure", "measures", "bars", "count"} or any(
+        marker in predicate for marker in ("item", "good", "amount", "quantity", "value")
+    ):
+        slots.add("item_or_value")
+    if tokens & {
+        "status",
+        "void",
+        "invalid",
+        "violation",
+        "flagged",
+        "disputed",
+        "unresolved",
+        "settled",
+        "consequence",
+        "penalty",
+        "return",
+        "returned",
+        "obligation",
+    } or any(marker in predicate for marker in ("status", "consequence", "penalty", "violation", "void", "return")):
+        slots.add("status_or_consequence")
+    return slots
 
 
 def _is_vague_wrapper_row(row: dict[str, Any]) -> bool:

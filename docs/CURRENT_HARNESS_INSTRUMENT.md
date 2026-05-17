@@ -243,6 +243,15 @@ Recent transfer work supports the current direction:
   drift; DeepSeek V4 Pro compiled to 33/5/2 with helpers still disabled but
   continued delivery drift. Treat model/provider choice as variance evidence,
   not as a substitute for the missing structural delivery contract.
+- The invariant audit now includes `repeated_record_detail_delivery_contract`.
+  It looks for repeated source-owned record anchors whose source text carries
+  transfer/action/status language, then checks whether admitted rows preserve
+  record identity, participant/actor, item/value, and status/consequence slots
+  as joinable surfaces. This is an audit gate only; an attempted prompt repair
+  was rejected because it over-compressed Dulse rather than improving QA. On
+  the 56-fixture native draw-1 preflight, the contract surfaced three weak
+  cases: `avalon_grant_committee`, `dulse_ledger`, and
+  `rotating_chair_authority`.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

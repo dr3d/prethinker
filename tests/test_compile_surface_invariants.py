@@ -194,6 +194,64 @@ def test_audit_compile_surface_invariants_allows_vague_event_wrapper_when_backbo
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_detects_repeated_record_detail_gap(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, entry_1_lee_traded_4_boxes_to_mira_status_valid).",
+            "source_record_text_atom(src_line_002, entry_2_omar_traded_5_crates_to_nia_status_void_must_return_goods).",
+            "source_record_text_atom(src_line_003, entry_3_nia_returned_5_crates_to_omar_status_settled).",
+            "ledger_entry(entry_1, 2026_01_01).",
+            "record_status(entry_1, valid).",
+            "ledger_entry(entry_2, 2026_01_02).",
+            "record_status(entry_2, void).",
+            "ledger_entry(entry_3, 2026_01_03).",
+            "record_status(entry_3, settled).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "repeated_record_detail_delivery_contract"
+    )
+    assert contract["status"] == "shallow_record_detail_delivery"
+    assert contract["record_anchor_count"] == 3
+    assert contract["complete_anchor_count"] == 0
+    assert "entry_2:item_or_value,participant" in contract["missing_keys"]
+
+
+def test_audit_compile_surface_invariants_passes_repeated_record_detail_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, entry_1_lee_traded_4_boxes_to_mira_status_valid).",
+            "source_record_text_atom(src_line_002, entry_2_omar_traded_5_crates_to_nia_status_void_must_return_goods).",
+            "source_record_text_atom(src_line_003, entry_3_nia_returned_5_crates_to_omar_status_settled).",
+            "ledger_entry(entry_1, 2026_01_01).",
+            "record_participant(entry_1, lee, sender).",
+            "record_item(entry_1, boxes, 4).",
+            "record_status(entry_1, valid).",
+            "ledger_entry(entry_2, 2026_01_02).",
+            "record_participant(entry_2, omar, sender).",
+            "record_item(entry_2, crates, 5).",
+            "record_status(entry_2, void).",
+            "ledger_entry(entry_3, 2026_01_03).",
+            "record_participant(entry_3, nia, sender).",
+            "record_item(entry_3, crates, 5).",
+            "record_status(entry_3, settled).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "repeated_record_detail_delivery_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["complete_anchor_count"] == 3
+
+
 def test_audit_compile_surface_invariants_detects_financial_baseline_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",
