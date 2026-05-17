@@ -4,130 +4,82 @@ This is the short handoff for coding agents working in Prethinker.
 
 ## First Read
 
-1. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-2. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+Read these in order before changing code:
+
+1. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+2. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 3. [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 4. [docs/CTO_ARCHITECTURE_BRIEF.md](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md)
-5. [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
-6. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
-7. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-8. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-9. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
-10. [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
-11. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
-12. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-13. [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
-14. [docs/DATASET_TRANSFER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DATASET_TRANSFER_WORKSHEET.md)
-15. [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
-16. [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
-17. [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md)
+5. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+6. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+7. [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
+8. [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+9. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+10. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+11. [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
+12. [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md)
 
-Treat older reports and prompt snapshots as Git history, not live guidance.
+Treat worksheets, generated reports, prompt snapshots, and long run journals as
+archive material. Git history and `C:\prethinker_tmp_archive` preserve them; do
+not use them as day-one guidance unless the user names a specific artifact.
 
 ## Current Shape
 
 - `src/mcp_server.py` owns the canonical `process_utterance()` runtime.
-- `ui_gateway/` is the live manual cockpit for prompt-book demos, route telemetry, KB mutations, and clarification turns.
-- `semantic_ir_v1` is the active research path for richer model semantics before deterministic admission; the console default is the LM Studio `qwen/qwen3.6-35b-a3b` lane.
-- `src/semantic_ir.py` owns the mapper, projection policy, and admission diagnostics.
-- Epistemic Worlds v1 preserves projection-blocked and supported-but-skipped candidates as scoped diagnostics, without admitting them as global truth.
-- Long story-like console inputs may be split into focused Semantic IR segments by `ui_gateway/gateway/phases.py`; each segment still goes through canonical `process_utterance()`, then the gateway dedupes the visible mutation list.
-- `medical@v0` is the active bounded ontology profile; `legal_courtlistener@v0` and `sec_contracts@v0` are live-data profile lanes for provenance/conflict and obligation/rule pressure.
-- `active_profile=auto` uses `semantic_router_v1` to choose one profile per Semantic IR turn and load that profile's thick context/contracts. It is context selection only, not write authority.
-- `scripts/run_mixed_domain_agility.py` is the current cross-domain pressure harness for shuffled Goldilocks/Glitch/Ledger/Silverton/Harbor/legal/SEC/medical streams.
-- `medical@v0` Semantic IR calls include profile-owned predicate contracts and compact UMLS bridge context; the generic mapper should remain structural rather than accumulating medical type lists.
-- `modelfiles/domain_profile_catalog.v0.json` is the thin skill-like roster. `profile.story_world.v0.json`, `profile.probate.v0.json`, `profile.legal_courtlistener.v0.json`, and `profile.sec_contracts.v0.json` are declarative thick-context packages for routing/profile experiments.
-- `adapters/courtlistener/` is a conservative legal-source adapter. Keep live generated data under ignored `datasets/courtlistener/generated/`; do not commit raw API caches.
-- `adapters/sec_edgar/` is a conservative SEC/contract adapter shell. Keep live generated data under ignored `datasets/sec_edgar/generated/`; do not commit raw API caches.
-- `src/umls_mvp.py` and `scripts/build_umls_semantic_network_kb.py` contain the current UMLS bridge/Semantic Network work.
-- The Prolog KB receives committed facts/rules only after runtime gates accept them.
-- For document/source compilation, the durable product is the compiled KB
-  artifact package: admitted world state, admitted epistemic/provenance state,
-  deterministic helpers, manifest metadata, and non-truth diagnostics. Q&A
-  should answer from the package, not by rereading source prose.
+- `ui_gateway/` is the manual cockpit for demos, route telemetry, KB mutation,
+  and clarification turns.
+- `semantic_ir_v1` is the active path: model-owned semantic workspace first,
+  deterministic mapper admission second.
+- `src/semantic_ir.py` owns mapper policy, projection policy, admission
+  diagnostics, and profile-owned predicate alias normalization.
+- `active_profile=auto` uses `semantic_router_v1` for context/profile selection
+  only. It never authorizes writes.
+- `modelfiles/domain_profile_catalog.v0.json` is the thin profile roster.
+  Thick profile context lives in the `profile.*.json` files.
+- `adapters/courtlistener/` and `adapters/sec_edgar/` are conservative source
+  adapter shells. Keep live generated data and raw caches out of Git.
+- The current document product is a compiled KB artifact package:
+  `world.pl`, `epistemic.pl`, deterministic ledgers, query policy, manifest,
+  and diagnostics.
+- The live query policy is no-helper by default. Native helper companion rows
+  are legacy/forensic compatibility, not the preferred architecture.
 
 ## Core Invariants
 
-- Prefer deterministic validation over trusting model prose.
-- Keep model proposals, clarification asks, committed mutations, and blocked mutations visible in the UI.
-- Do not broaden the medical profile into general clinical advice.
-- Do not commit licensed UMLS source archives or extracted full Metathesaurus tables.
-- Keep local run data under ignored paths such as `tmp/`.
+- Deterministic code decides what becomes durable truth.
+- Model output is proposal material until mapper/runtime gates admit it.
+- Keep source claims, established facts, uncertainty, corrections, and derived
+  conclusions separate.
+- Do not teach the harness fixture names, row IDs, answer strings, local people,
+  or source-specific vocabulary.
+- Do not reintroduce retired lab-automation, public-benchmarking, publishing,
+  helper-era, or generated-report lanes.
+- Public docs should describe the living project. Put stale notebooks and bulky
+  artifacts in Git history or `C:\prethinker_tmp_archive`.
 - Preserve user changes in a dirty worktree; never revert unrelated edits.
-- Do not reintroduce the retired lab-automation, public benchmarking, or
-  publishing lanes. Git history has them.
-- Keep fixture nouns out of architecture. A selector/helper/scoring fix should
-  be describable without local row IDs, story names, or fixture-specific
-  people/groups.
-- Treat helper retirement as a compile-surface stability problem. Direct
-  admitted surfaces should replace helper bridges; source-record fallback alone
-  is useful evidence but not proof that a helper can disappear.
 
 ## Verification
 
-Use focused tests while iterating, then run the full suite before a stopping-point commit:
+Use focused tests while iterating, then run the full suite before a stopping
+point commit when practical:
 
 ```powershell
-python -m pytest tests/test_medical_profile_runtime.py tests/test_ui_gateway_phases.py tests/test_ui_gateway_runtime_hooks.py -q
-python -m pytest tests/test_umls_mvp.py tests/test_umls_semantic_network_builder.py -q
-python -m pytest tests/test_semantic_ir_runtime.py tests/test_semantic_router.py tests/test_router_training_set.py -q
-python -m pytest tests/test_courtlistener_adapter.py tests/test_domain_profiles.py -q
-python -m pytest tests/test_sec_edgar_adapter.py tests/test_domain_profiles.py -q
+python -m pytest tests/test_semantic_ir_runtime.py tests/test_semantic_router.py -q
+python -m pytest tests/test_domain_bootstrap_file.py tests/test_domain_bootstrap_qa.py -q
+python -m pytest tests/test_compile_surface_invariants.py tests/test_compile_surface_stability.py -q
+python -m pytest tests/test_qa_mode_selector.py tests/test_selector_guard_families.py -q
 python -m pytest -q
 ```
 
-The latest full-suite cleanup pass is `996 passed, 2 subtests passed`. The latest focused
-helper/selector verification is `428 passed`; rerun the full suite before
-updating any full-suite headline. Recent focused batteries also
-cover CourtListener, SEC/contracts, domain profiles, Semantic IR runtime, UI
-gateway phases, trace rendering, router agility, router training data, archived
-Lava stress packs, UMLS builders, profile bootstrap, raw-file intake planning,
-post-ingestion QA, story-world fixtures, CE, and rule acquisition.
-Live/generated smoke traces belong under ignored paths such as
-`datasets/*/generated/` and `tmp/`.
+Latest known full-suite cleanup pass: `996 passed, 2 subtests passed`.
 
-## Harness Preflight Notes
+## Long Run Hygiene
 
-Before a long LM Studio/GPU research burn, run a small readiness pass:
-
-```powershell
-python -m pytest -q
-Invoke-RestMethod -Uri 'http://127.0.0.1:1234/v1/models' -TimeoutSec 5
-python scripts/run_clarification_eagerness_fixture.py --surface both --limit 1 --model qwen/qwen3.6-35b-a3b --temperature 0 --timeout-seconds 240 --max-tokens 4096 --out-dir tmp/preflight_lm_harness
-python scripts/run_umls_bridge_admission_probe.py
-python scripts/run_domain_profile_smoke.py --dataset datasets/courtlistener/samples/legal_seed_synthetic_5.jsonl --profile-id legal_courtlistener@v0 --domain legal_courtlistener --limit-per-dataset 1 --backend lmstudio --model qwen/qwen3.6-35b-a3b --base-url http://127.0.0.1:1234/v1 --timeout 240 --max-tokens 4096 --out tmp/preflight_lm_harness/legal_profile_smoke.jsonl
-python scripts/run_domain_profile_smoke.py --dataset datasets/sec_edgar/samples/sec_contracts_synthetic_5.jsonl --profile-id sec_contracts@v0 --domain sec_contracts --limit-per-dataset 1 --backend lmstudio --model qwen/qwen3.6-35b-a3b --base-url http://127.0.0.1:1234/v1 --timeout 240 --max-tokens 4096 --out tmp/preflight_lm_harness/sec_profile_smoke.jsonl
-```
-
-Notes from the 2026-05-03 Codex upgrade/preflight:
-
-- A raw LM Studio ping with `response_format={"type":"json_object"}` returned
-  HTTP 400. The project runners use strict `json_schema` payloads; verify with
-  the actual runners rather than a generic ping.
-- `run_domain_bootstrap_file.py` accepts either `http://127.0.0.1:1234` or
-  `http://127.0.0.1:1234/v1` for `--base-url`; it normalizes before appending
-  the chat-completions path.
-- A tiny CE smoke with `--max-tokens 1200` produced a parse error because the
-  Semantic IR was clipped. Rerunning the same case with `--max-tokens 4096`
-  parsed and scored correctly. Treat low token caps as a likely cause of
-  `empty_or_unparseable_semantic_ir`.
-- The loaded Qwen endpoint may expose `reasoning_content` during raw manual
-  pings. The harness configs pass `think_enabled=False` and
-  `reasoning_effort=none`; use temperature `0` for research sweeps unless a run
-  is explicitly measuring variance.
-- After the Codex app upgrade, bundled `rg` at
-  `C:\Program Files\WindowsApps\OpenAI.Codex_...\app\resources\rg.exe` returned
-  `Access is denied`. If that happens, use PowerShell `Select-String` /
-  `Get-ChildItem` until the bundled tool is available again.
-- LM Studio base URL expectations differ by runner. `run_domain_bootstrap_file.py`
-  expects `--base-url http://127.0.0.1:1234`; passing `/v1` produced an empty
-  profile response in a Three Moles replay. `run_domain_bootstrap_qa.py` and
-  the profile smoke scripts use `--base-url http://127.0.0.1:1234/v1`.
-- Keep `tmp/` lean. It is scratch only, and should normally be empty except for
-  ad hoc local handoffs or active experiments. Fixture handoff folders and bulky
-  scratch outputs can be moved to `C:\prethinker_tmp_archive`.
-- Treat `C:\prethinker_tmp_archive` as cold storage, not day-to-day context.
-  Search it only for named artifacts or prior run evidence when needed, and do
-  not bulk-load it into context. If an archived artifact becomes an active
-  research result, summarize the lesson in tracked docs or fixture journals and
-  reference the archive path.
+- Keep `tmp/` lean; move bulky scratch output to `C:\prethinker_tmp_archive`.
+- Use OpenRouter or POWER according to wall-clock throughput and provider
+  stability. Hosted runs usually default to six lanes or fewer.
+- Tag OpenRouter calls by experiment family/phase/fixture when possible.
+- Treat transport/provider failures as transport evidence, not architecture
+  evidence.
+- If an archived artifact becomes important again, summarize the lesson in a
+  current tracked doc instead of relinking the whole notebook.

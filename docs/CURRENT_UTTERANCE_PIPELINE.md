@@ -203,7 +203,7 @@ emit a reusable, fixture-free surface directly.
 The selector chooses the best encounter surface per row. A guard prevents a
 tempting wrong surface from winning.
 
-The current live rollup has 7 guard families and 0 unclassified guards. The
+The current live rollup has 4 guard families and 0 unclassified guards. The
 guard count is intentionally audited rather than prematurely parameterized.
 Every guard should answer:
 

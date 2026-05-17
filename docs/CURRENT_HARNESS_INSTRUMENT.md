@@ -170,7 +170,7 @@ Recent transfer work supports the current direction:
   into direct admitted predicates, deterministic ledgers, or query policy.
 - Predicate inventory is now tracked directly so fixture-shaped names can be
   audited by frequency, scope, and layer rather than discovered by surprise in
-  worksheets.
+  archived notebooks.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -191,8 +191,8 @@ python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSO
 ```
 
 Generated run JSON can stay under `tmp/`. Durable scorecard lessons and
-artifact references should be captured in tracked fixture journals or current
-worksheets.
+artifact references should be captured in tracked fixture journals or compact
+current docs.
 
 `C:\prethinker_tmp_archive` is cold storage for bulky tmp evidence worth keeping
 but not worth carrying in the active tree or model context. Search it narrowly

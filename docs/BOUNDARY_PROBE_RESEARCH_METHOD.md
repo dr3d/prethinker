@@ -223,16 +223,15 @@ Next Probe:
 <unlike fixture or axis variant>
 ```
 
-## Relation To Active Worksheets
+## Relation To Research Archives
 
-The boundary-hunt worksheet is now the active movement log for broad corpus
-coordinates, designed probes, and helper/source cleanup:
+Detailed boundary-hunt notebooks are archived outside the public docs tree.
+This file keeps the durable method: measure, classify by fixture-free geometry,
+probe with unlike examples, and promote only transfer-safe repairs.
 
-- `docs/BOUNDARY_HUNT_WORKSHEET.md`
-
-The guard-generalization worksheet is now a completed compression archive in
-Git history/cold storage unless a boundary hunt discovers a new transferable
-guard replacement.
+The guard-generalization and helper-era worksheets are completed compression
+archives in Git history/cold storage unless a new transferable principle needs
+to be summarized in a current doc.
 
 When guard count drops, ask what changed:
 

@@ -142,8 +142,9 @@ failure.
 
 ## Next CTO Job
 
-Run the boundary hunt. Use `docs/BOUNDARY_HUNT_WORKSHEET.md` as the live
-workbench and `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md` as the doctrine.
+Run boundary probes. Use `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md` as the
+doctrine and `docs/ACTIVE_RESEARCH_LANES.md` for current priorities. Detailed
+movement logs are archive material, not front-door docs.
 
 The seed measurement is the 2026-05-12 wide OpenRouter corpus run:
 
@@ -184,10 +185,9 @@ Start with class-level boundary work:
 ## Progress Journals
 
 Maintain a journal entry for every meaningful research slice. Fixture-specific
-work belongs in that fixture's `progress_journal.md`. Cross-harness boundary
-work belongs in `docs/BOUNDARY_HUNT_WORKSHEET.md`. The guard worksheet is now
-the compression archive unless a boundary hunt reveals a new transferable guard
-replacement.
+work belongs in that fixture's `progress_journal.md`. Cross-harness lessons
+should be summarized in compact current docs when they become architecture; the
+detailed worksheets live in Git history or `C:\prethinker_tmp_archive`.
 
 Each entry should capture the date, the changed surface, the measured result,
 the artifact path when useful, the tests run, and the architecture lesson. It

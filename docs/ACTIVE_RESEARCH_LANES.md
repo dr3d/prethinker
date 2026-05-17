@@ -28,14 +28,14 @@ dataset label. Promote only when the principle survives unlike probes.
 
 ## Live Lanes
 
-| Priority | Lane | Question | Current Artifact |
+| Priority | Lane | Question | Current Surface |
 | --- | --- | --- | --- |
-| 1 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces instead of query-time compatibility bridges? | `docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md` |
-| 2 | Instrument stamp | What does the current no-helper instrument score across internal and external corpora when measured as a frozen system? | `docs/INSTRUMENT_STAMP_WORKSHEET.md` |
-| 3 | Lens vocabulary audit | Do lens terms fire on unlike documents because they are structural, or because they still carry corpus-shaped trigger conditions? | `docs/LENS_VOCABULARY_AUDIT_WORKSHEET.md` |
-| 4 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `docs/TRANSITION_DELTA_CONTRACT_WORKSHEET.md` |
-| 5 | Dataset transfer | How far does the instrument transfer across RACE, SQuAD, contract, privacy-policy, and other external QA corpora without dataset-specific tuning? | `docs/DATASET_TRANSFER_WORKSHEET.md` |
-| 6 | Language transfer | Which parts of the harness assume English surface forms, date formats, role verbs, or section conventions? | `docs/LANGUAGE_TRANSFER_AUDIT_WORKSHEET.md` |
+| 1 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces instead of query-time compatibility bridges? | `docs/CURRENT_HARNESS_INSTRUMENT.md`, `docs/COMPILED_KB_ARTIFACT_PACKAGE.md` |
+| 2 | Instrument stamp | What does the current no-helper instrument score across internal and external corpora when measured as a frozen system? | `PROJECT_STATE.md`, current scorecards under `tmp` during active runs |
+| 3 | Lens vocabulary audit | Do lens terms fire on unlike documents because they are structural, or because they still carry corpus-shaped trigger conditions? | `docs/SEMANTIC_LENS_ROSTER.md`, targeted tests |
+| 4 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `src/transition_delta_normalizer.py`, focused tests |
+| 5 | Dataset transfer | How far does the instrument transfer across RACE, SQuAD, contract, privacy-policy, and other external QA corpora without dataset-specific tuning? | summarized in `PROJECT_STATE.md` and current scorecards |
+| 6 | Language transfer | Which parts of the harness assume English surface forms, date formats, role verbs, or section conventions? | `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, focused language probes |
 | 7 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete plans, generated artifact strata, or misleading history? | `README.md`, `docs/index.html`, `docs/PUBLIC_DOCS_GUIDE.md` |
 
 ## Current Architecture Pressure
@@ -80,7 +80,7 @@ question is measurement rather than repair.
 
 Before a full stamp:
 
-1. Commit pending code and worksheet changes.
+1. Commit pending code and current-doc changes.
 2. Confirm native helper companion delivery is off by default.
 3. Run focused no-helper smoke checks.
 4. Decide the exact corpus list and draw count.

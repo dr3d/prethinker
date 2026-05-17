@@ -421,9 +421,11 @@ Companion inventory:
 from `scripts/select_qa_mode_without_oracle.py` and tracks whether many
 individual selector guards are collapsing into a small number of semantic
 families. The current rollup has `5` active guard return sites, `5` unique guard
-reasons, `4` families, and `0` unclassified reasons; the companion ledger keeps
-retired/scar history visible.
+reasons, `4` families, and `0` unclassified reasons. Detailed retired/scar
+ledger output is generated under `tmp` when needed and stays out of the public
+docs tree.
 
-[Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md) is the active
-workbench for not-exact rows that remain after guard compression. The older
-cross-fixture repair-slice report has moved to the external archive.
+[Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+describes the active method for not-exact rows that remain after guard
+compression. Detailed boundary and repair-slice notebooks have moved to the
+external archive.

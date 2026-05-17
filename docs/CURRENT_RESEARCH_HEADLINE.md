@@ -9,8 +9,9 @@ pegboard of semantic surfaces over frozen artifacts.
 
 Prethinker compiles source material into a governed KB package, then tests
 questions against candidate surfaces: baseline compile, focused lenses,
-registry-scaffolded vocabularies, query helpers, evidence bundles, selector
-policies, and guarded activation. Each surface may help some rows and hurt
+registry-scaffolded vocabularies, deterministic ledgers, direct query surfaces,
+evidence bundles, selector policies, and guarded activation. Each surface may
+help some rows and hurt
 others. The instrument's job is to measure that without letting the model see
 answer keys, judge labels, gold KBs, or source prose during selector choice.
 
@@ -61,7 +62,8 @@ names, and row addresses as first-class answer surfaces. Some candidates are
 live helpers. Some are temporary registry scaffolds. Most are row-gated until
 transfer proves them.
 
-Guard compression is archived; boundary hunt is active. The latest wide corpus
+Guard compression and detailed hunt notebooks are archived; boundary probing is
+active. The latest wide corpus
 run produced `1008 / 76 / 134` over `1218` questions with `0` runtime load
 errors and `0` write proposal rows. The `210` not-exact rows are now boundary
 coordinates: compile-surface gaps, hybrid-join gaps, query-surface gaps,
@@ -70,8 +72,8 @@ fixture-specific repairs.
 
 The newest successor pressure is compile-surface stability. Helper rows are
 being treated as legacy compatibility bridges unless the direct compile product
-can prove it already emits the reusable surface they were bridging to. The new
-invariant audit checks source-record ledgers against admitted direct facts
+can prove it already emits the reusable surface they were bridging to. Current
+invariant audits check source-record ledgers against admitted direct facts
 before no-helper QA burns, so "fewer helpers" cannot hide a weaker compile.
 
 ## Guard Pressure
@@ -106,7 +108,7 @@ Current discipline:
 
 Parameterization can wait. The project is still discovering the shape of the
 guard surface. The right next move is finding duplicate or near-duplicate
-guards, proving safe merges, and watching whether the seven families continue
+guards, proving safe merges, and watching whether the four families continue
 to hold.
 
 ## Current Itinerary
@@ -145,10 +147,9 @@ to hold.
 ## Read Next
 
 - [Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
-- [Boundary Hunt Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
-- [Compile Surface Stability Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+- [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
 - [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-- [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
 - [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)

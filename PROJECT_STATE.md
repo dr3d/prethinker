@@ -150,10 +150,10 @@ verdict = records what happened
   scorecard shape and names the current top slices as
   `narrative_event_detail_surface` and
   `governance_authority_rationale_surface`.
-- The older cross-fixture repair-slice report has moved to the external archive.
-  Current boundary work lives in `docs/BOUNDARY_HUNT_WORKSHEET.md` and
-  `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, which classify not-exact rows by
-  fixture-free boundary geometry before promoting repairs.
+- The older cross-fixture repair-slice report and detailed boundary notebooks
+  have moved to the external archive. Current boundary doctrine lives in
+  `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`; current priorities live in
+  `docs/ACTIVE_RESEARCH_LANES.md`.
 - First action from that planner: a scoped rule-interpretation/application
   source-surface pass over Heronvale and Meridian. Meridian is a strong local
   lift: full-40 moved from `26 exact / 10 partial / 4 miss` in the archived
@@ -799,8 +799,8 @@ Deep dives:
 1. `docs/PROJECT_HORIZON.md`
 2. `docs/DOMAIN_PROFILE_CATALOG.md`
 3. `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`
-4. `docs/DATASET_TRANSFER_WORKSHEET.md`
-5. `docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md`
+4. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+5. `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`
 6. `docs/PUBLIC_DOCS_GUIDE.md`
 7. `ui_gateway/README.md`
 
