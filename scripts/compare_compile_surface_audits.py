@@ -34,6 +34,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--min-direct-fact-ratio", type=float, default=0.85)
+    parser.add_argument(
+        "--max-lost-predicates",
+        type=int,
+        default=0,
+        help="Maximum baseline direct predicates the candidate may drop before the gate fails.",
+    )
     return parser.parse_args()
 
 
@@ -43,6 +49,7 @@ def main() -> int:
         _load(args.baseline_audit),
         _load(args.candidate_audit),
         min_direct_fact_ratio=args.min_direct_fact_ratio,
+        max_lost_predicates=args.max_lost_predicates,
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -64,6 +71,7 @@ def compare_audits(
     candidate: dict[str, Any],
     *,
     min_direct_fact_ratio: float = 0.85,
+    max_lost_predicates: int = 0,
 ) -> dict[str, Any]:
     baseline_reports = {report["fixture"]: report for report in baseline.get("reports", [])}
     candidate_reports = {report["fixture"]: report for report in candidate.get("reports", [])}
@@ -73,6 +81,7 @@ def compare_audits(
             baseline_reports[fixture],
             candidate_reports[fixture],
             min_direct_fact_ratio=min_direct_fact_ratio,
+            max_lost_predicates=max_lost_predicates,
         )
         for fixture in fixtures
     ]
@@ -83,10 +92,12 @@ def compare_audits(
         "family_regression_count": sum(len(row["family_regressions"]) for row in comparisons),
         "contract_regression_count": sum(len(row["contract_regressions"]) for row in comparisons),
         "predicate_loss_count": sum(len(row["lost_predicates"]) for row in comparisons),
+        "predicate_loss_regression_count": sum(1 for row in comparisons if row["predicate_loss_regression"]),
     }
     return {
         "schema_version": "compile_surface_audit_comparison_v1",
         "min_direct_fact_ratio": min_direct_fact_ratio,
+        "max_lost_predicates": max_lost_predicates,
         "summary": summary,
         "comparisons": comparisons,
     }
@@ -97,6 +108,7 @@ def _compare_fixture(
     candidate: dict[str, Any],
     *,
     min_direct_fact_ratio: float,
+    max_lost_predicates: int,
 ) -> dict[str, Any]:
     base_direct = int(baseline.get("direct_fact_count") or 0)
     cand_direct = int(candidate.get("direct_fact_count") or 0)
@@ -116,8 +128,9 @@ def _compare_fixture(
     lost_predicates = sorted(base_predicates - cand_predicates)
     gained_predicates = sorted(cand_predicates - base_predicates)
     direct_fact_regression = direct_ratio < min_direct_fact_ratio
+    predicate_loss_regression = len(lost_predicates) > max_lost_predicates
     gate_status = "pass"
-    if direct_fact_regression or family_regressions or contract_regressions:
+    if direct_fact_regression or family_regressions or contract_regressions or predicate_loss_regression:
         gate_status = "regression"
     return {
         "fixture": candidate.get("fixture") or baseline.get("fixture"),
@@ -127,6 +140,7 @@ def _compare_fixture(
         "candidate_direct_fact_count": cand_direct,
         "direct_fact_ratio": round(direct_ratio, 4),
         "direct_fact_regression": direct_fact_regression,
+        "predicate_loss_regression": predicate_loss_regression,
         "family_regressions": family_regressions,
         "contract_regressions": contract_regressions,
         "lost_predicates": lost_predicates,
@@ -175,6 +189,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- Schema: `{payload['schema_version']}`",
         f"- Min direct-fact ratio: `{payload['min_direct_fact_ratio']}`",
+        f"- Max lost predicates: `{payload['max_lost_predicates']}`",
         f"- Summary: `{payload['summary']}`",
         "",
         "| Fixture | Gate | Direct facts | Ratio | Family regressions | Contract regressions | Lost predicates |",
@@ -202,6 +217,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"- Direct fact count regressed: `{row['baseline_direct_fact_count']}` -> `{row['candidate_direct_fact_count']}`."
             )
+        if row["predicate_loss_regression"]:
+            lines.append(f"- Predicate preservation failed: `{len(row['lost_predicates'])}` lost predicates.")
         for item in row["family_regressions"]:
             lines.append(
                 f"- Family `{item['family']}`: `{item['baseline_status']}` -> `{item['candidate_status']}`."

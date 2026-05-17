@@ -78,5 +78,29 @@ def test_compare_compile_surface_audits_passes_non_regression() -> None:
     row = payload["comparisons"][0]
     assert row["gate_status"] == "pass"
     assert row["direct_fact_regression"] is False
+    assert row["predicate_loss_regression"] is False
     assert row["family_regressions"] == []
     assert row["contract_regressions"] == []
+
+
+def test_compare_compile_surface_audits_fails_predicate_loss() -> None:
+    baseline = _audit_report(
+        direct_count=100,
+        family_status="pass",
+        contract_status="pass",
+        predicates=["event_happened", "vote_cast"],
+    )
+    candidate = _audit_report(
+        direct_count=120,
+        family_status="pass",
+        contract_status="pass",
+        predicates=["event_happened", "new_detail"],
+    )
+
+    payload = compare_audits(baseline, candidate, min_direct_fact_ratio=0.85)
+
+    row = payload["comparisons"][0]
+    assert row["gate_status"] == "regression"
+    assert row["direct_fact_regression"] is False
+    assert row["predicate_loss_regression"] is True
+    assert row["lost_predicates"] == ["vote_cast"]

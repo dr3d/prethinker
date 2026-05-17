@@ -4558,3 +4558,100 @@ Next pressure:
 - Do not promote Sable's merged compile.
 - Apply the two-gate workflow to additional weak fixtures before any native
   no-helper restamp.
+
+## HR-054 - Predicate-Loss Gate Tightening and Dulse Replay
+
+Date: 2026-05-16
+
+Before:
+
+- The compile preservation gate reported lost predicates but did not fail the
+  candidate when baseline predicate names disappeared.
+- The direct Dulse contract-guided candidate increased direct fact volume but
+  dropped baseline predicate surfaces.
+- The two-gate workflow needed to prove that predicate preservation is enforced
+  before QA, not merely shown in the report.
+
+Prediction:
+
+- A direct candidate with lost baseline predicates should be rejected even when
+  direct fact volume increases and relation contracts do not regress.
+- A deterministic merge of baseline plus candidate additions should preserve
+  the old backbone while exposing any added answer-bearing surface to QA.
+
+Intervention:
+
+- Changed `scripts/compare_compile_surface_audits.py` so lost baseline
+  predicates are a gate regression by default.
+- Added `--max-lost-predicates` for explicit experiments, defaulting to `0`.
+- Added a focused regression test for predicate loss.
+- Reran the Dulse direct-candidate preservation gate.
+- Merged the Dulse baseline compile with the Dulse contract-guided candidate.
+- Audited, gated, and ran no-helper QA on the merged Dulse compile.
+
+After:
+
+Direct Dulse candidate:
+
+| Gate | Direct facts | Family regressions | Contract regressions | Lost predicates |
+| --- | ---: | ---: | ---: | ---: |
+| `regression` | `66 -> 113` | `0` | `0` | `16` |
+
+Merged Dulse candidate:
+
+| Gate | Direct facts | Family regressions | Contract regressions | Lost predicates |
+| --- | ---: | ---: | ---: | ---: |
+| `pass` | `66 -> 173` | `0` | `0` | `0` |
+
+No-helper QA:
+
+| Fixture | Baseline | Merged replay | QA gate | Delta |
+| --- | --- | --- | --- | --- |
+| `dulse_ledger` | `28 / 7 / 5` | `33 / 3 / 4` | `promotable` | exact `+5`, partial `-4`, miss `-1` |
+
+Artifacts:
+
+- `scripts/compare_compile_surface_audits.py`
+- `tests/test_compare_compile_surface_audits.py`
+- `docs/data/helper_residue/contract_guided_dulse_recompile_20260516.json`
+- `docs/data/helper_residue/contract_guided_dulse_recompile_20260516.md`
+- `docs/data/helper_residue/contract_guided_dulse_recompile_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_dulse_recompile_audit_20260516.md`
+- `docs/data/helper_residue/dulse_contract_guided_gate_20260516.json`
+- `docs/data/helper_residue/dulse_contract_guided_gate_20260516.md`
+- `docs/data/helper_residue/merged_dulse_replay_20260516.md`
+- `docs/data/helper_residue/merged_dulse_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_dulse_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_dulse_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_dulse_replay_gate_20260516.md`
+- `docs/data/helper_residue/merged_dulse_replay_qa_20260516.json`
+- `docs/data/helper_residue/merged_dulse_replay_qa_20260516.md`
+- `docs/data/helper_residue/merged_dulse_replay_qa_gate_20260516.json`
+- `docs/data/helper_residue/merged_dulse_replay_qa_gate_20260516.md`
+
+Verification:
+
+- `$env:PYTHONPATH='.'; pytest tests\test_compare_compile_surface_audits.py tests\test_merge_compile_facts.py tests\test_compare_qa_runs.py`
+  - `6 passed`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --candidate-audit docs\data\helper_residue\contract_guided_dulse_recompile_audit_20260516.json --out-json docs\data\helper_residue\dulse_contract_guided_gate_20260516.json --out-md docs\data\helper_residue\dulse_contract_guided_gate_20260516.md`
+- `python scripts\merge_compile_facts.py --baseline-compile tmp\native_nohelper_story_worlds_draw1_20260516_compile\dulse_ledger\domain_bootstrap_file_20260516T135617409798Z_source_qwen-qwen3-6-35b-a3b.json --candidate-compile tmp\contract_guided_dulse_recompile_20260516\dulse_ledger\domain_bootstrap_file_20260517T012902997610Z_source_qwen-qwen3-6-35b-a3b.json --out-json tmp\merged_dulse_replay_20260516\dulse_ledger\domain_bootstrap_file_merged_20260517T012902997610Z_source_qwen-qwen3-6-35b-a3b.json --out-md docs\data\helper_residue\merged_dulse_replay_20260516.md`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\merged_dulse_replay_20260516\dulse_ledger --out-json docs\data\helper_residue\merged_dulse_replay_audit_20260516.json --out-md docs\data\helper_residue\merged_dulse_replay_audit_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --candidate-audit docs\data\helper_residue\merged_dulse_replay_audit_20260516.json --out-json docs\data\helper_residue\merged_dulse_replay_gate_20260516.json --out-md docs\data\helper_residue\merged_dulse_replay_gate_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\story_worlds --compile-root tmp\merged_dulse_replay_20260516 --out-root tmp\merged_dulse_replay_qa_20260516 --fixture dulse_ledger --model qwen/qwen3.6-35b-a3b --base-url $env:PRETHINKER_BASE_URL --lanes 1 --limit 40 --timeout 900 --no-cache --helper-companion-row-limit 0 --out-json docs\data\helper_residue\merged_dulse_replay_qa_20260516.json --out-md docs\data\helper_residue\merged_dulse_replay_qa_20260516.md`
+- `python scripts\compare_qa_runs.py --baseline-qa docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.json --candidate-qa docs\data\helper_residue\merged_dulse_replay_qa_20260516.json --out-json docs\data\helper_residue\merged_dulse_replay_qa_gate_20260516.json --out-md docs\data\helper_residue\merged_dulse_replay_qa_gate_20260516.md`
+
+Lesson:
+
+Predicate preservation must be a hard gate. A candidate can increase direct
+fact count and still replace useful architecture with a narrower palette. The
+merge-preserving path converts stochastic compile variation into an additive
+surface test: preserve the old backbone, add the candidate's new rows, then let
+no-helper QA decide whether the addition is useful.
+
+Next pressure:
+
+- Apply the tightened preservation gate to the remaining low-six weak fixtures.
+- Prefer merge-preserving candidates over direct compile replacement until
+  compile stability can preserve all surfaces in a single draw.
+- Do not restamp the native corpus until promotable no-helper replays are
+  consolidated or explicitly rejected.
