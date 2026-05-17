@@ -4950,3 +4950,56 @@ Next pressure:
   compile guidance.
 - Keep the accepted root as a measurement artifact, not yet an instrument
   freeze.
+
+## HR-058 - Aggregate QA Gate Readout
+
+Date: 2026-05-16
+
+Before:
+
+- `scripts/compare_qa_runs.py` reported fixture-level promotion/regression
+  counts but did not expose aggregate exact/partial/miss deltas.
+- The accepted low-six run improved globally while one fixture regressed by
+  exact count, so the report needed to show both surfaces explicitly.
+
+Intervention:
+
+- Added aggregate baseline/candidate/delta accounting to
+  `scripts/compare_qa_runs.py`.
+- Added a unit test covering multi-fixture aggregate promotion.
+- Regenerated the accepted low-six QA gate artifact.
+
+After:
+
+The accepted low-six QA gate now reports:
+
+- aggregate status: `promotable`;
+- aggregate delta: exact `+16`, partial `-3`, miss `-13`;
+- fixture status: `5` promotable, `1` regression.
+
+Artifacts:
+
+- `scripts/compare_qa_runs.py`
+- `tests/test_compare_qa_runs.py`
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_gate_20260516.json`
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_gate_20260516.md`
+
+Verification:
+
+- `$env:PYTHONPATH='.'; pytest tests\test_compare_qa_runs.py tests\test_compare_compile_surface_audits.py tests\test_merge_compile_facts.py`
+  - `7 passed`
+- `python scripts\compare_qa_runs.py --baseline-qa docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.json --candidate-qa docs\data\helper_residue\accepted_low6_nohelper_qa_20260516.json --out-json docs\data\helper_residue\accepted_low6_nohelper_qa_gate_20260516.json --out-md docs\data\helper_residue\accepted_low6_nohelper_qa_gate_20260516.md`
+
+Lesson:
+
+Promotion decisions need two views. The aggregate view measures whether a
+candidate root is useful as an instrument state; the fixture view protects
+against hiding localized regressions. Future stamp artifacts should include
+both by default.
+
+Next pressure:
+
+- Add variance-aware replay labels for fixtures where exact drops but misses
+  also drop, instead of forcing that ambiguity into a binary story.
+- Use the accepted low-six measurement to guide selector-surface work before
+  any full native restamp.

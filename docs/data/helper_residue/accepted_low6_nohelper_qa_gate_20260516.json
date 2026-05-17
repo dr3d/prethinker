@@ -1,4 +1,22 @@
 {
+  "aggregate": {
+    "baseline": {
+      "exact": 166,
+      "miss": 52,
+      "partial": 22
+    },
+    "candidate": {
+      "exact": 182,
+      "miss": 39,
+      "partial": 19
+    },
+    "delta": {
+      "exact": 16,
+      "miss": -13,
+      "partial": -3
+    },
+    "promotion_status": "promotable"
+  },
   "comparisons": [
     {
       "baseline": {
@@ -117,6 +135,12 @@
   ],
   "schema_version": "qa_run_comparison_v1",
   "summary": {
+    "aggregate_delta": {
+      "exact": 16,
+      "miss": -13,
+      "partial": -3
+    },
+    "aggregate_promotion_status": "promotable",
     "fixture_count": 6,
     "promotable_count": 5,
     "regression_count": 1

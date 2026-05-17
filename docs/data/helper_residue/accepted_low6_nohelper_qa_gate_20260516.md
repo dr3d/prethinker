@@ -1,7 +1,8 @@
 # QA Run Comparison
 
 - Schema: `qa_run_comparison_v1`
-- Summary: `{'fixture_count': 6, 'promotable_count': 5, 'regression_count': 1}`
+- Summary: `{'fixture_count': 6, 'promotable_count': 5, 'regression_count': 1, 'aggregate_promotion_status': 'promotable', 'aggregate_delta': {'exact': 16, 'partial': -3, 'miss': -13}}`
+- Aggregate: `{'baseline': {'exact': 166, 'partial': 22, 'miss': 52}, 'candidate': {'exact': 182, 'partial': 19, 'miss': 39}, 'delta': {'exact': 16, 'partial': -3, 'miss': -13}, 'promotion_status': 'promotable'}`
 
 | Fixture | Status | Exact | Partial | Miss | Delta |
 | --- | --- | ---: | ---: | ---: | --- |

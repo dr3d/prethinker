@@ -40,13 +40,17 @@ def compare_qa_runs(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict
     candidate_rows = _fixture_summaries(candidate)
     fixtures = sorted(set(baseline_rows) & set(candidate_rows))
     comparisons = [_compare_fixture(fixture, baseline_rows[fixture], candidate_rows[fixture]) for fixture in fixtures]
+    aggregate = _aggregate_comparison(comparisons)
     return {
         "schema_version": "qa_run_comparison_v1",
         "summary": {
             "fixture_count": len(comparisons),
             "promotable_count": sum(1 for row in comparisons if row["promotion_status"] == "promotable"),
             "regression_count": sum(1 for row in comparisons if row["promotion_status"] == "regression"),
+            "aggregate_promotion_status": aggregate["promotion_status"],
+            "aggregate_delta": aggregate["delta"],
         },
+        "aggregate": aggregate,
         "comparisons": comparisons,
     }
 
@@ -85,12 +89,38 @@ def _compare_fixture(fixture: str, baseline: dict[str, Any], candidate: dict[str
     }
 
 
+def _aggregate_comparison(comparisons: list[dict[str, Any]]) -> dict[str, Any]:
+    baseline = {
+        "exact": sum(int(row["baseline"]["exact"]) for row in comparisons),
+        "partial": sum(int(row["baseline"]["partial"]) for row in comparisons),
+        "miss": sum(int(row["baseline"]["miss"]) for row in comparisons),
+    }
+    candidate = {
+        "exact": sum(int(row["candidate"]["exact"]) for row in comparisons),
+        "partial": sum(int(row["candidate"]["partial"]) for row in comparisons),
+        "miss": sum(int(row["candidate"]["miss"]) for row in comparisons),
+    }
+    delta = {
+        "exact": candidate["exact"] - baseline["exact"],
+        "partial": candidate["partial"] - baseline["partial"],
+        "miss": candidate["miss"] - baseline["miss"],
+    }
+    promotion_status = "promotable" if delta["exact"] >= 0 and delta["miss"] <= 0 else "regression"
+    return {
+        "baseline": baseline,
+        "candidate": candidate,
+        "delta": delta,
+        "promotion_status": promotion_status,
+    }
+
+
 def render_markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# QA Run Comparison",
         "",
         f"- Schema: `{payload['schema_version']}`",
         f"- Summary: `{payload['summary']}`",
+        f"- Aggregate: `{payload['aggregate']}`",
         "",
         "| Fixture | Status | Exact | Partial | Miss | Delta |",
         "| --- | --- | ---: | ---: | ---: | --- |",
