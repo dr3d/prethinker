@@ -4260,3 +4260,66 @@ Next pressure:
   4. run QA only if the gate passes.
 - Then extend toward best-of-N candidate selection or merge-preserving compile
   rather than adding more broad prompt guidance.
+
+## HR-050 - Replay Candidate Selector
+
+Date: 2026-05-16
+
+Before:
+
+- HR-047 added the preservation gate.
+- HR-048 and HR-049 produced multiple rejected replay candidates. The next
+  workflow step was deterministic candidate selection rather than manual
+  inspection.
+
+Intervention:
+
+- Added `scripts/select_compile_candidate.py`.
+- The selector ranks gate outputs by:
+  1. QA eligibility;
+  2. family/contract regression count;
+  3. direct fact retention ratio;
+  4. lost predicate count.
+- Added tests for selecting a QA-eligible candidate and ranking rejected
+  candidates by damage.
+- Ran the selector over five real rejected replay candidates from Sable and
+  Thornfield.
+
+After:
+
+- Candidate count: `5`
+- QA-eligible candidates: `0`
+- Best rejected candidate:
+  - `contract_guided_thornfield_recompile_reroll_20260516`
+  - direct-fact ratio: `0.8279`
+  - family regressions: `0`
+  - contract regressions: `0`
+  - lost predicates: `15`
+
+Artifacts:
+
+- `scripts/select_compile_candidate.py`
+- `tests/test_select_compile_candidate.py`
+- `docs/data/helper_residue/compile_candidate_selection_rejected_replays_20260516.json`
+- `docs/data/helper_residue/compile_candidate_selection_rejected_replays_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\select_compile_candidate.py`
+- `python -m pytest tests\test_select_compile_candidate.py tests\test_compare_compile_surface_audits.py -q`
+  - `4 passed`
+- `python scripts\select_compile_candidate.py --comparison-json docs\data\helper_residue\sable_financial_vs_statement_replay_gate_20260516.json --comparison-json docs\data\helper_residue\sable_financial_vs_statement_bad_draw_gate_20260516.json --comparison-json docs\data\helper_residue\thornfield_contract_guided_gate_20260516.json --comparison-json docs\data\helper_residue\thornfield_contract_guided_reroll_gate_20260516.json --comparison-json docs\data\helper_residue\thornfield_preservation_guided_gate_20260516.json --out-json docs\data\helper_residue\compile_candidate_selection_rejected_replays_20260516.json --out-md docs\data\helper_residue\compile_candidate_selection_rejected_replays_20260516.md`
+
+Lesson:
+
+The no-helper replay loop now has a deterministic stop/go decision. This keeps
+the work from drifting into "try QA anyway" when a compile has already lost the
+backbone. The absence of any QA-eligible replay candidate is itself a result:
+the next layer has to make candidate compiles preserve or merge existing
+surfaces, not merely generate another stochastic draw.
+
+Next pressure:
+
+- Move from candidate selection to merge-preserving compile strategy: retain
+  accepted baseline rows while adding newly targeted rows that pass contract
+  checks.
