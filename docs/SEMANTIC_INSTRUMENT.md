@@ -119,8 +119,8 @@ A **selector guard** is a named rule that prevents the selector from choosing th
 The active guard return sites currently cluster into 4 semantic families with
 0 unclassified reasons in the current rollup. The exact count changes as the
 lab discovers, merges, and retires guards; the live accounting is maintained in
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`, with retired/scar history preserved in
-`docs/SELECTOR_GUARD_LEDGER.md`.
+`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Detailed retired/scar ledger output is
+generated under `tmp` when needed and is kept out of the public docs tree.
 
 | Family | What It Prevents | Example |
 |--------|-----------------|---------|

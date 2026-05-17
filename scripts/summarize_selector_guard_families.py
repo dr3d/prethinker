@@ -15,7 +15,7 @@ DEFAULT_SELECTOR = REPO_ROOT / "scripts" / "select_qa_mode_without_oracle.py"
 DEFAULT_JSON = REPO_ROOT / "tmp" / "selector_guard_families.json"
 DEFAULT_MD = REPO_ROOT / "docs" / "SELECTOR_GUARD_FAMILY_ROLLUP.md"
 DEFAULT_LEDGER_JSON = REPO_ROOT / "tmp" / "selector_guard_ledger.json"
-DEFAULT_LEDGER_MD = REPO_ROOT / "docs" / "SELECTOR_GUARD_LEDGER.md"
+DEFAULT_LEDGER_MD = REPO_ROOT / "tmp" / "selector_guard_ledger.md"
 
 GUARD_FUNCTIONS = {
     "structural_baseline_answer_surface_guard_reason",
@@ -3683,7 +3683,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "",
         "Generated from `scripts/select_qa_mode_without_oracle.py`.",
         "",
-        "Companion audit ledger: [SELECTOR_GUARD_LEDGER.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_LEDGER.md).",
+        "Detailed audit ledger output defaults to `tmp/selector_guard_ledger.md` and is intentionally kept out of the public docs tree.",
         "",
         "## Summary",
         "",

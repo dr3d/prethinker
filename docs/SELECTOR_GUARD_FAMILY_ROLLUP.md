@@ -7,7 +7,7 @@ before they become daily-driver harness doctrine.
 
 Generated from `scripts/select_qa_mode_without_oracle.py`.
 
-Companion audit ledger: [SELECTOR_GUARD_LEDGER.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_LEDGER.md).
+Detailed audit ledger output defaults to `tmp/selector_guard_ledger.md` and is intentionally kept out of the public docs tree.
 
 ## Summary
 
