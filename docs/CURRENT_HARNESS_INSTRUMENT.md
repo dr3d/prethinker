@@ -197,8 +197,10 @@ compile-surface and ledger improvements retiring downstream selector scars.
 
 Recent transfer work supports the current direction:
 
-- Native no-helper draw-1 scanned 56 compile artifacts with zero helper delivery
-  in the active QA path.
+- The 2026-05-17 native MoE no-helper stamp compiled all 56 native fixtures
+  and answered 2163 judged rows with helper companion delivery disabled:
+  1880 exact, 83 partial, 196 miss, for an exact rate of 86.92%. Runtime load
+  errors and write proposals were both zero, and helper rows were exactly zero.
 - External corpora and unlike probes routinely run with 0-3 helper rows because
   the modern path relies on admitted predicates and source ledgers instead of
   native compatibility adapters.
@@ -252,6 +254,11 @@ Recent transfer work supports the current direction:
   the 56-fixture native draw-1 preflight, the contract surfaced three weak
   cases: `avalon_grant_committee`, `dulse_ledger`, and
   `rotating_chair_authority`.
+- The stamp's remaining gap is still mostly compile-surface addressability:
+  170 compile-surface gaps, 59 hybrid-join gaps, 44 query-surface gaps, 8
+  judge-uncertain rows, and 2 answer-surface gaps. That keeps the next repair
+  pressure on direct admitted surfaces and deterministic ledgers, not on
+  restoring helper compatibility rows.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

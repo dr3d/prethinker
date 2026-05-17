@@ -31,7 +31,7 @@ dataset label. Promote only when the principle survives unlike probes.
 | Priority | Lane | Question | Current Surface |
 | --- | --- | --- | --- |
 | 1 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces instead of query-time compatibility bridges? | `docs/CURRENT_HARNESS_INSTRUMENT.md`, `docs/COMPILED_KB_ARTIFACT_PACKAGE.md` |
-| 2 | Instrument stamp | What does the current no-helper instrument score across internal and external corpora when measured as a frozen system? | `docs/CURRENT_HARNESS_INSTRUMENT.md`, current scorecards under `tmp` during active runs |
+| 2 | Instrument stamp | What does the current no-helper instrument score across internal and external corpora when measured as a frozen system? | `docs/CURRENT_HARNESS_INSTRUMENT.md`; current scorecards under `tmp` during active runs |
 | 3 | Lens vocabulary audit | Do lens terms fire on unlike documents because they are structural, or because they still carry corpus-shaped trigger conditions? | `docs/SEMANTIC_LENS_ROSTER.md`, targeted tests |
 | 4 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `src/transition_delta_normalizer.py`, focused tests |
 | 5 | Dataset transfer | How far does the instrument transfer across RACE, SQuAD, contract, privacy-policy, and other external QA corpora without dataset-specific tuning? | summarized in `docs/CURRENT_HARNESS_INSTRUMENT.md` and current scorecards |
@@ -76,7 +76,9 @@ Provider failures are transport evidence, not architecture evidence.
 
 The project is near, but not permanently in, instrument-freeze mode. Freeze only
 when the current repair cycle has stopped changing architecture and the next
-question is measurement rather than repair.
+question is measurement rather than repair. The 2026-05-17 native MoE
+no-helper stamp completed the internal-corpus measurement at 1880/83/196 over
+2163 judged rows, exact rate 86.92%, with zero helper rows.
 
 Before a full stamp:
 
