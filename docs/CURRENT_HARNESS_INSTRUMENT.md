@@ -280,6 +280,13 @@ Recent transfer work supports the current direction:
   not inspect reference answers, and does not create helper rows. A no-helper
   smoke over a quantity miss confirmed the source row became visible and the
   row judged exact.
+- A six-fixture no-helper replay over source-stranded native rows measured the
+  combined source-query repairs as a bounded gain, not a blanket fix: exact
+  rows moved by +10 net across 240 judged rows, with zero helper rows and zero
+  runtime errors. The lift concentrated in fixtures where source rows already
+  carried the missing detail but prior query routing failed to expose them.
+  One fixture regressed by two exact rows, so these changes remain query-route
+  evidence rather than a new stamped baseline.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
