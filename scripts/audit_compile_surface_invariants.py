@@ -772,6 +772,8 @@ def _is_statement_structural_row(row: dict[str, Any]) -> bool:
     predicate = str(row["predicate"]).lower()
     if predicate.startswith(("rule_", "policy_", "charter_")):
         return False
+    if any(marker in predicate for marker in ("translation", "language", "original_text", "statement_original")):
+        return False
     return bool(
         tokens
         & {

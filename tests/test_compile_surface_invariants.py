@@ -249,6 +249,28 @@ def test_audit_compile_surface_invariants_passes_statement_status_contract(tmp_p
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_ignores_statement_language_components(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, translated_statement_is_advisory_not_binding).",
+            "statement_original(statement_1, raw_text).",
+            "statement_translation(statement_1, translated_text).",
+            "statement_language(statement_1, indonesian).",
+            "participant_statement(statement_1, witness_1, hearing_1, translated_text).",
+            "statement_epistemic_status(statement_1, advisory).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "participant_statement_status_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["required_key_count"] == 1
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

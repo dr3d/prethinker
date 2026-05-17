@@ -3880,3 +3880,161 @@ Next pressure:
   guidance and rerun no-helper QA.
 - If q038 or discussion-position rows improve, expand the statement-status
   audit to the weak native slice.
+
+## HR-045 - Participant Statement Replay Negative
+
+Date: 2026-05-16
+
+Before:
+
+- HR-044 identified a real shallow surface: statement-like rows existed, but
+  binding/advisory status was not consistently same-anchored for
+  certifications, public comments, and staff estimates.
+- The financial-baseline compile was the best Sable no-helper draw so far:
+  `34 / 2 / 3`.
+
+Prediction:
+
+- A recompile with participant statement/status guidance might improve
+  nonbinding/advisory list questions and discussion-position questions without
+  reintroducing helpers.
+
+Intervention:
+
+- Ran one replay compile with the new participant statement/status guidance.
+- The first draw was rejected as a bad compile draw:
+  - admitted facts dropped to `32`;
+  - invariant audit regressed to `3` pass, `8` partial, `1` ledger-only;
+  - financial and event-backbone surfaces degraded.
+- Ran a second replay compile and audited before QA.
+
+After:
+
+Second replay compile:
+
+- Candidate predicates: `21`
+- Admitted / skipped: `84 / 21`
+- Rough score: `0.889`
+- One repeated-structure role mismatch on `member_vote/4`
+
+Audit:
+
+- Family status summary: `7` pass, `5` partial
+- `participant_statement_status_contract`: still `partial`, now narrowed to
+  public comments lacking same-anchor status coverage.
+
+QA:
+
+| Run | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Financial-baseline recompile | `34` | `2` | `3` | `0` |
+| Statement-status replay | `34` | `2` | `4` | `0` |
+
+Observed movement:
+
+- q038 advisory/nonbinding list improved from miss to partial: the replay
+  retrieved Restrepo/Lourdes advisory items but still missed Soto/Webb.
+- q016 and q039 regressed because the replay compile lost emergency-ratification
+  and notice-error surfaces that earlier compiles preserved.
+- q029/q031 still lack participant discussion-position rows for the specific
+  non-public-comment discussion statements.
+- q020/q040 remain counterfactual/simulation pressure.
+
+Artifacts:
+
+- `docs/data/helper_residue/participant_statement_sable_recompile_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_recompile_20260516.md`
+- `docs/data/helper_residue/participant_statement_sable_recompile_audit_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_recompile_audit_20260516.md`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_20260516.md`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_audit_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_audit_20260516.md`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_qa_20260516.json`
+- `docs/data/helper_residue/participant_statement_sable_recompile_reroll_qa_20260516.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --fixture sable_creek_budget --compile-source --compile-plan-passes --focused-pass-ops-schema --source-entity-ledger --source-record-ledger --source-record-ledger-facts --intake-registry-context --review-profile --profile-review-retry --quality-gate`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\participant_statement_sable_recompile_reroll_20260516\sable_creek_budget --out-json docs\data\helper_residue\participant_statement_sable_recompile_reroll_audit_20260516.json --out-md docs\data\helper_residue\participant_statement_sable_recompile_reroll_audit_20260516.md`
+- `python scripts\run_domain_bootstrap_qa_batch.py --compile-root tmp\participant_statement_sable_recompile_reroll_20260516 --fixture sable_creek_budget --helper-companion-row-limit 0 --no-cache`
+
+Lesson:
+
+The statement-status contract is real, but a single compile draw can improve
+one surface while losing another. This is no longer only about inventing the
+next invariant. The next architecture layer is compile-surface preservation:
+new guidance should be guarded by checks that concrete backbone rows,
+corrections, event timelines, and numeric derivations do not disappear while a
+new surface improves.
+
+Next pressure:
+
+- Expand the current invariant/contract audit across the weak native slice
+  before more focused recompiles.
+- Add a compile-quality comparison gate that flags regressions in concrete
+  backbone rows and invariant pass/partial counts when a replay compile trades
+  one surface for another.
+
+## HR-046 - Weak Slice Contract Map
+
+Date: 2026-05-16
+
+Before:
+
+- HR-045 showed that a focused replay can improve one surface while losing
+  another.
+- Before more recompiles, the new contracts needed a broader map across the
+  weak native no-helper slice.
+
+Intervention:
+
+- Ran the current compile-surface invariant and contract audit across the six
+  weak native draw-1 compiles.
+- Fixed a recognizer bug: statement language/original/translation component
+  rows should not be treated as full statement rows requiring binding/advisory
+  status.
+
+After:
+
+Contract pressure across the six weak compiles:
+
+| Contract | Fixtures with pressure |
+| --- | --- |
+| `financial_baseline_derivation_contract` | `sable_creek_budget`, `thornfield_variance` |
+| `participant_statement_status_contract` | `dulse_ledger`, `industrial_sensor_clock_correction`, `sable_creek_budget`, `school_activity_roster_reconciliation`, `thornfield_variance` |
+
+Notable details:
+
+- `ridgeline_fire` now passes `participant_statement_status_contract` after the
+  recognizer stopped treating language/translation component rows as full
+  statements.
+- `sable_creek_budget` remains the densest contract-pressure case, but the
+  pressure is not isolated to Sable.
+- `thornfield_variance` carries both financial/counterfactual-like derivation
+  pressure and testimony statement-status pressure.
+
+Artifacts:
+
+- `docs/data/helper_residue/native_nohelper_low6_contract_audit_20260516.json`
+- `docs/data/helper_residue/native_nohelper_low6_contract_audit_20260516.md`
+
+Verification:
+
+- `python -m py_compile scripts\audit_compile_surface_invariants.py`
+- `python -m pytest tests\test_compile_surface_invariants.py -q`
+  - `16 passed`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\ridgeline_fire --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\thornfield_variance --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\dulse_ledger --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\sable_creek_budget --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\school_activity_roster_reconciliation --compile-json tmp\native_nohelper_story_worlds_draw1_20260516_compile\industrial_sensor_clock_correction --out-json docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --out-md docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.md`
+
+Lesson:
+
+The next obstacle is preservation, not helper retirement. Helpers are already
+at zero in these runs. The architecture now needs to prevent a replay compile
+from improving participant statements while dropping event, correction,
+financial, or procedural backbone rows.
+
+Next pressure:
+
+- Add a compile-quality comparison gate for replay compiles: compare baseline
+  and candidate direct fact count, invariant status transitions, contract
+  status transitions, and concrete predicate retention before spending QA time.

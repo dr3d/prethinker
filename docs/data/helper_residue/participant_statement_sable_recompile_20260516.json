@@ -1,0 +1,66 @@
+{
+  "generated": "2026-05-17T00:06:39.581959+00:00",
+  "lanes": 1,
+  "base_timeout": 1200,
+  "effective_timeout": 1200,
+  "fixture_count": 1,
+  "parsed_ok_count": 1,
+  "totals": {
+    "candidate_predicates": 18,
+    "compile_admitted": 32,
+    "compile_skipped": 3
+  },
+  "results": [
+    {
+      "fixture": "sable_creek_budget",
+      "returncode": 0,
+      "started": "2026-05-17T00:01:00.364705+00:00",
+      "finished": "2026-05-17T00:06:39.581959+00:00",
+      "out_dir": "C:\\prethinker\\tmp\\participant_statement_sable_recompile_20260516\\sable_creek_budget",
+      "compile_json": "C:\\prethinker\\tmp\\participant_statement_sable_recompile_20260516\\sable_creek_budget\\domain_bootstrap_file_20260517T000639553950Z_source_qwen-qwen3-6-35b-a3b.json",
+      "summary": {
+        "parsed_ok": true,
+        "candidate_predicates": 18,
+        "compile_admitted": 32,
+        "compile_skipped": 3,
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "repeated_structure_count": 2,
+        "repeated_structure_id_only_record_refs": [],
+        "repeated_structure_role_mismatch_refs": [],
+        "frontier_unknown_positive_predicate_count": 1,
+        "frontier_unknown_positive_predicate_refs": [
+          "record_correction/7"
+        ],
+        "generic_predicate_count": 0,
+        "detail_wrapper_drift_flags": []
+      },
+      "stdout_tail": "Wrote C:\\prethinker\\tmp\\participant_statement_sable_recompile_20260516\\sable_creek_budget\\domain_bootstrap_file_20260517T000639553950Z_source_qwen-qwen3-6-35b-a3b.json\nWrote C:\\prethinker\\tmp\\participant_statement_sable_recompile_20260516\\sable_creek_budget\\domain_bootstrap_file_20260517T000639553950Z_source_qwen-qwen3-6-35b-a3b.md\n{\"candidate_predicates\": 18, \"compile_admitted\": 32, \"compile_skipped\": 3, \"expected_signature_recall\": null, \"parsed_ok\": true, \"score\": {\"entity_type_count\": 4, \"frontier_case_count\": 5, \"frontier_unknown_positive_predicate_count\": 1, \"frontier_unknown_positive_predicate_refs\": [\"record_correction/7\"], \"generic_predicate_count\": 0, \"predicate_count\": 18, \"repeated_structure_count\": 2, \"repeated_structure_id_only_record_refs\": [], \"repeated_structure_role_mismatch_refs\": [], \"repeated_structure_unknown_predicate_refs\": [], \"risk_count\": 5, \"rough_score\": 0.889, \"schema_ok\": true}}\n",
+      "stderr_tail": ""
+    }
+  ],
+  "quality_gate": {
+    "schema_version": "compile_quality_gate_v1",
+    "min_rough_score": 0.775,
+    "max_risk_count": 5,
+    "passed": true,
+    "pass_count": 1,
+    "hold_count": 0,
+    "rows": [
+      {
+        "fixture": "sable_creek_budget",
+        "passed": true,
+        "decision": "pass",
+        "reasons": [],
+        "rough_score": 0.889,
+        "risk_count": 5,
+        "compile_admitted": 32,
+        "compile_skipped": 3,
+        "compile_skipped_share": 0.0857,
+        "candidate_predicates": 18,
+        "compile_json": "C:\\prethinker\\tmp\\participant_statement_sable_recompile_20260516\\sable_creek_budget\\domain_bootstrap_file_20260517T000639553950Z_source_qwen-qwen3-6-35b-a3b.json",
+        "detail_wrapper_drift_flags": []
+      }
+    ]
+  }
+}
