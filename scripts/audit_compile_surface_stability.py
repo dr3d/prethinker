@@ -76,16 +76,22 @@ def _load_draw(path: Path) -> dict[str, Any]:
         predicate = _predicate_name(fact)
         if predicate:
             predicate_counts[predicate] = predicate_counts.get(predicate, 0) + 1
+    signature_counts = _fact_signature_counts(direct_rows)
+    candidate_signatures = _candidate_signatures(parsed)
     return {
         "compile_json": str(path),
         "fixture": path.parent.name,
         "run": path.parent.parent.name,
         "parsed_ok": bool(payload.get("parsed_ok")),
-        "candidate_signatures": _candidate_signatures(parsed),
+        "candidate_signatures": candidate_signatures,
         "direct_fact_count": len(direct_facts),
         "direct_predicate_count": len(predicate_counts),
         "direct_facts": direct_facts,
         "predicate_counts": dict(sorted(predicate_counts.items())),
+        "signature_counts": signature_counts,
+        "candidate_zero_yield_signatures": sorted(
+            signature for signature in candidate_signatures if int(signature_counts.get(signature, 0)) == 0
+        ),
         "surface_counts": _surface_counts(direct_facts),
         "contracts": _contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
     }
@@ -110,6 +116,28 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
     palette_unstable = sorted(palette_union - palette_common)
     palette_churn_ratio = (len(palette_unstable) / len(palette_union)) if palette_union else 0.0
     predicate_arity_drift = _predicate_arity_drift(palette_union)
+    signature_names = sorted({name for draw in draws for name in draw["signature_counts"]})
+    signature_delivery_drift = []
+    for signature in signature_names:
+        counts = [int(draw["signature_counts"].get(signature, 0)) for draw in draws]
+        if len(set(counts)) <= 1:
+            continue
+        signature_delivery_drift.append(
+            {
+                "signature": signature,
+                "counts": counts,
+                "min": min(counts),
+                "max": max(counts),
+                "delta": max(counts) - min(counts),
+            }
+        )
+    candidate_zero_yield_union = sorted(
+        {
+            signature
+            for draw in draws
+            for signature in draw.get("candidate_zero_yield_signatures", [])
+        }
+    )
     fact_sets = [set(draw["direct_facts"]) for draw in draws]
     union_facts = set().union(*fact_sets) if fact_sets else set()
     common_facts = set.intersection(*fact_sets) if fact_sets else set()
@@ -165,6 +193,9 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
         "palette_churn_ratio": round(palette_churn_ratio, 4),
         "unstable_candidate_signatures": palette_unstable,
         "predicate_arity_drift": predicate_arity_drift,
+        "signature_delivery_drift": signature_delivery_drift,
+        "candidate_zero_yield_signature_count": len(candidate_zero_yield_union),
+        "candidate_zero_yield_signatures": candidate_zero_yield_union,
         "stable": not unstable_facts,
         "union_fact_count": len(union_facts),
         "common_fact_count": len(common_facts),
@@ -180,8 +211,11 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
                 "candidate_signatures": draw["candidate_signatures"],
                 "missing_palette_union_count": len(sorted(palette_union - set(draw["candidate_signatures"]))),
                 "missing_palette_union_signatures": sorted(palette_union - set(draw["candidate_signatures"]))[:25],
+                "candidate_zero_yield_signature_count": len(draw["candidate_zero_yield_signatures"]),
+                "candidate_zero_yield_signatures": draw["candidate_zero_yield_signatures"][:25],
                 "direct_fact_count": draw["direct_fact_count"],
                 "direct_predicate_count": draw["direct_predicate_count"],
+                "direct_signature_count": len(draw["signature_counts"]),
                 "surface_counts": draw["surface_counts"],
                 "contracts": draw["contracts"],
             }
@@ -201,6 +235,10 @@ def _summarize(fixtures: list[dict[str, Any]]) -> dict[str, Any]:
         "palette_unstable_fixture_count": len(palette_unstable),
         "palette_unstable_signature_count": sum(int(fixture.get("palette_unstable_count", 0)) for fixture in fixtures),
         "predicate_arity_drift_count": sum(len(fixture.get("predicate_arity_drift", [])) for fixture in fixtures),
+        "signature_delivery_drift_count": sum(len(fixture.get("signature_delivery_drift", [])) for fixture in fixtures),
+        "candidate_zero_yield_signature_count": sum(
+            int(fixture.get("candidate_zero_yield_signature_count", 0)) for fixture in fixtures
+        ),
         "unstable_fact_count": sum(int(fixture["unstable_fact_count"]) for fixture in fixtures),
         "predicate_drift_count": sum(len(fixture["predicate_drift"]) for fixture in fixtures),
         "surface_drift_count": sum(len(fixture["surface_drift"]) for fixture in fixtures),
@@ -246,6 +284,18 @@ def _split_signature(signature: str) -> tuple[str, int | None]:
     if not match:
         return raw.split("/", 1)[0], None
     return match.group(1), int(match.group(2))
+
+
+def _fact_signature_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        predicate = str(row.get("predicate", "")).strip()
+        args = row.get("args", [])
+        if not predicate or not isinstance(args, list):
+            continue
+        signature = f"{predicate}/{len(args)}"
+        counts[signature] = counts.get(signature, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _predicate_name(fact: str) -> str:
@@ -634,6 +684,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Palette-unstable fixtures: `{report['summary']['palette_unstable_fixture_count']}`",
         f"- Unstable palette signatures: `{report['summary']['palette_unstable_signature_count']}`",
         f"- Predicate arity drift rows: `{report['summary']['predicate_arity_drift_count']}`",
+        f"- Signature delivery drift rows: `{report['summary']['signature_delivery_drift_count']}`",
+        f"- Candidate zero-yield signatures: `{report['summary']['candidate_zero_yield_signature_count']}`",
         f"- Unstable direct facts: `{report['summary']['unstable_fact_count']}`",
         f"- Predicate drift rows: `{report['summary']['predicate_drift_count']}`",
         f"- Surface drift rows: `{report['summary']['surface_drift_count']}`",
@@ -650,6 +702,8 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Common / union palette signatures: `{fixture['palette_common_count']} / {fixture['palette_union_count']}`",
                 f"- Unstable palette signatures: `{fixture['palette_unstable_count']}`",
                 f"- Palette churn ratio: `{fixture['palette_churn_ratio']}`",
+                f"- Signature delivery drift rows: `{len(fixture['signature_delivery_drift'])}`",
+                f"- Candidate zero-yield signatures: `{fixture['candidate_zero_yield_signature_count']}`",
                 f"- Common / union direct facts: `{fixture['common_fact_count']} / {fixture['union_fact_count']}`",
                 f"- Unstable direct facts: `{fixture['unstable_fact_count']}`",
                 "",
@@ -666,6 +720,21 @@ def render_markdown(report: dict[str, Any]) -> str:
                 lines.append(
                     f"| `{draw_name}` | {draw['candidate_signature_count']} | `{draw['missing_palette_union_signatures']}` |"
                 )
+            lines.append("")
+        if fixture.get("candidate_zero_yield_signatures"):
+            lines.append(f"- Candidate zero-yield signatures: `{fixture['candidate_zero_yield_signatures']}`")
+            lines.append("")
+            lines.extend(["| Draw | Candidate zero-yield signatures |", "| --- | --- |"])
+            for draw in fixture["draws"]:
+                draw_name = Path(draw["compile_json"]).parent.parent.name
+                lines.append(
+                    f"| `{draw_name}` | `{draw['candidate_zero_yield_signatures']}` |"
+                )
+            lines.append("")
+        if fixture.get("signature_delivery_drift"):
+            lines.extend(["| Signature | Counts | Delta |", "| --- | --- | ---: |"])
+            for row in fixture["signature_delivery_drift"]:
+                lines.append(f"| `{row['signature']}` | `{row['counts']}` | {row['delta']} |")
             lines.append("")
         if fixture["predicate_drift"]:
             lines.extend(["| Predicate | Counts | Delta |", "| --- | --- | ---: |"])

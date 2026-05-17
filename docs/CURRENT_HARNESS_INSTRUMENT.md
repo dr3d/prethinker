@@ -192,9 +192,11 @@ Recent transfer work supports the current direction:
   flagged when event identity, time, participant/system, subject, and outcome
   backbone rows are missing.
 - Compile-surface stability audits now report candidate-palette churn and
-  predicate arity drift across redraws. Recent roster redraws showed high
-  palette churn even when QA stayed in the same rough band, which points toward
-  profile/palette stabilization before broad native no-helper stamping.
+  predicate arity drift across redraws, plus signature-level row delivery drift
+  and zero-yield candidate signatures. Recent roster redraws showed high
+  palette churn even when QA stayed in the same rough band, and palette-prior
+  replay showed the sharper failure mode: a compile can preserve many labels
+  while losing the delivered rows that made those labels queryable.
 - Palette registries can now be built from compile artifacts as vocabulary-only
   scaffolds. Early roster replay showed that a palette prior can reduce churn,
   but overly strict name/arity preservation can still lose answer-bearing slots.

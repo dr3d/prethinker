@@ -54,6 +54,9 @@ def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: P
     assert fixture["predicate_drift"] == [
         {"predicate": "task_assigned_to", "counts": [1, 2], "min": 1, "max": 2, "delta": 1}
     ]
+    assert fixture["signature_delivery_drift"] == [
+        {"signature": "task_assigned_to/3", "counts": [1, 2], "min": 1, "max": 2, "delta": 1}
+    ]
     surface_drift = {row["surface"]: row for row in fixture["surface_drift"]}
     assert surface_drift["assignment_binding_surface"] == {
         "surface": "assignment_binding_surface",
@@ -67,6 +70,7 @@ def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: P
     assert first_contracts["parallel_assignment_event_preservation"]["status"] == "partial"
     assert second_contracts["parallel_assignment_event_preservation"]["status"] == "pass"
     assert report["summary"]["unstable_fixture_count"] == 1
+    assert report["summary"]["signature_delivery_drift_count"] == 1
 
 
 def test_compile_surface_stability_reports_candidate_palette_drift(tmp_path: Path) -> None:
@@ -91,6 +95,22 @@ def test_compile_surface_stability_reports_candidate_palette_drift(tmp_path: Pat
     assert fixture["palette_unstable_count"] == 3
     assert fixture["predicate_arity_drift"] == [{"predicate": "attribute_exception", "arities": [3, 4]}]
     assert report["summary"]["palette_unstable_fixture_count"] == 1
+
+
+def test_compile_surface_stability_reports_candidate_zero_yield_signatures(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_zero_yield" / "domain_bootstrap_file_a.json",
+        ["entity_assignment(entity_001, version_a, cohort_a)."],
+        candidate_predicates=["entity_assignment/3", "source_capture/4"],
+    )
+
+    report = audit_paths([draw])
+
+    fixture = report["fixtures"][0]
+    assert fixture["candidate_zero_yield_signatures"] == ["source_capture/4"]
+    assert fixture["candidate_zero_yield_signature_count"] == 1
+    assert fixture["draws"][0]["candidate_zero_yield_signatures"] == ["source_capture/4"]
+    assert report["summary"]["candidate_zero_yield_signature_count"] == 1
 
 
 def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:
