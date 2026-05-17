@@ -659,6 +659,94 @@ def test_evidence_bundle_plan_repairs_source_text_memberchk_filter() -> None:
     ]
 
 
+def test_evidence_bundle_plan_repairs_multiple_source_text_memberchk_filters() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_1, correction_notice_mentions_threshold_only).",
+        "source_record_text_atom(src_2, correction_notice_mentions_threshold_and_appeal_window).",
+        "source_record_text_atom(src_3, appeal_window_reference_without_required_floor).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_text_multi_contains",
+                    "purpose": "Find source text containing both normalized phrases.",
+                    "query_templates": [
+                        "source_record_text_atom(Line, Text), "
+                        "memberchk('threshold', Text), "
+                        "memberchk('appeal_window', Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["contains_needles"] == ["threshold", "appeal_window"]
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_2", "Text": "correction_notice_mentions_threshold_and_appeal_window"}
+    ]
+
+
+def test_evidence_bundle_plan_repairs_source_text_string_contains_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_1, license_notes_contain_expiration_only).",
+        "source_record_text_atom(src_2, permit_condition_requires_supervisor_signature).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_text_string_contains",
+                    "purpose": "Find source text containing a requested normalized phrase.",
+                    "query_templates": [
+                        "source_record_text_atom(Line, Text), "
+                        "string_contains(Text, 'supervisor_signature')."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_text_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_2", "Text": "permit_condition_requires_supervisor_signature"}
+    ]
+
+
+def test_evidence_bundle_plan_does_not_repair_unbound_source_text_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("source_record_text_atom(src_1, threshold_and_appeal_window).").get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_text_unbound_filter",
+                    "purpose": "This should not become a broad scan without a source text surface.",
+                    "query_templates": ["string_contains(Text, 'appeal_window')."],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "error"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "rejected"
+
+
 def test_method_frame_purpose_companion_links_method_to_agent_frame() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

@@ -287,6 +287,19 @@ Recent transfer work supports the current direction:
   carried the missing detail but prior query routing failed to expose them.
   One fixture regressed by two exact rows, so these changes remain query-route
   evidence rather than a new stamped baseline.
+- Evidence-bundle source-text filters are now repaired as bounded execution
+  filters when they start from `source_record_text_atom/2`. The harness accepts
+  LLM-authored forms such as `memberchk(...)`, `string_contains(...)`,
+  `text_contains(...)`, and simple `Text contains ...` only after a source-text
+  surface has already bound the row and text variables, then requires all
+  normalized needles to appear in the deterministic source text. This converts
+  common rejected query templates into row filters without adding facts,
+  helper rows, or fixture vocabulary. Local replay over existing stamp/replay
+  artifacts found 112 newly executable templates, 95 with hits, including 65
+  that had previously been rejected. A targeted four-fixture OpenRouter smoke
+  stayed helper-free and moved two fixtures up by +5 exact combined, while two
+  fixtures showed no net score movement and normal stochastic row flips; treat
+  this as routing validation, not a stamped baseline.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

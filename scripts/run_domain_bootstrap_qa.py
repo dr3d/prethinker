@@ -13538,25 +13538,61 @@ def _parse_simple_equality_goal(text: str) -> tuple[str, str] | None:
     return left, right
 
 
-def _source_text_memberchk_repair(query: str) -> dict[str, str] | None:
-    match = re.fullmatch(
-        r"\s*source_record_text_atom\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*,\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s*,\s*"
-        r"memberchk\(\s*['\"]([^'\"]+)['\"]\s*,\s*\2\s*\)\s*\.?\s*",
-        str(query or ""),
-    )
-    if not match:
+def _source_text_memberchk_repair(query: str) -> dict[str, Any] | None:
+    text = str(query or "").strip()
+    parts = split_top_level_args(text.rstrip(". "))
+    if len(parts) < 2:
         return None
-    line_var, text_var, needle = match.groups()
+    parsed = parse_prolog_query(parts[0])
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate != "source_record_text_atom" or len(args) != 2:
+        return None
+    line_var, text_var = args
     if not line_var[:1].isupper() or not text_var[:1].isupper():
         return None
-    return {"line_var": line_var, "text_var": text_var, "needle": needle}
+    needles: list[str] = []
+    for part in parts[1:]:
+        needle = _source_text_contains_filter_needle(part, text_var)
+        if not needle:
+            return None
+        needles.append(needle)
+    needles = _ordered_atom_unique(needles)
+    if not needles:
+        return None
+    return {"line_var": line_var, "text_var": text_var, "needle": needles[0], "needles": needles}
+
+
+def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
+    variable_pattern = re.escape(str(text_var or ""))
+    member_match = re.fullmatch(
+        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\))\s*\)\s*\.?\s*",
+        str(goal or ""),
+    )
+    if member_match:
+        return _normalize_text_filter_atom(member_match.group(1))
+    contains_match = re.fullmatch(
+        rf"\s*(?:string_contains|text_contains)\(\s*{variable_pattern}\s*,\s*['\"]([^'\"]+)['\"]\s*\)\s*\.?\s*",
+        str(goal or ""),
+    )
+    if contains_match:
+        return _normalize_text_filter_atom(contains_match.group(1))
+    infix_match = re.fullmatch(
+        rf"\s*{variable_pattern}\s+contains\s+['\"]([^'\"]+)['\"]\s*\.?\s*",
+        str(goal or ""),
+    )
+    if infix_match:
+        return _normalize_text_filter_atom(infix_match.group(1))
+    return ""
+
 
 
 def _run_source_text_contains_filter(
     *,
     runtime: CorePrologRuntime,
     original_query: str,
-    filter_spec: dict[str, str],
+    filter_spec: dict[str, Any],
     bundle_id: str,
     purpose: str,
     helper_companions_enabled: bool = True,
@@ -13564,7 +13600,11 @@ def _run_source_text_contains_filter(
 ) -> dict[str, Any]:
     line_var = filter_spec["line_var"]
     text_var = filter_spec["text_var"]
-    needle = _normalize_text_filter_atom(filter_spec["needle"])
+    needles = [
+        _normalize_text_filter_atom(str(item))
+        for item in filter_spec.get("needles", [filter_spec.get("needle", "")])
+        if _normalize_text_filter_atom(str(item))
+    ]
     repaired_query = f"source_record_text_atom({line_var}, {text_var})."
     item = run_query_plan(
         runtime,
@@ -13578,8 +13618,8 @@ def _run_source_text_contains_filter(
         row
         for row in rows
         if isinstance(row, dict)
-        and needle
-        and needle in _normalize_text_filter_atom(str(row.get(text_var, "")))
+        and needles
+        and all(needle in _normalize_text_filter_atom(str(row.get(text_var, ""))) for needle in needles)
     ]
     return {
         "query": original_query,
@@ -13598,7 +13638,8 @@ def _run_source_text_contains_filter(
                 "validation": "source_text_contains_filter_repaired",
                 "original_query": original_query,
                 "repaired_query": repaired_query,
-                "unsupported_predicate": "memberchk/2",
+                "contains_needles": needles,
+                "unsupported_predicate": "source_text_contains_filter",
             },
         },
         "derived_from_queries": [repaired_query],
