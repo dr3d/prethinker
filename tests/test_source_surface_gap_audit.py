@@ -29,6 +29,16 @@ def test_source_text_question_token_hints_prioritize_initial_surname() -> None:
     assert queries[0] == 'source_record_text_atom(SourceRow, TextAtom), memberchk("r_kim", TextAtom).'
 
 
+def test_source_text_question_token_hints_include_quantity_questions() -> None:
+    queries = _source_text_question_token_hint_queries(
+        utterance="How many books were damaged in the pipe burst?",
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+    )
+
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("the_pipe_burst", TextAtom).' in queries
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("books", TextAtom).' in queries
+
+
 def test_source_field_question_key_hints_use_existing_source_field_headers() -> None:
     queries = _source_field_question_key_hint_queries(
         utterance="What is the vendor and model number for device QR-17?",

@@ -2004,11 +2004,24 @@ def _source_text_question_token_hint_queries(
     text = str(utterance or "").strip()
     if not text:
         return []
-    is_short_answer_probe = bool(re.search(r"\b(?:what|which|who|when|where|does|is|are|list)\b", text, re.IGNORECASE))
+    is_short_answer_probe = bool(
+        re.search(r"\b(?:what|which|who|when|where|how|does|is|are|list)\b", text, re.IGNORECASE)
+    )
     if not is_short_answer_probe:
         return []
     needles = _source_text_question_needles(text)
-    return [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:6]]
+    needle_limit = 10 if _is_quantity_source_text_question(text) else 6
+    return [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:needle_limit]]
+
+
+def _is_quantity_source_text_question(text: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(?:how\s+many|how\s+much|count|counts|number|total|sum|quantity|amount)\b",
+            str(text or ""),
+            re.IGNORECASE,
+        )
+    )
 
 
 def _source_text_question_needles(utterance: str) -> list[str]:

@@ -270,7 +270,16 @@ Recent transfer work supports the current direction:
   validating and executing the bundle, while rejecting alias-only equality that
   would become a broad source scan. A no-helper smoke over two affected native
   fixtures showed the bounded effect: one source-row reason miss became exact,
-  while a separate missing quantity surface remained a compile gap.
+  while unrelated rows remained outside the repair.
+- Quantity questions now participate in the same deterministic source-text hint
+  path. Previously, `How many...` rows could skip question-token source scans
+  entirely, leaving prose counts stranded even when the source row was present.
+  The query path now treats quantity prompts as source-text probes and allows a
+  slightly wider question-token hint set. This remains query routing only: it
+  uses question tokens and deterministic `source_record_text_atom/2` rows, does
+  not inspect reference answers, and does not create helper rows. A no-helper
+  smoke over a quantity miss confirmed the source row became visible and the
+  row judged exact.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
