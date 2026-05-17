@@ -4727,3 +4727,226 @@ Next pressure:
   certification scope over query-time roster or sensor companions.
 - When a replay depends on a domain predicate, require transfer evidence before
   describing it as architecture.
+
+## HR-056 - Low-Six Replay Board After Gate Tightening
+
+Date: 2026-05-16
+
+Before:
+
+- HR-054 promoted Dulse through the tightened preservation gate and QA gate.
+- The earlier Sable financial-baseline replay was promotable relative to the
+  low-six baseline, even though the later merged Sable replay was rejected.
+- HR-055 labelled roster and sensor helper vocabulary as compatibility,
+  helper-adapter, or under-transfer rather than global architecture.
+- Remaining weak fixtures needed the same two-gate treatment before any native
+  no-helper restamp.
+
+Prediction:
+
+- Direct compile replacement would continue to be unsafe because stochastic
+  compiles can add one surface while dropping another.
+- Merge-preserve should rescue only candidates whose added rows help QA without
+  confusing selection.
+- Sensor-specific vocabulary should be treated as a replay risk unless the
+  merged compile improves QA with helpers still off.
+
+Intervention:
+
+- Ran contract-guided recompiles for:
+  - `school_activity_roster_reconciliation` on OpenRouter;
+  - `ridgeline_fire` on OpenRouter;
+  - `industrial_sensor_clock_correction` locally through LM Studio / POWER.
+- Audited and preservation-gated each direct compile.
+- Merged each candidate with its baseline compile where useful.
+- Audited and preservation-gated the merged compiles.
+- Ran no-helper QA only for merged candidates that passed structural
+  preservation.
+
+After:
+
+Direct replacement gates:
+
+| Fixture | Direct gate | Direct facts | Lost predicates | Notes |
+| --- | --- | ---: | ---: | --- |
+| `school_activity_roster_reconciliation` | `regression` | `190 -> 219` | `9` | fact gain but predicate loss |
+| `ridgeline_fire` | `regression` | `242 -> 45` | `22` | hard backbone collapse |
+| `industrial_sensor_clock_correction` | `regression` | `121 -> 96` | `19` | source-authority and custody regressions |
+
+Merged structural gates:
+
+| Fixture | Merged gate | Direct facts | Lost predicates | Contract regressions |
+| --- | --- | ---: | ---: | ---: |
+| `school_activity_roster_reconciliation` | `pass` | `190 -> 331` | `0` | `0` |
+| `ridgeline_fire` | `regression` | `242 -> 287` | `0` | `1` |
+| `industrial_sensor_clock_correction` | `pass` | `121 -> 205` | `0` | `0` |
+
+No-helper QA gates:
+
+| Fixture | Baseline | Merged replay | QA gate | Delta |
+| --- | --- | --- | --- | --- |
+| `school_activity_roster_reconciliation` | `29 / 1 / 10` | `26 / 1 / 13` | `regression` | exact `-3`, miss `+3` |
+| `industrial_sensor_clock_correction` | `31 / 0 / 9` | `33 / 0 / 7` | `promotable` | exact `+2`, miss `-2` |
+
+Accepted low-six virtual score:
+
+| State | Exact | Partial | Miss | Helper rows |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline low-six | `166` | `22` | `52` | `0` |
+| Accepted replays: Sable financial + Thornfield + Dulse + Industrial | `179` | `18` | `42` | `0` |
+
+Artifacts:
+
+- `docs/data/helper_residue/contract_guided_school_recompile_20260516.json`
+- `docs/data/helper_residue/contract_guided_school_recompile_20260516.md`
+- `docs/data/helper_residue/contract_guided_school_recompile_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_school_recompile_audit_20260516.md`
+- `docs/data/helper_residue/school_contract_guided_gate_20260516.json`
+- `docs/data/helper_residue/school_contract_guided_gate_20260516.md`
+- `docs/data/helper_residue/merged_school_replay_20260516.md`
+- `docs/data/helper_residue/merged_school_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_school_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_school_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_school_replay_gate_20260516.md`
+- `docs/data/helper_residue/merged_school_replay_qa_20260516.json`
+- `docs/data/helper_residue/merged_school_replay_qa_20260516.md`
+- `docs/data/helper_residue/merged_school_replay_qa_gate_20260516.json`
+- `docs/data/helper_residue/merged_school_replay_qa_gate_20260516.md`
+- `docs/data/helper_residue/contract_guided_ridgeline_recompile_20260516.json`
+- `docs/data/helper_residue/contract_guided_ridgeline_recompile_20260516.md`
+- `docs/data/helper_residue/contract_guided_ridgeline_recompile_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_ridgeline_recompile_audit_20260516.md`
+- `docs/data/helper_residue/ridgeline_contract_guided_gate_20260516.json`
+- `docs/data/helper_residue/ridgeline_contract_guided_gate_20260516.md`
+- `docs/data/helper_residue/merged_ridgeline_replay_20260516.md`
+- `docs/data/helper_residue/merged_ridgeline_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_ridgeline_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_ridgeline_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_ridgeline_replay_gate_20260516.md`
+- `docs/data/helper_residue/contract_guided_industrial_local_recompile_20260516.json`
+- `docs/data/helper_residue/contract_guided_industrial_local_recompile_20260516.md`
+- `docs/data/helper_residue/contract_guided_industrial_local_recompile_audit_20260516.json`
+- `docs/data/helper_residue/contract_guided_industrial_local_recompile_audit_20260516.md`
+- `docs/data/helper_residue/industrial_local_contract_guided_gate_20260516.json`
+- `docs/data/helper_residue/industrial_local_contract_guided_gate_20260516.md`
+- `docs/data/helper_residue/merged_industrial_local_replay_20260516.md`
+- `docs/data/helper_residue/merged_industrial_local_replay_audit_20260516.json`
+- `docs/data/helper_residue/merged_industrial_local_replay_audit_20260516.md`
+- `docs/data/helper_residue/merged_industrial_local_replay_gate_20260516.json`
+- `docs/data/helper_residue/merged_industrial_local_replay_gate_20260516.md`
+- `docs/data/helper_residue/merged_industrial_local_replay_qa_20260516.json`
+- `docs/data/helper_residue/merged_industrial_local_replay_qa_20260516.md`
+- `docs/data/helper_residue/merged_industrial_local_replay_qa_gate_20260516.json`
+- `docs/data/helper_residue/merged_industrial_local_replay_qa_gate_20260516.md`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_qa_gate_20260516.json`
+- `docs/data/helper_residue/financial_baseline_sable_recompile_qa_gate_20260516.md`
+
+Verification:
+
+- Structural gates were run with `scripts\compare_compile_surface_audits.py`
+  using default `--max-lost-predicates 0`.
+- QA gates were run with `scripts\compare_qa_runs.py`.
+- QA runs used `--helper-companion-row-limit 0`, `--no-cache`, and no legacy
+  helper adapter opt-in.
+- Local resource check during the industrial compile showed POWER at `100%`
+  GPU utilization with one local lane.
+
+Lesson:
+
+The two-gate workflow is now doing real selection. More surface is not always
+better: School passed structural preservation and still regressed QA, while
+Industrial passed both gates and improved without helper rows. Ridgeline showed
+that merge-preserve can still fail when candidate additions introduce shallow
+contract rows. The emerging next layer is candidate-surface selection and query
+robustness, not broader helper resurrection.
+
+Next pressure:
+
+- Build an accepted low-six compile root containing only promoted merged
+  compiles plus untouched baselines.
+- Rerun the accepted low-six QA as a single combined measurement.
+- Inspect regression candidates, especially School and Ridgeline, for selector
+  confusion or shallow additive rows before designing any new compile guidance.
+
+## HR-057 - Accepted Low-Six No-Helper Combined Measurement
+
+Date: 2026-05-16
+
+Before:
+
+- Individual replay gates promoted Sable financial, Thornfield merged, Dulse
+  merged, and Industrial merged candidates.
+- School merged replay regressed on its individual QA run.
+- Ridgeline merged replay failed structural preservation.
+- The accepted-state score was still a virtual rollup rather than one combined
+  no-helper batch.
+
+Prediction:
+
+- A combined accepted-root run should improve the weak-slice aggregate over the
+  low-six baseline while keeping helper rows at zero.
+- Fixture-level QA variance may still appear, especially where individual QA
+  gains were small or where answer judging is sensitive to larger support
+  surfaces.
+
+Intervention:
+
+- Built `tmp/accepted_low6_nohelper_compile_20260516` with:
+  - promoted Sable financial-baseline compile;
+  - promoted Thornfield merged compile;
+  - promoted Dulse merged compile;
+  - promoted Industrial merged compile;
+  - baseline School compile;
+  - baseline Ridgeline compile.
+- Ran a fresh six-fixture QA batch with `--helper-companion-row-limit 0`,
+  `--no-cache`, six OpenRouter lanes, and the accepted compile root.
+- Compared the accepted combined run against the low-six baseline.
+
+After:
+
+Combined accepted low-six run:
+
+| Run | Exact | Partial | Miss | Exact rate | Helper rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline low-six | `166` | `22` | `52` | `0.6917` | `0` |
+| Accepted low-six combined | `182` | `19` | `39` | `0.7583` | `0` |
+
+Fixture-level comparison:
+
+| Fixture | Baseline | Accepted root | Gate | Delta |
+| --- | --- | --- | --- | --- |
+| `dulse_ledger` | `28 / 7 / 5` | `37 / 3 / 0` | `promotable` | exact `+9`, miss `-5` |
+| `industrial_sensor_clock_correction` | `31 / 0 / 9` | `29 / 4 / 7` | `regression` | exact `-2`, miss `-2` |
+| `ridgeline_fire` | `23 / 7 / 10` | `24 / 6 / 10` | `promotable` | exact `+1`, miss `0` |
+| `sable_creek_budget` | `31 / 3 / 6` | `33 / 2 / 5` | `promotable` | exact `+2`, miss `-1` |
+| `school_activity_roster_reconciliation` | `29 / 1 / 10` | `29 / 2 / 9` | `promotable` | exact `0`, miss `-1` |
+| `thornfield_variance` | `24 / 4 / 12` | `30 / 2 / 8` | `promotable` | exact `+6`, miss `-4` |
+
+Artifacts:
+
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_20260516.json`
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_20260516.md`
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_gate_20260516.json`
+- `docs/data/helper_residue/accepted_low6_nohelper_qa_gate_20260516.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\story_worlds --compile-root tmp\accepted_low6_nohelper_compile_20260516 --out-root tmp\accepted_low6_nohelper_qa_20260516 --fixture ridgeline_fire --fixture thornfield_variance --fixture dulse_ledger --fixture sable_creek_budget --fixture school_activity_roster_reconciliation --fixture industrial_sensor_clock_correction --model qwen/qwen3.6-35b-a3b --base-url $env:PRETHINKER_BASE_URL --lanes 6 --limit 40 --timeout 600 --no-cache --helper-companion-row-limit 0 --out-json docs\data\helper_residue\accepted_low6_nohelper_qa_20260516.json --out-md docs\data\helper_residue\accepted_low6_nohelper_qa_20260516.md`
+- `python scripts\compare_qa_runs.py --baseline-qa docs\data\helper_residue\native_nohelper_alias_hardened_low6_qa_20260516.json --candidate-qa docs\data\helper_residue\accepted_low6_nohelper_qa_20260516.json --out-json docs\data\helper_residue\accepted_low6_nohelper_qa_gate_20260516.json --out-md docs\data\helper_residue\accepted_low6_nohelper_qa_gate_20260516.md`
+
+Lesson:
+
+The no-helper path is improving, but fixture-level promotion still needs
+variance awareness. Industrial was promotable in its individual replay
+(`33 / 0 / 7`) but regressed by exact count in the combined draw (`29 / 4 / 7`)
+while still reducing misses. This should be treated as an unstable coordinate,
+not as permission to tune sensor-specific helpers. The aggregate weak-slice
+gain is real: `+16` exact and `-13` misses with helpers still at zero.
+
+Next pressure:
+
+- Add variance tracking to replay promotion for small-delta fixtures.
+- Investigate School/Ridgeline/Industrial at the selector surface before new
+  compile guidance.
+- Keep the accepted root as a measurement artifact, not yet an instrument
+  freeze.

@@ -1,0 +1,46 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 242,
+      "baseline_run": "native_nohelper_story_worlds_draw1_20260516_compile",
+      "candidate_direct_fact_count": 287,
+      "candidate_run": "merged_ridgeline_replay_20260516",
+      "contract_regressions": [
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "contract": "participant_statement_status_contract"
+        }
+      ],
+      "direct_fact_ratio": 1.186,
+      "direct_fact_regression": false,
+      "family_regressions": [],
+      "fixture": "ridgeline_fire",
+      "gained_predicates": [
+        "correction_new_value",
+        "correction_old_value",
+        "correction_target_event",
+        "person_role",
+        "witness_language",
+        "wui_zone"
+      ],
+      "gate_status": "regression",
+      "lost_predicates": [],
+      "predicate_loss_regression": false
+    }
+  ],
+  "max_lost_predicates": 0,
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 1,
+    "direct_fact_regression_count": 0,
+    "family_regression_count": 0,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "regression": 1
+    },
+    "predicate_loss_count": 0,
+    "predicate_loss_regression_count": 0
+  }
+}

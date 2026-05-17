@@ -1,0 +1,29 @@
+{
+  "comparisons": [
+    {
+      "baseline": {
+        "exact": 31,
+        "miss": 9,
+        "partial": 0
+      },
+      "candidate": {
+        "exact": 33,
+        "miss": 7,
+        "partial": 0
+      },
+      "delta": {
+        "exact": 2,
+        "miss": -2,
+        "partial": 0
+      },
+      "fixture": "industrial_sensor_clock_correction",
+      "promotion_status": "promotable"
+    }
+  ],
+  "schema_version": "qa_run_comparison_v1",
+  "summary": {
+    "fixture_count": 1,
+    "promotable_count": 1,
+    "regression_count": 0
+  }
+}

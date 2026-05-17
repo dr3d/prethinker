@@ -1,0 +1,77 @@
+{
+  "comparisons": [
+    {
+      "baseline_direct_fact_count": 121,
+      "baseline_run": "native_nohelper_story_worlds_draw1_20260516_compile",
+      "candidate_direct_fact_count": 96,
+      "candidate_run": "contract_guided_industrial_local_recompile_20260516",
+      "contract_regressions": [],
+      "direct_fact_ratio": 0.7934,
+      "direct_fact_regression": true,
+      "family_regressions": [
+        {
+          "baseline_status": "partial",
+          "candidate_status": "ledger_only",
+          "family": "custody_control_surface"
+        },
+        {
+          "baseline_status": "pass",
+          "candidate_status": "partial",
+          "family": "source_authority_surface"
+        }
+      ],
+      "fixture": "industrial_sensor_clock_correction",
+      "gained_predicates": [
+        "cause_unresolved",
+        "corrected_timestamp",
+        "data_missing",
+        "event_type",
+        "operator_on_shift",
+        "policy_condition",
+        "policy_consequence",
+        "production_hold_interval",
+        "raw_timestamp",
+        "sensor_calibration_due",
+        "sync_valid_until",
+        "system_property"
+      ],
+      "gate_status": "regression",
+      "lost_predicates": [
+        "active_production_time_excludes",
+        "cause_status",
+        "drift_direction",
+        "event_corrected_timestamp",
+        "event_id",
+        "event_raw_timestamp",
+        "event_system",
+        "hold_interval",
+        "last_sync_time",
+        "missing_evidence",
+        "person_role",
+        "procedure_requirement",
+        "sensor_calibration_date",
+        "sensor_id",
+        "sensor_next_calibration_due",
+        "system_id",
+        "system_name",
+        "system_resolution",
+        "system_time_source"
+      ],
+      "predicate_loss_regression": true
+    }
+  ],
+  "max_lost_predicates": 0,
+  "min_direct_fact_ratio": 0.85,
+  "schema_version": "compile_surface_audit_comparison_v1",
+  "summary": {
+    "contract_regression_count": 0,
+    "direct_fact_regression_count": 1,
+    "family_regression_count": 2,
+    "fixture_count": 1,
+    "gate_status_counts": {
+      "regression": 1
+    },
+    "predicate_loss_count": 19,
+    "predicate_loss_regression_count": 1
+  }
+}
