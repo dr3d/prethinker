@@ -238,6 +238,11 @@ Recent transfer work supports the current direction:
   enumeration, restitution, and rule-consequence joins. The next repair should
   protect structural slot delivery and detail-bearing ledger surfaces; it
   should not freeze fixture predicate names or restore legacy helper rows.
+- A small model-variance spot check on `dulse_ledger` did not make the issue
+  disappear. Qwen 3.6 27B compiled to 29/5/4 with parse loss and higher palette
+  drift; DeepSeek V4 Pro compiled to 33/5/2 with helpers still disabled but
+  continued delivery drift. Treat model/provider choice as variance evidence,
+  not as a substitute for the missing structural delivery contract.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
