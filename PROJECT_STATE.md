@@ -587,7 +587,11 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
 - `semantic_router_v1` now emits a `context_audit` block explaining why the profile/context was selected, which context sources should be loaded, which secondary profiles were considered, and why they were not primary. Runtime and router harness traces copy this as `context_audit_v1` with loaded context/contract/predicate counts.
 - The router harness now also emits `router_diagnostics_v1`, a structural router/compiler alignment layer that can flag cases such as "router chose medical, but the compiler emitted legal predicate surfaces" without inspecting raw language.
 - Mapper admission diagnostics now include human-readable `admission_justifications` derived from deterministic gates and rationale codes. Each operation can explain accepted-because and blocked-because reasons such as allowed palette, predicate contract pass, direct source, source-policy block, or missing durable rule clause.
-- A first labeled router training seed lives at `docs/data/router_training/router_training_seed_v1.jsonl` with 164 examples assembled from frontier packs, multilingual probes, and mixed-domain agility cases.
+- A first labeled router training seed existed in the retired generated-docs
+  artifact layer with 164 examples assembled from frontier packs, multilingual
+  probes, and mixed-domain agility cases. That generated layer has been moved
+  out of the public docs tree; recreate or recover it from Git history/local
+  archive only when router-training work becomes active again.
 - `semantic_ir_lava_pack_v5` is retained as historical mixed-domain calibration evidence. It targets truth-maintenance dependency pressure, predicate canonicalization drift, claim/fact/observation promotion, segmentation semantics, multilingual ontology pressure, rule sufficiency, source fidelity, and bootstrap behavior, but it is no longer the active research frontier.
 - `scripts/run_semantic_ir_lava_sweep.py --fast` remains available as an archived stress-pack smoke. Routine active research should prefer current fixture scorecards, boundary-hunt coordinates, and compiled KB artifact packages.
 - A new research note, `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, captures the meta-profile idea: when no domain profile exists, a strong model may propose candidate entity types, predicates, contracts, risks, clarification policies, and starter frontier cases. This is review material for creating a profile, not authority for durable writes.
@@ -626,7 +630,11 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
 - `sec_contracts@v0` is now the third large starter domain. It targets SEC/EDGAR and contract-obligation intake: filing/exhibit provenance, party roles, obligations, rights, conditions, effective/termination triggers, and breach-event boundaries.
 - A first-pass SEC EDGAR adapter shell now lives under `adapters/sec_edgar/`. It requires `SEC_USER_AGENT` for live calls, caches raw responses locally, emits harness cases, and includes an offline synthetic fixture for obligation-not-fact and condition-not-event tests.
 - First SEC live smoke generated ignored Apple/Microsoft filing harness data and ran 11 Semantic IR cases through LM Studio. All emitted valid JSON; adding `filer_of/2` fixed an initial palette gap where filing metadata was being squeezed into `party_to_contract/3`.
-- A new held-out cross-turn frontier proposal lives at `docs/data/frontier_packs/semantic_ir_cross_turn_frontier_pack_v1.json`. It targets identity drift, claim/observation separation, noisy multilingual corrections, mixed rule/query/fact turns, temporal corrections, and domain type ambiguity.
+- The held-out cross-turn frontier proposal targets identity drift,
+  claim/observation separation, noisy multilingual corrections, mixed
+  rule/query/fact turns, temporal corrections, and domain type ambiguity. Its
+  generated JSON pack was retired with the old generated-docs artifact layer;
+  Git history preserves the exact file if that lane reopens.
 - A new `policy_demo` Semantic IR bakeoff group now targets the "talk your rules into existence" demo family: reimbursement-policy violations, meeting commitments, access sponsorship expiry, customer-support override ladders, story-world throne claims, and business dependency credibility.
 - Prompt/context policy now explicitly separates pure answers from mixed write+query turns, prioritizes direct grounded facts before complex rule clauses under the operation cap, requires explicit query operations for explicit questions, and blocks necessary-condition-to-sufficient-rule inversions such as turning "no launch without QA" into `launch_allowed(...)`.
 - Epistemic Worlds v1 now surfaces projection-blocked and supported-but-skipped writes as scoped diagnostic memory instead of global truth. The mapper can preserve the candidate as fixed wrapper clauses such as `world_operation/4`, `world_arg/4`, and `world_policy/3`; these are diagnostic scoped-memory clauses and do not enter the durable domain predicates.
@@ -681,7 +689,10 @@ Supporting architecture:
 Router/context work:
 
 - Treat richer domain context as a catalog/skill mechanism, not hardwired prompt drift. The current auto path is router-owned and measured; next steps are multi-profile turns, router confidence UX, and deciding when mixed-domain utterances should be segmented before Semantic IR.
-- Treat `docs/data/router_training/router_training_seed_v1.jsonl` as a router contract surface, not a fine-tuning set. It is large enough to harden schema/prompt expectations, but still thin around bootstrap and legal/probate boundary tension.
+- Treat any revived router-training seed as a router contract surface, not a
+  fine-tuning set. The retired seed was large enough to harden schema/prompt
+  expectations, but still thin around bootstrap and legal/probate boundary
+  tension.
 - Expand router/profile-selection tests from clean synthetic switching into messy mixed-domain turns. Profile selection is advisory context loading, not admission authority.
 - Harden `profile_bootstrap_v1`: feed unfamiliar-domain text through profile proposal, review, retry, starter-case generation, and closed-loop mapper evaluation. The success criterion remains reviewable profile-design material, not automatic profile authority.
 
@@ -789,7 +800,7 @@ Deep dives:
 2. `docs/DOMAIN_PROFILE_CATALOG.md`
 3. `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`
 4. `docs/DATASET_TRANSFER_WORKSHEET.md`
-5. `docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md`
+5. `docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md`
 6. `docs/PUBLIC_DOCS_GUIDE.md`
 7. `ui_gateway/README.md`
 

@@ -48,11 +48,11 @@ repair path is direct compile-surface stability: when a recurring query-time
 join matters, make the compiler or deterministic ledger emit a reusable,
 fixture-free surface directly.
 
-Helper-era evidence and retirement history live in
-`docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md`. That worksheet is the right place to
-look when a historical result mentions `candidate-helper`, `clean-helper`, or
-legacy companion rows. New contexts should treat that material as migration
-history, not as the active harness center.
+Helper-era evidence and retirement history were retired from the public docs
+tree. Git history preserves the old worksheet for cases where a historical
+result mentions `candidate-helper`, `clean-helper`, or legacy companion rows.
+New contexts should treat that material as migration history, not as the active
+harness center.
 
 ## Current Paths
 

@@ -186,9 +186,10 @@ comparison, but they are opt-in:
 ```
 
 Those adapters are marked `legacy_native_compatibility_adapter` and
-`default_delivery=disabled`. Their historical evidence and retirement trail live
-in `docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md`. New architecture should prefer
-direct admitted predicates and deterministic ledger surfaces such as
+`default_delivery=disabled`. Their historical evidence and retirement trail
+were retired from the public docs tree; Git history preserves the old worksheet.
+New architecture should prefer direct admitted predicates and deterministic
+ledger surfaces such as
 `explicit_table_membership/4`, `explicit_table_member_label/5`,
 `source_record_field/3`, source/authority predicates, temporal/status rows, and
 role/assignment/statement predicates that are emitted by the compiler.

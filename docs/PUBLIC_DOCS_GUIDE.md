@@ -21,14 +21,14 @@ Use the project terms this way:
   rejects candidate operations.
 - **Prolog KB**: the durable symbolic state after admission.
 - **Compiled KB package**: the durable artifact package, especially
-  `world.pl`, `epistemic.pl`, helpers, manifest, and diagnostics.
+  `world.pl`, `epistemic.pl`, manifest, deterministic ledgers, and diagnostics.
 - **Row**: one measured encounter between a question and the compiled state:
   question, reference answer, attempt, verdict, and supporting trace.
 - **Selector**: the steering wheel that chooses the best available QA surface
   for a row.
 - **Guard**: the check that blocks a tempting but wrong surface when it has
   volume, proximity, or relaxed evidence without the needed precision.
-- **Pegboard**: the working roster of lenses, helpers, registries, and selector
+- **Pegboard**: the working roster of lenses, ledgers, registries, and selector
   modes that can be tested row-by-row against frozen artifacts.
 - **Console**: the live cockpit for watching the process.
 - **Medical/UMLS**: a bounded domain lane, not a general clinical reasoning
@@ -45,18 +45,17 @@ Read these first:
 5. [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
 6. [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
 7. [docs/BOUNDARY_HUNT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_HUNT_WORKSHEET.md)
-8. [docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/HELPER_RESIDUE_AUDIT_WORKSHEET.md)
-9. [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
-10. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
-11. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-12. [docs/SELECTOR_GUARD_FAMILY_ROLLUP.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
-13. [docs/README.md](https://github.com/dr3d/prethinker/blob/main/docs/README.md)
-14. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
-15. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
-16. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
-17. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
-18. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
-19. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
+8. [docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILE_SURFACE_STABILITY_WORKSHEET.md)
+9. [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+10. [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+11. [docs/SELECTOR_GUARD_FAMILY_ROLLUP.md](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)
+12. [docs/README.md](https://github.com/dr3d/prethinker/blob/main/docs/README.md)
+13. [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
+14. [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
+15. [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
+16. [docs/CLARIFICATION_EAGERNESS_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/CLARIFICATION_EAGERNESS_STRATEGY.md)
+17. [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
+18. [README.md](https://github.com/dr3d/prethinker/blob/main/README.md)
 
 ## Current Research Center
 
@@ -84,10 +83,10 @@ utterance + context
 ```
 
 The current frontier extends that pivot to multi-pass compilation, rule
-promotion, query helpers, and selector governance. Story-like, procedural,
+promotion, direct query surfaces, and selector governance. Story-like, procedural,
 enterprise-guidance, and charter-rule sources can be viewed through separate
 backbone, support/source, temporal/status, rule, provenance, registry, and
-helper surfaces. The model proposes each view; deterministic admission decides
+source-ledger surfaces. The model proposes each view; deterministic admission decides
 what can enter the compiled artifact; selectors and guards decide which
 encounter surface is safe for each row.
 
@@ -130,11 +129,11 @@ The newest rule-ingestion work started in Glass Tide and now transfers across
 Sable Creek and Avalon. Broad compiles preserve charter/policy rules as source
 records, while separate semantic lenses can admit executable clauses, acquire
 body facts, union promotion-ready rule surfaces, and expose fanout, dormancy,
-unsupported body goals, and helper-substrate gaps before any rule is promoted as
-durable product behavior.
+unsupported body goals, and missing direct-surface gaps before any rule is
+promoted as durable product behavior.
 
 The newest query-surface work is row-level activation. Safe accumulated
-rule/evidence/helper surfaces can rescue rows that need them, but global
+rule/evidence/source-ledger surfaces can rescue rows that need them, but global
 activation can perturb rows that were already good. Perfect-selector reports
 are diagnostic upper bounds, not runtime policies.
 
