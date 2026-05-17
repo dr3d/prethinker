@@ -550,6 +550,7 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: when a source document, correspondence item, report, order, policy, catalog, or register section supports an answer-bearing claim/status/access/finding, preserve the source document id, source actor/author, source date when stated, governed subject, and authority/evidence role as direct rows when compatible predicates exist.",
     "Compile surface invariant rule: when a basis, rationale, corroboration, or evidence source is tied to a named section/source coordinate, preserve both the semantic fact and its source coordinate. A possession_basis, authority, finding, status, or access row without the section/source that states it is shallow for source-addressability questions.",
     "Compile surface invariant rule: answer-bearing details in source text are additive, not replacements for backbone rows. First preserve the source-stated identity, status, date/time, count, amount, role, and subject/object rows. Then, when a source also states a rationale, explanation, availability/scope boundary, separate arrangement, pending commitment, acknowledgment, promised future action, exclusion, or unresolved item, preserve a direct detail surface anchored to the governed subject/action/source when compatible predicates exist. A broad status, event, or source_record_text_atom row alone is shallow if it drops the stated detail that would answer why, what else, what exception, what remains pending, or what is outside the main scope.",
+    "Compile surface invariant rule: if source_detail/4 is available, use it only as an additive fallback detail carrier for exact source-stated attributes or details that no stricter profile predicate can carry. Its slots are subject_id, detail_kind, detail_value, and source_row. It must not replace concrete profile rows for identity, event, status, temporal, count, amount, role, rule, or authority surfaces.",
     "Compile surface invariant rule: do not satisfy answer-detail preservation by inventing a broad generic event/detail wrapper that replaces concrete profile rows. If the source states room numbers, device ids, departure times, membership lists, expiry dates, amounts, current states, or governed subjects, those concrete surfaces must remain queryable even when additive detail rows are also emitted. Prefer profile-owned detail/source predicates; if no compatible detail predicate exists, preserve the backbone rows and note the missing detail carrier in self_check rather than creating a vague wrapper.",
     "Compile surface invariant rule: participant statements need direct statement surfaces. When a source records who said, advised, estimated, certified, commented, clarified, asked, supported, opposed, or observed something, preserve speaker or actor, content or position, speech act, source event or date, language or translation when stated, and binding/advisory/informational status where stated. If binding/advisory status is emitted as a companion row, it must share a stable statement id or source anchor with the statement row. Do not preserve only formal public comments while dropping other participant, staff, official, or member statements.",
     "Compile surface invariant rule: when a document, report, note, card, survey, receipt, photograph, exhibit, or expert statement has stated provenance, preserve the provenance slot contract directly when compatible predicates exist: artifact/source id; preparer/presenter/submitter/filer/commissioner/requester/relying body/admitting body; recipient or presentation context; date; correction detail; and location/container. Role-only or recipient-only rows are not enough when the source states a full provenance relation.",
@@ -1014,6 +1015,9 @@ def main() -> int:
             if isinstance(retry_parsed, dict):
                 parsed = retry_parsed
                 error = retry_error
+    profile_extension_metadata: dict[str, Any] | None = None
+    if isinstance(parsed, dict) and bool(args.compile_source) and bool(args.source_record_ledger):
+        profile_extension_metadata = _ensure_source_detail_predicate(parsed)
     score = profile_bootstrap_score(parsed)
     record: dict[str, Any] = {
         "ts": _utc_now(),
@@ -1040,6 +1044,8 @@ def main() -> int:
         record["profile_review"] = profile_review
     if profile_review_retry is not None:
         record["profile_review_retry"] = profile_review_retry
+    if profile_extension_metadata is not None:
+        record["profile_extension_metadata"] = profile_extension_metadata
     if not args.skip_intake_plan:
         record["intake_plan"] = {
             "parsed_ok": isinstance(intake_plan, dict),
@@ -2245,6 +2251,83 @@ def _append_source_field_id_facts(source_compile: dict[str, Any], parsed_profile
                 "an allowed unary id predicate."
             ),
         }
+
+
+def _ensure_source_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    """Ensure a generic additive source-detail carrier is available.
+
+    This extends the profile vocabulary only; it does not extract facts. The
+    predicate is intentionally scoped to exact source-stated details that lack a
+    stricter profile predicate, so it can replace old helper-era crutches
+    without encouraging fixture-shaped predicate names.
+    """
+
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_source_detail_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "source_detail/4" in signatures:
+        return {
+            "schema_version": "profile_source_detail_extension_v1",
+            "added": False,
+            "reason": "source_detail_already_present",
+        }
+    if _has_specific_detail_carrier(signatures):
+        return {
+            "schema_version": "profile_source_detail_extension_v1",
+            "added": False,
+            "reason": "specific_detail_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "source_detail/4",
+            "args": ["subject_id", "detail_kind", "detail_value", "source_row"],
+            "description": (
+                "Additive fallback for exact source-stated attributes or details when no stricter "
+                "profile predicate can carry the value."
+            ),
+            "why": (
+                "Preserves answer-bearing source details without inventing fixture-specific predicate names "
+                "or replacing concrete domain rows."
+            ),
+            "admission_notes": [
+                "Use only as a fallback carrier for exact source-stated detail values.",
+                "Do not use when a stricter profile predicate can preserve the same surface.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "source_detail/4" not in provenance:
+        provenance.append("source_detail/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added source_detail/4 as an additive fallback detail carrier.")
+    return {
+        "schema_version": "profile_source_detail_extension_v1",
+        "added": True,
+        "signature": "source_detail/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_detail_carrier(signatures: set[str]) -> bool:
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"3", "4", "5"}:
+            continue
+        if predicate.endswith("_attribute") or predicate.endswith("_detail"):
+            return True
+        if predicate in {"item_attribute", "asset_attribute", "device_attribute", "equipment_attribute"}:
+            return True
+    return False
 
 
 def _entity_id_predicate_bases(parsed_profile: dict[str, Any]) -> list[tuple[str, str]]:

@@ -1,6 +1,6 @@
 # Current Harness Instrument
 
-Last updated: 2026-05-16
+Last updated: 2026-05-17
 
 Prethinker's harness is part of the product. It is the research instrument that
 lets the project replay live behavior, capture structural signatures, compare
@@ -138,6 +138,12 @@ Recent no-helper work made this boundary explicit:
 - Source/role review pressure treats old names such as
   `industrial_sensor_clock_correction` as fixture-risk audit coordinates, not
   public architecture.
+- Source-surface gap audits now distinguish answer strings that are stranded in
+  deterministic `source_record_*` rows from values that have earned direct
+  admitted predicates. `source_detail/4` is available only as an additive
+  fallback carrier when a stricter profile attribute/detail predicate is absent;
+  it must not replace concrete identity, event, status, temporal, count, amount,
+  rule, role, or authority rows.
 
 ## Selector And Guard Discipline
 

@@ -1673,6 +1673,7 @@ def run_one_question(
             *queries,
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_text_question_token_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
@@ -1976,6 +1977,59 @@ def _source_column_text_hint_queries(
     return ["source_record_text_atom(SourceRow, TextAtom)."]
 
 
+def _source_text_question_token_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Add filtered source-text lookups for named-object attribute questions.
+
+    This is query routing, not an answer helper. It uses only tokens already in
+    the question and deterministic source-record text rows; it does not inspect
+    the source document, gold answers, or fixture names.
+    """
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_text_atom/2" not in signatures:
+        return []
+    text = str(utterance or "").strip()
+    if not text:
+        return []
+    is_short_answer_probe = bool(re.search(r"\b(?:what|which|who|when|where|does|is|are|list)\b", text, re.IGNORECASE))
+    if not is_short_answer_probe:
+        return []
+    needles = _source_text_question_needles(text)
+    return [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:6]]
+
+
+def _source_text_question_needles(utterance: str) -> list[str]:
+    raw = str(utterance or "")
+    tokens = _query_atom_tokens(raw)
+    if not tokens:
+        return []
+
+    identifier_needles: list[str] = []
+    for match in re.finditer(r"\b[A-Z]\.\s*[A-Z][A-Za-z]+\b", raw):
+        needle = _normalize_text_filter_atom(match.group(0))
+        if needle:
+            identifier_needles.append(needle)
+    for match in re.finditer(r"\b[A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)+\b", raw):
+        needle = _normalize_text_filter_atom(match.group(0))
+        needle_tokens = _query_atom_tokens(needle)
+        if len(needle_tokens) >= 2 and not all(token.isdigit() for token in needle_tokens):
+            identifier_needles.append("_".join(needle_tokens))
+
+    phrase_needles: list[str] = []
+    for width in (3, 2):
+        for index in range(0, max(0, len(tokens) - width + 1)):
+            group = tokens[index : index + width]
+            if any(token.isdigit() for token in group) or width == 3:
+                phrase_needles.append("_".join(group))
+
+    unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
+    return _ordered_atom_unique([*identifier_needles, *phrase_needles, *unigram_needles])
+
+
 def _source_coordinate_hint_queries(
     *,
     utterance: str,
@@ -2107,6 +2161,20 @@ def run_query_plan(
     for query in queries:
         effective_query = query
         used_relaxed_fallback = False
+        source_text_filter = _source_text_memberchk_repair(query)
+        if source_text_filter:
+            results.append(
+                _run_source_text_contains_filter(
+                    runtime=runtime,
+                    original_query=query,
+                    filter_spec=source_text_filter,
+                    bundle_id="question_token_source_text_hint",
+                    purpose="Retrieve deterministic source text rows matching salient tokens already present in the question.",
+                    helper_companions_enabled=helper_companions_enabled,
+                    include_legacy_native_helpers=include_legacy_native_helpers,
+                )
+            )
+            continue
         numeric_token_repair = _source_record_numeric_token_repaired_query(query)
         if numeric_token_repair:
             repaired_query = str(numeric_token_repair.get("query", "")).strip()
@@ -13586,6 +13654,18 @@ def _query_atom_tokens(value: str) -> list[str]:
         if token and token not in GENERIC_QUERY_PLACEHOLDERS
     ]
     return tokens
+
+
+def _ordered_atom_unique(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for value in values:
+        text = str(value or "").strip("_")
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text)
+    return out
 
 
 def _negative_join_with_previous(

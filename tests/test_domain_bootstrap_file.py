@@ -17,6 +17,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_health_summary,
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
+    _ensure_source_detail_predicate,
     _profile_admission_report,
     _profile_admission_retry_context,
     _attach_profile_admission_report,
@@ -48,6 +49,50 @@ def test_narrative_context_guards_attributes_and_official_duties() -> None:
     assert "choice-by-contrast" in context
     assert "comic-consequence" in context
     assert "explicit-moral" in context
+
+
+def test_source_detail_profile_extension_is_additive_fallback_only() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "item_id/1",
+                "args": ["item_id"],
+                "description": "Item identifier.",
+                "why": "Keeps item ids queryable.",
+                "admission_notes": [],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_source_detail_predicate(profile)
+
+    assert metadata["added"] is True
+    assert any(item["signature"] == "source_detail/4" for item in profile["candidate_predicates"])
+    assert "source_detail/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_source_detail_profile_extension_respects_specific_detail_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "device_attribute/3",
+                "args": ["device_id", "attribute_kind", "attribute_value"],
+                "description": "Device attribute.",
+                "why": "Keeps device attributes queryable.",
+                "admission_notes": [],
+            }
+        ],
+    }
+
+    metadata = _ensure_source_detail_predicate(profile)
+
+    assert metadata == {
+        "schema_version": "profile_source_detail_extension_v1",
+        "added": False,
+        "reason": "specific_detail_carrier_present",
+    }
 
 
 def test_operational_record_context_guards_status_corrections_and_unresolved_items() -> None:
