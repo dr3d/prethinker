@@ -4,12 +4,17 @@ from pathlib import Path
 from scripts.audit_compile_surface_stability import audit_paths
 
 
-def _write_compile(path: Path, facts: list[str]) -> Path:
+def _write_compile(path: Path, facts: list[str], candidate_predicates: list[str] | None = None) -> Path:
     path.parent.mkdir(parents=True)
     path.write_text(
         json.dumps(
             {
                 "parsed_ok": True,
+                "parsed": {
+                    "candidate_predicates": [
+                        {"signature": signature} for signature in (candidate_predicates or [])
+                    ]
+                },
                 "source_compile": {"facts": facts},
             }
         ),
@@ -62,6 +67,30 @@ def test_compile_surface_stability_detects_parallel_assignment_drift(tmp_path: P
     assert first_contracts["parallel_assignment_event_preservation"]["status"] == "partial"
     assert second_contracts["parallel_assignment_event_preservation"]["status"] == "pass"
     assert report["summary"]["unstable_fixture_count"] == 1
+
+
+def test_compile_surface_stability_reports_candidate_palette_drift(tmp_path: Path) -> None:
+    draw1 = _write_compile(
+        tmp_path / "draw1" / "fixture_palette" / "domain_bootstrap_file_a.json",
+        ["entity_assignment(entity_001, version_a, cohort_a)."],
+        candidate_predicates=["entity_assignment/3", "attribute_exception/3"],
+    )
+    draw2 = _write_compile(
+        tmp_path / "draw2" / "fixture_palette" / "domain_bootstrap_file_b.json",
+        ["entity_assignment(entity_001, version_a, cohort_a)."],
+        candidate_predicates=["entity_assignment/3", "attribute_exception/4", "source_capture/4"],
+    )
+
+    report = audit_paths([draw1, draw2])
+
+    fixture = report["fixtures"][0]
+    assert fixture["stable"] is True
+    assert fixture["palette_stable"] is False
+    assert fixture["palette_common_count"] == 1
+    assert fixture["palette_union_count"] == 4
+    assert fixture["palette_unstable_count"] == 3
+    assert fixture["predicate_arity_drift"] == [{"predicate": "attribute_exception", "arities": [3, 4]}]
+    assert report["summary"]["palette_unstable_fixture_count"] == 1
 
 
 def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:

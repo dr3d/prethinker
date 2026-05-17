@@ -144,6 +144,11 @@ Recent no-helper work made this boundary explicit:
   fallback carrier when a stricter profile attribute/detail predicate is absent;
   it must not replace concrete identity, event, status, temporal, count, amount,
   rule, role, or authority rows.
+- Compile-surface stability now tracks candidate predicate palette stability,
+  not just admitted fact stability. A compile draw can preserve enough meaning
+  to answer some questions while still alternating between incompatible
+  predicate names or arities for the same source. Those palette shifts are
+  measured as first-class churn before any repair is designed.
 - Literal `Key: Value` source lines now emit deterministic
   `source_record_inline_field/3` plus the shared `source_record_field/3`
   surface used for tables. This is source addressability, not semantic
@@ -186,6 +191,10 @@ Recent transfer work supports the current direction:
   detail/event wrappers: wrappers may remain as additive residue, but they are
   flagged when event identity, time, participant/system, subject, and outcome
   backbone rows are missing.
+- Compile-surface stability audits now report candidate-palette churn and
+  predicate arity drift across redraws. Recent roster redraws showed high
+  palette churn even when QA stayed in the same rough band, which points toward
+  profile/palette stabilization before broad native no-helper stamping.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -203,6 +212,7 @@ python scripts/stage_incoming_fixtures.py --root tmp/incoming --out-root tmp/inc
 python scripts/plan_story_world_fixture_runs.py --fixture copperfall_deadline_docket --fixture harrowgate_witness_file --fixture larkspur_clockwork_fair --fixture meridian_permit_board --fixture northbridge_authority_packet --qa-limit 40 --out-json tmp/story_world_runs/promoted_incoming_cold_run_plan.json --out-md tmp/story_world_runs/promoted_incoming_cold_run_plan.md
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
+python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_OR_DIR> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/compile_surface_stability.json --out-md tmp/compile_surface_stability.md
 ```
 
 Generated run JSON can stay under `tmp/`. Durable scorecard lessons and

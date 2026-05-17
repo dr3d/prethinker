@@ -64,6 +64,7 @@ def _expand_compile_paths(inputs: list[Path]) -> list[Path]:
 
 def _load_draw(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    parsed = payload.get("parsed") if isinstance(payload.get("parsed"), dict) else {}
     facts = _facts_from_compile(payload)
     direct_facts = sorted(fact for fact in facts if not _predicate_name(fact).startswith("source_record"))
     source_facts = sorted(fact for fact in facts if _predicate_name(fact).startswith("source_record"))
@@ -80,6 +81,7 @@ def _load_draw(path: Path) -> dict[str, Any]:
         "fixture": path.parent.name,
         "run": path.parent.parent.name,
         "parsed_ok": bool(payload.get("parsed_ok")),
+        "candidate_signatures": _candidate_signatures(parsed),
         "direct_fact_count": len(direct_facts),
         "direct_predicate_count": len(predicate_counts),
         "direct_facts": direct_facts,
@@ -102,6 +104,12 @@ def _facts_from_compile(payload: dict[str, Any]) -> list[str]:
 
 
 def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
+    palette_sets = [set(draw["candidate_signatures"]) for draw in draws]
+    palette_union = set().union(*palette_sets) if palette_sets else set()
+    palette_common = set.intersection(*palette_sets) if palette_sets else set()
+    palette_unstable = sorted(palette_union - palette_common)
+    palette_churn_ratio = (len(palette_unstable) / len(palette_union)) if palette_union else 0.0
+    predicate_arity_drift = _predicate_arity_drift(palette_union)
     fact_sets = [set(draw["direct_facts"]) for draw in draws]
     union_facts = set().union(*fact_sets) if fact_sets else set()
     common_facts = set.intersection(*fact_sets) if fact_sets else set()
@@ -150,6 +158,13 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "fixture": fixture,
         "draw_count": len(draws),
+        "palette_stable": not palette_unstable and not predicate_arity_drift,
+        "palette_union_count": len(palette_union),
+        "palette_common_count": len(palette_common),
+        "palette_unstable_count": len(palette_unstable),
+        "palette_churn_ratio": round(palette_churn_ratio, 4),
+        "unstable_candidate_signatures": palette_unstable,
+        "predicate_arity_drift": predicate_arity_drift,
         "stable": not unstable_facts,
         "union_fact_count": len(union_facts),
         "common_fact_count": len(common_facts),
@@ -161,6 +176,10 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
                 "compile_json": draw["compile_json"],
                 "run": draw["run"],
                 "parsed_ok": draw["parsed_ok"],
+                "candidate_signature_count": len(draw["candidate_signatures"]),
+                "candidate_signatures": draw["candidate_signatures"],
+                "missing_palette_union_count": len(sorted(palette_union - set(draw["candidate_signatures"]))),
+                "missing_palette_union_signatures": sorted(palette_union - set(draw["candidate_signatures"]))[:25],
                 "direct_fact_count": draw["direct_fact_count"],
                 "direct_predicate_count": draw["direct_predicate_count"],
                 "surface_counts": draw["surface_counts"],
@@ -174,13 +193,59 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _summarize(fixtures: list[dict[str, Any]]) -> dict[str, Any]:
     unstable = [fixture for fixture in fixtures if not fixture["stable"]]
+    palette_unstable = [fixture for fixture in fixtures if not fixture.get("palette_stable")]
     return {
         "stable_fixture_count": len(fixtures) - len(unstable),
         "unstable_fixture_count": len(unstable),
+        "palette_stable_fixture_count": len(fixtures) - len(palette_unstable),
+        "palette_unstable_fixture_count": len(palette_unstable),
+        "palette_unstable_signature_count": sum(int(fixture.get("palette_unstable_count", 0)) for fixture in fixtures),
+        "predicate_arity_drift_count": sum(len(fixture.get("predicate_arity_drift", [])) for fixture in fixtures),
         "unstable_fact_count": sum(int(fixture["unstable_fact_count"]) for fixture in fixtures),
         "predicate_drift_count": sum(len(fixture["predicate_drift"]) for fixture in fixtures),
         "surface_drift_count": sum(len(fixture["surface_drift"]) for fixture in fixtures),
     }
+
+
+def _candidate_signatures(parsed: dict[str, Any]) -> list[str]:
+    rows = parsed.get("candidate_predicates")
+    if not isinstance(rows, list):
+        return []
+    out: list[str] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        signature = str(row.get("signature") or "").strip()
+        if not signature:
+            name = str(row.get("name") or row.get("predicate") or "").strip()
+            args = row.get("args", [])
+            if name and isinstance(args, list):
+                signature = f"{name}/{len(args)}"
+        if signature:
+            out.append(signature)
+    return sorted(dict.fromkeys(out))
+
+
+def _predicate_arity_drift(signatures: set[str]) -> list[dict[str, Any]]:
+    by_name: dict[str, set[int]] = {}
+    for signature in signatures:
+        name, arity = _split_signature(signature)
+        if not name or arity is None:
+            continue
+        by_name.setdefault(name, set()).add(arity)
+    return [
+        {"predicate": name, "arities": sorted(arities)}
+        for name, arities in sorted(by_name.items())
+        if len(arities) > 1
+    ]
+
+
+def _split_signature(signature: str) -> tuple[str, int | None]:
+    raw = str(signature or "").strip()
+    match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)/(\d+)", raw)
+    if not match:
+        return raw.split("/", 1)[0], None
+    return match.group(1), int(match.group(2))
 
 
 def _predicate_name(fact: str) -> str:
@@ -565,6 +630,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Fixtures: `{report['fixture_count']}`",
         f"- Stable fixtures: `{report['summary']['stable_fixture_count']}`",
         f"- Unstable fixtures: `{report['summary']['unstable_fixture_count']}`",
+        f"- Palette-stable fixtures: `{report['summary']['palette_stable_fixture_count']}`",
+        f"- Palette-unstable fixtures: `{report['summary']['palette_unstable_fixture_count']}`",
+        f"- Unstable palette signatures: `{report['summary']['palette_unstable_signature_count']}`",
+        f"- Predicate arity drift rows: `{report['summary']['predicate_arity_drift_count']}`",
         f"- Unstable direct facts: `{report['summary']['unstable_fact_count']}`",
         f"- Predicate drift rows: `{report['summary']['predicate_drift_count']}`",
         f"- Surface drift rows: `{report['summary']['surface_drift_count']}`",
@@ -577,11 +646,27 @@ def render_markdown(report: dict[str, Any]) -> str:
                 "",
                 f"- Draws: `{fixture['draw_count']}`",
                 f"- Stable: `{fixture['stable']}`",
+                f"- Palette stable: `{fixture['palette_stable']}`",
+                f"- Common / union palette signatures: `{fixture['palette_common_count']} / {fixture['palette_union_count']}`",
+                f"- Unstable palette signatures: `{fixture['palette_unstable_count']}`",
+                f"- Palette churn ratio: `{fixture['palette_churn_ratio']}`",
                 f"- Common / union direct facts: `{fixture['common_fact_count']} / {fixture['union_fact_count']}`",
                 f"- Unstable direct facts: `{fixture['unstable_fact_count']}`",
                 "",
             ]
         )
+        if not fixture["palette_stable"]:
+            lines.append(f"- Unstable candidate signatures: `{fixture['unstable_candidate_signatures']}`")
+            if fixture.get("predicate_arity_drift"):
+                lines.append(f"- Predicate arity drift: `{fixture['predicate_arity_drift']}`")
+            lines.append("")
+            lines.extend(["| Draw | Candidate signatures | Missing palette-union signatures |", "| --- | ---: | --- |"])
+            for draw in fixture["draws"]:
+                draw_name = Path(draw["compile_json"]).parent.parent.name
+                lines.append(
+                    f"| `{draw_name}` | {draw['candidate_signature_count']} | `{draw['missing_palette_union_signatures']}` |"
+                )
+            lines.append("")
         if fixture["predicate_drift"]:
             lines.extend(["| Predicate | Counts | Delta |", "| --- | --- | ---: |"])
             for row in fixture["predicate_drift"]:
