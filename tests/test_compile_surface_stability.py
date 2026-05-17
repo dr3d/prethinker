@@ -186,3 +186,58 @@ def test_operational_lifecycle_contract_reports_event_date_split_surfaces(tmp_pa
     assert contract["status"] == "ledger_only"
     assert contract["direct_complete_count"] == 0
     assert contract["direct_split_count"] == 1
+
+
+def test_operational_lifecycle_contract_accepts_typed_event_date_palette(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, on_2026_05_01_record_a_status_was_pending).",
+            "source_record_text_atom(src_line_2, on_2026_05_02_record_a_was_closed_as_approved).",
+            "event_type(evt_1, received).",
+            "event_timestamp(evt_1, 2026_05_01).",
+            "event_type(evt_2, closed).",
+            "event_timestamp(evt_2, 2026_05_02).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 2
+    assert contract["direct_split_count"] == 0
+
+
+def test_operational_lifecycle_contract_ignores_undated_lifecycle_words(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, packet_supersedes_prior_notice_where_conflicts_exist).",
+            "source_record_text_atom(src_line_2, final_review_was_completed_before_release).",
+            "record_note(packet_a, supersedes_prior_notice).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["status"] == "not_applicable"
+    assert contract["source_signal_count"] == 0
+
+
+def test_operational_lifecycle_contract_ignores_assignment_and_negative_receipt(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, june_14_2026_14_15_division_chief_is_assigned_as_observer).",
+            "source_record_text_atom(src_line_2, june_15_2026_03_30_office_has_not_received_the_notice).",
+            "person_assignment(person_a, observer, 2026_06_14).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["status"] == "not_applicable"
+    assert contract["source_signal_count"] == 0

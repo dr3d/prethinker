@@ -382,7 +382,7 @@ def _operational_lifecycle_contract(*, source_texts: list[str], direct_rows: lis
     source_mentions = [
         text
         for text in source_texts
-        if _has_lifecycle_marker(text) and _has_temporal_or_state_marker(text)
+        if _has_lifecycle_marker(text) and _has_temporal_marker(text) and not _negated_lifecycle_source_text(text)
     ]
     complete_units, partial_units, split_units = _operational_lifecycle_direct_units(direct_rows)
     return _contract_status(
@@ -406,17 +406,22 @@ def _operational_lifecycle_direct_units(
     partial: set[tuple[str, ...]] = set()
     date_by_subject: dict[str, set[tuple[str, ...]]] = {}
     state_by_subject: dict[str, set[tuple[str, ...]]] = {}
+    typed_event_by_subject: dict[str, set[tuple[str, ...]]] = {}
     for index, row in enumerate(direct_rows):
         predicate = str(row.get("predicate") or "").lower()
         args = [str(arg).strip().lower() for arg in row.get("args", [])]
         lifecycle_predicate = _has_lifecycle_marker(predicate)
         date_carrier_predicate = _has_temporal_carrier_marker(predicate)
-        if not lifecycle_predicate and not date_carrier_predicate:
+        typed_event_predicate = _has_typed_event_marker(predicate)
+        if not lifecycle_predicate and not date_carrier_predicate and not typed_event_predicate:
             continue
         key = (predicate, str(index), *(args[:3]))
         joined_args = " ".join(args)
         has_temporal = _has_temporal_marker(joined_args)
-        has_state = lifecycle_predicate and (_has_state_marker(joined_args) or _has_lifecycle_marker(joined_args))
+        has_state = (
+            lifecycle_predicate
+            and (_has_state_marker(joined_args) or _has_lifecycle_marker(joined_args))
+        ) or (typed_event_predicate and len(args) >= 2 and bool(args[1]))
         if len(args) >= 2:
             subject = args[0]
             if subject:
@@ -424,13 +429,18 @@ def _operational_lifecycle_direct_units(
                     date_by_subject.setdefault(subject, set()).add(key)
                 if has_state:
                     state_by_subject.setdefault(subject, set()).add(key)
+                if typed_event_predicate and bool(args[1]):
+                    typed_event_by_subject.setdefault(subject, set()).add(key)
         if lifecycle_predicate and len(args) >= 3 and (has_temporal or has_state):
             complete.add(key)
         elif len(args) >= 2:
             partial.add(key)
     split: set[tuple[str, ...]] = set()
+    for subject in sorted(set(date_by_subject) & set(typed_event_by_subject)):
+        complete.add(("joined_event_lifecycle_surface", subject))
     for subject in sorted(set(date_by_subject) & set(state_by_subject)):
-        split.add(("split_lifecycle_surface", subject))
+        if subject not in typed_event_by_subject:
+            split.add(("split_lifecycle_surface", subject))
     return complete, partial, split
 
 
@@ -445,7 +455,6 @@ def _has_lifecycle_marker(text: str) -> bool:
             "lifecycle",
             "received",
             "filed",
-            "assigned",
             "approved",
             "denied",
             "withdrawn",
@@ -458,16 +467,40 @@ def _has_lifecycle_marker(text: str) -> bool:
     )
 
 
-def _has_temporal_or_state_marker(text: str) -> bool:
-    return _has_temporal_marker(text) or _has_state_marker(text)
+def _negated_lifecycle_source_text(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "not_received",
+            "has_not_received",
+            "had_not_received",
+            "not_approved",
+            "not_completed",
+            "not_closed",
+        )
+    )
 
 
 def _has_temporal_marker(text: str) -> bool:
-    return bool(re.search(r"\b(?:v_)?\d{4}_\d{2}_\d{2}\b", text))
+    return bool(re.search(r"(?:^|[^0-9])(?:v_)?\d{4}[-_]\d{2}[-_]\d{2}(?:[^0-9]|$)", text))
 
 
 def _has_temporal_carrier_marker(text: str) -> bool:
     return any(marker in text for marker in ("date", "dated", "timestamp", "time", "turn"))
+
+
+def _has_typed_event_marker(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "event_type",
+            "event_action",
+            "event_status",
+            "transition_type",
+            "transition_action",
+            "lifecycle_action",
+        )
+    )
 
 
 def _has_state_marker(text: str) -> bool:
