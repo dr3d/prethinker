@@ -4193,3 +4193,70 @@ Next pressure:
   events, measures, source authority, statements, corrections, and domain
   backbone predicates.
 - Keep the gate as the decision point before any QA replay.
+
+## HR-049 - Preservation Prompt Replay Rejected
+
+Date: 2026-05-16
+
+Before:
+
+- HR-048 showed two Thornfield replay compiles failed the preservation gate.
+- A compact preservation rule was added to the compile context to say invariant
+  rows are additive and must not replace concrete typed backbone rows.
+
+Prediction:
+
+- If prompt guidance alone can stabilize preservation, a new Thornfield draw
+  should retain the baseline backbone while holding or improving contracts.
+
+Intervention:
+
+- Recompiled `thornfield_variance` after adding the preservation rule.
+- Audited the candidate.
+- Compared it against the low-six baseline audit with the preservation gate.
+
+After:
+
+- Candidate compile rough score: `1.0`
+- Candidate admitted facts: `52`
+- Gate: `regression`
+- Direct facts: `122 -> 52` (`0.4262`)
+- Family regressions:
+  - `object_device_surface`: `partial -> ledger_only`
+  - `rule_policy_surface`: `pass -> partial`
+- Lost predicates: `15`, including `testimony_statement`,
+  `variance_finding`, `variance_standard`, `setback_requirement`,
+  `notice_requirement`, `hearing_attendance`, `permit_application`, and
+  `record_status`.
+
+Artifacts:
+
+- `docs/data/helper_residue/preservation_guided_thornfield_recompile_20260516.json`
+- `docs/data/helper_residue/preservation_guided_thornfield_recompile_20260516.md`
+- `docs/data/helper_residue/preservation_guided_thornfield_recompile_audit_20260516.json`
+- `docs/data/helper_residue/preservation_guided_thornfield_recompile_audit_20260516.md`
+- `docs/data/helper_residue/thornfield_preservation_guided_gate_20260516.json`
+- `docs/data/helper_residue/thornfield_preservation_guided_gate_20260516.md`
+
+Verification:
+
+- `python scripts\run_domain_bootstrap_file_batch.py --fixture thornfield_variance --compile-source --compile-plan-passes --focused-pass-ops-schema --source-entity-ledger --source-record-ledger --source-record-ledger-facts --intake-registry-context --review-profile --profile-review-retry --quality-gate`
+- `python scripts\audit_compile_surface_invariants.py --compile-json tmp\preservation_guided_thornfield_recompile_20260516\thornfield_variance --out-json docs\data\helper_residue\preservation_guided_thornfield_recompile_audit_20260516.json --out-md docs\data\helper_residue\preservation_guided_thornfield_recompile_audit_20260516.md`
+- `python scripts\compare_compile_surface_audits.py --baseline-audit docs\data\helper_residue\native_nohelper_low6_contract_audit_20260516.json --candidate-audit docs\data\helper_residue\preservation_guided_thornfield_recompile_audit_20260516.json --out-json docs\data\helper_residue\thornfield_preservation_guided_gate_20260516.json --out-md docs\data\helper_residue\thornfield_preservation_guided_gate_20260516.md`
+
+Lesson:
+
+Prompt prose alone is not enough to guarantee surface preservation. The rough
+score can report `1.0` while the candidate loses most of the useful predicate
+backbone. The architecture needs deterministic acceptance, best-of-N selection,
+or merge-preserving compile machinery before broad no-helper restamping.
+
+Next pressure:
+
+- Build a deterministic replay acceptance workflow:
+  1. generate candidate compile;
+  2. audit candidate;
+  3. compare candidate to baseline;
+  4. run QA only if the gate passes.
+- Then extend toward best-of-N candidate selection or merge-preserving compile
+  rather than adding more broad prompt guidance.

@@ -1,0 +1,636 @@
+{
+  "compile_count": 1,
+  "reports": [
+    {
+      "candidate_predicate_count": 15,
+      "compile_json": "C:\\prethinker\\tmp\\preservation_guided_thornfield_recompile_20260516\\thornfield_variance\\domain_bootstrap_file_20260517T004635304114Z_source_qwen-qwen3-6-35b-a3b.json",
+      "direct_fact_count": 52,
+      "direct_predicates": [
+        "appeal_ground",
+        "board_finding",
+        "board_vote",
+        "disputed_fact",
+        "document_type",
+        "notice_sent",
+        "party_claim",
+        "procedural_ruling",
+        "property_dimension",
+        "structure_location",
+        "survey_measurement",
+        "variance_condition",
+        "zoning_requirement"
+      ],
+      "families": [
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "registrar_or_recorder": [
+              "recorded"
+            ]
+          },
+          "description": "named people or organizations with answer-bearing roles",
+          "family": "identity_role_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "registrar_or_recorder": [
+              "recorder",
+              "recorded"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "basis_coordinate": [
+              "ground"
+            ],
+            "negative_inference_coordinate": [
+              "not",
+              "absence"
+            ],
+            "section_coordinate": [
+              "part"
+            ]
+          },
+          "description": "named sections, titles, register parts, and source coordinates",
+          "family": "source_addressability_surface",
+          "ledger_only_groups": {
+            "title_or_heading": [
+              "heading"
+            ]
+          },
+          "missing_groups": [
+            "title_or_heading"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "basis_coordinate": [
+              "basis",
+              "reason"
+            ],
+            "negative_inference_coordinate": [
+              "not"
+            ],
+            "section_coordinate": [
+              "section"
+            ],
+            "title_or_heading": [
+              "heading"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "authority_or_evidence_role": [
+              "finding"
+            ],
+            "governed_subject_or_item": [
+              "claim",
+              "status",
+              "finding"
+            ],
+            "source_document_or_correspondence": [
+              "document"
+            ]
+          },
+          "description": "source documents, authority/evidence roles, source actors or dates, and governed subjects",
+          "family": "source_authority_surface",
+          "ledger_only_groups": {
+            "source_actor_or_date": [
+              "date",
+              "court",
+              "prepared"
+            ]
+          },
+          "missing_groups": [
+            "source_actor_or_date"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "authority_or_evidence_role": [
+              "finding",
+              "basis"
+            ],
+            "governed_subject_or_item": [
+              "subject",
+              "object",
+              "status",
+              "finding"
+            ],
+            "source_actor_or_date": [
+              "date",
+              "court",
+              "prepared"
+            ],
+            "source_document_or_correspondence": [
+              "document",
+              "report",
+              "source"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "commitment_or_future_action": [
+              "will",
+              "pending"
+            ],
+            "negative_or_exclusion_detail": [
+              "not"
+            ]
+          },
+          "description": "source-stated answer details, rationales, availability/scope, commitments, and exclusions",
+          "family": "answer_detail_surface",
+          "ledger_only_groups": {
+            "availability_or_scope": [
+              "separate"
+            ],
+            "detail_or_explanation": [
+              "reason",
+              "basis",
+              "because"
+            ]
+          },
+          "missing_groups": [
+            "availability_or_scope",
+            "detail_or_explanation"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "availability_or_scope": [
+              "separate"
+            ],
+            "commitment_or_future_action": [
+              "will"
+            ],
+            "detail_or_explanation": [
+              "reason",
+              "basis",
+              "because"
+            ],
+            "negative_or_exclusion_detail": [
+              "not",
+              "without"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "binding_or_epistemic_status": [
+              "not",
+              "opinion"
+            ],
+            "content_or_position": [
+              "position",
+              "concern"
+            ],
+            "context_or_source_event": [
+              "hearing",
+              "record"
+            ],
+            "speaker_or_actor": [
+              "member"
+            ],
+            "speech_act_or_record_type": [
+              "opinion"
+            ]
+          },
+          "description": "speaker/actor statements, advice, estimates, comments, clarifications, content, context, and binding status",
+          "family": "participant_statement_surface",
+          "ledger_only_groups": {},
+          "missing_groups": [],
+          "status": "pass",
+          "triggered_groups": {
+            "binding_or_epistemic_status": [
+              "not",
+              "opinion"
+            ],
+            "content_or_position": [
+              "position",
+              "question",
+              "reason"
+            ],
+            "context_or_source_event": [
+              "hearing",
+              "record",
+              "source",
+              "date",
+              "translation"
+            ],
+            "speaker_or_actor": [
+              "staff",
+              "member"
+            ],
+            "speech_act_or_record_type": [
+              "opinion",
+              "stated"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "exception_or_exclusion": [
+              "not"
+            ],
+            "ratio_or_requirement": [
+              "minimum",
+              "requirement"
+            ]
+          },
+          "description": "rules, policies, procedure identifiers, clauses, ratios, and governing sections",
+          "family": "rule_policy_surface",
+          "ledger_only_groups": {
+            "policy_or_rule_id": [
+              "section"
+            ]
+          },
+          "missing_groups": [
+            "policy_or_rule_id"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "exception_or_exclusion": [
+              "unless",
+              "not"
+            ],
+            "policy_or_rule_id": [
+              "section"
+            ],
+            "ratio_or_requirement": [
+              "minimum",
+              "required"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "objects, devices, systems, vendor/model identifiers, and inventory ids",
+          "family": "object_device_surface",
+          "ledger_only_groups": {
+            "object_or_item_id": [
+              "object"
+            ],
+            "vendor_or_model": [
+              "make"
+            ]
+          },
+          "missing_groups": [
+            "object_or_item_id",
+            "vendor_or_model"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "object_or_item_id": [
+              "object"
+            ],
+            "vendor_or_model": [
+              "make"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {},
+          "description": "events, raw/corrected timestamps, effective dates, and transitions",
+          "family": "temporal_event_surface",
+          "ledger_only_groups": {
+            "timestamp_or_date": [
+              "date"
+            ]
+          },
+          "missing_groups": [
+            "timestamp_or_date"
+          ],
+          "status": "ledger_only",
+          "triggered_groups": {
+            "timestamp_or_date": [
+              "date"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "event_identity": [
+              "record"
+            ],
+            "outcome_or_state": [
+              "status",
+              "void"
+            ],
+            "participant_or_system": [
+              "party"
+            ]
+          },
+          "description": "event rows whose identity, temporal anchor, participant, governed subject, and outcome remain joinable",
+          "family": "event_backbone_unit_surface",
+          "ledger_only_groups": {
+            "subject_or_object": [
+              "subject",
+              "object",
+              "request"
+            ],
+            "temporal_anchor": [
+              "date"
+            ]
+          },
+          "missing_groups": [
+            "subject_or_object",
+            "temporal_anchor"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "event_identity": [
+              "record"
+            ],
+            "outcome_or_state": [
+              "status",
+              "void",
+              "issued"
+            ],
+            "participant_or_system": [
+              "party"
+            ],
+            "subject_or_object": [
+              "subject",
+              "object",
+              "request"
+            ],
+            "temporal_anchor": [
+              "date"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "count_or_total": [
+              "total"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ],
+            "threshold_or_limit": [
+              "threshold",
+              "minimum"
+            ]
+          },
+          "description": "explicit counts, thresholds, durations, percentages, and computed requirements",
+          "family": "measure_count_surface",
+          "ledger_only_groups": {
+            "duration_or_hours": [
+              "days"
+            ],
+            "measurement_value": [
+              "second",
+              "value"
+            ]
+          },
+          "missing_groups": [
+            "duration_or_hours",
+            "measurement_value"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "count_or_total": [
+              "count",
+              "total"
+            ],
+            "duration_or_hours": [
+              "days"
+            ],
+            "measurement_value": [
+              "second",
+              "value"
+            ],
+            "ratio_or_formula": [
+              "per"
+            ],
+            "threshold_or_limit": [
+              "limit",
+              "minimum"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "adjustment_value": [
+              "addition"
+            ],
+            "constraint_or_threshold": [
+              "minimum",
+              "threshold"
+            ]
+          },
+          "description": "financial or numeric-state baselines, adjustments, scenarios, resulting values, and thresholds",
+          "family": "financial_baseline_surface",
+          "ledger_only_groups": {
+            "baseline_value": [
+              "current"
+            ],
+            "resulting_value": [
+              "new"
+            ],
+            "scenario_or_actuality": [
+              "would",
+              "if",
+              "after",
+              "before"
+            ]
+          },
+          "missing_groups": [
+            "baseline_value",
+            "resulting_value",
+            "scenario_or_actuality"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "adjustment_value": [
+              "addition"
+            ],
+            "baseline_value": [
+              "current"
+            ],
+            "constraint_or_threshold": [
+              "minimum",
+              "limit"
+            ],
+            "resulting_value": [
+              "new"
+            ],
+            "scenario_or_actuality": [
+              "would",
+              "if",
+              "after",
+              "before"
+            ]
+          }
+        },
+        {
+          "candidate_only_groups": {},
+          "covered_groups": {
+            "access_or_location": [
+              "location"
+            ]
+          },
+          "description": "custody, access, ownership, recall/return, and control state",
+          "family": "custody_control_surface",
+          "ledger_only_groups": {
+            "ownership_or_title": [
+              "owner"
+            ]
+          },
+          "missing_groups": [
+            "ownership_or_title"
+          ],
+          "status": "partial",
+          "triggered_groups": {
+            "access_or_location": [
+              "location"
+            ],
+            "ownership_or_title": [
+              "owner"
+            ]
+          }
+        }
+      ],
+      "fixture": "thornfield_variance",
+      "parsed_ok": true,
+      "relation_contracts": [
+        {
+          "companion_key_count": 0,
+          "companion_predicate": "access_source",
+          "contract": "access_authority_source_pair",
+          "description": "authorized access item/party pairs should expose the source or authority companion row",
+          "missing_keys": [],
+          "required_key_count": 0,
+          "required_predicate": "access_authorized_to",
+          "status": "not_applicable"
+        },
+        {
+          "companion_key_count": 1,
+          "contract": "financial_baseline_derivation_contract",
+          "covered_slots": {
+            "constraint_or_threshold": [
+              "threshold",
+              "minimum"
+            ]
+          },
+          "description": "numeric-state changes should bind baseline, adjustment, result, scenario or basis, and constraint in structural rows",
+          "missing_keys": [
+            "adjustment_value",
+            "baseline_or_previous_value",
+            "resulting_value",
+            "scenario_or_basis"
+          ],
+          "required_key_count": 5,
+          "status": "partial",
+          "structural_predicates": [
+            "board_finding",
+            "party_claim",
+            "variance_condition"
+          ],
+          "structural_row_count": 3,
+          "triggered_groups": {
+            "adjustment": [
+              "addition"
+            ],
+            "financial_state": [
+              "value"
+            ],
+            "result": [
+              "new",
+              "reduce"
+            ]
+          }
+        },
+        {
+          "companion_key_count": 1,
+          "contract": "participant_statement_status_contract",
+          "covered_keys": [
+            "party_claim[1]"
+          ],
+          "description": "statement/advice/comment/estimate rows should expose binding or advisory status on the row or a same-anchor companion",
+          "missing_keys": [],
+          "required_key_count": 1,
+          "statement_predicates": [
+            "party_claim"
+          ],
+          "status": "pass",
+          "status_predicates": [],
+          "triggered_groups": {
+            "binding_status": [
+              "not",
+              "opinion"
+            ],
+            "speech_surface": [
+              "opinion",
+              "stated"
+            ]
+          }
+        }
+      ],
+      "run": "preservation_guided_thornfield_recompile_20260516",
+      "source_record_fact_count": 1704,
+      "summary": {
+        "ledger_only": 2,
+        "partial": 8,
+        "pass": 2
+      }
+    }
+  ],
+  "schema_version": "compile_surface_invariant_audit_v1",
+  "summary": {
+    "family_status_counts": {
+      "answer_detail_surface": {
+        "partial": 1
+      },
+      "custody_control_surface": {
+        "partial": 1
+      },
+      "event_backbone_unit_surface": {
+        "partial": 1
+      },
+      "financial_baseline_surface": {
+        "partial": 1
+      },
+      "identity_role_surface": {
+        "pass": 1
+      },
+      "measure_count_surface": {
+        "partial": 1
+      },
+      "object_device_surface": {
+        "ledger_only": 1
+      },
+      "participant_statement_surface": {
+        "pass": 1
+      },
+      "rule_policy_surface": {
+        "partial": 1
+      },
+      "source_addressability_surface": {
+        "partial": 1
+      },
+      "source_authority_surface": {
+        "partial": 1
+      },
+      "temporal_event_surface": {
+        "ledger_only": 1
+      }
+    },
+    "status_counts": {
+      "ledger_only": 2,
+      "partial": 8,
+      "pass": 2
+    }
+  }
+}
