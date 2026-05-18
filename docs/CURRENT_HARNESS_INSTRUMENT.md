@@ -318,6 +318,18 @@ Recent transfer work supports the current direction:
   query-layer cleanup before a QA-only native no-helper restamp; the remaining
   stranded-only compile-surface gaps need direct compile-surface work rather
   than more runtime normalizers.
+- The QA-only native no-helper restamp on the same 56 compiled fixtures
+  measured the cumulative query-layer movement without introducing compile
+  variance: 1934 exact, 64 partial, 162 miss over 2163 rows, for 89.41% exact.
+  This is +54 exact and +2.49 percentage points over the 86.92% native MoE
+  no-helper stamp. Runtime load errors and write proposals remained zero, and
+  helper rows remained exactly zero. Failure surfaces moved from 170 to 148
+  compile-surface gaps, 59 to 57 hybrid-join gaps, 44 to 17 query-surface
+  gaps, and 8 to 3 judge-uncertain rows. The source-surface audit of the 148
+  remaining compile gaps still found 58 `answer_stranded_in_source_record`
+  rows, down from 67, so the next high-value layer is direct compile-surface
+  emission for source-record-only distinctions rather than more query-filter
+  normalization.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
