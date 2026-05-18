@@ -18,6 +18,56 @@ from typing import Any
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+PROMOTABLE_SOURCE_RECORD_MARKERS = {
+    "abandoned",
+    "access",
+    "assigned",
+    "available",
+    "calibration",
+    "coach",
+    "contested",
+    "correction",
+    "date",
+    "device",
+    "discovered",
+    "due",
+    "errata",
+    "group",
+    "identifier",
+    "manager",
+    "motion",
+    "next",
+    "not",
+    "overruled",
+    "registrar",
+    "role",
+    "scanner",
+    "scheduled",
+    "status",
+    "ticket",
+}
+SOURCE_RECORD_STOP_TOKENS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "by",
+    "for",
+    "in",
+    "line",
+    "of",
+    "on",
+    "or",
+    "per",
+    "record",
+    "row",
+    "section",
+    "source",
+    "src",
+    "the",
+    "to",
+    "v",
+}
 
 
 @dataclass(frozen=True)
@@ -340,7 +390,10 @@ def _expand_compile_paths(inputs: list[Path]) -> list[Path]:
             if matches:
                 out.append(matches[-1])
                 continue
-            out.extend(sorted(item.glob("*/domain_bootstrap_file_*.json")))
+            for fixture_dir in sorted(path for path in item.iterdir() if path.is_dir()):
+                fixture_matches = sorted(fixture_dir.glob("domain_bootstrap_file_*.json"))
+                if fixture_matches:
+                    out.append(fixture_matches[-1])
         elif item.is_file():
             out.append(item)
     return sorted(dict.fromkeys(path.resolve() for path in out))
@@ -357,6 +410,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
     source_record_tokens = _tokens_for_facts(source_facts)
     direct_predicates = sorted({_predicate_name(fact) for fact in direct_facts if _predicate_name(fact)})
     candidate_predicates = _candidate_predicates(data)
+    source_record_promotion = _audit_source_record_promotion(source_facts, direct_facts)
 
     families = [
         _audit_family(
@@ -378,6 +432,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "source_record_fact_count": len(source_facts),
         "candidate_predicate_count": len(candidate_predicates),
         "direct_predicates": direct_predicates,
+        "source_record_promotion_telemetry": source_record_promotion,
         "families": families,
         "relation_contracts": [
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
@@ -400,6 +455,79 @@ def _facts_from_compile(data: dict[str, Any]) -> list[str]:
     if isinstance(parsed_facts, list):
         return [str(fact).strip() for fact in parsed_facts if str(fact).strip()]
     return []
+
+
+def _audit_source_record_promotion(source_facts: list[str], direct_facts: list[str]) -> dict[str, Any]:
+    direct_text = "\n".join(direct_facts).casefold()
+    direct_tokens = _tokens_for_facts(direct_facts)
+    candidates: list[dict[str, Any]] = []
+    for fact in source_facts:
+        row = _source_record_candidate_from_fact(fact)
+        if row is None:
+            continue
+        tokens = _promotable_tokens(row["value"])
+        if not tokens:
+            continue
+        marker_hits = sorted(tokens & PROMOTABLE_SOURCE_RECORD_MARKERS)
+        looks_like_identifier = _looks_like_identifier_tokens(tokens)
+        looks_like_list = len([token for token in tokens if token.isdigit()]) >= 3
+        if not marker_hits and not looks_like_identifier and not looks_like_list:
+            continue
+        covered = sorted(tokens & direct_tokens)
+        coverage_ratio = round(len(covered) / len(tokens), 4) if tokens else 0.0
+        value_in_direct = str(row["value"]).casefold() in direct_text
+        stranded = not value_in_direct and coverage_ratio < 0.5
+        candidates.append(
+            {
+                **row,
+                "marker_hits": marker_hits,
+                "token_count": len(tokens),
+                "covered_token_count": len(covered),
+                "coverage_ratio": coverage_ratio,
+                "value_in_direct": value_in_direct,
+                "stranded": stranded,
+            }
+        )
+    stranded_rows = [row for row in candidates if row["stranded"]]
+    return {
+        "schema_version": "source_record_promotion_telemetry_v1",
+        "candidate_count": len(candidates),
+        "stranded_count": len(stranded_rows),
+        "top_stranded": stranded_rows[:20],
+    }
+
+
+def _source_record_candidate_from_fact(fact: str) -> dict[str, Any] | None:
+    predicate = _predicate_name(fact)
+    args = _split_fact_args(FACT_RE.match(fact).group(2)) if FACT_RE.match(fact) else []
+    if predicate == "source_record_label" and len(args) >= 2:
+        return {"predicate": predicate, "source_ref": args[0], "value": _clean_source_record_value(args[1])}
+    if predicate in {"source_record_field", "source_record_inline_field"} and len(args) >= 3:
+        value = f"{_clean_source_record_value(args[1])}_{_clean_source_record_value(args[2])}"
+        return {"predicate": predicate, "source_ref": args[0], "value": value}
+    if predicate == "source_record_cell" and len(args) >= 3:
+        return {"predicate": predicate, "source_ref": args[0], "value": _clean_source_record_value(args[2])}
+    return None
+
+
+def _clean_source_record_value(value: str) -> str:
+    return str(value).strip().strip("'\"")
+
+
+def _promotable_tokens(value: str) -> set[str]:
+    return {
+        token
+        for token in TOKEN_RE.findall(str(value).casefold())
+        if token not in SOURCE_RECORD_STOP_TOKENS and not re.fullmatch(r"\d{1,2}", token)
+    }
+
+
+def _looks_like_identifier_tokens(tokens: set[str]) -> bool:
+    if not tokens:
+        return False
+    has_alpha = any(re.search(r"[a-z]", token) for token in tokens)
+    has_digit = any(re.search(r"\d", token) for token in tokens)
+    return has_alpha and has_digit
 
 
 def _candidate_predicates(data: dict[str, Any]) -> list[str]:
@@ -477,7 +605,13 @@ def _audit_family(
 def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     status_counts: dict[str, int] = {}
     family_status_counts: dict[str, dict[str, int]] = {}
+    promotion_candidate_count = 0
+    promotion_stranded_count = 0
     for report in reports:
+        telemetry = report.get("source_record_promotion_telemetry")
+        if isinstance(telemetry, dict):
+            promotion_candidate_count += int(telemetry.get("candidate_count") or 0)
+            promotion_stranded_count += int(telemetry.get("stranded_count") or 0)
         for family in report["families"]:
             status = str(family["status"])
             status_counts[status] = status_counts.get(status, 0) + 1
@@ -486,6 +620,8 @@ def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "status_counts": dict(sorted(status_counts.items())),
         "family_status_counts": {key: dict(sorted(value.items())) for key, value in sorted(family_status_counts.items())},
+        "source_record_promotion_candidate_count": promotion_candidate_count,
+        "source_record_promotion_stranded_count": promotion_stranded_count,
     }
 
 
@@ -1108,6 +1244,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Schema: `{payload['schema_version']}`",
         f"- Compiles: `{payload['compile_count']}`",
         f"- Status counts: `{payload['summary']['status_counts']}`",
+        f"- Source-record promotion candidates: `{payload['summary'].get('source_record_promotion_candidate_count', 0)}`",
+        f"- Source-record promotion stranded candidates: `{payload['summary'].get('source_record_promotion_stranded_count', 0)}`",
         "",
         "## Fixture Summary",
         "",
@@ -1148,7 +1286,37 @@ def render_markdown(payload: dict[str, Any]) -> str:
             lines.append(
                 f"- `{contract['contract']}`: `{contract['status']}`; missing keys `{contract['missing_keys']}`"
             )
+        telemetry = report.get("source_record_promotion_telemetry")
+        if isinstance(telemetry, dict) and int(telemetry.get("stranded_count") or 0):
+            lines.append(
+                f"- `source_record_promotion_telemetry`: `stranded`; candidates `{telemetry.get('candidate_count', 0)}`, stranded `{telemetry.get('stranded_count', 0)}`"
+            )
         lines.append("")
+    stranded = [
+        (report, row)
+        for report in payload["reports"]
+        for row in (
+            report.get("source_record_promotion_telemetry", {}).get("top_stranded", [])
+            if isinstance(report.get("source_record_promotion_telemetry"), dict)
+            else []
+        )
+    ]
+    if stranded:
+        lines.extend(
+            [
+                "## Source-Record Promotion Telemetry",
+                "",
+                "| Run | Fixture | Predicate | Source Ref | Coverage | Value |",
+                "| --- | --- | --- | --- | ---: | --- |",
+            ]
+        )
+        for report, row in stranded[:40]:
+            value = str(row.get("value") or "").replace("|", "\\|")
+            if len(value) > 120:
+                value = value[:117] + "..."
+            lines.append(
+                f"| `{report['run']}` | `{report['fixture']}` | `{row.get('predicate', '')}` | `{row.get('source_ref', '')}` | {row.get('coverage_ratio', 0)} | `{value}` |"
+            )
     return "\n".join(lines).rstrip() + "\n"
 
 

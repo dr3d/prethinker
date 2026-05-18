@@ -351,6 +351,15 @@ Recent transfer work supports the current direction:
   an architecture slot. The lesson is that compact source-record promotion
   needs instrumentation or profile-palette support, not another broad prompt
   sentence.
+- Compile-surface invariant audit now includes source-record promotion
+  telemetry. It scans compact source-record labels, fields, inline fields, and
+  cells for structurally promotable identity/role/id/date/status/list-like
+  values, then reports values whose tokens are not substantially covered by
+  direct admitted rows. This is telemetry only, not a quality hold. On the
+  six-fixture stranded-source slice it reports 925 compact candidates and 120
+  stranded candidates after using only the latest compile per fixture. The
+  next calibration step is to align that telemetry with the 9 QA-proven
+  stranded rows before making any retry or gate behavior.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate

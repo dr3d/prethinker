@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 
 from scripts.audit_compile_surface_invariants import audit_compile, summarize_reports
+from scripts.audit_compile_surface_invariants import _expand_compile_paths
 
 
 def _write_compile(path: Path, facts: list[str], candidate_predicates: list[str] | None = None) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
             {
@@ -92,6 +94,35 @@ def test_audit_compile_surface_invariants_detects_answer_detail_ledger_only(tmp_
     assert "availability_or_scope" in detail["missing_groups"]
     assert "negative_or_exclusion_detail" in detail["missing_groups"]
     assert "commitment_or_future_action" in detail["covered_groups"]
+
+
+def test_audit_compile_surface_invariants_reports_stranded_source_record_promotions(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_label(src_line_001, next_calibration_due_2026_07_12).",
+            "source_record_field(src_line_002, device_id, dev_scan_07).",
+            "device_id(dev_scan_07).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    telemetry = report["source_record_promotion_telemetry"]
+    assert telemetry["candidate_count"] == 2
+    assert telemetry["stranded_count"] == 1
+    assert telemetry["top_stranded"][0]["value"] == "next_calibration_due_2026_07_12"
+
+
+def test_expand_compile_paths_uses_latest_per_fixture_directory(tmp_path: Path) -> None:
+    first = _write_compile(tmp_path / "root" / "fixture_a" / "domain_bootstrap_file_001.json", [])
+    latest = _write_compile(tmp_path / "root" / "fixture_a" / "domain_bootstrap_file_002.json", [])
+    other = _write_compile(tmp_path / "root" / "fixture_b" / "domain_bootstrap_file_001.json", [])
+
+    paths = _expand_compile_paths([tmp_path / "root"])
+
+    assert paths == sorted([latest.resolve(), other.resolve()])
+    assert first.resolve() not in paths
 
 
 def test_audit_compile_surface_invariants_detects_incomplete_event_backbone(tmp_path: Path) -> None:
