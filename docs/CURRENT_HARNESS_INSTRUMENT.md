@@ -356,10 +356,12 @@ Recent transfer work supports the current direction:
   cells for structurally promotable identity/role/id/date/status/list-like
   values, then reports values whose tokens are not substantially covered by
   direct admitted rows. This is telemetry only, not a quality hold. On the
-  six-fixture stranded-source slice it reports 925 compact candidates and 120
-  stranded candidates after using only the latest compile per fixture. The
-  next calibration step is to align that telemetry with the 9 QA-proven
-  stranded rows before making any retry or gate behavior.
+  six-fixture stranded-source slice it reports 1433 compact candidates and 169
+  stranded candidates after using only the latest compile per fixture. A
+  calibration check confirmed overlap with all 9 QA-proven stranded rows, but
+  the candidate set is still too broad for a hard gate. The next step is to
+  reduce false positives or use the telemetry as a targeted retry hint, not as
+  permission to promote every compact source-record value.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate

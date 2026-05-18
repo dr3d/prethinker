@@ -518,7 +518,7 @@ def _promotable_tokens(value: str) -> set[str]:
     return {
         token
         for token in TOKEN_RE.findall(str(value).casefold())
-        if token not in SOURCE_RECORD_STOP_TOKENS and not re.fullmatch(r"\d{1,2}", token)
+        if token not in SOURCE_RECORD_STOP_TOKENS
     }
 
 
