@@ -2241,6 +2241,13 @@ def run_query_plan(
                     include_legacy_native_helpers=include_legacy_native_helpers,
                 )
             )
+            results.extend(
+                _source_identifier_slot_fallback_queries(
+                    runtime,
+                    query=query,
+                    source_constants=[str(item) for item in source_record_filter.get("needles", [])],
+                )
+            )
             continue
         post_filter = _single_goal_post_filter_repair(query)
         if post_filter:
@@ -2402,6 +2409,11 @@ def run_query_plan(
                 include_legacy_native_helpers=include_legacy_native_helpers,
             ):
                 append_companion(domain_companion)
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
+            source_slot_fallbacks = _source_identifier_slot_fallback_queries(runtime, query=effective_query)
+            if source_slot_fallbacks:
+                results.extend(source_slot_fallbacks)
+                last_result = source_slot_fallbacks[-1].get("result", {})
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
@@ -13984,6 +13996,136 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
         },
         "derived_from_queries": [text],
     }
+
+
+def _runtime_predicate_arities(runtime: CorePrologRuntime) -> list[tuple[str, int]]:
+    """Return predicate/arities present in the loaded runtime, in stable order."""
+
+    engine = getattr(runtime, "engine", None)
+    clauses = getattr(engine, "clauses", []) if engine is not None else []
+    seen: set[tuple[str, int]] = set()
+    out: list[tuple[str, int]] = []
+    for clause in clauses:
+        head = getattr(clause, "head", None)
+        predicate = str(getattr(head, "name", "") or "").strip()
+        args = getattr(head, "args", [])
+        if not predicate or not isinstance(args, list):
+            continue
+        item = (predicate, len(args))
+        if item in seen:
+            continue
+        seen.add(item)
+        out.append(item)
+    return out
+
+
+def _source_identifier_constants(runtime: CorePrologRuntime, args: list[str]) -> list[str]:
+    """Find query constants that the KB itself treats as source/document identifiers."""
+
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in args:
+        value = str(raw or "").strip()
+        if not value or value in seen or _is_prolog_variable(value) or _is_numeric_atom(value):
+            continue
+        probes = [
+            f"document_type({value}, SourceType).",
+            f"source_document({value}).",
+            f"source_document({value}, SourceType).",
+            f"record_type({value}, SourceType).",
+            f"source_record_label(SourceRow, {value}).",
+        ]
+        for probe in probes:
+            result = runtime.query_rows(probe)
+            if result.get("status") == "success" and int(result.get("num_rows") or 0) > 0:
+                out.append(value)
+                seen.add(value)
+                break
+    return out
+
+
+def _source_identifier_slot_fallback_queries(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    source_constants: list[str] | None = None,
+    max_results: int = 6,
+) -> list[dict[str, Any]]:
+    """Recover over-bound queries that put a source/document id in the wrong slot.
+
+    This is query routing over admitted rows. It only fires after a query miss
+    and only for constants the KB already identifies as source-like, then asks
+    other non-ledger predicates whether that identifier appears in one of their
+    source/provenance slots. It does not parse source prose or introduce new
+    predicate names.
+    """
+
+    text = str(query or "").strip()
+    parsed = parse_prolog_query(text)
+    original_predicate = ""
+    if parsed is not None:
+        original_predicate, args = parsed
+        source_identifiers = _source_identifier_constants(runtime, args)
+    elif source_constants is not None:
+        source_identifiers = _source_identifier_constants(runtime, source_constants)
+    else:
+        return []
+    if not source_identifiers:
+        return []
+
+    skip_predicates = {
+        "document_type",
+        "entity_type",
+        "event_type",
+        "record_type",
+        "source_document",
+    }
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = {text}
+    for predicate, arity in _runtime_predicate_arities(runtime):
+        if len(out) >= max_results:
+            break
+        if arity < 2 or arity > 6:
+            continue
+        if predicate == original_predicate or predicate in skip_predicates or predicate.startswith("source_record_"):
+            continue
+        slot_order = list(range(arity, 0, -1))
+        for source_constant in source_identifiers:
+            if len(out) >= max_results:
+                break
+            for slot in slot_order:
+                if len(out) >= max_results:
+                    break
+                fallback_args = [f"SourceSlot{index}" for index in range(1, arity + 1)]
+                fallback_args[slot - 1] = source_constant
+                fallback_query = format_prolog_query(predicate, fallback_args)
+                if fallback_query in seen_queries:
+                    continue
+                seen_queries.add(fallback_query)
+                result = runtime.query_rows(fallback_query)
+                if result.get("status") != "success" or int(result.get("num_rows") or 0) <= 0:
+                    continue
+                out.append(
+                    {
+                        "query": fallback_query,
+                        "result": {
+                            **result,
+                            "reasoning_basis": {
+                                "kind": "core-local",
+                                "note": (
+                                    "source-identifier slot fallback retrieved admitted rows where a "
+                                    "question-bound document/source id appears in a provenance-bearing slot "
+                                    "after an over-bound query missed"
+                                ),
+                                "original_query": text,
+                                "source_identifier": source_constant,
+                                "source_slot": slot,
+                            },
+                        },
+                        "derived_from_queries": [text],
+                    }
+                )
+    return out
 
 
 def _token_subset_filter_relaxed_rows(

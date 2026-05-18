@@ -2559,6 +2559,55 @@ def test_relaxed_constant_query_recovers_over_bound_atom_drift() -> None:
     ]
 
 
+def test_run_query_plan_falls_back_to_source_identifier_slots() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "document_type(crq_31, conservation_request).",
+        "asset_status(m_208, dry_imaging_only, crq_31).",
+        "asset_restriction(m_208, no_wet_flattening, cn_14).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ["asset_restriction(crq_31, restriction, Source)."],
+        helper_companions_enabled=False,
+    )
+
+    fallback = [
+        item
+        for item in results
+        if "source-identifier slot fallback" in str(item.get("result", {}).get("reasoning_basis", {}).get("note", ""))
+    ]
+    assert fallback
+    assert fallback[0]["query"] == "asset_status(SourceSlot1, SourceSlot2, crq_31)."
+    assert fallback[0]["result"]["rows"] == [{"SourceSlot1": "m_208", "SourceSlot2": "dry_imaging_only"}]
+
+
+def test_source_text_filter_over_source_id_adds_source_slot_fallback() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "document_type(crq_31, conservation_request).",
+        "asset_status(m_208, dry_imaging_only, crq_31).",
+        "source_record_text_atom(src_line_1, conservation_request_crq_31_is_approved_for).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ['source_record_text_atom(SourceRow, TextAtom), memberchk("crq_31", TextAtom).'],
+        helper_companions_enabled=False,
+    )
+
+    fallback = [
+        item
+        for item in results
+        if "source-identifier slot fallback" in str(item.get("result", {}).get("reasoning_basis", {}).get("note", ""))
+    ]
+    assert fallback
+    assert fallback[0]["query"] == "asset_status(SourceSlot1, SourceSlot2, crq_31)."
+
+
 def test_relaxed_constant_query_filters_token_subset_matches() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
