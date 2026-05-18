@@ -405,10 +405,12 @@ Recent transfer work supports the current direction:
   variable. Searching the global 948-signature registry recalled only 18 of 49
   exact hinted schemas at `k=20`; scoping retrieval to the active fixture/profile
   candidate palette recalled 46 of 49. Source-gap evidence did not beat
-  fixture/profile scoping in this proxy. The result says top-k gating is
-  plausible but not ready for admission: the next layer needs source-span
-  attachment, richer registry metadata, or multi-draw palette consensus before
-  constrained emission.
+  fixture/profile scoping in this proxy. Hard category filtering reduced recall
+  to 31 of 49, or 36 of 49 with source-gap context, so coarse lens/category
+  labels are ranking hints, not admission filters yet. The result says top-k
+  gating is plausible but not ready for admission: the next layer needs
+  source-span attachment, richer registry metadata, or multi-draw palette
+  consensus before constrained emission.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

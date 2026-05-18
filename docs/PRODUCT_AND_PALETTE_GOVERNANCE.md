@@ -187,6 +187,13 @@ Adding source-gap evidence recalled 45 / 49 rows. The immediate lesson is that
 profile-local palette scoping matters more than simply enlarging top-k or
 searching the global registry.
 
+Hard category filtering is not ready. A follow-up audit that restricted
+fixture-local retrieval to coarse inferred target categories reduced candidate
+spread but also dropped exact recall to 31 / 49 without source-gap context and
+36 / 49 with source-gap context at `k=20`. The current category classifier is
+too coarse to act as an admission membrane. Category/lens context should remain
+a ranking feature until registry metadata and span attachment improve.
+
 The coordinate-level proxy is useful enough to expose the pressure, but not
 strong enough to govern canonical row admission by itself. It measures whether
 the right schema is recoverable from existing candidate palettes; it does not

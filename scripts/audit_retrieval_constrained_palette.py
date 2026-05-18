@@ -275,6 +275,7 @@ def run_audit(
     failure_surfaces: set[str],
     k_values: list[int],
     registry_scope: str,
+    category_filter: str,
 ) -> dict[str, Any]:
     registry, compile_by_fixture = _load_registry(compile_paths)
     source_gap_context = _load_source_gap_context(source_gap_audit)
@@ -306,6 +307,14 @@ def run_audit(
                 for signature, entry in registry.items()
                 if fixture in entry.fixtures
             }
+        if category_filter == "target" and targets:
+            target_scoped_registry = {
+                signature: entry
+                for signature, entry in scoped_registry.items()
+                if entry.category in targets
+            }
+            if target_scoped_registry:
+                scoped_registry = target_scoped_registry
         scored = sorted(
             (
                 (_score(entry, context, targets), signature)
@@ -363,6 +372,7 @@ def run_audit(
             "span-level constrained decoding."
         ),
         "registry_scope": registry_scope,
+        "category_filter": category_filter,
         "source_gap_context_rows": len(source_gap_context),
         "registry_signature_count": len(registry),
         "compile_fixture_count": len(compile_by_fixture),
@@ -454,6 +464,7 @@ def main() -> int:
     )
     parser.add_argument("--k", action="append", type=int, default=[5, 10, 20])
     parser.add_argument("--registry-scope", choices=["global", "fixture"], default="fixture")
+    parser.add_argument("--category-filter", choices=["none", "target"], default="none")
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path)
     args = parser.parse_args()
@@ -467,6 +478,7 @@ def main() -> int:
         failure_surfaces={str(item) for item in args.failure_surface if str(item).strip()},
         k_values=sorted({int(k) for k in args.k if int(k) > 0}),
         registry_scope=str(args.registry_scope),
+        category_filter=str(args.category_filter),
     )
     out_json = args.out_json if args.out_json.is_absolute() else (REPO_ROOT / args.out_json).resolve()
     out_json.parent.mkdir(parents=True, exist_ok=True)
