@@ -70,11 +70,9 @@ coordinates: compile-surface gaps, hybrid-join gaps, query-surface gaps,
 answer-surface gaps, and judge-uncertainty cases to be probed without
 fixture-specific repairs.
 
-The newest successor pressure is compile-surface stability. Helper rows are
-being treated as legacy compatibility bridges unless the direct compile product
-can prove it already emits the reusable surface they were bridging to. Current
-invariant audits check source-record ledgers against admitted direct facts
-before no-helper QA burns, so "fewer helpers" cannot hide a weaker compile.
+The newest successor pressure is compile-surface stability. Current invariant
+audits check source-record ledgers against admitted direct facts before QA
+burns, so a cleaner query path cannot hide a weaker compile.
 
 ## Guard Pressure
 
@@ -121,12 +119,11 @@ to hold.
 2. **Promote only transfer-backed surfaces.** A registry scaffold may earn a
    candidate slot after one fixture; it earns a roster slot only after unlike
    transfer and exact-row protection.
-3. **Retire helper-era adapters through compile-surface proof.** Temporal
-   slots, deadline families, status intervals, classification conversions,
-   quantity conservation, and financial corrections belong in direct admitted
-   surfaces or deterministic ledgers. Native adapters that merely bridge legacy
-   source shapes should be quarantined unless the compiler emits the direct
-   surface they point toward.
+3. **Promote recurring distinctions into direct surfaces.** Temporal slots,
+   deadline families, status intervals, classification conversions, quantity
+   conservation, and financial corrections belong in direct admitted surfaces
+   or deterministic ledgers. Compatibility bridges are historical evidence,
+   not the forward architecture.
 4. **Run the boundary hunt.** Classify not-exact rows by fixture-free failure
    geometry, design small probes around one axis at a time, and promote only
    repairs that replay on unlike rows.

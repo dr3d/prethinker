@@ -24,7 +24,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.audit_helper_usage import helper_pressure_metrics  # noqa: E402
+from scripts.audit_helper_usage import display_pressure_label, helper_pressure_metrics  # noqa: E402
 
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "story_worlds"
 DEFAULT_COMPILE_ROOT = REPO_ROOT / "tmp" / "incoming_6_cold_compile_20260508"
@@ -375,7 +375,7 @@ def _render_md(summary: dict[str, Any]) -> str:
         f"- Exact rate: `{totals.get('exact_rate', 0.0)}`",
         f"- Runtime load errors: `{totals.get('runtime_load_error_count', 0)}`",
         f"- Write proposal rows: `{totals.get('write_proposal_rows', 0)}`",
-        f"- Helper pressure: `{helper_pressure.get('pressure_label', 'unknown')}` rows=`{helper_pressure.get('row_count', 0)}` rows/exact=`{helper_pressure.get('helper_rows_per_exact')}` candidate-share=`{helper_pressure.get('candidate_helper_share', 0.0)}`",
+        f"- Compatibility rows: `{display_pressure_label(helper_pressure.get('pressure_label', 'unknown'))}` rows=`{helper_pressure.get('row_count', 0)}` rows/exact=`{helper_pressure.get('helper_rows_per_exact')}` candidate-share=`{helper_pressure.get('candidate_helper_share', 0.0)}`",
         "",
         "| Fixture | Return | Exact | Partial | Miss | QA JSON |",
         "| --- | ---: | ---: | ---: | ---: | --- |",

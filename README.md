@@ -36,7 +36,7 @@ propagation = visible recomputation, not hidden belief
 - [CTO architecture brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - the current operating doctrine for new high-context collaborators.
 - [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
-- [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, selectors, no-helper policy, risk gates, and repair queues.
+- [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, direct-surface policy, selectors, risk gates, and repair queues.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
 - [Boundary probe method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed without fixture-vocabulary leakage.
 - [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
@@ -60,8 +60,8 @@ are the rumble strips that stop tempting but wrong surfaces from winning.
 
 The newest hard problem is no longer "can we add another lens?" It is where
 the current semantic interior gets blurry on unlike source shapes. Guard
-compression is archived; boundary probing, no-helper compile-surface
-stability, lens audits, and instrument stamping are the active work. The
+compression is archived; boundary probing, direct compile-surface stability,
+lens audits, and instrument stamping are the active work. The
 current cycle separates compile-surface gaps from selector, query,
 answer-surface, and legacy adapter gaps, then extends the system only with
 generic repairs that survive replay on unlike rows.
@@ -70,14 +70,12 @@ For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
 and then the
 [active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
-External transfer, language transfer, instrument stamping, and no-helper
-compile-surface work are summarized there; detailed worksheets have been
+External transfer, language transfer, instrument stamping, and direct-surface
+work are summarized there; detailed worksheets have been
 retired from the public docs surface.
 The active replacement lane is direct compile-surface stability:
 source-record ledgers preserve fidelity, but recurring answer-bearing surfaces
-should become direct admitted compile facts. The old helper-residue worksheet
-has been retired from the public docs tree; Git history and the local cold
-archive preserve that migration trail.
+should become direct admitted compile facts.
 
 ## Current State
 

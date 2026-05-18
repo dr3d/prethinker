@@ -36,30 +36,16 @@ specific question.
 
 ## Current Artifact Unit
 
-The live no-helper artifact under evaluation is:
+The live artifact under evaluation is:
 
 ```text
-source + lens set + deterministic ledgers + admitted predicates + query policy
+source + lens set + deterministic ledgers + admitted predicates + direct query policy
 ```
 
-The default query policy is no-helper:
-
-```text
---helper-companion-row-limit 0
-```
-
-Legacy helper adapters are compatibility and forensic tools only. They remain
-opt-in for replaying older artifacts and understanding how past high-water
-surfaces were reached, but they are not the current architecture. The current
-repair path is direct compile-surface stability: when a recurring query-time
-join matters, make the compiler or deterministic ledger emit a reusable,
-fixture-free surface directly.
-
-Helper-era evidence and retirement history were retired from the public docs
-tree. Git history preserves the old worksheet for cases where a historical
-result mentions `candidate-helper`, `clean-helper`, or legacy companion rows.
-New contexts should treat that material as migration history, not as the active
-harness center.
+The current repair path is direct compile-surface stability: when a recurring
+query-time join matters, make the compiler or deterministic ledger emit a
+reusable, fixture-free surface directly. Retired compatibility adapters exist
+only for historical replay and are not day-one architecture for new work.
 
 ## Current Paths
 
@@ -91,7 +77,7 @@ source
   -> intake/profile/bootstrap passes
   -> semantic compile candidates
   -> mapper-admitted KB artifact
-  -> no-helper QA over direct compile surfaces, ledgers, selectors, and guards
+  -> QA over direct compile surfaces, ledgers, selectors, and guards
 ```
 
 POWER, the local workstation with an RTX 5090, and OpenRouter, the cloud lane,
@@ -149,14 +135,13 @@ queryable so a later compile or QA pass can recover the exact row, date, count,
 source label, record cell, or printed identifier without relying on model
 recall.
 
-Recent no-helper work made this boundary explicit:
+Recent direct-surface work made this boundary explicit:
 
 - `explicit_table_membership/4`, `explicit_table_member_label/5`, and
   `explicit_table_member_alias/2` replaced school-shaped roster table names as
   the primary explicit grouping/member table surface.
 - Source-coordinate profile work moved old packet-style source lookup pressure
-  toward direct ledger facts and query planning rather than restoring helper
-  rows.
+  toward direct ledger facts and query planning.
 - Source/role review pressure treats fixture-flavored predicate names surfaced
   during native inventory work as audit coordinates, not public architecture.
 - Source-surface gap audits now distinguish answer strings that are stranded in
@@ -179,7 +164,7 @@ Recent no-helper work made this boundary explicit:
 - Literal `Key: Value` source lines now emit deterministic
   `source_record_inline_field/3` plus the shared `source_record_field/3`
   surface used for tables. This is source addressability, not semantic
-  interpretation: it preserves printed keys and values so no-helper query
+  interpretation: it preserves printed keys and values so direct query
   planning can retrieve them when the question names the same key.
 
 ## Selector And Guard Discipline
@@ -200,17 +185,18 @@ compile-surface and ledger improvements retiring downstream selector scars.
 
 ## Current Empirical State
 
-The current native no-helper capstone is the 2026-05-17 QA-only restamp over
+The current native direct-surface capstone is the 2026-05-17 QA-only restamp over
 the same 56 compiled native fixtures. It measured cumulative query-layer work
 without introducing compile variance:
 
 - 2163 judged rows: 1934 exact, 64 partial, 162 miss
-- 89.41% exact, up from the prior 86.92% native no-helper stamp
-- +54 exact rows and +2.49 percentage points over the previous no-helper
+- 89.41% exact, up from the prior 86.92% native direct-surface stamp
+- +54 exact rows and +2.49 percentage points over the previous direct-surface
   baseline
-- zero helper rows, zero runtime load errors, and zero write proposals
+- zero compatibility rows, zero runtime load errors, and zero write proposals
 
-The remaining gaps are no longer primarily helper or query-filter failures.
+The remaining gaps are no longer primarily query-filter or compatibility
+adapter failures.
 After the query-layer restamp, compile-surface gaps fell to 148 and
 query-surface gaps fell to 17. A source-surface audit still found 58 rows where
 answer-bearing values are stranded in deterministic `source_record_*` rows.
@@ -252,18 +238,17 @@ questions.
 
 Recent transfer work supports the current direction:
 
-- Helpers are retired from the daily path. External corpora and unlike probes
-  routinely run with 0-3 helper rows because the modern path relies on admitted
-  predicates, deterministic source ledgers, selectors, and guards rather than
-  native compatibility adapters.
+- Current document QA relies on admitted predicates, deterministic source
+  ledgers, selectors, and guards. Retired native compatibility adapters are
+  not part of the daily path.
 - The native corpus is still valuable because it contains historical pressure:
   legacy residue, fixture-flavored predicates, and compile-surface gaps. Those
-  are audit coordinates, not permission to restore helpers or freeze fixture
+  are audit coordinates, not permission to restore compatibility adapters or freeze fixture
   vocabulary into public architecture.
 - Query-layer cleanup is bounded. Source-record text, labels, sections, fields,
   simple equality constraints, list membership, and contains-style filters are
   executed only after a deterministic or admitted surface has already bound the
-  row. These repairs add no facts, no helper rows, and no fixture vocabulary.
+  row. These repairs add no facts, no compatibility rows, and no fixture vocabulary.
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.
@@ -281,7 +266,7 @@ Recent transfer work supports the current direction:
   fact extraction. On the focused recall/inventory replay it changed the
   compile from 32 admitted / 27 skipped rows to 128 admitted / 1 skipped row,
   dropped compile-surface QA gaps from 10 to 4, and moved the fixture from
-  25/5/10 to 29/3/8 with helpers still off.
+  25/5/10 to 29/3/8 on direct-surface QA.
   Transfer replay was mixed: a fire/operations fixture improved slightly
   (28/3/9 to 29/3/8), while a variance/hearing fixture regressed under a fresh
   compile draw (28/1/11 to 23/4/13). Treat the repair as proven for hidden
@@ -290,7 +275,7 @@ Recent transfer work supports the current direction:
   palette instability. Three fresh compile-only draws produced only 2 common
   candidate signatures out of 40 union signatures, 38 unstable signatures, and
   371 unstable direct facts. A vocabulary-only multi-draw palette registry
-  replay then recovered the fixture to 30/3/7 with helpers still off and
+  replay then recovered the fixture to 30/3/7 on direct-surface QA and
   compile-surface gaps down to 8. This is evidence for a control-plane
   response path: use multi-draw palette priors to stabilize ontology choice
   without supplying facts, answers, expected rows, or source authority. A
@@ -304,9 +289,9 @@ Recent transfer work supports the current direction:
   source-authority row instead of leaving the distinction in rule prose or
   source-record text. On a procedural docket replay, a vocabulary-only palette
   prior plus source-authority retry cleared the quality hold, emitted direct
-  authority rows, and moved no-helper QA from 31/1/8 to 39/0/1.
+  authority rows, and moved direct-surface QA from 31/1/8 to 39/0/1.
   A four-fixture authority transfer slice then split cleanly: two fixtures
-  passed quality gates and each scored 39/0/1 with helpers off, while two
+  passed quality gates and each scored 39/0/1, while two
   denser custody/access fixtures remained held because source-authority units
   were still partial or ledger-only. That makes dense custody/access authority
   the next diagnostic coordinate, not a reason to weaken the gate.
@@ -318,7 +303,7 @@ Recent transfer work supports the current direction:
   do not count. Replaying the held authority slice without recompilation moved
   the custody/title/access packet from held to pass, while the probate/access
   register remained held for lifecycle/state backbone loss. The newly
-  pass-qualified custody packet then scored 34/1/5 with helpers off, showing
+  pass-qualified custody packet then scored 34/1/5, showing
   that detector calibration was necessary but not sufficient; remaining misses
   are still compile/hybrid resolution pressure.
 - Lifecycle/state quality gates are now stricter about what they mean. Token
@@ -327,24 +312,23 @@ Recent transfer work supports the current direction:
   as operational lifecycle transitions. Static contested/uncontested values now
   count as state backbone when they appear in direct rows. With those
   calibrations, the probate/access register also passed quality without
-  recompilation and scored 36/0/4 with helpers off. The authority transfer
+  recompilation and scored 36/0/4. The authority transfer
   slice therefore becomes a clean measurement set: two simpler authority probes
   at 39/0/1, one dense custody/title/access probe at 34/1/5, and one dense
   probate/access probe at 36/0/4. The remaining pressure is concrete
-  compile-surface coverage, not helper resurrection or looser gates.
+  compile-surface coverage, not compatibility-adapter resurrection or looser gates.
 - A six-fixture stranded-source promotion slice tested whether recent
   compile-surface invariants move the largest native gap class before a full
-  stamp. Against the prior native no-helper stamp on the same fixtures, QA
-  moved from 196/6/38 to 215/4/21 over 240 questions, with helper rows still
-  zero and compile-surface gaps dropping from 35 to 18. The slice is not a
+  stamp. Against the prior native direct-surface stamp on the same fixtures, QA
+  moved from 196/6/38 to 215/4/21 over 240 questions, with compile-surface gaps
+  dropping from 35 to 18. The slice is not a
   stamp, because two compiles carried caveats, but it is strong directional
   evidence that source-record promotion and quality-gate calibration are
   reducing real native misses. A source-surface audit on the new slice still
   found 9 compile-surface rows where answer text remains stranded only in
-  source-record rows, so the next repair target is narrower than "more
-  helpers": promote recurring source-stated identity, role, location, status,
-  and document-reference values into direct surfaces without copying fixture
-  vocabulary.
+  source-record rows, so the next repair target is direct promotion of
+  recurring source-stated identity, role, location, status, and
+  document-reference values without copying fixture vocabulary.
 - A proposed prompt-level compact-label micro-fact invariant was tested and
   rejected for now. A two-fixture replay on label-heavy fixtures regressed
   relative to the preceding stranded-source slice, so the wording did not earn
@@ -380,16 +364,16 @@ Recent transfer work supports the current direction:
   vocabulary-only and extracts no facts. Focused replay proved the slot can
   carry setpoint and feed-rate values; four-fixture replay still found one
   stochastic sensor hold, so this is an architectural advance, not a stamp.
-- A broader native no-helper stamp-candidate run on 2026-05-18 gives the
+- A broader native direct-surface stamp-candidate run on 2026-05-18 gives the
   current empirical reading after the recent compile-surface work. All 56
-  source fixtures compiled and scored with helper rows forced to zero:
+  source fixtures compiled and scored through the current direct-surface path:
   `1902/100/160` over 2163 questions, or 87.93% exact. This is below the
   prior 89.41% QA-only anchor, so the cumulative work has not earned a freeze.
   The compile quality gate held 20 of 56 fixtures. Pass fixtures scored 88.77%
   exact; held fixtures scored 86.50%, so the gate is directionally predictive
   but not sufficient. The dominant not-exact surface remains compile-surface
   loss: 165 compile-surface gaps out of 261 not-exact rows, with 81 answers
-  stranded only in source-record rows. Helpers are no longer the explanation;
+  stranded only in source-record rows. Compatibility adapters are no longer the explanation;
   direct surface preservation is.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
@@ -401,7 +385,7 @@ Recent transfer work supports the current direction:
   teaching the harness fixture vocabulary.
 - Retrieval-constrained palette grounding is now an audit-only experiment, not
   active compiler behavior. A first coordinate-level proxy on six unstable
-  native no-helper fixtures showed that retrieval scope is the load-bearing
+  native direct-surface fixtures showed that retrieval scope is the load-bearing
   variable. Searching the global 948-signature registry recalled only 18 of 49
   exact hinted schemas at `k=20`; scoping retrieval to the active fixture/profile
   candidate palette recalled 46 of 49. Source-gap evidence did not beat
@@ -412,7 +396,7 @@ Recent transfer work supports the current direction:
   source-span attachment, richer registry metadata, or multi-draw palette
   consensus before constrained emission.
 - A mixed-protocol repeated-compile stability audit on 2026-05-18 used the
-  available native no-helper, surface-promotion, and delivery-diagnostic
+  available native direct-surface, surface-promotion, and delivery-diagnostic
   compile roots as variance evidence. This is not a stamp and not a clean N=3
   statistic, because the roots used different prompt/protocol states. It is
   still diagnostically useful: across 165 compile artifacts and 56 fixtures it

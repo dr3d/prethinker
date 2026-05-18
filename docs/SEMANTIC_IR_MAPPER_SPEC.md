@@ -315,7 +315,7 @@ operational ledgers: OpenRouter temporal-state compiles were proposing correct
 facts such as `event_timestamp(e_02, 2026_04_28_08_00)`, and the mapper was
 rejecting them as non-temporal before the timestamp validator learned that
 shape. This is a structural admission rule, not a fixture-specific temporal
-helper.
+runtime function.
 
 The mapper does not infer legal, medical, or story meaning from raw English to
 make this decision. It uses the IR's normalized arguments, entity metadata, and

@@ -260,32 +260,32 @@ That guard is classified under `operational_record_status`.
 - `case_status_interval_support` is query-side support for exact date misses
   over `case_status_at_date/3`. It computes interval rows from admitted
   transition anchors, without adding facts or reading source prose. Temporary
-  stay/override status still must be compiled explicitly before the helper can
+  stay/override status still must be compiled explicitly before the support row can
   return it.
 - Oxalis adds three recall/regulatory query companions over frozen artifacts:
   `recall_classification_at_date_support` derives effective classification from
   admitted classification and reclassification anchors, `unit_range_count_support`
   counts admitted lot-range atoms, and `recall_accounted_units_support` derives
   termination-request accounting from admitted total and latest-unaccounted
-  rows. The accounting helper is deliberately scoped to termination questions
+  rows. The accounting companion is deliberately scoped to termination questions
   after a broader activation perturbed a unit-status row.
 - Three Moles adds two story-world companions without promoting a new lens:
   `story_choice_contrast_support` contrasts accepted little/middle/great-family
   items against rejected same-family judgments, and
   `story_remediation_method_support` pairs admitted wound/method events with
-  admitted extraction/key outcomes. These helpers are allowed to compose only
+  admitted extraction/key outcomes. These companions are allowed to compose only
   already admitted rows; missing explicit morals, residents, and source phrasing
   still belong to compile-side story acquisition. The companion pass therefore
   adds narrative-only compile guidance for residence rosters, errand/distraction
   setup, contrast choices, comic consequences, and explicit morals rather than
   trying to infer those missing surfaces at query time.
-- Lantern adds `roster_state_support`, a query-only helper over admitted
+- Lantern adds `roster_state_support`, a query-local companion over admitted
   `group_member`, `group_membership`, `supervises`, and
   `supervision_assignment` rows. It normalizes temporary group membership,
   supervision intervals, group counts, and role hints from admitted group atoms.
   The first targeted replay recovered Lotte's Day 3 recording role, but left
   Station A/B rosters and Day 3 chaperone count as compile gaps. This is the
-  desired boundary: helpers compose admitted rows; they do not invent missing
+  desired boundary: companions compose admitted rows; they do not invent missing
   station facts.
 - Lantern then added an aggregate roster/station registry-context candidate.
   Used as intake context rather than a direct profile, it admitted explicit
@@ -332,8 +332,8 @@ That guard is classified under `operational_record_status`.
   ordinary incident rows, so this reinforces the existing evidence-provenance
   lesson: use the lens surgically for source roles, not as a full incident
   compiler.
-- `classification_conversion_effect_support` is a query-only conservation
-  helper for classification changes. When `conversion_effective_date/3` is
+- `classification_conversion_effect_support` is a query-local conservation
+  companion for classification changes. When `conversion_effective_date/3` is
   already queried, it can combine admitted converted-unit rows with admitted
   before/after `unit_count/2` rows and expose `TotalCountEffect = no_change`
   only when the source class decrease and target class increase balance. It
@@ -341,15 +341,15 @@ That guard is classified under `operational_record_status`.
   facts or reading source prose. The pegboard lesson is that conversions can be
   semantic conservation problems; missing unit rows or missing before/after
   counts still belong to compile acquisition.
-- Census accounting added a broader helper substrate without adding a new
+- Census accounting added a broader query-local substrate without adding a new
   compile lens. `assessment_revenue_support`, `conversion_assessment_delta_support`,
   `classification_deferral_effect_support`, `vacancy_voting_eligibility_support`,
   and `assessment_transfer_policy_support` expose totals, deltas, deferred
   current-state effects, vacancy/vote effects, and repeated transfer-policy
-  boundaries from admitted rows. On `census_reconciliation`, helper work plus
+  boundaries from admitted rows. On `census_reconciliation`, companion work plus
   two scoped source compiles moved the fixture from `29 / 1 / 10` to a
   diagnostic row-gated `40 / 0 / 0`. The pegboard lesson is the split: arithmetic
-  and repeated responsibility patterns belong to helpers; bylaw claims,
+  and repeated responsibility patterns belong to direct support surfaces; bylaw claims,
   cross-reference errors, notice status, and exact open-item language belong to
   narrow source surfaces.
 - `planning_application_summary_registry_v1` is a candidate row-gated

@@ -66,5 +66,5 @@ Warnings:
 - Do not call a guard a new lens until it transfers or clearly belongs to a family.
 - If a family grows past a readable size, split by semantic reason, not by fixture.
 - Do not hide guard growth inside parameter bags. A family generator must report its enumerated surfaces, transfer evidence, and retirement candidates.
-- Prefer retiring guards when compile/query/helper improvements make the originating failure pass without selector intervention.
+- Prefer retiring guards when compile, query, or deterministic-surface improvements make the originating failure pass without selector intervention.
 - If a guard remains unclassified, either retire it, rename it, or add a family with a purpose.

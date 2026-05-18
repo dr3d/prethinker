@@ -24,7 +24,7 @@ compiled_source/
   world.pl          admitted source state
   epistemic.pl      source commitment, claims, corrections, uncertainty
   ledgers.pl        deterministic source addressability and exact fields
-  query_policy.json no-helper/direct-surface policy and selector settings
+  query_policy.json direct-surface policy and selector settings
   manifest.json     compiler/run/schema/lens metadata
   diagnostics.json  skipped/blocked/zombie/coverage notes, not truth
 ```
@@ -85,9 +85,9 @@ lets compile and QA recover the exact source coordinate without asking the model
 to remember or paraphrase it.
 
 `query_policy.json` records how Q&A was allowed to answer. The current default
-is no-helper: admitted predicates, deterministic ledgers, direct compile
-surfaces, selectors, and guards are in-bounds; legacy native helper adapters are
-only enabled by explicit forensic/compatibility settings.
+is direct-surface QA: admitted predicates, deterministic ledgers, direct compile
+surfaces, selectors, and guards are in-bounds. Retired compatibility adapters
+belong only to explicit historical replay.
 
 ## Manifest
 

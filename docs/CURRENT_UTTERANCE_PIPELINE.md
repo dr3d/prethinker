@@ -5,7 +5,7 @@ Last updated: 2026-05-16
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language
 proposes meaning, deterministic admission decides what becomes durable state,
-and no-helper query planning tries to retrieve admitted state without granting
+and direct query planning tries to retrieve admitted state without granting
 the model write authority.
 
 The project now has two closely related paths:
@@ -21,7 +21,7 @@ document source
   -> intake/profile/bootstrap passes
   -> semantic compile candidates
   -> mapper-admitted KB artifact
-  -> no-helper QA over direct compile surfaces + selector/guards
+  -> QA over direct compile surfaces + selector/guards
 ```
 
 The LLM is still a stenographer and semantic instrument. It reads language,
@@ -36,11 +36,12 @@ For document work, the evaluated artifact is:
 source + lens set + deterministic ledgers + admitted predicates + query policy
 ```
 
-The current default query policy is no-helper: `--helper-companion-row-limit 0`.
-Legacy helper adapters remain available only for forensic replay and old
-artifact compatibility. Two runs over the same source can still differ if they
-use different lens sets, ledgers, admitted predicate contracts, or query
-policies, so those settings must be named in reports.
+The current default query policy answers from admitted predicates,
+deterministic ledgers, direct compile surfaces, selectors, and guards. Retired
+compatibility adapters belong only to historical replay. Two runs over the
+same source can still differ if they use different lens sets, ledgers, admitted
+predicate contracts, or query policies, so those settings must be named in
+reports.
 
 ## Architecture In Five Lines
 
@@ -166,9 +167,9 @@ The archival identifier ledger/pinboard is the same design pattern at the
 lexical layer: deterministic extraction of exact identifiers before the LLM can
 paraphrase or normalize them.
 
-## Query Surfaces And Legacy Adapters
+## Query Surfaces
 
-The live measurement path is now no-helper by default. QA should first ask:
+The live measurement path is direct-surface QA. QA should first ask:
 
 - did the compile emit the answer-bearing distinction as admitted state?
 - did the deterministic ledger preserve the exact source coordinate, label,
@@ -177,17 +178,6 @@ The live measurement path is now no-helper by default. QA should first ask:
   prose?
 - did selector/guard logic choose the right surface for this row?
 
-Legacy helper adapters still exist in code for old artifact replay and forensic
-comparison, but they are opt-in:
-
-```text
---helper-companion-row-limit 0
---include-legacy-native-helper-adapters  # explicit forensic/compatibility mode
-```
-
-Those adapters are marked `legacy_native_compatibility_adapter` and
-`default_delivery=disabled`. Their historical evidence and retirement trail
-were retired from the public docs tree; Git history preserves the old worksheet.
 New architecture should prefer direct admitted predicates and deterministic
 ledger surfaces such as
 `explicit_table_membership/4`, `explicit_table_member_label/5`,
@@ -251,16 +241,16 @@ Recent transfer work supports the current direction:
 
 - Six fresh transfer fixtures cold on OpenRouter scored `177 / 10 / 53`
   over 240 rows, or 73.75% exact.
-- `school_activity_roster_reconciliation` exposed why legacy helper evidence
+- `school_activity_roster_reconciliation` exposed why compatibility evidence
   had to become compile-surface work: the high-water was reachable, but the
-  forward repair is direct assignment/table surfaces, not helper delivery.
+  forward repair is direct assignment/table surfaces.
 - `count_composition_roster` now has a clean six-mode memory package with a
   `40 / 0 / 0` row-gated ceiling. Adding question-shape selector risk gates
   moved guarded selection from `31 / 3 / 6` to `40 / 0 / 0`, proving the
   residual was surface routing rather than missing compiled state.
-- Grant, sensor, clinic, probate, and roster helper-era replays are now treated
-  as archaeology: they show which distinctions were reachable, then CSS work
-  decides which ones deserve direct compile or ledger surfaces.
+- Grant, sensor, clinic, probate, and roster compatibility replays are now
+  treated as archaeology: they show which distinctions were reachable, then
+  CSS work decides which ones deserve direct compile or ledger surfaces.
 - The main weak surface is no longer "can the model understand the document?"
   It is often "did the admitted state become addressable, composable, and
   queryable at the exact row shape the question demands?"
@@ -284,7 +274,7 @@ make that memory inspectable and queryable.
 | Unsafe implication | Skip, quarantine, reject, or clarify |
 | Projection-blocked proposal | Preserve in scoped diagnostics, not domain truth |
 | Deterministic source-record row | Admit only as source addressability |
-| Legacy adapter-derived support row | Forensic query evidence only; no KB mutation |
+| Retired adapter-derived support row | Forensic query evidence only; no KB mutation |
 | General negative fact | Skip until negation semantics are explicit |
 | Rule candidate | Admit only through explicit rule path and policy checks |
 | Ambiguous referent | Clarify or quarantine |
@@ -311,7 +301,6 @@ The architectural line stays the same:
 language proposes
 admission governs
 state records
-legacy adapters may compare
 selectors choose surfaces
 dependencies stay visible
 ```

@@ -335,7 +335,7 @@ As of May 12, 2026:
 ### Internal Health
 
 - full local cleanup verification is green at `996 passed, 2 subtests passed`
-- focused helper/selector verification is green at `428 passed`; rerun the
+- focused direct-surface/selector verification is green at `428 passed`; rerun the
   full suite before updating any full-suite headline
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission

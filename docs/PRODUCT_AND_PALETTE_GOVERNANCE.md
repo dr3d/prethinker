@@ -169,7 +169,7 @@ Success criteria:
 ### First Audit Result
 
 An initial coordinate-level proxy audit was run on 2026-05-18 against six
-unstable native no-helper fixtures from the latest stamp-candidate run. Scope:
+unstable native direct-surface fixtures from the latest stamp-candidate run. Scope:
 49 boundary rows, 948 candidate registry signatures, `k=5/10/20`, no compiler
 behavior change.
 
@@ -210,7 +210,7 @@ The next experiment should add one of these before constrained emission:
 ### Mixed-Protocol Stability Finding
 
 A follow-up audit used already-available repeated compile artifacts from the
-native no-helper, surface-promotion, and delivery-diagnostic runs. Because
+native direct-surface, surface-promotion, and delivery-diagnostic runs. Because
 those roots mix protocol states, the result is not a formal variance band. It
 does, however, expose the next governance surface.
 

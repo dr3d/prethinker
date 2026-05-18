@@ -1,6 +1,6 @@
 """Compare compile-surface invariant audits before QA replay.
 
-This gate is meant for no-helper architecture work. A replay compile can improve
+This gate is meant for direct-surface architecture work. A replay compile can improve
 one surface while silently dropping another; this script makes those tradeoffs
 visible before spending QA/judge cycles.
 """

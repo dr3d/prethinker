@@ -3,13 +3,13 @@
 Last updated: 2026-05-12
 
 This note is internal research doctrine for future CTO/Codex work. It describes
-how to use fixtures, the completed guard-compression archive, helper pressure,
-and diagnostics to characterize what Prethinker can and cannot currently
-quantize.
+how to use fixtures, the completed guard-compression archive, direct-surface
+pressure, and diagnostics to characterize what Prethinker can and cannot
+currently quantize.
 
 Here, **quantize** means: preserve answer-bearing source meaning as named,
 queryable, auditable coordinates rather than as opaque prose, fixture-local
-helper behavior, or selector luck. It does not mean "capture all meaning."
+behavior, or selector luck. It does not mean "capture all meaning."
 
 It is not a public claim that Prethinker captures "meaning" in full. The safer
 claim is narrower and more useful:
@@ -37,12 +37,12 @@ Each compile projects natural language into structured coordinates:
 - temporal anchor;
 - epistemic state;
 - authority and provenance;
-- helper/support-kind surfaces;
+- support-kind or direct query surfaces;
 - selector and guard behavior;
 - diagnostics, quarantine, and residue.
 
 In this document, a **coordinate** is one of those concrete system surfaces: a
-predicate contract, helper/support-kind row, source-record address, scoring
+predicate contract, support-kind row, source-record address, scoring
 principle, diagnostic, guard, scar, or quarantine event. It is not an abstract
 semantic truth floating outside the artifact.
 
@@ -51,7 +51,7 @@ epistemic envelope intact, is inside the current Prethinker set: durable,
 governable, and queryable.
 
 Meaning that does not land cleanly is outside or at the edge. It may remain as
-source text, diagnostic residue, helper pressure, selector uncertainty, a guard,
+source text, diagnostic residue, direct-surface pressure, selector uncertainty, a guard,
 or a clarification/quarantine event.
 
 The research target is the boundary, not the easy interior.
@@ -63,7 +63,7 @@ was hard to see. Everything looked like a hole.
 
 After compression into named semantic families and reusable scoring principles,
 the current set has shape. The shape makes incompleteness visible. Remaining
-guards, scars, helper-pressure rows, and diagnostics are no longer just cleanup
+guards, scars, surface-pressure rows, and diagnostics are no longer just cleanup
 work; they are observations about where the coordinate system is thin.
 
 The goal is not zero guards. Some stable singletons may be legitimate boundary
@@ -93,7 +93,7 @@ Examples:
 - rationale boundary: explanation surface versus adjacent operational status;
 - source-addressability boundary: exact source row needed but semantic
   predicate is too broad;
-- grid-fit boundary: source meaning exists but no current predicate/helper axis
+- grid-fit boundary: source meaning exists but no current predicate or ledger axis
   can name it.
 
 After the run, record the result as a boundary update:
@@ -113,7 +113,7 @@ Prethinker already produces boundary observations during normal work:
 
 - guard activations;
 - scar guards;
-- helper pressure and candidate-helper breadth;
+- direct-surface pressure and candidate-surface breadth;
 - selector uncertainty;
 - compile diagnostics;
 - quarantine and clarification requests;
@@ -125,7 +125,7 @@ Treat these as observations of where meaning stayed bounded or escaped the
 current coordinate system.
 
 Do not confuse an exact answer with full quantization. A fixture can be answered
-while still exposing helper bloat, source-note leakage, or a guard that only
+while still exposing source-note leakage, surface bloat, or a guard that only
 works because it remembers local vocabulary.
 
 ## Third Axis: Grid-Fit
@@ -139,14 +139,14 @@ Add a third axis:
 
 ```text
 grid-fit: how much of the source's answer-bearing meaning lands in named,
-transferable coordinates rather than opaque residue or fixture-local helpers.
+transferable coordinates rather than opaque residue or fixture-local behavior.
 ```
 
 Grid-fit is not just exact-answer rate. It asks:
 
 - Did the architecture name the answer-bearing distinction?
 - Is the coordinate reusable on unlike documents?
-- Did helper rows stay bounded?
+- Did support rows stay bounded and source-grounded?
 - Did source addressability remain intact?
 - Did the selector choose through general scoring rather than a local guard?
 
@@ -173,7 +173,7 @@ missing coordinate that the current corpus could not expose.
 
 1. Do not let fixture nouns become substrate.
 2. Do not retire a guard because one row now wins.
-3. Retire a guard only when a reusable predicate, helper, compile, or scoring
+3. Retire a guard only when a reusable predicate, compile, ledger, or scoring
    principle explains the win.
 4. Preserve scars when a local accident is worth remembering but should not be
    active behavior.
@@ -201,17 +201,17 @@ This should stress <axis> because <current principle> may confuse <X> with <Y>.
 
 Expected Interior:
 If the current architecture is sufficient, the answer should land through
-<predicate/helper/source/scoring surface> without a new fixture-specific guard.
+<predicate/source/scoring surface> without a new fixture-specific guard.
 
 Expected Escape:
-If it escapes, look for <diagnostic residue/helper pressure/selector ambiguity>.
+If it escapes, look for <diagnostic residue/direct-surface pressure/selector ambiguity>.
 
 Forbidden Fix:
 Do not encode <local names, row ids, answer words, fixture-specific phrases>.
 
 Result:
 - exact / partial / miss:
-- helper pressure:
+- support-surface pressure:
 - guards triggered:
 - diagnostics/quarantine:
 
@@ -229,15 +229,15 @@ Detailed boundary-hunt notebooks are archived outside the public docs tree.
 This file keeps the durable method: measure, classify by fixture-free geometry,
 probe with unlike examples, and promote only transfer-safe repairs.
 
-The guard-generalization and helper-era worksheets are completed compression
-archives in Git history/cold storage unless a new transferable principle needs
-to be summarized in a current doc.
+The guard-generalization and retired-adapter worksheets are completed
+compression archives in Git history/cold storage unless a new transferable
+principle needs to be summarized in a current doc.
 
 When guard count drops, ask what changed:
 
 - Did a reusable substrate principle emerge?
 - Did a family split into cleaner semantic pressure?
-- Did a helper surface earn transfer?
+- Did a surface earn transfer?
 - Did a singleton become a keeper?
 - Did the compression reveal a new largest boundary family?
 
@@ -256,7 +256,7 @@ When wide-corpus not-exact rows appear, ask a different question:
 
 Compression work has a stop condition.
 
-When remaining guards or helpers no longer imply a reusable coordinate, do not
+When remaining guards or residual surfaces no longer imply a reusable coordinate, do not
 keep squeezing them just to make a count smaller. Stable residue can be a valid
 boundary observation.
 
@@ -266,7 +266,7 @@ Examples of terminal residue:
   source row or archival row-value fallback;
 - baseline-arbitration guards that prevent a broad but attractive candidate
   surface from overruling direct identity/name/role support;
-- helper rows that expose useful source prose but still parse local phrasing
+- support rows that expose useful source prose but still parse local phrasing
   rather than a transferable source-record relation;
 - diagnostics or quarantines that correctly say "the current coordinate system
   should not name this yet."
@@ -276,7 +276,7 @@ retirement to one of these moves:
 
 - add unlike transfer evidence;
 - improve source addressability;
-- split helper pressure into clean source-coordinate rows versus candidate
+- split surface pressure into clean source-coordinate rows versus candidate
   prose-derived rows;
 - write the keeper rationale and leave the sentinel active;
 - scar the local accident and remove active behavior.

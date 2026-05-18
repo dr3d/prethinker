@@ -150,7 +150,7 @@ def test_helper_usage_audit_measures_helper_pressure_against_answer_surface(tmp_
     fixture = payload["fixtures"]["fixture_a"]
 
     assert payload["schema_version"] == "helper_usage_audit_v2"
-    assert payload["helper_pressure_summary"]["pressure_label"] == "high_candidate_helper_pressure"
+    assert payload["helper_pressure_summary"]["pressure_label"] == "high_compatibility_pressure"
     assert payload["helper_pressure_summary"]["helper_rows_per_exact"] == 600.0
     assert payload["helper_pressure_summary"]["unique_row_count"] == 1
     assert payload["helper_pressure_summary"]["exact_rate"] == 0.5
@@ -176,15 +176,16 @@ def test_helper_usage_audit_measures_helper_pressure_against_answer_surface(tmp_
     ]
     assert fixture["unique_row_count"] == 1
     assert fixture["candidate_helper_share"] == 1.0
-    assert fixture["pressure_label"] == "high_candidate_helper_pressure"
+    assert fixture["pressure_label"] == "high_compatibility_pressure"
 
     markdown = render_markdown(payload)
-    assert "Candidate Pruning Targets" in markdown
+    assert "Compatibility Adapter Usage Audit" in markdown
+    assert "Adapter Pruning Targets" in markdown
     assert "600 (1 unique)" in markdown
     assert "`group_count`" in markdown
     assert "`single_fixture_pressure`" in markdown
     assert "Rows/exact" in markdown
-    assert "high_candidate_helper_pressure" in markdown
+    assert "high_compatibility_pressure" in markdown
 
 
 def test_candidate_transfer_signal_separates_single_fixture_debt_from_transfer_scars() -> None:

@@ -41,8 +41,9 @@ not use them as day-one guidance unless the user names a specific artifact.
 - The current document product is a compiled KB artifact package:
   `world.pl`, `epistemic.pl`, deterministic ledgers, query policy, manifest,
   and diagnostics.
-- The live query policy is no-helper by default. Native helper companion rows
-  are legacy/forensic compatibility, not the preferred architecture.
+- The live document QA path answers from admitted KB state, deterministic
+  ledgers, direct query surfaces, selectors, and guards. Retired compatibility
+  adapters are not day-one architecture.
 
 ## Core Invariants
 
@@ -53,7 +54,7 @@ not use them as day-one guidance unless the user names a specific artifact.
 - Do not teach the harness fixture names, row IDs, answer strings, local people,
   or source-specific vocabulary.
 - Do not reintroduce retired lab-automation, public-benchmarking, publishing,
-  helper-era, or generated-report lanes.
+  generated-report, or compatibility-adapter lanes.
 - Public docs should describe the living project. Put stale notebooks and bulky
   artifacts in Git history or `C:\prethinker_tmp_archive`.
 - Preserve user changes in a dirty worktree; never revert unrelated edits.

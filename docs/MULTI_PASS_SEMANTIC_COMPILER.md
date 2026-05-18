@@ -65,14 +65,14 @@ valid-but-wrong mappings without weakening the authority boundary.
 
 The first practical hook is now `scripts/run_semantic_shortcut_audit.py`. It
 audits already-produced Prolog clauses or JSON compile artifacts for structural
-shortcut risks such as unbound head variables, helper-argument misuse,
+shortcut risks such as unbound head variables, deterministic-function argument misuse,
 claim-to-fact collapse, broad class-predicate fanout, sibling-rule masking, and
 aggregation-to-final-outcome overclaiming. The audit is deliberately post hoc
 and structural: it reads admitted Prolog surfaces, not source prose, and it
 does not authorize writes. Early gold-KB probes showed a second useful signal:
-some risks are not bad semantics but missing helper substrate, such as raw
-arithmetic or negation that should be represented by bounded deterministic
-helpers before an LLM-acquired rule is promotion-ready.
+some risks are not bad semantics but missing deterministic substrate, such as
+raw arithmetic or negation that should be represented by bounded runtime
+predicates before an LLM-acquired rule is promotion-ready.
 Rule-lens runtime artifacts now include this shortcut-audit summary alongside
 promotion-readiness metrics, so a rule can be loadable/firing/probe-clean while
 still carrying a visible semantic-risk note for review.
@@ -127,7 +127,7 @@ already-admitted backbone. It should not invent a new domain surface.
 ### Temporal / Status Lens
 
 Extracts state changes, time anchors, validity windows, temporal order,
-deadlines, and duration helpers. This lens exists because temporal detail tends
+deadlines, and duration functions. This lens exists because temporal detail tends
 to crowd out ordinary fact extraction when mixed into one giant pass.
 
 ### Rule Lens
@@ -193,9 +193,9 @@ runaway Python process in the workspace.
 
 Source-pass structured-output calls should use the same no-thinking policy as
 the main Semantic IR path: `temperature=0.0` and `reasoning_effort="none"`.
-Glass Tide exposed a drift here after the rule/support pass helpers were added:
+Glass Tide exposed a drift here after the rule/support pass utilities were added:
 the model could spend budget in `reasoning_content` while producing no JSON
-`content`. The shared source-pass helper now sends `reasoning_effort="none"` so
+`content`. The shared source-pass utility now sends `reasoning_effort="none"` so
 rule-lens runs spend tokens on the schema body.
 
 Rule lifecycle is now reported separately:
@@ -253,12 +253,12 @@ by source-admitted atoms like `submit_revised_budget` and
 `provide_matching_docs`.
 
 Avalon then showed why the mapper should share part of the verifier's rule
-doctrine. A Section A eligibility replay kept useful helper-composed matching
+doctrine. A Section A eligibility replay kept useful runtime-composed matching
 fund branches, but the model also proposed raw Prolog constructs such as
 negation, disjunction, equality, and comparisons. The verifier already withheld
 promotion for those clauses. Durable rule admission now goes further and skips
 them at the mapper boundary with `rule_contains_unsupported_construct`. In this
-phase, executable LLM-authored rules should compose safe helper predicates such
+phase, executable LLM-authored rules should compose safe runtime predicates such
 as `number_greater_than/2` and `percent_at_least/3`, not invent low-level
 control semantics.
 
@@ -294,11 +294,11 @@ scoring. The high-water results held: tax stayed at `3` promotion-ready rules
 and salvage stayed at `2`, with all authored positive/negative probes still
 passing.
 
-GLT-032/034 adds a temporal-helper branch. A narrow body-fact lens admitted
+GLT-032/034 adds a temporal-runtime branch. A narrow body-fact lens admitted
 quarantine patient, no-fever, and negative-test rows; `hours_at_least/3` then
 supported an isolated promotion-ready clearance rule for Dax while the Mira
 negative probe stayed empty because her tests were only five hours apart. This
-also sharpened the verifier: context-dependent helpers should be judged inside
+also sharpened the verifier: context-dependent runtime predicates should be judged inside
 the rule conjunction, not as standalone row generators.
 
 GLT-035/036 adds the council priority/override branch. The body-fact lens
@@ -307,8 +307,8 @@ no-emergency-override rows. The verifier retained one promotion-ready
 budget-veto failure rule and dropped normal-vote branches that depended on
 unsupported negation or aggregation.
 
-GLT-037 adds the first aggregation helper, `support_count_at_least/2`, and
-keeps the negative result: the helper substrate works, but the rule lens still
+GLT-037 adds the first aggregation runtime predicate, `support_count_at_least/2`, and
+keeps the negative result: the deterministic substrate works, but the rule lens still
 mixed support threshold with final passage. Future council aggregation should
 derive an intermediate threshold status before any veto/override branch decides
 final outcome.
@@ -386,7 +386,7 @@ remains a cheap baseline, not a replacement policy.
   negative probes should become standard for any rule class that might
   overgeneralize. AG-011 adds another structural shortcut: repeated body goals
   can pretend to satisfy multiple distinct requirements while aliasing to the
-  same row unless the rule uses literal anchors, a deterministic helper, or
+  same row unless the rule uses literal anchors, a deterministic function, or
   admitted `required_condition`-style body facts.
 - Probe role policy: SC-005 exposed a false-negative promotion probe when the
   rule derived the right subject and status but preserved a more precise source
@@ -395,10 +395,10 @@ remains a cheap baseline, not a replacement policy.
   slots from provenance/category slots, using variables or explicit
   slot-equivalence policies when the exact source anchor is not the target of
   the test.
-- Helper substrate: threshold/exception rules such as taxability need
-  deterministic helper predicates before the rule lens can safely emit
-  executable clauses. Glass Tide now uses `value_greater_than/2` and
-  `value_at_most/2` as query-only helpers resolved from admitted value facts.
+- Deterministic substrate: threshold/exception rules such as taxability need
+  bounded runtime predicates before the rule lens can safely emit executable
+  clauses. Glass Tide now uses `value_greater_than/2` and `value_at_most/2` as
+  query-only runtime predicates resolved from admitted value facts.
 - Exception substrate: GLT-025/027 show relief-style exemptions work better as
   a separate exception lens that can be deterministically unioned with the
   threshold branch after promotion filtering.

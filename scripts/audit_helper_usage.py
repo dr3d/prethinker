@@ -220,7 +220,7 @@ def pruning_targets(
 
 
 def candidate_transfer_signal(*, fixture_count: int, unique_candidate_rows: int) -> str:
-    """Classify candidate-helper pressure without naming fixtures or answers."""
+    """Classify compatibility-row pressure without naming fixtures or answers."""
 
     if fixture_count <= 1:
         return "single_fixture_pressure"
@@ -275,17 +275,17 @@ def helper_pressure_metrics(
     clean_helper_share = round(float(clean_rows) / float(row_count), 4) if row_count else 0.0
     exact_rate = round(float(exact) / float(judge_rows), 4) if judge_rows else None
     if row_count <= 0:
-        pressure_label = "no_helper_rows"
+        pressure_label = "no_compatibility_rows"
     elif judge_rows <= 0:
-        pressure_label = "helper_volume_without_judged_answers"
+        pressure_label = "compatibility_volume_without_judged_answers"
     elif row_count >= 500 and candidate_helper_share >= 0.25:
-        pressure_label = "high_candidate_helper_pressure"
+        pressure_label = "high_compatibility_pressure"
     elif row_count >= 500:
-        pressure_label = "high_clean_helper_volume"
+        pressure_label = "high_compatibility_volume"
     elif candidate_helper_share >= 0.5:
-        pressure_label = "candidate_helper_dominant"
+        pressure_label = "compatibility_dominant"
     else:
-        pressure_label = "bounded_helper_surface"
+        pressure_label = "bounded_compatibility_surface"
     return {
         "candidate_helper_share": candidate_helper_share,
         "clean_helper_share": clean_helper_share,
@@ -294,6 +294,19 @@ def helper_pressure_metrics(
         "helper_rows_per_question": helper_rows_per_question,
         "pressure_label": pressure_label,
     }
+
+
+def display_pressure_label(label: object) -> str:
+    raw = str(label or "").strip()
+    return {
+        "no_helper_rows": "none",
+        "no_compatibility_rows": "none",
+        "helper_volume_without_judged_answers": "compatibility_volume_without_judged_answers",
+        "high_candidate_helper_pressure": "high_compatibility_pressure",
+        "high_clean_helper_volume": "high_compatibility_volume",
+        "candidate_helper_dominant": "compatibility_dominant",
+        "bounded_helper_surface": "bounded_compatibility_surface",
+    }.get(raw, raw.replace("candidate_helper", "compatibility").replace("clean_helper", "compatibility").replace("helper", "compatibility"))
 
 
 def audit_file(path: Path) -> tuple[str, dict[str, dict[str, Any]], dict[str, int]]:
@@ -523,18 +536,18 @@ def audit_roots(
 
 def render_markdown(payload: dict[str, Any]) -> str:
     lines = [
-        "# Helper Usage Audit",
+        "# Compatibility Adapter Usage Audit",
         "",
         f"Generated: {payload['generated_at']}",
         f"JSON files scanned: `{payload['json_file_count']}`",
-        f"Helpers observed: `{payload['helper_count']}`",
-        f"Helper pressure: `{payload.get('helper_pressure_summary', {}).get('pressure_label', '')}`",
-        f"Suspicious low-transfer helpers: `{payload['suspicious_helper_count']}`",
-        f"Orphaned artifact helpers: `{payload.get('orphaned_artifact_helper_count', 0)}`",
+        f"Adapters observed: `{payload['helper_count']}`",
+        f"Compatibility rows: `{display_pressure_label(payload.get('helper_pressure_summary', {}).get('pressure_label', ''))}`",
+        f"Suspicious low-transfer adapters: `{payload['suspicious_helper_count']}`",
+        f"Orphaned artifact adapters: `{payload.get('orphaned_artifact_helper_count', 0)}`",
         "",
-        "## Candidate Pruning Targets",
+        "## Adapter Pruning Targets",
         "",
-        "| Helper | Support kind | Candidate rows | Share of helper | Fixtures | Signal |",
+        "| Adapter | Support kind | Candidate rows | Share of adapter | Fixtures | Signal |",
         "| --- | --- | ---: | ---: | ---: | --- |",
     ]
     for item in payload.get("candidate_pruning_targets", []):
@@ -555,9 +568,9 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## Suspicious Helpers",
+            "## Suspicious Adapters",
             "",
-            "| Helper | Fixtures | Files | Rows | Implemented | Helper classes | Top support kinds | Fixture list |",
+            "| Adapter | Fixtures | Files | Rows | Implemented | Adapter classes | Top support kinds | Fixture list |",
             "| --- | ---: | ---: | ---: | --- | --- | --- | --- |",
         ]
     )
@@ -582,7 +595,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
             "",
             "## Fixtures",
             "",
-            "| Fixture | Helpers | Rows | Rows/exact | Candidate share | Pressure | Helper classes | Top support kinds | Helper list |",
+            "| Fixture | Adapters | Rows | Rows/exact | Candidate share | Pressure | Adapter classes | Top support kinds | Adapter list |",
             "| --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- |",
         ]
     )
@@ -594,7 +607,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 rows=item["row_count"],
                 rows_per_exact=item.get("helper_rows_per_exact"),
                 candidate_share=item.get("candidate_helper_share"),
-                pressure=item.get("pressure_label", ""),
+                pressure=display_pressure_label(item.get("pressure_label", "")),
                 classes=item.get("helper_class_counts", {}),
                 support_kinds=_top_counts(item.get("support_kind_counts", {})),
                 helper_list=", ".join(item.get("helpers", [])),
@@ -603,9 +616,9 @@ def render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## All Helpers",
+            "## All Adapters",
             "",
-            "| Helper | Fixtures | Files | Rows | Suspicious | Implemented |",
+            "| Adapter | Fixtures | Files | Rows | Suspicious | Implemented |",
             "| --- | ---: | ---: | ---: | --- | --- |",
         ]
     )

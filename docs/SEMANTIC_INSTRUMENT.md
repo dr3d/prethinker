@@ -4,17 +4,17 @@
 
 Prethinker compiles natural language documents into governed knowledge bases.
 This document describes the *instrument* - the collection of semantic lenses,
-selector guards, deterministic ledgers, legacy compatibility adapters, and
-uncertainty distinctions that the system uses to read documents from multiple
-angles and decide what can be answered from admitted state.
+selector guards, deterministic ledgers, direct query surfaces, and uncertainty
+distinctions that the system uses to read documents from multiple angles and
+decide what can be answered from admitted state.
 
 Think of it as the spec sheet for a scientific instrument. A spectrometer has wavelength ranges, resolution limits, and calibration procedures. Prethinker has semantic lenses, selector guards, and an uncertainty vocabulary. Both instruments get sharper through calibration against known samples.
 
-As of the current no-helper instrument, the active semantic vocabulary is
-organized into thirteen lens facets and roughly 136 typed lens terms. The exact
-term count is calibration telemetry rather than a product promise: terms keep
-their place only when transfer evidence shows they describe a reusable meaning
-surface rather than a development fixture.
+The active semantic vocabulary is organized into thirteen lens facets and
+roughly 136 typed lens terms. The exact term count is calibration telemetry
+rather than a product promise: terms keep their place only when transfer
+evidence shows they describe a reusable meaning surface rather than a
+development fixture.
 
 ---
 
@@ -51,7 +51,7 @@ The instrument now has a separate deterministic pre-compile layer:
 ```text
 semantic lenses = model-owned meaning proposals
 deterministic ledgers = exact source addressability
-legacy helpers = opt-in compatibility adapters, not the active architecture
+direct query surfaces = how admitted state becomes answerable
 ```
 
 The deterministic ledgers are not lenses and not guards. They do not interpret
@@ -71,8 +71,8 @@ propagation = recomputing what must be true, what may be true, and what is impos
 ```
 
 Prethinker is not there yet as a general substrate. Today it has early pieces:
-Prolog rule/query execution, query-only helpers, temporal ordering propagation,
-and diagnostic truth-maintenance proposals. The intended direction is that
+Prolog rule/query execution, deterministic query functions, temporal ordering
+propagation, and diagnostic truth-maintenance proposals. The intended direction is that
 derived cells remain visibly derived. A propagated answer should point back to
 its supporting facts, rules, constraints, and retractions instead of becoming a
 silent durable fact.
@@ -155,10 +155,9 @@ system, assignment/timekeeping evidence beats physical badge-exit rows.
 
 The guard roster is still in discovery mode. Do not parameterize the active families
 yet. First merge exact or near duplicates, prove the merged guard by replaying
-the rows that created the originals, and retire guards when better compile or
-helper surfaces make them unnecessary. A new guard is healthy when it names a
-semantic question/evidence mismatch; it is suspicious when it only names a
-fixture.
+the rows that created the originals, and retire guards when better compile
+surfaces make them unnecessary. A new guard is healthy when it names a semantic
+question/evidence mismatch; it is suspicious when it only names a fixture.
 
 ---
 
@@ -232,7 +231,7 @@ These are as important as the positive ones:
 - The partial-skeleton instruction that helped Three Moles (story world) hurt Oxalis (regulatory) - it was scoped back to narrative passes only
 - A broader evidence-filter floor that helped Black Lantern's miss count hurt its exact count - evidence filtering is not "more is better"
 - The temporal/status/deadline surface regressed Copperfall globally - deadline families need query-level disambiguation, not compile-level broadening
-- The newest Oxalis/Three Moles pass preserves that discipline: recall accounting helpers, story choice contrast, and remediation-method support are query-only companions over admitted KB rows. They show targeted row rescues, but they do not change the headline score until a full replay proves exact-row protection.
+- The newest Oxalis/Three Moles pass preserves that discipline: recall accounting surfaces, story choice contrast, and remediation-method support are query-local companions over admitted KB rows. They show targeted row rescues, but they do not change the headline score until a full replay proves exact-row protection.
 
 ---
 

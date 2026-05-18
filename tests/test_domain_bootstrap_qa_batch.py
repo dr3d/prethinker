@@ -129,12 +129,12 @@ def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
     assert helper_pressure["row_count"] == 600
     assert helper_pressure["helper_rows_per_exact"] == 40.0
     assert helper_pressure["candidate_helper_share"] == 0.6667
-    assert helper_pressure["pressure_label"] == "high_candidate_helper_pressure"
+    assert helper_pressure["pressure_label"] == "high_compatibility_pressure"
     assert helper_pressure["companion_row_totals"] == {"roster_state_support": 600}
 
     markdown = _render_md(summary)
-    assert "Helper pressure" in markdown
-    assert "high_candidate_helper_pressure" in markdown
+    assert "Compatibility rows" in markdown
+    assert "high_compatibility_pressure" in markdown
 
 
 def test_qa_batch_can_summarize_existing_artifact(tmp_path: Path) -> None:

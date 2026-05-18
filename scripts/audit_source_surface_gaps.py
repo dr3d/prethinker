@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit whether no-helper QA misses have answer evidence in source surfaces.
+"""Audit whether direct-surface QA misses have answer evidence in source surfaces.
 
 This is a diagnostic tool, not a repair. It reads QA scorecard artifacts and
 their compile JSONs, then checks whether reference-answer tokens are present in

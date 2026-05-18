@@ -57,8 +57,8 @@ source or utterance
 - **Direct surfaces** are admitted predicates and deterministic ledger facts
   that make recurring roles, statuses, quantities, transitions, and authority
   envelopes queryable without query-time compatibility bridges.
-- **Legacy helper adapters** are forensic replay tools. They are not the
-  preferred repair path.
+- **Retired compatibility adapters** are forensic replay tools. They are not
+  the preferred repair path.
 - **Selectors** choose the best encounter surface for a question.
 - **Guards** prevent tempting but wrong selector choices. Treat them as
   sensors and bandages, not the desired final architecture.
@@ -72,7 +72,7 @@ do not restart guard retirement just to make the count smaller.
 Current selector ledger accounting from the terminal audit:
 
 - `5` active guards
-- `0` high-priority `candidate_guard:helper_pressure` entries
+- `0` high-priority compatibility-pressure entries
 - `186` scar guards
 - `0` high-priority singleton `candidate_guard` entries
 - `4` semantic families
@@ -156,8 +156,8 @@ The seed measurement is the 2026-05-12 wide OpenRouter corpus run:
   questions;
 - exact rate was `0.8276`;
 - runtime load errors and write proposal rows were both `0`;
-- legacy helper pressure was `2877` rows, `2.854` rows per exact answer, and
-  `0.1585` candidate-helper share in that historical measurement;
+- compatibility-adapter pressure was visible in that historical measurement,
+  but it is not the current repair lane;
 - the 210 not-exact rows are boundary coordinates, not permission for
   fixture-specific tuning.
 
@@ -165,7 +165,7 @@ Start with class-level boundary work:
 
 1. Classify not-exact rows by fixture-free failure geometry, especially
    compile-surface, hybrid-join, query-surface, answer-surface, source-fidelity,
-   legacy-adapter volume, and judge-ambiguity pressure.
+   compatibility-adapter volume, and judge-ambiguity pressure.
 2. Design small probe fixtures that isolate one tricky axis at a time.
 3. Repair only when the replacement can be stated without fixture names, row
    ids, question ids, answer strings, local people, local organizations, or

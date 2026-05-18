@@ -2,7 +2,7 @@
 
 The merge is conservative: keep the candidate source-record ledger, preserve all
 baseline direct facts, and append candidate direct facts that are not already
-present. This supports no-helper replay experiments where a candidate adds a
+present. This supports direct-surface replay experiments where a candidate adds a
 new surface but drops previously accepted backbone rows.
 """
 
