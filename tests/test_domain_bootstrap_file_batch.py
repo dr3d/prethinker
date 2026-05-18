@@ -1,4 +1,5 @@
 from scripts.run_domain_bootstrap_file_batch import (
+    _detail_wrapper_drift_flags,
     _extract_compile_summary,
     _quality_gate_result,
     _quality_retry_context_lines,
@@ -112,6 +113,21 @@ def test_compile_batch_summary_treats_date_atoms_as_date_time_backbone() -> None
     )
 
     assert "date_time_backbone_missing_with_wrapper:source_detail" not in summary["detail_wrapper_drift_flags"]
+
+
+def test_detail_wrapper_drift_counts_contested_state_values() -> None:
+    payload = {
+        "parsed": {"candidate_predicates": [{"signature": "source_detail/4"}]},
+        "source_compile": {
+            "facts": [
+                "source_record_field(src_line_1, title_status, contested_by_party).",
+                "register_entry(item_a, external_a, object_a, holder_a, owner_a, contested_by_party).",
+                "source_detail(item_a, title_status, contested_by_party, src_line_1).",
+            ]
+        },
+    }
+
+    assert _detail_wrapper_drift_flags(payload) == []
 
 
 def test_compile_quality_gate_passes_accepted_draw_shape() -> None:

@@ -849,9 +849,9 @@ def _operational_lifecycle_direct_units(
 
 
 def _has_lifecycle_marker(text: str) -> bool:
-    return any(
-        marker in text
-        for marker in (
+    return _has_token_marker(
+        text,
+        (
             "status",
             "state",
             "phase",
@@ -864,10 +864,17 @@ def _has_lifecycle_marker(text: str) -> bool:
             "withdrawn",
             "closed",
             "reopened",
-            "supersed",
             "corrected",
             "completed",
-        )
+        ),
+    ) or bool(re.search(r"(?:^|[^a-z0-9])supersed[a-z]*(?:[^a-z0-9]|$)", text.lower()))
+
+
+def _has_token_marker(text: str, markers: tuple[str, ...]) -> bool:
+    normalized = str(text).lower().replace("-", "_")
+    return any(
+        re.search(rf"(?:^|[^a-z0-9]){re.escape(marker)}(?:[^a-z0-9]|$)", normalized)
+        for marker in markers
     )
 
 
@@ -878,6 +885,10 @@ def _is_operational_lifecycle_source_text(text: str) -> bool:
     if _is_temporal_or_metric_correction_text(text):
         return False
     if _is_storage_or_window_boundary_text(text):
+        return False
+    if _is_schedule_or_deadline_text(text):
+        return False
+    if _is_static_status_snapshot_text(text):
         return False
     return _has_status_or_record_subject_marker(text)
 
@@ -913,6 +924,25 @@ def _is_storage_or_window_boundary_text(text: str) -> bool:
             "review_window",
         )
     )
+
+
+def _is_schedule_or_deadline_text(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "deadline",
+            "due_",
+            "_due",
+            "hearing",
+            "scheduled",
+            "calendared",
+            "rescheduled",
+        )
+    )
+
+
+def _is_static_status_snapshot_text(text: str) -> bool:
+    return "status" in text and any(marker in text for marker in ("as_of", "recorded_as", "title_status"))
 
 
 def _has_status_or_record_subject_marker(text: str) -> bool:

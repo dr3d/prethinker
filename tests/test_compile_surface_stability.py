@@ -349,6 +349,41 @@ def test_source_authority_contract_does_not_count_shallow_presentation_row(tmp_p
     assert contract["direct_complete_count"] == 0
 
 
+def test_operational_lifecycle_contract_does_not_read_estate_as_state(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_estate" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, estate_opened_on_2026_01_01).",
+            "source_record_text_atom(src_line_2, estate_review_due_2026_02_01).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["contract"] == "operational_lifecycle_preservation"
+    assert contract["status"] == "not_applicable"
+    assert contract["source_text_mention_count"] == 0
+
+
+def test_operational_lifecycle_contract_ignores_schedule_and_static_status_text(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_schedule" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, filed_in_support_of_status_report_due_2026_05_15).",
+            "source_record_text_atom(src_line_2, as_of_2026_04_30_status_of_item_a_recorded_as_contested).",
+            "source_record_text_atom(src_line_3, hearing_is_now_set_for_2026_06_17_title_status).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["contract"] == "operational_lifecycle_preservation"
+    assert contract["status"] == "not_applicable"
+    assert contract["source_text_mention_count"] == 0
+
+
 def test_operational_lifecycle_contract_scores_complete_status_surfaces(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_d" / "domain_bootstrap_file_a.json",

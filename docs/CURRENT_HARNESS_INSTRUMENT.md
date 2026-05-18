@@ -321,6 +321,17 @@ Recent transfer work supports the current direction:
   pass-qualified custody packet then scored 34/1/5 with helpers off, showing
   that detector calibration was necessary but not sufficient; remaining misses
   are still compile/hybrid resolution pressure.
+- Lifecycle/state quality gates are now stricter about what they mean. Token
+  matching prevents words such as `estate` from firing the `state` lifecycle
+  marker, and schedule/deadline/static-status snapshots are no longer treated
+  as operational lifecycle transitions. Static contested/uncontested values now
+  count as state backbone when they appear in direct rows. With those
+  calibrations, the probate/access register also passed quality without
+  recompilation and scored 36/0/4 with helpers off. The authority transfer
+  slice therefore becomes a clean measurement set: two simpler authority probes
+  at 39/0/1, one dense custody/title/access probe at 34/1/5, and one dense
+  probate/access probe at 36/0/4. The remaining pressure is concrete
+  compile-surface coverage, not helper resurrection or looser gates.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
