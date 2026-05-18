@@ -274,6 +274,14 @@ does justify the next measurement layer: every palette-prior replay should
 report prior-offered, prior-delivered, prior-zero-yield, and non-prior-delivered
 signatures separately from QA.
 
+The replay's not-exact rows then ran through the retrieval audit. At `k=10`,
+the active 15-signature candidate palette recalled hinted schemas for 9 of 10
+boundary rows. That means the candidate palette is often near enough to the
+answer even when QA fails. The missing product layer is not only "retrieve the
+right vocabulary"; it is "attach source spans to candidate rows, deliver the
+answer-bearing rows, and compose the query over them." Retrieval is a membrane,
+not the whole wall.
+
 ## Design Notes To Preserve
 
 The palette registry will need richer metadata than predicate name and arity:

@@ -449,6 +449,12 @@ Recent transfer work supports the current direction:
   fixture, so the result is a partial win: soft priors can stabilize recurring
   vocabulary without hard-caging the compiler, but they do not recover
   rare/high-value answer-bearing surfaces by themselves.
+- Running the retrieval audit on the 10 not-exact rows from that same replay
+  recalled hinted schemas for 9 of 10 rows at `k=10` from the 15-signature
+  active candidate palette. This says the vocabulary neighborhood is usually
+  visible by the end of compile. The unresolved pressure is source-span
+  binding, direct-row delivery, and query composition, not simply absence of a
+  candidate predicate name.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
