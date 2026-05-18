@@ -345,6 +345,12 @@ Recent transfer work supports the current direction:
   helpers": promote recurring source-stated identity, role, location, status,
   and document-reference values into direct surfaces without copying fixture
   vocabulary.
+- A proposed prompt-level compact-label micro-fact invariant was tested and
+  rejected for now. A two-fixture replay on label-heavy fixtures regressed
+  relative to the preceding stranded-source slice, so the wording did not earn
+  an architecture slot. The lesson is that compact source-record promotion
+  needs instrumentation or profile-palette support, not another broad prompt
+  sentence.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
