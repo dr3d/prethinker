@@ -380,10 +380,25 @@ Recent transfer work supports the current direction:
   vocabulary-only and extracts no facts. Focused replay proved the slot can
   carry setpoint and feed-rate values; four-fixture replay still found one
   stochastic sensor hold, so this is an architectural advance, not a stamp.
+- A broader native no-helper stamp-candidate run on 2026-05-18 gives the
+  current empirical reading after the recent compile-surface work. All 56
+  source fixtures compiled and scored with helper rows forced to zero:
+  `1902/100/160` over 2163 questions, or 87.93% exact. This is below the
+  prior 89.41% QA-only anchor, so the cumulative work has not earned a freeze.
+  The compile quality gate held 20 of 56 fixtures. Pass fixtures scored 88.77%
+  exact; held fixtures scored 86.50%, so the gate is directionally predictive
+  but not sufficient. The dominant not-exact surface remains compile-surface
+  loss: 165 compile-surface gaps out of 261 not-exact rows, with 81 answers
+  stranded only in source-record rows. Helpers are no longer the explanation;
+  direct surface preservation is.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
-  The next compile-layer pressure is quantity-rich event/profile preservation
-  and other source-record-only distinctions, not a native full stamp.
+  The next compile-layer pressure is preserving direct identity, role,
+  location, state, date/time, quantity, and source-authority surfaces when the
+  source-record ledger already carries those values. Do not broaden prompt
+  guidance without replay evidence; use telemetry, palette priors, targeted
+  retries, or multi-draw consensus experiments to reduce variance without
+  teaching the harness fixture vocabulary.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
