@@ -145,3 +145,59 @@ def test_source_surface_gap_audit_separates_stranded_source_from_direct_rows(tmp
     report = audit_scorecard(scorecard)
 
     assert report["summary"]["evidence_class_counts"] == {"answer_stranded_in_source_record": 1}
+    assert report["summary"]["coordinate_class_counts"] == {"other_answer_bearing_detail": 1}
+    assert report["rows"][0]["coordinate_class"] == "other_answer_bearing_detail"
+
+
+def test_source_surface_gap_audit_classifies_coordinate_shapes(tmp_path) -> None:
+    compile_json = tmp_path / "compile.json"
+    compile_json.write_text(
+        """
+        {
+          "source_compile": {
+            "facts": [
+              "source_record_text_atom(src_line_1, case_status_active_pleadings_on_2026_03_20).",
+              "source_record_text_atom(src_line_2, maintenance_ticket_mt_404_for_camera_firmware_update).",
+              "source_record_text_atom(src_line_3, quality_director_lee_chen)."
+            ],
+            "rules": []
+          }
+        }
+        """,
+        encoding="utf-8",
+    )
+    qa_json = tmp_path / "qa.json"
+    qa_json.write_text(
+        """
+        {
+          "rows": [
+            {"id": "q001", "utterance": "What was the case status on March 20?", "reference_answer": "Active pleadings."},
+            {"id": "q002", "utterance": "What is the maintenance ticket for the firmware update?", "reference_answer": "MT-404."},
+            {"id": "q003", "utterance": "Who is the Quality Director?", "reference_answer": "Lee Chen."}
+          ]
+        }
+        """,
+        encoding="utf-8",
+    )
+    scorecard = {
+        "artifacts": [
+            {
+                "label": "unlike_fixture",
+                "path": str(qa_json),
+                "run_json": str(compile_json),
+                "non_exact_rows": [
+                    {"id": "q001", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What was the case status on March 20?", "queries": []},
+                    {"id": "q002", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What is the maintenance ticket for the firmware update?", "queries": []},
+                    {"id": "q003", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "Who is the Quality Director?", "queries": []},
+                ],
+            }
+        ]
+    }
+
+    report = audit_scorecard(scorecard)
+
+    assert report["summary"]["coordinate_class_counts"] == {
+        "identity_or_role": 1,
+        "source_reference": 1,
+        "status_or_state": 1,
+    }

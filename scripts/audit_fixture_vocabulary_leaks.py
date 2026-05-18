@@ -15,6 +15,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+FIXTURE_ROOT = ROOT / "datasets" / "story_worlds"
 
 
 @dataclass(frozen=True)
@@ -231,6 +232,13 @@ TEXT_SUFFIXES = {".html", ".json", ".jsonl", ".md", ".py", ".txt", ".yml", ".yam
 
 def area_for(path: Path) -> str:
     rel = path.relative_to(ROOT).as_posix()
+    if rel in {
+        "scripts/plan_incoming_fixture_runs.py",
+        "scripts/plan_story_world_fixture_runs.py",
+        "scripts/summarize_selector_guard_families.py",
+        "scripts/summarize_story_world_progress.py",
+    }:
+        return "fixture_operator"
     if rel.startswith(("src/", "scripts/")):
         return "active_code"
     if rel.startswith("tests/"):
@@ -278,7 +286,36 @@ def summarize_hits(hits: list[Hit]) -> dict[str, int]:
     return dict(sorted(summary.items()))
 
 
-def render_markdown(rows: list[dict[str, object]]) -> str:
+def active_surface_hits(hits: list[Hit]) -> list[Hit]:
+    return [hit for hit in hits if hit.area in {"active_code", "current_docs"}]
+
+
+def fixture_names() -> list[str]:
+    if not FIXTURE_ROOT.exists():
+        return []
+    return sorted(path.name for path in FIXTURE_ROOT.iterdir() if path.is_dir())
+
+
+def scan_fixture_name_leaks() -> list[dict[str, object]]:
+    rows: list[dict[str, object]] = []
+    for name in fixture_names():
+        hits = scan_term(name)
+        active_hits = active_surface_hits(hits)
+        if not active_hits:
+            continue
+        rows.append(
+            {
+                "fixture": name,
+                "risk": "high",
+                "status": "fixture_name_leak",
+                "counts": summarize_hits(active_hits),
+                "hits": [asdict(hit) for hit in active_hits],
+            }
+        )
+    return rows
+
+
+def render_markdown(rows: list[dict[str, object]], *, fixture_name_leaks: list[dict[str, object]] | None = None) -> str:
     lines = [
         "# Fixture Vocabulary Leak Audit",
         "",
@@ -319,6 +356,37 @@ def render_markdown(rows: list[dict[str, object]]) -> str:
         if len(active_hits) > 12:
             lines.append(f"- ... {len(active_hits) - 12} more active-code hits")
         lines.append("")
+    fixture_name_leaks = fixture_name_leaks or []
+    lines.extend(["## Fixture Name Leaks", ""])
+    if not fixture_name_leaks:
+        lines.append("No dataset fixture directory names were found in active code or current docs.")
+        lines.append("")
+    else:
+        lines.extend(
+            [
+                "| Fixture name | Active code | Current docs |",
+                "| --- | ---: | ---: |",
+            ]
+        )
+        for row in fixture_name_leaks:
+            counts = row["counts"]
+            assert isinstance(counts, dict)
+            lines.append(
+                "| `{fixture}` | {active} | {docs} |".format(
+                    fixture=row["fixture"],
+                    active=counts.get("active_code", 0),
+                    docs=counts.get("current_docs", 0),
+                )
+            )
+        lines.append("")
+        for row in fixture_name_leaks[:20]:
+            lines.append(f"### `{row['fixture']}`")
+            lines.append("")
+            for hit in row["hits"][:8]:
+                lines.append(f"- `{hit['path']}:{hit['line']}` - {hit['context']}")
+            if len(row["hits"]) > 8:
+                lines.append(f"- ... {len(row['hits']) - 8} more active-surface hits")
+            lines.append("")
     lines.extend(
         [
             "## Operating Rule",
@@ -350,17 +418,20 @@ def main() -> int:
             }
         )
 
+    fixture_name_leaks = scan_fixture_name_leaks()
     payload = {
         "audit": "fixture_vocabulary_leaks",
         "term_count": len(rows),
         "rows": rows,
+        "fixture_name_leak_count": len(fixture_name_leaks),
+        "fixture_name_leaks": fixture_name_leaks,
     }
     out_json = Path(args.out_json)
     out_md = Path(args.out_md)
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_md.parent.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    out_md.write_text(render_markdown(rows), encoding="utf-8")
+    out_md.write_text(render_markdown(rows, fixture_name_leaks=fixture_name_leaks), encoding="utf-8")
     return 0
 
 

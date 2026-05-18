@@ -145,6 +145,7 @@ def audit_scorecard(
             )
 
     evidence_counts = Counter(str(row.get("evidence_class", "")) for row in rows)
+    coordinate_counts = Counter(str(row.get("coordinate_class", "")) for row in rows)
     surface_counts = Counter(str(row.get("failure_surface", "")) for row in rows)
     return {
         "schema_version": "source_surface_gap_audit_v1",
@@ -159,6 +160,7 @@ def audit_scorecard(
             "row_count": len(rows),
             "failure_surface_counts": dict(sorted(surface_counts.items())),
             "evidence_class_counts": dict(sorted(evidence_counts.items())),
+            "coordinate_class_counts": dict(sorted(coordinate_counts.items())),
             "answer_in_source_record_rows": sum(
                 1 for row in rows if row["answer_evidence"]["source_record_strong_match_count"]
             ),
@@ -186,6 +188,13 @@ def _audit_row(
     question_evidence = _evidence(tokens=question_tokens, compile_index=compile_index, min_overlap=2)
     direct_predicates = sorted({predicate for query in scorecard_row.get("queries", []) for predicate in _query_predicates(query)})
     evidence_class = _evidence_class(answer_evidence=answer_evidence, question_evidence=question_evidence)
+    coordinate_class = _coordinate_class(
+        question=question,
+        reference_answer=answer,
+        predicate_hints=direct_predicates,
+        answer_tokens=answer_tokens,
+        question_tokens=question_tokens,
+    )
     return {
         "fixture": fixture,
         "id": str(scorecard_row.get("id", "")),
@@ -195,6 +204,7 @@ def _audit_row(
         "reference_answer": answer,
         "predicate_hints": direct_predicates,
         "evidence_class": evidence_class,
+        "coordinate_class": coordinate_class,
         "answer_tokens": sorted(answer_tokens),
         "question_tokens": sorted(question_tokens),
         "answer_evidence": answer_evidence,
@@ -247,6 +257,46 @@ def _evidence_class(*, answer_evidence: dict[str, Any], question_evidence: dict[
     if question_source:
         return "question_surface_present_without_answer_match"
     return "no_obvious_source_match"
+
+
+def _coordinate_class(
+    *,
+    question: str,
+    reference_answer: str,
+    predicate_hints: list[str],
+    answer_tokens: set[str],
+    question_tokens: set[str],
+) -> str:
+    """Classify the answer-bearing shape without naming fixture content."""
+
+    semantic_hints = [
+        hint for hint in predicate_hints if hint != "memberchk" and not hint.startswith("source_record")
+    ]
+    text = " ".join([question, reference_answer, *semantic_hints]).lower().replace("_", " ")
+    tokens = set(question_tokens) | set(answer_tokens) | set(WORD_RE.findall(" ".join(semantic_hints).lower()))
+    if _has_any(text, ("how many", "how long", "elapsed", "total", "count", "number", "minutes", "hours", "amount", "rate", "percentage")):
+        return "quantity_or_duration"
+    if _has_any(text, ("according to", "source", "document", "packet", "report", "memo", "order", "section", "bench notes", "which document", "ticket", "identifier")):
+        return "source_reference"
+    if _has_any(text, ("status", "current", "condition", "active", "pending", "closed", "resolved", "unresolved", "authorized", "approved", "denied")):
+        return "status_or_state"
+    if _has_any(text, ("can ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
+        return "rule_or_authority_application"
+    if _has_any(text, ("when", "what date", "date", "deadline", "scheduled", "window", "as of", "on what date")):
+        return "date_time_or_interval"
+    if _has_any(text, ("where", "located", "location", "custody", "retained", "stored", "cabinet", "vault", "room")):
+        return "location_or_custody"
+    if _has_any(text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds")):
+        return "identity_or_role"
+    if _has_any(text, ("why", "reason", "basis", "because", "rationale", "explain", "waive", "exception", "ambiguity")):
+        return "rationale_or_exception"
+    if tokens & {"list", "all", "which"}:
+        return "set_or_list_membership"
+    return "other_answer_bearing_detail"
+
+
+def _has_any(text: str, needles: tuple[str, ...]) -> bool:
+    return any(needle in text for needle in needles)
 
 
 def _compile_index(payload: dict[str, Any]) -> dict[str, Any]:
@@ -395,14 +445,15 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- Rows audited: `{summary.get('row_count', 0)}`",
             f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
             f"- Evidence classes: `{summary.get('evidence_class_counts', {})}`",
+            f"- Coordinate classes: `{summary.get('coordinate_class_counts', {})}`",
             f"- Answer present in source_record rows: `{summary.get('answer_in_source_record_rows', 0)}`",
             f"- Answer present in direct rows: `{summary.get('answer_in_direct_rows', 0)}`",
             f"- Question terms present in source_record rows: `{summary.get('question_terms_in_source_record_rows', 0)}`",
             "",
             "## Rows",
             "",
-            "| Fixture | Row | Verdict | Surface | Evidence Class | Source Answer Matches | Direct Answer Matches | Question |",
-            "| --- | --- | --- | --- | --- | ---: | ---: | --- |",
+            "| Fixture | Row | Verdict | Surface | Evidence Class | Coordinate | Source Answer Matches | Direct Answer Matches | Question |",
+            "| --- | --- | --- | --- | --- | --- | ---: | ---: | --- |",
         ]
     )
     for row in report.get("rows", []):
@@ -411,6 +462,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         lines.append(
             f"| `{row.get('fixture', '')}` | `{row.get('id', '')}` | `{row.get('verdict', '')}` | "
             f"`{row.get('failure_surface', '')}` | `{row.get('evidence_class', '')}` | "
+            f"`{row.get('coordinate_class', '')}` | "
             f"`{answer.get('source_record_strong_match_count', 0)}` | "
             f"`{answer.get('direct_strong_match_count', 0)}` | {question} |"
         )
