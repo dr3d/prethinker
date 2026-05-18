@@ -57,9 +57,11 @@ class RetrievalConstrainedPaletteAuditTests(unittest.TestCase):
             report = run_audit(
                 compile_paths=[root / "compile"],
                 boundary_plan=boundary,
+                source_gap_audit=None,
                 fixtures={"fixture_a"},
                 failure_surfaces={"compile_surface_gap"},
                 k_values=[1],
+                registry_scope="global",
             )
 
         self.assertEqual(report["summary_by_k"]["1"]["verdict_counts"], {"schema_recalled": 1})
@@ -113,9 +115,11 @@ class RetrievalConstrainedPaletteAuditTests(unittest.TestCase):
             report = run_audit(
                 compile_paths=[root / "compile"],
                 boundary_plan=boundary,
+                source_gap_audit=None,
                 fixtures={"fixture_a"},
                 failure_surfaces={"compile_surface_gap"},
                 k_values=[1],
+                registry_scope="global",
             )
 
         self.assertEqual(report["summary_by_k"]["1"]["verdict_counts"], {"missed_schema": 1})
@@ -169,9 +173,11 @@ class RetrievalConstrainedPaletteAuditTests(unittest.TestCase):
             report = run_audit(
                 compile_paths=[root / "compile"],
                 boundary_plan=boundary,
+                source_gap_audit=None,
                 fixtures={"fixture_a"},
                 failure_surfaces={"compile_surface_gap"},
                 k_values=[1],
+                registry_scope="global",
             )
 
         self.assertEqual(

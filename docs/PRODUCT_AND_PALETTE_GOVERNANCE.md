@@ -173,17 +173,24 @@ unstable native no-helper fixtures from the latest stamp-candidate run. Scope:
 49 boundary rows, 948 candidate registry signatures, `k=5/10/20`, no compiler
 behavior change.
 
-At `k=20`:
+With the whole global registry, `k=20` was weak:
 
 - exact schema recalled: 18 / 49;
 - family recalled but exact schema missed: 11 / 49;
 - missed schema: 18 / 49;
 - no non-source predicate hint: 2 / 49.
 
-Increasing from `k=10` to `k=20` did not improve exact recall. That means the
-first retriever is limited by context and metadata, not just by candidate set
-size. The coordinate-level proxy is useful enough to expose the pressure, but
-not strong enough to govern canonical row admission.
+That first result looked poor because the retrieval space was wrong. When the
+same audit was scoped to the active fixture/profile candidate palette, `k=20`
+recalled the exact hinted schema for 46 / 49 rows without source-gap context.
+Adding source-gap evidence recalled 45 / 49 rows. The immediate lesson is that
+profile-local palette scoping matters more than simply enlarging top-k or
+searching the global registry.
+
+The coordinate-level proxy is useful enough to expose the pressure, but not
+strong enough to govern canonical row admission by itself. It measures whether
+the right schema is recoverable from existing candidate palettes; it does not
+yet prove that span-level constrained decoding would preserve QA.
 
 The next experiment should add one of these before constrained emission:
 

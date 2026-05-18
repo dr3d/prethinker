@@ -146,7 +146,44 @@ def _load_boundary_rows(path: Path) -> list[dict[str, Any]]:
     return []
 
 
-def _context_tokens(row: dict[str, Any]) -> set[str]:
+def _load_source_gap_context(path: Path | None) -> dict[tuple[str, str], dict[str, Any]]:
+    if path is None:
+        return {}
+    resolved = path if path.is_absolute() else (REPO_ROOT / path).resolve()
+    if not resolved.exists():
+        return {}
+    payload = json.loads(resolved.read_text(encoding="utf-8-sig"))
+    out: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in payload.get("rows", []) if isinstance(payload.get("rows"), list) else []:
+        if not isinstance(row, dict):
+            continue
+        fixture = str(row.get("fixture", ""))
+        qid = str(row.get("id", ""))
+        if fixture and qid:
+            out[(fixture, qid)] = row
+    return out
+
+
+def _source_gap_tokens(row: dict[str, Any]) -> set[str]:
+    tokens = set()
+    for field in ("reference_answer", "evidence_class"):
+        tokens |= _tokens(row.get(field))
+    for evidence_key in ("answer_evidence", "question_evidence"):
+        evidence = row.get(evidence_key)
+        if not isinstance(evidence, dict):
+            continue
+        for match_key in ("source_record_matches", "direct_matches"):
+            for match in evidence.get(match_key, []) if isinstance(evidence.get(match_key), list) else []:
+                if not isinstance(match, dict):
+                    continue
+                tokens |= _tokens(match.get("predicate"))
+                tokens |= _tokens(match.get("fact"))
+                for overlap in match.get("overlap", []) if isinstance(match.get("overlap"), list) else []:
+                    tokens |= _tokens(overlap)
+    return tokens
+
+
+def _context_tokens(row: dict[str, Any], source_gap_row: dict[str, Any] | None = None) -> set[str]:
     values = [
         row.get("question", ""),
         row.get("rationale", ""),
@@ -159,6 +196,8 @@ def _context_tokens(row: dict[str, Any]) -> set[str]:
     tokens: set[str] = set()
     for value in values:
         tokens |= _tokens(value)
+    if source_gap_row:
+        tokens |= _source_gap_tokens(source_gap_row)
     return tokens
 
 
@@ -231,11 +270,14 @@ def run_audit(
     *,
     compile_paths: list[Path],
     boundary_plan: Path,
+    source_gap_audit: Path | None,
     fixtures: set[str],
     failure_surfaces: set[str],
     k_values: list[int],
+    registry_scope: str,
 ) -> dict[str, Any]:
     registry, compile_by_fixture = _load_registry(compile_paths)
+    source_gap_context = _load_source_gap_context(source_gap_audit)
     boundary_rows = _load_boundary_rows(boundary_plan)
     selected = []
     for row in boundary_rows:
@@ -251,13 +293,23 @@ def run_audit(
     by_k: dict[str, Counter[str]] = {str(k): Counter() for k in k_values}
     category_spread: dict[str, list[int]] = {str(k): [] for k in k_values}
     for row in selected:
-        context = _context_tokens(row)
+        fixture = str(row.get("fixture", ""))
+        qid = str(row.get("id", ""))
+        source_gap_row = source_gap_context.get((fixture, qid))
+        context = _context_tokens(row, source_gap_row)
         targets = _target_categories(context)
         hint_signatures = _hint_signatures(row, registry)
+        scoped_registry = registry
+        if registry_scope == "fixture":
+            scoped_registry = {
+                signature: entry
+                for signature, entry in registry.items()
+                if fixture in entry.fixtures
+            }
         scored = sorted(
             (
                 (_score(entry, context, targets), signature)
-                for signature, entry in registry.items()
+                for signature, entry in scoped_registry.items()
             ),
             key=lambda item: (-item[0], item[1]),
         )
@@ -281,6 +333,8 @@ def run_audit(
                 "compile_surface_class": row.get("compile_surface_class", ""),
                 "hybrid_join_class": row.get("hybrid_join_class", ""),
                 "context_categories": sorted(targets),
+                "context_token_count": len(context),
+                "source_gap_context": bool(source_gap_row),
                 "hint_signatures": sorted(hint_signatures),
                 "k_results": k_results,
                 "question": row.get("question", ""),
@@ -308,6 +362,8 @@ def run_audit(
             "to source spans, so this measures boundary-coordinate retrieval against candidate palettes, not final "
             "span-level constrained decoding."
         ),
+        "registry_scope": registry_scope,
+        "source_gap_context_rows": len(source_gap_context),
         "registry_signature_count": len(registry),
         "compile_fixture_count": len(compile_by_fixture),
         "selected_fixture_count": len(fixtures) if fixtures else len(set(row.get("fixture", "") for row in selected)),
@@ -389,6 +445,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--compile-json", action="append", type=Path, default=[])
     parser.add_argument("--boundary-plan-json", type=Path, required=True)
+    parser.add_argument("--source-gap-audit-json", type=Path)
     parser.add_argument("--fixture", action="append", default=[])
     parser.add_argument(
         "--failure-surface",
@@ -396,6 +453,7 @@ def main() -> int:
         default=["compile_surface_gap", "hybrid_join_gap", "query_surface_gap"],
     )
     parser.add_argument("--k", action="append", type=int, default=[5, 10, 20])
+    parser.add_argument("--registry-scope", choices=["global", "fixture"], default="fixture")
     parser.add_argument("--out-json", type=Path, required=True)
     parser.add_argument("--out-md", type=Path)
     args = parser.parse_args()
@@ -404,9 +462,11 @@ def main() -> int:
     report = run_audit(
         compile_paths=args.compile_json,
         boundary_plan=boundary_plan,
+        source_gap_audit=args.source_gap_audit_json,
         fixtures={str(item) for item in args.fixture if str(item).strip()},
         failure_surfaces={str(item) for item in args.failure_surface if str(item).strip()},
         k_values=sorted({int(k) for k in args.k if int(k) > 0}),
+        registry_scope=str(args.registry_scope),
     )
     out_json = args.out_json if args.out_json.is_absolute() else (REPO_ROOT / args.out_json).resolve()
     out_json.parent.mkdir(parents=True, exist_ok=True)

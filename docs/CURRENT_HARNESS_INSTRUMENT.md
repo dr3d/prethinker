@@ -401,12 +401,14 @@ Recent transfer work supports the current direction:
   teaching the harness fixture vocabulary.
 - Retrieval-constrained palette grounding is now an audit-only experiment, not
   active compiler behavior. A first coordinate-level proxy on six unstable
-  native no-helper fixtures recalled the exact hinted schema for 18 of 49
-  boundary rows at `k=20`, found a sibling/family schema but missed the exact
-  schema for 11 rows, missed 18 rows, and had 2 rows without non-source hints.
-  The result says top-k gating is plausible but not ready for admission: the
-  next layer needs source-span attachment, richer registry metadata, or
-  multi-draw palette consensus before constrained emission.
+  native no-helper fixtures showed that retrieval scope is the load-bearing
+  variable. Searching the global 948-signature registry recalled only 18 of 49
+  exact hinted schemas at `k=20`; scoping retrieval to the active fixture/profile
+  candidate palette recalled 46 of 49. Source-gap evidence did not beat
+  fixture/profile scoping in this proxy. The result says top-k gating is
+  plausible but not ready for admission: the next layer needs source-span
+  attachment, richer registry metadata, or multi-draw palette consensus before
+  constrained emission.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
