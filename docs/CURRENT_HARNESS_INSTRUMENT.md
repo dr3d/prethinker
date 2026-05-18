@@ -332,6 +332,19 @@ Recent transfer work supports the current direction:
   at 39/0/1, one dense custody/title/access probe at 34/1/5, and one dense
   probate/access probe at 36/0/4. The remaining pressure is concrete
   compile-surface coverage, not helper resurrection or looser gates.
+- A six-fixture stranded-source promotion slice tested whether recent
+  compile-surface invariants move the largest native gap class before a full
+  stamp. Against the prior native no-helper stamp on the same fixtures, QA
+  moved from 196/6/38 to 215/4/21 over 240 questions, with helper rows still
+  zero and compile-surface gaps dropping from 35 to 18. The slice is not a
+  stamp, because two compiles carried caveats, but it is strong directional
+  evidence that source-record promotion and quality-gate calibration are
+  reducing real native misses. A source-surface audit on the new slice still
+  found 9 compile-surface rows where answer text remains stranded only in
+  source-record rows, so the next repair target is narrower than "more
+  helpers": promote recurring source-stated identity, role, location, status,
+  and document-reference values into direct surfaces without copying fixture
+  vocabulary.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
