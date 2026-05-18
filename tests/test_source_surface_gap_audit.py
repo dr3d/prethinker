@@ -201,3 +201,62 @@ def test_source_surface_gap_audit_classifies_coordinate_shapes(tmp_path) -> None
         "source_reference": 1,
         "status_or_state": 1,
     }
+
+
+def test_source_surface_gap_audit_splits_quantity_detail_shapes(tmp_path) -> None:
+    compile_json = tmp_path / "compile.json"
+    compile_json.write_text(
+        """
+        {
+          "source_compile": {
+            "facts": [
+              "source_record_text_atom(src_line_1, awarded_19_fellowships).",
+              "source_record_text_atom(src_line_2, filing_was_40_hours_after_scan).",
+              "source_record_text_atom(src_line_3, rate_is_75_percent_of_standard_assessment).",
+              "source_record_text_atom(src_line_4, seal_numbers_seal_001_through_seal_003)."
+            ],
+            "rules": []
+          }
+        }
+        """,
+        encoding="utf-8",
+    )
+    qa_json = tmp_path / "qa.json"
+    qa_json.write_text(
+        """
+        {
+          "rows": [
+            {"id": "q001", "utterance": "How many fellowships were awarded?", "reference_answer": "19 fellowships."},
+            {"id": "q002", "utterance": "Was the filing timely within the deadline?", "reference_answer": "No, it was 40 hours after the scan."},
+            {"id": "q003", "utterance": "What assessment rate applies?", "reference_answer": "75 percent of the standard assessment."},
+            {"id": "q004", "utterance": "What seal numbers are recorded?", "reference_answer": "SEAL-001 through SEAL-003."}
+          ]
+        }
+        """,
+        encoding="utf-8",
+    )
+    scorecard = {
+        "artifacts": [
+            {
+                "label": "unlike_fixture",
+                "path": str(qa_json),
+                "run_json": str(compile_json),
+                "non_exact_rows": [
+                    {"id": "q001", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "How many fellowships were awarded?", "queries": []},
+                    {"id": "q002", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "Was the filing timely within the deadline?", "queries": []},
+                    {"id": "q003", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What assessment rate applies?", "queries": []},
+                    {"id": "q004", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What seal numbers are recorded?", "queries": []},
+                ],
+            }
+        ]
+    }
+
+    report = audit_scorecard(scorecard)
+
+    assert report["summary"]["coordinate_class_counts"] == {"quantity_or_duration": 4}
+    assert report["summary"]["coordinate_detail_class_counts"] == {
+        "count_or_total": 1,
+        "deadline_or_duration_arithmetic": 1,
+        "identifier_range_or_sequence": 1,
+        "monetary_rate_or_amount": 1,
+    }

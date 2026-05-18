@@ -146,6 +146,11 @@ def audit_scorecard(
 
     evidence_counts = Counter(str(row.get("evidence_class", "")) for row in rows)
     coordinate_counts = Counter(str(row.get("coordinate_class", "")) for row in rows)
+    coordinate_detail_counts = Counter(
+        str(row.get("coordinate_detail_class", ""))
+        for row in rows
+        if str(row.get("coordinate_detail_class", ""))
+    )
     surface_counts = Counter(str(row.get("failure_surface", "")) for row in rows)
     return {
         "schema_version": "source_surface_gap_audit_v1",
@@ -161,6 +166,7 @@ def audit_scorecard(
             "failure_surface_counts": dict(sorted(surface_counts.items())),
             "evidence_class_counts": dict(sorted(evidence_counts.items())),
             "coordinate_class_counts": dict(sorted(coordinate_counts.items())),
+            "coordinate_detail_class_counts": dict(sorted(coordinate_detail_counts.items())),
             "answer_in_source_record_rows": sum(
                 1 for row in rows if row["answer_evidence"]["source_record_strong_match_count"]
             ),
@@ -195,6 +201,14 @@ def _audit_row(
         answer_tokens=answer_tokens,
         question_tokens=question_tokens,
     )
+    coordinate_detail_class = _coordinate_detail_class(
+        coordinate_class=coordinate_class,
+        question=question,
+        reference_answer=answer,
+        predicate_hints=direct_predicates,
+        answer_tokens=answer_tokens,
+        question_tokens=question_tokens,
+    )
     return {
         "fixture": fixture,
         "id": str(scorecard_row.get("id", "")),
@@ -205,6 +219,7 @@ def _audit_row(
         "predicate_hints": direct_predicates,
         "evidence_class": evidence_class,
         "coordinate_class": coordinate_class,
+        "coordinate_detail_class": coordinate_detail_class,
         "answer_tokens": sorted(answer_tokens),
         "question_tokens": sorted(question_tokens),
         "answer_evidence": answer_evidence,
@@ -273,26 +288,117 @@ def _coordinate_class(
         hint for hint in predicate_hints if hint != "memberchk" and not hint.startswith("source_record")
     ]
     text = " ".join([question, reference_answer, *semantic_hints]).lower().replace("_", " ")
+    question_text = str(question or "").lower().replace("_", " ")
+    answer_text = str(reference_answer or "").lower().replace("_", " ")
     tokens = set(question_tokens) | set(answer_tokens) | set(WORD_RE.findall(" ".join(semantic_hints).lower()))
-    if _has_any(text, ("how many", "how long", "elapsed", "total", "count", "number", "minutes", "hours", "amount", "rate", "percentage")):
+    if _has_any(
+        question_text,
+        (
+            "how many",
+            "how long",
+            "what percentage",
+            "what percent",
+            "what rate",
+            "assessment rate",
+            "what amount",
+            "total additional",
+            "total harvest",
+            "what seal numbers",
+            "license number",
+            "motion number",
+            "timely",
+            "deadline",
+            "duration",
+            "on time",
+        ),
+    ):
         return "quantity_or_duration"
-    if _has_any(text, ("according to", "source", "document", "packet", "report", "memo", "order", "section", "bench notes", "which document", "ticket", "identifier")):
+    if _has_any(question_text, ("according to", "source", "document", "packet", "report", "memo", "order", "section", "bench notes", "which document", "ticket", "identifier")):
         return "source_reference"
-    if _has_any(text, ("status", "current", "condition", "active", "pending", "closed", "resolved", "unresolved", "authorized", "approved", "denied")):
+    if _has_any(question_text, ("status", "current", "condition", "active", "pending", "closed", "resolved", "unresolved", "authorized", "approved", "denied")):
         return "status_or_state"
-    if _has_any(text, ("can ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
+    if _has_any(question_text, ("can ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
         return "rule_or_authority_application"
-    if _has_any(text, ("when", "what date", "date", "deadline", "scheduled", "window", "as of", "on what date")):
+    if _has_any(question_text, ("when", "what date", "date", "deadline", "scheduled", "window", "as of", "on what date")):
         return "date_time_or_interval"
-    if _has_any(text, ("where", "located", "location", "custody", "retained", "stored", "cabinet", "vault", "room")):
+    if _has_any(question_text, ("where", "located", "location", "custody", "retained", "stored", "cabinet", "vault", "room")):
         return "location_or_custody"
-    if _has_any(text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds")):
+    if _has_any(question_text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds")):
         return "identity_or_role"
-    if _has_any(text, ("why", "reason", "basis", "because", "rationale", "explain", "waive", "exception", "ambiguity")):
+    if _has_any(
+        " ".join([question_text, answer_text]),
+        ("how many", "how long", "elapsed", "total", "count", "number", "minutes", "hours", "amount", "rate", "percentage"),
+    ):
+        return "quantity_or_duration"
+    if _has_any(question_text, ("why", "reason", "basis", "because", "rationale", "explain", "waive", "exception", "ambiguity")):
         return "rationale_or_exception"
     if tokens & {"list", "all", "which"}:
         return "set_or_list_membership"
     return "other_answer_bearing_detail"
+
+
+def _coordinate_detail_class(
+    *,
+    coordinate_class: str,
+    question: str,
+    reference_answer: str,
+    predicate_hints: list[str],
+    answer_tokens: set[str],
+    question_tokens: set[str],
+) -> str:
+    """Split broad coordinate classes into repair-relevant subshapes."""
+
+    if coordinate_class != "quantity_or_duration":
+        return ""
+    qa_text = " ".join([question, reference_answer]).lower().replace("_", " ")
+    qa_tokens = set(question_tokens) | set(answer_tokens)
+    has_number = bool(re.search(r"(?:^|[^a-z])(?:\d+|\$|£|€|%)(?:[^a-z]|$)", qa_text))
+    if _has_any(qa_text, ("seal", "serial", "range", "through")) and (
+        "number" in qa_tokens or "numbers" in qa_tokens or has_number
+    ):
+        return "identifier_range_or_sequence"
+    if _has_any(qa_text, ("license number", "motion number", "case number", "file number")):
+        return "identifier_range_or_sequence"
+    if _has_any(qa_text, ("how many", "number of")) and not (qa_tokens & {"minutes", "minute", "hours", "hour"}):
+        return "count_or_total"
+    deadline_tokens = {
+        "timely",
+        "deadline",
+        "elapsed",
+        "window",
+        "duration",
+        "hours",
+        "hour",
+        "minutes",
+        "minute",
+        "late",
+    }
+    if qa_tokens & deadline_tokens or _has_any(qa_text, ("how long", "on time", "past 22:00", "days before", "days after")):
+        return "deadline_or_duration_arithmetic"
+    monetary_tokens = {
+        "amount",
+        "budget",
+        "revenue",
+        "rate",
+        "assessment",
+        "cost",
+        "fund",
+        "funds",
+        "funding",
+        "percent",
+        "percentage",
+        "dollars",
+        "unit",
+    }
+    if re.search(r"[$£€]|\b\d+(?:\.\d+)?\s*%", qa_text) or qa_tokens & monetary_tokens or "per unit" in qa_text:
+        return "monetary_rate_or_amount"
+    if _has_any(qa_text, ("change", "changed", "increase", "decrease", "difference", "delta", "same total")):
+        return "quantity_comparison_or_delta"
+    if _has_any(qa_text, ("how many", "count", "number of", "total", "different", "awarded", "violations", "members")):
+        return "count_or_total"
+    if not has_number:
+        return "scoped_availability_or_permission"
+    return "other_quantity_or_duration"
 
 
 def _has_any(text: str, needles: tuple[str, ...]) -> bool:
@@ -446,14 +552,15 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
             f"- Evidence classes: `{summary.get('evidence_class_counts', {})}`",
             f"- Coordinate classes: `{summary.get('coordinate_class_counts', {})}`",
+            f"- Coordinate detail classes: `{summary.get('coordinate_detail_class_counts', {})}`",
             f"- Answer present in source_record rows: `{summary.get('answer_in_source_record_rows', 0)}`",
             f"- Answer present in direct rows: `{summary.get('answer_in_direct_rows', 0)}`",
             f"- Question terms present in source_record rows: `{summary.get('question_terms_in_source_record_rows', 0)}`",
             "",
             "## Rows",
             "",
-            "| Fixture | Row | Verdict | Surface | Evidence Class | Coordinate | Source Answer Matches | Direct Answer Matches | Question |",
-            "| --- | --- | --- | --- | --- | --- | ---: | ---: | --- |",
+            "| Fixture | Row | Verdict | Surface | Evidence Class | Coordinate | Detail | Source Answer Matches | Direct Answer Matches | Question |",
+            "| --- | --- | --- | --- | --- | --- | --- | ---: | ---: | --- |",
         ]
     )
     for row in report.get("rows", []):
@@ -463,6 +570,7 @@ def render_markdown(report: dict[str, Any]) -> str:
             f"| `{row.get('fixture', '')}` | `{row.get('id', '')}` | `{row.get('verdict', '')}` | "
             f"`{row.get('failure_surface', '')}` | `{row.get('evidence_class', '')}` | "
             f"`{row.get('coordinate_class', '')}` | "
+            f"`{row.get('coordinate_detail_class', '')}` | "
             f"`{answer.get('source_record_strong_match_count', 0)}` | "
             f"`{answer.get('direct_strong_match_count', 0)}` | {question} |"
         )
