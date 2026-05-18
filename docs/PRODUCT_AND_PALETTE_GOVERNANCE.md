@@ -248,6 +248,22 @@ The response path should stay audit-first:
 - reserve multi-draw consensus for rows that survive schema and slot checks;
 - route unstable or novel schemas to residue instead of canonical state.
 
+The first registry-mode calibration on the same three probes supports a soft
+prior rather than a hard freeze. Intersection was too thin, union was too broad,
+and a majority threshold gave the most plausible vocabulary scaffold:
+
+| Probe type | Intersection | Majority threshold | Union |
+| --- | ---: | ---: | ---: |
+| sensor/time correction | 2 | 9 | 61 |
+| authority/variance | 2 | 10 | 40 |
+| narrative machine | 5 | 11 | 29 |
+
+The architectural lesson is not "admit majority rows." The lesson is that
+repeated candidate signatures can provide a vocabulary prior for a future draw.
+The prior should bias or retry schema selection while still requiring source
+support, slot validity, and direct-row delivery before anything becomes
+canonical state.
+
 ## Design Notes To Preserve
 
 The palette registry will need richer metadata than predicate name and arity:

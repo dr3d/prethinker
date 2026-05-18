@@ -435,6 +435,12 @@ Recent transfer work supports the current direction:
   blunt. The next architectural response should be audit-first palette
   stabilization: profile-local retrieval, multi-draw palette priors, or
   targeted retry when high-value schemas are offered inconsistently.
+- Registry-mode calibration on the same three probes split the options:
+  intersection registries were too sparse (2, 2, and 5 signatures), union
+  registries were too broad (61, 40, and 29 signatures), and majority-threshold
+  registries were the plausible middle (9, 10, and 11 signatures). Majority
+  signatures are not facts and do not earn admission by repetition. They are
+  candidate vocabulary priors for later constrained compile or retry tests.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
