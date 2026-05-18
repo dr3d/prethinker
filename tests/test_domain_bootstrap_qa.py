@@ -2608,6 +2608,37 @@ def test_source_text_filter_over_source_id_adds_source_slot_fallback() -> None:
     assert fallback[0]["query"] == "asset_status(SourceSlot1, SourceSlot2, crq_31)."
 
 
+def test_source_identifier_fallback_rows_feed_temporal_join_context() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "document_type(ccl_5, cold_chain_log).",
+        "event_end(evt_temp_check_f12, 2026_06_11t08_10, ccl_5).",
+        "event_start(evt_alarm_f12, 2026_06_11t09_02, af_5).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        [
+            "event_start(evt_temp_check_f12, Starttime, ccl_5).",
+            "event_start(evt_alarm_f12, Endtime, af_5).",
+            "elapsed_minutes(Starttime, Endtime, Minutes).",
+        ],
+        helper_companions_enabled=False,
+    )
+
+    joined = [
+        item
+        for item in results
+        if "elapsed_minutes" in item.get("query", "")
+        and item.get("result", {}).get("status") == "success"
+    ]
+    assert joined
+    assert joined[-1]["result"]["rows"] == [
+        {"Starttime": "2026_06_11t08_10", "Endtime": "2026_06_11t09_02", "Minutes": "52"}
+    ]
+
+
 def test_relaxed_constant_query_filters_token_subset_matches() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

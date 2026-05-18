@@ -391,6 +391,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal helpers with unbound invented lowercase constants.",
         "For duration questions asking how long an entity was inside, active, held, processing, in custody, offline, or otherwise in a named interval/state, bind the start-event and end-event timestamp variables first, then call elapsed_minutes(StartTime, EndTime, Minutes). If the KB has event-description or event-type rows for start/end, ingress/egress, opened/closed, began/ended, or entered/exited labels, query those rows with shared event variables before the temporal helper. Never call elapsed_minutes(start, end, duration) with lowercase placeholders.",
         "For within-window or deadline-compliance questions, retrieve three pieces before computing: the start event/time, the target event/time, and the policy deadline/interval. Then call elapsed_minutes/3, elapsed_hours/3, or add_hours/3 with those bound variables. Do not ask a temporal helper with an unbound Starttime if the relevant start event predicate exists in the compiled inventory.",
+        "For elapsed-time questions between two named event descriptions, do not emit only a broad event_start(Event, Time, Source) scan followed by elapsed_minutes(X, Y, Z). Bind the start and end timestamps with separate event/status/source queries first, using distinct variables such as StartTime and EndTime, then call elapsed_minutes(StartTime, EndTime, Minutes).",
         "When a question asks elapsed time between a derived threshold moment and a later event, compute the threshold moment with add_hours(StartTime, ThresholdHours, ThresholdTime) before calling elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 over elapsed_hours/3 unless the question explicitly requires whole hours only.",
         "For inspection-current or validity-window questions expressed in days, retrieve the inspection row and authorization row with shared variables, then call elapsed_days(InspectionDate, AuthorizationTime, ElapsedDays). Do not use add_hours/3 with a days-validity value.",
         "For questions asking when an advisory testing interval takes effect, ends, or reverts to normal, query both the interval rule and the advisory state event: testing_interval(contamination_advisory, Hours) or testing_interval(declared_contamination_advisory, Hours), plus contamination_advisory(triggered, StartTime) or contamination_advisory(lifted, EndTime).",
@@ -2241,13 +2242,17 @@ def run_query_plan(
                     include_legacy_native_helpers=include_legacy_native_helpers,
                 )
             )
-            results.extend(
-                _source_identifier_slot_fallback_queries(
-                    runtime,
-                    query=query,
-                    source_constants=[str(item) for item in source_record_filter.get("needles", [])],
-                )
+            source_slot_fallbacks = _source_identifier_slot_fallback_queries(
+                runtime,
+                query=query,
+                source_constants=[str(item) for item in source_record_filter.get("needles", [])],
             )
+            if source_slot_fallbacks:
+                results.extend(source_slot_fallbacks)
+                for fallback_item in source_slot_fallbacks:
+                    fallback_query = str(fallback_item.get("query", "")).strip()
+                    if fallback_query and fallback_query not in previous_queries:
+                        previous_queries.append(fallback_query)
             continue
         post_filter = _single_goal_post_filter_repair(query)
         if post_filter:
@@ -2413,6 +2418,10 @@ def run_query_plan(
             source_slot_fallbacks = _source_identifier_slot_fallback_queries(runtime, query=effective_query)
             if source_slot_fallbacks:
                 results.extend(source_slot_fallbacks)
+                for fallback_item in source_slot_fallbacks:
+                    fallback_query = str(fallback_item.get("query", "")).strip()
+                    if fallback_query and fallback_query not in previous_queries:
+                        previous_queries.append(fallback_query)
                 last_result = source_slot_fallbacks[-1].get("result", {})
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
@@ -14063,9 +14072,10 @@ def _source_identifier_slot_fallback_queries(
     text = str(query or "").strip()
     parsed = parse_prolog_query(text)
     original_predicate = ""
+    original_args: list[str] = []
     if parsed is not None:
-        original_predicate, args = parsed
-        source_identifiers = _source_identifier_constants(runtime, args)
+        original_predicate, original_args = parsed
+        source_identifiers = _source_identifier_constants(runtime, original_args)
     elif source_constants is not None:
         source_identifiers = _source_identifier_constants(runtime, source_constants)
     else:
@@ -14096,8 +14106,16 @@ def _source_identifier_slot_fallback_queries(
             for slot in slot_order:
                 if len(out) >= max_results:
                     break
-                fallback_args = [f"SourceSlot{index}" for index in range(1, arity + 1)]
-                fallback_args[slot - 1] = source_constant
+                if (
+                    original_args
+                    and len(original_args) == arity
+                    and slot <= len(original_args)
+                    and str(original_args[slot - 1]).strip() == source_constant
+                ):
+                    fallback_args = list(original_args)
+                else:
+                    fallback_args = [f"SourceSlot{index}" for index in range(1, arity + 1)]
+                    fallback_args[slot - 1] = source_constant
                 fallback_query = format_prolog_query(predicate, fallback_args)
                 if fallback_query in seen_queries:
                     continue
