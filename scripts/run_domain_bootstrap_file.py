@@ -1088,6 +1088,7 @@ def main() -> int:
     if isinstance(parsed, dict) and bool(args.compile_source) and bool(args.source_record_ledger):
         extension_rows = [
             _ensure_repeated_structure_predicates(parsed),
+            _ensure_source_authority_predicate(parsed, source_text=source_text),
             _ensure_source_detail_predicate(parsed),
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
         ]
@@ -2591,6 +2592,102 @@ def _ensure_repeated_structure_predicates(parsed_profile: dict[str, Any]) -> dic
         "added": False,
         "reason": "all_repeated_structure_predicates_already_present",
     }
+
+
+SOURCE_AUTHORITY_TEXT_RE = re.compile(
+    r"\b(?:only\s+(?:the\s+)?[a-z][a-z\s_-]{0,40}\s+(?:may|can|must|is_authorized_to|is_authorised_to)|"
+    r"authorized\s+by|authorised\s+by|authority|governing\s+(?:rule|policy|source)|"
+    r"(?:court|board|agency|committee|supervisor|director|officer)\s+(?:order|approval|authorization|authorisation))\b",
+    re.IGNORECASE,
+)
+
+
+def _ensure_source_authority_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic source-authority carrier for explicit authority constraints.
+
+    This is vocabulary-only. It gives the compiler a direct surface for source
+    text that states which authority, source, or rule governs an action/scope,
+    without deriving any facts from that text in Python.
+    """
+
+    if not SOURCE_AUTHORITY_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_source_authority_extension_v1",
+            "added": False,
+            "reason": "no_explicit_source_authority_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_source_authority_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_source_authority_carrier(signatures):
+        return {
+            "schema_version": "profile_source_authority_extension_v1",
+            "added": False,
+            "reason": "source_authority_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "source_authority/3",
+            "args": ["subject_id", "authority_or_source", "scope_or_action"],
+            "description": (
+                "Direct source-authority surface for source-stated rules, orders, policies, or authorities "
+                "that govern an action, status, access, finding, deadline, or other scoped decision."
+            ),
+            "why": (
+                "Prevents authority/source constraints from being stranded inside rule text, notes, "
+                "or source-record rows when questions need the governing source and governed scope."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated authority constraints.",
+                "Keep the governed subject/scope, the authority or source, and the authorized action or status joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "source_authority/3" not in provenance:
+        provenance.append("source_authority/3")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added source_authority/3 after explicit authority/source signal.")
+    return {
+        "schema_version": "profile_source_authority_extension_v1",
+        "added": True,
+        "signature": "source_authority/3",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_source_authority_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "access_authority_source/2",
+        "access_authorized_to/3",
+        "access_source/3",
+        "authority_for/3",
+        "authority_source/3",
+        "authorized_by/3",
+        "governing_source/3",
+        "source_authority/3",
+        "source_for_authority/3",
+    }
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"3", "4", "5"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"authority", "authorized", "authorised", "governing"} and tokens & {"source", "rule", "policy", "order", "scope"}:
+            return True
+    return False
 
 
 def _ensure_quantity_event_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:

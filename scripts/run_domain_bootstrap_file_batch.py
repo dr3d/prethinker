@@ -426,6 +426,15 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "line, emit a compatible direct unit that keeps governed subject or item, lifecycle state/action, "
                 "and date or turn joinable. Two-slot status/result rows without the date/event join are shallow."
             )
+        if "source_authority_pair_preservation:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile saw source text where a rule, policy, order, authority, "
+                "or authorized actor governs an action/status/scope, but no direct source-authority surface was "
+                "delivered. In this retry, emit compatible direct source_authority/3 or equivalent rows that keep "
+                "the governed subject or scope, authority/source, and authorized action/status joinable. A rule "
+                "description, note, docket text, or source_record row is additive only and must not be the only "
+                "carrier for an explicit authority constraint."
+            )
     return lines
 
 

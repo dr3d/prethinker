@@ -286,6 +286,22 @@ Recent transfer work supports the current direction:
   (28/3/9 to 29/3/8), while a variance/hearing fixture regressed under a fresh
   compile draw (28/1/11 to 23/4/13). Treat the repair as proven for hidden
   repeated-structure palettes, not as a universal compile-stability solution.
+- The variance/hearing regression isolated a different layer: predicate
+  palette instability. Three fresh compile-only draws produced only 2 common
+  candidate signatures out of 40 union signatures, 38 unstable signatures, and
+  371 unstable direct facts. A vocabulary-only multi-draw palette registry
+  replay then recovered the fixture to 30/3/7 with helpers still off and
+  compile-surface gaps down to 8. This is evidence for a control-plane
+  response path: use multi-draw palette priors to stabilize ontology choice
+  without supplying facts, answers, expected rows, or source authority.
+- Source-authority preservation is now a bounded vocabulary/delivery contract.
+  When source text explicitly says a rule, policy, order, or authority governs
+  an action/status/scope, the profile can add `source_authority/3` as
+  vocabulary only. Quality retry then asks the compile to deliver a direct
+  source-authority row instead of leaving the distinction in rule prose or
+  source-record text. On a procedural docket replay, a vocabulary-only palette
+  prior plus source-authority retry cleared the quality hold, emitted direct
+  authority rows, and moved no-helper QA from 31/1/8 to 39/0/1.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
@@ -324,6 +340,7 @@ python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activ
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_OR_DIR> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/compile_surface_stability.json --out-md tmp/compile_surface_stability.md
 python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
+python scripts/run_domain_bootstrap_file_batch.py --fixture <name> --compile-source --compile-flat-plus-plan-passes --source-record-ledger --source-record-ledger-facts --quality-gate --quality-retry-on-hold --profile-registry tmp/profile_palette_registry.json --profile-registry-palette-prior
 ```
 
 Generated run JSON can stay under `tmp/`. Durable scorecard lessons and

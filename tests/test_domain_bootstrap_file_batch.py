@@ -195,15 +195,18 @@ def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds
             "reasons": [
                 "detail_wrapper_drift:location_backbone_missing_with_wrapper:source_detail",
                 "compile_surface_contract:operational_lifecycle_preservation:ledger_only:source=2:direct=0",
+                "compile_surface_contract:source_authority_pair_preservation:ledger_only:source=1:direct=0",
             ]
         }
     )
 
     assert any("missing location backbone surface" in line for line in lines)
     assert any("complete direct lifecycle units" in line for line in lines)
+    assert any("direct source-authority surface" in line for line in lines)
     joined = "\n".join(lines).casefold()
     assert "fixture" not in joined
     assert "source_detail, event, context, note, or summary row is additive only" in joined
+    assert "rule description, note, docket text, or source_record row is additive only" in joined
 
 
 def test_compile_batch_quality_gate_renders_markdown() -> None:

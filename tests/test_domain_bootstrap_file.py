@@ -19,6 +19,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_with_plan_passes,
     _ensure_quantity_event_predicate,
     _ensure_repeated_structure_predicates,
+    _ensure_source_authority_predicate,
     _ensure_source_detail_predicate,
     _profile_admission_report,
     _profile_admission_retry_context,
@@ -146,6 +147,70 @@ def test_quantity_event_profile_extension_respects_existing_carrier() -> None:
         "added": False,
         "reason": "no_shallow_quantity_event_palette",
     }
+
+
+def test_source_authority_profile_extension_adds_vocabulary_for_explicit_authority() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "rule_condition/3",
+                "args": ["rule_id", "condition", "consequence"],
+                "description": "Rule condition.",
+                "why": "Captures condition/consequence pairs.",
+                "admission_notes": [],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_source_authority_predicate(
+        profile,
+        source_text="Only the judge may grant the extension; stipulations are insufficient without a court order.",
+    )
+
+    assert metadata["added"] is True
+    assert metadata["fact_extraction"] is False
+    assert any(item["signature"] == "source_authority/3" for item in profile["candidate_predicates"])
+    assert "source_authority/3" in profile["provenance_sensitive_predicates"]
+
+
+def test_source_authority_profile_extension_is_not_added_without_signal() -> None:
+    profile = {"candidate_predicates": [], "provenance_sensitive_predicates": [], "self_check": {"notes": []}}
+
+    metadata = _ensure_source_authority_predicate(profile, source_text="The note lists three dates and two amounts.")
+
+    assert metadata == {
+        "schema_version": "profile_source_authority_extension_v1",
+        "added": False,
+        "reason": "no_explicit_source_authority_signal",
+    }
+    assert profile["candidate_predicates"] == []
+
+
+def test_source_authority_profile_extension_respects_existing_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "governing_source/3",
+                "args": ["subject_id", "source_id", "scope"],
+                "description": "Governing source.",
+                "why": "Carries source authority.",
+                "admission_notes": [],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_source_authority_predicate(profile, source_text="The governing rule controls the action.")
+
+    assert metadata == {
+        "schema_version": "profile_source_authority_extension_v1",
+        "added": False,
+        "reason": "source_authority_carrier_present",
+    }
+    assert all(item["signature"] != "source_authority/3" for item in profile["candidate_predicates"])
 
 
 def test_repeated_structure_predicate_extension_admits_property_predicates() -> None:
