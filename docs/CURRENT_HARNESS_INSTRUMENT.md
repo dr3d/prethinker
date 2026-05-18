@@ -271,6 +271,10 @@ Recent transfer work supports the current direction:
   The current quantity-event detector only searches content slots, ignores
   source-line locators, and reports issues when numeric event/log details are
   trapped in generic wrappers without a direct quantity-bearing event carrier.
+  Applied to the 56 compiled native stamp artifacts, the calibrated detector
+  found 10 candidate quantity-rich wrapper queues. That is a repair queue, not
+  a scorecard: each queue still needs replay or transfer evidence before it can
+  become a compile invariant.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate

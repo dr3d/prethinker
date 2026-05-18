@@ -199,6 +199,38 @@ def test_quantity_event_telemetry_ignores_source_line_locators(tmp_path: Path) -
     assert report["summary"]["quantity_event_delivery_issue_count"] == 0
 
 
+def test_quantity_event_telemetry_allows_event_log_source_detail(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_log" / "domain_bootstrap_file_a.json",
+        ["source_detail(event_a, event_log_reading, pressure_value_18_4_kpa, src_line_0013)."],
+        candidate_predicates=["source_detail/4"],
+    )
+
+    report = audit_paths([draw])
+
+    fixture = report["fixtures"][0]
+    telemetry = fixture["delivery_telemetry"][0]
+    assert telemetry["status"] == "not_offered"
+    assert telemetry["numeric_wrapper_counts"] == [1]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 1
+
+
+def test_quantity_event_telemetry_ignores_date_only_event_source_detail(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_date" / "domain_bootstrap_file_a.json",
+        ["source_detail(event_a, release_date, november_2007, src_line_0013)."],
+        candidate_predicates=["source_detail/4"],
+    )
+
+    report = audit_paths([draw])
+
+    fixture = report["fixtures"][0]
+    telemetry = fixture["delivery_telemetry"][0]
+    assert telemetry["status"] == "not_applicable"
+    assert telemetry["numeric_wrapper_counts"] == [0]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 0
+
+
 def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_b" / "domain_bootstrap_file_a.json",

@@ -34,18 +34,26 @@ QUANTITY_EVENT_CARRIER_PREDICATES = {
     "reading_value",
 }
 QUANTITY_EVENT_WRAPPER_PREDICATES = {
-    "description",
     "event_description",
     "event_detail",
     "event_note",
-    "note",
     "source_detail",
 }
-QUANTITY_MARKER_RE = re.compile(
-    r"(?:^|[_\W])(?:\d+(?:[._]\d+)?|kg|min|minute|hour|second|k|kw|percent|ratio|rate|threshold|setpoint|value|duration|offset|score|reading)(?:[_\W]|$)",
+NUMBER_RE = re.compile(r"(?:^|[_\W])\d+(?:[._]\d+)?(?:[_\W]|$)")
+QUANTITY_TERM_RE = re.compile(
+    r"(?:^|[_\W])(?:kg|min|minute|hour|day|days|k|kw|percent|ratio|rate|threshold|setpoint|value|duration|offset|score|reading|acre|acres|sq_ft|foot|feet|unit|units|count|amount|humidity|temperature)(?:[_\W]|$)",
     re.IGNORECASE,
 )
 SOURCE_LOCATOR_RE = re.compile(r"^(?:src|source)?_?line_?\d+$|^l\d+$|^line_?\d+$", re.IGNORECASE)
+EVENT_WRAPPER_CONTEXT_RE = re.compile(
+    r"(?:^|_)(?:event|events|log|logs|reading|readings|measurement|measurements|metric|metrics)(?:_|$)",
+    re.IGNORECASE,
+)
+QUANTITY_FIELD_CONTEXT_RE = re.compile(
+    r"(?:^|_)(?:quantity|measure|measurement|metric|reading|rate|setpoint|threshold|duration|offset|score|count|amount|value)(?:_|$)",
+    re.IGNORECASE,
+)
+DATE_TIME_FIELD_RE = re.compile(r"(?:^|_)(?:date|time|timestamp|year|month|day)(?:_|$)", re.IGNORECASE)
 QUANTITY_EVENT_ISSUE_STATUSES = {"not_offered", "offered_not_delivered", "partially_delivered"}
 
 
@@ -510,7 +518,22 @@ def _is_numeric_event_wrapper(row: dict[str, Any]) -> bool:
     if predicate not in QUANTITY_EVENT_WRAPPER_PREDICATES:
         return False
     text = " ".join(_quantity_content_args(predicate, args))
-    return bool(QUANTITY_MARKER_RE.search(text))
+    if predicate == "source_detail":
+        return bool(NUMBER_RE.search(text) and _source_detail_has_quantity_event_context(args, text))
+    return bool(NUMBER_RE.search(text) and QUANTITY_TERM_RE.search(text))
+
+
+def _source_detail_has_quantity_event_context(args: list[Any], text: str) -> bool:
+    values = [str(arg).strip() for arg in args]
+    if len(values) < 3:
+        return False
+    subject = values[0]
+    field = values[1]
+    if DATE_TIME_FIELD_RE.search(field):
+        return False
+    has_event_context = bool(EVENT_WRAPPER_CONTEXT_RE.search(subject) or EVENT_WRAPPER_CONTEXT_RE.search(field))
+    has_quantity_context = bool(QUANTITY_FIELD_CONTEXT_RE.search(field) or QUANTITY_TERM_RE.search(text))
+    return (has_event_context or has_quantity_context) and has_quantity_context
 
 
 def _quantity_content_args(predicate: str, args: list[Any]) -> list[str]:
