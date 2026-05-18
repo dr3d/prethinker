@@ -310,6 +310,17 @@ Recent transfer work supports the current direction:
   denser custody/access fixtures remained held because source-authority units
   were still partial or ledger-only. That makes dense custody/access authority
   the next diagnostic coordinate, not a reason to weaken the gate.
+- Source-authority audit grammar now recognizes structural equivalents rather
+  than one preferred predicate spelling. Access pairs expressed as
+  `authorized_access/3` plus `access_authority_source/3`, and direct surfaces
+  such as title, custody, publication authority, access authority, and negative
+  authority count as source-authority delivery. Shallow presentation rows still
+  do not count. Replaying the held authority slice without recompilation moved
+  the custody/title/access packet from held to pass, while the probate/access
+  register remained held for lifecycle/state backbone loss. The newly
+  pass-qualified custody packet then scored 34/1/5 with helpers off, showing
+  that detector calibration was necessary but not sufficient; remaining misses
+  are still compile/hybrid resolution pressure.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate

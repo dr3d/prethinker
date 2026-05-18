@@ -716,11 +716,21 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
         for args in by_predicate.get("access_authorized_to", [])
         if len(args) >= 3 and args[0] and args[1] and args[2]
     }
+    authorized_keys.update(
+        (args[0], args[1])
+        for args in by_predicate.get("authorized_access", [])
+        if len(args) >= 3 and args[0] and args[1] and args[2]
+    )
     source_keys = {
         (args[0], args[1])
         for args in by_predicate.get("access_source", [])
         if len(args) >= 3 and args[0] and args[1] and args[2]
     }
+    source_keys.update(
+        (args[0], args[1])
+        for args in by_predicate.get("access_authority_source", [])
+        if len(args) >= 3 and args[0] and args[1] and args[2]
+    )
     for key in sorted(authorized_keys & source_keys):
         complete.add(("access_pair", *key))
     for key in sorted((authorized_keys | source_keys) - (authorized_keys & source_keys)):
@@ -729,7 +739,7 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
     source_by_subject = {
         args[0]
         for args in by_predicate.get("access_authority_source", [])
-        if len(args) >= 2 and args[0] and args[1]
+        if len(args) == 2 and args[0] and args[1]
     }
     party_by_subject = {
         args[0]
@@ -740,6 +750,20 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
         complete.add(("packed_access_authority", subject))
     for subject in sorted((source_by_subject | party_by_subject) - (source_by_subject & party_by_subject)):
         partial.add(("packed_access_authority", subject))
+
+    for predicate in (
+        "access_authority",
+        "publication_authority",
+        "legal_title",
+        "legal_title_holder",
+        "physical_custody",
+        "physical_custodian",
+        "negative_authority",
+        "no_access_for",
+    ):
+        for args in by_predicate.get(predicate, []):
+            if len(args) >= 2 and args[0] and args[1]:
+                complete.add((predicate, args[0], args[1]))
 
     for predicate in (
         "source_authority",

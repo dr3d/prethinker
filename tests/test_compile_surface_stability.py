@@ -286,6 +286,69 @@ def test_source_authority_contract_prefers_structured_source_field_units(tmp_pat
     assert contract["source_text_mention_count"] == 1
 
 
+def test_source_authority_contract_accepts_authorized_access_source_pair(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_access" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_field(src_line_1, item_id, item_a).",
+            "source_record_field(src_line_1, authorized_party, reader_one).",
+            "source_record_field(src_line_1, authority_source, policy_a).",
+            "authorized_access(item_a, reader_one, physical_inspection).",
+            "access_authority_source(item_a, reader_one, policy_a).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1
+    assert contract["direct_partial_count"] == 0
+
+
+def test_source_authority_contract_counts_direct_custody_and_title_surfaces(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_custody" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_field(src_line_1, object, item_a).",
+            "source_record_field(src_line_1, holder, custodian_one).",
+            "source_record_field(src_line_1, authority, court_order_a).",
+            "legal_title(item_a, owner_one).",
+            "physical_custody(item_a, custodian_one, 2026_01_01_to_2026_01_31).",
+            "publication_authority(item_a, archive_policy).",
+            "access_authority(item_a, supervisor_one, reading_room).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 4
+    assert contract["direct_partial_count"] == 0
+
+
+def test_source_authority_contract_does_not_count_shallow_presentation_row(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_shallow" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_field(src_line_1, item, item_a).",
+            "source_record_field(src_line_1, authorized_party, reader_one).",
+            "source_record_field(src_line_1, source, policy_a).",
+            "presented_to(item_a, reader_one).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "ledger_only"
+    assert contract["direct_complete_count"] == 0
+
+
 def test_operational_lifecycle_contract_scores_complete_status_surfaces(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_d" / "domain_bootstrap_file_a.json",
