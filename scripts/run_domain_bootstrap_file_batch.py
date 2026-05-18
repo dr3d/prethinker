@@ -110,8 +110,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--profile-review-retry", action="store_true")
     parser.add_argument("--quality-gate", action="store_true", help="Annotate compile summaries with stamp-readiness quality decisions.")
     parser.add_argument("--quality-gate-fail-on-hold", action="store_true", help="Return nonzero when --quality-gate holds any fixture.")
+    parser.add_argument(
+        "--quality-retry-on-hold",
+        action="store_true",
+        help=(
+            "If the first compile hits a repairable quality-gate hold, rerun that fixture once "
+            "with generic corrective compile context. This is a replay diagnostic, not a fact oracle."
+        ),
+    )
     parser.add_argument("--quality-min-rough-score", type=float, default=0.775)
     parser.add_argument("--quality-max-risk-count", type=int, default=5)
+    parser.add_argument(
+        "--extra-compile-context-line",
+        action="append",
+        default=[],
+        help="Forward an additional compile-only context line to each fixture compile.",
+    )
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing compile artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -153,7 +167,7 @@ def main() -> int:
         results = []
         with concurrent.futures.ThreadPoolExecutor(max_workers=lanes) as pool:
             future_map = {
-                pool.submit(_run_job, job, command): job
+                pool.submit(_run_job_with_optional_quality_retry, job, command, args): job
                 for job, command in zip(jobs, commands)
             }
             for future in concurrent.futures.as_completed(future_map):
@@ -251,6 +265,9 @@ def _build_command(
             command.append("--" + flag.replace("_", "-"))
     if int(args.max_plan_passes) > 0:
         command.extend(["--max-plan-passes", str(int(args.max_plan_passes))])
+    for line in (str(item).strip() for item in getattr(args, "extra_compile_context_line", []) or []):
+        if line:
+            command.extend(["--extra-compile-context-line", line])
     return command
 
 
@@ -341,6 +358,75 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "detail_wrapper_drift_flags": _detail_wrapper_drift_flags(payload),
         "compile_surface_contract_flags": _compile_surface_contract_flags(payload),
     }
+
+
+def _run_job_with_optional_quality_retry(
+    job: CompileJob,
+    command: list[str],
+    args: argparse.Namespace,
+) -> dict[str, Any]:
+    result = _run_job(job, command)
+    if not bool(getattr(args, "quality_retry_on_hold", False)):
+        return result
+    gate = _quality_gate_result(
+        result,
+        min_rough_score=float(getattr(args, "quality_min_rough_score", 0.775)),
+        max_risk_count=int(getattr(args, "quality_max_risk_count", 5)),
+    )
+    if bool(gate.get("passed")):
+        return result
+    context_lines = _quality_retry_context_lines(gate)
+    if not context_lines:
+        result["quality_retry"] = {
+            "attempted": False,
+            "reason": "no_generic_quality_retry_context",
+            "initial_reasons": gate.get("reasons", []),
+        }
+        return result
+    retry_command = list(command)
+    for line in context_lines:
+        retry_command.extend(["--extra-compile-context-line", line])
+    retry_result = _run_job(job, retry_command)
+    retry_result["quality_retry"] = {
+        "attempted": True,
+        "initial_reasons": gate.get("reasons", []),
+        "context_lines": context_lines,
+        "initial_compile_json": result.get("compile_json", ""),
+    }
+    return retry_result
+
+
+def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
+    reasons = [str(item).strip() for item in gate.get("reasons", []) if str(item).strip()]
+    lines: list[str] = []
+    seen: set[str] = set()
+
+    def add(line: str) -> None:
+        if line not in seen:
+            seen.add(line)
+            lines.append(line)
+
+    for reason in reasons:
+        if reason.startswith("detail_wrapper_drift:") and "_backbone_missing_with_wrapper:" in reason:
+            body = reason.split("detail_wrapper_drift:", 1)[1]
+            group = body.split("_backbone_missing_with_wrapper:", 1)[0].strip()
+            if group:
+                add(
+                    "QUALITY GATE RETRY: the prior compile preserved a broad detail/event/source wrapper "
+                    f"while source-record fields signaled a missing {group} backbone surface. In this retry, "
+                    f"emit compatible direct {group} predicates before any wrapper rows. A source_detail, "
+                    "event, context, note, or summary row is additive only and must not be the only carrier "
+                    f"for source-stated {group} values."
+                )
+        if "operational_lifecycle_preservation:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile saw repeated dated lifecycle/status source lines "
+                "but did not preserve complete direct lifecycle units. In this retry, for each stated dated "
+                "received/filed/approved/denied/withdrawn/corrected/superseded/reopened/closed/current-status "
+                "line, emit a compatible direct unit that keeps governed subject or item, lifecycle state/action, "
+                "and date or turn joinable. Two-slot status/result rows without the date/event join are shallow."
+            )
+    return lines
 
 
 def _compile_surface_contract_flags(payload: dict[str, Any]) -> list[str]:

@@ -573,7 +573,7 @@ def _operational_lifecycle_contract(*, source_texts: list[str], direct_rows: lis
     source_mentions = [
         text
         for text in source_texts
-        if _has_lifecycle_marker(text) and _has_temporal_marker(text) and not _negated_lifecycle_source_text(text)
+        if _is_operational_lifecycle_source_text(text)
     ]
     complete_units, partial_units, split_units = _operational_lifecycle_direct_units(direct_rows)
     return _contract_status(
@@ -654,6 +654,78 @@ def _has_lifecycle_marker(text: str) -> bool:
             "supersed",
             "corrected",
             "completed",
+        )
+    )
+
+
+def _is_operational_lifecycle_source_text(text: str) -> bool:
+    text = str(text).casefold()
+    if not _has_lifecycle_marker(text) or not _has_temporal_marker(text) or _negated_lifecycle_source_text(text):
+        return False
+    if _is_temporal_or_metric_correction_text(text):
+        return False
+    if _is_storage_or_window_boundary_text(text):
+        return False
+    return _has_status_or_record_subject_marker(text)
+
+
+def _is_temporal_or_metric_correction_text(text: str) -> bool:
+    if not any(marker in text for marker in ("corrected", "correction")):
+        return False
+    return any(
+        marker in text
+        for marker in (
+            "timestamp",
+            "wall_clock",
+            "clock",
+            "time_of",
+            "score",
+            "rank",
+            "reading",
+            "measurement",
+            "value",
+        )
+    )
+
+
+def _is_storage_or_window_boundary_text(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "originals_are_filed",
+            "retained_for_audit",
+            "cycle_window",
+            "maintenance_window",
+            "inspection_window",
+            "review_window",
+        )
+    )
+
+
+def _has_status_or_record_subject_marker(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "status",
+            "state",
+            "phase",
+            "record",
+            "case",
+            "application",
+            "request",
+            "permit",
+            "proposal",
+            "ticket",
+            "issue",
+            "notice",
+            "claim",
+            "appeal",
+            "docket",
+            "filing",
+            "form",
+            "document",
+            "order",
+            "finding",
         )
     )
 

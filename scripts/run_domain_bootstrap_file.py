@@ -741,6 +741,15 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--extra-compile-context-line",
+        action="append",
+        default=[],
+        help=(
+            "Additional compile-only context line. Intended for generic replay diagnostics and "
+            "quality-gate retry pressure, not fixture facts."
+        ),
+    )
+    parser.add_argument(
         "--review-profile",
         action="store_true",
         help="Run an LLM-owned profile review pass before optional source compilation.",
@@ -1143,6 +1152,11 @@ def main() -> int:
         extra_compile_context.extend(source_record_ledger_context(source_record_ledger))
     if profile_registry and bool(args.profile_registry_palette_prior) and bool(args.compile_source) and isinstance(parsed, dict):
         extra_compile_context.extend(_profile_registry_palette_prior_context(profile_registry))
+    extra_compile_context.extend(
+        line
+        for line in (str(item).strip() for item in getattr(args, "extra_compile_context_line", []) or [])
+        if line
+    )
     if bool(args.compile_source) and isinstance(parsed, dict) and bool(args.compile_flat_plus_plan_passes) and isinstance(intake_plan, dict):
         record["source_compile"] = _compile_source_flat_plus_plan_passes(
             source_text=source_text,

@@ -339,6 +339,16 @@ Recent transfer work supports the current direction:
   wrappers or lifecycle fragments still failed to preserve enough direct
   backbone slots. That result confirms the remaining work is real
   compile-surface preservation, not another QA normalizer.
+- A follow-up compile-quality retry loop now maps structural hold reasons into
+  one generic corrective replay context. It is deliberately bounded: wrapper
+  drift can ask for missing backbone slot preservation, and lifecycle/status
+  holds can ask for joined subject/state/date units; it cannot inject fixture
+  facts. On the same four replay artifacts, contract calibration separated
+  false lifecycle alarms from true compile loss: two artifacts passed, one held
+  only on high profile risk, and one still held on a real quantity-backbone
+  drift where numeric values remained inside event descriptions. The next
+  compile-layer target is therefore quantity-rich event/profile palette
+  preservation, not a full stamp.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

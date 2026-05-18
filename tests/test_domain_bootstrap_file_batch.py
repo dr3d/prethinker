@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_file_batch import (
     _extract_compile_summary,
     _quality_gate_result,
+    _quality_retry_context_lines,
     _render_md,
     _summarize,
 )
@@ -186,6 +187,23 @@ def test_compile_quality_gate_holds_surface_contract_flag() -> None:
     assert gate["reasons"] == [
         "compile_surface_contract:operational_lifecycle_preservation:ledger_only:source=2:direct=0"
     ]
+
+
+def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "detail_wrapper_drift:location_backbone_missing_with_wrapper:source_detail",
+                "compile_surface_contract:operational_lifecycle_preservation:ledger_only:source=2:direct=0",
+            ]
+        }
+    )
+
+    assert any("missing location backbone surface" in line for line in lines)
+    assert any("complete direct lifecycle units" in line for line in lines)
+    joined = "\n".join(lines).casefold()
+    assert "fixture" not in joined
+    assert "source_detail, event, context, note, or summary row is additive only" in joined
 
 
 def test_compile_batch_quality_gate_renders_markdown() -> None:

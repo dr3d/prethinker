@@ -319,3 +319,22 @@ def test_operational_lifecycle_contract_ignores_assignment_and_negative_receipt(
     contract = report["fixtures"][0]["draws"][0]["contracts"][2]
     assert contract["status"] == "not_applicable"
     assert contract["source_signal_count"] == 0
+
+
+def test_operational_lifecycle_contract_ignores_temporal_correction_and_storage_phrases(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_d" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, src_03_visual_content_corrected_timestamp_post_cc_2026_04_22_lob).",
+            "source_record_text_atom(src_line_2, cycle_window_applications_opened_2026_02_15_closed_2026_04_01).",
+            "source_record_text_atom(src_line_3, rc_2026_04_20_k_originals_are_filed).",
+            "source_record_text_atom(src_line_4, maintenance_window_completed_line_restart_authorized_at_2026_04_23).",
+            "event_timestamp_corrected(evt_1, 2026_04_22).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][2]
+    assert contract["status"] == "not_applicable"
+    assert contract["source_signal_count"] == 0
