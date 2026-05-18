@@ -241,10 +241,10 @@ Recent transfer work supports the current direction:
 
 - Six fresh transfer fixtures cold on OpenRouter scored `177 / 10 / 53`
   over 240 rows, or 73.75% exact.
-- `school_activity_roster_reconciliation` exposed why compatibility evidence
-  had to become compile-surface work: the high-water was reachable, but the
-  forward repair is direct assignment/table surfaces.
-- `count_composition_roster` now has a clean six-mode memory package with a
+- A roster-reconciliation fixture exposed why compatibility evidence had to
+  become compile-surface work: the high-water was reachable, but the forward
+  repair is direct assignment/table surfaces.
+- A count-composition fixture now has a clean six-mode memory package with a
   `40 / 0 / 0` row-gated ceiling. Adding question-shape selector risk gates
   moved guarded selection from `31 / 3 / 6` to `40 / 0 / 0`, proving the
   residual was surface routing rather than missing compiled state.

@@ -146,7 +146,7 @@ role.
 
 ## Current Reality
 
-As of May 11, 2026:
+As of May 18, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -154,10 +154,10 @@ As of May 11, 2026:
 - `semantic_ir_v1` is the active architecture pivot for model understanding before deterministic admission
 - `semantic_router_v1` is the active context/profile planner when `active_profile=auto`
 - [src/semantic_ir.py](https://github.com/dr3d/prethinker/blob/main/src/semantic_ir.py) owns mapper projection policy and admission diagnostics
-- `medical@v0`, `legal_courtlistener@v0`, and `sec_contracts@v0` are the main starter domain lanes
-- UMLS Semantic Network assets are built locally for type/relation explanation
-- `intake_plan_v1` and `profile_bootstrap_v1` are the current hint-free raw-document/profile discovery path
-- post-ingestion document QA is now a first-class research surface: compiled KBs are queried through structured Semantic IR, support rows can be acquired in separate mapper-admitted passes, and deterministic safe unions can accumulate multiple safe symbolic views
+- domain profiles are context and validation packages, not domain-product claims
+- post-ingestion document QA is now a first-class research surface: compiled KBs are queried from admitted predicates, deterministic ledgers, selectors, and guards
+- the native direct-surface restamp is `1934 / 64 / 162` over `2163` judged rows (`89.41%` exact), with zero compatibility rows and zero write proposals
+- compile-surface stability, source-fidelity preservation, palette governance, and unlike-document transfer are the active research pressures
 - lab automation, public benchmarking, and publishing are retired lanes; git history is the archive for that work
 
 That means the repo already supports the governed compiler shape directly.
@@ -187,7 +187,8 @@ The codebase has three different kinds of artifacts because they serve different
   - `docs/EXPLAINER.md`
   - `docs/SEMANTIC_IR_MAPPER_SPEC.md`
   - `docs/DOMAIN_PROFILE_CATALOG.md`
-  - `docs/PROJECT_HORIZON.md`
+  - `docs/CURRENT_HARNESS_INSTRUMENT.md`
+  - `docs/ACTIVE_RESEARCH_LANES.md`
 
 The point is not just to build a parser.
 

@@ -197,19 +197,16 @@ verdict = records what happened
 Truth lives in the compiled KB. Rows are where the system tests whether that
 truth can be retrieved, selected, and answered under pressure.
 
-Current benchmark evidence gives that claim some teeth. The instrument has been
-calibrated against hostile benchmarks across many domain types, including
-municipal water contamination, medical device recalls, zoning hearings,
-botanical seed banks, maritime insurance, regulatory access ledgers, and fresh
-story-world fixtures. A prior surgical fixture batch reached `284 / 303` exact
-answers (`94%`) with only `3` misses. The newest cold-injected 10-fixture
-story-world batch now has a row-gated high-water of `361 / 400` exact
-(`90.25%`), with zero unauthorized writes in the contributing QA runs.
+Current evidence gives that claim some teeth. The native direct-surface
+instrument has been restamped over `2163` judged rows at `1934 / 64 / 162`
+exact/partial/miss (`89.41%` exact), with zero compatibility rows, zero runtime
+load errors, and zero write proposals. External and unlike-probe work continues
+to test whether those surfaces transfer beyond the fixtures that exposed them.
 
-That is not perfection. Story-world longitudinal tracking, row-level activation,
-rule composition, and temporal arithmetic are still frontier work. But the
-governance layer is doing the thing it was built to do: keep model proposals
-from silently becoming durable authority.
+That is not perfection. Compile-surface gaps, source-fidelity preservation,
+hybrid joins, language transfer, and palette stability are still frontier work.
+But the governance layer is doing the thing it was built to do: keep model
+proposals from silently becoming durable authority.
 
 ## Domain Fit And Necessary Brittleness
 
@@ -343,20 +340,17 @@ As of May 12, 2026:
 - the latest weak-edge runtime A/B is `10/10` decision labels with `1.000` average score
 - the policy/reimbursement demo installs English rules, derives query answers, retracts a fact, and changes the answer without writing derived violations as facts
 
-### Fixture Evidence
+### Evidence Snapshot
 
 - the prior surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
-- the newest cold-injected story-world batch spans `10` fixtures and `400` questions; row-gated selector replay is now `361 exact / 16 partial / 23 miss` (`90.25%`), including Nested Puppet Court at `40/40` and Clockmakers at `39/40` with zero misses
-- the incoming-6 full-40 batch spans `6` new fixtures and `240` rows; measured row-gated high-water is `240 / 0 / 0`, up from a cold `186 / 16 / 38` baseline. This is diagnostic evidence that the surfaces are reachable, not a claim that one global compiler solves the batch.
-- the Anaplan Polaris enterprise-guidance fixture reached `42 exact / 1 partial / 0 miss` on post-ingestion QA through multi-support safe-surface accumulation, with no QA write proposals
-- the Clarification Eagerness Trap fixture reached `40/40` under authority-aware scoring with perfect ask/no-ask posture, no context-write violations, and `10/10` blocked-slot question coverage
-- Fenmore Seedbank and Greywell Pipeline are current perfect surgical-batch fixtures
-- Meridian Permit Board shows the largest single-fixture lens gain so far, moving from `27` exact baseline answers to `39` exact under the rule-interpretation lane, while still needing transfer proof before broad promotion
-- Sable Creek and Avalon show the current rule-ingestion transfer path: separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
+- the native direct-surface restamp spans `2163` judged rows and currently sits at `1934 exact / 64 partial / 162 miss` (`89.41%`), with no compatibility rows or write proposals
+- the current residual pressure is compile-surface and source-fidelity coverage: answer-bearing distinctions must become admitted predicates or deterministic ledgers, not hidden query-time archaeology
+- enterprise-guidance and clarification probes show that safe-surface accumulation and ask/no-ask governance can be measured separately from ordinary QA
+- rule-ingestion transfer now uses separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
 - the next hard problem is row-level activation: accumulated symbolic surfaces can rescue weak answers, but global activation can perturb rows that were already good
 - raw-file/domain bootstrapping now has an LLM-owned `intake_plan_v1 -> profile_bootstrap_v1` path for hint-free predicate discovery and later QA against the compiled KB
 - Epistemic Worlds v1 can preserve rejected, quarantined, or supported-but-skipped candidates as scoped diagnostics without asserting them as global truth
-- Silverton probate/noisy temporal packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
+- noisy temporal and probate-style packs are intentionally hard pressure gauges for policy labels, temporal representation, and claim/fact separation
 - the current bet is Semantic IR context engineering before deterministic admission
 
 The important subtlety is this:

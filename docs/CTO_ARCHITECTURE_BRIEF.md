@@ -92,7 +92,7 @@ event, interval, population, or status scope.
 Bad:
 
 ```text
-Prefer Green Group return-coach rows.
+Prefer this fixture's return-coach rows.
 ```
 
 ## Generality Rule

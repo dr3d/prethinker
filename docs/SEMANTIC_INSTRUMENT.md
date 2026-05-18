@@ -107,16 +107,13 @@ Each lens targets one of these meaning surfaces:
 
 ## How Lenses Work Together
 
-No lens is used alone. The system compiles a document through multiple lenses and then uses a **selector** to choose the best lens for each question.
+No lens is used alone. The system compiles a document through multiple lenses
+and then uses a selector to choose the best lens for each question.
 
-Example from the Fenmore Seed Bank fixture:
-
-- **"Who collected lot FB-2026-001?"** -> Baseline lens (has the collector name directly)
-- **"What is the current operational status of the bur oak lot?"** -> Operational-record lens (has the status lifecycle)
-- **"Is the cryogenic split a viability concern?"** -> Rationale/contrast lens (has the curator's note: "conservation measure, not viability concern")
-- **"Has the bur oak lot been deaccessioned yet?"** -> Object/state lens (has the "scheduled but not formally completed" status)
-
-Four questions about the same document. Four different lenses provide the best answer. The selector chooses without seeing the correct answer - it uses structural signals about what kind of evidence each question needs.
+One document can contain collector identity, lifecycle status, rationale notes,
+source provenance, and current object state. Different questions need different
+surfaces. The selector chooses without seeing the correct answer; it uses
+structural signals about what kind of evidence each question needs.
 
 ---
 
@@ -142,22 +139,11 @@ generated under `tmp` when needed and is kept out of the public docs tree.
 | **Authority/provenance** | Trusting the wrong source | A staff memo is not a board determination. An anonymous tip is not an established fact. |
 | **State/custody** | Confusing current state with historical state | "Has it been deaccessioned?" needs current status, not the full history of the lot |
 
-The newest guards came from the cold-injected story-world batch. They route
-survey-commission questions to explicit `report_commissioned_by` provenance,
-ledger-location questions to `ledger_found_location`, intake-actor questions to
-`item_received_from`, and source-claim/permission-request questions back to
-witness-statement surfaces when a narrow provenance registry is too thin. The
-Claude 8 dense-record batch added a printed source-provenance guard: when a
-question asks which source recorded a specific event, archival row/source labels
-beat generic packet identifiers. A follow-up lexical pinboard added a
-timekeeping guard: when the question asks about clocking out of a timekeeping
-system, assignment/timekeeping evidence beats physical badge-exit rows.
-
-The guard roster is still in discovery mode. Do not parameterize the active families
-yet. First merge exact or near duplicates, prove the merged guard by replaying
-the rows that created the originals, and retire guards when better compile
-surfaces make them unnecessary. A new guard is healthy when it names a semantic
-question/evidence mismatch; it is suspicious when it only names a fixture.
+Current guards route by question/evidence mismatch: provenance questions need
+provenance rows, timekeeping questions need timekeeping surfaces, current-state
+questions need current-state rows, and authority questions need controlling
+authority evidence. A new guard is healthy when it names that reusable mismatch;
+it is suspicious when it only names a fixture.
 
 ---
 
@@ -186,52 +172,38 @@ These distinctions matter because "I don't know," "the source doesn't say," "the
 
 ## Current Instrument State
 
-### Current Score Evidence
+The live evidence anchor is the native direct-surface fixed-compile QA restamp:
 
-The instrument has been calibrated across hostile fixtures and fresh
-cold-injected story worlds. Two current evidence bands matter:
+```text
+2163 judged rows
+1934 exact / 64 partial / 162 miss
+89.41% exact
+0 compatibility rows
+0 runtime load errors
+0 write proposal rows
+```
 
-- Prior surgical fixture batch: **284 / 303 exact (94%)**, with only **3**
-  misses and zero unauthorized writes. This remains useful historical evidence;
-  newer work is now focused on cold-fixture transfer and boundary hunting.
-- 2026-05-07 cold-injected story-world batch: **361 / 400 exact (90.25%)**
-  under row-gated selector replay, with **16 partial**, **23 miss**, and zero
-  QA write proposals in the contributing runs.
-- 2026-05-08 incoming-6 full-40 batch: cold baseline **186 / 16 / 38** moved to
-  a diagnostic row-gated high-water of **240 / 0 / 0** over **240** rows. This
-  proves reachable surfaces, not one global compiler; the contributing row
-  shapes remain selector-scoped until transfer checks prove them.
-- 2026-05-09 precision fixture batch: cold OpenRouter baseline **148 / 16 / 76**
-  over **240** rows moved to **223 / 8 / 9** selected exact/partial/miss after
-  candidate farming, guarded selection, and deterministic source-record ledger
-  V2. The available candidate ceiling is now **232 / 4 / 4**. The lift came
-  without a new semantic lens or guard family: the durable lesson is that exact
-  source addressability is a separate substrate from model-owned meaning.
-- Fresh perfect cold-batch fixtures now include **Nested Puppet Court 40/40**
-  and **Clockmakers Three Ledgers 39/40 with zero misses** under row-gated
-  evidence-provenance and ledger/object-provenance modes.
+The detailed score history lives in
+[Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md).
+This document keeps the instrument vocabulary, not a rolling results ledger.
 
-### Lens Transfer Evidence
+Current lessons:
 
-Each lens has been tested for transfer - whether it helps on fixtures it wasn't designed for:
+- The daily answer path is direct-surface QA over admitted predicates,
+  deterministic ledgers, selectors, and guards.
+- Guard compression is no longer the active center; the current pressure is
+  compile-surface stability and source-fidelity preservation.
+- Lens terms earn slots through unlike-document transfer and slot contracts,
+  not by helping one fixture.
+- Deterministic ledgers preserve source coordinates; they do not interpret
+  source meaning.
+- Palette priors and registry scaffolds are control-plane aids until transfer
+  proves they are reusable architecture.
 
-- The **rationale/contrast lens** transfers cleanly across Fenmore, Greywell, Heronvale, Veridia, and Ashgrove
-- The **operational-record lens** transfers across all fixture types but must NOT be used as a global default - it helps status questions and hurts eligibility questions
-- The **rule-interpretation lens** produced the strongest single-fixture gain (Meridian 27->39) but has not yet been tested for broad transfer
-- The **temporal/deadline surface** was explicitly rejected as a global compile on Copperfall - it confuses deadline families
-- The **evidence-provenance scaffold** is useful only as a row-gated lens so
-  far: it closed Nested Puppet Court to 40/40 and moved Clockmakers to 39/40,
-  while each registry compile regressed broad rows when used globally.
-
-### Negative Results
-
-These are as important as the positive ones:
-
-- A broad object/state/custody surface blurred too many rows on Fenmore and Larkspur - the fix was a narrow deaccession-yet guard, not a bigger lens
-- The partial-skeleton instruction that helped Three Moles (story world) hurt Oxalis (regulatory) - it was scoped back to narrative passes only
-- A broader evidence-filter floor that helped Black Lantern's miss count hurt its exact count - evidence filtering is not "more is better"
-- The temporal/status/deadline surface regressed Copperfall globally - deadline families need query-level disambiguation, not compile-level broadening
-- The newest Oxalis/Three Moles pass preserves that discipline: recall accounting surfaces, story choice contrast, and remediation-method support are query-local companions over admitted KB rows. They show targeted row rescues, but they do not change the headline score until a full replay proves exact-row protection.
+Negative results matter as much as positives. A broader lens, bigger context,
+or larger evidence surface is not automatically better. When a surface helps
+one row but blurs another, the right response is classification, transfer
+probing, and a tighter contract, not public promotion.
 
 ---
 

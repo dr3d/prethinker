@@ -1,486 +1,127 @@
 # Multi-Pass Semantic Compiler
 
-Last updated: 2026-05-03
+Last updated: 2026-05-18
 
-This note captures the current architecture direction exposed by the Anaplan
-and Glass Tide experiments.
+This document is the current doctrine for multi-pass compilation. Older
+experiment logs and rule-lens run diaries were archived to
+`C:\prethinker_tmp_archive\docs_markdown_sweep_20260518` and remain recoverable
+through Git history.
 
-## Thesis
+## Current Thesis
 
-A single LLM compile is a viewpoint. Prethinker should not optimize for one
-perfect giant pass. It should accumulate multiple mapper-admitted semantic
-views:
+A single LLM compile is one viewpoint. Prethinker should build a governed
+artifact by accumulating multiple safe semantic views, but only after
+deterministic admission:
 
 ```text
 source
-  -> backbone lens
-  -> support/source lens
-  -> temporal/status lens
-  -> rule lens
-  -> mapper admission per lens
+  -> deterministic source ledgers
+  -> profile/context plan
+  -> focused semantic passes
+  -> mapper admission per pass
   -> deterministic safe-surface union
-  -> Prolog query/trial surface
+  -> QA over admitted state, ledgers, selectors, and guards
 ```
 
-The invariant does not change:
+The invariant is unchanged:
 
 ```text
 LLMs propose.
 The mapper admits.
 Only admitted clauses accumulate.
-Python does not read prose to derive meaning.
+Python does not read prose to invent meaning.
 ```
 
-## Formal Complement: Semantic Determination Audit
+## What A Pass May Do
 
-The shortcut-freeness literature gives a useful warning for this architecture:
-passing structural constraints is not the same as having the intended meaning.
-A candidate can be right-shaped but wrong-meaning:
+A pass may propose a bounded semantic surface:
 
-- `approved` might mean a claim status, a reviewer action, or a payment release;
-- an allegation can be collapsed into a finding;
-- a binary event predicate can pass arity/type checks while its argument roles
-  are inverted;
-- two profile-valid predicate surfaces can answer different questions from the
-  same admitted-looking rows.
+- backbone facts: entities, events, roles, statuses, quantities, dates;
+- source/provenance rows: document roles, source labels, evidence status;
+- temporal/status rows: intervals, supersession, deadlines, effective windows;
+- rule rows: explicit source-stated conditions, exceptions, thresholds;
+- epistemic rows: claims, disputes, retractions, unsupported or unstated facts;
+- query-relevant source coordinates preserved by deterministic ledgers.
 
-The multi-pass compiler should eventually include a deterministic semantic
-determination audit over structured candidates and profile contracts:
-
-```text
-structured candidate alternatives
-  -> finite-domain validation over profile pins/contracts
-  -> search for another valid mapping
-  -> admit invariant rows, hold/clarify shortcut-sensitive rows
-```
-
-This is not runtime NLP. Python or an ASP/CSP backend may enumerate structured
-alternatives, validate constraints, and report shortcut witnesses. It must not
-derive the alternatives from raw prose. The LLM proposes alternatives; profile
-contracts and mapper policy determine which mappings are admissible.
-
-In Prethinker terms, predicate aliases, argument-role contracts, source-status
-validators, and clarification answers are **pins**. They reduce the space of
-valid-but-wrong mappings without weakening the authority boundary.
-
-The first practical hook is now `scripts/run_semantic_shortcut_audit.py`. It
-audits already-produced Prolog clauses or JSON compile artifacts for structural
-shortcut risks such as unbound head variables, deterministic-function argument misuse,
-claim-to-fact collapse, broad class-predicate fanout, sibling-rule masking, and
-aggregation-to-final-outcome overclaiming. The audit is deliberately post hoc
-and structural: it reads admitted Prolog surfaces, not source prose, and it
-does not authorize writes. Early gold-KB probes showed a second useful signal:
-some risks are not bad semantics but missing deterministic substrate, such as
-raw arithmetic or negation that should be represented by bounded runtime
-predicates before an LLM-acquired rule is promotion-ready.
-Rule-lens runtime artifacts now include this shortcut-audit summary alongside
-promotion-readiness metrics, so a rule can be loadable/firing/probe-clean while
-still carrying a visible semantic-risk note for review.
-
-## Why This Exists
-
-APR proved that a deterministic union of safe compiles can beat either compile
-alone. The high-water Anaplan path reached `42 exact / 1 partial / 0 miss` by
-accumulating independently admitted backbone/support surfaces.
-
-Glass Tide then showed the rule-ingestion version of the same lesson:
-
-- A single default compile preserved charter rules as source records, but
-  admitted `0` executable rules.
-- Adding rule pressure to that same broad compile regressed the admitted
-  surface and still admitted `0` executable rules.
-- A separate rule lens admitted executable clauses, but runtime trial exposed
-  two new risks: overgeneralized class-predicate fanout and dormant rules whose
-  bodies had no matching backbone facts.
-- The latest Glass Tide rule trials added active predicate palettes,
-  body-goal support checks, lifecycle labels, and authored positive/negative
-  probes. GLT-023 has a role-joined repair rule that derives
-  `derived_authorization(repair_order_71, valid, glass_tide_repair)` and does
-  not derive the one-signer repair order. GLT-024 has threshold tax rules that
-  pass high-value/low-value probes but fail the high-value relief-cargo
-  exemption probe.
-
-So the next architecture is not "more prompt." It is pass specialization.
-
-## Initial Lenses
-
-Start with four lenses, not twelve.
-
-### Backbone Lens
-
-Captures the central source surface:
-
-- people, roles, places, objects, source documents
-- core events and statuses
-- recommendations or requirements
-- source-stated rule records
-- basic claims and evidence rows
-
-It should avoid deep rationale, speculative rules, and broad inferred
-consequences.
-
-### Support / Source Lens
-
-Adds reasons, effects, tradeoffs, exceptions, and source-priority support to an
-already-admitted backbone. It should not invent a new domain surface.
-
-### Temporal / Status Lens
-
-Extracts state changes, time anchors, validity windows, temporal order,
-deadlines, and duration functions. This lens exists because temporal detail tends
-to crowd out ordinary fact extraction when mixed into one giant pass.
-
-### Rule Lens
-
-Converts explicit source-stated conditional guidance into executable rule
-candidates. The first rule-lens implementation is
-`scripts/run_rule_acquisition_pass.py`.
-
-Rule candidates must:
-
-- use `operation="rule"`
-- include a one-line `candidate_operations[].clause`
-- be executable Horn clauses with a real `Head :- Body` shape, not fact-shaped
-  clauses submitted under `operation="rule"`
-- use only allowed predicates
-- keep head variables bound in the body
-- use uppercase Prolog variables when a value should bind across the head and
-  body
-- avoid class-predicate fanout
-- avoid permission-from-occurrence collapse
-- avoid claim-to-finding collapse
-- match body-goal argument patterns against admitted support rows
-- pass mapper admission before runtime trial
+A pass may not become durable truth by itself. The mapper must still validate
+schema shape, predicate palette, arity, argument roles, source status, safety,
+profile contracts, and conflict/correction rules.
 
 ## Safe-Surface Accumulation
 
-Union is deterministic and operates only on mapper-admitted clauses:
+Safe union is deterministic. It operates over admitted structured rows, not raw
+source prose and not answer keys:
 
 ```text
 admitted facts
 admitted rules
 admitted queries
 admitted retraction plans
+deterministic ledgers
 ```
 
-It does not read source prose, infer new clauses, or consult answer keys.
+If a candidate surface helps one row but drops backbone rows, the result is a
+compile-stability coordinate, not permission to replace the compiler. Current
+work measures palette stability, row delivery collapse, vague event/detail
+wrappers, stranded source-record values, and preservation of concrete
+backbone rows before spending QA cycles.
 
-Current utility:
+## Rule And Derived-State Discipline
 
-```text
-scripts/union_domain_bootstrap_compiles.py
-```
+Executable rules are allowed only through the explicit rule path. A rule must:
 
-## Runtime Trial
+- have a real `Head :- Body` shape;
+- keep head variables bound in the body;
+- use profile-approved predicates and deterministic runtime predicates;
+- avoid claim-to-fact, permission-from-occurrence, and class-fanout collapse;
+- pass isolated and dependency-composed promotion checks before being treated
+  as promotion-ready;
+- remain diagnostic until the product policy admits it as durable behavior.
 
-Executable rules need a second diagnostic beyond admission:
+Runtime predicates such as arithmetic, temporal comparison, interval overlap,
+and threshold checks are deterministic substrate. They should compose admitted
+rows; they should not smuggle source interpretation into Python.
 
-```text
-Can the rule load?
-Does it fire?
-Does it fan out too broadly?
-Does it derive from the intended support rows?
-Does it pass authored positive and negative probes?
-```
+## Compile-Stability Layer
 
-The first rule-lens script records runtime load errors, derived-head query
-rows, firing-rule count, high-fanout count, unsupported body signatures, and
-unsupported body goals/fragments. It also accepts authored positive and
-negative Prolog probes. These are diagnostics, not automatic truth decisions.
-The script now wraps LM Studio calls in a hard child-process deadline, so a
-stalled local model call returns a clean failed artifact instead of leaving a
-runaway Python process in the workspace.
+The newest pressure is no longer "add another broad pass." It is whether the
+compiler reliably emits the concrete rows that profiles and priors make
+available.
 
-Source-pass structured-output calls should use the same no-thinking policy as
-the main Semantic IR path: `temperature=0.0` and `reasoning_effort="none"`.
-Glass Tide exposed a drift here after the rule/support pass utilities were added:
-the model could spend budget in `reasoning_content` while producing no JSON
-`content`. The shared source-pass utility now sends `reasoning_effort="none"` so
-rule-lens runs spend tokens on the schema body.
+Current stability checks ask:
 
-Rule lifecycle is now reported separately:
+- Did the compile preserve source-record ledgers and direct admitted facts?
+- Did a candidate palette offer useful predicates that the compile failed to
+  deliver as rows?
+- Did vague `detail` or `event` wrappers appear while concrete backbone rows
+  disappeared?
+- Did multi-draw palette priors stabilize vocabulary without supplying facts,
+  answers, or source authority?
+- Did a repair transfer to unlike documents without fixture nouns, row ids,
+  answer strings, or local organizations?
 
-```text
-candidate_rule
-mapper_admitted_rule
-runtime_loadable_rule
-firing_rule
-promotion_ready_rule
-durable_rule
-```
+Multi-pass work is successful when it makes the compiled artifact sharper and
+more reproducible. It is not successful merely because a new pass emits more
+rows.
 
-A rule is currently counted as promotion-ready in the temporary trial only when
-it loads, fires at least once, stays below the fanout threshold, and has no
-unsupported body signatures, goals, or fragments. Promotion-ready is still a
-diagnostic label; durable rule admission remains a separate product decision.
-Probe-adjusted promotion readiness additionally requires all supplied positive
-and negative probes to pass.
+## Evidence Labels
 
-Fresh Sable Creek rule-lens replay added an important safety guard: a rule whose
-head contains a variable absent from the body is an unsafe generalization even
-if the temporary runtime can produce a synthetic binding. The mapper now skips
-that rule before trial, and the verifier reports the same problem as a
-non-promotion fragment. The mapper also skips fact-shaped clauses such as
-`voting_threshold(amendment_adoption, 4, 7).` when they are submitted as
-`operation="rule"`; those belong either as source facts through ordinary assert
-operations or as bodies/heads inside an executable rule.
+Results should be labeled before comparison:
 
-The follow-up Sable replay added a structural support index to the rule-lens
-payload: counts and examples of admitted fact signatures such as
-`amendment_introduced/4`. This does not interpret source prose; it summarizes
-already-admitted Prolog rows so the model can choose body predicates that exist
-in the backbone. With that support summary and a narrow active palette, the
-rule lens admitted a bounded public-hearing rule:
+- `cold_unseen`: source-only run before tuning or profile help;
+- `cold_after_general_architecture_change`: rerun after a generic change;
+- `assisted_profile`: run with a non-oracle profile or palette prior;
+- `oracle_calibration`: run with answer-shaped or gold material intentionally
+  exposed for engineering;
+- `regression_replay`: rerun to ensure a generic change did not rot existing
+  behavior;
+- `fixed_compile_qa`: QA-only rerun over frozen compile artifacts.
 
-```prolog
-derived_status(AmendmentId, requires_public_hearing, budget_amendment) :-
-    amendment_introduced(AmendmentId, _, _, Amount),
-    number_greater_than(Amount, 50000).
-```
-
-The companion low-threshold branch loaded cleanly but stayed dormant because no
-current Sable amendment amount is at most `50000`. That distinction matters:
-clean dormancy is not the same as unsupported body structure.
-
-The AG-011 repeated-body lesson is now promoted from a shortcut-audit warning
-into the rule-acquisition verifier. Repeated body goals that share multiple
-same-position variables, and have no distinct literal role anchors, are treated
-as unsupported fragments during promotion scoring. This blocks rules that can
-appear to satisfy two distinct requirements with one admitted row. The positive
-AG-012 shape remains allowed: repeated predicates such as `required_condition/2`
-and `deadline_met/2` may compose safely when the requirement slots are anchored
-by source-admitted atoms like `submit_revised_budget` and
-`provide_matching_docs`.
-
-Avalon then showed why the mapper should share part of the verifier's rule
-doctrine. A Section A eligibility replay kept useful runtime-composed matching
-fund branches, but the model also proposed raw Prolog constructs such as
-negation, disjunction, equality, and comparisons. The verifier already withheld
-promotion for those clauses. Durable rule admission now goes further and skips
-them at the mapper boundary with `rule_contains_unsupported_construct`. In this
-phase, executable LLM-authored rules should compose safe runtime predicates such
-as `number_greater_than/2` and `percent_at_least/3`, not invent low-level
-control semantics.
-
-When the post-gate Avalon rules were unioned into the AG-001 QA surface, the
-result was `27 exact / 10 partial / 3 miss`: the same exact count as the older
-rule union, but fewer misses. The remaining mode comparison still shows
-volatile rows and a diagnostic perfect-selector upper bound of `29 exact`.
-That is the next query-side lesson for multi-pass compilation: accumulated
-surfaces need row-level activation or fallback selection, not blind global
-activation.
-
-Promotion scoring now uses an isolated per-rule runtime: each rule is tested by
-itself against the backbone surface, so a sibling rule with the same derived
-head cannot make a dormant rule look firing. The accumulated rule surface is
-still tested afterward with combined positive/negative probes.
-
-The deterministic compile-union utility can now run this same rule trial over
-an accumulated rule surface. With `--trial-backbone-json`,
-`--drop-non-promotion-ready-rules`, and authored positive/negative probes, it
-can union separate mapper-admitted rule lenses, discard non-promotion-ready
-clauses, and score the accumulated temporary KB. Glass Tide GLT-027 used this to
-combine threshold and exception tax lenses into `3` promotion-ready rules that
-passed `3/3` positive and `1/1` negative probes.
-
-GLT-028/029 adds the companion lesson: sometimes the rule lens is not enough
-because the backbone lacks the body facts a safe rule needs. A narrow body-fact
-lens over the salvage source span admitted `recovered_from_water/3`,
-`abandoned/1`, `sacred/1`, and `not_sacred/1`; the subsequent rule union retained
-`2` promotion-ready salvage rules and passed both reward probes.
-
-GLT-030/031 reran the tax and salvage unions under isolated per-rule promotion
-scoring. The high-water results held: tax stayed at `3` promotion-ready rules
-and salvage stayed at `2`, with all authored positive/negative probes still
-passing.
-
-GLT-032/034 adds a temporal-runtime branch. A narrow body-fact lens admitted
-quarantine patient, no-fever, and negative-test rows; `hours_at_least/3` then
-supported an isolated promotion-ready clearance rule for Dax while the Mira
-negative probe stayed empty because her tests were only five hours apart. This
-also sharpened the verifier: context-dependent runtime predicates should be judged inside
-the rule conjunction, not as standalone row generators.
-
-GLT-035/036 adds the council priority/override branch. The body-fact lens
-captured proposal, budget-matter, support-vote, treasurer-veto, and
-no-emergency-override rows. The verifier retained one promotion-ready
-budget-veto failure rule and dropped normal-vote branches that depended on
-unsupported negation or aggregation.
-
-GLT-037 adds the first aggregation runtime predicate, `support_count_at_least/2`, and
-keeps the negative result: the deterministic substrate works, but the rule lens still
-mixed support threshold with final passage. Future council aggregation should
-derive an intermediate threshold status before any veto/override branch decides
-final outcome.
-
-GLT-038 adds that intermediate condition surface. `derived_condition/3` lets an
-aggregation lens derive `support_threshold_met` without claiming the proposal
-passed. This creates a cleaner input for later rule composition.
-
-GLT-039 unions the council threshold and veto branches. The accumulated surface
-can now say both that the support threshold was met and that the budget-veto
-branch failed the proposal, while the final-passage probe remains empty.
-
-GLT-040 adds a restraint guard: rule-acquisition passes may not receive credit
-for re-emitting rules already present in their admitted backbone context. A
-final-outcome lens over the council branch surface declined to emit a generic
-`council_vote` failure rule because the source-stated outcome was already
-represented by the budget-veto branch. This keeps semantic parallax from
-becoming semantic echo.
-
-The rule verifier now also distinguishes **isolated readiness** from
-**dependency-composed readiness**. Isolated readiness tests each rule by itself
-against the backbone so same-head siblings cannot make a dormant rule look
-successful. Dependency-composed readiness then retests the rule with only
-upstream sibling rules whose heads appear in the target rule body, while still
-excluding same-head siblings. This lets a final rule depend on an intermediate
-condition such as:
-
-```prolog
-derived_condition(Proposal, support_threshold_met, council_vote).
-```
-
-without letting another `derived_status/3` rule satisfy the target head by
-accident. The deterministic union promotion filter now keeps rules that are
-promotion-ready under either isolated or dependency-composed trial.
-
-The dependency-composed trial now follows transitive derived dependencies across
-already-admitted sibling rules. A final rule can therefore be tested with a
-bounded chain such as `derived_condition/3 -> derived_permission/4 ->
-derived_status/3`, while same-head siblings for the target rule remain excluded
-so they cannot mask dormancy. This is structural composition over admitted
-clauses, not source-prose interpretation.
-
-Rule activation now has a small pack harness:
-`scripts/run_rule_activation_mode_pack.py`. It resolves fixture run ids from
-`progress_metrics.jsonl`, checks that the referenced QA artifacts are present,
-builds a mode-comparison report, and optionally runs the non-oracle selector
-over the same evidence modes. The pack is intentionally post-run: it reads
-existing QA artifacts and structured query evidence, not source prose, and it
-does not rerun compilation or judging.
-
-The first restored-artifact packs compare baseline, rule-union, and focused
-evidence modes for Sable and Avalon. Sable's three-mode rule pack has a
-diagnostic upper bound of `26 exact / 7 partial / 7 miss`; the direct selector
-with a larger JSON budget reached `25 / 8 / 7`, missing only one best-mode row.
-Avalon's four-mode pack has an upper bound of `32 / 7 / 1`; direct selection
-reached `28 / 10 / 2`, while direct selection with bounded self-check context
-reached `29 / 9 / 2`. A heavier experimental `activation` selector prompt
-regressed to `28 / 10 / 2`, so the useful signal is not "say activation more
-loudly." The current best Avalon next move is to understand the remaining
-four missed-best rows under the direct+self-check posture. Structural selection
-remains a cheap baseline, not a replacement policy.
-
-## Open Problems
-
-- Pass planner: the router should choose lenses and source spans instead of
-  dumping a full document into every pass.
-- Anti-meta-rot: semantic lenses must not become a beautiful rut. Each run
-  should record why a lens was selected, what it was allowed to emit, what it
-  was forbidden to emit, and whether it added unique downstream value. New
-  fixtures should first receive frozen cold baselines before any fixture
-  hardening or domain-pack assistance.
-- Rule verifier: admitted rules need checks for fanout, dormant bodies,
-  unsupported body predicates, unsupported body-goal argument patterns, and
-  unsupported body fragments such as equality/comparison leftovers. Positive and
-  negative probes should become standard for any rule class that might
-  overgeneralize. AG-011 adds another structural shortcut: repeated body goals
-  can pretend to satisfy multiple distinct requirements while aliasing to the
-  same row unless the rule uses literal anchors, a deterministic function, or
-  admitted `required_condition`-style body facts.
-- Probe role policy: SC-005 exposed a false-negative promotion probe when the
-  rule derived the right subject and status but preserved a more precise source
-  anchor (`charter_9.2`) where the authored probe expected a coarse category
-  (`budget_amendment`). Probe definitions should distinguish meaning-bearing
-  slots from provenance/category slots, using variables or explicit
-  slot-equivalence policies when the exact source anchor is not the target of
-  the test.
-- Deterministic substrate: threshold/exception rules such as taxability need
-  bounded runtime predicates before the rule lens can safely emit executable
-  clauses. Glass Tide now uses `value_greater_than/2` and `value_at_most/2` as
-  query-only runtime predicates resolved from admitted value facts.
-- Exception substrate: GLT-025/027 show relief-style exemptions work better as
-  a separate exception lens that can be deterministically unioned with the
-  threshold branch after promotion filtering.
-- Scope and placeholder discipline: recent preflight runs showed that a
-  role-joined rule can be body-supported but still fail probes if the model uses
-  a neighboring scope atom, or can be syntactically admitted but dormant if it
-  uses lowercase role placeholders such as `warden` and `repair_order` instead
-  of variables or admitted source atoms.
-- Predicate surface: rule bodies need a backbone with enough explicit
-  status/evidence/temporal predicates to fire without inventing facts.
-- Conflict-aware union: multiple admitted lenses may produce compatible
-  distinctions, synonym drift, or direct conflicts.
-- Rule composition: final-outcome rules need explicit dependency-aware
-  promotion trials. The verifier can now rescue rules that depend on upstream
-  derived conditions, but the next fixture should stress longer chains,
-  branch conflicts, and final-status projection policy.
-- Body-fact alignment: AG-012 shows the positive path for multi-condition rule
-  composition. A body-fact lens can add `required_condition/2` rows, but those
-  atoms must align with admitted body predicates such as `deadline_met/2`; rich
-  source-detail atoms that do not join are less useful than boring atoms that
-  let rules fire safely.
-- Metrics: track QA lift per admitted clause, duplicate rate, conflict rate,
-  firing-rule count, high-fanout count, and rule-derived answer count.
-- Lens contribution accounting: every flat-plus-focused compile should record
-  per-pass unique rows, duplicate rows, fact/rule/query counts, and purpose.
-  A lens that emits no unique admitted surface is a research signal, not a
-  harmless implementation detail. MMM-002 exposed this directly when the
-  event/causal pass contributed `0` unique rows on a compile-gap-heavy cold
-  story replay.
-- Focused-pass retry is necessary but not sufficient. MMM-003 recovered a
-  failed event/causal pass from `0` to `28` unique rows, but QA stayed flat.
-  RF-002/RF-003 then showed the opposite failure: dense incident passes can
-  parse but remain too thin or skip-heavy. The next lens-quality metric should
-  flag zero-yield, thin-surface, and skip-heavy passes, not just `invalid_json`.
-- Semantic struggle detection is now a named circuit breaker. The structural
-  `semantic_progress_assessment_v1` layer reports unique contribution totals,
-  duplicate ratios, stale pass tails, skip-heavy/thin-surface flags, and
-  selector-governor failures. A high-risk run should stop and report struggle;
-  a medium-risk run should continue only when the next pass states the expected
-  contribution it is meant to add.
-- Compact broad skeleton: DL-003/DL-004 exposed that the old full Semantic IR
-  flat pass can overflow on dense source material while compact focused passes
-  survive. When `--focused-pass-ops-schema` is enabled, the broad
-  `flat_skeleton` now also uses `source_pass_ops_v1`. On Dulse this moved the
-  flat skeleton from `0` rows to `51` rows and reduced full-QA misses from `6`
-  to `2`, while still leaving thin focused passes as the next repair target.
-  DL-005 then selected between the original and compact-flat QA evidence modes
-  without source or answer-key access and reached `32 exact / 6 partial / 2
-  miss`, which is the query-time form of the same parallax principle.
-  OX-003 confirmed the change transfers to a safety-adjacent regulatory recall
-  fixture: healthy compile, `91` admitted rows, only `4` skips, and QA moved
-  from `16/9/15` to `27/8/5`.
-- Compile-lens health now summarizes those pass diagnostics at the top level.
-  A compile can be marked `healthy`, `warning`, or `poor` with a recommendation
-  such as `qa_run_reasonable` or `repair_compile_before_qa`. V9-002 used this
-  gate on a cold Veridia replay: all seven lenses were healthy, the compile
-  admitted fewer rows than V9-001, and QA still improved from `18/5/17` to
-  `19/6/15`. The lesson is deliberately modest: pass health can screen out
-  obviously bad compiles, but it is not the same as answer-bearing coverage.
-
-## Evidence Lanes
-
-Multi-pass results should be labeled before they are compared:
-
-- `cold_unseen`: source-only run on a fixture before tuning or profile help;
-- `cold_after_general_architecture_change`: rerun after a broadly motivated
-  harness change;
-- `assisted_domain_pack`: run with a non-oracle domain pack or starter profile;
-- `oracle_calibration`: run with reference signatures, gold KB, or answer-shaped
-  material intentionally exposed;
-- `hardened_variant`: a deliberately revised adversarial descendant of an
-  earlier fixture;
-- `regression_replay`: rerun of an older fixture to check that a general change
-  did not rot existing behavior.
-
-The label is part of the result. A high `oracle_calibration` score is useful
-for engineering but should not be compared to a `cold_unseen` generalization
-baseline.
+Do not compare `oracle_calibration` scores to cold generalization baselines.
 
 ## Current Lesson
 
-The right target is not one perfect compile.
-
-The right target is a governed symbolic surface built from multiple safe,
-auditable semantic lenses.
+The target is not one perfect compile. The target is a governed symbolic
+artifact built from admitted semantic surfaces, deterministic source ledgers,
+and measured query behavior. Each new pass must earn its place by adding a
+transferable surface without weakening source fidelity or direct answerability.

@@ -1,6 +1,6 @@
 # Semantic IR Mapper Specification
 
-Last updated: 2026-05-09
+Last updated: 2026-05-18
 
 ## Purpose
 
@@ -15,7 +15,7 @@ semantic_ir_v1 proposal
   -> projected decision
   -> admissible operations
   -> scoped diagnostic worlds for blocked candidates
-  -> legacy parse/runtime packet
+  -> runtime packet and compatibility traces
   -> KB mutation, query, clarification, quarantine, or rejection
 ```
 
@@ -282,7 +282,7 @@ palette so narrative runs do not have to misuse broad predicates:
 - preference/fit predicates such as `too_hot_for/2` and `just_right_for/2`
 
 This palette is intentionally generic story/world-state vocabulary, not a
-Goldilocks patch. It gives the LLM better legal targets while keeping the mapper
+earlier fixture patch. It gives the LLM better legal targets while keeping the mapper
 free to reject out-of-palette or ungrounded operations.
 
 ## Predicate Contract Role Policy
@@ -445,10 +445,10 @@ durable residue of a turn whose actual content is unsafe.
 ## Alias Grounding Policy
 
 Initial-only person aliases are weak grounding for durable person-state facts.
-If a safe direct state write uses an entity like `A. Silverton`, the mapper may
-still admit the factual temporal/event clause, but it projects the decision to
-`mixed`. This keeps the KB traceable while preserving the unresolved identity
-pressure for follow-up policy.
+If a safe direct state write uses an unresolved initial-plus-name alias, the
+mapper may still admit the factual temporal/event clause, but it projects the
+decision to `mixed`. This keeps the KB traceable while preserving the unresolved
+identity pressure for follow-up policy.
 
 ## Minimal Temporal Vocabulary
 

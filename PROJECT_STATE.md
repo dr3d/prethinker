@@ -594,7 +594,7 @@ This section keeps useful current detail for maintainers. Public-facing pages sh
   archive only when router-training work becomes active again.
 - The historical mixed-domain calibration pack is retained in Git history. It targets truth-maintenance dependency pressure, predicate canonicalization drift, claim/fact/observation promotion, segmentation semantics, multilingual ontology pressure, rule sufficiency, source fidelity, and bootstrap behavior, but it is no longer the active research frontier.
 - `scripts/run_semantic_ir_stress_sweep.py --fast` remains available as an archived mixed-domain stress smoke. Routine active research should prefer current fixture scorecards, boundary-hunt coordinates, and compiled KB artifact packages.
-- A new research note, `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`, captures the meta-profile idea: when no domain profile exists, a strong model may propose candidate entity types, predicates, contracts, risks, clarification policies, and starter frontier cases. This is review material for creating a profile, not authority for durable writes.
+- The current profile/palette direction is summarized in `docs/PRODUCT_AND_PALETTE_GOVERNANCE.md`: when no approved profile exists, candidate vocabulary is review material and must earn transfer evidence before becoming architecture.
 - A first `profile_bootstrap_v1` harness now exists at `scripts/run_profile_bootstrap.py` with a contracts/compliance seed fixture. It asks the local structured-output model to propose a candidate domain profile, then scores schema validity, generic predicate use, and whether starter frontier cases stay inside the proposed predicate palette and arities.
 - `scripts/run_profile_bootstrap_loop.py` now closes the meta-profile loop: it loads a local profile bootstrap run, projects its candidate predicates/contracts into a temporary Semantic IR profile, runs the generated starter cases through the normal model+mapper path, and scores valid JSON, palette skips, must-not violations, and expected-boundary hits.
 - `scripts/run_domain_bootstrap_file.py` now captures the Codex-style open-domain move as an explicit LLM-owned profile-bootstrap path: Python reads a raw text file, the model proposes the predicate/entity surface, and optional source compilation uses that draft profile without Python deriving predicates or segmenting the language.
@@ -792,17 +792,16 @@ If you have an hour:
 4. `docs/CURRENT_HARNESS_INSTRUMENT.md`
 5. `docs/PUBLIC_DOCS_GUIDE.md`
 6. `docs/EXPLAINER.md`
-7. `docs/CLARIFICATION_EAGERNESS_STRATEGY.md`
+7. `docs/PRODUCT_AND_PALETTE_GOVERNANCE.md`
 
 Deep dives:
 
-1. `docs/PROJECT_HORIZON.md`
-2. `docs/DOMAIN_PROFILE_CATALOG.md`
-3. `docs/DOMAIN_BOOTSTRAPPING_META_MODE.md`
-4. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
-5. `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`
-6. `docs/PUBLIC_DOCS_GUIDE.md`
-7. `ui_gateway/README.md`
+1. `docs/DOMAIN_PROFILE_CATALOG.md`
+2. `docs/PRODUCT_AND_PALETTE_GOVERNANCE.md`
+3. `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+4. `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`
+5. `docs/PUBLIC_DOCS_GUIDE.md`
+6. `ui_gateway/README.md`
 
 ## What Was Pruned
 
