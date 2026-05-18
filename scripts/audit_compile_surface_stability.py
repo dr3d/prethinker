@@ -26,6 +26,27 @@ SURFACE_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 PALETTE_DELIVERY_REPEATED_MIN = 3
 PALETTE_DELIVERY_COLLAPSE_RATIO = 0.55
+QUANTITY_EVENT_CARRIER_PREDICATES = {
+    "event_measurement",
+    "event_quantity",
+    "measurement_value",
+    "metric_observation",
+    "reading_value",
+}
+QUANTITY_EVENT_WRAPPER_PREDICATES = {
+    "description",
+    "event_description",
+    "event_detail",
+    "event_note",
+    "note",
+    "source_detail",
+}
+QUANTITY_MARKER_RE = re.compile(
+    r"(?:^|[_\W])(?:\d+(?:[._]\d+)?|kg|min|minute|hour|second|k|kw|percent|ratio|rate|threshold|setpoint|value|duration|offset|score|reading)(?:[_\W]|$)",
+    re.IGNORECASE,
+)
+SOURCE_LOCATOR_RE = re.compile(r"^(?:src|source)?_?line_?\d+$|^l\d+$|^line_?\d+$", re.IGNORECASE)
+QUANTITY_EVENT_ISSUE_STATUSES = {"not_offered", "offered_not_delivered", "partially_delivered"}
 
 
 def audit_paths(paths: list[Path]) -> dict[str, Any]:
@@ -95,6 +116,7 @@ def _load_draw(path: Path) -> dict[str, Any]:
             signature for signature in candidate_signatures if int(signature_counts.get(signature, 0)) == 0
         ),
         "surface_counts": _surface_counts(direct_facts),
+        "delivery_telemetry": _delivery_telemetry(candidate_signatures=candidate_signatures, direct_rows=direct_rows),
         "contracts": _contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
     }
 
@@ -141,6 +163,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
         }
     )
     palette_delivery_contracts = _palette_delivery_contracts(draws)
+    delivery_telemetry = _fixture_delivery_telemetry(draws)
     fact_sets = [set(draw["direct_facts"]) for draw in draws]
     union_facts = set().union(*fact_sets) if fact_sets else set()
     common_facts = set.intersection(*fact_sets) if fact_sets else set()
@@ -200,6 +223,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
         "candidate_zero_yield_signature_count": len(candidate_zero_yield_union),
         "candidate_zero_yield_signatures": candidate_zero_yield_union,
         "palette_delivery_contracts": palette_delivery_contracts,
+        "delivery_telemetry": delivery_telemetry,
         "stable": not unstable_facts,
         "union_fact_count": len(union_facts),
         "common_fact_count": len(common_facts),
@@ -221,6 +245,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
                 "direct_predicate_count": draw["direct_predicate_count"],
                 "direct_signature_count": len(draw["signature_counts"]),
                 "surface_counts": draw["surface_counts"],
+                "delivery_telemetry": draw["delivery_telemetry"],
                 "contracts": draw["contracts"],
             }
             for draw in draws
@@ -232,6 +257,12 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
 def _summarize(fixtures: list[dict[str, Any]]) -> dict[str, Any]:
     unstable = [fixture for fixture in fixtures if not fixture["stable"]]
     palette_unstable = [fixture for fixture in fixtures if not fixture.get("palette_stable")]
+    quantity_delivery = [
+        row
+        for fixture in fixtures
+        for row in fixture.get("delivery_telemetry", [])
+        if isinstance(row, dict) and row.get("kind") == "quantity_event_delivery"
+    ]
     return {
         "stable_fixture_count": len(fixtures) - len(unstable),
         "unstable_fixture_count": len(unstable),
@@ -244,6 +275,9 @@ def _summarize(fixtures: list[dict[str, Any]]) -> dict[str, Any]:
             int(fixture.get("candidate_zero_yield_signature_count", 0)) for fixture in fixtures
         ),
         "palette_delivery_contract_count": sum(len(fixture.get("palette_delivery_contracts", [])) for fixture in fixtures),
+        "quantity_event_delivery_issue_count": sum(
+            1 for row in quantity_delivery if row.get("status") in QUANTITY_EVENT_ISSUE_STATUSES
+        ),
         "unstable_fact_count": sum(int(fixture["unstable_fact_count"]) for fixture in fixtures),
         "predicate_drift_count": sum(len(fixture["predicate_drift"]) for fixture in fixtures),
         "surface_drift_count": sum(len(fixture["surface_drift"]) for fixture in fixtures),
@@ -365,6 +399,138 @@ def _palette_delivery_status(
     if candidate_present and count == 0:
         return "zero_yield"
     return "delivery_collapse"
+
+
+def _delivery_telemetry(*, candidate_signatures: list[str], direct_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "quantity_event_delivery": _quantity_event_delivery_telemetry(
+            candidate_signatures=candidate_signatures,
+            direct_rows=direct_rows,
+        )
+    }
+
+
+def _fixture_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    quantity_rows = []
+    for draw in draws:
+        item = draw.get("delivery_telemetry", {}).get("quantity_event_delivery")
+        if isinstance(item, dict):
+            quantity_rows.append(item)
+    if quantity_rows:
+        statuses = [str(item.get("delivery_status", "")) for item in quantity_rows]
+        rows.append(
+            {
+                "kind": "quantity_event_delivery",
+                "status": _aggregate_quantity_delivery_status(statuses),
+                "status_counts": _count_statuses(statuses),
+                "carrier_offered_counts": [int(item.get("carrier_offered_count", 0) or 0) for item in quantity_rows],
+                "carrier_row_counts": [int(item.get("carrier_row_count", 0) or 0) for item in quantity_rows],
+                "numeric_wrapper_counts": [int(item.get("numeric_wrapper_count", 0) or 0) for item in quantity_rows],
+                "stranded_numeric_wrapper_counts": [
+                    int(item.get("stranded_numeric_wrapper_count", 0) or 0) for item in quantity_rows
+                ],
+                "draws": quantity_rows,
+            }
+        )
+    return rows
+
+
+def _aggregate_quantity_delivery_status(statuses: list[str]) -> str:
+    meaningful = [status for status in statuses if status and status != "not_applicable"]
+    if not meaningful:
+        return "not_applicable"
+    if all(status == "delivered" for status in meaningful):
+        return "delivered"
+    if any(status == "offered_not_delivered" for status in meaningful):
+        return "offered_not_delivered"
+    if any(status == "partially_delivered" for status in meaningful):
+        return "partially_delivered"
+    if any(status == "not_offered" for status in meaningful):
+        return "not_offered"
+    return "mixed"
+
+
+def _quantity_event_delivery_telemetry(
+    *,
+    candidate_signatures: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    carrier_signatures = [
+        signature
+        for signature in candidate_signatures
+        if _split_signature(signature)[0] in QUANTITY_EVENT_CARRIER_PREDICATES
+    ]
+    carrier_rows = [
+        row
+        for row in direct_rows
+        if str(row.get("predicate", "")).strip() in QUANTITY_EVENT_CARRIER_PREDICATES
+    ]
+    carrier_subjects = {
+        str((row.get("args") or [""])[0]).strip()
+        for row in carrier_rows
+        if isinstance(row.get("args"), list) and row.get("args")
+    }
+    numeric_wrappers = [
+        row
+        for row in direct_rows
+        if _is_numeric_event_wrapper(row)
+    ]
+    stranded_wrappers = [
+        row
+        for row in numeric_wrappers
+        if not _wrapper_subject_has_quantity_carrier(row, carrier_subjects)
+    ]
+    if not numeric_wrappers:
+        status = "not_applicable"
+    elif not carrier_signatures:
+        status = "not_offered"
+    elif carrier_signatures and numeric_wrappers and not carrier_rows:
+        status = "offered_not_delivered"
+    elif stranded_wrappers:
+        status = "partially_delivered"
+    else:
+        status = "delivered"
+    return {
+        "kind": "quantity_event_delivery",
+        "delivery_status": status,
+        "carrier_offered_count": len(carrier_signatures),
+        "carrier_offered_signatures": carrier_signatures,
+        "carrier_row_count": len(carrier_rows),
+        "numeric_wrapper_count": len(numeric_wrappers),
+        "stranded_numeric_wrapper_count": len(stranded_wrappers),
+        "sample_numeric_wrappers": [_row_to_fact_like(row) for row in numeric_wrappers[:6]],
+        "sample_stranded_numeric_wrappers": [_row_to_fact_like(row) for row in stranded_wrappers[:6]],
+    }
+
+
+def _is_numeric_event_wrapper(row: dict[str, Any]) -> bool:
+    predicate = str(row.get("predicate", "")).strip()
+    args = row.get("args") if isinstance(row.get("args"), list) else []
+    if predicate not in QUANTITY_EVENT_WRAPPER_PREDICATES:
+        return False
+    text = " ".join(_quantity_content_args(predicate, args))
+    return bool(QUANTITY_MARKER_RE.search(text))
+
+
+def _quantity_content_args(predicate: str, args: list[Any]) -> list[str]:
+    values = [str(arg).strip() for arg in args]
+    if predicate == "source_detail" and len(values) >= 3:
+        values = values[2:]
+    elif len(values) >= 2:
+        values = values[1:]
+    return [value for value in values if value and not SOURCE_LOCATOR_RE.fullmatch(value)]
+
+
+def _wrapper_subject_has_quantity_carrier(row: dict[str, Any], carrier_subjects: set[str]) -> bool:
+    args = row.get("args") if isinstance(row.get("args"), list) else []
+    return bool(args and str(args[0]).strip() in carrier_subjects)
+
+
+def _row_to_fact_like(row: dict[str, Any]) -> str:
+    predicate = str(row.get("predicate", "")).strip()
+    args = row.get("args") if isinstance(row.get("args"), list) else []
+    return f"{predicate}({', '.join(str(arg) for arg in args)})."
 
 
 def _count_statuses(statuses: list[str]) -> dict[str, int]:
@@ -835,6 +1001,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Signature delivery drift rows: `{report['summary']['signature_delivery_drift_count']}`",
         f"- Candidate zero-yield signatures: `{report['summary']['candidate_zero_yield_signature_count']}`",
         f"- Palette delivery contract rows: `{report['summary']['palette_delivery_contract_count']}`",
+        f"- Quantity-event delivery issues: `{report['summary']['quantity_event_delivery_issue_count']}`",
         f"- Unstable direct facts: `{report['summary']['unstable_fact_count']}`",
         f"- Predicate drift rows: `{report['summary']['predicate_drift_count']}`",
         f"- Surface drift rows: `{report['summary']['surface_drift_count']}`",
@@ -854,6 +1021,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Signature delivery drift rows: `{len(fixture['signature_delivery_drift'])}`",
                 f"- Candidate zero-yield signatures: `{fixture['candidate_zero_yield_signature_count']}`",
                 f"- Palette delivery contract rows: `{len(fixture['palette_delivery_contracts'])}`",
+                f"- Delivery telemetry rows: `{len(fixture.get('delivery_telemetry', []))}`",
                 f"- Common / union direct facts: `{fixture['common_fact_count']} / {fixture['union_fact_count']}`",
                 f"- Unstable direct facts: `{fixture['unstable_fact_count']}`",
                 "",
@@ -896,6 +1064,20 @@ def render_markdown(report: dict[str, Any]) -> str:
                 ]
                 lines.append(
                     f"| `{row['signature']}` | {row['max_row_count']} | `{row['classification_counts']}` | `{statuses}` |"
+                )
+            lines.append("")
+        if fixture.get("delivery_telemetry"):
+            lines.extend(
+                [
+                    "| Telemetry | Status | Status counts | Carrier rows | Numeric wrappers | Stranded wrappers |",
+                    "| --- | --- | --- | --- | --- | --- |",
+                ]
+            )
+            for row in fixture["delivery_telemetry"]:
+                lines.append(
+                    f"| `{row['kind']}` | `{row['status']}` | `{row['status_counts']}` | "
+                    f"`{row.get('carrier_row_counts', [])}` | `{row.get('numeric_wrapper_counts', [])}` | "
+                    f"`{row.get('stranded_numeric_wrapper_counts', [])}` |"
                 )
             lines.append("")
         if fixture["predicate_drift"]:

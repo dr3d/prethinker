@@ -142,6 +142,63 @@ def test_compile_surface_stability_reports_palette_delivery_contracts(tmp_path: 
     assert contract["draws"][1]["status"] == "arity_drift"
 
 
+def test_compile_surface_stability_reports_quantity_event_delivery_telemetry(tmp_path: Path) -> None:
+    draw1 = _write_compile(
+        tmp_path / "draw1" / "fixture_quantity" / "domain_bootstrap_file_a.json",
+        [
+            "event_description(ev_1, feed_rate_increased_to_18_4_kg_min).",
+            "event_measurement(ev_1, feed_rate, 18.4, kg_min).",
+        ],
+        candidate_predicates=["event_description/2", "event_measurement/4"],
+    )
+    draw2 = _write_compile(
+        tmp_path / "draw2" / "fixture_quantity" / "domain_bootstrap_file_b.json",
+        ["event_description(ev_1, feed_rate_increased_to_18_4_kg_min)."],
+        candidate_predicates=["event_description/2", "event_measurement/4"],
+    )
+    draw3 = _write_compile(
+        tmp_path / "draw3" / "fixture_quantity" / "domain_bootstrap_file_c.json",
+        ["event_description(ev_1, feed_rate_increased_to_18_4_kg_min)."],
+        candidate_predicates=["event_description/2"],
+    )
+
+    report = audit_paths([draw1, draw2, draw3])
+
+    fixture = report["fixtures"][0]
+    telemetry = fixture["delivery_telemetry"][0]
+    assert telemetry["kind"] == "quantity_event_delivery"
+    assert telemetry["status"] == "offered_not_delivered"
+    assert telemetry["status_counts"] == {
+        "delivered": 1,
+        "not_offered": 1,
+        "offered_not_delivered": 1,
+    }
+    assert telemetry["carrier_row_counts"] == [1, 0, 0]
+    assert telemetry["stranded_numeric_wrapper_counts"] == [0, 1, 1]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 1
+    markdown = __import__("scripts.audit_compile_surface_stability", fromlist=["render_markdown"]).render_markdown(report)
+    assert "Quantity-event delivery issues" in markdown
+
+
+def test_quantity_event_telemetry_ignores_source_line_locators(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_story" / "domain_bootstrap_file_a.json",
+        [
+            "source_detail(person_a, errand, buy_brown_twine_and_vinegar, src_line_0013).",
+            "source_detail(person_a, physical_trait, very_near_sighted, src_line_0007).",
+        ],
+        candidate_predicates=["source_detail/4"],
+    )
+
+    report = audit_paths([draw])
+
+    fixture = report["fixtures"][0]
+    telemetry = fixture["delivery_telemetry"][0]
+    assert telemetry["status"] == "not_applicable"
+    assert telemetry["numeric_wrapper_counts"] == [0]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 0
+
+
 def test_source_authority_contract_requires_shared_subject_and_recipient_slots(tmp_path: Path) -> None:
     draw1 = _write_compile(
         tmp_path / "draw1" / "fixture_b" / "domain_bootstrap_file_a.json",

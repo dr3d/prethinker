@@ -76,9 +76,9 @@ Provider failures are transport evidence, not architecture evidence.
 
 The project is near, but not permanently in, instrument-freeze mode. Freeze only
 when the current repair cycle has stopped changing architecture and the next
-question is measurement rather than repair. The 2026-05-17 native MoE
-no-helper stamp completed the internal-corpus measurement at 1880/83/196 over
-2163 judged rows, exact rate 86.92%, with zero helper rows.
+question is measurement rather than repair. The 2026-05-17 fixed-compile
+native no-helper restamp measured the internal corpus at 1934/64/162 over 2163
+judged rows, exact rate 89.41%, with zero helper rows.
 
 Before a full stamp:
 

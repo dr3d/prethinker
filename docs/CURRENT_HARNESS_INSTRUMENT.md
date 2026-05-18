@@ -170,6 +170,12 @@ Recent no-helper work made this boundary explicit:
   to answer some questions while still alternating between incompatible
   predicate names or arities for the same source. Those palette shifts are
   measured as first-class churn before any repair is designed.
+- Compile delivery telemetry now distinguishes "profile or wrapper evidence
+  exists" from "the direct answer-bearing carrier was actually emitted." The
+  first N=3 compile-only diagnostic found the quantity-rich event target
+  unstable while a narrative control stayed quiet after source-line locators
+  were excluded from quantity detection. This is a diagnostic signal, not a
+  repair permission.
 - Literal `Key: Value` source lines now emit deterministic
   `source_record_inline_field/3` plus the shared `source_record_field/3`
   surface used for tables. This is source addressability, not semantic
@@ -261,6 +267,10 @@ Recent transfer work supports the current direction:
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.
+- Offered-but-not-delivered telemetry is being added one surface at a time.
+  The current quantity-event detector only searches content slots, ignores
+  source-line locators, and reports issues when numeric event/log details are
+  trapped in generic wrappers without a direct quantity-bearing event carrier.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
