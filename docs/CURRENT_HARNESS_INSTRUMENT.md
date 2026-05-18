@@ -1,6 +1,6 @@
 # Current Harness Instrument
 
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 Prethinker compiles documents into governed, queryable KB artifacts and audits
 whether questions can be answered from admitted state alone, without rereading
@@ -157,9 +157,8 @@ Recent no-helper work made this boundary explicit:
 - Source-coordinate profile work moved old packet-style source lookup pressure
   toward direct ledger facts and query planning rather than restoring helper
   rows.
-- Source/role review pressure treats old names such as
-  `industrial_sensor_clock_correction` as fixture-risk audit coordinates, not
-  public architecture.
+- Source/role review pressure treats fixture-flavored predicate names surfaced
+  during native inventory work as audit coordinates, not public architecture.
 - Source-surface gap audits now distinguish answer strings that are stranded in
   deterministic `source_record_*` rows from values that have earned direct
   admitted predicates. `source_detail/4` is available only as an additive
@@ -193,162 +192,94 @@ Can a better compile surface or deterministic ledger retire it?
 The healthy long-term motion is not infinite guard growth. It is direct
 compile-surface and ledger improvements retiring downstream selector scars.
 
+## Current Empirical State
+
+The current native no-helper capstone is the 2026-05-17 QA-only restamp over
+the same 56 compiled native fixtures. It measured cumulative query-layer work
+without introducing compile variance:
+
+- 2163 judged rows: 1934 exact, 64 partial, 162 miss
+- 89.41% exact, up from the prior 86.92% native no-helper stamp
+- +54 exact rows and +2.49 percentage points over the previous no-helper
+  baseline
+- zero helper rows, zero runtime load errors, and zero write proposals
+
+The remaining gaps are no longer primarily helper or query-filter failures.
+After the query-layer restamp, compile-surface gaps fell to 148 and
+query-surface gaps fell to 17. A source-surface audit still found 58 rows where
+answer-bearing values are stranded in deterministic `source_record_*` rows.
+That makes direct compile-surface emission for source-record-only distinctions
+the next high-value layer.
+
+## Operating Protocol
+
+Measurement now follows the layer being changed:
+
+- Pure query/runtime changes use QA-only restamps on fixed compile artifacts.
+- Compile, profile, palette, or invariant changes start with small replay
+  compiles and quality gates before any full compile+QA stamp.
+- Full corpus stamps are reserved for frozen instrument states, not for every
+  local repair.
+
+This separation matters because a full recompile would mix query-layer progress
+with compile stochasticity. The 89.41% result is meaningful precisely because
+it used fixed compile artifacts.
+
+## Delivery Contracts
+
+Palette delivery contracts are the current stabilization vocabulary. They ask
+whether a retained repeated signature actually delivers rows across redraws,
+not merely whether the same predicate label appears. Each draw is classified as
+one of four states:
+
+- `healthy`: the signature still delivers usable rows
+- `zero_yield`: the signature exists but emits no rows
+- `arity_drift`: the name survives but the slot shape changes
+- `delivery_collapse`: the retained surface loses the rows that made it
+  queryable
+
+This vocabulary keeps palette stability honest. Freezing names is not enough;
+the harness must preserve the structural slots that make those names answer
+questions.
+
 ## Current Evidence Pattern
 
 Recent transfer work supports the current direction:
 
-- The 2026-05-17 native MoE no-helper stamp compiled all 56 native fixtures
-  and answered 2163 judged rows with helper companion delivery disabled:
-  1880 exact, 83 partial, 196 miss, for an exact rate of 86.92%. Runtime load
-  errors and write proposals were both zero, and helper rows were exactly zero.
-- External corpora and unlike probes routinely run with 0-3 helper rows because
-  the modern path relies on admitted predicates and source ledgers instead of
+- Helpers are retired from the daily path. External corpora and unlike probes
+  routinely run with 0-3 helper rows because the modern path relies on admitted
+  predicates, deterministic source ledgers, selectors, and guards rather than
   native compatibility adapters.
-- The native corpus still carries many historical shapes, which makes it the
-  best place to find legacy residue and compile-surface gaps. That is not a
-  reason to restore helpers; it is the reason to convert reachable distinctions
-  into direct admitted predicates, deterministic ledgers, or query policy.
-- Predicate inventory is now tracked directly so fixture-shaped names can be
-  audited by frequency, scope, and layer rather than discovered by surprise in
-  archived notebooks.
-- Compile-surface invariant audits now include a quality contract for generic
-  detail/event wrappers: wrappers may remain as additive residue, but they are
-  flagged when event identity, time, participant/system, subject, and outcome
-  backbone rows are missing.
-- Compile-surface stability audits now report candidate-palette churn and
-  predicate arity drift across redraws, plus signature-level row delivery drift
-  and zero-yield candidate signatures. Recent roster redraws showed high
-  palette churn even when QA stayed in the same rough band, and palette-prior
-  replay showed the sharper failure mode: a compile can preserve many labels
-  while losing the delivered rows that made those labels queryable.
-- Palette registries can now be built from compile artifacts as vocabulary-only
-  scaffolds. Early roster replay showed that a palette prior can reduce churn,
-  but overly strict name/arity preservation can still lose answer-bearing slots.
-  The next repair layer must preserve the structural slots that make the
-  surface queryable, not merely freeze predicate labels.
-- Palette delivery contracts are the current stabilization target. The contract
-  asks whether a retained repeated signature actually delivers rows across
-  redraws, classifying each draw as `healthy`, `zero_yield`, `arity_drift`, or
-  `delivery_collapse`. Delivery-contract guidance improved the roster replay
-  from 29/2/9 under strict palette prior to 33/1/6 with helpers still disabled,
-  while reducing palette churn and arity drift.
-- Transfer validation is mixed and therefore still active. On
-  `sable_creek_budget`, delivery-guided replay preserved the accepted no-helper
-  QA score at 36/1/3 and removed arity drift, but still swapped many
-  row-bearing signatures. On `dulse_ledger`, the same pattern regressed from
-  34/5/1 to 32/5/3 with helpers still disabled, mainly around ledger/detail
-  enumeration, restitution, and rule-consequence joins. The next repair should
-  protect structural slot delivery and detail-bearing ledger surfaces; it
-  should not freeze fixture predicate names or restore legacy helper rows.
-- A small model-variance spot check on `dulse_ledger` did not make the issue
-  disappear. Qwen 3.6 27B compiled to 29/5/4 with parse loss and higher palette
-  drift; DeepSeek V4 Pro compiled to 33/5/2 with helpers still disabled but
-  continued delivery drift. Treat model/provider choice as variance evidence,
-  not as a substitute for the missing structural delivery contract.
-- The invariant audit now includes `repeated_record_detail_delivery_contract`.
-  It looks for repeated source-owned record anchors whose source text carries
-  transfer/action/status language, then checks whether admitted rows preserve
-  record identity, participant/actor, item/value, and status/consequence slots
-  as joinable surfaces. This is an audit gate only; an attempted prompt repair
-  was rejected because it over-compressed Dulse rather than improving QA. On
-  the 56-fixture native draw-1 preflight, the contract surfaced three weak
-  cases: `avalon_grant_committee`, `dulse_ledger`, and
-  `rotating_chair_authority`.
-- The stamp's remaining gap is still mostly compile-surface addressability:
-  170 compile-surface gaps, 59 hybrid-join gaps, 44 query-surface gaps, 8
-  judge-uncertain rows, and 2 answer-surface gaps. That keeps the next repair
-  pressure on direct admitted surfaces and deterministic ledgers, not on
-  restoring helper compatibility rows.
-- The first post-stamp repair targeted evidence-bundle query execution, not
-  fixture content. The source-surface diagnostic found that 84 of the 170
-  compile-surface gaps had strong answer evidence in deterministic
-  `source_record_*` rows, including 67 where the answer was stranded there and
-  absent from direct admitted rows. Evidence-bundle plans were sometimes
-  proposing Prolog-like equality constraints such as `Label = some_source_row`
-  inside otherwise valid source-record joins. The harness now folds simple
-  variable-to-constant equality constraints into predicate arguments before
-  validating and executing the bundle, while rejecting alias-only equality that
-  would become a broad source scan. A no-helper smoke over two affected native
-  fixtures showed the bounded effect: one source-row reason miss became exact,
-  while unrelated rows remained outside the repair.
-- Quantity questions now participate in the same deterministic source-text hint
-  path. Previously, `How many...` rows could skip question-token source scans
-  entirely, leaving prose counts stranded even when the source row was present.
-  The query path now treats quantity prompts as source-text probes and allows a
-  slightly wider question-token hint set. This remains query routing only: it
-  uses question tokens and deterministic `source_record_text_atom/2` rows, does
-  not inspect reference answers, and does not create helper rows. A no-helper
-  smoke over a quantity miss confirmed the source row became visible and the
-  row judged exact.
-- A six-fixture no-helper replay over source-stranded native rows measured the
-  combined source-query repairs as a bounded gain, not a blanket fix: exact
-  rows moved by +10 net across 240 judged rows, with zero helper rows and zero
-  runtime errors. The lift concentrated in fixtures where source rows already
-  carried the missing detail but prior query routing failed to expose them.
-  One fixture regressed by two exact rows, so these changes remain query-route
-  evidence rather than a new stamped baseline.
-- Evidence-bundle source-text filters are now repaired as bounded execution
-  filters when they start from `source_record_text_atom/2`. The harness accepts
-  LLM-authored forms such as `memberchk(...)`, `string_contains(...)`,
-  `text_contains(...)`, and simple `Text contains ...` only after a source-text
-  surface has already bound the row and text variables, then requires all
-  normalized needles to appear in the deterministic source text. This converts
-  common rejected query templates into row filters without adding facts,
-  helper rows, or fixture vocabulary. Local replay over existing stamp/replay
-  artifacts found 112 newly executable templates, 95 with hits, including 65
-  that had previously been rejected. A targeted four-fixture OpenRouter smoke
-  stayed helper-free and moved two fixtures up by +5 exact combined, while two
-  fixtures showed no net score movement and normal stochastic row flips; treat
-  this as routing validation, not a stamped baseline.
-- The same bounded filter pattern now covers source-record labels, sections,
-  text keys, and fields when the query first binds one deterministic
-  `source_record_*` surface and then filters a returned variable. Local replay
-  found this is a smaller hygiene layer than source text: 27 newly executable
-  templates, 13 with hits, and 2 on non-exact rows. It is useful for avoiding
-  rejected ledger-column filters, but it is not expected to move the native
-  score materially by itself.
-- A final query-layer cleanup before restamp added deterministic post-filter
-  execution for single admitted predicates followed by simple list-membership
-  or concat-as-contains filters. This catches evidence plans such as "query the
-  admitted role/claim rows, then keep rows whose returned value belongs to this
-  list or contains this atom" without inventing new predicates. Local replay
-  found 101 newly executable templates, 58 with hits, including 14 hits on
-  previously non-exact rows. A targeted three-fixture OpenRouter smoke moved
-  +5 exact over 120 rows with helpers still at zero. This is the cutoff for
-  query-layer cleanup before a QA-only native no-helper restamp; the remaining
-  stranded-only compile-surface gaps need direct compile-surface work rather
-  than more runtime normalizers.
-- The QA-only native no-helper restamp on the same 56 compiled fixtures
-  measured the cumulative query-layer movement without introducing compile
-  variance: 1934 exact, 64 partial, 162 miss over 2163 rows, for 89.41% exact.
-  This is +54 exact and +2.49 percentage points over the 86.92% native MoE
-  no-helper stamp. Runtime load errors and write proposals remained zero, and
-  helper rows remained exactly zero. Failure surfaces moved from 170 to 148
-  compile-surface gaps, 59 to 57 hybrid-join gaps, 44 to 17 query-surface
-  gaps, and 8 to 3 judge-uncertain rows. The source-surface audit of the 148
-  remaining compile gaps still found 58 `answer_stranded_in_source_record`
-  rows, down from 67, so the next high-value layer is direct compile-surface
-  emission for source-record-only distinctions rather than more query-filter
-  normalization.
-- The operating protocol now distinguishes measurement layers: pure
-  query/runtime changes should use a QA-only restamp on fixed compile artifacts;
-  compile-guidance changes should start with small replay compiles and quality
-  gates before any full compile+QA stamp. A first four-fixture source-record
-  promotion probe was diagnostic rather than a compile-layer win: all four
-  replay compiles parsed, but all four quality gates held because detail
-  wrappers or lifecycle fragments still failed to preserve enough direct
-  backbone slots. That result confirms the remaining work is real
-  compile-surface preservation, not another QA normalizer.
-- A follow-up compile-quality retry loop now maps structural hold reasons into
-  one generic corrective replay context. It is deliberately bounded: wrapper
-  drift can ask for missing backbone slot preservation, and lifecycle/status
-  holds can ask for joined subject/state/date units; it cannot inject fixture
-  facts. On the same four replay artifacts, contract calibration separated
-  false lifecycle alarms from true compile loss: two artifacts passed, one held
-  only on high profile risk, and one still held on a real quantity-backbone
-  drift where numeric values remained inside event descriptions. The next
-  compile-layer target is therefore quantity-rich event/profile palette
-  preservation, not a full stamp.
+- The native corpus is still valuable because it contains historical pressure:
+  legacy residue, fixture-flavored predicates, and compile-surface gaps. Those
+  are audit coordinates, not permission to restore helpers or freeze fixture
+  vocabulary into public architecture.
+- Query-layer cleanup is bounded. Source-record text, labels, sections, fields,
+  simple equality constraints, list membership, and contains-style filters are
+  executed only after a deterministic or admitted surface has already bound the
+  row. These repairs add no facts, no helper rows, and no fixture vocabulary.
+- Compile-surface stability is now measured at the palette and delivery level:
+  candidate-palette churn, predicate arity drift, zero-yield signatures, and
+  row delivery collapse are first-class telemetry.
+- Source-record ledgers preserve fidelity but are not semantic substitutes.
+  When source rows carry answer-bearing identity, status, count, time, amount,
+  role, authority, or rationale, the target state is a direct admitted predicate
+  or stricter profile surface, not source text as the only carrier.
+- Compile-quality gates now distinguish true compile loss from noisy audit
+  alarms. Generic detail/event wrappers may remain as additive residue, but
+  they are flagged when concrete backbone rows disappear. Calibration has
+  already separated false lifecycle alarms from real quantity-backbone drift.
+- Quantity-rich event preservation now has the same bounded shape as
+  source-detail preservation: a deterministic vocabulary extension can add
+  `event_measurement/4` only when profile admission sees repeated numeric
+  event/log details and no direct quantity-bearing event carrier. This is
+  vocabulary-only and extracts no facts. Focused replay proved the slot can
+  carry setpoint and feed-rate values; four-fixture replay still found one
+  stochastic sensor hold, so this is an architectural advance, not a stamp.
+- Transfer validation is mixed and active. Model/provider variation is treated
+  as variance evidence, not as a replacement for structural delivery contracts.
+  The next compile-layer pressure is quantity-rich event/profile preservation
+  and other source-record-only distinctions, not a native full stamp.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

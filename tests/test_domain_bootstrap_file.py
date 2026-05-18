@@ -17,6 +17,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_health_summary,
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
+    _ensure_quantity_event_predicate,
     _ensure_source_detail_predicate,
     _profile_admission_report,
     _profile_admission_retry_context,
@@ -94,6 +95,55 @@ def test_source_detail_profile_extension_respects_specific_detail_carrier() -> N
         "schema_version": "profile_source_detail_extension_v1",
         "added": False,
         "reason": "specific_detail_carrier_present",
+    }
+
+
+def test_quantity_event_profile_extension_is_vocabulary_only() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "event_record/3", "args": ["event_id", "source", "timestamp"]},
+            {"signature": "event_description/2", "args": ["event_id", "description"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_quantity_event_predicate(
+        profile,
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+    )
+
+    assert metadata["added"] is True
+    assert metadata["fact_extraction"] is False
+    assert any(item["signature"] == "event_measurement/4" for item in profile["candidate_predicates"])
+    assert "event_measurement/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_quantity_event_profile_extension_respects_existing_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "metric_observation/4",
+                "args": ["event_id", "metric", "value", "unit"],
+            }
+        ],
+    }
+
+    metadata = _ensure_quantity_event_predicate(
+        profile,
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+    )
+
+    assert metadata == {
+        "schema_version": "profile_quantity_event_extension_v1",
+        "added": False,
+        "reason": "no_shallow_quantity_event_palette",
     }
 
 
@@ -803,6 +853,25 @@ def test_profile_admission_flags_shallow_operational_lifecycle_palette() -> None
     assert report["findings"][0]["class"] == "shallow_lifecycle_palette"
 
 
+def test_profile_admission_flags_shallow_quantity_event_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "event_record/3", "args": ["event_id", "source", "timestamp"]},
+                {"signature": "event_description/2", "args": ["event_id", "description"]},
+            ]
+        },
+    )
+
+    assert report["source_signal_counts"]["quantity_event"] == 2
+    assert report["candidate_contract_counts"]["quantity_event_capable"] == 0
+    assert report["findings"][0]["class"] == "shallow_quantity_event_palette"
+
+
 def test_profile_bootstrap_admission_context_guides_operational_status_palettes() -> None:
     context = _profile_bootstrap_admission_context(
         intake_plan=None,
@@ -813,6 +882,18 @@ def test_profile_bootstrap_admission_context_guides_operational_status_palettes(
     assert "complete status-at-date or lifecycle-event shape" in joined
     assert "subject, state/action/result, and date/source together" in joined
     assert "status_changed_on/2" in joined
+
+
+def test_profile_bootstrap_admission_context_guides_quantity_event_palettes() -> None:
+    context = _profile_bootstrap_admission_context(
+        intake_plan=None,
+        domain_hint="sensor measurement rate threshold values",
+    )
+    joined = "\n".join(context)
+
+    assert "direct quantity-bearing event/record shape" in joined
+    assert "event_description/2" in joined
+    assert "numeric event details" in joined
 
 
 def test_profile_admission_retry_context_names_complete_status_shapes() -> None:
@@ -833,6 +914,24 @@ def test_profile_admission_retry_context_names_complete_status_shapes() -> None:
     assert "proposal_status/2" in joined
 
 
+def test_profile_admission_retry_context_names_quantity_event_shapes() -> None:
+    context = _profile_admission_retry_context(
+        {
+            "findings": [
+                {
+                    "class": "shallow_quantity_event_palette",
+                    "nearby_signatures": ["event_description/2"],
+                }
+            ]
+        }
+    )
+    joined = "\n".join(context)
+
+    assert "event_measurement/4" in joined
+    assert "event/record/reading id" in joined
+    assert "event_description/2" in joined
+
+
 def test_profile_admission_accepts_complete_operational_lifecycle_palette() -> None:
     report = _profile_admission_report(
         source_text=(
@@ -847,6 +946,26 @@ def test_profile_admission_accepts_complete_operational_lifecycle_palette() -> N
     )
 
     assert report["candidate_contract_counts"]["operational_lifecycle_capable"] == 1
+    assert report["findings"] == []
+
+
+def test_profile_admission_accepts_complete_quantity_event_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "event_measurement/4",
+                    "args": ["event_id", "measure", "value", "unit"],
+                },
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["quantity_event_capable"] == 1
     assert report["findings"] == []
 
 

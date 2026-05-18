@@ -53,6 +53,22 @@ PROFILE_ADMISSION_SUBJECT_SLOTS = {
     "ticket",
 }
 PROFILE_ADMISSION_STATE_SLOTS = {"outcome", "phase", "result", "state", "status"}
+PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS = {"ev", "event", "entry", "interval", "measurement", "observation", "reading", "record", "sample"}
+PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS = {
+    "amount",
+    "count",
+    "duration",
+    "limit",
+    "measurement",
+    "offset",
+    "quantity",
+    "rate",
+    "ratio",
+    "score",
+    "threshold",
+    "value",
+}
+PROFILE_ADMISSION_QUANTITY_UNIT_SLOTS = {"basis", "unit", "units"}
 PROFILE_ADMISSION_LIFECYCLE_TERMS = {
     "approved",
     "assigned",
@@ -75,6 +91,27 @@ PROFILE_ADMISSION_LIFECYCLE_TERMS = {
     "transition",
     "withdrawn",
 }
+PROFILE_ADMISSION_QUANTITY_TERMS = {
+    "amount",
+    "count",
+    "duration",
+    "increase",
+    "increased",
+    "limit",
+    "measurement",
+    "offset",
+    "quantity",
+    "rate",
+    "ratio",
+    "reading",
+    "reverted",
+    "score",
+    "setpoint",
+    "threshold",
+    "unit",
+    "value",
+}
+PROFILE_ADMISSION_QUANTITY_UNIT_TERMS = {"c", "cm", "feet", "hours", "kg", "k", "kw", "m", "meters", "min", "minutes", "mm", "percent", "seconds"}
 
 PROFILE_SIGNATURE_ROSTER_JSON_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -943,7 +980,8 @@ def main() -> int:
     if profile_admission_context and isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
         admission_report = _profile_admission_report(parsed_profile=parsed, source_text=source_text)
         if any(
-            isinstance(item, dict) and item.get("class") == "shallow_lifecycle_palette"
+            isinstance(item, dict)
+            and item.get("class") in {"shallow_lifecycle_palette", "shallow_quantity_event_palette"}
             for item in admission_report.get("findings", [])
             if isinstance(admission_report.get("findings"), list)
         ):
@@ -1048,7 +1086,14 @@ def main() -> int:
                 error = retry_error
     profile_extension_metadata: dict[str, Any] | None = None
     if isinstance(parsed, dict) and bool(args.compile_source) and bool(args.source_record_ledger):
-        profile_extension_metadata = _ensure_source_detail_predicate(parsed)
+        extension_rows = [
+            _ensure_source_detail_predicate(parsed),
+            _ensure_quantity_event_predicate(parsed, source_text=source_text),
+        ]
+        profile_extension_metadata = {
+            "schema_version": "profile_extensions_v1",
+            "extensions": extension_rows,
+        }
     score = profile_bootstrap_score(parsed)
     record: dict[str, Any] = {
         "ts": _utc_now(),
@@ -2462,6 +2507,83 @@ def _ensure_source_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str,
     }
 
 
+def _ensure_quantity_event_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic quantity-bearing event carrier when profile admission proves it is needed.
+
+    This extends vocabulary only. It does not parse source rows or create facts;
+    the Semantic IR compile still has to choose and populate the predicate from
+    source evidence.
+    """
+
+    report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    if not any(
+        isinstance(item, dict) and item.get("class") == "shallow_quantity_event_palette"
+        for item in findings
+    ):
+        return {
+            "schema_version": "profile_quantity_event_extension_v1",
+            "added": False,
+            "reason": "no_shallow_quantity_event_palette",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_quantity_event_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "event_measurement/4" in signatures:
+        return {
+            "schema_version": "profile_quantity_event_extension_v1",
+            "added": False,
+            "reason": "event_measurement_already_present",
+        }
+    if any(_candidate_can_carry_quantity_event_unit(item) for item in candidates if isinstance(item, dict)):
+        return {
+            "schema_version": "profile_quantity_event_extension_v1",
+            "added": False,
+            "reason": "quantity_event_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "event_measurement/4",
+            "args": ["event_id", "measure", "value", "unit"],
+            "description": (
+                "Direct quantity-bearing event or log-entry surface for source-stated measurements, rates, "
+                "thresholds, durations, offsets, scores, or before/after values."
+            ),
+            "why": (
+                "Prevents query-bearing numeric event details from being stranded inside prose wrappers such as "
+                "event_description/2."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for exact source-stated numeric event details.",
+                "Keep event id, measure name, numeric value, and unit or basis in separate slots.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "event_measurement/4" not in provenance:
+        provenance.append("event_measurement/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added event_measurement/4 after shallow_quantity_event_palette."
+            )
+    return {
+        "schema_version": "profile_quantity_event_extension_v1",
+        "added": True,
+        "signature": "event_measurement/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
 def _has_specific_detail_carrier(signatures: set[str]) -> bool:
     for signature in signatures:
         predicate, _, arity = signature.partition("/")
@@ -2711,7 +2833,7 @@ def _profile_bootstrap_admission_context(
     if isinstance(intake_plan, dict):
         label_parts.append(json.dumps(intake_plan, ensure_ascii=False).casefold())
     label = " ".join(label_parts)
-    if not any(
+    has_operational_pressure = any(
         token in label
         for token in (
             "application",
@@ -2728,57 +2850,129 @@ def _profile_bootstrap_admission_context(
             "status record",
             "ticket",
         )
-    ):
-        return []
-    return [
-        (
-            "Profile admission rule: when an operational record, queue, proposal, application, ticket, docket, "
-            "permit, sample, or intake source has repeated dated lifecycle/status lines, the candidate predicate "
-            "palette must include at least one complete status-at-date or lifecycle-event shape carrying subject, "
-            "state/action/result, and date/source together."
-        ),
-        (
-            "Do not offer only separate status/2 plus status_changed_on/2, event_date/2, or event_date/3 surfaces "
-            "for repeated dated status timelines. Those split palettes are shallow unless another candidate can carry "
-            "the joined subject/status/date unit."
-        ),
-    ]
+    )
+    has_quantity_pressure = any(
+        token in label
+        for token in (
+            "calculation",
+            "formula",
+            "measurement",
+            "metric",
+            "numeric",
+            "quantity",
+            "rate",
+            "reading",
+            "sensor",
+            "threshold",
+            "value",
+        )
+    )
+    context: list[str] = []
+    if has_operational_pressure:
+        context.extend(
+            [
+                (
+                    "Profile admission rule: when an operational record, queue, proposal, application, ticket, docket, "
+                    "permit, sample, or intake source has repeated dated lifecycle/status lines, the candidate predicate "
+                    "palette must include at least one complete status-at-date or lifecycle-event shape carrying subject, "
+                    "state/action/result, and date/source together."
+                ),
+                (
+                    "Do not offer only separate status/2 plus status_changed_on/2, event_date/2, or event_date/3 surfaces "
+                    "for repeated dated status timelines. Those split palettes are shallow unless another candidate can carry "
+                    "the joined subject/status/date unit."
+                ),
+            ]
+        )
+    if has_quantity_pressure:
+        context.extend(
+            [
+                (
+                    "Profile admission rule: when a log, table, calculation, measurement, sensor, score, or metric source "
+                    "contains repeated numeric event details, the candidate predicate palette must include at least one "
+                    "direct quantity-bearing event/record shape carrying event or record id, measure or attribute, numeric "
+                    "value, and unit or basis when stated."
+                ),
+                (
+                    "Do not offer only event_description/2, note/2, summary/2, or other prose-wrapper surfaces for numeric "
+                    "event details. A prose description is shallow when the source states query-bearing quantities, rates, "
+                    "thresholds, offsets, durations, scores, or before/after values."
+                ),
+            ]
+        )
+    return context
 
 
 def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
     findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
     nearby: list[str] = []
+    classes = {
+        str(finding.get("class", "")).strip()
+        for finding in findings
+        if isinstance(finding, dict)
+    }
     for finding in findings:
         if isinstance(finding, dict):
             nearby.extend(str(item) for item in finding.get("nearby_signatures", []) if str(item).strip())
-    return [
-        (
-            "PROFILE ADMISSION RETRY: the previous profile had a shallow_lifecycle_palette finding. "
-            "Regenerate the profile so repeated dated lifecycle/status source lines have a complete candidate "
-            "predicate shape carrying subject, state/action/result, and date/source together."
-        ),
-        (
-            "Acceptable shapes include record_status_phase/4, record_status_at/3, record_lifecycle_event/5, "
-            "or source-local equivalents such as proposal_status_at/3, queue_status_at/3, docket_status_at/3, "
-            "ticket_status_at/3, application_status_at/3, sample_status_at/3, or *_status_on/3 when their args "
-            "are subject, status/result/state, and date/source."
-        ),
-        (
-            "Do not merely keep split surfaces like "
-            f"{', '.join(nearby[:8]) or 'status/2 plus event_date/status_changed_on'} "
-            "unless a complete joined status-at-date candidate is also present."
-        ),
-    ]
+    context: list[str] = []
+    if "shallow_lifecycle_palette" in classes:
+        context.extend(
+            [
+                (
+                    "PROFILE ADMISSION RETRY: the previous profile had a shallow_lifecycle_palette finding. "
+                    "Regenerate the profile so repeated dated lifecycle/status source lines have a complete candidate "
+                    "predicate shape carrying subject, state/action/result, and date/source together."
+                ),
+                (
+                    "Acceptable shapes include record_status_phase/4, record_status_at/3, record_lifecycle_event/5, "
+                    "or source-local equivalents such as proposal_status_at/3, queue_status_at/3, docket_status_at/3, "
+                    "ticket_status_at/3, application_status_at/3, sample_status_at/3, or *_status_on/3 when their args "
+                    "are subject, status/result/state, and date/source."
+                ),
+                (
+                    "Do not merely keep split surfaces like "
+                    f"{', '.join(nearby[:8]) or 'status/2 plus event_date/status_changed_on'} "
+                    "unless a complete joined status-at-date candidate is also present."
+                ),
+            ]
+        )
+    if "shallow_quantity_event_palette" in classes:
+        context.extend(
+            [
+                (
+                    "PROFILE ADMISSION RETRY: the previous profile had a shallow_quantity_event_palette finding. "
+                    "Regenerate the profile so repeated numeric event/log/source rows have a complete candidate "
+                    "predicate shape carrying event or record id, measure or attribute, numeric value, and unit or basis "
+                    "when stated."
+                ),
+                (
+                    "Acceptable shapes include event_measurement/4, event_quantity/4, reading_value/4, "
+                    "measurement_value/4, metric_observation/4, or source-local equivalents whose args include "
+                    "event/record/reading id, measure/attribute, value/amount/rate/threshold/duration, and unit/basis."
+                ),
+                (
+                    "Do not merely keep prose wrappers like event_description/2, note/2, description/2, or source_detail/4 "
+                    "unless a direct quantity-bearing event/record candidate is also present."
+                ),
+            ]
+        )
+    return context
 
 
 def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:
     source_mentions = _operational_lifecycle_source_mentions(source_text)
+    quantity_mentions = _quantity_event_source_mentions(source_text)
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
     lifecycle_capable = [
         _candidate_signature(item)
         for item in candidate_rows
         if _candidate_can_carry_operational_lifecycle_unit(item)
+    ]
+    quantity_capable = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_can_carry_quantity_event_unit(item)
     ]
     findings: list[dict[str, Any]] = []
     if len(source_mentions) >= 2 and not lifecycle_capable:
@@ -2797,16 +2991,38 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
                 "evidence": source_mentions[:3],
             }
         )
+    if len(quantity_mentions) >= 2 and not quantity_capable:
+        nearby = [
+            _candidate_signature(item)
+            for item in candidate_rows
+            if _candidate_signature(item)
+            and (
+                _quantity_event_text(_candidate_signature(item) + " " + " ".join(_candidate_args(item)))
+                or _candidate_signature(item).split("/", 1)[0] in {"event_description", "description", "note", "source_detail"}
+            )
+        ]
+        findings.append(
+            {
+                "class": "shallow_quantity_event_palette",
+                "source_signal_count": len(quantity_mentions),
+                "candidate_count": len(candidate_rows),
+                "nearby_signatures": nearby[:12],
+                "evidence": quantity_mentions[:3],
+            }
+        )
     return {
         "schema_version": "profile_admission_contracts_v1",
         "source_signal_counts": {
             "operational_lifecycle": len(source_mentions),
+            "quantity_event": len(quantity_mentions),
         },
         "candidate_contract_counts": {
             "operational_lifecycle_capable": len(lifecycle_capable),
+            "quantity_event_capable": len(quantity_capable),
         },
         "capable_signatures": {
             "operational_lifecycle": lifecycle_capable[:12],
+            "quantity_event": quantity_capable[:12],
         },
         "findings": findings,
     }
@@ -2828,6 +3044,25 @@ def _operational_lifecycle_source_mentions(source_text: str) -> list[str]:
     return mentions
 
 
+def _quantity_event_source_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.lower()
+        tokens = _profile_admission_tokens(lowered)
+        has_numeric = bool(re.search(r"\b\d+(?:[._]\d+)?\b", lowered))
+        if (
+            has_numeric
+            and (PROFILE_ADMISSION_DATE_RE.search(lowered) or tokens & PROFILE_ADMISSION_QUANTITY_UNIT_TERMS)
+            and _quantity_event_text(lowered)
+            and _profile_admission_tokens(lowered) & PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS
+        ):
+            mentions.append(line[:240])
+    return mentions
+
+
 def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     args = _candidate_args(candidate)
@@ -2842,6 +3077,25 @@ def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -
     return has_subject and has_state and has_date and _operational_lifecycle_text(signature + " " + " ".join(args))
 
 
+def _candidate_can_carry_quantity_event_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name in {"event_measurement", "event_quantity", "reading_value", "measurement_value", "metric_observation"}:
+        return True
+    args = _candidate_args(candidate)
+    if len(args) < 3:
+        return False
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_subject = any(tokens & PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS for tokens in arg_tokens)
+    has_value = any(tokens & PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS for tokens in arg_tokens)
+    has_measure = (
+        any(tokens & {"attribute", "field", "measure", "metric", "name", "type"} for tokens in arg_tokens)
+        or _quantity_event_text(signature)
+    )
+    has_unit_or_basis = any(tokens & PROFILE_ADMISSION_QUANTITY_UNIT_SLOTS for tokens in arg_tokens)
+    return has_subject and has_value and has_measure and has_unit_or_basis
+
+
 def _candidate_signature(candidate: dict[str, Any]) -> str:
     return str(candidate.get("signature") or "")
 
@@ -2853,6 +3107,10 @@ def _candidate_args(candidate: dict[str, Any]) -> list[str]:
 
 def _operational_lifecycle_text(text: str) -> bool:
     return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_LIFECYCLE_TERMS)
+
+
+def _quantity_event_text(text: str) -> bool:
+    return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_QUANTITY_TERMS)
 
 
 def _profile_admission_tokens(text: str) -> set[str]:
