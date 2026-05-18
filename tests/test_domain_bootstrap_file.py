@@ -18,6 +18,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
     _ensure_quantity_event_predicate,
+    _ensure_repeated_structure_predicates,
     _ensure_source_detail_predicate,
     _profile_admission_report,
     _profile_admission_retry_context,
@@ -145,6 +146,37 @@ def test_quantity_event_profile_extension_respects_existing_carrier() -> None:
         "added": False,
         "reason": "no_shallow_quantity_event_palette",
     }
+
+
+def test_repeated_structure_predicate_extension_admits_property_predicates() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "reconciliation_report/5",
+                "args": ["report_id", "date", "subject", "status", "count"],
+                "description": "Repeated reconciliation record.",
+                "admission_notes": [],
+            }
+        ],
+        "repeated_structures": [
+            {
+                "name": "reconciliation reports",
+                "record_predicate": "reconciliation_report/5",
+                "property_predicates": ["unit_count/3", "unaccounted_units/3"],
+            }
+        ],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_repeated_structure_predicates(profile)
+
+    signatures = {item["signature"] for item in profile["candidate_predicates"]}
+    assert metadata["added"] is True
+    assert metadata["signatures"] == ["unit_count/3", "unaccounted_units/3"]
+    assert {"reconciliation_report/5", "unit_count/3", "unaccounted_units/3"} <= signatures
+    added = [item for item in profile["candidate_predicates"] if item["signature"] == "unit_count/3"][0]
+    assert added["args"] == ["arg_1", "arg_2", "arg_3"]
+    assert metadata["fact_extraction"] is False
 
 
 def test_operational_record_context_guards_status_corrections_and_unresolved_items() -> None:

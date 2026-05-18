@@ -1087,6 +1087,7 @@ def main() -> int:
     profile_extension_metadata: dict[str, Any] | None = None
     if isinstance(parsed, dict) and bool(args.compile_source) and bool(args.source_record_ledger):
         extension_rows = [
+            _ensure_repeated_structure_predicates(parsed),
             _ensure_source_detail_predicate(parsed),
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
         ]
@@ -2504,6 +2505,91 @@ def _ensure_source_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str,
         "signature": "source_detail/4",
         "authority": "vocabulary_extension_only",
         "fact_extraction": False,
+    }
+
+
+def _ensure_repeated_structure_predicates(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    """Admit repeated-structure record/property predicates named by the profile.
+
+    The profile schema treats repeated_structures as a vocabulary reference, not
+    as a separate hidden namespace. If the LLM names property predicates there
+    but omits them from candidate_predicates, the compiler can otherwise produce
+    structurally correct rows and then reject them as outside the allowed
+    palette. This extension repairs that palette contract only; it extracts no
+    facts.
+    """
+
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {
+            "schema_version": "profile_repeated_structure_predicate_extension_v1",
+            "added": False,
+            "reason": "no_candidate_list",
+        }
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    repeated = parsed_profile.get("repeated_structures")
+    if not isinstance(repeated, list):
+        return {
+            "schema_version": "profile_repeated_structure_predicate_extension_v1",
+            "added": False,
+            "reason": "no_repeated_structures",
+        }
+    added: list[str] = []
+    for item in repeated:
+        if not isinstance(item, dict):
+            continue
+        refs = [str(item.get("record_predicate", "")).strip()]
+        if isinstance(item.get("property_predicates"), list):
+            refs.extend(str(ref).strip() for ref in item.get("property_predicates", []) if str(ref).strip())
+        for ref in refs:
+            signature = _normalized_signature(ref)
+            if not signature or signature in signatures:
+                continue
+            _name, arity_text = signature.split("/", 1)
+            arity = int(arity_text)
+            candidates.append(
+                {
+                    "signature": signature,
+                    "args": [f"arg_{index}" for index in range(1, arity + 1)],
+                    "description": (
+                        "Predicate named by repeated_structures and admitted so repeated record/property rows "
+                        "can use the same palette they were planned under."
+                    ),
+                    "why": (
+                        "Keeps repeated-structure vocabulary from becoming a hidden namespace that compile passes "
+                        "can plan but not emit."
+                    ),
+                    "admission_notes": [
+                        "Vocabulary extension only; use only for source-grounded rows belonging to the repeated structure.",
+                    ],
+                }
+            )
+            signatures.add(signature)
+            added.append(signature)
+    if added:
+        self_check = parsed_profile.get("self_check")
+        if isinstance(self_check, dict):
+            notes = self_check.get("notes")
+            if isinstance(notes, list):
+                notes.append(
+                    "Deterministic profile extension admitted repeated_structure record/property predicates: "
+                    + ", ".join(added[:12])
+                )
+        return {
+            "schema_version": "profile_repeated_structure_predicate_extension_v1",
+            "added": True,
+            "signatures": added,
+            "authority": "vocabulary_extension_only",
+            "fact_extraction": False,
+        }
+    return {
+        "schema_version": "profile_repeated_structure_predicate_extension_v1",
+        "added": False,
+        "reason": "all_repeated_structure_predicates_already_present",
     }
 
 

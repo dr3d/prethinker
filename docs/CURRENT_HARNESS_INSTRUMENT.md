@@ -275,6 +275,13 @@ Recent transfer work supports the current direction:
   found 10 candidate quantity-rich wrapper queues. That is a repair queue, not
   a scorecard: each queue still needs replay or transfer evidence before it can
   become a compile invariant.
+- Repeated-structure property predicates are now admitted into the profile
+  palette when the profile names them under `repeated_structures` but omits
+  them from `candidate_predicates`. This is a vocabulary contract repair, not
+  fact extraction. On the focused recall/inventory replay it changed the
+  compile from 32 admitted / 27 skipped rows to 128 admitted / 1 skipped row,
+  dropped compile-surface QA gaps from 10 to 4, and moved the fixture from
+  25/5/10 to 29/3/8 with helpers still off.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
