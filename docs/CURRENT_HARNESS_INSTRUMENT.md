@@ -330,6 +330,15 @@ Recent transfer work supports the current direction:
   rows, down from 67, so the next high-value layer is direct compile-surface
   emission for source-record-only distinctions rather than more query-filter
   normalization.
+- The operating protocol now distinguishes measurement layers: pure
+  query/runtime changes should use a QA-only restamp on fixed compile artifacts;
+  compile-guidance changes should start with small replay compiles and quality
+  gates before any full compile+QA stamp. A first four-fixture source-record
+  promotion probe was diagnostic rather than a compile-layer win: all four
+  replay compiles parsed, but all four quality gates held because detail
+  wrappers or lifecycle fragments still failed to preserve enough direct
+  backbone slots. That result confirms the remaining work is real
+  compile-surface preservation, not another QA normalizer.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

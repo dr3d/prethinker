@@ -265,6 +265,10 @@ def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     assert "Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition" in context
     assert "preserve the receiving or filing actor separately from the submitter/source actor" in context
     assert "preserve the requested action/content/line item or descriptive target" in context
+    assert "deterministic source-record rows are provenance, not a substitute for semantic addressability" in context
+    assert "identity, role, identifier, location, current status, permission, obligation, count" in context
+    assert "Do not leave the only queryable copy of such a value inside source_record_text_atom/2 or source_record_field/3" in context
+    assert "source-record promotion must preserve slots, not merely copy prose" in context
 
 
 def test_rule_ingestion_context_keeps_rule_composition_slot_contracts() -> None:
