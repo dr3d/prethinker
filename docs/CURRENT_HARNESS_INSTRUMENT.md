@@ -441,6 +441,14 @@ Recent transfer work supports the current direction:
   registries were the plausible middle (9, 10, and 11 signatures). Majority
   signatures are not facts and do not earn admission by repetition. They are
   candidate vocabulary priors for later constrained compile or retry tests.
+- A first majority-prior causal probe on the sensor/time fixture offered and
+  delivered all 9 majority-prior signatures in a fresh compile, while allowing
+  6 non-prior signatures through the normal compiler path. The compile passed
+  quality gates with 15 candidate predicates and 81 admitted rows. QA remained
+  only 30/3/7 over 40 questions, below stronger recent runs on the same
+  fixture, so the result is a partial win: soft priors can stabilize recurring
+  vocabulary without hard-caging the compiler, but they do not recover
+  rare/high-value answer-bearing surfaces by themselves.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -460,6 +468,7 @@ python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activ
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_OR_DIR> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/compile_surface_stability.json --out-md tmp/compile_surface_stability.md
 python scripts/audit_retrieval_constrained_palette.py --boundary-plan-json <BOUNDARY_PLAN_JSON> --compile-root <COMPILE_ROOT> --registry-scope fixture --out-json tmp/retrieval_constrained_palette_audit.json --out-md tmp/retrieval_constrained_palette_audit.md
+python scripts/audit_profile_palette_prior_delivery.py --registry-json <PROFILE_REGISTRY_JSON> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/profile_palette_prior_delivery_audit.json --out-md tmp/profile_palette_prior_delivery_audit.md
 python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
 python scripts/run_domain_bootstrap_file_batch.py --fixture <name> --compile-source --compile-flat-plus-plan-passes --source-record-ledger --source-record-ledger-facts --quality-gate --quality-retry-on-hold --profile-registry tmp/profile_palette_registry.json --profile-registry-palette-prior
 ```

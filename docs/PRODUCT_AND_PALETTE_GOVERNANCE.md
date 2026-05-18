@@ -264,6 +264,16 @@ The prior should bias or retry schema selection while still requiring source
 support, slot validity, and direct-row delivery before anything becomes
 canonical state.
 
+A first causal replay with a majority prior supports the narrow version of that
+claim. On a fresh sensor/time compile, all 9 majority-prior signatures were
+offered and delivered, and 6 non-prior signatures were still allowed through
+normal compiler discovery. The prior behaved like a soft scaffold rather than a
+hard cage. QA scored only 30/3/7 over 40 questions, below stronger recent runs
+on the same fixture, so the replay does not justify a broad prior rollout. It
+does justify the next measurement layer: every palette-prior replay should
+report prior-offered, prior-delivered, prior-zero-yield, and non-prior-delivered
+signatures separately from QA.
+
 ## Design Notes To Preserve
 
 The palette registry will need richer metadata than predicate name and arity:
