@@ -282,6 +282,10 @@ Recent transfer work supports the current direction:
   compile from 32 admitted / 27 skipped rows to 128 admitted / 1 skipped row,
   dropped compile-surface QA gaps from 10 to 4, and moved the fixture from
   25/5/10 to 29/3/8 with helpers still off.
+  Transfer replay was mixed: a fire/operations fixture improved slightly
+  (28/3/9 to 29/3/8), while a variance/hearing fixture regressed under a fresh
+  compile draw (28/1/11 to 23/4/13). Treat the repair as proven for hidden
+  repeated-structure palettes, not as a universal compile-stability solution.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
