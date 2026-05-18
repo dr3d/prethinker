@@ -411,6 +411,30 @@ Recent transfer work supports the current direction:
   gating is plausible but not ready for admission: the next layer needs
   source-span attachment, richer registry metadata, or multi-draw palette
   consensus before constrained emission.
+- A mixed-protocol repeated-compile stability audit on 2026-05-18 used the
+  available native no-helper, surface-promotion, and delivery-diagnostic
+  compile roots as variance evidence. This is not a stamp and not a clean N=3
+  statistic, because the roots used different prompt/protocol states. It is
+  still diagnostically useful: across 165 compile artifacts and 56 fixtures it
+  found only 5 palette-stable fixtures, 2746 unstable candidate signatures,
+  159 predicate-arity drift rows, 2383 signature-delivery drift rows, and 618
+  candidate zero-yield signatures. The lesson is that the next layer cannot
+  merely retrieve the right schema; it must also stabilize whether that schema
+  is offered, whether its arity stays fixed, and whether offered schemas
+  produce direct rows. Treat this as pressure for a clean same-protocol N=3
+  palette/delivery experiment, not as permission to constrain admission yet.
+- A cleaner same-protocol slice on three repeated-draw probes confirmed that
+  the pressure is real, not merely an artifact of mixing old and new protocol
+  roots. Across 9 compile artifacts, 0 of 3 fixtures were palette-stable. The
+  audit found 121 unstable candidate signatures, 3 predicate-arity drifts,
+  118 signature-delivery drifts, 18 candidate zero-yield signatures, and 1019
+  unstable direct facts. The worst sensor/time fixture had only 2 common
+  signatures across a 61-signature union; a variance/authority fixture had only
+  2 common signatures across a 40-signature union. The interpretation is now
+  sharper: query-layer cleanup is not enough, and prompt broadening is too
+  blunt. The next architectural response should be audit-first palette
+  stabilization: profile-local retrieval, multi-draw palette priors, or
+  targeted retry when high-value schemas are offered inconsistently.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -429,6 +453,7 @@ python scripts/plan_story_world_fixture_runs.py --fixture copperfall_deadline_do
 python scripts/select_qa_mode_without_oracle.py --selection-policy guarded_activation --group <name>:baseline=<QA_JSON>+<FAILURE_SURFACE_QA_JSON>,candidate=<QA_JSON> --out-json <OUT_JSON> --out-md <OUT_MD>
 python scripts/plan_selector_risk_gate.py --baseline-run protected=<SELECTOR_JSON> --candidate-run guarded_activation=<SELECTOR_JSON> --transfer-comparison <SELECTOR_POLICY_COMPARISON_JSON> --out-dir tmp/selector_risk_gates
 python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_OR_DIR> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/compile_surface_stability.json --out-md tmp/compile_surface_stability.md
+python scripts/audit_retrieval_constrained_palette.py --boundary-plan-json <BOUNDARY_PLAN_JSON> --compile-root <COMPILE_ROOT> --registry-scope fixture --out-json tmp/retrieval_constrained_palette_audit.json --out-md tmp/retrieval_constrained_palette_audit.md
 python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
 python scripts/run_domain_bootstrap_file_batch.py --fixture <name> --compile-source --compile-flat-plus-plan-passes --source-record-ledger --source-record-ledger-facts --quality-gate --quality-retry-on-hold --profile-registry tmp/profile_palette_registry.json --profile-registry-palette-prior
 ```

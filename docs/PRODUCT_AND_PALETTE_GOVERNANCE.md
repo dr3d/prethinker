@@ -207,6 +207,47 @@ The next experiment should add one of these before constrained emission:
   family membership;
 - multi-draw palette consensus to stabilize vocabulary before fact admission.
 
+### Mixed-Protocol Stability Finding
+
+A follow-up audit used already-available repeated compile artifacts from the
+native no-helper, surface-promotion, and delivery-diagnostic runs. Because
+those roots mix protocol states, the result is not a formal variance band. It
+does, however, expose the next governance surface.
+
+Across 165 compile artifacts and 56 fixtures, only 5 fixtures were palette
+stable. The audit found 2746 unstable candidate signatures, 159 predicate-arity
+drift rows, 2383 signature-delivery drift rows, and 618 candidate zero-yield
+signatures.
+
+That finding changes the retrieval-constrained roadmap. The first audit showed
+that fixture/profile-local retrieval can usually find the right schema. The
+mixed stability audit shows that retrieval alone is not enough: the instrument
+also needs to know whether a schema is consistently offered, whether its arity
+is stable, and whether offered schemas produce admitted rows.
+
+The next clean experiment should therefore be a same-protocol N=3 audit on a
+small fixture set: one known unstable fixture, one recently improved fixture,
+and one stable control. The target metric is palette and delivery stability,
+not QA score. If the same-protocol audit reproduces the mixed finding, then
+multi-draw palette priors or targeted retry become the right response path. If
+it does not, the mixed finding remains historical protocol-change evidence.
+
+That same-protocol slice was then run against three already-compiled repeated
+draw probes. It reproduced the pressure: 0 of 3 fixtures were palette-stable,
+with 121 unstable candidate signatures, 3 predicate-arity drift rows, 118
+signature-delivery drift rows, and 18 candidate zero-yield signatures. This is
+still a small diagnostic slice, not a corpus stamp, but it is enough to promote
+palette/delivery stability from suspicion to active architecture work.
+
+The response path should stay audit-first:
+
+- use profile-local retrieval as a candidate-prior, not an admission gate;
+- measure whether the retrieved prior reduces palette churn across fresh draws;
+- use targeted retry only when a high-value schema is known from the profile
+  but missing or zero-yield in the current draw;
+- reserve multi-draw consensus for rows that survive schema and slot checks;
+- route unstable or novel schemas to residue instead of canonical state.
+
 ## Design Notes To Preserve
 
 The palette registry will need richer metadata than predicate name and arity:
