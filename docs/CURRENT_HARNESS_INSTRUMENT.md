@@ -305,6 +305,11 @@ Recent transfer work supports the current direction:
   source-record text. On a procedural docket replay, a vocabulary-only palette
   prior plus source-authority retry cleared the quality hold, emitted direct
   authority rows, and moved no-helper QA from 31/1/8 to 39/0/1.
+  A four-fixture authority transfer slice then split cleanly: two fixtures
+  passed quality gates and each scored 39/0/1 with helpers off, while two
+  denser custody/access fixtures remained held because source-authority units
+  were still partial or ledger-only. That makes dense custody/access authority
+  the next diagnostic coordinate, not a reason to weaken the gate.
 - Source-record ledgers preserve fidelity but are not semantic substitutes.
   When source rows carry answer-bearing identity, status, count, time, amount,
   role, authority, or rationale, the target state is a direct admitted predicate
