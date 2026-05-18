@@ -399,6 +399,14 @@ Recent transfer work supports the current direction:
   guidance without replay evidence; use telemetry, palette priors, targeted
   retries, or multi-draw consensus experiments to reduce variance without
   teaching the harness fixture vocabulary.
+- Retrieval-constrained palette grounding is now an audit-only experiment, not
+  active compiler behavior. A first coordinate-level proxy on six unstable
+  native no-helper fixtures recalled the exact hinted schema for 18 of 49
+  boundary rows at `k=20`, found a sibling/family schema but missed the exact
+  schema for 11 rows, missed 18 rows, and had 2 rows without non-source hints.
+  The result says top-k gating is plausible but not ready for admission: the
+  next layer needs source-span attachment, richer registry metadata, or
+  multi-draw palette consensus before constrained emission.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

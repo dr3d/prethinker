@@ -166,6 +166,33 @@ Success criteria:
 - repeated compile draws show a more stable predicate palette;
 - retrieval has a low missed-schema rate.
 
+### First Audit Result
+
+An initial coordinate-level proxy audit was run on 2026-05-18 against six
+unstable native no-helper fixtures from the latest stamp-candidate run. Scope:
+49 boundary rows, 948 candidate registry signatures, `k=5/10/20`, no compiler
+behavior change.
+
+At `k=20`:
+
+- exact schema recalled: 18 / 49;
+- family recalled but exact schema missed: 11 / 49;
+- missed schema: 18 / 49;
+- no non-source predicate hint: 2 / 49.
+
+Increasing from `k=10` to `k=20` did not improve exact recall. That means the
+first retriever is limited by context and metadata, not just by candidate set
+size. The coordinate-level proxy is useful enough to expose the pressure, but
+not strong enough to govern canonical row admission.
+
+The next experiment should add one of these before constrained emission:
+
+- source-span to candidate-row attachment, so retrieval sees the local source
+  evidence instead of only question/rationale text;
+- richer registry metadata for sibling predicates, slot criticality, and
+  family membership;
+- multi-draw palette consensus to stabilize vocabulary before fact admission.
+
 ## Design Notes To Preserve
 
 The palette registry will need richer metadata than predicate name and arity:
@@ -201,4 +228,3 @@ The goal is not to make the LLM less expressive. The goal is to keep expression
 behind an admission membrane. The LLM may still notice novel distinctions, but
 canonical KB vocabulary should be earned through registry membership, slot
 contracts, transfer evidence, and measurable stability.
-
