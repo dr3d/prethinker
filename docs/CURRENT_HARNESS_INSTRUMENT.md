@@ -293,7 +293,10 @@ Recent transfer work supports the current direction:
   replay then recovered the fixture to 30/3/7 with helpers still off and
   compile-surface gaps down to 8. This is evidence for a control-plane
   response path: use multi-draw palette priors to stabilize ontology choice
-  without supplying facts, answers, expected rows, or source authority.
+  without supplying facts, answers, expected rows, or source authority. A
+  follow-up replay with the calibrated quality gate remained at 30 exact,
+  confirming that the source-authority extension did not over-trigger on this
+  source; the remaining pressure is still compile-surface coverage.
 - Source-authority preservation is now a bounded vocabulary/delivery contract.
   When source text explicitly says a rule, policy, order, or authority governs
   an action/status/scope, the profile can add `source_authority/3` as
@@ -310,6 +313,9 @@ Recent transfer work supports the current direction:
   alarms. Generic detail/event wrappers may remain as additive residue, but
   they are flagged when concrete backbone rows disappear. Calibration has
   already separated false lifecycle alarms from real quantity-backbone drift.
+  Date-like atoms in direct rows now count as date/time backbone evidence, so
+  a row such as `event(..., 2026_04_24, ...)` is not mistaken for a missing
+  date surface merely because the predicate name is not date-specific.
 - Quantity-rich event preservation now has the same bounded shape as
   source-detail preservation: a deterministic vocabulary extension can add
   `event_measurement/4` only when profile admission sees repeated numeric

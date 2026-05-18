@@ -95,6 +95,25 @@ def test_compile_batch_summary_allows_detail_wrapper_with_backbone() -> None:
     assert summary["detail_wrapper_drift_flags"] == []
 
 
+def test_compile_batch_summary_treats_date_atoms_as_date_time_backbone() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {"candidate_predicates": [{"signature": "source_detail/4"}]},
+            "source_compile": {
+                "facts": [
+                    "source_record_field(src_line_001, hearing_date, v_2026_04_24).",
+                    "hearing_event(hearing_1, 2026_04_24, held).",
+                    "source_detail(hearing_1, note, held_as_scheduled, src_line_001).",
+                ],
+            },
+            "score": {"rough_score": 0.9, "risk_count": 2},
+        }
+    )
+
+    assert "date_time_backbone_missing_with_wrapper:source_detail" not in summary["detail_wrapper_drift_flags"]
+
+
 def test_compile_quality_gate_passes_accepted_draw_shape() -> None:
     result = {
         "fixture": "fixture_a",

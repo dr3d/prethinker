@@ -40,6 +40,12 @@ bootstrap_env_local()
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+DATE_LIKE_ATOM_RE = re.compile(
+    r"^(?:v_)?(?:\d{4}[_-]\d{1,2}[_-]\d{1,2}|\d{1,2}[_-]\d{1,2}[_-]\d{2,4}|"
+    r"(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|"
+    r"oct|october|nov|november|dec|december)[_-]\d{1,2}(?:[_-]\d{2,4})?)$",
+    re.IGNORECASE,
+)
 VAGUE_DETAIL_WRAPPER_PREDICATES = {
     "amendment_event",
     "context",
@@ -525,6 +531,8 @@ def _fact_slot_groups(facts: list[str]) -> set[str]:
     for fact in facts:
         groups.update(_slot_groups_for_text(_predicate_name(fact)))
         for arg in _fact_args(fact):
+            if DATE_LIKE_ATOM_RE.fullmatch(str(arg or "").strip()):
+                groups.add("date_time")
             groups.update(_slot_groups_for_text(arg))
     return groups
 
