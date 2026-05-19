@@ -520,6 +520,12 @@ Recent transfer work supports the current direction:
   rows to partial direct coverage. The retry instruction now explicitly asks for
   every distinct stated authority coordinate, not only a representative
   authority row.
+- A later replay with the stronger authority/status/source-claim retry language
+  regressed back to offered-but-undelivered source-authority and source-claim
+  carriers. That is the current decision point: this is no longer primarily a
+  wording problem. The evidence now points at compile variance/preservation, so
+  further progress should consider multi-draw consensus or deterministic
+  preservation for offered carriers rather than another prompt-only tweak.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record
