@@ -198,12 +198,12 @@ def test_source_surface_gap_audit_classifies_coordinate_shapes(tmp_path) -> None
 
     assert report["summary"]["coordinate_class_counts"] == {
         "identity_or_role": 1,
-        "source_reference": 1,
+        "other_answer_bearing_detail": 1,
         "status_or_state": 1,
     }
     assert report["summary"]["coordinate_detail_class_counts"] == {
+        "compact_identifier_detail": 1,
         "official_or_staff_role_identity": 1,
-        "other_source_reference": 1,
         "point_in_time_status": 1,
     }
 

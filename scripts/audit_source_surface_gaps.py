@@ -320,8 +320,6 @@ def _coordinate_class(
         or bool(re.search(r"[$£€]|\b\d+(?:,\d{3})+\b", answer_text))
     ):
         return "quantity_or_duration"
-    if _has_any(question_text, ("according to", "source", "document", "packet", "report", "memo", "order", "section", "bench notes", "which document", "ticket", "identifier")):
-        return "source_reference"
     if _has_any(
         question_text,
         (
@@ -348,12 +346,16 @@ def _coordinate_class(
         return "status_or_state"
     if _has_any(question_text, ("can ", "could ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
         return "rule_or_authority_application"
-    if _has_any(question_text, ("when", "what date", "date", "deadline", "scheduled", "window", "as of", "on what date")):
+    if _is_temporal_question(question_text):
         return "date_time_or_interval"
     if _has_any(question_text, ("where", "located", "location", "custody", "retained", "stored", "cabinet", "vault", "room")):
         return "location_or_custody"
     if _has_any(question_text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds", "what type", "management entity")):
         return "identity_or_role"
+    if _has_any(question_text, ("list all", "list the", "chronological", "chronology", "rank order")):
+        return "set_or_list_membership"
+    if _is_source_reference_question(question_text):
+        return "source_reference"
     if _has_any(
         " ".join([question_text, answer_text]),
         ("how many", "how long", "elapsed", "total", "count", "number", "minutes", "hours", "amount", "rate", "percentage"),
@@ -642,6 +644,39 @@ def _coordinate_detail_class(
 
 def _has_any(text: str, needles: tuple[str, ...]) -> bool:
     return any(needle in text for needle in needles)
+
+
+def _is_source_reference_question(question_text: str) -> bool:
+    if _has_any(
+        question_text,
+        (
+            "according to",
+            "per ",
+            "source within",
+            "source for",
+            "which document",
+            "what document",
+            "which source",
+            "what source",
+            "which section",
+            "what section",
+            "where in",
+            "document recorded",
+            "document that recorded",
+        ),
+    ):
+        return True
+    return bool(
+        re.search(r"\b(?:document|packet|report|memo|order|section|exhibit|appendix)\b", question_text)
+        and re.search(r"\b(?:which|what|where|source|according|per|recorded|authority|binding)\b", question_text)
+    )
+
+
+def _is_temporal_question(question_text: str) -> bool:
+    return bool(
+        _has_any(question_text, ("when", "what date", "deadline", "scheduled", "window", "as of", "on what date"))
+        or re.search(r"\bdate\b", question_text)
+    )
 
 
 def _is_compact_identifier_detail(*, question: str, reference_answer: str, qa_tokens: set[str]) -> bool:
