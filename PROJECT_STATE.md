@@ -124,14 +124,10 @@ verdict = records what happened
   `1`, with all `15/15` nonbaseline rescue targets and `7/7` baseline-exact
   protection targets passing. The remaining failure is a volatile
   prefer-baseline target, not a selected miss.
-- Selector guard growth now has a family-level rollup:
-  `scripts/summarize_selector_guard_families.py` parses selector guard reasons
-  and writes `docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Current active inventory
-  is `5` guard return sites, `5` unique guard reasons, `4` semantic families,
-  `0` unclassified reasons, and `0` exact duplicate reasons. The companion
-  ledger keeps the larger retired/scar history visible. Use the family count to
-  detect sprawl, but keep watching raw guard pressure; generalize, merge, and
-  retire before parameterizing.
+- Selector guard compression is historical context, not the current public
+  workbench. Current guard/selector status is summarized in the harness
+  instrument and active lanes; retired rollups stay in git history rather than
+  the day-to-day docs tree.
 - Broad score-hold check after the rule/selector guard work is clean: the main
   frozen-artifact selector lanes still match documented results for Larkspur
   (`40 / 0 / 0`), Calder (`14 / 3 / 3`), Oxalis (`33 / 6 / 1`), Avalon

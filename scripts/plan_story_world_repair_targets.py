@@ -391,7 +391,7 @@ def _repair_lane(*, surface: str) -> str:
     if surface == "compile_surface_gap":
         return "scoped_source_surface_repair"
     if surface == "hybrid_join_gap":
-        return "helper_or_query_join_repair"
+        return "hybrid_query_join_repair"
     if surface == "query_surface_gap":
         return "query_planner_repair"
     if surface == "answer_surface_gap":

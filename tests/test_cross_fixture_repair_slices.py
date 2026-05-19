@@ -56,7 +56,7 @@ def test_cross_fixture_repair_slices_require_transfer_shape(tmp_path: Path) -> N
                 "id": "q003",
                 "verdict": "partial",
                 "failure_surface": "hybrid_join_gap",
-                "repair_lane": "helper_or_query_join_repair",
+                "repair_lane": "hybrid_query_join_repair",
                 "question": "What was the permit status on May 1?",
                 "queries": ["permit_status_at(p, may_1_2026, Status)."],
             }

@@ -38,7 +38,7 @@ def test_compile_repair_plan_prioritizes_surfaces_and_selector_status() -> None:
     assert report["summary"]["target_count"] == 2
     assert report["targets"][0]["selector_status"] == "candidate_rescue"
     assert report["targets"][0]["repair_lane"] == "row_selector_calibration"
-    assert report["targets"][1]["repair_lane"] == "helper_or_query_join_repair"
+    assert report["targets"][1]["repair_lane"] == "hybrid_query_join_repair"
 
 
 def test_compile_repair_plan_markdown_lists_targets() -> None:

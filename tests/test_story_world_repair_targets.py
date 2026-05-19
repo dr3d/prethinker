@@ -35,7 +35,7 @@ def test_story_world_repair_plan_uses_query_predicates_for_lenses() -> None:
     }
     assert report["targets"][0]["acquisition_lens"] == "object_state_transition_surface"
     assert report["targets"][0]["repair_lane"] == "scoped_source_surface_repair"
-    assert report["targets"][1]["repair_lane"] == "helper_or_query_join_repair"
+    assert report["targets"][1]["repair_lane"] == "hybrid_query_join_repair"
 
 
 def test_story_world_repair_plan_can_filter_fixture() -> None:

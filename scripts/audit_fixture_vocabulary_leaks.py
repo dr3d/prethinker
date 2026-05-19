@@ -235,7 +235,6 @@ def area_for(path: Path) -> str:
     if rel in {
         "scripts/plan_incoming_fixture_runs.py",
         "scripts/plan_story_world_fixture_runs.py",
-        "scripts/summarize_selector_guard_families.py",
         "scripts/summarize_story_world_progress.py",
     }:
         return "fixture_operator"

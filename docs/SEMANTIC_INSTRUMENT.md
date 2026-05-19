@@ -123,11 +123,11 @@ A **selector guard** is a named rule that prevents the selector from choosing th
 
 ### Guard Families
 
-The active guard return sites currently cluster into 4 semantic families with
-0 unclassified reasons in the current rollup. The exact count changes as the
-lab discovers, merges, and retires guards; the live accounting is maintained in
-`docs/SELECTOR_GUARD_FAMILY_ROLLUP.md`. Detailed retired/scar ledger output is
-generated under `tmp` when needed and is kept out of the public docs tree.
+Guard-family rollups were useful during compression, but they are no longer the
+active public surface. Current guard accounting belongs in
+[Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
+and active research notes. Detailed retired/scar ledgers are generated under
+`tmp` when needed and are kept out of the public docs tree.
 
 | Family | What It Prevents | Example |
 |--------|-----------------|---------|
@@ -211,7 +211,6 @@ probing, and a tighter contract, not public promotion.
 
 - **[The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)** - plain-language guide to the reader/control lenses and how they differ.
 - **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
-- **[Selector Guard Family Rollup](https://github.com/dr3d/prethinker/blob/main/docs/SELECTOR_GUARD_FAMILY_ROLLUP.md)** - tracks whether active guard return sites are collapsing into a smaller number of semantic families (currently 4 families, 0 unclassified)
 - **[Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)** - the current fixture/probe methodology for boundary coordinates, resolution ladders, and transfer-safe repair pressure
 - **[Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)** - compact map of current work without worksheet sediment
 
