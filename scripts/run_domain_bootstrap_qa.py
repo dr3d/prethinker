@@ -2402,7 +2402,7 @@ def run_query_plan(
             if defined_interval:
                 append_companion(defined_interval)
                 last_result = defined_interval.get("result", {})
-        if helper_companions_enabled and isinstance(last_result, dict) and last_result.get("status") != "success":
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
             status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
             if status_interval:
                 append_companion(status_interval)

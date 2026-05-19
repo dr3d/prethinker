@@ -1150,6 +1150,36 @@ def test_run_query_plan_derives_status_from_corrected_interval() -> None:
     assert support["result"]["rows"][0]["SupportKind"] == "explicit_point_state"
 
 
+def test_status_interval_support_runs_when_helper_companions_disabled() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "record_status(record_alpha, pending, 2026_01_05).",
+        "record_status(record_alpha, active, 2026_01_15).",
+        "notice_type(pause_notice, suspension).",
+        "corrected_interval(pause_notice, 2026_02_05, 2026_02_10).",
+        "record_status(record_alpha, active, 2026_02_11).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["record_status(record_alpha, Status, 2026_02_06)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    support = next(
+        item
+        for item in rows
+        if item["result"].get("prolog_query", "").startswith("record_status_interval_support")
+    )
+    result_row = support["result"]["rows"][0]
+    assert result_row["Status"] == "suspended"
+    assert result_row["SupportKind"] == "corrected_or_stated_interval"
+    assert "HelperClass" not in result_row
+    assert support["result"]["reasoning_basis"]["kind"] == "core-local"
+
+
 def test_run_query_plan_derives_status_from_scheduled_state_after_effective_date() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
