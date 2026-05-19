@@ -1715,6 +1715,89 @@ def test_profile_delivery_accepts_emitted_quantity_carrier_rows() -> None:
     assert source_compile["compile_health"]["verdict"] == "healthy"
 
 
+def test_profile_delivery_flags_date_bearing_event_identifier_without_temporal_row() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "event_occurred(ev_emergency_declaration_2026_05_12, emergency_declaration).",
+            "event_outcome(ev_ratification_2026_05_14, ratified).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="operational record status lifecycle",
+        source_text=(
+            "Emergency declaration occurred on 2026-05-12.\n"
+            "Ratification occurred on 2026-05-14."
+        ),
+        parsed_profile={"candidate_predicates": []},
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["temporal_backbone"]["missing_event_id_count"] == 2
+    assert delivery["findings"][0]["class"] == "event_identifier_date_only"
+    assert delivery["findings"][0]["missing_event_ids"] == [
+        "ev_emergency_declaration_2026_05_12",
+        "ev_ratification_2026_05_14",
+    ]
+    health = source_compile["compile_health"]
+    assert health["flag_counts"]["event_identifier_date_only"] == 1
+    assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_accepts_date_bearing_event_identifier_with_temporal_row() -> None:
+    source_compile = {
+        "unique_fact_count": 4,
+        "facts": [
+            "event_occurred(ev_emergency_declaration_2026_05_12, emergency_declaration).",
+            "event_date(ev_emergency_declaration_2026_05_12, 2026_05_12).",
+            "event_outcome(ev_ratification_2026_05_14, ratified).",
+            "event_date(ev_ratification_2026_05_14, 2026_05_14).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 4,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="operational record status lifecycle",
+        source_text=(
+            "Emergency declaration occurred on 2026-05-12.\n"
+            "Ratification occurred on 2026-05-14."
+        ),
+        parsed_profile={"candidate_predicates": []},
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["temporal_backbone"]["covered_event_id_count"] == 2
+    assert delivery["temporal_backbone"]["missing_event_id_count"] == 0
+    assert delivery["findings"] == []
+    assert source_compile["compile_health"]["verdict"] == "healthy"
+
+
 def test_profile_admission_warning_is_operational_context_bounded() -> None:
     source_compile = {
         "unique_fact_count": 5,

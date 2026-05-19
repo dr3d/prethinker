@@ -30,6 +30,8 @@ if str(REPO_ROOT) not in sys.path:
 
 PROFILE_ADMISSION_TOKEN_RE = re.compile(r"[a-z0-9]+")
 PROFILE_ADMISSION_DATE_RE = re.compile(r"\b(?:v_)?\d{4}[-_]\d{2}[-_]\d{2}\b")
+PROFILE_ADMISSION_FULL_DATE_ATOM_RE = re.compile(r"(?:^|[_\-\s])(?:v_)?(?:19|20)\d{2}[_\-]?[01]\d[_\-]?[0-3]\d(?:[_\-\s]|$)")
+PROFILE_ADMISSION_COMPACT_DATE_RE = re.compile(r"(?:^|[_\-\s])(?:19|20)\d{6}(?:[_\-\s]|$)")
 FACT_CLAUSE_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 ENTITY_ID_ATOM_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 PROFILE_ADMISSION_DATE_SLOTS = {"date", "dated", "timestamp", "time", "turn", "source"}
@@ -3335,6 +3337,17 @@ def _profile_delivery_report(
                 "emitted_predicate_sample": sorted(emitted_predicates)[:24],
             }
         )
+    temporal_backbone = _event_identifier_temporal_backbone_report(source_compile)
+    if temporal_backbone["missing_event_ids"]:
+        findings.append(
+            {
+                "class": "event_identifier_date_only",
+                "source_signal_count": temporal_backbone["event_id_count"],
+                "missing_event_ids": temporal_backbone["missing_event_ids"][:12],
+                "covered_event_ids": temporal_backbone["covered_event_ids"][:12],
+                "emitted_predicate_sample": temporal_backbone["sample_predicates"][:24],
+            }
+        )
     return {
         "schema_version": "profile_delivery_contracts_v1",
         "source_signal_counts": {
@@ -3355,8 +3368,119 @@ def _profile_delivery_report(
             "status_state": delivered_status_state[:12],
             "quantity_event": delivered_quantity[:12],
         },
+        "temporal_backbone": temporal_backbone,
         "findings": findings,
     }
+
+
+def _normalize_profile_atom(value: str) -> str:
+    return str(value or "").strip().strip("'\"").casefold()
+
+
+def _event_identifier_temporal_backbone_report(source_compile: dict[str, Any]) -> dict[str, Any]:
+    parsed_rows: list[tuple[str, list[str]]] = []
+    for fact in _clause_list(source_compile.get("facts", [])):
+        parsed = _parse_fact_clause(fact)
+        if parsed is None or parsed[0].startswith("source_record"):
+            continue
+        parsed_rows.append(parsed)
+    event_ids = sorted(
+        {
+            _normalize_profile_atom(arg)
+            for predicate, args in parsed_rows
+            for arg in args
+            if _is_date_bearing_event_identifier_arg(predicate, arg)
+        }
+    )
+    covered = [event_id for event_id in event_ids if _event_id_has_explicit_temporal_row(event_id, parsed_rows)]
+    missing = [event_id for event_id in event_ids if event_id not in set(covered)]
+    sample_predicates = sorted(
+        {
+            predicate
+            for predicate, args in parsed_rows
+            if any(_normalize_profile_atom(arg) in event_ids for arg in args)
+        }
+    )
+    return {
+        "schema_version": "event_identifier_temporal_backbone_v1",
+        "date_bearing_event_ids": event_ids[:50],
+        "covered_event_ids": covered[:50],
+        "missing_event_ids": missing[:50],
+        "event_id_count": len(event_ids),
+        "covered_event_id_count": len(covered),
+        "missing_event_id_count": len(missing),
+        "sample_predicates": sample_predicates[:50],
+    }
+
+
+def _is_date_bearing_event_identifier_arg(predicate: str, value: str) -> bool:
+    norm = _normalize_profile_atom(value)
+    if not _profile_atom_has_calendar_date(norm):
+        return False
+    predicate_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(str(predicate or "").casefold()))
+    value_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(norm))
+    event_terms = {
+        "action",
+        "appeal",
+        "approval",
+        "declaration",
+        "event",
+        "ev",
+        "filing",
+        "hearing",
+        "incident",
+        "meeting",
+        "motion",
+        "notice",
+        "occurrence",
+        "ratification",
+        "resolution",
+        "review",
+        "transition",
+    }
+    identifier_markers = {"ev", "event", "incident", "hearing", "meeting", "notice", "filing", "motion"}
+    if not (value_tokens & event_terms or value_tokens & identifier_markers):
+        return False
+    return bool((predicate_tokens | value_tokens) & event_terms)
+
+
+def _event_id_has_explicit_temporal_row(
+    event_id: str,
+    parsed_rows: list[tuple[str, list[str]]],
+) -> bool:
+    temporal_predicate_terms = {"date", "dated", "effective", "occurred", "scheduled", "time", "timestamp"}
+    for predicate, args in parsed_rows:
+        norm_args = [_normalize_profile_atom(arg) for arg in args]
+        if event_id not in norm_args:
+            continue
+        other_args = [arg for arg in norm_args if arg != event_id]
+        if any(_profile_atom_is_calendar_date_value(arg) for arg in other_args):
+            return True
+        predicate_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(str(predicate or "").casefold()))
+        if predicate_tokens & temporal_predicate_terms and any(_profile_atom_has_calendar_date(arg) for arg in other_args):
+            return True
+    return False
+
+
+def _profile_atom_has_calendar_date(value: str) -> bool:
+    norm = _normalize_profile_atom(value)
+    return bool(
+        PROFILE_ADMISSION_DATE_RE.search(norm)
+        or PROFILE_ADMISSION_FULL_DATE_ATOM_RE.search(norm)
+        or PROFILE_ADMISSION_COMPACT_DATE_RE.search(norm)
+    )
+
+
+def _profile_atom_is_calendar_date_value(value: str) -> bool:
+    norm = _normalize_profile_atom(value)
+    if not _profile_atom_has_calendar_date(norm):
+        return False
+    non_date_tokens = [
+        token
+        for token in PROFILE_ADMISSION_TOKEN_RE.findall(norm)
+        if token != "v" and not token.isdigit()
+    ]
+    return len(non_date_tokens) <= 2
 
 
 def _profile_bootstrap_admission_context(

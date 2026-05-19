@@ -504,13 +504,14 @@ Recent transfer work supports the current direction:
   exact, but a nearby emergency-ratification row came back partial because the
   query plan did not assemble the hour calculation. Multi-draw preservation is
   therefore an active experiment, not a default stamp path yet.
-  The follow-up invariant audit now records
-  `event_identifier_temporal_backbone_contract`: event ids may contain dates,
-  but date-bearing ids do not count as temporal backbone unless a same-event
-  date/time row is also emitted. On the same four-fixture slice this signal was
-  bounded: four compiles were not applicable, one passed with explicit temporal
-  rows, and three flagged identifier-only dates. That makes the next pressure a
-  generic compile-delivery issue, not a fixture-specific arithmetic patch.
+  The follow-up invariant audit and compile-health telemetry now record
+  `event_identifier_temporal_backbone_contract` / `event_identifier_date_only`:
+  event ids may contain dates, but date-bearing ids do not count as temporal
+  backbone unless a same-event date/time row is also emitted. On the same
+  four-fixture slice this signal was bounded: four compiles were not
+  applicable, one passed with explicit temporal rows, and three flagged
+  identifier-only dates. That makes the next pressure a generic
+  compile-delivery issue, not a fixture-specific arithmetic patch.
 - The same profile-admission/profile-delivery shape now covers status/state
   pressure. Point-in-time status, current condition, availability, pending
   resolution, supersession, and partial-population state must offer a direct
