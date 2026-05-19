@@ -5592,6 +5592,30 @@ def test_generic_status_query_derives_interval_support_from_transition_anchors()
     assert result_row["ObservedEntity"] == "lot_5b"
 
 
+def test_generic_status_query_uses_admitted_status_change_as_interval_anchor() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_status(asset_42, baseline_hold, 2026_02_01).",
+        "status_change(asset_42, escalated_hold, reviewer_7, 2026_02_10).",
+        "status_change(asset_42, released, reviewer_8, 2026_02_22).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["asset_status(asset_42, Status, 2026_02_15)."])
+
+    companion = [
+        row
+        for row in rows
+        if row.get("query") == "asset_status_interval_support(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+    ]
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["Status"] == "escalated_hold"
+    assert result_row["EffectiveFrom"] == "2026_02_10"
+    assert result_row["EffectiveUntil"] == "2026_02_22"
+    assert result_row["SupportKind"] == "status_change_anchor"
+
+
 def test_status_at_date_query_derives_interval_support_from_transition_anchors() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -5646,6 +5670,95 @@ def test_status_at_query_derives_interval_support_from_transition_anchors() -> N
     assert result_row["EffectiveFrom"] == "2025_09_10"
     assert result_row["EffectiveUntil"] == "2025_09_22"
     assert result_row["ObservedEntity"] == "asset_9"
+
+
+def test_run_query_plan_exposes_scoped_population_state_from_related_subsets() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "batch_status(batch_alpha, released, 2026_01_01).",
+        "population_subset(batch_alpha, batch_alpha_diverted).",
+        "population_remainder(batch_alpha, batch_alpha_remaining).",
+        "batch_status(batch_alpha_diverted, held, 2026_01_10).",
+        "batch_status(batch_alpha_remaining, released, 2026_01_10).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["batch_status(batch_alpha, Status, 2026_01_12)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_population_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("RelatedEntity") == "batch_alpha_diverted"
+        and row.get("Status") == "held"
+        and row.get("EffectiveFrom") == "2026_01_10"
+        and row.get("ScopeKind") == "population_subset"
+        and row.get("SupportKind") == "scoped_status_at_requested_date"
+        for row in result_rows
+    )
+    assert any(
+        row.get("RelatedEntity") == "batch_alpha_remaining"
+        and row.get("Status") == "released"
+        and row.get("ScopeKind") == "population_remainder"
+        for row in result_rows
+    )
+
+
+def test_run_query_plan_exposes_scoped_population_event_window_without_asserting_status() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_status(crate_7, normal, 2026_03_01).",
+        "entity_subset(crate_7, crate_7_diverted).",
+        "transfer_window(crate_7_diverted, station_b, station_c, 2026_03_12, 2026_03_14).",
+        "asset_status(crate_7_diverted, hold, 2026_03_15).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["asset_status(crate_7, Status, 2026_03_13)."])
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "scoped_population_state_support")
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("RelatedEntity") == "crate_7_diverted"
+        and row.get("SupportKind") == "scoped_event_window"
+        and row.get("EventPredicate") == "transfer_window"
+        and row.get("EventStart") == "2026_03_12"
+        and row.get("EventEnd") == "2026_03_14"
+        and row.get("FutureStatus") == "hold"
+        and row.get("Status") == ""
+        for row in result_rows
+    )
+
+
+def test_scoped_population_state_requires_related_population_surface() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_status(crate_7, normal, 2026_03_01).",
+        "asset_status(crate_7_diverted, hold, 2026_03_15).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["asset_status(crate_7, Status, 2026_03_13)."])
+
+    assert not any(item["result"].get("predicate") == "scoped_population_state_support" for item in rows)
+
+
+def test_scoped_population_state_runs_with_companion_delivery_disabled() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "case_status(case_group, open, 2026_04_01).",
+        "case_subset(case_group, case_group_remainder).",
+        "case_status(case_group_remainder, stayed, 2026_04_05).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["case_status(case_group, Status, 2026_04_06)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    assert any(item["result"].get("predicate") == "scoped_population_state_support" for item in rows)
 
 
 def test_return_to_state_query_derives_support_from_intervening_state_end() -> None:

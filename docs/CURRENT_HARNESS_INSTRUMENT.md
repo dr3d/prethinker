@@ -410,6 +410,15 @@ Recent transfer work supports the current direction:
   compile guidance can recover missing transition anchors, and the remaining
   hard case is scoped population state, not a reason to restore retired
   compatibility machinery.
+- The scoped-state query layer now treats admitted `*_status_change` rows as
+  interval anchors and exposes parent/subset population state evidence as a
+  core query surface. A focused three-row replay on the same fresh status-heavy
+  compile moved from `1/2/0` before the repair to `3/0/0`. Point-in-time status
+  over status-change rows became exact, and the subset-status case resolved by
+  exposing parent status, subset event window, and nearby subset state anchors
+  together. The important guardrail is that event-window support does not assert
+  the subset's interior status; it only exposes the admitted window and nearby
+  state anchors for the answering layer.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

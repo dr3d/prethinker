@@ -2407,6 +2407,9 @@ def run_query_plan(
             if status_interval:
                 append_companion(status_interval)
                 last_result = status_interval.get("result", {})
+        scoped_population_state = _scoped_population_state_companion(runtime, query=effective_query)
+        if scoped_population_state:
+            append_companion(scoped_population_state)
         if helper_companions_enabled:
             for domain_companion in _domain_companion_queries(
                 runtime,
@@ -12904,6 +12907,354 @@ def _runtime_temporal_datetime(runtime: CorePrologRuntime, value: str) -> dateti
         return None
 
 
+_POPULATION_SCOPE_TOKENS = {
+    "portion",
+    "remainder",
+    "remaining",
+    "segment",
+    "split",
+    "subgroup",
+    "subset",
+}
+
+
+def _scoped_population_state_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    shape = _status_query_shape_for_interval_support(query)
+    if shape is None:
+        return None
+    predicate, entity_arg, status_arg, date_arg, timeline_query, support_query = shape
+    if _is_prolog_variable(entity_arg) or _is_prolog_variable(date_arg):
+        return None
+    requested_at = _runtime_temporal_datetime(runtime, date_arg)
+    if requested_at is None:
+        return None
+
+    related = _related_population_entities(runtime, entity_arg)
+    if not related:
+        return None
+
+    timeline_rows = _runtime_rows(runtime, timeline_query)
+    if not timeline_rows:
+        return None
+    entities = {entity_arg, *related}
+    anchors_by_entity = _status_anchors_by_entity(
+        runtime,
+        timeline_rows=timeline_rows,
+        entities=entities,
+    )
+
+    requested_status = "" if _is_prolog_variable(status_arg) else status_arg
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for entity in sorted(entities, key=lambda value: (value != entity_arg, _case_atom_key(value))):
+        anchors = anchors_by_entity.get(entity, [])
+        previous_anchor, next_anchor = _surrounding_status_anchors(anchors, requested_at=requested_at)
+        scope_kind = "query_entity" if entity == entity_arg else related.get(entity, "related_population")
+        if previous_anchor:
+            key = (entity, "status_at_requested_date", previous_anchor["observed_status"], previous_anchor["observed_date"])
+            if key not in seen:
+                seen.add(key)
+                row = {
+                    "ParentEntity": entity_arg,
+                    "RelatedEntity": entity,
+                    "StatusPredicate": predicate,
+                    "RequestedDate": date_arg,
+                    "Status": previous_anchor["observed_status"],
+                    "EffectiveFrom": previous_anchor["observed_date"],
+                    "EffectiveUntil": str(next_anchor.get("observed_date", "") if next_anchor else ""),
+                    "ScopeKind": scope_kind,
+                    "SupportKind": "scoped_status_at_requested_date",
+                }
+                if requested_status:
+                    row["RequestedStatus"] = requested_status
+                    row["StatusMatches"] = "true" if requested_status == previous_anchor["observed_status"] else "false"
+                rows.append(row)
+
+        event_rows = _population_event_windows_covering_date(
+            runtime,
+            entity=entity,
+            requested_at=requested_at,
+            date_arg=date_arg,
+            future_anchor=next_anchor,
+        )
+        for event_row in event_rows:
+            key = (
+                entity,
+                "event_window",
+                event_row.get("EventPredicate", ""),
+                event_row.get("EventStart", ""),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "ParentEntity": entity_arg,
+                    "RelatedEntity": entity,
+                    "StatusPredicate": predicate,
+                    "RequestedDate": date_arg,
+                    "Status": "",
+                    "EffectiveFrom": "",
+                    "EffectiveUntil": "",
+                    "ScopeKind": scope_kind,
+                    "SupportKind": "scoped_event_window",
+                    **event_row,
+                }
+            )
+
+    if len(rows) <= 1:
+        return None
+    result = {
+        "status": "success",
+        "result_type": "table",
+        "predicate": "scoped_population_state_support",
+        "prolog_query": support_query,
+        "variables": list(rows[0].keys()),
+        "rows": rows[:40],
+        "num_rows": min(len(rows), 40),
+        "reasoning_basis": {
+            "kind": "core-local",
+            "note": (
+                "query-only scoped population state support exposed admitted parent/subset status anchors "
+                "and event windows around the requested date; no durable fact was written"
+            ),
+            "original_query": query,
+            "timeline_query": timeline_query,
+        },
+    }
+    return {
+        "query": support_query,
+        "result": result,
+        "derived_from_queries": [query, timeline_query],
+    }
+
+
+def _status_query_shape_for_interval_support(query: str) -> tuple[str, str, str, str, str, str] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if len(args) != 3:
+        return None
+    if predicate == "case_status_at_date":
+        entity_arg = str(args[0]).strip()
+        date_arg = str(args[1]).strip()
+        status_arg = str(args[2]).strip()
+        timeline_query = "case_status_at_date(Entity, Date, Status)."
+    elif predicate.endswith(("_status_at_date", "_state_at_date", "_condition_at_date")):
+        entity_arg = str(args[0]).strip()
+        status_arg = str(args[1]).strip()
+        date_arg = str(args[2]).strip()
+        timeline_query = format_prolog_query(predicate, ["Entity", "Status", "Date"])
+    elif predicate.endswith(("_status_at", "_state_at")):
+        entity_arg = str(args[0]).strip()
+        date_arg = str(args[1]).strip()
+        status_arg = str(args[2]).strip()
+        timeline_query = format_prolog_query(predicate, ["Entity", "Date", "Status"])
+    elif predicate.endswith("_status"):
+        entity_arg = str(args[0]).strip()
+        status_arg = str(args[1]).strip()
+        date_arg = str(args[2]).strip()
+        timeline_query = format_prolog_query(predicate, ["Entity", "Status", "Date"])
+    else:
+        return None
+    support_query = (
+        "scoped_population_state_support"
+        "(ParentEntity, RelatedEntity, StatusPredicate, RequestedDate, Status, ScopeKind, SupportKind)."
+    )
+    if not entity_arg or not status_arg or not date_arg:
+        return None
+    return predicate, entity_arg, status_arg, date_arg, timeline_query, support_query
+
+
+def _related_population_entities(runtime: CorePrologRuntime, parent_entity: str) -> dict[str, str]:
+    parent_key = _case_atom_key(parent_entity)
+    out: dict[str, str] = {}
+    facts = _runtime_fact_rows(runtime)
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate.startswith("source_record_") or len(args) < 2:
+            continue
+        predicate_tokens = set(_type_taxonomy_tokens(predicate))
+        if not (predicate_tokens & _POPULATION_SCOPE_TOKENS):
+            continue
+        matching_positions = [
+            index
+            for index, arg in enumerate(args)
+            if arg == parent_entity or _case_atom_key(arg) == parent_key
+        ]
+        if not matching_positions:
+            continue
+        for index, arg in enumerate(args[:3]):
+            if index in matching_positions:
+                continue
+            if not arg or _is_prolog_variable(arg) or _runtime_temporal_datetime(runtime, arg) is not None:
+                continue
+            if _case_atom_key(arg) == parent_key:
+                continue
+            out.setdefault(arg, predicate)
+
+    observed_entities = {
+        arg
+        for fact in facts
+        if not str(fact.get("predicate", "")).startswith("source_record_")
+        for arg in [str(item).strip() for item in fact.get("args", [])[:1]]
+        if arg
+    }
+    for entity in observed_entities:
+        if entity == parent_entity or _case_atom_key(entity) == parent_key:
+            continue
+        if not entity.lower().startswith(f"{str(parent_entity).strip().lower()}_"):
+            continue
+        if set(_type_taxonomy_tokens(entity)) & _POPULATION_SCOPE_TOKENS:
+            out.setdefault(entity, "atom_scope_relation")
+    return out
+
+
+def _status_anchors_by_entity(
+    runtime: CorePrologRuntime,
+    *,
+    timeline_rows: list[dict[str, Any]],
+    entities: set[str],
+) -> dict[str, list[dict[str, Any]]]:
+    entity_keys = {_case_atom_key(entity): entity for entity in entities}
+    out: dict[str, list[dict[str, Any]]] = {}
+    for row in timeline_rows:
+        if not isinstance(row, dict):
+            continue
+        observed_entity = str(row.get("Entity", "")).strip()
+        observed_date = str(row.get("Date", "")).strip()
+        observed_status = str(row.get("Status", "")).strip()
+        if not observed_entity or not observed_date or not observed_status:
+            continue
+        canonical_entity = entity_keys.get(_case_atom_key(observed_entity))
+        if not canonical_entity:
+            continue
+        observed_at = _runtime_temporal_datetime(runtime, observed_date)
+        if observed_at is None:
+            continue
+        out.setdefault(canonical_entity, []).append(
+            {
+                "observed_entity": observed_entity,
+                "observed_date": observed_date,
+                "observed_status": observed_status,
+                "observed_at": observed_at,
+            }
+        )
+    for anchors in out.values():
+        anchors.sort(key=lambda item: item["observed_at"])
+    for entity in entities:
+        change_anchors = _status_change_anchors(runtime, entity_arg=entity)
+        if change_anchors:
+            out.setdefault(entity, []).extend(change_anchors)
+            out[entity].sort(key=lambda item: item["observed_at"])
+    return out
+
+
+def _status_change_anchors(runtime: CorePrologRuntime, *, entity_arg: str) -> list[dict[str, Any]]:
+    entity_key = _case_atom_key(entity_arg)
+    anchors: list[dict[str, Any]] = []
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 3 or predicate.startswith("source_record_"):
+            continue
+        predicate_tokens = set(_type_taxonomy_tokens(predicate))
+        if not (predicate_tokens & {"status", "state", "condition", "classification"}):
+            continue
+        if not (predicate_tokens & {"change", "changed", "transition", "reclassification", "reclassified"}):
+            continue
+        observed_entity = args[0]
+        if observed_entity != entity_arg and _case_atom_key(observed_entity) != entity_key:
+            continue
+        dated_args = [(arg, _runtime_temporal_datetime(runtime, arg)) for arg in args[1:]]
+        dated_args = [(arg, parsed) for arg, parsed in dated_args if parsed is not None]
+        if not dated_args:
+            continue
+        observed_date, observed_at = dated_args[-1]
+        status_candidates = [
+            arg
+            for arg in args[1:]
+            if arg != observed_date
+            and _runtime_temporal_datetime(runtime, arg) is None
+            and not _is_prolog_variable(arg)
+        ]
+        if not status_candidates:
+            continue
+        observed_status = status_candidates[0]
+        anchors.append(
+            {
+                "observed_entity": observed_entity,
+                "observed_date": observed_date,
+                "observed_status": observed_status,
+                "observed_at": observed_at,
+                "entity_match": "exact" if observed_entity == entity_arg else "canonical_atom",
+                "support_kind": "status_change_anchor",
+            }
+        )
+    anchors.sort(key=lambda item: item["observed_at"])
+    return anchors
+
+
+def _surrounding_status_anchors(
+    anchors: list[dict[str, Any]],
+    *,
+    requested_at: datetime,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    previous_anchor: dict[str, Any] | None = None
+    next_anchor: dict[str, Any] | None = None
+    for anchor in anchors:
+        if anchor["observed_at"] <= requested_at:
+            previous_anchor = anchor
+            continue
+        next_anchor = anchor
+        break
+    return previous_anchor, next_anchor
+
+
+def _population_event_windows_covering_date(
+    runtime: CorePrologRuntime,
+    *,
+    entity: str,
+    requested_at: datetime,
+    date_arg: str,
+    future_anchor: dict[str, Any] | None,
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    entity_key = _case_atom_key(entity)
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate.startswith("source_record_") or len(args) < 3:
+            continue
+        if not any(arg == entity or _case_atom_key(arg) == entity_key for arg in args[:3]):
+            continue
+        dated = [
+            (arg, _runtime_temporal_datetime(runtime, arg))
+            for arg in args
+            if _runtime_temporal_datetime(runtime, arg) is not None
+        ]
+        if len(dated) < 2:
+            continue
+        dated_sorted = sorted(dated, key=lambda item: item[1] or datetime.min)
+        start_atom, start_at = dated_sorted[0]
+        end_atom, end_at = dated_sorted[-1]
+        if start_at is None or end_at is None or not (start_at <= requested_at <= end_at):
+            continue
+        row = {
+            "EventPredicate": predicate,
+            "EventStart": start_atom,
+            "EventEnd": end_atom,
+            "CoversRequestedDate": "true",
+        }
+        if future_anchor:
+            row["FutureStatus"] = str(future_anchor.get("observed_status", ""))
+            row["FutureStatusDate"] = str(future_anchor.get("observed_date", ""))
+        rows.append(row)
+    return rows
+
+
 def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
     parsed = parse_prolog_query(query)
     if parsed is None:
@@ -13001,9 +13352,11 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
                 "observed_status": observed_status,
                 "observed_at": observed_at,
                 "entity_match": entity_match,
+                "support_kind": "transition_anchor",
             }
         )
 
+    anchors.extend(_status_change_anchors(runtime, entity_arg=entity_arg))
     if not anchors:
         return None
     anchors.sort(key=lambda item: item["observed_at"])
@@ -13022,7 +13375,7 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
     if previous_anchor is None:
         return None
     selected_anchor = previous_anchor
-    support_kind = "transition_anchor"
+    support_kind = str(selected_anchor.get("support_kind") or "transition_anchor")
     if interval_anchor and interval_anchor["observed_at"] <= requested_at:
         selected_anchor = interval_anchor
         support_kind = "corrected_or_stated_interval"
