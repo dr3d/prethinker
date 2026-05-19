@@ -386,7 +386,26 @@ Recent transfer work supports the current direction:
   inference move but does not constitute a new freeze stamp. The remaining
   compile-surface map is led by `other_answer_bearing_detail` (43 rows) and
   `source_reference` (25 rows), so the next pressure is source-addressed answer
-  detail preservation rather than helper resurrection.
+  detail preservation rather than restoring retired compatibility adapters.
+- The source-surface gap audit now splits source-addressed answer detail more
+  sharply. A classifier leak where the substring `id ` matched ordinary
+  question text such as `did ` was removed. The old 43-row
+  `other_answer_bearing_detail` bucket now resolves into concrete pressure
+  classes such as `point_in_time_status` (14), `other_source_reference` (11),
+  `official_or_staff_role_identity` (9), `count_or_total` (9),
+  `deadline_or_duration_arithmetic` (8), participant statements (6), source
+  stated facts (6), and true compact identifiers (3). The lesson is that the
+  next repair should follow the refined coordinate, not a generic prompt
+  broadening for "details."
+- A focused status-heavy replay tested the refined pressure against a fresh
+  current compile. The new compile emitted direct status-transition and lab
+  result surfaces that the older stamp compile had missed, and a tiny QA replay
+  over the six prior status/result misses scored `5/0/1`. The one remaining
+  miss is a denser subset-status question where the source distinguishes a
+  moved subset from the parent population. This confirms two layers: current
+  compile guidance can recover missing transition anchors, and the remaining
+  hard case is scoped population state, not a reason to restore retired
+  compatibility machinery.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

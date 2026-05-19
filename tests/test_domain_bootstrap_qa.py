@@ -5592,6 +5592,34 @@ def test_generic_status_query_derives_interval_support_from_transition_anchors()
     assert result_row["ObservedEntity"] == "lot_5b"
 
 
+def test_status_at_date_query_derives_interval_support_from_transition_anchors() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "lot_status_at_date(lot_5b, precautionary_hold, 2025_08_28).",
+        "lot_status_at_date(lot_5b, suspect, 2025_09_10).",
+        "lot_status_at_date(lot_5b, cleared, 2025_09_22).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["lot_status_at_date(lot_5b, Status, 2025_09_15)."],
+    )
+    companion = [
+        row
+        for row in rows
+        if row.get("query")
+        == "lot_status_at_date_interval_support(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+    ]
+
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["Status"] == "suspect"
+    assert result_row["EffectiveFrom"] == "2025_09_10"
+    assert result_row["EffectiveUntil"] == "2025_09_22"
+    assert result_row["ObservedEntity"] == "lot_5b"
+
+
 def test_status_at_query_derives_interval_support_from_transition_anchors() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

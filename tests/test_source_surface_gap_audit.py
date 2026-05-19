@@ -201,6 +201,11 @@ def test_source_surface_gap_audit_classifies_coordinate_shapes(tmp_path) -> None
         "source_reference": 1,
         "status_or_state": 1,
     }
+    assert report["summary"]["coordinate_detail_class_counts"] == {
+        "official_or_staff_role_identity": 1,
+        "other_source_reference": 1,
+        "point_in_time_status": 1,
+    }
 
 
 def test_source_surface_gap_audit_splits_quantity_detail_shapes(tmp_path) -> None:
@@ -331,7 +336,8 @@ def test_source_surface_gap_audit_splits_source_and_answer_detail_shapes(tmp_pat
               "source_record_text_atom(src_line_1, asset_tag_is_dev_12891).",
               "source_record_text_atom(src_line_2, source_within_packet_is_appendix_b).",
               "source_record_text_atom(src_line_3, applicant_statement_is_opinion_not_finding).",
-              "source_record_text_atom(src_line_4, eligible_project_categories_are_repair_and_access)."
+              "source_record_text_atom(src_line_4, eligible_project_categories_are_repair_and_access).",
+              "source_record_text_atom(src_line_5, rivera_suggested_replacing_the_filter)."
             ],
             "rules": []
           }
@@ -347,7 +353,8 @@ def test_source_surface_gap_audit_splits_source_and_answer_detail_shapes(tmp_pat
             {"id": "q001", "utterance": "What is the asset tag for the laptop?", "reference_answer": "DEV-12891."},
             {"id": "q002", "utterance": "What is the source within the packet for the statement?", "reference_answer": "Appendix B."},
             {"id": "q003", "utterance": "Which source claim is the applicant's opinion rather than a staff finding?", "reference_answer": "The applicant statement."},
-            {"id": "q004", "utterance": "What are the eligible project categories?", "reference_answer": "Repair and access."}
+            {"id": "q004", "utterance": "What are the eligible project categories?", "reference_answer": "Repair and access."},
+            {"id": "q005", "utterance": "What did Rivera suggest during the inspection?", "reference_answer": "Replacing the filter."}
           ]
         }
         """,
@@ -364,6 +371,7 @@ def test_source_surface_gap_audit_splits_source_and_answer_detail_shapes(tmp_pat
                     {"id": "q002", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What is the source within the packet for the statement?", "queries": []},
                     {"id": "q003", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "Which source claim is the applicant's opinion rather than a staff finding?", "queries": []},
                     {"id": "q004", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What are the eligible project categories?", "queries": []},
+                    {"id": "q005", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What did Rivera suggest during the inspection?", "queries": []},
                 ],
             }
         ]
@@ -372,12 +380,13 @@ def test_source_surface_gap_audit_splits_source_and_answer_detail_shapes(tmp_pat
     report = audit_scorecard(scorecard)
 
     assert report["summary"]["coordinate_class_counts"] == {
-        "other_answer_bearing_detail": 2,
+        "other_answer_bearing_detail": 3,
         "source_reference": 2,
     }
     assert report["summary"]["coordinate_detail_class_counts"] == {
         "claim_or_opinion_attribution": 1,
+        "compact_identifier_detail": 1,
         "eligibility_scope_or_category": 1,
-        "identifier_or_label_detail": 1,
+        "participant_statement_detail": 1,
         "source_location_or_section": 1,
     }

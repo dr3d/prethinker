@@ -301,6 +301,8 @@ def _coordinate_class(
             "what rate",
             "assessment rate",
             "what amount",
+            "what would the reserve",
+            "what would the balance",
             "total additional",
             "total harvest",
             "what seal numbers",
@@ -313,17 +315,44 @@ def _coordinate_class(
         ),
     ):
         return "quantity_or_duration"
+    if (question_tokens & {"reserve", "balance", "budget", "fund", "funds"}) and (
+        bool(answer_tokens & {"000", "dollars", "minimum", "minus", "starting", "unchanged"})
+        or bool(re.search(r"[$£€]|\b\d+(?:,\d{3})+\b", answer_text))
+    ):
+        return "quantity_or_duration"
     if _has_any(question_text, ("according to", "source", "document", "packet", "report", "memo", "order", "section", "bench notes", "which document", "ticket", "identifier")):
         return "source_reference"
-    if _has_any(question_text, ("status", "current", "condition", "active", "pending", "closed", "resolved", "unresolved", "authorized", "approved", "denied")):
+    if _has_any(
+        question_text,
+        (
+            "status",
+            "current",
+            "condition",
+            "classification",
+            "result",
+            "active",
+            "pending",
+            "closed",
+            "resolved",
+            "unresolved",
+            "authorized",
+            "approved",
+            "denied",
+            "decided",
+            "deaccessioned",
+            "filed",
+            "issued",
+            "rescinded",
+        ),
+    ):
         return "status_or_state"
-    if _has_any(question_text, ("can ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
+    if _has_any(question_text, ("can ", "could ", "may ", "must", "should", "required", "valid", "merit", "authority", "determine", "controls", "rule")):
         return "rule_or_authority_application"
     if _has_any(question_text, ("when", "what date", "date", "deadline", "scheduled", "window", "as of", "on what date")):
         return "date_time_or_interval"
     if _has_any(question_text, ("where", "located", "location", "custody", "retained", "stored", "cabinet", "vault", "room")):
         return "location_or_custody"
-    if _has_any(question_text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds")):
+    if _has_any(question_text, ("who", "whose", "by whom", "owner", "director", "judge", "supervisor", "assigned", "role", "retains", "holds", "what type", "management entity")):
         return "identity_or_role"
     if _has_any(
         " ".join([question_text, answer_text]),
@@ -409,9 +438,64 @@ def _coordinate_detail_class(
             return "partial_population_state"
         if qa_tokens & {"pending", "undetermined", "unresolved", "decided", "determined", "clarification", "commit"}:
             return "pending_or_resolution_state"
-        if qa_tokens & {"current", "currently", "condition", "available", "active", "approved", "denied", "cleared", "suspect"}:
+        if qa_tokens & {"current", "currently", "condition", "classification", "result", "available", "active", "approved", "denied", "cleared", "suspect"}:
             return "current_condition_or_availability"
         return "other_status_or_state"
+
+    if coordinate_class == "identity_or_role":
+        if _has_any(
+            qa_text,
+            (
+                "owner",
+                "owned",
+                "ownership",
+                "possession",
+                "possessor",
+                "retains",
+                "held",
+                "holds",
+                "custodian",
+                "custody",
+                "administered",
+            ),
+        ):
+            return "ownership_or_custody_identity"
+        if _has_any(
+            qa_text,
+            (
+                "director",
+                "keeper",
+                "captain",
+                "captained",
+                "mechanic",
+                "manager",
+                "managed",
+                "mayor",
+                "quality",
+                "role",
+                "supervised",
+                "supervisor",
+                "assigned",
+            ),
+        ):
+            return "official_or_staff_role_identity"
+        if _has_any(
+            qa_text,
+            (
+                "according to whose",
+                "whose statement",
+                "by whom",
+                "who exposed",
+                "who discovered",
+                "who reported",
+                "who prepared",
+                "who authored",
+            ),
+        ):
+            return "source_actor_or_discoverer_identity"
+        if qa_tokens & {"brother", "sister", "parent", "child", "children", "spouse", "heir", "beneficiary"}:
+            return "family_or_legal_relationship_identity"
+        return "other_identity_or_role"
 
     if coordinate_class == "source_reference":
         if _has_any(
@@ -450,20 +534,10 @@ def _coordinate_detail_class(
         return "other_source_reference"
 
     if coordinate_class == "other_answer_bearing_detail":
-        if _has_any(
-            qa_text,
-            (
-                "asset tag",
-                "ticket",
-                "serial",
-                "identifier",
-                "id ",
-                "number",
-                "code",
-                "label",
-            ),
-        ):
-            return "identifier_or_label_detail"
+        if _is_participant_statement_detail(qa_text):
+            return "participant_statement_detail"
+        if _has_any(qa_text, ("deny", "denied", "acknowledged", "disputed", "conceded", "admitted")):
+            return "claim_status_detail"
         if _has_any(
             qa_text,
             (
@@ -477,6 +551,8 @@ def _coordinate_detail_class(
             ),
         ):
             return "decision_or_finding_detail"
+        if _is_compact_identifier_detail(question=question, reference_answer=reference_answer, qa_tokens=qa_tokens):
+            return "compact_identifier_detail"
         if _has_any(
             qa_text,
             (
@@ -496,6 +572,9 @@ def _coordinate_detail_class(
             (
                 "consequence",
                 "penalty",
+                "effect",
+                "inherit",
+                "inherited",
                 "veto",
                 "visited",
                 "observed",
@@ -563,6 +642,57 @@ def _coordinate_detail_class(
 
 def _has_any(text: str, needles: tuple[str, ...]) -> bool:
     return any(needle in text for needle in needles)
+
+
+def _is_compact_identifier_detail(*, question: str, reference_answer: str, qa_tokens: set[str]) -> bool:
+    """Detect questions whose requested answer is a compact identifier/code.
+
+    Keep this deliberately question-led. Reference answers often carry bracketed
+    QA labels or local document codes, and those labels should not turn an
+    ordinary statement-detail miss into an identifier-surface gap.
+    """
+
+    question_text = str(question).lower().replace("_", " ")
+    if _has_any(
+        question_text,
+        (
+            "asset tag",
+            "barcode",
+            "bar code",
+            "case number",
+            "device id",
+            "device identifier",
+            "file number",
+            "identifier",
+            "license number",
+            "locker code",
+            "locker codes",
+            "maintenance ticket",
+            "motion number",
+            "permit number",
+            "serial number",
+            "ticket number",
+        ),
+    ):
+        return True
+    if re.search(
+        r"\b(?:what|which)\b.{0,80}\b(?:id|ids|code|codes|tag|tags|serial|serials|ticket|tickets|barcode|barcodes|identifier|identifiers)\b",
+        question_text,
+    ):
+        return True
+    if re.search(r"\bwhat\s+(?:is|are)\s+the\b.{0,60}\blabels?\b", question_text):
+        return True
+    return bool(qa_tokens & {"identifier", "identifiers", "serial", "serials", "barcode", "barcodes"})
+
+
+def _is_participant_statement_detail(text: str) -> bool:
+    return bool(
+        re.search(
+            r"\bwhat\b.{0,80}\b(?:said|say|suggest|suggested|state|stated|testify|testified|claim|claimed|comment|commented|object|objected)\b",
+            text,
+        )
+        or re.search(r"\b(?:statement|comment|testimony|suggestion|objection|concern)s?\b", text)
+    )
 
 
 def _compile_index(payload: dict[str, Any]) -> dict[str, Any]:
