@@ -18,6 +18,8 @@ from typing import Any
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+CALENDAR_DATE_RE = re.compile(r"(?:^|[_\-\s])(?:v_)?(?:19|20)\d{2}[_\-]?[01]\d[_\-]?[0-3]\d(?:[_\-\s]|$)")
+COMPACT_CALENDAR_DATE_RE = re.compile(r"(?:^|[_\-\s])(?:19|20)\d{6}(?:[_\-\s]|$)")
 NUMBER_WORDS = {
     "zero",
     "one",
@@ -525,6 +527,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
             _audit_participant_statement_status_contract(source_facts, direct_rows),
             _audit_status_state_scope_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
+            _audit_event_identifier_temporal_backbone_contract(direct_rows),
             _audit_repeated_record_detail_delivery_contract(source_facts, direct_rows),
         ],
         "summary": _summarize_families(families),
@@ -1502,6 +1505,136 @@ def _audit_vague_wrapper_backbone_contract(
         "wrapper_row_count": len(wrapper_rows),
         "wrapper_predicates": wrapper_predicates,
     }
+
+
+def _audit_event_identifier_temporal_backbone_contract(
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Flag event identifiers that encode dates without explicit date rows.
+
+    Date-bearing identifiers can be convenient labels, but they are not a
+    reliable temporal surface. If an event id embeds a calendar date, a sibling
+    row should bind that event to an explicit date/time value so QA plans can
+    join and calculate without parsing ids.
+    """
+
+    event_ids = sorted(
+        {
+            _normalize_arg(arg)
+            for row in direct_rows
+            for arg in row.get("args", [])
+            if _is_date_bearing_event_identifier(row, str(arg))
+        }
+    )
+    if not event_ids:
+        return {
+            "contract": "event_identifier_temporal_backbone_contract",
+            "description": "date-bearing event identifiers should have explicit same-event date/time rows; identifiers alone must not substitute for temporal backbone",
+            "status": "not_applicable",
+            "required_key_count": 0,
+            "companion_key_count": 0,
+            "missing_keys": [],
+            "covered_keys": [],
+            "event_id_count": 0,
+            "temporal_backbone_count": 0,
+            "sample_predicates": [],
+        }
+
+    covered: list[str] = []
+    missing: list[str] = []
+    for event_id in event_ids:
+        if _event_identifier_has_temporal_backbone(event_id, direct_rows):
+            covered.append(event_id)
+        else:
+            missing.append(event_id)
+
+    if not missing:
+        status = "pass"
+    elif covered:
+        status = "partial_identifier_date_only"
+    else:
+        status = "identifier_date_only"
+
+    sample_predicates = sorted(
+        {
+            str(row.get("predicate") or "")
+            for row in direct_rows
+            if any(_normalize_arg(arg) in event_ids for arg in row.get("args", []))
+        }
+    )
+    return {
+        "contract": "event_identifier_temporal_backbone_contract",
+        "description": "date-bearing event identifiers should have explicit same-event date/time rows; identifiers alone must not substitute for temporal backbone",
+        "status": status,
+        "required_key_count": len(event_ids),
+        "companion_key_count": len(covered),
+        "missing_keys": missing,
+        "covered_keys": covered,
+        "event_id_count": len(event_ids),
+        "temporal_backbone_count": len(covered),
+        "sample_predicates": sample_predicates,
+    }
+
+
+def _is_date_bearing_event_identifier(row: dict[str, Any], value: str) -> bool:
+    norm = _normalize_arg(value)
+    if not _arg_has_calendar_date(norm):
+        return False
+    predicate = str(row.get("predicate") or "").lower()
+    predicate_tokens = set(TOKEN_RE.findall(predicate))
+    value_tokens = set(TOKEN_RE.findall(norm))
+    event_terms = {
+        "action",
+        "appeal",
+        "approval",
+        "declaration",
+        "event",
+        "ev",
+        "filing",
+        "hearing",
+        "incident",
+        "meeting",
+        "motion",
+        "notice",
+        "occurrence",
+        "ratification",
+        "resolution",
+        "review",
+        "transition",
+    }
+    identifier_markers = {"ev", "event", "incident", "hearing", "meeting", "notice", "filing", "motion"}
+    if not (value_tokens & event_terms or value_tokens & identifier_markers):
+        return False
+    return bool((predicate_tokens | value_tokens) & event_terms)
+
+
+def _event_identifier_has_temporal_backbone(event_id: str, direct_rows: list[dict[str, Any]]) -> bool:
+    temporal_predicate_terms = {"date", "dated", "time", "timestamp", "occurred", "effective", "scheduled"}
+    for row in direct_rows:
+        args = [_normalize_arg(arg) for arg in row.get("args", [])]
+        if event_id not in args:
+            continue
+        predicate_tokens = set(TOKEN_RE.findall(str(row.get("predicate") or "").lower()))
+        other_args = [arg for arg in args if arg != event_id]
+        if any(_arg_is_calendar_date_value(arg) for arg in other_args):
+            return True
+        if predicate_tokens & temporal_predicate_terms and any(_arg_has_calendar_date(arg) for arg in other_args):
+            return True
+    return False
+
+
+def _arg_has_calendar_date(value: str) -> bool:
+    norm = _normalize_arg(value)
+    return bool(CALENDAR_DATE_RE.search(norm) or COMPACT_CALENDAR_DATE_RE.search(norm))
+
+
+def _arg_is_calendar_date_value(value: str) -> bool:
+    norm = _normalize_arg(value)
+    if not _arg_has_calendar_date(norm):
+        return False
+    date_tokens = len(re.findall(r"(?:19|20)\d{2}|[01]\d|[0-3]\d", norm))
+    non_date_tokens = [token for token in TOKEN_RE.findall(norm) if token not in {"v"} and not token.isdigit()]
+    return date_tokens >= 1 and len(non_date_tokens) <= 2
 
 
 def _row_local_trigger_groups(

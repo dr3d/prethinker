@@ -225,6 +225,73 @@ def test_audit_compile_surface_invariants_allows_vague_event_wrapper_when_backbo
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_flags_date_bearing_event_id_without_date_row(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, emergency_declaration_on_2026_05_12_ratified_on_2026_05_14).",
+            "event_occurred(ev_emergency_declaration_2026_05_12, emergency_declaration).",
+            "event_outcome(ev_ratification_2026_05_14, ratified).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row
+        for row in report["relation_contracts"]
+        if row["contract"] == "event_identifier_temporal_backbone_contract"
+    )
+    assert contract["status"] == "identifier_date_only"
+    assert contract["required_key_count"] == 2
+    assert contract["companion_key_count"] == 0
+    assert contract["missing_keys"] == ["ev_emergency_declaration_2026_05_12", "ev_ratification_2026_05_14"]
+
+
+def test_audit_compile_surface_invariants_passes_date_bearing_event_id_with_date_rows(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, emergency_declaration_on_2026_05_12_ratified_on_2026_05_14).",
+            "event_occurred(ev_emergency_declaration_2026_05_12, emergency_declaration).",
+            "event_date(ev_emergency_declaration_2026_05_12, 2026_05_12).",
+            "event_outcome(ev_ratification_2026_05_14, ratified).",
+            "event_date(ev_ratification_2026_05_14, 2026_05_14).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row
+        for row in report["relation_contracts"]
+        if row["contract"] == "event_identifier_temporal_backbone_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["required_key_count"] == 2
+    assert contract["companion_key_count"] == 2
+
+
+def test_audit_compile_surface_invariants_does_not_flag_non_event_business_ids(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, budget_amendment_ba_2026_07_appropriation_amount_185000).",
+            "budget_amendment(ba_2026_07).",
+            "appropriation_amount(ba_2026_07, 185000).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row
+        for row in report["relation_contracts"]
+        if row["contract"] == "event_identifier_temporal_backbone_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
 def test_audit_compile_surface_invariants_does_not_cross_join_backbone_trigger_rows(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

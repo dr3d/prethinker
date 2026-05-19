@@ -496,6 +496,21 @@ Recent transfer work supports the current direction:
   control, then replayed on the recall/inventory fixture where the March 15
   accounted-unit percentage moved to exact. A fresh 40-row replay of that
   fixture scored `31/2/7`, with zero compatibility rows and no runtime errors.
+  A two-draw stability audit over the four-fixture quantity slice showed the
+  harder compile-stability problem directly: all four fixtures had palette and
+  direct-fact drift. A bounded preservation candidate for a municipal notice
+  row merged only volatile `source_authority/3` and `source_detail/4` rows from
+  a sibling draw into the anchor compile; the public-notice question moved to
+  exact, but a nearby emergency-ratification row came back partial because the
+  query plan did not assemble the hour calculation. Multi-draw preservation is
+  therefore an active experiment, not a default stamp path yet.
+  The follow-up invariant audit now records
+  `event_identifier_temporal_backbone_contract`: event ids may contain dates,
+  but date-bearing ids do not count as temporal backbone unless a same-event
+  date/time row is also emitted. On the same four-fixture slice this signal was
+  bounded: four compiles were not applicable, one passed with explicit temporal
+  rows, and three flagged identifier-only dates. That makes the next pressure a
+  generic compile-delivery issue, not a fixture-specific arithmetic patch.
 - The same profile-admission/profile-delivery shape now covers status/state
   pressure. Point-in-time status, current condition, availability, pending
   resolution, supersession, and partial-population state must offer a direct
