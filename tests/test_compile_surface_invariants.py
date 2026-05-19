@@ -633,6 +633,23 @@ def test_audit_compile_surface_invariants_ignores_statement_language_components(
     assert contract["required_key_count"] == 1
 
 
+def test_audit_compile_surface_invariants_does_not_treat_plain_not_as_statement_status(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, witness_stated_the_device_was_not_in_room_alpha).",
+            "witness_statement(statement_1, witness_1, location_topic, device_not_in_room_alpha).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "participant_statement_status_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
 def test_audit_compile_surface_invariants_detects_access_source_pair_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

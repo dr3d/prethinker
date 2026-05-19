@@ -464,6 +464,11 @@ Recent transfer work supports the current direction:
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record
   delivery, financial derivation, and wrapper/backbone contracts.
+- The participant-statement status recognizer was tightened so plain negation
+  in a statement no longer counts as binding/advisory status pressure. After
+  calibration, its native contract pressure is `6` missing status companions,
+  `8` missing structural surfaces, `1` partial, `2` pass, and `39` not
+  applicable; the previous broader count was mostly recognizer noise.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

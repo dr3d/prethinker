@@ -1324,11 +1324,14 @@ def _audit_participant_statement_status_contract(
         "suggested",
         "asked",
     }
-    status_tokens = {"binding", "advisory", "nonbinding", "informational", "opinion", "not", "false", "true"}
+    status_tokens = {"binding", "advisory", "nonbinding", "informational", "opinion", "false", "true"}
     triggered = {
         "speech_surface": sorted(speech_tokens & source_tokens),
         "binding_status": sorted(status_tokens & source_tokens),
     }
+    source_text = " ".join(source_facts).lower()
+    if re.search(r"(?:not|non)[_\s-]+(?:binding|authoritative|controlling|final|official)", source_text):
+        triggered["binding_status"].append("not_binding_like")
     if not triggered["speech_surface"] or not triggered["binding_status"]:
         return {
             "contract": "participant_statement_status_contract",
