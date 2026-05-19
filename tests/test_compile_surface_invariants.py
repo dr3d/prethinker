@@ -225,6 +225,25 @@ def test_audit_compile_surface_invariants_allows_vague_event_wrapper_when_backbo
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_does_not_cross_join_backbone_trigger_rows(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, event_log_intro).",
+            "source_record_text_atom(src_line_002, report_date_2026_04_02).",
+            "source_record_text_atom(src_line_003, sample_4_status_settled).",
+            "event_detail(event_7, source_line_001).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "vague_wrapper_backbone_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
 def test_audit_compile_surface_invariants_detects_repeated_record_detail_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

@@ -1468,7 +1468,6 @@ def _audit_vague_wrapper_backbone_contract(
     coordinates.
     """
 
-    source_tokens = _tokens_for_facts(source_facts)
     trigger_terms = {
         "event_identity": {"event", "entry", "record", "incident", "log"},
         "temporal_anchor": {"timestamp", "time", "date", "dated", "chronological", "order"},
@@ -1476,11 +1475,7 @@ def _audit_vague_wrapper_backbone_contract(
         "subject_or_object": {"subject", "object", "item", "sample", "request", "proposal", "debt"},
         "outcome_or_state": {"status", "outcome", "result", "state", "settled", "void", "issued"},
     }
-    triggered_groups = {
-        name: sorted(tokens & source_tokens)
-        for name, tokens in trigger_terms.items()
-        if tokens & source_tokens
-    }
+    triggered_groups = _row_local_trigger_groups(source_facts, trigger_terms)
     backbone = next((row for row in families if row.get("family") == "event_backbone_unit_surface"), {})
     backbone_status = str(backbone.get("status") or "")
     wrapper_rows = [row for row in direct_rows if _is_vague_wrapper_row(row)]
@@ -1507,6 +1502,29 @@ def _audit_vague_wrapper_backbone_contract(
         "wrapper_row_count": len(wrapper_rows),
         "wrapper_predicates": wrapper_predicates,
     }
+
+
+def _row_local_trigger_groups(
+    source_facts: list[str],
+    trigger_terms: dict[str, set[str]],
+) -> dict[str, list[str]]:
+    best: dict[str, set[str]] = {}
+    best_size = 0
+    for row in _source_record_text_rows(source_facts):
+        payload = _strip_source_record_coordinate_prefix(_source_record_payload_text(row)).lower()
+        tokens = set(TOKEN_RE.findall(payload))
+        groups = {
+            name: terms & tokens
+            for name, terms in trigger_terms.items()
+            if terms & tokens
+        }
+        if len(groups) > best_size:
+            best = {name: set(values) for name, values in groups.items()}
+            best_size = len(groups)
+        elif len(groups) == best_size and groups:
+            for name, values in groups.items():
+                best.setdefault(name, set()).update(values)
+    return {name: sorted(values) for name, values in sorted(best.items())}
 
 
 def _audit_repeated_record_detail_delivery_contract(

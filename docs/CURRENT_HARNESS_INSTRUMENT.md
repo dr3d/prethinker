@@ -469,6 +469,11 @@ Recent transfer work supports the current direction:
   calibration, its native contract pressure is `6` missing status companions,
   `8` missing structural surfaces, `1` partial, `2` pass, and `39` not
   applicable; the previous broader count was mostly recognizer noise.
+- The vague-wrapper/backbone contract now uses row-local triggering instead of
+  cross-joining event/date/subject/status words from unrelated source rows. On
+  the native compile set this moved the contract from `3` not applicable to
+  `12` not applicable, while preserving `22` missing backbone and `7`
+  wrapper-without-backbone signals that still look like real compile pressure.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,
