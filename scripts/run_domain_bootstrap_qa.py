@@ -2104,6 +2104,14 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         return []
 
     identifier_needles: list[str] = []
+    for pattern in (
+        r"\b(?:transfer|transfers|transferred|alter|alters|altered|determine|determines|determined|hold|holds|held)\s+(?:legal\s+)?(?:title|ownership)\b",
+        r"\b(?:title|ownership)\s+(?:transfer|transfers|transferred|holder|holders|status|determination)\b",
+    ):
+        for match in re.finditer(pattern, raw, flags=re.IGNORECASE):
+            needle = _normalize_text_filter_atom(match.group(0))
+            if needle:
+                identifier_needles.append(needle)
     for match in re.finditer(r"\b[A-Z]\.\s*[A-Z][A-Za-z]+\b", raw):
         needle = _normalize_text_filter_atom(match.group(0))
         if needle:

@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_qa import (
     _current_state_source_text_hint_queries,
     _event_description_hint_queries,
+    _source_text_question_needles,
     _source_coordinate_hint_queries,
     _source_attribution_hint_queries,
 )
@@ -123,3 +124,11 @@ def test_source_coordinate_hint_recognizes_according_to_and_per() -> None:
         utterance="What is the packet ID associated with this source within the packet?",
         kb_inventory=kb_inventory,
     )[3] == "source_record_field(SourceRow, Field, Value)."
+
+
+def test_source_text_needles_preserve_legal_title_phrase() -> None:
+    needles = _source_text_question_needles(
+        "Per the memo, what is required for the insurance settlement to transfer title to the wreck?"
+    )
+
+    assert needles[0] == "transfer_title"

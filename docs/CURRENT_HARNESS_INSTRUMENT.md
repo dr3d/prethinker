@@ -261,10 +261,11 @@ Recent transfer work supports the current direction:
   source-within-packet, packet-id, ticket, and reported-by phrasing as explicit
   requests for deterministic source addressability. On the 17-row native
   source-reference stranded slice, query-only replay moved from `7/1/9` to
-  `16/0/1` on the same frozen compile artifacts, with zero compatibility rows.
-  The one remaining miss asks for a title-transfer requirement from an
-  authority memo, which is stronger evidence for a direct rule surface than for
-  broader source-coordinate routing.
+  `17/0/0` on the same frozen compile artifacts, with zero compatibility rows.
+  The final row exposed a placeholder-vs-content distinction: `title` remains a
+  protected slot placeholder in Prolog query arguments, but legal title phrases
+  such as `transfer title` are preserved as source-text needles because there
+  the word is source content.
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.
