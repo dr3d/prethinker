@@ -451,6 +451,15 @@ Recent transfer work supports the current direction:
   for `event_measurement/4`: the candidate carrier existed, but only
   `event_description` rows were emitted. That makes this a delivery/preservation
   problem, not merely a vocabulary problem.
+- Source-reference pressure now has the same audit shape.
+  `source_attributed_claim_contract` detects source-record prose that attributes
+  a status, finding, authority, or unresolved claim to a memo, report, statement,
+  note, opinion, source actor, or document, then asks whether admitted state has
+  a direct row binding source/document, content, and source/scope. On the latest
+  native compile artifacts it found `29` passes, `21` missing direct
+  source-reference surfaces, and `6` not applicable. This is measurement only:
+  it does not license copying local source names into the architecture, but it
+  exposes when attribution remains stranded in source-record text.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

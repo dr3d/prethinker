@@ -521,6 +521,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
             _audit_quantity_value_delivery_contract(source_facts, direct_rows, candidate_predicates),
+            _audit_source_attributed_claim_contract(source_facts, direct_rows),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
             _audit_status_state_scope_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
@@ -1160,6 +1161,135 @@ def _text_has_numeric_value(text: str) -> bool:
         )
         or tokens & NUMBER_WORDS
     )
+
+
+def _audit_source_attributed_claim_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    source_rows = _source_record_text_rows(source_facts)
+    source_mentions = _source_attribution_mentions(source_rows)
+    structural_rows = [row for row in direct_rows if _is_source_attributed_claim_row(row)]
+    wrapper_rows = [
+        row
+        for row in direct_rows
+        if str(row.get("predicate") or "").lower() in {"source_recorded_assertion", "source_detail", "answer_detail"}
+    ]
+    if not source_mentions:
+        status = "not_applicable"
+    elif structural_rows:
+        status = "pass"
+    elif wrapper_rows:
+        status = "source_reference_wrapper_only"
+    else:
+        status = "missing_source_reference_surface"
+    return {
+        "contract": "source_attributed_claim_contract",
+        "description": "source-attributed claims should preserve source actor/document, content, and source/scope as direct rows rather than only source-record prose",
+        "status": status,
+        "required_key_count": len(source_mentions),
+        "companion_key_count": len(structural_rows),
+        "missing_keys": [] if structural_rows else [row["excerpt"] for row in source_mentions[:12]],
+        "source_signal_count": len(source_mentions),
+        "structural_row_count": len(structural_rows),
+        "structural_predicates": sorted({str(row["predicate"]) for row in structural_rows}),
+        "wrapper_predicates": sorted({str(row["predicate"]) for row in wrapper_rows}),
+        "triggered_groups": {
+            "source_signals": [row["groups"] for row in source_mentions[:12]],
+        },
+    }
+
+
+def _source_attribution_mentions(source_rows: list[str]) -> list[dict[str, Any]]:
+    mentions: list[dict[str, Any]] = []
+    source_terms = {
+        "according",
+        "attested",
+        "claim",
+        "claimed",
+        "email",
+        "letter",
+        "memo",
+        "memorandum",
+        "note",
+        "opinion",
+        "per",
+        "report",
+        "reported",
+        "says",
+        "source",
+        "statement",
+        "states",
+        "stated",
+        "testimony",
+    }
+    content_terms = {
+        "active",
+        "authority",
+        "available",
+        "binding",
+        "confirmed",
+        "determined",
+        "finding",
+        "not",
+        "open",
+        "pending",
+        "resolved",
+        "status",
+        "supports",
+        "unresolved",
+    }
+    for row in source_rows:
+        payload = _strip_source_record_coordinate_prefix(_source_record_payload_text(row)).lower()
+        tokens = set(TOKEN_RE.findall(payload))
+        source_hits = sorted(tokens & source_terms)
+        content_hits = sorted(tokens & content_terms)
+        if source_hits and content_hits:
+            mentions.append(
+                {
+                    "excerpt": payload[:180],
+                    "groups": {
+                        "source_or_speech_cue": source_hits,
+                        "claim_content_cue": content_hits,
+                    },
+                }
+            )
+    return mentions
+
+
+def _is_source_attributed_claim_row(row: dict[str, Any]) -> bool:
+    predicate = str(row.get("predicate") or "").lower()
+    args = [str(arg) for arg in row.get("args", [])]
+    if predicate.startswith("source_record") or len(args) < 3:
+        return False
+    if predicate in {
+        "participant_statement",
+        "witness_statement",
+        "legal_opinion",
+        "source_authority",
+        "source_attributed_claim",
+        "source_detail",
+        "statement_detail",
+    }:
+        return True
+    tokens = _tokens_for_row(row)
+    predicate_tokens = set(TOKEN_RE.findall(predicate))
+    source_tokens = {
+        "claim",
+        "email",
+        "letter",
+        "memo",
+        "memorandum",
+        "note",
+        "opinion",
+        "report",
+        "source",
+        "statement",
+        "testimony",
+        "witness",
+    }
+    content_tokens = {"authority", "content", "detail", "finding", "status", "support", "topic"}
+    return bool(predicate_tokens & source_tokens and (tokens & content_tokens or len(args) >= 4))
 
 
 def _audit_participant_statement_status_contract(

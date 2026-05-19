@@ -445,6 +445,60 @@ def test_audit_compile_surface_invariants_ignores_record_heading_numbers_and_lab
     assert contract["status"] == "not_applicable"
 
 
+def test_audit_compile_surface_invariants_detects_missing_source_attributed_claim(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, according_to_rivera_memo_device_alpha_status_active).",
+            "device_status(device_alpha, active).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "source_attributed_claim_contract"
+    )
+    assert contract["status"] == "missing_source_reference_surface"
+    assert contract["source_signal_count"] == 1
+    assert contract["structural_row_count"] == 0
+
+
+def test_audit_compile_surface_invariants_passes_source_attributed_claim_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, according_to_rivera_memo_device_alpha_status_active).",
+            "source_attributed_claim(claim_1, rivera_memo, device_alpha_status_active, src_line_001).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "source_attributed_claim_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["structural_predicates"] == ["source_attributed_claim"]
+
+
+def test_audit_compile_surface_invariants_ignores_unattributed_status_rows(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, device_alpha_status_active).",
+            "device_status(device_alpha, active).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "source_attributed_claim_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
 def test_audit_compile_surface_invariants_detects_participant_statement_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",
