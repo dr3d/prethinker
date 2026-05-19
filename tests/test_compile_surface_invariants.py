@@ -100,6 +100,7 @@ def test_audit_compile_surface_invariants_reports_stranded_source_record_promoti
     compile_json = _write_compile(
         tmp_path / "compile.json",
         [
+            "source_record_field(src_line_000, fixture_id, black_lantern_maze_v1).",
             "source_record_label(src_line_001, next_calibration_due_2026_07_12).",
             "source_record_field(src_line_002, device_id, dev_scan_07).",
             "device_id(dev_scan_07).",

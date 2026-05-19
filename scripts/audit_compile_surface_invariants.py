@@ -557,6 +557,8 @@ def _audit_source_record_promotion(source_facts: list[str], direct_facts: list[s
         tokens = _promotable_tokens(row["value"])
         if not tokens:
             continue
+        if _is_source_record_metadata_candidate(row, tokens):
+            continue
         marker_hits = sorted(tokens & PROMOTABLE_SOURCE_RECORD_MARKERS)
         looks_like_identifier = _looks_like_identifier_tokens(tokens)
         looks_like_list = len([token for token in tokens if token.isdigit()]) >= 3
@@ -621,6 +623,13 @@ def _looks_like_identifier_tokens(tokens: set[str]) -> bool:
     has_alpha = any(re.search(r"[a-z]", token) for token in tokens)
     has_digit = any(re.search(r"\d", token) for token in tokens)
     return has_alpha and has_digit
+
+
+def _is_source_record_metadata_candidate(row: dict[str, Any], tokens: set[str]) -> bool:
+    value = _normalize_arg(str(row.get("value") or ""))
+    if value.startswith("fixture_id_") or ("fixture" in tokens and "fixture_id" in value):
+        return True
+    return False
 
 
 def _source_record_promotion_class(row: dict[str, Any], tokens: set[str]) -> str:

@@ -364,8 +364,9 @@ Recent transfer work supports the current direction:
   reduce false positives or use the telemetry as a targeted retry hint, not as
   permission to promote every compact source-record value.
   The telemetry now classifies stranded candidates into fixture-free queues
-  before any repair is attempted. On the same slice the largest classes were
-  compact identifiers (171), source addresses/headings (39), other source
+  before any repair is attempted. Harness metadata such as `fixture_id` is
+  excluded from that queue. On the same slice the largest classes were
+  compact identifiers (166), source addresses/headings (39), other source
   detail (29), date/time values (27), and identity/role values (9). This keeps
   the next work out of a generic "promote labels" trap: compact ticket/tag/id
   recovery, source-address recovery, and date/status/role recovery are
