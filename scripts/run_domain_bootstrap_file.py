@@ -3803,6 +3803,10 @@ def _candidate_can_carry_source_attributed_claim_unit(candidate: dict[str, Any])
 def _candidate_can_carry_status_state_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     name = signature.split("/", 1)[0]
+    if _candidate_can_carry_source_attributed_claim_unit(candidate):
+        return False
+    if set(name.split("_")) & {"claim", "memo", "note", "opinion", "report", "source", "statement", "testimony", "witness"}:
+        return False
     if name.endswith(("_status_at", "_state_at", "_condition_at", "_status_on", "_state_on")):
         return True
     if name in {"entity_status_at", "item_availability_at", "population_state_at", "record_condition_at", "status_state_at"}:

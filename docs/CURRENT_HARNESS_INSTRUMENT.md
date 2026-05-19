@@ -468,7 +468,10 @@ Recent transfer work supports the current direction:
   Shallow palettes can now receive a vocabulary-only `status_state_at/4`
   extension; that extension admits no facts by itself and exists only to give
   the compiler a transferable carrier when the source already has scoped
-  status/state pressure.
+  status/state pressure. The recognizer explicitly keeps source/provenance
+  claim rows from satisfying the status/state contract just because one argument
+  is named `status`; a source-attributed claim can support a status, but it is
+  not itself the direct status/state surface.
 - Source-reference pressure now has the same audit shape.
   `source_attributed_claim_contract` detects source-record prose that attributes
   a status, finding, authority, or unresolved claim to a memo, report, statement,

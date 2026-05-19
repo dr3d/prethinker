@@ -1251,6 +1251,27 @@ def test_profile_admission_accepts_complete_source_attributed_claim_palette() ->
     assert report["findings"] == []
 
 
+def test_source_attributed_claim_does_not_satisfy_status_state_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_document", "content_status", "source_row"],
+                },
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["source_attributed_claim_capable"] == 1
+    assert report["candidate_contract_counts"]["status_state_capable"] == 0
+    assert "shallow_status_state_palette" in {finding["class"] for finding in report["findings"]}
+
+
 def test_profile_admission_accepts_complete_status_state_palette() -> None:
     report = _profile_admission_report(
         source_text=(
