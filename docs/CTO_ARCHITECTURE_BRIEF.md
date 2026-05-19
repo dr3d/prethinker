@@ -1,6 +1,6 @@
 # CTO Architecture Brief
 
-Last updated: 2026-05-12
+Last updated: 2026-05-19
 
 This is the fastest orientation for a new high-context collaborator. Read it
 as the current operating doctrine, not as a research diary.
@@ -144,34 +144,31 @@ failure.
 
 ## Next CTO Job
 
-Run boundary probes. Use `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md` as the
-doctrine and `docs/ACTIVE_RESEARCH_LANES.md` for current priorities. Detailed
-movement logs are archive material, not front-door docs.
+The next CTO job is to get to a clean instrument-freeze decision.
 
-The seed measurement is the 2026-05-12 wide OpenRouter corpus run:
+Current native fixed-compile direct-surface anchor:
 
-- compile attempted `56` source-backed fixtures;
-- `32` compile artifacts were produced;
-- QA40 over those `32` fixtures completed `1008 / 76 / 134` over `1218`
-  questions;
-- exact rate was `0.8276`;
-- runtime load errors and write proposal rows were both `0`;
-- compatibility-adapter pressure was visible in that historical measurement,
-  but it is not the current repair lane;
-- the 210 not-exact rows are boundary coordinates, not permission for
-  fixture-specific tuning.
+- `2163` judged rows;
+- `1934 exact / 64 partial / 162 miss`;
+- `89.41%` exact;
+- `0` compatibility rows;
+- `0` runtime load errors;
+- `0` write proposal rows.
 
-Start with class-level boundary work:
+Recent cleanup retired compatibility-era public artifacts, stale guard-rollup
+surfaces, old selector mode labels, and prompt-facing terminology that made
+retired compatibility adapters look like active architecture.
 
-1. Classify not-exact rows by fixture-free failure geometry, especially
-   compile-surface, hybrid-join, query-surface, answer-surface, source-fidelity,
-   compatibility-adapter volume, and judge-ambiguity pressure.
-2. Design small probe fixtures that isolate one tricky axis at a time.
-3. Repair only when the replacement can be stated without fixture names, row
-   ids, question ids, answer strings, local people, local organizations, or
-   story nouns.
-4. Replay on unlike rows before promoting any direct surface, predicate,
-   deterministic ledger, query plan, or selector principle.
+Continue only if you find one of these:
+
+1. stale public docs or dead links;
+2. fixture-shaped vocabulary in active prompt/config surfaces;
+3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
+4. active code paths that would re-enable compatibility adapters by default.
+
+If those stay quiet, the right next move is a frozen native-corpus stamp. Do
+not rush toward it if new cruft is visible, but also do not keep polishing
+internal legacy names that are not public, prompt-facing, or artifact-facing.
 
 ## Repo Hygiene
 
