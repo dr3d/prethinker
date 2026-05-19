@@ -691,6 +691,7 @@ def _audit_family(
 def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     status_counts: dict[str, int] = {}
     family_status_counts: dict[str, dict[str, int]] = {}
+    relation_contract_status_counts: dict[str, dict[str, int]] = {}
     promotion_candidate_count = 0
     promotion_stranded_count = 0
     for report in reports:
@@ -703,9 +704,20 @@ def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
             status_counts[status] = status_counts.get(status, 0) + 1
             bucket = family_status_counts.setdefault(str(family["family"]), {})
             bucket[status] = bucket.get(status, 0) + 1
+        for contract in report.get("relation_contracts", []):
+            if not isinstance(contract, dict):
+                continue
+            status = str(contract.get("status") or "")
+            if not status:
+                continue
+            bucket = relation_contract_status_counts.setdefault(str(contract.get("contract") or ""), {})
+            bucket[status] = bucket.get(status, 0) + 1
     return {
         "status_counts": dict(sorted(status_counts.items())),
         "family_status_counts": {key: dict(sorted(value.items())) for key, value in sorted(family_status_counts.items())},
+        "relation_contract_status_counts": {
+            key: dict(sorted(value.items())) for key, value in sorted(relation_contract_status_counts.items())
+        },
         "source_record_promotion_candidate_count": promotion_candidate_count,
         "source_record_promotion_stranded_count": promotion_stranded_count,
     }
@@ -1959,6 +1971,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Schema: `{payload['schema_version']}`",
         f"- Compiles: `{payload['compile_count']}`",
         f"- Status counts: `{payload['summary']['status_counts']}`",
+        f"- Relation contract status counts: `{payload['summary'].get('relation_contract_status_counts', {})}`",
         f"- Source-record promotion candidates: `{payload['summary'].get('source_record_promotion_candidate_count', 0)}`",
         f"- Source-record promotion stranded candidates: `{payload['summary'].get('source_record_promotion_stranded_count', 0)}`",
         "",

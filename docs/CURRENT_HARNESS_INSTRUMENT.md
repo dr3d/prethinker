@@ -460,6 +460,10 @@ Recent transfer work supports the current direction:
   source-reference surfaces, and `6` not applicable. This is measurement only:
   it does not license copying local source names into the architecture, but it
   exposes when attribution remains stranded in source-record text.
+- The compile-surface audit now reports relation-contract status counts in its
+  top-level summary, so pressure boards no longer need ad hoc counting scripts
+  for quantity delivery, source attribution, status scope, repeated-record
+  delivery, financial derivation, and wrapper/backbone contracts.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,
