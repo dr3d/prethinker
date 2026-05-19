@@ -111,6 +111,9 @@ def test_audit_compile_surface_invariants_reports_stranded_source_record_promoti
     telemetry = report["source_record_promotion_telemetry"]
     assert telemetry["candidate_count"] == 2
     assert telemetry["stranded_count"] == 1
+    assert telemetry["candidate_class_counts"] == {"compact_identifier": 1, "date_time_or_interval": 1}
+    assert telemetry["stranded_class_counts"] == {"date_time_or_interval": 1}
+    assert telemetry["top_stranded"][0]["promotion_class"] == "date_time_or_interval"
     assert telemetry["top_stranded"][0]["value"] == "next_calibration_due_2026_07_12"
 
 
@@ -793,3 +796,4 @@ def test_summarize_reports_counts_family_statuses(tmp_path: Path) -> None:
     assert summary["family_status_counts"]["object_device_surface"]["ledger_only"] == 1
     assert summary["relation_contract_status_counts"]["quantity_value_delivery_contract"]["not_applicable"] == 2
     assert summary["relation_contract_status_counts"]["source_attributed_claim_contract"]["not_applicable"] == 2
+    assert "source_record_promotion_stranded_class_counts" in summary

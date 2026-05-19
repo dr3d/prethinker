@@ -562,6 +562,7 @@ def _audit_source_record_promotion(source_facts: list[str], direct_facts: list[s
         looks_like_list = len([token for token in tokens if token.isdigit()]) >= 3
         if not marker_hits and not looks_like_identifier and not looks_like_list:
             continue
+        promotion_class = _source_record_promotion_class(row, tokens)
         covered = sorted(tokens & direct_tokens)
         coverage_ratio = round(len(covered) / len(tokens), 4) if tokens else 0.0
         value_in_direct = str(row["value"]).casefold() in direct_text
@@ -575,6 +576,7 @@ def _audit_source_record_promotion(source_facts: list[str], direct_facts: list[s
                 "coverage_ratio": coverage_ratio,
                 "value_in_direct": value_in_direct,
                 "stranded": stranded,
+                "promotion_class": promotion_class,
             }
         )
     stranded_rows = [row for row in candidates if row["stranded"]]
@@ -582,6 +584,8 @@ def _audit_source_record_promotion(source_facts: list[str], direct_facts: list[s
         "schema_version": "source_record_promotion_telemetry_v1",
         "candidate_count": len(candidates),
         "stranded_count": len(stranded_rows),
+        "candidate_class_counts": _count_rows_by_key(candidates, "promotion_class"),
+        "stranded_class_counts": _count_rows_by_key(stranded_rows, "promotion_class"),
         "top_stranded": stranded_rows[:20],
     }
 
@@ -617,6 +621,41 @@ def _looks_like_identifier_tokens(tokens: set[str]) -> bool:
     has_alpha = any(re.search(r"[a-z]", token) for token in tokens)
     has_digit = any(re.search(r"\d", token) for token in tokens)
     return has_alpha and has_digit
+
+
+def _source_record_promotion_class(row: dict[str, Any], tokens: set[str]) -> str:
+    value = _normalize_arg(str(row.get("value") or ""))
+    predicate = str(row.get("predicate") or "")
+    value_has_alpha_digit = _looks_like_identifier_tokens(tokens)
+    if tokens & {"section", "subsection", "appendix", "heading", "title", "packet", "source", "table"}:
+        return "source_address_or_heading"
+    if tokens & {"date", "dated", "due", "scheduled", "effective", "expires", "expiry", "time"}:
+        return "date_time_or_interval"
+    if tokens & {"ticket", "asset", "tag", "identifier", "id", "serial", "seal", "case", "permit", "docket"}:
+        return "compact_identifier"
+    if value_has_alpha_digit and re.search(r"[a-z]+[_-]?[0-9]|[0-9]+[_-]?[a-z]", value):
+        return "compact_identifier"
+    if tokens & {"status", "state", "active", "approved", "available", "cleared", "closed", "denied", "pending", "resolved", "unresolved", "voided"}:
+        return "status_or_state"
+    if tokens & {"role", "manager", "officer", "operator", "registrar", "recorder", "staff", "supervisor", "custodian", "keeper", "authority", "authorized", "approver"}:
+        return "identity_or_role"
+    if tokens & {"location", "room", "suite", "zone", "station", "cabinet", "shelf", "custody", "holder", "possession"}:
+        return "location_or_custody"
+    if tokens & {"count", "total", "amount", "rate", "duration", "deadline", "threshold", "minimum", "maximum", "percent"}:
+        return "quantity_or_duration"
+    if len([token for token in tokens if token.isdigit()]) >= 3:
+        return "set_or_list_detail"
+    if predicate in {"source_record_field", "source_record_inline_field", "source_record_cell"}:
+        return "field_or_cell_value"
+    return "other_source_record_detail"
+
+
+def _count_rows_by_key(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        value = str(row.get(key) or "unknown")
+        counts[value] = counts.get(value, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def _candidate_predicates(data: dict[str, Any]) -> list[str]:
@@ -697,11 +736,17 @@ def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
     relation_contract_status_counts: dict[str, dict[str, int]] = {}
     promotion_candidate_count = 0
     promotion_stranded_count = 0
+    promotion_candidate_class_counts: dict[str, int] = {}
+    promotion_stranded_class_counts: dict[str, int] = {}
     for report in reports:
         telemetry = report.get("source_record_promotion_telemetry")
         if isinstance(telemetry, dict):
             promotion_candidate_count += int(telemetry.get("candidate_count") or 0)
             promotion_stranded_count += int(telemetry.get("stranded_count") or 0)
+            for key, value in (telemetry.get("candidate_class_counts") or {}).items():
+                promotion_candidate_class_counts[str(key)] = promotion_candidate_class_counts.get(str(key), 0) + int(value or 0)
+            for key, value in (telemetry.get("stranded_class_counts") or {}).items():
+                promotion_stranded_class_counts[str(key)] = promotion_stranded_class_counts.get(str(key), 0) + int(value or 0)
         for family in report["families"]:
             status = str(family["status"])
             status_counts[status] = status_counts.get(status, 0) + 1
@@ -723,6 +768,8 @@ def summarize_reports(reports: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "source_record_promotion_candidate_count": promotion_candidate_count,
         "source_record_promotion_stranded_count": promotion_stranded_count,
+        "source_record_promotion_candidate_class_counts": dict(sorted(promotion_candidate_class_counts.items())),
+        "source_record_promotion_stranded_class_counts": dict(sorted(promotion_stranded_class_counts.items())),
     }
 
 
@@ -2128,6 +2175,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         f"- Relation contract status counts: `{payload['summary'].get('relation_contract_status_counts', {})}`",
         f"- Source-record promotion candidates: `{payload['summary'].get('source_record_promotion_candidate_count', 0)}`",
         f"- Source-record promotion stranded candidates: `{payload['summary'].get('source_record_promotion_stranded_count', 0)}`",
+        f"- Source-record stranded classes: `{payload['summary'].get('source_record_promotion_stranded_class_counts', {})}`",
         "",
         "## Fixture Summary",
         "",
@@ -2171,7 +2219,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
         telemetry = report.get("source_record_promotion_telemetry")
         if isinstance(telemetry, dict) and int(telemetry.get("stranded_count") or 0):
             lines.append(
-                f"- `source_record_promotion_telemetry`: `stranded`; candidates `{telemetry.get('candidate_count', 0)}`, stranded `{telemetry.get('stranded_count', 0)}`"
+                f"- `source_record_promotion_telemetry`: `stranded`; candidates `{telemetry.get('candidate_count', 0)}`, stranded `{telemetry.get('stranded_count', 0)}`, classes `{telemetry.get('stranded_class_counts', {})}`"
             )
         lines.append("")
     stranded = [
@@ -2188,8 +2236,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
             [
                 "## Source-Record Promotion Telemetry",
                 "",
-                "| Run | Fixture | Predicate | Source Ref | Coverage | Value |",
-                "| --- | --- | --- | --- | ---: | --- |",
+                "| Run | Fixture | Class | Predicate | Source Ref | Coverage | Value |",
+                "| --- | --- | --- | --- | --- | ---: | --- |",
             ]
         )
         for report, row in stranded[:40]:
@@ -2197,7 +2245,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
             if len(value) > 120:
                 value = value[:117] + "..."
             lines.append(
-                f"| `{report['run']}` | `{report['fixture']}` | `{row.get('predicate', '')}` | `{row.get('source_ref', '')}` | {row.get('coverage_ratio', 0)} | `{value}` |"
+                f"| `{report['run']}` | `{report['fixture']}` | `{row.get('promotion_class', '')}` | `{row.get('predicate', '')}` | `{row.get('source_ref', '')}` | {row.get('coverage_ratio', 0)} | `{value}` |"
             )
     return "\n".join(lines).rstrip() + "\n"
 
