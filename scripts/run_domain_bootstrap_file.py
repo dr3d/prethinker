@@ -1114,6 +1114,7 @@ def main() -> int:
             _ensure_repeated_structure_predicates(parsed),
             _ensure_source_authority_predicate(parsed, source_text=source_text),
             _ensure_source_detail_predicate(parsed),
+            _ensure_status_state_predicate(parsed, source_text=source_text),
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
         ]
         profile_extension_metadata = {
@@ -2786,6 +2787,82 @@ def _ensure_quantity_event_predicate(parsed_profile: dict[str, Any], *, source_t
         "schema_version": "profile_quantity_event_extension_v1",
         "added": True,
         "signature": "event_measurement/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_status_state_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic status/state scope carrier when profile admission proves it is needed.
+
+    This is vocabulary-only. It provides a direct surface for point-in-time or
+    scoped status/state facts; it does not derive facts from source text.
+    """
+
+    report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    if not any(
+        isinstance(item, dict) and item.get("class") == "shallow_status_state_palette"
+        for item in findings
+    ):
+        return {
+            "schema_version": "profile_status_state_extension_v1",
+            "added": False,
+            "reason": "no_shallow_status_state_palette",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_status_state_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "status_state_at/4" in signatures:
+        return {
+            "schema_version": "profile_status_state_extension_v1",
+            "added": False,
+            "reason": "status_state_at_already_present",
+        }
+    if any(_candidate_can_carry_status_state_unit(item) for item in candidates if isinstance(item, dict)):
+        return {
+            "schema_version": "profile_status_state_extension_v1",
+            "added": False,
+            "reason": "status_state_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "status_state_at/4",
+            "args": ["subject_id", "state_value", "scope_or_date", "source_or_basis"],
+            "description": (
+                "Direct status/state surface for source-stated point-in-time status, current condition, "
+                "availability, pending resolution, supersession, or scoped population state."
+            ),
+            "why": (
+                "Prevents status/state values from being stranded inside prose wrappers or split status/date rows "
+                "when questions need subject, state, and temporal/source scope together."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for exact source-stated scoped status/state facts.",
+                "Keep subject or subset, state/status value, scope/date, and source/basis joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "status_state_at/4" not in provenance:
+        provenance.append("status_state_at/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added status_state_at/4 after shallow_status_state_palette."
+            )
+    return {
+        "schema_version": "profile_status_state_extension_v1",
+        "added": True,
+        "signature": "status_state_at/4",
         "authority": "vocabulary_extension_only",
         "fact_extraction": False,
     }

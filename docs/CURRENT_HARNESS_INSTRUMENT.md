@@ -465,6 +465,10 @@ Recent transfer work supports the current direction:
   carrier that binds subject or subset, state/status value, and temporal/source
   scope. If the palette offers that carrier but emitted facts never populate it,
   compile health records `status_state_carrier_offered_but_undelivered`.
+  Shallow palettes can now receive a vocabulary-only `status_state_at/4`
+  extension; that extension admits no facts by itself and exists only to give
+  the compiler a transferable carrier when the source already has scoped
+  status/state pressure.
 - Source-reference pressure now has the same audit shape.
   `source_attributed_claim_contract` detects source-record prose that attributes
   a status, finding, authority, or unresolved claim to a memo, report, statement,

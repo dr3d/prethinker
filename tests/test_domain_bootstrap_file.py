@@ -21,6 +21,7 @@ from scripts.run_domain_bootstrap_file import (
     _ensure_repeated_structure_predicates,
     _ensure_source_authority_predicate,
     _ensure_source_detail_predicate,
+    _ensure_status_state_predicate,
     _profile_admission_report,
     _profile_admission_retry_context,
     _attach_profile_admission_report,
@@ -146,6 +147,52 @@ def test_quantity_event_profile_extension_respects_existing_carrier() -> None:
         "schema_version": "profile_quantity_event_extension_v1",
         "added": False,
         "reason": "no_shallow_quantity_event_palette",
+    }
+
+
+def test_status_state_profile_extension_is_vocabulary_only() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "record_status/2", "args": ["record_id", "status"]},
+            {"signature": "status_date/2", "args": ["record_id", "date"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_status_state_predicate(
+        profile,
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+    )
+
+    assert metadata["added"] is True
+    assert metadata["fact_extraction"] is False
+    assert any(item["signature"] == "status_state_at/4" for item in profile["candidate_predicates"])
+    assert "status_state_at/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_status_state_profile_extension_respects_existing_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "record_status_at/3", "args": ["record_id", "status", "date"]},
+        ],
+    }
+
+    metadata = _ensure_status_state_predicate(
+        profile,
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+    )
+
+    assert metadata == {
+        "schema_version": "profile_status_state_extension_v1",
+        "added": False,
+        "reason": "no_shallow_status_state_palette",
     }
 
 
