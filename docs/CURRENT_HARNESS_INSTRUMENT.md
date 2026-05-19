@@ -507,6 +507,14 @@ Recent transfer work supports the current direction:
   warning. That result matters: quality retries can repair delivery failures,
   and the gate now treats remaining profile-delivery warnings as hold reasons
   instead of allowing a superficially clean pass.
+- A fresh quality-retry run with profile-delivery reasons included closed the
+  same authority/source-claim pressure cleanly: the initial draw exposed
+  source-authority and source-claim offered-but-undelivered flags, the retry
+  received generic correction lines for both, and the final artifact passed with
+  zero compile-surface contract flags and zero profile-delivery flags. This is
+  the current model for compile-stability work: detect offered-but-undelivered
+  carriers, retry with fixture-free slot contracts, then only treat the draw as
+  stamp-ready if delivery telemetry is clean.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record
