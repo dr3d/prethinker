@@ -639,6 +639,13 @@ Recent transfer work supports the current direction:
   That makes the next query-layer pressure measurable: reduce reliance on
   broad relaxed/source-text fallbacks by planning direct state/date joins over
   already admitted rows.
+- Query placeholder repair now treats compact lowercase slot labels for
+  state/value/time fields as variables when the original query returns no rows.
+  This is a runtime fallback repair, not new compile vocabulary. On the four
+  preservation-replay query/hybrid residual rows, exacts moved from `0/4` to
+  `3/4` and relaxed over-bound fallback dropped from `3` rows to `0`. A fresh
+  full 40-row replay landed at `34 exact / 1 partial / 5 miss`, so this is a
+  useful query-layer cleanup but not a full residual repair.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

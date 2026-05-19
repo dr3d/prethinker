@@ -1311,8 +1311,52 @@ def _looks_like_temporal_slot_placeholder(value: str) -> bool:
         return False
     lowered = item.lower()
     return lowered.endswith(
-        ("date", "time", "timestamp", "deadline", "duration", "hours", "minutes", "event")
+        (
+            "date",
+            "time",
+            "timestamp",
+            "deadline",
+            "duration",
+            "hours",
+            "minutes",
+            "event",
+            "expiry",
+            "expiration",
+        )
     ) or "elapsed" in lowered
+
+
+_COMPACT_SLOT_LABEL_SUFFIXES = (
+    "amount",
+    "balance",
+    "count",
+    "date",
+    "duration",
+    "expiry",
+    "expiration",
+    "rate",
+    "rent",
+    "score",
+    "status",
+    "state",
+    "time",
+    "total",
+    "value",
+)
+
+
+def _looks_like_compact_slot_label_placeholder(value: str) -> bool:
+    item = str(value or "").strip().lower()
+    if item in GENERIC_QUERY_PLACEHOLDERS or _looks_like_temporal_slot_placeholder(item):
+        return True
+    if not re.fullmatch(r"[a-z][a-z0-9_]*", item):
+        return False
+    if any(char.isdigit() for char in item):
+        return False
+    tokens = [token for token in item.split("_") if token]
+    if len(tokens) > 1 and all(token in GENERIC_QUERY_PLACEHOLDERS for token in tokens):
+        return True
+    return any(item == suffix or item.endswith(suffix) for suffix in _COMPACT_SLOT_LABEL_SUFFIXES)
 
 
 def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
@@ -1333,7 +1377,7 @@ def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
             repaired_args.append(variable)
             repairs.append({"index": index, "from": item, "to": variable})
             continue
-        if _looks_like_temporal_slot_placeholder(item):
+        if _looks_like_compact_slot_label_placeholder(item):
             variable = _variable_name_for_placeholder(item, index)
             repaired_args.append(variable)
             repairs.append({"index": index, "from": item, "to": variable})

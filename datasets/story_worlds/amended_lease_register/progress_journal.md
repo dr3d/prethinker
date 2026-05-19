@@ -129,3 +129,37 @@ unioning an entire compile set, but this replay did not by itself lift QA. The
 remaining misses are mostly current-state temporal joins, correction reasons,
 and pre-amendment state resolution. This points to row-level preservation as a
 promising substrate stabilizer, not a complete query-layer repair.
+
+## ALR-004 - Compact Slot-Label Query Repair Replay
+
+Date: 2026-05-19
+
+Evidence lane: `query_surface_residual_repair`
+
+The query residual audit showed that current-state value questions were
+falling into relaxed over-bound query fallback when query plans used lowercase
+slot labels as constants. The runtime repair now attempts the original query
+first, then converts compact lowercase state/value/time slot labels to variables
+only after the original query returns no rows.
+
+Artifacts:
+
+- Targeted residual replay: `tmp\source_authority_query_placeholder_replay_20260519\domain_bootstrap_qa_20260519T095155816947Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted residual audit: `tmp\source_authority_query_placeholder_residuals_20260519.json`
+- Full replay: `tmp\source_authority_query_placeholder_full_20260519\domain_bootstrap_qa_20260519T100124456474Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full residual audit: `tmp\source_authority_query_placeholder_full_residuals_20260519.json`
+
+Result:
+
+- Targeted query/hybrid residual rows: `3 exact / 0 partial / 1 miss`
+- Targeted relaxed over-bound fallback rows: `0`, down from `3`
+- Full replay: `34 exact / 1 partial / 5 miss`
+- Full residual fallback rows: `3`, with `2` relaxed over-bound rows
+- Writes/errors: `0` / `0`
+
+Meaning lesson:
+
+The repair converts a real class of query-layer misses into exact answers while
+staying below the compile architecture. It does not solve missing correction
+reason, outdoor-use state, first-extension rent, or parking-responsibility
+surfaces. Those remain direct-surface or join-composition pressures.
