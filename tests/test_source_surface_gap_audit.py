@@ -260,3 +260,62 @@ def test_source_surface_gap_audit_splits_quantity_detail_shapes(tmp_path) -> Non
         "identifier_range_or_sequence": 1,
         "monetary_rate_or_amount": 1,
     }
+
+
+def test_source_surface_gap_audit_splits_status_state_detail_shapes(tmp_path) -> None:
+    compile_json = tmp_path / "compile.json"
+    compile_json.write_text(
+        """
+        {
+          "source_compile": {
+            "facts": [
+              "source_record_text_atom(src_line_1, record_alpha_status_suspect_on_september_15).",
+              "source_record_text_atom(src_line_2, record_beta_reclassified_from_hold_to_failed).",
+              "source_record_text_atom(src_line_3, all_protected_items_are_a_b_and_c).",
+              "source_record_text_atom(src_line_4, request_pending_clarification)."
+            ],
+            "rules": []
+          }
+        }
+        """,
+        encoding="utf-8",
+    )
+    qa_json = tmp_path / "qa.json"
+    qa_json.write_text(
+        """
+        {
+          "rows": [
+            {"id": "q001", "utterance": "What status applied to record alpha as of September 15?", "reference_answer": "Suspect."},
+            {"id": "q002", "utterance": "What condition was record beta reclassified to?", "reference_answer": "Failed, reclassified from hold."},
+            {"id": "q003", "utterance": "What is the current status of the protected item population after the update?", "reference_answer": "A, B, and C."},
+            {"id": "q004", "utterance": "What is the pending status of the request?", "reference_answer": "It remains pending clarification."}
+          ]
+        }
+        """,
+        encoding="utf-8",
+    )
+    scorecard = {
+        "artifacts": [
+            {
+                "label": "unlike_fixture",
+                "path": str(qa_json),
+                "run_json": str(compile_json),
+                "non_exact_rows": [
+                    {"id": "q001", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What status applied to record alpha as of September 15?", "queries": []},
+                    {"id": "q002", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What condition was record beta reclassified to?", "queries": []},
+                    {"id": "q003", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What is the current status of the protected item population after the update?", "queries": []},
+                    {"id": "q004", "verdict": "miss", "failure_surface": "compile_surface_gap", "question": "What is the pending status of the request?", "queries": []},
+                ],
+            }
+        ]
+    }
+
+    report = audit_scorecard(scorecard)
+
+    assert report["summary"]["coordinate_class_counts"] == {"status_or_state": 4}
+    assert report["summary"]["coordinate_detail_class_counts"] == {
+        "partial_population_state": 1,
+        "pending_or_resolution_state": 1,
+        "point_in_time_status": 1,
+        "status_transition_or_supersession": 1,
+    }

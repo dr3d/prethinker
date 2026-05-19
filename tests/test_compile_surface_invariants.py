@@ -364,6 +364,48 @@ def test_audit_compile_surface_invariants_passes_participant_statement_surface(t
     assert surface["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_detects_shallow_status_state_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, record_alpha_status_suspect_on_2026_09_15).",
+            "source_record_text_atom(src_line_002, record_beta_status_cleared_on_2026_09_05).",
+            "record_status(record_alpha, suspect).",
+            "record_status(record_beta, cleared).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    surface = next(row for row in report["families"] if row["family"] == "status_state_surface")
+    assert surface["status"] == "pass"
+    contract = next(row for row in report["relation_contracts"] if row["contract"] == "status_state_scope_contract")
+    assert contract["status"] == "shallow_status_state_surface"
+    assert contract["required_key_count"] == 2
+    assert contract["complete_status_row_count"] == 0
+    assert "record_status[1]:temporal_or_source_scope" in contract["missing_keys"]
+
+
+def test_audit_compile_surface_invariants_passes_status_state_scope_contract(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, record_alpha_status_suspect_on_2026_09_15).",
+            "source_record_text_atom(src_line_002, record_beta_status_cleared_on_2026_09_05).",
+            "record_status_at(record_alpha, suspect, 2026_09_15).",
+            "record_status_at(record_beta, cleared, 2026_09_05).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    surface = next(row for row in report["families"] if row["family"] == "status_state_surface")
+    assert surface["status"] == "pass"
+    contract = next(row for row in report["relation_contracts"] if row["contract"] == "status_state_scope_contract")
+    assert contract["status"] == "pass"
+    assert contract["complete_status_row_count"] == 2
+
+
 def test_audit_compile_surface_invariants_detects_statement_status_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

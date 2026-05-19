@@ -196,6 +196,66 @@ INVARIANTS: tuple[InvariantSpec, ...] = (
         },
     ),
     InvariantSpec(
+        family="status_state_surface",
+        description="point-in-time status/state, current condition, transitions, and scoped population state",
+        groups={
+            "subject_or_population": (
+                "application",
+                "case",
+                "document",
+                "item",
+                "lot",
+                "permit",
+                "population",
+                "record",
+                "request",
+                "sample",
+                "subject",
+            ),
+            "state_or_status_value": (
+                "active",
+                "approved",
+                "available",
+                "cleared",
+                "condition",
+                "current",
+                "denied",
+                "failed",
+                "hold",
+                "pending",
+                "resolved",
+                "state",
+                "status",
+                "suspect",
+            ),
+            "temporal_or_source_scope": (
+                "as",
+                "at",
+                "current",
+                "date",
+                "dated",
+                "effective",
+                "final",
+                "initial",
+                "on",
+                "source",
+                "time",
+            ),
+            "transition_or_resolution": (
+                "after",
+                "before",
+                "changed",
+                "from",
+                "not",
+                "reclassified",
+                "replaced",
+                "superseded",
+                "to",
+                "voided",
+            ),
+        },
+    ),
+    InvariantSpec(
         family="participant_statement_surface",
         description="speaker/actor statements, advice, estimates, comments, clarifications, content, context, and binding status",
         groups={
@@ -438,6 +498,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
+            _audit_status_state_scope_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
             _audit_repeated_record_detail_delivery_contract(source_facts, direct_rows),
         ],
@@ -903,6 +964,73 @@ def _audit_participant_statement_status_contract(
     }
 
 
+def _audit_status_state_scope_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Require status/state rows to keep subject, value, and scope together.
+
+    Status words alone are too cheap: the native pressure rows ask for state at
+    a date, current condition, pending resolution, supersession, or scoped
+    subset state. This contract watches for source rows with those signals and
+    checks whether direct status-like rows preserve a queryable subject, state
+    value, and temporal/source/current scope on the same row or stable anchor.
+    """
+
+    source_rows = _source_record_text_rows(source_facts)
+    status_source_rows = [row for row in source_rows if _is_status_state_source_row(row)]
+    triggered_groups = _status_state_trigger_groups(status_source_rows)
+    if not status_source_rows or not triggered_groups.get("state_or_status_value"):
+        return {
+            "contract": "status_state_scope_contract",
+            "description": "status/state surfaces should bind subject, state value, and temporal/source/current scope",
+            "status": "not_applicable",
+            "required_key_count": 0,
+            "companion_key_count": 0,
+            "missing_keys": [],
+            "triggered_groups": triggered_groups,
+            "status_row_count": 0,
+            "complete_status_row_count": 0,
+            "status_predicates": [],
+        }
+
+    status_rows = [row for row in direct_rows if _is_status_state_structural_row(row)]
+    complete: list[str] = []
+    shallow: list[str] = []
+    for index, row in enumerate(status_rows, start=1):
+        slots = _status_state_slots(row)
+        key = f"{row['predicate']}[{index}]"
+        if {"subject", "state_value", "temporal_or_source_scope"} <= slots:
+            complete.append(key)
+        else:
+            missing = sorted({"subject", "state_value", "temporal_or_source_scope"} - slots)
+            shallow.append(f"{key}:{','.join(missing)}")
+
+    source_row_count = len(status_source_rows)
+    complete_ratio = len(complete) / source_row_count if source_row_count else 0.0
+    if complete and not shallow:
+        status = "pass"
+    elif complete:
+        status = "partial"
+    elif status_rows:
+        status = "shallow_status_state_surface"
+    else:
+        status = "missing_status_state_surface"
+    return {
+        "contract": "status_state_scope_contract",
+        "description": "status/state surfaces should bind subject, state value, and temporal/source/current scope",
+        "status": status,
+        "required_key_count": source_row_count,
+        "companion_key_count": len(complete),
+        "missing_keys": shallow[:20],
+        "triggered_groups": triggered_groups,
+        "status_row_count": len(status_rows),
+        "complete_status_row_count": len(complete),
+        "complete_status_row_ratio": round(complete_ratio, 4),
+        "status_predicates": sorted({str(row["predicate"]) for row in status_rows}),
+    }
+
+
 def _audit_vague_wrapper_backbone_contract(
     source_facts: list[str],
     direct_rows: list[dict[str, Any]],
@@ -1213,6 +1341,183 @@ def _is_statement_status_row(row: dict[str, Any]) -> bool:
         or "epistemic" in predicate
         or ({"binding", "advisory", "nonbinding", "informational"} & tokens)
     )
+
+
+def _status_state_trigger_groups(source_rows: list[str]) -> dict[str, list[str]]:
+    groups: dict[str, set[str]] = {}
+    for row in source_rows:
+        tokens = set(TOKEN_RE.findall(_source_record_payload_text(row).lower()))
+        for group, terms in {
+            "subject_or_population": {
+                "application",
+                "case",
+                "document",
+                "item",
+                "lot",
+                "permit",
+                "population",
+                "record",
+                "request",
+                "sample",
+                "subject",
+            },
+            "state_or_status_value": {
+                "active",
+                "approved",
+                "available",
+                "cleared",
+                "condition",
+                "current",
+                "denied",
+                "failed",
+                "hold",
+                "pending",
+                "resolved",
+                "state",
+                "status",
+                "suspect",
+            },
+            "temporal_or_source_scope": {
+                "as",
+                "at",
+                "current",
+                "date",
+                "dated",
+                "effective",
+                "final",
+                "initial",
+                "on",
+                "source",
+                "time",
+            },
+            "transition_or_resolution": {
+                "after",
+                "before",
+                "changed",
+                "from",
+                "not",
+                "reclassified",
+                "replaced",
+                "superseded",
+                "to",
+                "voided",
+            },
+        }.items():
+            hits = tokens & terms
+            if hits:
+                groups.setdefault(group, set()).update(hits)
+    return {group: sorted(values) for group, values in sorted(groups.items())}
+
+
+def _status_state_source_tokens(source_row: str) -> set[str]:
+    groups = _status_state_trigger_groups([source_row])
+    return set(groups)
+
+
+def _is_status_state_source_row(source_row: str) -> bool:
+    groups = _status_state_source_tokens(source_row)
+    if "state_or_status_value" not in groups:
+        return False
+    if "subject_or_population" not in groups:
+        return False
+    return bool(groups & {"temporal_or_source_scope", "transition_or_resolution"})
+
+
+def _is_status_state_structural_row(row: dict[str, Any]) -> bool:
+    predicate = str(row.get("predicate") or "").lower()
+    predicate_tokens = set(TOKEN_RE.findall(predicate))
+    if predicate.startswith("source_record"):
+        return False
+    if _is_statement_status_row(row) and not any(
+        marker in predicate for marker in ("record", "case", "application", "item", "lot", "sample", "permit", "status_at")
+    ):
+        return False
+    predicate_markers = {
+        "active",
+        "approved",
+        "available",
+        "availability",
+        "cleared",
+        "current",
+        "denied",
+        "failed",
+        "hold",
+        "pending",
+        "phase",
+        "resolved",
+        "state",
+        "status",
+        "suspect",
+        "suspended",
+        "unresolved",
+        "voided",
+    }
+    condition_context = "condition" in predicate_tokens and bool(predicate_tokens & {"current", "state", "status"})
+    return bool(
+        predicate.endswith(("_status_at", "_state_at", "_condition_at", "_status_on", "_state_on"))
+        or bool(predicate_tokens & predicate_markers)
+        or condition_context
+    )
+
+
+def _status_state_slots(row: dict[str, Any]) -> set[str]:
+    predicate = str(row.get("predicate") or "").lower()
+    args = [str(arg) for arg in row.get("args", [])]
+    tokens = _tokens_for_row(row)
+    slots: set[str] = set()
+    state_terms = {
+        "active",
+        "approved",
+        "available",
+        "cleared",
+        "closed",
+        "condition",
+        "current",
+        "denied",
+        "failed",
+        "hold",
+        "pending",
+        "resolved",
+        "settled",
+        "state",
+        "status",
+        "suspect",
+        "suspended",
+        "unresolved",
+        "void",
+        "voided",
+    }
+    if args:
+        slots.add("subject")
+    if tokens & state_terms or any(marker in predicate for marker in ("status", "state", "condition", "phase")):
+        slots.add("state_value")
+    if (
+        predicate.endswith(("_status_at", "_state_at", "_condition_at", "_status_on", "_state_on"))
+        or len(args) >= 3
+        or any(_looks_temporal_or_source_scope(arg) for arg in args)
+        or tokens & {"as", "at", "current", "date", "dated", "effective", "final", "initial", "source", "time"}
+    ):
+        slots.add("temporal_or_source_scope")
+    if tokens & {"after", "before", "changed", "from", "reclassified", "replaced", "superseded", "to", "voided"}:
+        slots.add("transition")
+    return slots
+
+
+def _looks_temporal_or_source_scope(value: str) -> bool:
+    norm = _normalize_arg(value)
+    return bool(
+        re.search(r"(?:^|_)(?:20\d{2}|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|current|final|initial|source|src|line)(?:_|$)", norm)
+    )
+
+
+def _source_record_payload_text(fact: str) -> str:
+    match = FACT_RE.match(str(fact))
+    if not match:
+        return str(fact)
+    args = _split_fact_args(match.group(2))
+    if len(args) <= 1:
+        return " ".join(args)
+    return " ".join(args[1:])
 
 
 def _tokens_for_row(row: dict[str, Any]) -> set[str]:

@@ -348,10 +348,73 @@ def _coordinate_detail_class(
 ) -> str:
     """Split broad coordinate classes into repair-relevant subshapes."""
 
-    if coordinate_class != "quantity_or_duration":
-        return ""
     qa_text = " ".join([question, reference_answer]).lower().replace("_", " ")
     qa_tokens = set(question_tokens) | set(answer_tokens)
+    if coordinate_class == "status_or_state":
+        if _has_any(
+            qa_text,
+            (
+                "as of",
+                " on january",
+                " on february",
+                " on march",
+                " on april",
+                " on may",
+                " on june",
+                " on july",
+                " on august",
+                " on september",
+                " on october",
+                " on november",
+                " on december",
+                "on 202",
+                "status on",
+                "state on",
+                "condition on",
+            ),
+        ):
+            return "point_in_time_status"
+        if _has_any(
+            qa_text,
+            (
+                "reclassified",
+                "changed status",
+                "status changed",
+                "elevated from",
+                "moved from",
+                "from active",
+                "from pending",
+                "superseded",
+                "replaced",
+                "voided",
+                "prior superseded",
+                "current authoritative",
+            ),
+        ):
+            return "status_transition_or_supersession"
+        if _has_any(
+            qa_text,
+            (
+                "list all",
+                "which items",
+                "which applications",
+                "which lots",
+                "all protected",
+                "all in-scope",
+                "any further",
+                "any outdoor",
+                "population",
+            ),
+        ):
+            return "partial_population_state"
+        if qa_tokens & {"pending", "undetermined", "unresolved", "decided", "determined", "clarification", "commit"}:
+            return "pending_or_resolution_state"
+        if qa_tokens & {"current", "currently", "condition", "available", "active", "approved", "denied", "cleared", "suspect"}:
+            return "current_condition_or_availability"
+        return "other_status_or_state"
+
+    if coordinate_class != "quantity_or_duration":
+        return ""
     has_number = bool(re.search(r"(?:^|[^a-z])(?:\d+|\$|£|€|%)(?:[^a-z]|$)", qa_text))
     if _has_any(qa_text, ("seal", "serial", "range", "through")) and (
         "number" in qa_tokens or "numbers" in qa_tokens or has_number

@@ -603,6 +603,8 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: if the source states events, raw/corrected times, superseded values, intervals, windows, deadlines, or transitions, preserve the temporal anchors and correction relation directly.",
     "Compile surface invariant rule: chronological/event-list sources need complete event backbone units when compatible predicates exist. Preserve event id or entry label, date/time/order, actor/party/system, governed subject or object, and outcome/status/action as joinable rows. Do not leave a timeline answer split between source_record text, a vague event wrapper, and unrelated status/date rows.",
     "Compile surface invariant rule: repeated tables, logs, registers, and chronologies with row ids plus time/date and action/status/description columns need row-by-row direct preservation when compatible predicates exist. Do not compile only a representative prefix or the first N rows; later rows often close, reopen, supersede, authorize, complete, or otherwise determine the current state.",
+    "Compile surface invariant rule: point-in-time status/state questions need direct status surfaces. When the source states a current/as-of/on-date status, condition, availability, approval/denial, pending resolution, active/closed state, or authoritative current value, preserve subject, state/status value, temporal or source scope, and reason/authority when stated as joinable direct rows. Do not leave the answer only in source_record text, a broad event wrapper, or split status/2 plus unjoined date rows.",
+    "Compile surface invariant rule: status transitions and scoped population states are additive surfaces. When a source states before/after state, reclassification, replacement, supersession, pending-to-decided movement, or only part of a population in a state, preserve both the governed subject or subset and the state transition with its effective date/source. Do not collapse a population state into one unscoped current-status atom.",
     "Compile surface invariant rule: operational record/status events should preserve the event or record id, governed subject/item/application, actor/body, timestamp/turn, status before and after when stated, authority/source, and reason/correction detail when stated. Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition vocabulary should not be left only as record labels.",
     "Compile surface invariant rule: operational lifecycle compiles should prefer stable phase and event surfaces when compatible predicates exist: record_alias/2 for equivalent record ids; record_status_phase/4 for initial/current/final/prior status; record_status_at/3 for dated status; record_lifecycle_event/5 for event type, actor, object/subject, and date; and record_superseded_by/4 for superseding source/event/document separately from resulting status.",
     "Compile surface invariant rule: repeated lifecycle/status source lines require parallel preservation. For each stated dated lifecycle/status line, emit at least one complete direct unit that keeps subject, lifecycle state/action, and date/turn joinable; do not satisfy the series with only supersession fragments, event labels, status words, or two-slot status/result predicates that omit the date/event join.",
@@ -3034,6 +3036,21 @@ def _profile_bootstrap_admission_context(
             "ticket",
         )
     )
+    has_status_state_pressure = any(
+        token in label
+        for token in (
+            "as-of status",
+            "condition",
+            "current status",
+            "current state",
+            "partial population",
+            "point-in-time",
+            "state transition",
+            "status at",
+            "status transition",
+            "status/state",
+        )
+    )
     has_quantity_pressure = any(
         token in label
         for token in (
@@ -3064,6 +3081,22 @@ def _profile_bootstrap_admission_context(
                     "Do not offer only separate status/2 plus status_changed_on/2, event_date/2, or event_date/3 surfaces "
                     "for repeated dated status timelines. Those split palettes are shallow unless another candidate can carry "
                     "the joined subject/status/date unit."
+                ),
+            ]
+        )
+    if has_status_state_pressure and not has_operational_pressure:
+        context.extend(
+            [
+                (
+                    "Profile admission rule: when a source has point-in-time status, current condition, "
+                    "availability, pending resolution, state transition, supersession, or partial-population state "
+                    "pressure, the candidate predicate palette must include at least one direct status/state surface "
+                    "that carries subject or subset, state/status value, and temporal/source scope together."
+                ),
+                (
+                    "Do not offer only status/2, condition/2, event_date/2, note/2, or description/2 for status/state "
+                    "pressure. Those surfaces are shallow unless another candidate can carry subject, state value, and "
+                    "as-of/effective/source scope in a joined row."
                 ),
             ]
         )
