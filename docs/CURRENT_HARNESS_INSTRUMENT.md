@@ -515,6 +515,11 @@ Recent transfer work supports the current direction:
   the current model for compile-stability work: detect offered-but-undelivered
   carriers, retry with fixture-free slot contracts, then only treat the draw as
   stamp-ready if delivery telemetry is clean.
+- The follow-up three-fixture slice showed why coverage matters: two fixtures
+  passed clean, while the authority-heavy case improved from no direct authority
+  rows to partial direct coverage. The retry instruction now explicitly asks for
+  every distinct stated authority coordinate, not only a representative
+  authority row.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record

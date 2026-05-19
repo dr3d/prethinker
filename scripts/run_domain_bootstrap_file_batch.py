@@ -449,16 +449,18 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "QUALITY GATE RETRY: the prior compile saw source text where a rule, policy, order, authority, "
                 "or authorized actor governs an action/status/scope, but no direct source-authority surface was "
                 "delivered. In this retry, emit compatible direct source_authority/3 or equivalent rows that keep "
-                "the governed subject or scope, authority/source, and authorized action/status joinable. A rule "
-                "description, note, docket text, or source_record row is additive only and must not be the only "
-                "carrier for an explicit authority constraint."
+                "the governed subject or scope, authority/source, and authorized action/status joinable. Emit one "
+                "direct authority row for every distinct stated authority coordinate, not only a representative "
+                "example. A rule description, note, docket text, or source_record row is additive only and must not "
+                "be the only carrier for an explicit authority constraint."
             )
         if "profile_delivery:source_authority_carrier_offered_but_undelivered:" in reason:
             add(
                 "QUALITY GATE RETRY: the prior compile offered a direct source-authority carrier but emitted no "
                 "matching rows. In this retry, populate source_authority/3 or an equivalent allowed carrier for "
                 "source-stated authority/rule/order/policy constraints, keeping governed subject or scope, "
-                "authority/source, and authorized action/status joinable."
+                "authority/source, and authorized action/status joinable. Emit one direct authority row for every "
+                "distinct stated authority coordinate, not only a representative example."
             )
         if "profile_delivery:source_claim_carrier_offered_but_undelivered:" in reason:
             add(

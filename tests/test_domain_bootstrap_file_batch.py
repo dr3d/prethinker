@@ -301,6 +301,7 @@ def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds
     assert "fixture" not in joined
     assert "source_detail, event, context, note, or summary row is additive only" in joined
     assert "rule description, note, docket text, or source_record row is additive only" in joined
+    assert "every distinct stated authority coordinate" in joined
 
 
 def test_compile_batch_quality_gate_renders_markdown() -> None:
