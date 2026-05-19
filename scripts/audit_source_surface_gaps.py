@@ -413,6 +413,103 @@ def _coordinate_detail_class(
             return "current_condition_or_availability"
         return "other_status_or_state"
 
+    if coordinate_class == "source_reference":
+        if _has_any(
+            qa_text,
+            (
+                "opinion rather than",
+                "applicant's opinion",
+                "asserted",
+                "claim or characterization",
+                "staff finding",
+                "established facts",
+            ),
+        ):
+            return "claim_or_opinion_attribution"
+        if _has_any(
+            qa_text,
+            (
+                "source within",
+                "source for",
+                "which section",
+                "what section",
+                "where in",
+                "packet",
+                "register",
+                "appendix",
+                "schedule",
+                "exhibit",
+                "§",
+            ),
+        ):
+            return "source_location_or_section"
+        if _has_any(qa_text, ("list all unresolved", "open questions", "remaining open", "open items")):
+            return "open_item_source_list"
+        if _has_any(qa_text, ("according to", "per ", "whose", "by whom", "prepared by", "authored by")):
+            return "source_actor_or_authority"
+        return "other_source_reference"
+
+    if coordinate_class == "other_answer_bearing_detail":
+        if _has_any(
+            qa_text,
+            (
+                "asset tag",
+                "ticket",
+                "serial",
+                "identifier",
+                "id ",
+                "number",
+                "code",
+                "label",
+            ),
+        ):
+            return "identifier_or_label_detail"
+        if _has_any(
+            qa_text,
+            (
+                "decision",
+                "outcome",
+                "approved",
+                "denied",
+                "rejected",
+                "determined",
+                "finding",
+            ),
+        ):
+            return "decision_or_finding_detail"
+        if _has_any(
+            qa_text,
+            (
+                "eligible",
+                "eligibility",
+                "category",
+                "categories",
+                "priority",
+                "voting rights",
+                "full voting",
+                "scope",
+            ),
+        ):
+            return "eligibility_scope_or_category"
+        if _has_any(
+            qa_text,
+            (
+                "consequence",
+                "penalty",
+                "veto",
+                "visited",
+                "observed",
+                "measured",
+                "retains",
+                "notebook",
+                "disposition",
+            ),
+        ):
+            return "source_stated_factual_detail"
+        if _has_any(qa_text, ("list all", "which ", "what are the", "all claims", "all items")):
+            return "set_or_list_detail"
+        return "other_answer_detail"
+
     if coordinate_class != "quantity_or_duration":
         return ""
     has_number = bool(re.search(r"(?:^|[^a-z])(?:\d+|\$|£|€|%)(?:[^a-z]|$)", qa_text))

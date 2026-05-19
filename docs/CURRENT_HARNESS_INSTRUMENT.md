@@ -1,6 +1,6 @@
 # Current Harness Instrument
 
-Last updated: 2026-05-18
+Last updated: 2026-05-19
 
 Prethinker compiles documents into governed, queryable KB artifacts and audits
 whether questions can be answered from admitted state alone, without rereading
@@ -375,6 +375,18 @@ Recent transfer work supports the current direction:
   loss: 165 compile-surface gaps out of 261 not-exact rows, with 81 answers
   stranded only in source-record rows. Compatibility adapters are no longer the explanation;
   direct surface preservation is.
+- A 2026-05-19 QA-only remeasure on the same native compile root tested the
+  query-layer promotion of status-at-date interval inference into core runtime
+  behavior. The full fresh OpenRouter run scored `1959/73/200` over 2233
+  questions with `0` compatibility rows, `0` runtime load errors, and `0` write
+  proposals. Because this run evaluated 70 more rows than the prior scorecard,
+  the clean comparison is the 2163-row overlap: exact rows moved from `1902`
+  to `1905`; old status/state compile-gap rows had 8 improvements, 1
+  regression, and 13 unchanged rows. The result validates the core interval
+  inference move but does not constitute a new freeze stamp. The remaining
+  compile-surface map is led by `other_answer_bearing_detail` (43 rows) and
+  `source_reference` (25 rows), so the next pressure is source-addressed answer
+  detail preservation rather than helper resurrection.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,
