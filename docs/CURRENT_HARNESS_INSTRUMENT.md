@@ -433,6 +433,11 @@ Recent transfer work supports the current direction:
   by missing raw temporal/event rows or contradictory derived statuses; one
   apparent query arithmetic bug did not reproduce on rerun, so no new duration
   support surface was admitted from that pass.
+- Monetary/rate pressure is also compile-side. A focused replay of the old
+  `monetary_rate_or_amount` rows found one already exact, with the remaining
+  six rows all classified as compile-surface gaps. This bucket should move next
+  through compile-surface preservation and profile delivery, not QA-side numeric
+  patching.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,
