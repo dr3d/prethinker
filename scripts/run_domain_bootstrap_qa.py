@@ -523,20 +523,22 @@ def parse_args() -> argparse.Namespace:
         help="Minimum broad-context fallback clauses retained by --evidence-bundle-context-filter.",
     )
     parser.add_argument(
-        "--helper-companion-row-limit",
+        "--compatibility-adapter-row-limit",
+        dest="helper_companion_row_limit",
         type=int,
         default=0,
         help=(
-            "Question-level budget for retired query-only helper companion rows. "
-            "Default 0 disables helper companion assembly; use -1 for unbounded forensic delivery."
+            "Question-level budget for retired query-only compatibility rows. "
+            "Default 0 disables compatibility row assembly; use -1 for unbounded forensic delivery."
         ),
     )
     parser.add_argument(
-        "--include-legacy-native-helper-adapters",
+        "--include-retired-native-compatibility-adapters",
+        dest="include_legacy_native_helper_adapters",
         action="store_true",
         help=(
-            "Opt in to older native-corpus helper adapters for forensic compatibility. "
-            "Default QA relies on direct compile surfaces plus current generic companions."
+            "Opt in to older native-corpus compatibility adapters for forensic replay. "
+            "Default QA relies on direct compile surfaces plus current deterministic query support."
         ),
     )
     parser.add_argument(
@@ -15762,7 +15764,7 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
             continue
         surface = str(failure.get("surface", "")).strip() or "unknown"
         failure_surface_counts[surface] = failure_surface_counts.get(surface, 0) + 1
-    helper_class_summary = summarize_helper_classes(rows)
+    compatibility_row_summary = summarize_compatibility_rows(rows)
     return {
         "question_count": len(rows),
         "reference_answer_rows": sum(1 for row in rows if row.get("reference_answer")),
@@ -15776,13 +15778,13 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         "judge_partial": sum(1 for judge in judge_rows if judge.get("verdict") == "partial"),
         "judge_miss": sum(1 for judge in judge_rows if judge.get("verdict") == "miss"),
         "failure_surface_counts": failure_surface_counts,
-        "helper_class_summary": helper_class_summary,
+        "compatibility_row_summary": compatibility_row_summary,
         "runtime_load_error_count": len(load_errors),
         "elapsed_ms": elapsed_ms,
     }
 
 
-def summarize_helper_classes(rows: list[dict[str, Any]]) -> dict[str, Any]:
+def summarize_compatibility_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     companion_counts: dict[str, Counter[str]] = {}
     companion_rows: Counter[str] = Counter()
     total_counts: Counter[str] = Counter()
@@ -15799,7 +15801,7 @@ def summarize_helper_classes(rows: list[dict[str, Any]]) -> dict[str, Any]:
             if not _is_helper_query_result(query_result):
                 continue
             classes = [
-                str(result_row.get("HelperClass", "") or "unlabeled")
+                _public_compatibility_row_class(str(result_row.get("HelperClass", "") or "unlabeled"))
                 for result_row in result_rows
                 if isinstance(result_row, dict)
             ]
@@ -15811,18 +15813,26 @@ def summarize_helper_classes(rows: list[dict[str, Any]]) -> dict[str, Any]:
             total_counts.update(classes)
     return {
         "row_count": int(sum(total_counts.values())),
-        "helper_class_counts": dict(sorted(total_counts.items())),
+        "row_class_counts": dict(sorted(total_counts.items())),
         "companion_row_totals": dict(sorted(companion_rows.items())),
-        "companion_helper_class_counts": {
+        "companion_row_class_counts": {
             name: dict(sorted(counts.items()))
             for name, counts in sorted(companion_counts.items())
         },
     }
 
 
+def _public_compatibility_row_class(row_class: str) -> str:
+    if row_class == "clean-helper":
+        return "direct"
+    if row_class == "candidate-helper":
+        return "tentative"
+    return row_class or "unlabeled"
+
+
 def write_summary(record: dict[str, Any], path: Path) -> None:
     summary = record.get("summary", {})
-    helper_summary = summary.get("helper_class_summary", {})
+    compatibility_summary = summary.get("compatibility_row_summary", {})
     lines = [
         "# Domain Bootstrap QA Run",
         "",
@@ -15837,28 +15847,28 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
         f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
         f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
-        f"- Helper classes: `{helper_summary.get('helper_class_counts', {})}` rows=`{helper_summary.get('row_count', 0)}`",
+        f"- Compatibility rows: `{compatibility_summary.get('row_class_counts', {})}` rows=`{compatibility_summary.get('row_count', 0)}`",
         f"- Cache: enabled=`{summary.get('cache_enabled', False)}` hits=`{summary.get('cache_hits', 0)}` misses=`{summary.get('cache_misses', 0)}`",
         "",
     ]
-    companion_counts = helper_summary.get("companion_helper_class_counts", {})
+    companion_counts = compatibility_summary.get("companion_row_class_counts", {})
     if companion_counts:
         lines.extend(
             [
-                "## Helper Classes",
+                "## Compatibility Rows",
                 "",
-                "| Companion | Rows | clean-helper | candidate-helper | unlabeled |",
+                "| Companion | Rows | direct | tentative | unlabeled |",
                 "| --- | ---: | ---: | ---: | ---: |",
             ]
         )
-        row_totals = helper_summary.get("companion_row_totals", {})
+        row_totals = compatibility_summary.get("companion_row_totals", {})
         for companion, counts in sorted(companion_counts.items()):
             lines.append(
                 "| {companion} | {rows} | {clean} | {candidate} | {unlabeled} |".format(
                     companion=companion,
                     rows=row_totals.get(companion, 0),
-                    clean=counts.get("clean-helper", 0),
-                    candidate=counts.get("candidate-helper", 0),
+                    clean=counts.get("direct", 0),
+                    candidate=counts.get("tentative", 0),
                     unlabeled=counts.get("unlabeled", 0),
                 )
             )

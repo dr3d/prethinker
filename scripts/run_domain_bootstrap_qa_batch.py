@@ -24,8 +24,6 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from scripts.audit_helper_usage import display_pressure_label, helper_pressure_metrics  # noqa: E402
-
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "story_worlds"
 DEFAULT_COMPILE_ROOT = REPO_ROOT / "tmp" / "incoming_6_cold_compile_20260508"
 DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "incoming_6_full40_qa_20260508"
@@ -62,18 +60,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-classify-failure-surfaces", action="store_true")
     parser.add_argument("--no-cache", action="store_true", help="Pass through to QA runner for fresh hosted calls.")
     parser.add_argument(
-        "--helper-companion-row-limit",
+        "--compatibility-adapter-row-limit",
         type=int,
         default=0,
+        dest="compatibility_adapter_row_limit",
         help=(
-            "Question-level budget for retired query-only helper companion rows. "
-            "Default 0 disables helper companion assembly; use -1 for unbounded forensic delivery."
+            "Question-level budget for retired query-only compatibility rows. "
+            "Default 0 disables compatibility row assembly; use -1 for unbounded forensic delivery."
         ),
     )
     parser.add_argument(
-        "--include-legacy-native-helper-adapters",
+        "--include-retired-native-compatibility-adapters",
+        dest="include_retired_native_compatibility_adapters",
         action="store_true",
-        help="Opt in to older native-corpus helper adapters for forensic compatibility.",
+        help="Opt in to older native-corpus compatibility adapters for forensic replay.",
     )
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
@@ -103,8 +103,8 @@ def main() -> int:
             evidence_bundle=not bool(args.no_evidence_bundle),
             classify_failure_surfaces=not bool(args.no_classify_failure_surfaces),
             cache=not bool(args.no_cache),
-            helper_companion_row_limit=args.helper_companion_row_limit,
-            include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
+            compatibility_adapter_row_limit=args.compatibility_adapter_row_limit,
+            include_retired_native_compatibility_adapters=bool(args.include_retired_native_compatibility_adapters),
         )
         for job in jobs
     ]
@@ -185,8 +185,8 @@ def _build_command(
     evidence_bundle: bool,
     classify_failure_surfaces: bool,
     cache: bool = True,
-    helper_companion_row_limit: int | None = 0,
-    include_legacy_native_helper_adapters: bool = False,
+    compatibility_adapter_row_limit: int | None = 0,
+    include_retired_native_compatibility_adapters: bool = False,
 ) -> list[str]:
     command = [
         sys.executable,
@@ -214,10 +214,10 @@ def _build_command(
         command.append("--classify-failure-surfaces")
     if not cache:
         command.append("--no-cache")
-    if helper_companion_row_limit is not None:
-        command.extend(["--helper-companion-row-limit", str(int(helper_companion_row_limit))])
-    if include_legacy_native_helper_adapters:
-        command.append("--include-legacy-native-helper-adapters")
+    if compatibility_adapter_row_limit is not None:
+        command.extend(["--compatibility-adapter-row-limit", str(int(compatibility_adapter_row_limit))])
+    if include_retired_native_compatibility_adapters:
+        command.append("--include-retired-native-compatibility-adapters")
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
     return command
@@ -302,7 +302,7 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
             continue
         for key in totals:
             totals[key] += int(summary.get(key, 0) or 0)
-    helper_pressure = _summarize_helper_pressure(results=results, totals=totals)
+    compatibility_pressure = _summarize_compatibility_pressure(results=results, totals=totals)
     exact_rate = (totals["judge_exact"] / totals["question_count"]) if totals["question_count"] else 0.0
     return {
         "generated": datetime.now(timezone.utc).isoformat(),
@@ -310,28 +310,28 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
         "base_timeout": base_timeout,
         "effective_timeout": effective_timeout,
         "totals": {**totals, "exact_rate": round(exact_rate, 4)},
-        "helper_pressure_summary": helper_pressure,
+        "compatibility_pressure_summary": compatibility_pressure,
         "results": results,
     }
 
 
-def _summarize_helper_pressure(*, results: list[dict[str, Any]], totals: dict[str, int]) -> dict[str, Any]:
-    helper_class_counts: Counter[str] = Counter()
+def _summarize_compatibility_pressure(*, results: list[dict[str, Any]], totals: dict[str, int]) -> dict[str, Any]:
+    row_class_counts: Counter[str] = Counter()
     companion_row_totals: Counter[str] = Counter()
     row_count = 0
     for result in results:
         summary = result.get("summary", {})
         if not isinstance(summary, dict):
             continue
-        helper_summary = summary.get("helper_class_summary", {})
-        if not isinstance(helper_summary, dict):
+        compatibility_summary = summary.get("compatibility_row_summary", {})
+        if not isinstance(compatibility_summary, dict) or not compatibility_summary:
             continue
-        row_count += int(helper_summary.get("row_count", 0) or 0)
-        raw_class_counts = helper_summary.get("helper_class_counts", {})
+        row_count += int(compatibility_summary.get("row_count", 0) or 0)
+        raw_class_counts = compatibility_summary.get("row_class_counts", {})
         if isinstance(raw_class_counts, dict):
             for key, value in raw_class_counts.items():
-                helper_class_counts[str(key)] += int(value or 0)
-        raw_companion_totals = helper_summary.get("companion_row_totals", {})
+                row_class_counts[str(key)] += int(value or 0)
+        raw_companion_totals = compatibility_summary.get("companion_row_totals", {})
         if isinstance(raw_companion_totals, dict):
             for key, value in raw_companion_totals.items():
                 companion_row_totals[str(key)] += int(value or 0)
@@ -347,13 +347,13 @@ def _summarize_helper_pressure(*, results: list[dict[str, Any]], totals: dict[st
     return dict(
         {
             "row_count": row_count,
-            "helper_class_counts": dict(sorted(helper_class_counts.items())),
+            "row_class_counts": dict(sorted(row_class_counts.items())),
             "companion_row_totals": dict(sorted(companion_row_totals.items())),
             "answer_surface_summary": answer_summary,
         },
-        **helper_pressure_metrics(
+        **compatibility_pressure_metrics(
             row_count=row_count,
-            helper_class_counts=helper_class_counts,
+            row_class_counts=row_class_counts,
             answer_summary=answer_summary,
         ),
     )
@@ -361,7 +361,7 @@ def _summarize_helper_pressure(*, results: list[dict[str, Any]], totals: dict[st
 
 def _render_md(summary: dict[str, Any]) -> str:
     totals = summary.get("totals", {})
-    helper_pressure = summary.get("helper_pressure_summary", {})
+    compatibility_pressure = summary.get("compatibility_pressure_summary", {})
     lines = [
         "# Domain Bootstrap QA Batch Summary",
         "",
@@ -375,7 +375,7 @@ def _render_md(summary: dict[str, Any]) -> str:
         f"- Exact rate: `{totals.get('exact_rate', 0.0)}`",
         f"- Runtime load errors: `{totals.get('runtime_load_error_count', 0)}`",
         f"- Write proposal rows: `{totals.get('write_proposal_rows', 0)}`",
-        f"- Compatibility rows: `{display_pressure_label(helper_pressure.get('pressure_label', 'unknown'))}` rows=`{helper_pressure.get('row_count', 0)}` rows/exact=`{helper_pressure.get('helper_rows_per_exact')}` candidate-share=`{helper_pressure.get('candidate_helper_share', 0.0)}`",
+        f"- Compatibility rows: `{display_pressure_label(compatibility_pressure.get('pressure_label', 'unknown'))}` rows=`{compatibility_pressure.get('row_count', 0)}` rows/exact=`{compatibility_pressure.get('compatibility_rows_per_exact')}` tentative-share=`{compatibility_pressure.get('tentative_share', 0.0)}`",
         "",
         "| Fixture | Return | Exact | Partial | Miss | QA JSON |",
         "| --- | ---: | ---: | ---: | ---: | --- |",
@@ -394,6 +394,44 @@ def _render_md(summary: dict[str, Any]) -> str:
         )
     lines.append("")
     return "\n".join(lines)
+
+
+def compatibility_pressure_metrics(
+    *,
+    row_count: int,
+    row_class_counts: Counter[str],
+    answer_summary: dict[str, int],
+) -> dict[str, Any]:
+    exact = int(answer_summary.get("judge_exact", 0) or 0)
+    tentative_rows = int(row_class_counts.get("tentative", 0) or 0)
+    direct_rows = int(row_class_counts.get("direct", 0) or 0)
+    rows_per_exact = (row_count / exact) if exact else 0.0
+    tentative_share = (tentative_rows / row_count) if row_count else 0.0
+    return {
+        "compatibility_rows_per_exact": round(rows_per_exact, 4),
+        "tentative_share": round(tentative_share, 4),
+        "direct_support_rows": direct_rows,
+        "tentative_support_rows": tentative_rows,
+        "pressure_label": compatibility_pressure_label(
+            row_count=row_count,
+            rows_per_exact=rows_per_exact,
+            tentative_share=tentative_share,
+        ),
+    }
+
+
+def compatibility_pressure_label(*, row_count: int, rows_per_exact: float, tentative_share: float) -> str:
+    if row_count <= 0:
+        return "no_compatibility_pressure"
+    if rows_per_exact >= 25 or tentative_share >= 0.5:
+        return "high_compatibility_pressure"
+    if rows_per_exact >= 5:
+        return "medium_compatibility_pressure"
+    return "low_compatibility_pressure"
+
+
+def display_pressure_label(value: str) -> str:
+    return str(value or "unknown").replace("_", " ")
 
 
 if __name__ == "__main__":

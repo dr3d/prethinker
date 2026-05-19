@@ -33,9 +33,9 @@ def test_qa_batch_accepts_markdown_answer_key_without_oracle(tmp_path: Path) -> 
     assert "--judge-reference-answers" in command
     assert "--classify-failure-surfaces" in command
     assert "--no-cache" in command
-    assert "--helper-companion-row-limit" in command
-    assert command[command.index("--helper-companion-row-limit") + 1] == "0"
-    assert "--include-legacy-native-helper-adapters" not in command
+    assert "--compatibility-adapter-row-limit" in command
+    assert command[command.index("--compatibility-adapter-row-limit") + 1] == "0"
+    assert "--include-retired-native-compatibility-adapters" not in command
 
     legacy_command = _build_command(
         job,
@@ -46,12 +46,12 @@ def test_qa_batch_accepts_markdown_answer_key_without_oracle(tmp_path: Path) -> 
         evidence_bundle=False,
         classify_failure_surfaces=True,
         cache=False,
-        include_legacy_native_helper_adapters=True,
+        include_retired_native_compatibility_adapters=True,
     )
-    assert "--include-legacy-native-helper-adapters" in legacy_command
+    assert "--include-retired-native-compatibility-adapters" in legacy_command
 
 
-def test_qa_batch_stamp_command_can_run_with_helpers_genuinely_off(tmp_path: Path) -> None:
+def test_qa_batch_stamp_command_can_run_with_compatibility_adapters_off(tmp_path: Path) -> None:
     dataset_root = tmp_path / "datasets"
     compile_root = tmp_path / "compiles"
     out_root = tmp_path / "qa"
@@ -73,17 +73,17 @@ def test_qa_batch_stamp_command_can_run_with_helpers_genuinely_off(tmp_path: Pat
         evidence_bundle=True,
         classify_failure_surfaces=True,
         cache=False,
-        helper_companion_row_limit=0,
-        include_legacy_native_helper_adapters=False,
+        compatibility_adapter_row_limit=0,
+        include_retired_native_compatibility_adapters=False,
     )
 
-    assert "--helper-companion-row-limit" in command
-    assert command[command.index("--helper-companion-row-limit") + 1] == "0"
-    assert "--include-legacy-native-helper-adapters" not in command
+    assert "--compatibility-adapter-row-limit" in command
+    assert command[command.index("--compatibility-adapter-row-limit") + 1] == "0"
+    assert "--include-retired-native-compatibility-adapters" not in command
     assert "--no-cache" in command
 
 
-def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
+def test_qa_batch_summary_rolls_up_compatibility_pressure() -> None:
     summary = _summarize(
         [
             {
@@ -95,9 +95,9 @@ def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
                     "judge_exact": 10,
                     "judge_partial": 0,
                     "judge_miss": 0,
-                    "helper_class_summary": {
+                    "compatibility_row_summary": {
                         "row_count": 600,
-                        "helper_class_counts": {"candidate-helper": 400, "clean-helper": 200},
+                        "row_class_counts": {"direct": 200, "tentative": 400},
                         "companion_row_totals": {"roster_state_support": 600},
                     },
                 },
@@ -111,9 +111,9 @@ def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
                     "judge_exact": 5,
                     "judge_partial": 3,
                     "judge_miss": 2,
-                    "helper_class_summary": {
+                    "compatibility_row_summary": {
                         "row_count": 0,
-                        "helper_class_counts": {},
+                        "row_class_counts": {},
                         "companion_row_totals": {},
                     },
                 },
@@ -124,17 +124,17 @@ def test_qa_batch_summary_rolls_up_helper_pressure() -> None:
         effective_timeout=90,
     )
 
-    helper_pressure = summary["helper_pressure_summary"]
+    compatibility_pressure = summary["compatibility_pressure_summary"]
     assert summary["totals"]["judge_exact"] == 15
-    assert helper_pressure["row_count"] == 600
-    assert helper_pressure["helper_rows_per_exact"] == 40.0
-    assert helper_pressure["candidate_helper_share"] == 0.6667
-    assert helper_pressure["pressure_label"] == "high_compatibility_pressure"
-    assert helper_pressure["companion_row_totals"] == {"roster_state_support": 600}
+    assert compatibility_pressure["row_count"] == 600
+    assert compatibility_pressure["compatibility_rows_per_exact"] == 40.0
+    assert compatibility_pressure["tentative_share"] == 0.6667
+    assert compatibility_pressure["pressure_label"] == "high_compatibility_pressure"
+    assert compatibility_pressure["companion_row_totals"] == {"roster_state_support": 600}
 
     markdown = _render_md(summary)
     assert "Compatibility rows" in markdown
-    assert "high_compatibility_pressure" in markdown
+    assert "high compatibility pressure" in markdown
 
 
 def test_qa_batch_can_summarize_existing_artifact(tmp_path: Path) -> None:

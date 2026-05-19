@@ -87,7 +87,7 @@ TERM_POLICIES: tuple[TermPolicy, ...] = (
     ),
     TermPolicy(
         term="source_record_student_group_assignment",
-        status="quarantined_candidate_helper",
+        status="quarantined_compatibility_adapter",
         risk="high",
         replacement="direct group_assignment/group_membership/explicit_table_membership compile surfaces",
         note="Candidate parser over school roster prose; should stay disabled by default.",
@@ -118,11 +118,11 @@ TERM_POLICIES: tuple[TermPolicy, ...] = (
         status="compatibility_predicate",
         risk="medium",
         replacement="person_role(Person, Role) or role_assignment(Person, Role, Scope)",
-        note="Not fixture-specific by itself, but the adult-roster helper around it is fixture-shaped.",
+        note="Not fixture-specific by itself, but the old adult-roster adapter around it is fixture-shaped.",
     ),
     TermPolicy(
         term="source_record_adult_role",
-        status="quarantined_candidate_helper",
+        status="quarantined_compatibility_adapter",
         risk="high",
         replacement="direct person_role/role_assignment compile surfaces",
         note="Derived by the legacy school-roster adult parser; should stay disabled by default.",
@@ -136,17 +136,17 @@ TERM_POLICIES: tuple[TermPolicy, ...] = (
     ),
     TermPolicy(
         term="industrial_sensor_support",
-        status="legacy_native_helper_adapter",
+        status="retired_native_compatibility_adapter",
         risk="high",
         replacement="direct device/instrument, measurement, timestamp, correction-rule, and status compile surfaces",
-        note="Query-time helper over one sensor-log family. It must not become the normal path for instrument records.",
+        note="Query-time compatibility adapter over one sensor-log family. It must not become the normal path for instrument records.",
     ),
     TermPolicy(
         term="_industrial_sensor_companion",
-        status="legacy_native_helper_adapter",
+        status="retired_native_compatibility_adapter",
         risk="high",
         replacement="direct device/instrument, measurement, timestamp, correction-rule, and status compile surfaces",
-        note="Implementation hook for industrial_sensor_support; keep disabled with helper delivery unless transfer evidence promotes a generic replacement.",
+        note="Implementation hook for industrial_sensor_support; keep disabled unless transfer evidence promotes a generic replacement.",
     ),
     TermPolicy(
         term="sensor_id",
@@ -185,10 +185,10 @@ TERM_POLICIES: tuple[TermPolicy, ...] = (
     ),
     TermPolicy(
         term="roster_state_support",
-        status="legacy_native_helper_adapter",
+        status="retired_native_compatibility_adapter",
         risk="high",
         replacement="direct compile surfaces plus explicit_table_* ledger facts",
-        note="Broad compatibility helper. It is acceptable only because default delivery is disabled.",
+        note="Broad compatibility adapter. It is acceptable only because default delivery is disabled.",
     ),
     TermPolicy(
         term="trip_leader_",
@@ -393,7 +393,7 @@ def render_markdown(rows: list[dict[str, object]], *, fixture_name_leaks: list[d
             "",
             "- `structural`: allowed as architecture.",
             "- `compatibility_alias` / `compatibility_predicate`: allowed for old artifacts and old compile outputs; new surfaces should prefer the replacement.",
-            "- `quarantined_candidate_helper` / `quarantined_parser_marker`: allowed only behind disabled legacy-helper paths or in historical documentation.",
+            "- `quarantined_compatibility_adapter` / `quarantined_parser_marker`: allowed only behind disabled retired-compatibility paths or in historical documentation.",
             "- Any new high-risk active-code hit needs transfer evidence or a generic replacement before it can be promoted.",
             "",
         ]

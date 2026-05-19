@@ -48,7 +48,7 @@ from scripts.run_domain_bootstrap_qa import (
     run_query_plan as _run_query_plan,
     score_oracle,
     summarize,
-    summarize_helper_classes,
+    summarize_compatibility_rows,
     write_cached_row,
 )
 from kb_pipeline import CorePrologRuntime
@@ -1491,7 +1491,7 @@ def test_summarize_counts_reference_judge_verdicts() -> None:
     assert summary["judge_miss"] == 1
 
 
-def test_summarize_counts_helper_class_rows_by_companion() -> None:
+def test_summarize_counts_compatibility_rows_by_companion() -> None:
     rows = [
         {
             "ok": True,
@@ -1522,17 +1522,17 @@ def test_summarize_counts_helper_class_rows_by_companion() -> None:
         }
     ]
 
-    helper_summary = summarize_helper_classes(rows)
+    compatibility_summary = summarize_compatibility_rows(rows)
 
-    assert helper_summary["row_count"] == 3
-    assert helper_summary["helper_class_counts"] == {
-        "candidate-helper": 1,
-        "clean-helper": 1,
+    assert compatibility_summary["row_count"] == 3
+    assert compatibility_summary["row_class_counts"] == {
+        "direct": 1,
+        "tentative": 1,
         "unlabeled": 1,
     }
-    assert helper_summary["companion_helper_class_counts"]["industrial_sensor_support"] == {
-        "candidate-helper": 1,
-        "clean-helper": 1,
+    assert compatibility_summary["companion_row_class_counts"]["industrial_sensor_support"] == {
+        "direct": 1,
+        "tentative": 1,
     }
 
 
