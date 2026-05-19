@@ -125,6 +125,7 @@ def _load_draw(path: Path) -> dict[str, Any]:
         ),
         "surface_counts": _surface_counts(direct_facts),
         "delivery_telemetry": _delivery_telemetry(candidate_signatures=candidate_signatures, direct_rows=direct_rows),
+        "profile_delivery_findings": _profile_delivery_findings(payload),
         "contracts": _contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
     }
 
@@ -172,6 +173,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
     )
     palette_delivery_contracts = _palette_delivery_contracts(draws)
     delivery_telemetry = _fixture_delivery_telemetry(draws)
+    profile_delivery_telemetry = _fixture_profile_delivery_telemetry(draws)
     fact_sets = [set(draw["direct_facts"]) for draw in draws]
     union_facts = set().union(*fact_sets) if fact_sets else set()
     common_facts = set.intersection(*fact_sets) if fact_sets else set()
@@ -232,6 +234,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
         "candidate_zero_yield_signatures": candidate_zero_yield_union,
         "palette_delivery_contracts": palette_delivery_contracts,
         "delivery_telemetry": delivery_telemetry,
+        "profile_delivery_telemetry": profile_delivery_telemetry,
         "stable": not unstable_facts,
         "union_fact_count": len(union_facts),
         "common_fact_count": len(common_facts),
@@ -254,6 +257,7 @@ def _audit_fixture(fixture: str, draws: list[dict[str, Any]]) -> dict[str, Any]:
                 "direct_signature_count": len(draw["signature_counts"]),
                 "surface_counts": draw["surface_counts"],
                 "delivery_telemetry": draw["delivery_telemetry"],
+                "profile_delivery_findings": draw["profile_delivery_findings"],
                 "contracts": draw["contracts"],
             }
             for draw in draws
@@ -283,6 +287,7 @@ def _summarize(fixtures: list[dict[str, Any]]) -> dict[str, Any]:
             int(fixture.get("candidate_zero_yield_signature_count", 0)) for fixture in fixtures
         ),
         "palette_delivery_contract_count": sum(len(fixture.get("palette_delivery_contracts", [])) for fixture in fixtures),
+        "profile_delivery_issue_count": sum(len(fixture.get("profile_delivery_telemetry", [])) for fixture in fixtures),
         "quantity_event_delivery_issue_count": sum(
             1 for row in quantity_delivery if row.get("status") in QUANTITY_EVENT_ISSUE_STATUSES
         ),
@@ -416,6 +421,78 @@ def _delivery_telemetry(*, candidate_signatures: list[str], direct_rows: list[di
             direct_rows=direct_rows,
         )
     }
+
+
+def _profile_delivery_findings(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    source_compile = payload.get("source_compile", {}) if isinstance(payload.get("source_compile"), dict) else {}
+    delivery = source_compile.get("profile_delivery", {}) if isinstance(source_compile.get("profile_delivery"), dict) else {}
+    findings = delivery.get("findings", []) if isinstance(delivery.get("findings"), list) else []
+    out: list[dict[str, Any]] = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        cls = str(finding.get("class") or "").strip()
+        if not cls:
+            continue
+        offered = [
+            str(item).strip()
+            for item in finding.get("offered_carriers", [])
+            if str(item).strip()
+        ] if isinstance(finding.get("offered_carriers"), list) else []
+        out.append(
+            {
+                "class": cls,
+                "source_signal_count": int(finding.get("source_signal_count") or 0),
+                "offered_carriers": offered,
+            }
+        )
+    return out
+
+
+def _fixture_profile_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    by_class: dict[str, list[dict[str, Any]]] = {}
+    for draw in draws:
+        findings = draw.get("profile_delivery_findings", [])
+        if not isinstance(findings, list):
+            continue
+        for finding in findings:
+            if not isinstance(finding, dict):
+                continue
+            cls = str(finding.get("class") or "").strip()
+            if cls:
+                by_class.setdefault(cls, []).append({"draw": draw, "finding": finding})
+    rows: list[dict[str, Any]] = []
+    for cls, items in sorted(by_class.items()):
+        rows.append(
+            {
+                "kind": "profile_delivery",
+                "class": cls,
+                "affected_draw_count": len(items),
+                "draw_count": len(draws),
+                "source_signal_counts": [
+                    int(item["finding"].get("source_signal_count") or 0)
+                    for item in items
+                ],
+                "offered_carriers": sorted(
+                    {
+                        str(carrier)
+                        for item in items
+                        for carrier in item["finding"].get("offered_carriers", [])
+                        if str(carrier).strip()
+                    }
+                ),
+                "draws": [
+                    {
+                        "run": item["draw"]["run"],
+                        "compile_json": item["draw"]["compile_json"],
+                        "source_signal_count": int(item["finding"].get("source_signal_count") or 0),
+                        "offered_carriers": item["finding"].get("offered_carriers", []),
+                    }
+                    for item in items
+                ],
+            }
+        )
+    return rows
 
 
 def _fixture_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1078,6 +1155,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Signature delivery drift rows: `{report['summary']['signature_delivery_drift_count']}`",
         f"- Candidate zero-yield signatures: `{report['summary']['candidate_zero_yield_signature_count']}`",
         f"- Palette delivery contract rows: `{report['summary']['palette_delivery_contract_count']}`",
+        f"- Profile delivery issue rows: `{report['summary']['profile_delivery_issue_count']}`",
         f"- Quantity-event delivery issues: `{report['summary']['quantity_event_delivery_issue_count']}`",
         f"- Unstable direct facts: `{report['summary']['unstable_fact_count']}`",
         f"- Predicate drift rows: `{report['summary']['predicate_drift_count']}`",
@@ -1099,6 +1177,7 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"- Candidate zero-yield signatures: `{fixture['candidate_zero_yield_signature_count']}`",
                 f"- Palette delivery contract rows: `{len(fixture['palette_delivery_contracts'])}`",
                 f"- Delivery telemetry rows: `{len(fixture.get('delivery_telemetry', []))}`",
+                f"- Profile delivery telemetry rows: `{len(fixture.get('profile_delivery_telemetry', []))}`",
                 f"- Common / union direct facts: `{fixture['common_fact_count']} / {fixture['union_fact_count']}`",
                 f"- Unstable direct facts: `{fixture['unstable_fact_count']}`",
                 "",
@@ -1155,6 +1234,19 @@ def render_markdown(report: dict[str, Any]) -> str:
                     f"| `{row['kind']}` | `{row['status']}` | `{row['status_counts']}` | "
                     f"`{row.get('carrier_row_counts', [])}` | `{row.get('numeric_wrapper_counts', [])}` | "
                     f"`{row.get('stranded_numeric_wrapper_counts', [])}` |"
+                )
+            lines.append("")
+        if fixture.get("profile_delivery_telemetry"):
+            lines.extend(
+                [
+                    "| Profile delivery class | Affected draws | Source signals | Offered carriers |",
+                    "| --- | ---: | --- | --- |",
+                ]
+            )
+            for row in fixture["profile_delivery_telemetry"]:
+                lines.append(
+                    f"| `{row['class']}` | {row['affected_draw_count']} / {row['draw_count']} | "
+                    f"`{row.get('source_signal_counts', [])}` | `{row.get('offered_carriers', [])}` |"
                 )
             lines.append("")
         if fixture["predicate_drift"]:

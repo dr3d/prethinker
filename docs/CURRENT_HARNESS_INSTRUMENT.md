@@ -604,6 +604,14 @@ Recent transfer work supports the current direction:
   visible by the end of compile. The unresolved pressure is source-span
   binding, direct-row delivery, and query composition, not simply absence of a
   candidate predicate name.
+- The compile-stability audit now imports generic profile-delivery findings
+  from compile artifacts and summarizes them across draws. On the four recent
+  authority/claim/status delivery draws for one variance probe, it found
+  source-authority carrier loss in 2 of 4 draws, source-claim carrier loss in
+  2 of 4 draws, and status-state carrier loss in 1 of 4 draws. The key lesson
+  is that targeted retry can recover direct carriers in some draws, but the
+  layer is not stable enough to treat prompt wording as the final repair. This
+  is evidence for preservation or multi-draw consensus experiments.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable

@@ -1,10 +1,15 @@
 import json
 from pathlib import Path
 
-from scripts.audit_compile_surface_stability import audit_paths
+from scripts.audit_compile_surface_stability import audit_paths, render_markdown
 
 
-def _write_compile(path: Path, facts: list[str], candidate_predicates: list[str] | None = None) -> Path:
+def _write_compile(
+    path: Path,
+    facts: list[str],
+    candidate_predicates: list[str] | None = None,
+    profile_delivery_findings: list[dict[str, object]] | None = None,
+) -> Path:
     path.parent.mkdir(parents=True)
     path.write_text(
         json.dumps(
@@ -15,7 +20,12 @@ def _write_compile(path: Path, facts: list[str], candidate_predicates: list[str]
                         {"signature": signature} for signature in (candidate_predicates or [])
                     ]
                 },
-                "source_compile": {"facts": facts},
+                "source_compile": {
+                    "facts": facts,
+                    "profile_delivery": {
+                        "findings": profile_delivery_findings or [],
+                    },
+                },
             }
         ),
         encoding="utf-8",
@@ -176,8 +186,60 @@ def test_compile_surface_stability_reports_quantity_event_delivery_telemetry(tmp
     assert telemetry["carrier_row_counts"] == [1, 0, 0]
     assert telemetry["stranded_numeric_wrapper_counts"] == [0, 1, 1]
     assert report["summary"]["quantity_event_delivery_issue_count"] == 1
-    markdown = __import__("scripts.audit_compile_surface_stability", fromlist=["render_markdown"]).render_markdown(report)
+    markdown = render_markdown(report)
     assert "Quantity-event delivery issues" in markdown
+
+
+def test_compile_surface_stability_reports_profile_delivery_telemetry(tmp_path: Path) -> None:
+    draw1 = _write_compile(
+        tmp_path / "draw1" / "fixture_profile_delivery" / "domain_bootstrap_file_a.json",
+        ["source_record_text_atom(src_line_1, policy_authorized_access_for_item_a_party_reader_one)."],
+        candidate_predicates=["source_authority/3"],
+        profile_delivery_findings=[
+            {
+                "class": "source_authority_carrier_offered_but_undelivered",
+                "source_signal_count": 3,
+                "offered_carriers": ["source_authority/3"],
+            }
+        ],
+    )
+    draw2 = _write_compile(
+        tmp_path / "draw2" / "fixture_profile_delivery" / "domain_bootstrap_file_b.json",
+        [
+            "source_record_text_atom(src_line_1, policy_authorized_access_for_item_a_party_reader_one).",
+            "source_authority(item_a, reader_one, policy_a).",
+        ],
+        candidate_predicates=["source_authority/3"],
+    )
+
+    report = audit_paths([draw1, draw2])
+
+    fixture = report["fixtures"][0]
+    assert report["summary"]["profile_delivery_issue_count"] == 1
+    assert fixture["profile_delivery_telemetry"] == [
+        {
+            "kind": "profile_delivery",
+            "class": "source_authority_carrier_offered_but_undelivered",
+            "affected_draw_count": 1,
+            "draw_count": 2,
+            "source_signal_counts": [3],
+            "offered_carriers": ["source_authority/3"],
+            "draws": [
+                {
+                    "run": "draw1",
+                    "compile_json": str(draw1),
+                    "source_signal_count": 3,
+                    "offered_carriers": ["source_authority/3"],
+                }
+            ],
+        }
+    ]
+    assert fixture["draws"][0]["profile_delivery_findings"][0]["class"] == (
+        "source_authority_carrier_offered_but_undelivered"
+    )
+    markdown = render_markdown(report)
+    assert "Profile delivery issue rows" in markdown
+    assert "source_authority_carrier_offered_but_undelivered" in markdown
 
 
 def test_quantity_event_telemetry_ignores_source_line_locators(tmp_path: Path) -> None:
