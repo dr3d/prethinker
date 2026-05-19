@@ -632,6 +632,13 @@ Recent transfer work supports the current direction:
   residuals were current-state temporal joins, correction reasons, and
   pre-amendment state resolution. So preservation is a substrate stabilizer;
   answer gains still need query composition or missing direct state surfaces.
+- A query-surface residual audit now separates post-compile query failure
+  signals from compile-surface gaps. On the preservation replay, all 4
+  query/hybrid residual rows carried fallback evidence: 3 used relaxed
+  over-bound query widening, and 4 used repaired source-text contains filters.
+  That makes the next query-layer pressure measurable: reduce reliance on
+  broad relaxed/source-text fallbacks by planning direct state/date joins over
+  already admitted rows.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -654,6 +661,7 @@ python scripts/audit_retrieval_constrained_palette.py --boundary-plan-json <BOUN
 python scripts/audit_profile_palette_prior_delivery.py --registry-json <PROFILE_REGISTRY_JSON> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/profile_palette_prior_delivery_audit.json --out-md tmp/profile_palette_prior_delivery_audit.md
 python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
 python scripts/build_compile_preservation_candidate.py --stability-json tmp/compile_surface_stability.json --fixture <fixture> --compile-json <COMPILE_A.json> --compile-json <COMPILE_B.json> --out-json tmp/compile_preservation_candidate.json --out-md tmp/compile_preservation_candidate.md
+python scripts/audit_query_surface_residuals.py --qa-json <QA_JSON> --out-json tmp/query_surface_residuals.json --out-md tmp/query_surface_residuals.md
 python scripts/run_domain_bootstrap_file_batch.py --fixture <name> --compile-source --compile-flat-plus-plan-passes --source-record-ledger --source-record-ledger-facts --quality-gate --quality-retry-on-hold --profile-registry tmp/profile_palette_registry.json --profile-registry-palette-prior
 ```
 

@@ -109,6 +109,7 @@ Artifacts:
 - Stability audit: `tmp\source_authority_profile_delivery_stability_20260519.json`
 - Preservation candidate: `tmp\source_authority_preservation_candidate_20260519.json`
 - QA replay: `tmp\source_authority_preservation_candidate_qa_20260519\domain_bootstrap_qa_20260519T071656043525Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Query residual audit: `tmp\source_authority_preservation_query_residuals_20260519.json`
 
 Result:
 
@@ -117,6 +118,8 @@ Result:
 - QA: `33 exact / 3 partial / 4 miss`
 - Failure surface counts: `3 compile_surface_gap`, `3 query_surface_gap`,
   `1 hybrid_join_gap`
+- Query residuals: `4` query/hybrid rows, all with fallback signals; `3`
+  relaxed over-bound query widenings and `4` repaired source-text filters.
 - Writes/errors: `0` / `0`
 
 Meaning lesson:
