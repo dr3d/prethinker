@@ -5761,6 +5761,48 @@ def test_scoped_population_state_runs_with_companion_delivery_disabled() -> None
     assert any(item["result"].get("predicate") == "scoped_population_state_support" for item in rows)
 
 
+def test_unary_distinct_count_supports_placeholder_count_queries() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "exhibit_id(exhibit_t_1).",
+        "exhibit_id(exhibit_t1).",
+        "exhibit_id(exhibit_k1).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["exhibit_id(exhibit)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    companion = next(item for item in rows if item["result"].get("predicate") == "unary_distinct_count_support")
+    result_row = companion["result"]["rows"][0]
+    assert result_row["SourcePredicate"] == "exhibit_id"
+    assert result_row["RawEntityCount"] == "3"
+    assert result_row["DistinctEntityCount"] == "2"
+    assert "exhibitt1: exhibit_t_1, exhibit_t1" in result_row["AliasGroups"]
+
+
+def test_unary_distinct_count_does_not_expand_specific_absent_entity() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "person_id(alice).",
+        "person_id(ben).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["person_id(clara)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    assert not any(item["result"].get("predicate") == "unary_distinct_count_support" for item in rows)
+
+
 def test_return_to_state_query_derives_support_from_intervening_state_end() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

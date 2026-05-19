@@ -419,6 +419,14 @@ Recent transfer work supports the current direction:
   together. The important guardrail is that event-window support does not assert
   the subset's interior status; it only exposes the admitted window and nearby
   state anchors for the answering layer.
+- Count pressure is now split between stale wins, missing compile delivery, and
+  query access. A focused replay of the old `count_or_total` rows found two
+  already exact under the current instrument. A new core unary distinct-count
+  surface handles the query-layer case where a placeholder-like constant
+  over-binds an enumerable unary predicate, then collapses compact identifier
+  aliases for the distinct count. The first replay moved a numbered-exhibit row
+  from miss to exact by exposing raw count `10`, distinct count `9`, and the
+  alias group responsible for the difference.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

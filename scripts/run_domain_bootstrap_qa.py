@@ -2410,6 +2410,9 @@ def run_query_plan(
         scoped_population_state = _scoped_population_state_companion(runtime, query=effective_query)
         if scoped_population_state:
             append_companion(scoped_population_state)
+        unary_distinct_count = _unary_distinct_count_companion(runtime, query=effective_query)
+        if unary_distinct_count:
+            append_companion(unary_distinct_count)
         if helper_companions_enabled:
             for domain_companion in _domain_companion_queries(
                 runtime,
@@ -3117,6 +3120,99 @@ def _date_atom_sort_key_for_strings(value: str) -> tuple[int, str]:
     if sort_key is None:
         return (1, str(value or ""))
     return (0, str(sort_key))
+
+
+def _unary_distinct_count_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if len(args) != 1:
+        return None
+    arg = str(args[0]).strip()
+    if _is_prolog_variable(arg):
+        return None
+    direct = runtime.query_rows(query)
+    if direct.get("status") == "success":
+        return None
+    if not _placeholder_constant_matches_unary_predicate(predicate=predicate, value=arg):
+        return None
+
+    entity_var = "Entity"
+    all_query = format_prolog_query(predicate, [entity_var])
+    result = runtime.query_rows(all_query)
+    if result.get("status") != "success":
+        return None
+    raw_entities = sorted(
+        {str(row.get(entity_var, "")).strip() for row in result.get("rows", []) or [] if isinstance(row, dict)},
+        key=_case_atom_key,
+    )
+    if len(raw_entities) < 2:
+        return None
+
+    groups: dict[str, set[str]] = {}
+    for entity in raw_entities:
+        groups.setdefault(_compact_identifier_key(entity), set()).add(entity)
+    canonical_entities = [
+        sorted(values, key=lambda item: (len(item), _case_atom_key(item)))[0]
+        for _key, values in sorted(groups.items(), key=lambda item: _case_atom_key(item[0]))
+    ]
+    alias_groups = {
+        key: values
+        for key, values in groups.items()
+        if len(values) > 1
+    }
+    rows = [
+        {
+            "SourcePredicate": predicate,
+            "RawEntityCount": str(len(raw_entities)),
+            "DistinctEntityCount": str(len(canonical_entities)),
+            "CanonicalEntities": ", ".join(canonical_entities),
+            "AliasGroups": "; ".join(
+                f"{key}: {', '.join(sorted(values, key=_case_atom_key))}"
+                for key, values in sorted(alias_groups.items(), key=lambda item: _case_atom_key(item[0]))
+            ),
+            "SupportKind": "unary_distinct_count",
+        }
+    ]
+    return _status_timeline_companion_result(
+        predicate="unary_distinct_count_support",
+        query=(
+            "unary_distinct_count_support"
+            "(SourcePredicate, RawEntityCount, DistinctEntityCount, CanonicalEntities, AliasGroups, SupportKind)."
+        ),
+        rows=rows,
+        original_query=query,
+        note=(
+            "query-only unary distinct count support counted admitted unary predicate rows after a placeholder-like "
+            "constant over-bound the query; compact identifier aliases are collapsed for the distinct count"
+        ),
+    )
+
+
+def _placeholder_constant_matches_unary_predicate(*, predicate: str, value: str) -> bool:
+    value_tokens = set(_type_taxonomy_tokens(value))
+    predicate_tokens = set(_type_taxonomy_tokens(predicate))
+    if not value_tokens or not predicate_tokens:
+        return False
+    generic_tokens = {
+        "application",
+        "case",
+        "document",
+        "entity",
+        "exhibit",
+        "identifier",
+        "item",
+        "member",
+        "object",
+        "record",
+        "source",
+    }
+    return value_tokens.issubset(predicate_tokens) or bool(value_tokens & generic_tokens & predicate_tokens)
+
+
+def _compact_identifier_key(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", str(value or "").strip().lower())
 
 
 def _identifier_alias_count_companion(
