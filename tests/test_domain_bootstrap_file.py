@@ -19,6 +19,7 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_with_plan_passes,
     _ensure_quantity_event_predicate,
     _ensure_repeated_structure_predicates,
+    _ensure_source_attributed_claim_predicate,
     _ensure_source_authority_predicate,
     _ensure_source_detail_predicate,
     _ensure_status_state_predicate,
@@ -193,6 +194,55 @@ def test_status_state_profile_extension_respects_existing_carrier() -> None:
         "schema_version": "profile_status_state_extension_v1",
         "added": False,
         "reason": "no_shallow_status_state_palette",
+    }
+
+
+def test_source_attributed_claim_profile_extension_is_vocabulary_only() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "source_note/2", "args": ["source_id", "text"]},
+            {"signature": "claim_status/2", "args": ["claim_id", "status"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_source_attributed_claim_predicate(
+        profile,
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+    )
+
+    assert metadata["added"] is True
+    assert metadata["fact_extraction"] is False
+    assert any(item["signature"] == "source_attributed_claim/4" for item in profile["candidate_predicates"])
+    assert "source_attributed_claim/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_source_attributed_claim_profile_extension_respects_existing_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "source_claim/4",
+                "args": ["claim_id", "source_document", "content", "source_row"],
+            }
+        ],
+    }
+
+    metadata = _ensure_source_attributed_claim_predicate(
+        profile,
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+    )
+
+    assert metadata == {
+        "schema_version": "profile_source_attributed_claim_extension_v1",
+        "added": False,
+        "reason": "no_shallow_source_attributed_claim_palette",
     }
 
 
@@ -1090,6 +1140,24 @@ def test_profile_admission_retry_context_names_complete_status_state_shapes() ->
     assert "entity_status/2" in joined
 
 
+def test_profile_admission_retry_context_names_complete_source_claim_shapes() -> None:
+    context = _profile_admission_retry_context(
+        {
+            "findings": [
+                {
+                    "class": "shallow_source_attributed_claim_palette",
+                    "nearby_signatures": ["source_note/2", "statement/2"],
+                }
+            ]
+        }
+    )
+    joined = "\n".join(context)
+
+    assert "shallow_source_attributed_claim_palette" in joined
+    assert "source_attributed_claim/4" in joined
+    assert "source_note/2" in joined
+
+
 def test_profile_admission_retry_context_names_quantity_event_shapes() -> None:
     context = _profile_admission_retry_context(
         {
@@ -1142,6 +1210,45 @@ def test_profile_admission_flags_shallow_status_state_palette() -> None:
     assert report["source_signal_counts"]["status_state"] == 2
     assert report["candidate_contract_counts"]["status_state_capable"] == 0
     assert "shallow_status_state_palette" in {finding["class"] for finding in report["findings"]}
+
+
+def test_profile_admission_flags_shallow_source_attributed_claim_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "source_note/2", "args": ["source_id", "text"]},
+                {"signature": "claim_status/2", "args": ["claim_id", "status"]},
+            ]
+        },
+    )
+
+    assert report["source_signal_counts"]["source_attributed_claim"] == 2
+    assert report["candidate_contract_counts"]["source_attributed_claim_capable"] == 0
+    assert "shallow_source_attributed_claim_palette" in {finding["class"] for finding in report["findings"]}
+
+
+def test_profile_admission_accepts_complete_source_attributed_claim_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_document", "content_status", "source_row"],
+                },
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["source_attributed_claim_capable"] == 1
+    assert report["findings"] == []
 
 
 def test_profile_admission_accepts_complete_status_state_palette() -> None:
@@ -1262,6 +1369,96 @@ def test_profile_delivery_flags_offered_status_state_carrier_without_emitted_row
     health = source_compile["compile_health"]
     assert health["flag_counts"]["status_state_carrier_offered_but_undelivered"] == 1
     assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_flags_offered_source_claim_carrier_without_emitted_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "source_note(rivera_memo, device_alpha_status_active).",
+            "claim_status(claim_beta, unresolved).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source attributed claim report status",
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_document", "content_status", "source_row"],
+                },
+            ]
+        },
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["findings"][0]["class"] == "source_claim_carrier_offered_but_undelivered"
+    assert delivery["offered_carriers"]["source_attributed_claim"] == ["source_attributed_claim/4"]
+    assert delivery["delivered_carriers"]["source_attributed_claim"] == []
+    health = source_compile["compile_health"]
+    assert health["flag_counts"]["source_claim_carrier_offered_but_undelivered"] == 1
+    assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_accepts_emitted_source_claim_carrier_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "source_attributed_claim(claim_1, rivera_memo, device_alpha_status_active, src_line_001).",
+            "source_attributed_claim(claim_2, field_report, claim_beta_unresolved, src_line_002).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source attributed claim report status",
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_document", "content_status", "source_row"],
+                },
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["source_attributed_claim"] == ["source_attributed_claim"]
+    assert source_compile["compile_health"]["verdict"] == "healthy"
 
 
 def test_profile_delivery_accepts_emitted_status_state_carrier_rows() -> None:

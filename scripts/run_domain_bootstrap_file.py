@@ -74,6 +74,35 @@ PROFILE_ADMISSION_STATUS_STATE_TERMS = {
     "unresolved",
     "voided",
 }
+PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS = {
+    "email",
+    "letter",
+    "memo",
+    "memorandum",
+    "note",
+    "opinion",
+    "report",
+    "source",
+    "statement",
+    "testimony",
+    "witness",
+}
+PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS = {
+    "active",
+    "authority",
+    "available",
+    "binding",
+    "claim",
+    "cleared",
+    "confirmed",
+    "determined",
+    "finding",
+    "pending",
+    "resolved",
+    "status",
+    "supports",
+    "unresolved",
+}
 PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS = {"ev", "event", "entry", "interval", "measurement", "observation", "reading", "record", "sample"}
 PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS = {
     "amount",
@@ -1114,6 +1143,7 @@ def main() -> int:
             _ensure_repeated_structure_predicates(parsed),
             _ensure_source_authority_predicate(parsed, source_text=source_text),
             _ensure_source_detail_predicate(parsed),
+            _ensure_source_attributed_claim_predicate(parsed, source_text=source_text),
             _ensure_status_state_predicate(parsed, source_text=source_text),
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
         ]
@@ -2868,6 +2898,82 @@ def _ensure_status_state_predicate(parsed_profile: dict[str, Any], *, source_tex
     }
 
 
+def _ensure_source_attributed_claim_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic source-attributed claim carrier when admission proves it is needed."""
+
+    report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
+    findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
+    if not any(
+        isinstance(item, dict) and item.get("class") == "shallow_source_attributed_claim_palette"
+        for item in findings
+    ):
+        return {
+            "schema_version": "profile_source_attributed_claim_extension_v1",
+            "added": False,
+            "reason": "no_shallow_source_attributed_claim_palette",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {
+            "schema_version": "profile_source_attributed_claim_extension_v1",
+            "added": False,
+            "reason": "no_candidate_list",
+        }
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "source_attributed_claim/4" in signatures:
+        return {
+            "schema_version": "profile_source_attributed_claim_extension_v1",
+            "added": False,
+            "reason": "source_attributed_claim_already_present",
+        }
+    if any(_candidate_can_carry_source_attributed_claim_unit(item) for item in candidates if isinstance(item, dict)):
+        return {
+            "schema_version": "profile_source_attributed_claim_extension_v1",
+            "added": False,
+            "reason": "source_attributed_claim_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "source_attributed_claim/4",
+            "args": ["claim_id", "source_or_speaker", "content_or_status", "source_row_or_scope"],
+            "description": (
+                "Direct source-attributed claim surface for source-stated reports, notes, statements, opinions, "
+                "or findings that assert a status, content, support relation, or unresolved claim."
+            ),
+            "why": (
+                "Prevents source-to-content attribution from being stranded inside notes, reports, statement text, "
+                "or source-record rows when questions need who/what asserted a claim."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only when the source explicitly attributes a claim, status, or finding.",
+                "Keep claim id, source or speaker/document, content/status, and source row or scope joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "source_attributed_claim/4" not in provenance:
+        provenance.append("source_attributed_claim/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added source_attributed_claim/4 after shallow_source_attributed_claim_palette."
+            )
+    return {
+        "schema_version": "profile_source_attributed_claim_extension_v1",
+        "added": True,
+        "signature": "source_attributed_claim/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
 def _has_specific_detail_carrier(signatures: set[str]) -> bool:
     for signature in signatures:
         predicate, _, arity = signature.partition("/")
@@ -3138,6 +3244,11 @@ def _profile_delivery_report(
 
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    source_claim_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_source_attributed_claim_unit(item)
+    ]
     status_state_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
@@ -3148,6 +3259,7 @@ def _profile_delivery_report(
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_can_carry_quantity_event_unit(item)
     ]
+    source_claim_predicates = {signature.split("/", 1)[0] for signature in source_claim_carriers}
     status_state_predicates = {signature.split("/", 1)[0] for signature in status_state_carriers}
     quantity_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
     emitted_predicates = {
@@ -3155,9 +3267,15 @@ def _profile_delivery_report(
         for fact in _clause_list(source_compile.get("facts", []))
         if (parsed := _parse_fact_clause(fact)) is not None and not parsed[0].startswith("source_record")
     }
+    delivered_source_claim = sorted(source_claim_predicates & emitted_predicates)
     delivered_status_state = sorted(status_state_predicates & emitted_predicates)
     delivered_quantity = sorted(quantity_predicates & emitted_predicates)
     source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
+    source_claim_signal_count = (
+        int(source_signal_counts.get("source_attributed_claim") or 0)
+        if isinstance(source_signal_counts, dict)
+        else 0
+    )
     status_state_signal_count = (
         int(source_signal_counts.get("status_state") or 0)
         if isinstance(source_signal_counts, dict)
@@ -3169,6 +3287,15 @@ def _profile_delivery_report(
         else 0
     )
     findings: list[dict[str, Any]] = []
+    if source_claim_signal_count and source_claim_carriers and not delivered_source_claim:
+        findings.append(
+            {
+                "class": "source_claim_carrier_offered_but_undelivered",
+                "source_signal_count": source_claim_signal_count,
+                "offered_carriers": source_claim_carriers[:12],
+                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+            }
+        )
     if status_state_signal_count and status_state_carriers and not delivered_status_state:
         findings.append(
             {
@@ -3190,14 +3317,17 @@ def _profile_delivery_report(
     return {
         "schema_version": "profile_delivery_contracts_v1",
         "source_signal_counts": {
+            "source_attributed_claim": source_claim_signal_count,
             "status_state": status_state_signal_count,
             "quantity_event": quantity_signal_count,
         },
         "offered_carriers": {
+            "source_attributed_claim": source_claim_carriers[:12],
             "status_state": status_state_carriers[:12],
             "quantity_event": quantity_carriers[:12],
         },
         "delivered_carriers": {
+            "source_attributed_claim": delivered_source_claim[:12],
             "status_state": delivered_status_state[:12],
             "quantity_event": delivered_quantity[:12],
         },
@@ -3247,6 +3377,21 @@ def _profile_bootstrap_admission_context(
             "status/state",
         )
     )
+    has_source_claim_pressure = any(
+        token in label
+        for token in (
+            "attributed claim",
+            "claim report",
+            "claim source",
+            "finding source",
+            "reported claim",
+            "reported finding",
+            "source attributed",
+            "source claim",
+            "source report",
+            "source statement",
+        )
+    )
     has_quantity_pressure = any(
         token in label
         for token in (
@@ -3293,6 +3438,23 @@ def _profile_bootstrap_admission_context(
                     "Do not offer only status/2, condition/2, event_date/2, note/2, or description/2 for status/state "
                     "pressure. Those surfaces are shallow unless another candidate can carry subject, state value, and "
                     "as-of/effective/source scope in a joined row."
+                ),
+            ]
+        )
+    if has_source_claim_pressure:
+        context.extend(
+            [
+                (
+                    "Profile admission rule: when a source attributes a claim, status, finding, opinion, or support "
+                    "relation to a memo, report, statement, note, witness, letter, email, or other source layer, the "
+                    "candidate predicate palette must include at least one direct source-attributed claim surface "
+                    "carrying claim/content id, source or speaker/document, asserted content/status/finding, and "
+                    "source row or scope together."
+                ),
+                (
+                    "Do not offer only source_note/2, report_text/2, statement/2, note/2, description/2, or split "
+                    "claim_status/2 plus source metadata for source-attributed claim pressure. Those surfaces are "
+                    "shallow unless another candidate can carry source, content/status, and source scope in a joined row."
                 ),
             ]
         )
@@ -3369,6 +3531,26 @@ def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
                 ),
             ]
         )
+    if "shallow_source_attributed_claim_palette" in classes:
+        context.extend(
+            [
+                (
+                    "PROFILE ADMISSION RETRY: the previous profile had a shallow_source_attributed_claim_palette "
+                    "finding. Regenerate the profile so source-attributed claims, statuses, findings, opinions, "
+                    "or reports have a complete candidate predicate shape carrying claim id, source/document or "
+                    "speaker, claim/content/status, and source row or scope together."
+                ),
+                (
+                    "Acceptable shapes include source_attributed_claim/4, source_claim/4, reported_finding/4, "
+                    "statement_claim/4, or source-local equivalents whose args include claim/content id, source "
+                    "or speaker/document, asserted content/status/finding, and source row/scope."
+                ),
+                (
+                    "Do not merely keep source_note/2, report_text/2, statement/2, note/2, or description/2 "
+                    "unless a direct source-to-claim/content carrier is also present."
+                ),
+            ]
+        )
     if "shallow_quantity_event_palette" in classes:
         context.extend(
             [
@@ -3394,6 +3576,7 @@ def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
 
 def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:
     source_mentions = _operational_lifecycle_source_mentions(source_text)
+    source_claim_mentions = _source_attributed_claim_mentions(source_text)
     status_state_mentions = _status_state_source_mentions(source_text)
     quantity_mentions = _quantity_event_source_mentions(source_text)
     candidates = parsed_profile.get("candidate_predicates")
@@ -3402,6 +3585,11 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         _candidate_signature(item)
         for item in candidate_rows
         if _candidate_can_carry_operational_lifecycle_unit(item)
+    ]
+    source_claim_capable = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_can_carry_source_attributed_claim_unit(item)
     ]
     status_state_capable = [
         _candidate_signature(item)
@@ -3428,6 +3616,25 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
                 "candidate_count": len(candidate_rows),
                 "nearby_signatures": nearby[:12],
                 "evidence": source_mentions[:3],
+            }
+        )
+    if len(source_claim_mentions) >= 2 and not source_claim_capable:
+        nearby = [
+            _candidate_signature(item)
+            for item in candidate_rows
+            if _candidate_signature(item)
+            and (
+                _source_attributed_claim_text(_candidate_signature(item) + " " + " ".join(_candidate_args(item)))
+                or _candidate_signature(item).split("/", 1)[0] in {"description", "note", "report_text", "source_note", "statement"}
+            )
+        ]
+        findings.append(
+            {
+                "class": "shallow_source_attributed_claim_palette",
+                "source_signal_count": len(source_claim_mentions),
+                "candidate_count": len(candidate_rows),
+                "nearby_signatures": nearby[:12],
+                "evidence": source_claim_mentions[:3],
             }
         )
     if len(status_state_mentions) >= 2 and not status_state_capable:
@@ -3472,16 +3679,19 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         "schema_version": "profile_admission_contracts_v1",
         "source_signal_counts": {
             "operational_lifecycle": len(source_mentions),
+            "source_attributed_claim": len(source_claim_mentions),
             "status_state": len(status_state_mentions),
             "quantity_event": len(quantity_mentions),
         },
         "candidate_contract_counts": {
             "operational_lifecycle_capable": len(lifecycle_capable),
+            "source_attributed_claim_capable": len(source_claim_capable),
             "status_state_capable": len(status_state_capable),
             "quantity_event_capable": len(quantity_capable),
         },
         "capable_signatures": {
             "operational_lifecycle": lifecycle_capable[:12],
+            "source_attributed_claim": source_claim_capable[:12],
             "status_state": status_state_capable[:12],
             "quantity_event": quantity_capable[:12],
         },
@@ -3500,6 +3710,22 @@ def _operational_lifecycle_source_mentions(source_text: str) -> list[str]:
             PROFILE_ADMISSION_DATE_RE.search(lowered)
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_STATE_SLOTS
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_LIFECYCLE_TERMS
+        ):
+            mentions.append(line[:240])
+    return mentions
+
+
+def _source_attributed_claim_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.lower()
+        tokens = _profile_admission_tokens(lowered)
+        if (
+            tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS
+            and tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS
         ):
             mentions.append(line[:240])
     return mentions
@@ -3559,6 +3785,21 @@ def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -
     return has_subject and has_state and has_date and _operational_lifecycle_text(signature + " " + " ".join(args))
 
 
+def _candidate_can_carry_source_attributed_claim_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name in {"reported_finding", "source_attributed_claim", "source_claim", "statement_claim"}:
+        return True
+    args = _candidate_args(candidate)
+    if len(args) < 3:
+        return False
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_source = any(tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS for tokens in arg_tokens)
+    has_content = any(tokens & (PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS | {"content", "detail", "topic"}) for tokens in arg_tokens)
+    has_anchor = any(tokens & (PROFILE_ADMISSION_SCOPE_SLOTS | {"claim", "id", "row", "scope"}) for tokens in arg_tokens)
+    return has_source and has_content and has_anchor and _source_attributed_claim_text(signature + " " + " ".join(args))
+
+
 def _candidate_can_carry_status_state_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     name = signature.split("/", 1)[0]
@@ -3606,6 +3847,11 @@ def _candidate_args(candidate: dict[str, Any]) -> list[str]:
 
 def _operational_lifecycle_text(text: str) -> bool:
     return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_LIFECYCLE_TERMS)
+
+
+def _source_attributed_claim_text(text: str) -> bool:
+    tokens = _profile_admission_tokens(text)
+    return bool(tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS and tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS)
 
 
 def _status_state_text(text: str) -> bool:

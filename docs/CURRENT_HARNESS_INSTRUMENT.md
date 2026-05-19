@@ -478,6 +478,13 @@ Recent transfer work supports the current direction:
   source-reference surfaces, and `6` not applicable. This is measurement only:
   it does not license copying local source names into the architecture, but it
   exposes when attribution remains stranded in source-record text.
+- Source-attributed claims now also participate in profile admission, profile
+  delivery, and vocabulary-only extension. Shallow palettes can receive
+  `source_attributed_claim/4`, and compile health records
+  `source_claim_carrier_offered_but_undelivered` when that carrier is offered
+  but never populated. This keeps source/reference repair in the same measured
+  architecture as quantity and status/state, rather than adding another
+  after-the-fact special case.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record
