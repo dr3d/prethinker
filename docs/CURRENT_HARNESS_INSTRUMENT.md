@@ -488,6 +488,14 @@ Recent transfer work supports the current direction:
   source-text-access experiment, and two reclassified into compile or hybrid
   pressure. The live quantity work is therefore compile delivery and join
   preservation, not broader query hinting.
+  One hybrid row did earn a generic query-layer repair: when admitted
+  category/count/date rows expose included and unresolved categories, and an
+  admitted total-count surface exists, `category_count_ratio_support` computes
+  the included total and percentage without reading source prose. The primitive
+  was validated on unlike inventory rows plus a non-disposition measurement
+  control, then replayed on the recall/inventory fixture where the March 15
+  accounted-unit percentage moved to exact. A fresh 40-row replay of that
+  fixture scored `31/2/7`, with zero compatibility rows and no runtime errors.
 - The same profile-admission/profile-delivery shape now covers status/state
   pressure. Point-in-time status, current condition, availability, pending
   resolution, supersession, and partial-population state must offer a direct

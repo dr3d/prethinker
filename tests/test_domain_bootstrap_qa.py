@@ -2756,6 +2756,52 @@ def test_run_query_plan_keeps_recall_accounted_units_scoped_to_termination_quest
     assert not any(item["result"].get("predicate") == "recall_accounted_units_support" for item in results)
 
 
+def test_run_query_plan_derives_category_count_ratio_from_admitted_surfaces() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "inventory_disposition(batch_alpha, returned, 20, 2026_02_10).",
+        "inventory_disposition(batch_alias, returned, 20, 2026_02_10).",
+        "inventory_disposition(batch_alpha, repaired, 5, 2026_02_10).",
+        "inventory_disposition(batch_alpha, unaccounted, 3, 2026_02_10).",
+        "source_detail(batch_scope, total_units, 28_units, src_line_1).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ["inventory_disposition(batch, status, Count, 2026_02_10)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    companion = next(item for item in results if item["result"].get("predicate") == "category_count_ratio_support")
+    row = companion["result"]["rows"][0]
+    assert row["IncludedTotal"] == "25"
+    assert row["ExcludedTotal"] == "3"
+    assert row["TotalCount"] == "28"
+    assert row["IncludedPercent"] == "89.3"
+    assert row["IncludedCategories"] == "repaired,returned"
+
+
+def test_run_query_plan_does_not_ratio_unrelated_measurement_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "sensor_measurement(sensor_alpha, temperature, 20, 2026_02_10).",
+        "sensor_measurement(sensor_alpha, pressure, 5, 2026_02_10).",
+        "source_detail(sensor_alpha, total_units, 25_units, src_line_1).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ["sensor_measurement(Sensor, Metric, Value, 2026_02_10)."],
+        helper_companions_enabled=False,
+        include_legacy_native_helpers=False,
+    )
+
+    assert not any(item["result"].get("predicate") == "category_count_ratio_support" for item in results)
+
+
 def test_run_query_plan_adds_story_choice_contrast_support() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

@@ -2630,6 +2630,9 @@ def run_query_plan(
                 effective_query = str(relaxed.get("query", query))
                 used_relaxed_fallback = True
                 last_result = relaxed.get("result", {})
+        category_ratio = _category_count_ratio_companion(runtime, query=effective_query)
+        if category_ratio:
+            append_companion(category_ratio)
         if helper_companions_enabled:
             companion = _evidence_table_companion_query(runtime, query=effective_query)
             append_companion(companion)
@@ -12857,6 +12860,214 @@ def _recall_accounted_units_companion(
             query,
             "unit_count(Recall, TotalUnits, Date).",
             "unit_status_change(Recall, Date, unaccounted, Count, Actor).",
+        ],
+    }
+
+
+_CATEGORY_COUNT_RATIO_PREDICATE_TOKENS = {
+    "allocation",
+    "classification",
+    "disposition",
+    "distribution",
+    "reconciliation",
+    "status",
+}
+
+_CATEGORY_COUNT_RATIO_EXCLUDED_TOKENS = {
+    "absent",
+    "missing",
+    "lost",
+    "outstanding",
+    "remaining",
+    "unaccounted",
+    "unknown",
+    "unresolved",
+}
+
+_CATEGORY_COUNT_TOTAL_KIND_TOKENS = {
+    "count",
+    "manufactured",
+    "population",
+    "quantity",
+    "scope",
+    "total",
+    "universe",
+    "unit",
+    "units",
+}
+
+
+def _integer_from_atom(value: str) -> int | None:
+    text = str(value or "").strip().lower().removeprefix("v_")
+    match = re.search(r"(?<!\d)(\d{1,3}(?:[_ ,]\d{3})+|\d+)(?!\d)", text)
+    if not match:
+        return None
+    digits = re.sub(r"[^0-9]", "", match.group(1))
+    if not digits:
+        return None
+    return int(digits)
+
+
+def _category_count_ratio_total_candidates(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    candidates: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for row in _runtime_rows(runtime, "source_detail(Source, DetailKind, DetailValue, SourceStatus)."):
+        kind = str(row.get("DetailKind", "")).strip()
+        value = str(row.get("DetailValue", "")).strip()
+        if not (_predicate_alias_tokens(kind) & _CATEGORY_COUNT_TOTAL_KIND_TOKENS):
+            continue
+        count = _integer_from_atom(value)
+        if count is None:
+            continue
+        key = (str(count), kind, value)
+        if key in seen:
+            continue
+        seen.add(key)
+        candidates.append(
+            {
+                "TotalCount": str(count),
+                "TotalKind": kind,
+                "TotalValue": value,
+                "TotalSource": str(row.get("SourceStatus", "")).strip(),
+            }
+        )
+    for row in _runtime_rows(runtime, "source_record_field(SourceRow, Header, Value)."):
+        header = str(row.get("Header", "")).strip()
+        value = str(row.get("Value", "")).strip()
+        if not (_predicate_alias_tokens(header) & _CATEGORY_COUNT_TOTAL_KIND_TOKENS):
+            continue
+        count = _integer_from_atom(value)
+        if count is None:
+            continue
+        key = (str(count), header, value)
+        if key in seen:
+            continue
+        seen.add(key)
+        candidates.append(
+            {
+                "TotalCount": str(count),
+                "TotalKind": header,
+                "TotalValue": value,
+                "TotalSource": str(row.get("SourceRow", "")).strip(),
+            }
+        )
+    return candidates
+
+
+def _category_count_ratio_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    query_predicate, _query_args = parsed
+    query_tokens = _predicate_alias_tokens(query_predicate)
+    if not (query_tokens & _CATEGORY_COUNT_RATIO_PREDICATE_TOKENS):
+        return None
+
+    grouped: dict[tuple[str, str], dict[tuple[str, int], set[str]]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        tokens = _predicate_alias_tokens(predicate)
+        if predicate != query_predicate and not (tokens & query_tokens & _CATEGORY_COUNT_RATIO_PREDICATE_TOKENS):
+            continue
+        category = ""
+        count_value = ""
+        scope = ""
+        if len(args) == 4:
+            category, count_value, scope = args[1], args[2], args[3]
+        elif len(args) == 5 and "status" in tokens and "change" in tokens:
+            scope, category, count_value = args[1], args[2], args[3]
+        else:
+            continue
+        if not category or not count_value or not scope:
+            continue
+        if _date_atom_sort_key(scope) is None:
+            continue
+        if not _is_numeric_atom(count_value):
+            continue
+        grouped.setdefault((predicate, scope), {}).setdefault((category, int(float(count_value))), set()).add(args[0])
+
+    totals = _category_count_ratio_total_candidates(runtime)
+    if not grouped or not totals:
+        return None
+
+    rows: list[dict[str, str]] = []
+    for (predicate, scope), category_counts in sorted(grouped.items()):
+        included: list[tuple[str, int]] = []
+        excluded: list[tuple[str, int]] = []
+        for category, count in sorted(category_counts):
+            category_tokens = _predicate_alias_tokens(category)
+            if category_tokens & _CATEGORY_COUNT_RATIO_EXCLUDED_TOKENS:
+                excluded.append((category, count))
+            else:
+                included.append((category, count))
+        if not included or not excluded:
+            continue
+        included_total = sum(count for _category, count in included)
+        excluded_total = sum(count for _category, count in excluded)
+        if included_total <= 0:
+            continue
+        usable_totals = [
+            total
+            for total in totals
+            if int(total["TotalCount"]) >= included_total and int(total["TotalCount"]) >= included_total + excluded_total
+        ]
+        if not usable_totals:
+            continue
+        total = sorted(usable_totals, key=lambda item: int(item["TotalCount"]))[0]
+        total_count = int(total["TotalCount"])
+        if total_count <= 0:
+            continue
+        percent = round((included_total / total_count) * 100, 1)
+        rows.append(
+            {
+                "ObservedPredicate": predicate,
+                "Scope": scope,
+                "IncludedCategories": ",".join(category for category, _count in included),
+                "IncludedTotal": str(included_total),
+                "ExcludedCategories": ",".join(category for category, _count in excluded),
+                "ExcludedTotal": str(excluded_total),
+                "TotalCount": str(total_count),
+                "IncludedPercent": f"{percent:.1f}",
+                "TotalKind": total["TotalKind"],
+                "TotalValue": total["TotalValue"],
+                "TotalSource": total["TotalSource"],
+                "CategoryEntityAliases": str(sum(len(category_counts[item]) for item in category_counts)),
+            }
+        )
+    if not rows:
+        return None
+    return {
+        "query": "category_count_ratio_support(ObservedPredicate, Scope, IncludedTotal, TotalCount, IncludedPercent).",
+        "result": {
+            "status": "success",
+            "predicate": "category_count_ratio_support",
+            "prolog_query": "category_count_ratio_support(ObservedPredicate, Scope, IncludedTotal, TotalCount, IncludedPercent).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": [
+                "ObservedPredicate",
+                "Scope",
+                "IncludedTotal",
+                "TotalCount",
+                "IncludedPercent",
+            ],
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only category-count ratio companion summed admitted category/count/date rows, "
+                    "excluded explicitly unresolved categories, and divided by an admitted total-count surface"
+                ),
+                "original_query": query,
+                "trigger_predicate": query_predicate,
+            },
+        },
+        "derived_from_queries": [
+            query,
+            "admitted category/count/date facts",
+            "source_detail(Source, DetailKind, DetailValue, SourceStatus).",
+            "source_record_field(SourceRow, Header, Value).",
         ],
     }
 

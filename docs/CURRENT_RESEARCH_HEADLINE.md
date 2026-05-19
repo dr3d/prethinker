@@ -50,7 +50,12 @@ The most recent focused replays show why the next work stays layer-specific:
   rows, so they are query-layer evidence rather than compile-stamp evidence.
 - Quantity/duration remains a compile-delivery pressure: a QA-only replay of
   the old 26-row queue scored `8/3/15`, and the query-surface subset did not
-  improve under a bounded source-text-access experiment.
+  improve under a bounded source-text-access experiment. One hybrid row did
+  earn a generic deterministic repair: admitted category/count/date rows plus
+  an admitted total-count surface can now produce `category_count_ratio_support`.
+  That moved the March 15 accounted-unit percentage to exact on replay, while a
+  fresh 40-row fixture smoke held zero compatibility rows and no runtime
+  errors.
 
 ## What Changed
 
