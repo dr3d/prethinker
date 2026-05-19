@@ -224,6 +224,16 @@ def test_compile_surface_stability_reports_profile_delivery_telemetry(tmp_path: 
             "draw_count": 2,
             "source_signal_counts": [3],
             "offered_carriers": ["source_authority/3"],
+            "carrier_delivery": [
+                {
+                    "carrier": "source_authority/3",
+                    "row_counts": [0, 1],
+                    "max": 1,
+                    "min": 0,
+                    "draws_with_rows": 1,
+                }
+            ],
+            "response_hint": "multi_draw_preservation_candidate",
             "draws": [
                 {
                     "run": "draw1",
@@ -240,6 +250,7 @@ def test_compile_surface_stability_reports_profile_delivery_telemetry(tmp_path: 
     markdown = render_markdown(report)
     assert "Profile delivery issue rows" in markdown
     assert "source_authority_carrier_offered_but_undelivered" in markdown
+    assert "multi_draw_preservation_candidate" in markdown
 
 
 def test_quantity_event_telemetry_ignores_source_line_locators(tmp_path: Path) -> None:

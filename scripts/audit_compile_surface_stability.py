@@ -463,6 +463,15 @@ def _fixture_profile_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dic
                 by_class.setdefault(cls, []).append({"draw": draw, "finding": finding})
     rows: list[dict[str, Any]] = []
     for cls, items in sorted(by_class.items()):
+        offered_carriers = sorted(
+            {
+                str(carrier)
+                for item in items
+                for carrier in item["finding"].get("offered_carriers", [])
+                if str(carrier).strip()
+            }
+        )
+        carrier_delivery = _profile_carrier_delivery(draws=draws, carriers=offered_carriers)
         rows.append(
             {
                 "kind": "profile_delivery",
@@ -473,14 +482,9 @@ def _fixture_profile_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dic
                     int(item["finding"].get("source_signal_count") or 0)
                     for item in items
                 ],
-                "offered_carriers": sorted(
-                    {
-                        str(carrier)
-                        for item in items
-                        for carrier in item["finding"].get("offered_carriers", [])
-                        if str(carrier).strip()
-                    }
-                ),
+                "offered_carriers": offered_carriers,
+                "carrier_delivery": carrier_delivery,
+                "response_hint": _profile_delivery_response_hint(carrier_delivery),
                 "draws": [
                     {
                         "run": item["draw"]["run"],
@@ -493,6 +497,28 @@ def _fixture_profile_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dic
             }
         )
     return rows
+
+
+def _profile_carrier_delivery(*, draws: list[dict[str, Any]], carriers: list[str]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for carrier in carriers:
+        counts = [int(draw["signature_counts"].get(carrier, 0)) for draw in draws]
+        rows.append(
+            {
+                "carrier": carrier,
+                "row_counts": counts,
+                "max": max(counts) if counts else 0,
+                "min": min(counts) if counts else 0,
+                "draws_with_rows": sum(1 for count in counts if count > 0),
+            }
+        )
+    return rows
+
+
+def _profile_delivery_response_hint(carrier_delivery: list[dict[str, Any]]) -> str:
+    if any(int(row.get("draws_with_rows", 0)) > 0 for row in carrier_delivery):
+        return "multi_draw_preservation_candidate"
+    return "compile_retry_or_projection_candidate"
 
 
 def _fixture_delivery_telemetry(draws: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1247,6 +1273,22 @@ def render_markdown(report: dict[str, Any]) -> str:
                 lines.append(
                     f"| `{row['class']}` | {row['affected_draw_count']} / {row['draw_count']} | "
                     f"`{row.get('source_signal_counts', [])}` | `{row.get('offered_carriers', [])}` |"
+                )
+            lines.append("")
+            lines.extend(
+                [
+                    "| Profile delivery class | Response hint | Carrier delivery |",
+                    "| --- | --- | --- |",
+                ]
+            )
+            for row in fixture["profile_delivery_telemetry"]:
+                carrier_delivery = [
+                    f"{item['carrier']}:{item['row_counts']}"
+                    for item in row.get("carrier_delivery", [])
+                    if isinstance(item, dict)
+                ]
+                lines.append(
+                    f"| `{row['class']}` | `{row.get('response_hint', '')}` | `{carrier_delivery}` |"
                 )
             lines.append("")
         if fixture["predicate_drift"]:

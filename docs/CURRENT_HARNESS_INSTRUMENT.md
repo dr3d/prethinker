@@ -612,6 +612,12 @@ Recent transfer work supports the current direction:
   is that targeted retry can recover direct carriers in some draws, but the
   layer is not stable enough to treat prompt wording as the final repair. This
   is evidence for preservation or multi-draw consensus experiments.
+- The same stability audit now splits profile-delivery findings by response
+  path. If an offered carrier is missing in some draws but delivered in others,
+  it is a multi-draw preservation candidate; if it is never delivered, it stays
+  a compile-retry or deterministic-projection candidate. In the authority
+  replay, source-authority and source-claim carriers are preservation
+  candidates, while the status-state carrier is still projection/retry pressure.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
