@@ -995,6 +995,18 @@ def test_profile_bootstrap_admission_context_guides_quantity_event_palettes() ->
     assert "numeric event details" in joined
 
 
+def test_profile_bootstrap_admission_context_guides_status_state_palettes() -> None:
+    context = _profile_bootstrap_admission_context(
+        intake_plan=None,
+        domain_hint="current status point-in-time partial population state",
+    )
+    joined = "\n".join(context)
+
+    assert "direct status/state surface" in joined
+    assert "subject or subset, state/status value, and temporal/source scope" in joined
+    assert "status/2" in joined
+
+
 def test_profile_admission_retry_context_names_complete_status_shapes() -> None:
     context = _profile_admission_retry_context(
         {
@@ -1011,6 +1023,24 @@ def test_profile_admission_retry_context_names_complete_status_shapes() -> None:
     assert "PROFILE ADMISSION RETRY" in joined
     assert "proposal_status_at/3" in joined
     assert "proposal_status/2" in joined
+
+
+def test_profile_admission_retry_context_names_complete_status_state_shapes() -> None:
+    context = _profile_admission_retry_context(
+        {
+            "findings": [
+                {
+                    "class": "shallow_status_state_palette",
+                    "nearby_signatures": ["entity_status/2", "effective_date/2"],
+                }
+            ]
+        }
+    )
+    joined = "\n".join(context)
+
+    assert "shallow_status_state_palette" in joined
+    assert "status_state_at/4" in joined
+    assert "entity_status/2" in joined
 
 
 def test_profile_admission_retry_context_names_quantity_event_shapes() -> None:
@@ -1045,6 +1075,42 @@ def test_profile_admission_accepts_complete_operational_lifecycle_palette() -> N
     )
 
     assert report["candidate_contract_counts"]["operational_lifecycle_capable"] == 1
+    assert report["findings"] == []
+
+
+def test_profile_admission_flags_shallow_status_state_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status/2", "args": ["record_id", "status"]},
+                {"signature": "status_date/2", "args": ["record_id", "date"]},
+            ]
+        },
+    )
+
+    assert report["source_signal_counts"]["status_state"] == 2
+    assert report["candidate_contract_counts"]["status_state_capable"] == 0
+    assert "shallow_status_state_palette" in {finding["class"] for finding in report["findings"]}
+
+
+def test_profile_admission_accepts_complete_status_state_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status_at/3", "args": ["record_id", "status", "date"]},
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["status_state_capable"] == 1
     assert report["findings"] == []
 
 
@@ -1105,6 +1171,90 @@ def test_profile_admission_warning_updates_compile_health() -> None:
     assert health["recommendation"] == "run_qa_but_treat_thin_lens_results_as_diagnostic"
     assert health["flag_counts"]["shallow_lifecycle_palette"] == 1
     assert "profile_admission" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_flags_offered_status_state_carrier_without_emitted_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "record_status(record_alpha, suspect).",
+            "record_status(record_beta, cleared).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="point-in-time status/state",
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status_at/3", "args": ["record_id", "status", "date"]},
+            ]
+        },
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["findings"][0]["class"] == "status_state_carrier_offered_but_undelivered"
+    assert delivery["offered_carriers"]["status_state"] == ["record_status_at/3"]
+    assert delivery["delivered_carriers"]["status_state"] == []
+    health = source_compile["compile_health"]
+    assert health["flag_counts"]["status_state_carrier_offered_but_undelivered"] == 1
+    assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_accepts_emitted_status_state_carrier_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "record_status_at(record_alpha, suspect, 2026_09_15).",
+            "record_status_at(record_beta, cleared, 2026_09_20).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="point-in-time status/state",
+        source_text=(
+            "On 2026-09-15 record alpha status was suspect.\n"
+            "On 2026-09-20 record beta status was cleared."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {"signature": "record_status_at/3", "args": ["record_id", "status", "date"]},
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["status_state"] == ["record_status_at"]
+    assert source_compile["compile_health"]["verdict"] == "healthy"
 
 
 def test_profile_delivery_flags_offered_quantity_carrier_without_emitted_rows() -> None:

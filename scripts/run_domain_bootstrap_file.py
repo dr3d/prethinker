@@ -53,6 +53,27 @@ PROFILE_ADMISSION_SUBJECT_SLOTS = {
     "ticket",
 }
 PROFILE_ADMISSION_STATE_SLOTS = {"outcome", "phase", "result", "state", "status"}
+PROFILE_ADMISSION_SCOPE_SLOTS = {"as", "asof", "current", "date", "dated", "effective", "scope", "source", "time", "timestamp"}
+PROFILE_ADMISSION_STATUS_STATE_TERMS = {
+    "active",
+    "approved",
+    "available",
+    "cleared",
+    "closed",
+    "condition",
+    "current",
+    "denied",
+    "failed",
+    "hold",
+    "pending",
+    "resolved",
+    "state",
+    "status",
+    "suspect",
+    "suspended",
+    "unresolved",
+    "voided",
+}
 PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS = {"ev", "event", "entry", "interval", "measurement", "observation", "reading", "record", "sample"}
 PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS = {
     "amount",
@@ -3040,26 +3061,47 @@ def _profile_delivery_report(
 
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    status_state_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_status_state_unit(item)
+    ]
     quantity_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_can_carry_quantity_event_unit(item)
     ]
-    carrier_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
+    status_state_predicates = {signature.split("/", 1)[0] for signature in status_state_carriers}
+    quantity_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
     emitted_predicates = {
         parsed[0]
         for fact in _clause_list(source_compile.get("facts", []))
         if (parsed := _parse_fact_clause(fact)) is not None and not parsed[0].startswith("source_record")
     }
-    delivered_carriers = sorted(carrier_predicates & emitted_predicates)
+    delivered_status_state = sorted(status_state_predicates & emitted_predicates)
+    delivered_quantity = sorted(quantity_predicates & emitted_predicates)
     source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
+    status_state_signal_count = (
+        int(source_signal_counts.get("status_state") or 0)
+        if isinstance(source_signal_counts, dict)
+        else 0
+    )
     quantity_signal_count = (
         int(source_signal_counts.get("quantity_event") or 0)
         if isinstance(source_signal_counts, dict)
         else 0
     )
     findings: list[dict[str, Any]] = []
-    if quantity_signal_count and quantity_carriers and not delivered_carriers:
+    if status_state_signal_count and status_state_carriers and not delivered_status_state:
+        findings.append(
+            {
+                "class": "status_state_carrier_offered_but_undelivered",
+                "source_signal_count": status_state_signal_count,
+                "offered_carriers": status_state_carriers[:12],
+                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+            }
+        )
+    if quantity_signal_count and quantity_carriers and not delivered_quantity:
         findings.append(
             {
                 "class": "quantity_carrier_offered_but_undelivered",
@@ -3071,13 +3113,16 @@ def _profile_delivery_report(
     return {
         "schema_version": "profile_delivery_contracts_v1",
         "source_signal_counts": {
+            "status_state": status_state_signal_count,
             "quantity_event": quantity_signal_count,
         },
         "offered_carriers": {
+            "status_state": status_state_carriers[:12],
             "quantity_event": quantity_carriers[:12],
         },
         "delivered_carriers": {
-            "quantity_event": delivered_carriers[:12],
+            "status_state": delivered_status_state[:12],
+            "quantity_event": delivered_quantity[:12],
         },
         "findings": findings,
     }
@@ -3226,6 +3271,27 @@ def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
                 ),
             ]
         )
+    if "shallow_status_state_palette" in classes:
+        context.extend(
+            [
+                (
+                    "PROFILE ADMISSION RETRY: the previous profile had a shallow_status_state_palette finding. "
+                    "Regenerate the profile so point-in-time status, current condition, pending resolution, "
+                    "availability, supersession, or partial-population state has a complete candidate predicate "
+                    "shape carrying subject or subset, state/status value, and temporal/source/as-of scope together."
+                ),
+                (
+                    "Acceptable shapes include status_state_at/4, entity_status_at/4, record_condition_at/4, "
+                    "population_state_at/4, item_availability_at/4, or source-local *_status_at/3-4 and *_state_at/3-4 "
+                    "surfaces whose args include subject/subset, state value, and date/source/current/effective scope."
+                ),
+                (
+                    "Do not merely keep split surfaces like "
+                    f"{', '.join(nearby[:8]) or 'status/2 plus date/source wrappers'} "
+                    "unless a complete joined status/state-scope candidate is also present."
+                ),
+            ]
+        )
     if "shallow_quantity_event_palette" in classes:
         context.extend(
             [
@@ -3251,6 +3317,7 @@ def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
 
 def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:
     source_mentions = _operational_lifecycle_source_mentions(source_text)
+    status_state_mentions = _status_state_source_mentions(source_text)
     quantity_mentions = _quantity_event_source_mentions(source_text)
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
@@ -3258,6 +3325,11 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         _candidate_signature(item)
         for item in candidate_rows
         if _candidate_can_carry_operational_lifecycle_unit(item)
+    ]
+    status_state_capable = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_can_carry_status_state_unit(item)
     ]
     quantity_capable = [
         _candidate_signature(item)
@@ -3279,6 +3351,25 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
                 "candidate_count": len(candidate_rows),
                 "nearby_signatures": nearby[:12],
                 "evidence": source_mentions[:3],
+            }
+        )
+    if len(status_state_mentions) >= 2 and not status_state_capable:
+        nearby = [
+            _candidate_signature(item)
+            for item in candidate_rows
+            if _candidate_signature(item)
+            and (
+                _status_state_text(_candidate_signature(item) + " " + " ".join(_candidate_args(item)))
+                or _candidate_signature(item).split("/", 1)[0] in {"condition", "description", "note", "status", "state"}
+            )
+        ]
+        findings.append(
+            {
+                "class": "shallow_status_state_palette",
+                "source_signal_count": len(status_state_mentions),
+                "candidate_count": len(candidate_rows),
+                "nearby_signatures": nearby[:12],
+                "evidence": status_state_mentions[:3],
             }
         )
     if len(quantity_mentions) >= 2 and not quantity_capable:
@@ -3304,14 +3395,17 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         "schema_version": "profile_admission_contracts_v1",
         "source_signal_counts": {
             "operational_lifecycle": len(source_mentions),
+            "status_state": len(status_state_mentions),
             "quantity_event": len(quantity_mentions),
         },
         "candidate_contract_counts": {
             "operational_lifecycle_capable": len(lifecycle_capable),
+            "status_state_capable": len(status_state_capable),
             "quantity_event_capable": len(quantity_capable),
         },
         "capable_signatures": {
             "operational_lifecycle": lifecycle_capable[:12],
+            "status_state": status_state_capable[:12],
             "quantity_event": quantity_capable[:12],
         },
         "findings": findings,
@@ -3329,6 +3423,27 @@ def _operational_lifecycle_source_mentions(source_text: str) -> list[str]:
             PROFILE_ADMISSION_DATE_RE.search(lowered)
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_STATE_SLOTS
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_LIFECYCLE_TERMS
+        ):
+            mentions.append(line[:240])
+    return mentions
+
+
+def _status_state_source_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.lower()
+        tokens = _profile_admission_tokens(lowered)
+        if (
+            tokens & PROFILE_ADMISSION_SUBJECT_SLOTS
+            and tokens & PROFILE_ADMISSION_STATUS_STATE_TERMS
+            and (
+                PROFILE_ADMISSION_DATE_RE.search(lowered)
+                or tokens & PROFILE_ADMISSION_SCOPE_SLOTS
+                or tokens & {"after", "before", "changed", "current", "effective", "from", "superseded", "to"}
+            )
         ):
             mentions.append(line[:240])
     return mentions
@@ -3367,6 +3482,23 @@ def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -
     return has_subject and has_state and has_date and _operational_lifecycle_text(signature + " " + " ".join(args))
 
 
+def _candidate_can_carry_status_state_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name.endswith(("_status_at", "_state_at", "_condition_at", "_status_on", "_state_on")):
+        return True
+    if name in {"entity_status_at", "item_availability_at", "population_state_at", "record_condition_at", "status_state_at"}:
+        return True
+    args = _candidate_args(candidate)
+    if len(args) < 3:
+        return False
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_subject = any(tokens & PROFILE_ADMISSION_SUBJECT_SLOTS for tokens in arg_tokens)
+    has_state = any(tokens & (PROFILE_ADMISSION_STATE_SLOTS | {"availability", "condition"}) for tokens in arg_tokens)
+    has_scope = any(tokens & (PROFILE_ADMISSION_DATE_SLOTS | PROFILE_ADMISSION_SCOPE_SLOTS) for tokens in arg_tokens)
+    return has_subject and has_state and has_scope and _status_state_text(signature + " " + " ".join(args))
+
+
 def _candidate_can_carry_quantity_event_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     name = signature.split("/", 1)[0]
@@ -3397,6 +3529,10 @@ def _candidate_args(candidate: dict[str, Any]) -> list[str]:
 
 def _operational_lifecycle_text(text: str) -> bool:
     return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_LIFECYCLE_TERMS)
+
+
+def _status_state_text(text: str) -> bool:
+    return bool(_profile_admission_tokens(text) & PROFILE_ADMISSION_STATUS_STATE_TERMS)
 
 
 def _quantity_event_text(text: str) -> bool:

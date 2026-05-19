@@ -459,6 +459,12 @@ Recent transfer work supports the current direction:
   delivery leaves the artifact healthy. This prepares the next layer for
   retry/consensus decisions based on compile health rather than a later audit
   script alone.
+- The same profile-admission/profile-delivery shape now covers status/state
+  pressure. Point-in-time status, current condition, availability, pending
+  resolution, supersession, and partial-population state must offer a direct
+  carrier that binds subject or subset, state/status value, and temporal/source
+  scope. If the palette offers that carrier but emitted facts never populate it,
+  compile health records `status_state_carrier_offered_but_undelivered`.
 - Source-reference pressure now has the same audit shape.
   `source_attributed_claim_contract` detects source-record prose that attributes
   a status, finding, authority, or unresolved claim to a memo, report, statement,
