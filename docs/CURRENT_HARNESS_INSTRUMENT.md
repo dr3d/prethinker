@@ -482,6 +482,12 @@ Recent transfer work supports the current direction:
   warning. The replay still exposed residual pressure in direct event backbone,
   source-reference, and source-authority pairing, which keeps the next work on
   compile-surface preservation instead of query-layer patching.
+  A current QA-only replay of the 26 old quantity/duration source-surface rows
+  scored `8/3/15` on the frozen native compile artifacts. The four rows still
+  classified as query-surface pressure did not improve under a transfer-safe
+  source-text-access experiment, and two reclassified into compile or hybrid
+  pressure. The live quantity work is therefore compile delivery and join
+  preservation, not broader query hinting.
 - The same profile-admission/profile-delivery shape now covers status/state
   pressure. Point-in-time status, current condition, availability, pending
   resolution, supersession, and partial-population state must offer a direct

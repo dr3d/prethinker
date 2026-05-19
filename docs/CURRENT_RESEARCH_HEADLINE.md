@@ -48,6 +48,9 @@ The most recent focused replays show why the next work stays layer-specific:
   source-text retrieval.
 - Both replays used frozen compile artifacts and delivered zero compatibility
   rows, so they are query-layer evidence rather than compile-stamp evidence.
+- Quantity/duration remains a compile-delivery pressure: a QA-only replay of
+  the old 26-row queue scored `8/3/15`, and the query-surface subset did not
+  improve under a bounded source-text-access experiment.
 
 ## What Changed
 
