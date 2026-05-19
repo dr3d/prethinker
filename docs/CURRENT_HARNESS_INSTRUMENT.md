@@ -427,6 +427,12 @@ Recent transfer work supports the current direction:
   aliases for the distinct count. The first replay moved a numbered-exhibit row
   from miss to exact by exposing raw count `10`, distinct count `9`, and the
   alias group responsible for the difference.
+- Deadline/duration pressure is mostly compile delivery at this point. A focused
+  replay of the old `deadline_or_duration_arithmetic` rows found three already
+  exact under the current instrument. The remaining live failures are dominated
+  by missing raw temporal/event rows or contradictory derived statuses; one
+  apparent query arithmetic bug did not reproduce on rerun, so no new duration
+  support surface was admitted from that pass.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

@@ -5782,7 +5782,9 @@ def test_unary_distinct_count_supports_placeholder_count_queries() -> None:
     assert result_row["SourcePredicate"] == "exhibit_id"
     assert result_row["RawEntityCount"] == "3"
     assert result_row["DistinctEntityCount"] == "2"
-    assert "exhibitt1: exhibit_t_1, exhibit_t1" in result_row["AliasGroups"]
+    assert result_row["AliasGroups"].startswith("exhibitt1:")
+    assert "exhibit_t1" in result_row["AliasGroups"]
+    assert "exhibit_t_1" in result_row["AliasGroups"]
 
 
 def test_unary_distinct_count_does_not_expand_specific_absent_entity() -> None:
@@ -5801,6 +5803,10 @@ def test_unary_distinct_count_does_not_expand_specific_absent_entity() -> None:
     )
 
     assert not any(item["result"].get("predicate") == "unary_distinct_count_support" for item in rows)
+
+
+def test_duration_display_accepts_t_separator_datetime_atoms() -> None:
+    assert qa_module._duration_between_atoms("2025_10_12t22_00", "2025_10_12t22_47") == "47 minutes"
 
 
 def test_return_to_state_query_derives_support_from_intervening_state_end() -> None:

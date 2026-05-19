@@ -8078,7 +8078,7 @@ def _display_datetime_atom(value: str) -> str:
     text = str(value or "").strip().lower()
     if text.startswith("v_"):
         text = text[2:]
-    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})(?:_(\d{2}))?", text)
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})[t_](\d{2})_(\d{2})(?:_(\d{2}))?", text)
     if match:
         second = match.group(6)
         return f"{match.group(1)}-{match.group(2)}-{match.group(3)} {match.group(4)}:{match.group(5)}" + (
@@ -8118,7 +8118,7 @@ def _datetime_from_ledger_atom(value: str) -> datetime | None:
     text = str(value or "").strip().lower()
     if text.startswith("v_"):
         text = text[2:]
-    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})_(\d{2})_(\d{2})(?:_(\d{2}))?", text)
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})[t_](\d{2})_(\d{2})(?:_(\d{2}))?", text)
     if not match:
         return None
     year, month, day, hour, minute = (int(part) for part in match.groups()[:5])
