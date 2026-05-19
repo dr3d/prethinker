@@ -459,6 +459,12 @@ Recent transfer work supports the current direction:
   delivery leaves the artifact healthy. This prepares the next layer for
   retry/consensus decisions based on compile health rather than a later audit
   script alone.
+  A three-fixture OpenRouter replay on 2026-05-19 confirmed the path can
+  improve delivery rather than only classify it: the measurement-heavy probe
+  emitted `event_measurement/4` rows and had no quantity carrier delivery
+  warning. The replay still exposed residual pressure in direct event backbone,
+  source-reference, and source-authority pairing, which keeps the next work on
+  compile-surface preservation instead of query-layer patching.
 - The same profile-admission/profile-delivery shape now covers status/state
   pressure. Point-in-time status, current condition, availability, pending
   resolution, supersession, and partial-population state must offer a direct
