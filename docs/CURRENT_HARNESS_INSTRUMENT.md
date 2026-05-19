@@ -618,6 +618,14 @@ Recent transfer work supports the current direction:
   a compile-retry or deterministic-projection candidate. In the authority
   replay, source-authority and source-claim carriers are preservation
   candidates, while the status-state carrier is still projection/retry pressure.
+- A bounded preservation-candidate builder now exists for experiments. It takes
+  the stability audit's multi-draw preservation signatures, keeps one anchor
+  compile's source-record ledger, and imports only direct facts matching those
+  volatile carrier signatures from sibling draws. On the authority replay, this
+  selected `source_attributed_claim/4` and `source_authority/3`, adding 9
+  direct facts to the anchor rather than unioning the whole compile set. This
+  is not default admission; it is a disciplined replay artifact for testing
+  whether row-level preservation can beat prompt-only retry.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
@@ -639,6 +647,7 @@ python scripts/audit_compile_surface_stability.py --compile-json <COMPILE_JSON_O
 python scripts/audit_retrieval_constrained_palette.py --boundary-plan-json <BOUNDARY_PLAN_JSON> --compile-root <COMPILE_ROOT> --registry-scope fixture --out-json tmp/retrieval_constrained_palette_audit.json --out-md tmp/retrieval_constrained_palette_audit.md
 python scripts/audit_profile_palette_prior_delivery.py --registry-json <PROFILE_REGISTRY_JSON> --compile-json <COMPILE_JSON_OR_DIR> --out-json tmp/profile_palette_prior_delivery_audit.json --out-md tmp/profile_palette_prior_delivery_audit.md
 python scripts/build_profile_palette_registry.py --compile-json <COMPILE_JSON_OR_DIR> --mode first --out-json tmp/profile_palette_registry.json --out-md tmp/profile_palette_registry.md
+python scripts/build_compile_preservation_candidate.py --stability-json tmp/compile_surface_stability.json --fixture <fixture> --compile-json <COMPILE_A.json> --compile-json <COMPILE_B.json> --out-json tmp/compile_preservation_candidate.json --out-md tmp/compile_preservation_candidate.md
 python scripts/run_domain_bootstrap_file_batch.py --fixture <name> --compile-source --compile-flat-plus-plan-passes --source-record-ledger --source-record-ledger-facts --quality-gate --quality-retry-on-hold --profile-registry tmp/profile_palette_registry.json --profile-registry-palette-prior
 ```
 
