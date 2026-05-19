@@ -241,6 +241,10 @@ Recent transfer work supports the current direction:
 - Current document QA relies on admitted predicates, deterministic source
   ledgers, selectors, and guards. Retired native compatibility adapters are
   not part of the daily path.
+- The stamp path and library-level query planner now keep retired native
+  compatibility adapters off by default. They remain available only through
+  explicit forensic opt-in, and tests that exercise those adapters opt in
+  locally rather than redefining the runtime default.
 - The native corpus is still valuable because it contains historical pressure:
   legacy residue, fixture-flavored predicates, and compile-surface gaps. Those
   are audit coordinates, not permission to restore compatibility adapters or freeze fixture
@@ -266,6 +270,10 @@ Recent transfer work supports the current direction:
   protected slot placeholder in Prolog query arguments, but legal title phrases
   such as `transfer title` are preserved as source-text needles because there
   the word is source content.
+- Compact source identifiers are no longer admitted by memorized native-prefix
+  families. Source-record metadata now uses a single `compact_identifier` kind
+  for code-like identifiers discovered by generic shape and local label context;
+  old prefix-specific kinds are treated as historical compatibility vocabulary.
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.

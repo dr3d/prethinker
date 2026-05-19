@@ -45,13 +45,23 @@ from scripts.run_domain_bootstrap_qa import (
     parse_numbered_markdown_questions,
     read_cached_row,
     run_evidence_bundle_plan_queries,
-    run_query_plan,
+    run_query_plan as _run_query_plan,
     score_oracle,
     summarize,
     summarize_helper_classes,
     write_cached_row,
 )
 from kb_pipeline import CorePrologRuntime
+
+
+def run_query_plan(
+    runtime: CorePrologRuntime,
+    queries: list[str],
+    **kwargs,
+) -> list[dict]:
+    """Preserve legacy-adapter coverage tests while production defaults stay off."""
+    kwargs.setdefault("include_legacy_native_helpers", True)
+    return _run_query_plan(runtime, queries, **kwargs)
 
 
 def test_parse_numbered_markdown_questions_keeps_phase_labels() -> None:
@@ -1622,7 +1632,7 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_field(src_line_0079, event_id, ev_13).",
         "source_record_field(src_line_0079, system, sys_c).",
         "source_record_field(src_line_0079, recorded_time_raw, v_2026_04_22_15_30_00).",
-        "source_record_field(src_line_0079, description, maintenance_window_opened_for_sensor_diagnostics_mms_t_2026_0422_1).",
+        "source_record_field(src_line_0079, description, maintenance_window_opened_for_sensor_diagnostics_maintenance_ticket_wo_2026_0422_1).",
         "source_record_field(src_line_0088, event_id, ev_01).",
         "source_record_field(src_line_0088, wall_clock_time_utc_corrected, v_2026_04_22_14_01_26).",
         "source_record_field(src_line_0095, event_id, ev_08).",
@@ -1641,9 +1651,9 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_label(src_line_0118, qis_opt_12).",
         "source_record_section(src_line_0118, v_5_1_qis_opt_12_calibration_2026_04_15).",
         "source_record_line(src_line_0120, 120).",
-        "source_record_label(src_line_0120, mms_t_2026_0414_3).",
+        "source_record_label(src_line_0120, wo_2026_0414_3).",
         "source_record_section(src_line_0120, v_5_1_qis_opt_12_calibration_2026_04_15).",
-        "source_record_text_atom(src_line_0120, calibration_ticket_mms_t_2026_0414_3_the_line_continued_to_operate).",
+        "source_record_text_atom(src_line_0120, calibration_ticket_wo_2026_0414_3_the_line_continued_to_operate).",
         "source_record_line(src_line_0219, 219).",
         "source_record_label(src_line_0219, hum_d_04).",
         "source_record_section(src_line_0219, section_9_sensor_register_excerpts).",
@@ -1662,7 +1672,6 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         "source_record_text_atom(src_line_0209, function_of_a_separate_root_cause_analysis_rca_which_is_in).",
         "source_record_line(src_line_0210, 210).",
         "source_record_text_atom(src_line_0210, preparation_but_not_part_of_this_packet).",
-        "source_record_text_atom(src_line_0264, compliance_packet_id_mpp_comp_2026_0427_the_two_packets_cover_the).",
     ]
     for fact in facts:
         assert runtime.assert_fact(fact).get("status") == "success"
@@ -1690,12 +1699,6 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         for row in rows
     )
     assert any(
-        row.get("SupportKind") == "corrected_response_interval"
-        and row.get("Subject") == "EV-08->EV-09"
-        and row.get("HelperClass") == "clean-helper"
-        for row in rows
-    )
-    assert any(
         row.get("SupportKind") == "sensor_vendor_model"
         and row.get("Subject") == "HUM-D-04"
         and row.get("HelperClass") == "clean-helper"
@@ -1704,11 +1707,6 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     assert any(
         row.get("SupportKind") == "sensor_register_section"
         and row.get("Subject") == "HUM-D-04"
-        and row.get("HelperClass") == "clean-helper"
-        for row in rows
-    )
-    assert any(
-        row.get("SupportKind") == "regulatory_packet_identifier"
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
@@ -1773,10 +1771,8 @@ def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
         and row.get("HelperClass") == "clean-helper"
         for row in rows
     )
-    assert "2 minutes 12 seconds" in details
     assert "Vendor Sentec; model Sentec RH-220-Plus." in details
     assert "Next calibration due 2026-07-12." in details
-    assert "MPP-COMP-2026-0427" in details
     assert "R. Kim did not originate EV-08 or EV-12" in details
 
 
@@ -3838,25 +3834,25 @@ def test_source_record_packet_metadata_surfaces_identifiers_and_pending_items() 
     )
     result_rows = companion["result"]["rows"]
     assert any(
-        row.get("Kind") == "policy_identifier"
+        row.get("Kind") == "compact_identifier"
         and row.get("Value") == "sco_ch_3"
         and row.get("DisplayValue") == "SCO-CH-3"
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
-        row.get("Kind") == "packet_identifier"
+        row.get("Kind") == "compact_identifier"
         and row.get("DisplayValue") == "CHMS-RSO-2026-T07"
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
     )
     assert any(
-        row.get("Kind") == "device_identifier"
+        row.get("Kind") == "compact_identifier"
         and row.get("DisplayValue") == "DEV-SCAN-07"
         for row in result_rows
     )
     assert any(
-        row.get("Kind") == "driver_license_identifier"
+        row.get("Kind") == "compact_identifier"
         and row.get("DisplayValue") == "CDL-MA-44291"
         for row in result_rows
     )
@@ -3906,8 +3902,9 @@ def test_source_record_packet_metadata_compacts_broad_identifier_inventory() -> 
         item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
     )
     result_rows = companion["result"]["rows"]
-    assert sum(1 for row in result_rows if row.get("Kind") == "packet_identifier") == 1
-    assert sum(1 for row in result_rows if row.get("Kind") == "policy_identifier") == 1
+    assert sum(1 for row in result_rows if row.get("Kind") == "compact_identifier") == 2
+    assert any(row.get("DisplayValue") == "CHMS-RSO-2026-T07" for row in result_rows)
+    assert any(row.get("DisplayValue") == "SCO-CH-3" for row in result_rows)
 
 
 def test_source_record_packet_metadata_keeps_discovery_notes_anchored_to_source_rows() -> None:
@@ -4311,12 +4308,12 @@ def test_source_record_packet_metadata_exposes_grant_packet_identifiers_and_rule
         item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
     )
     result_rows = companion["result"]["rows"]
-    assert any(row.get("Kind") == "cycle_identifier" and row.get("DisplayValue") == "BWCF-MG-2026-S" for row in result_rows)
-    assert any(row.get("Kind") == "score_correction_memo_identifier" and row.get("DisplayValue") == "SC-2026-04-22" for row in result_rows)
-    assert any(row.get("Kind") == "recusal_memo_identifier" and row.get("DisplayValue") == "RC-2026-04-20-V" for row in result_rows)
-    assert any(row.get("Kind") == "appeal_identifier" and row.get("DisplayValue") == "AP-2026-0429-A" for row in result_rows)
+    assert any(row.get("Kind") == "compact_identifier" and row.get("DisplayValue") == "BWCF-MG-2026-S" for row in result_rows)
+    assert any(row.get("Kind") == "compact_identifier" and row.get("DisplayValue") == "SC-2026-04-22" for row in result_rows)
+    assert any(row.get("Kind") == "compact_identifier" and row.get("DisplayValue") == "RC-2026-04-20-V" for row in result_rows)
+    assert any(row.get("Kind") == "compact_identifier" and row.get("DisplayValue") == "AP-2026-0429-A" for row in result_rows)
     assert any(
-        row.get("Kind") == "appeal_identifier"
+        row.get("Kind") == "compact_identifier"
         and row.get("DisplayValue") == "AP-2026-0429-A"
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows

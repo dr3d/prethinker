@@ -559,7 +559,7 @@ ADMINISTRATIVE_ROSTER_TIMELINE_CONTEXT_V1 = [
     "Administrative absence-coverage rule: when a supervisor leaves with a student, stays behind, returns, or does not return on a later day, preserve the absence window and the coverage/substitution state separately from the person's standing role.",
     "Administrative role-task rule: task assignments such as recording clipboard, first-aid duty, watch duty, escort duty, or active collection are query-bearing role rows. Preserve the task, assignee, reason if stated, and day/session scope.",
     "Administrative completion-report rule: closing reports are compact authoritative summaries. Preserve each listed incident/outcome as a separate row, including illness, injury, absence, hazard report, unresolved discrepancy, final attendance, and no-touch/no-hazard determinations.",
-    "Administrative attendance/count rule: attendance counts and exceptions need scoped rows: full trip attendance, session attendance, absent/ill/injured participants, chaperone presence, return-coach count, and final accounted-for status are different surfaces.",
+    "Administrative attendance/count rule: attendance counts and exceptions need scoped rows: full trip attendance, session attendance, absent/ill/injured participants, supervisor presence, return-transport count, and final accounted-for status are different surfaces.",
     "Administrative incident-report rule: incident reports can conflict. Preserve reporter, filing time, claim content, observed aftermath, unresolved discrepancy, and authoritative non-finding separately. Do not merge competing student reports into one objective event unless the source states a finding.",
     "Administrative direct-surface rule: for any roster-like document, emit direct membership, assignment, supervisor, version/status, change-event, count, and minimum/ratio-rule rows using the profile's current predicate palette. Do not depend on query-time roster helpers or old school-trip predicate names to recover roster state later.",
 ]
@@ -4283,7 +4283,7 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
             "roster",
             "station",
             "group assignment",
-            "return coach",
+            "return transport",
         ]
     ):
         contexts.extend(ADMINISTRATIVE_ROSTER_TIMELINE_CONTEXT_V1)

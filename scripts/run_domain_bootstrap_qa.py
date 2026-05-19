@@ -2407,7 +2407,7 @@ def run_query_plan(
     queries: list[str],
     *,
     helper_companions_enabled: bool = True,
-    include_legacy_native_helpers: bool = True,
+    include_legacy_native_helpers: bool = False,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
@@ -4578,7 +4578,7 @@ def _domain_companion_queries(
     runtime: CorePrologRuntime,
     *,
     query: str,
-    include_legacy_native_helpers: bool = True,
+    include_legacy_native_helpers: bool = False,
 ) -> list[dict[str, Any]]:
     parsed = parse_prolog_query(query)
     if parsed is None:
@@ -5452,7 +5452,7 @@ def _source_record_packet_metadata_companion(
                 "kind": "query-only-companion",
                 "note": (
                     "surfaced clean generic identifier/source-addressability metadata from admitted source_record "
-                    "ledger atoms and explicitly labeled fixture-family packet notes as candidate-helper rows"
+                    "ledger atoms plus narrowly labeled source-record notes"
                 ),
                 "trigger_predicate": predicate,
                 "original_query": query,
@@ -5650,7 +5650,7 @@ def _source_record_table_row_is_header(*, label: str, fields: dict[str, list[str
 
 def _is_source_record_metadata_identifier_kind(kind: str) -> bool:
     text = str(kind or "").strip()
-    return text == "packet_identifier" or text.endswith("_identifier")
+    return text == "compact_identifier" or text.endswith("_identifier")
 
 
 def _scope_source_record_packet_metadata_rows(
@@ -5662,7 +5662,7 @@ def _scope_source_record_packet_metadata_rows(
 ) -> list[dict[str, str]]:
     """Keep source-record metadata companions close to the asked surface.
 
-    The packet metadata companion is intentionally broad: it preserves exact
+    The source-record metadata companion is intentionally broad: it preserves exact
     structural facts from source records. Answer routing suffers when a
     role/custody/date question receives the entire packet inventory, so this
     predicate-level scoping ranks the relevant clean rows first without
@@ -5674,7 +5674,12 @@ def _scope_source_record_packet_metadata_rows(
         "physical_custodian": {"source_record_custody_location"},
         "access_authority": {"access_authority_order", "non_revocable_access_policy", "loan_amendment_effect"},
         "access_type": {"non_revocable_access_policy", "loan_amendment_effect"},
-        "external_id": {"source_record_custody_location", "loan_amendment_effect", "non_revocable_access_policy"},
+        "external_id": {
+            "source_record_custody_location",
+            "loan_amendment_effect",
+            "non_revocable_access_policy",
+            "role_holder",
+        },
         "recorded_assertion": {
             "recorded_assertion_not_finding",
             "asserted_event_date",
@@ -6241,43 +6246,47 @@ def _unruled_motion_value(text_atom: str) -> str:
 
 def _metadata_kind_for_atom(atom: str) -> str:
     text = str(atom or "").strip().lower()
-    if re.fullmatch(r"chms_rso_\d{4}_t\d+", text):
-        return "packet_identifier"
-    if re.fullmatch(r"chps_of_\d+", text) or re.fullmatch(r"sco_ch_\d+", text):
-        return "policy_identifier"
-    if re.fullmatch(r"dev_scan_\d+", text):
-        return "device_identifier"
-    if re.fullmatch(r"cdl_ma_\d+", text):
-        return "driver_license_identifier"
-    if re.fullmatch(r"ar_\d{4}_\d+", text):
-        return "accommodation_identifier"
-    if re.fullmatch(r"cn_\d{4}_\d{2}_\d{2}", text):
-        return "correction_notice_identifier"
-    if re.fullmatch(r"bwcf_mg_\d{4}_s", text):
-        return "cycle_identifier"
-    if re.fullmatch(r"bwcf_cp_\d{4}", text):
-        return "procedure_manual_identifier"
-    if re.fullmatch(r"sc_\d{4}_\d{2}_\d{2}", text):
-        return "score_correction_memo_identifier"
-    if re.fullmatch(r"rc_\d{4}_\d{2}_\d{2}_[a-z]", text):
-        return "recusal_memo_identifier"
-    if re.fullmatch(r"ap_\d{4}_\d{4}_[a-z]", text):
-        return "appeal_identifier"
-    if re.fullmatch(r"mpp_l4_inc_\d{4}_\d{4}", text):
-        return "packet_identifier"
-    if re.fullmatch(r"mpp_comp_\d{4}_\d{4}", text):
-        return "regulatory_packet_identifier"
-    if re.fullmatch(r"mms_t_\d{4}_\d{4}_\d+", text):
-        return "maintenance_ticket_identifier"
-    if re.fullmatch(r"lab_\d{4}_\d{4}_s\d+", text):
-        return "lab_sample_identifier"
-    if re.fullmatch(r"qhp_\d+", text):
-        return "procedure_identifier"
-    if re.fullmatch(r"b_\d{4}_\d{4}_\d+", text):
-        return "batch_identifier"
-    if re.fullmatch(r"(?:hum_d|qis_opt|dry_dl)_\d+", text):
-        return "sensor_identifier"
+    if _is_generic_source_metadata_identifier(text):
+        return "compact_identifier"
     return ""
+
+
+def _is_generic_source_metadata_identifier(atom: str) -> bool:
+    text = str(atom or "").strip().lower().strip("_")
+    if not text or text.startswith(("fixture_id_", "src_line_", "source_record_", "v_")):
+        return False
+    if re.fullmatch(r"(?:v_)?\d{4}_\d{2}_\d{2}(?:_\d{2}_\d{2}(?:_\d{2})?)?", text):
+        return False
+    tokens = [token for token in text.split("_") if token]
+    if len(tokens) < 2 or len(tokens) > 8:
+        return False
+    if set(tokens) & {
+        "appeal",
+        "as",
+        "badge",
+        "cycle",
+        "date",
+        "driver",
+        "handheld",
+        "identifier",
+        "is",
+        "license",
+        "logged",
+        "manual",
+        "memo",
+        "on",
+        "packet",
+        "records",
+        "scanner",
+    }:
+        return False
+    has_alpha = any(re.search(r"[a-z]", token) for token in tokens)
+    has_digit = any(re.search(r"\d", token) for token in tokens)
+    if not (has_alpha and has_digit):
+        return False
+    if any(token in {"section", "chapter", "line", "row", "heading"} for token in tokens):
+        return False
+    return True
 
 
 def _source_record_discovery_note(text_atom: str) -> dict[str, str] | None:
@@ -6954,98 +6963,68 @@ def _display_source_record_section_label(section_atom: str) -> str:
 
 def _metadata_tokens_from_text_atom(text_atom: str) -> list[str]:
     text = str(text_atom or "").lower()
-    patterns = [
-        r"chms_rso_\d{4}_t\d+",
-        r"chps_of_\d+",
-        r"sco_ch_\d+",
-        r"dev_scan_\d+",
-        r"cdl_ma_\d+",
-        r"ar_\d{4}_\d+",
-        r"cn_\d{4}_\d{2}_\d{2}",
-        r"bwcf_mg_\d{4}_s",
-        r"bwcf_cp_\d{4}",
-        r"sc_\d{4}_\d{2}_\d{2}",
-        r"rc_\d{4}_\d{2}_\d{2}_[a-z]",
-        r"ap_\d{4}_\d{4}_[a-z]",
-        r"mpp_l4_inc_\d{4}_\d{4}",
-        r"mpp_comp_\d{4}_\d{4}",
-        r"mms_t_\d{4}_\d{4}_\d+",
-        r"lab_\d{4}_\d{4}_s\d+",
-        r"qhp_\d+",
-        r"b_\d{4}_\d{4}_\d+",
-        r"(?:hum_d|qis_opt|dry_dl)_\d+",
-    ]
     out: list[str] = []
-    for pattern in patterns:
-        out.extend(re.findall(pattern, text))
+    context_labels = (
+        "packet_id",
+        "cycle_id",
+        "correction_memo",
+        "recusal_memo",
+        "procedure_manual",
+        "ticket",
+        "license",
+        "scanner",
+        "device",
+        "sample",
+        "batch",
+        "identifier",
+        "id",
+        "asset_tag",
+        "seal",
+        "order",
+        "permit",
+        "docket",
+        "source",
+        "lab",
+    )
+    for match in re.finditer(
+        r"(?:^|_)(?P<identifier>[a-z]{1,8}_\d{4}_\d{2,8}(?:_[a-z])?)(?:_|$)",
+        text,
+    ):
+        out.append(_trim_metadata_identifier_candidate(match.group("identifier").strip("_")))
+    for match in re.finditer(
+        r"(?:^|_)(?:" + "|".join(re.escape(label) for label in context_labels) + r")_(?P<identifier>[a-z][a-z0-9]*(?:_[a-z0-9]+){1,7})(?:_|$)",
+        text,
+    ):
+        out.append(_trim_metadata_identifier_candidate(match.group("identifier").strip("_")))
+    for match in re.finditer(
+        r"(?:^|_)(?P<identifier>[a-z]{1,10}(?:_[a-z0-9]{1,12}){1,6}_(?:\d{2,8}|t\d+|s\d+)(?:_[a-z0-9]{1,8}){0,3})(?:_|$)",
+        text,
+    ):
+        out.append(_trim_metadata_identifier_candidate(match.group("identifier").strip("_")))
+    out = [value for value in out if _is_generic_source_metadata_identifier(value)]
     return _dedupe_str(out)
+
+
+def _trim_metadata_identifier_candidate(value: str) -> str:
+    tokens = [token for token in str(value or "").strip("_").split("_") if token]
+    if not tokens:
+        return ""
+    out: list[str] = []
+    seen_digit = False
+    for token in tokens:
+        has_digit = bool(re.search(r"\d", token))
+        if seen_digit and not has_digit and len(token) > 1:
+            break
+        out.append(token)
+        if has_digit:
+            seen_digit = True
+    return "_".join(out)
 
 
 def _display_source_atom(atom: str) -> str:
     text = str(atom or "").strip().lower()
-    match = re.fullmatch(r"chms_rso_(\d{4})_t(\d+)", text)
-    if match:
-        return f"CHMS-RSO-{match.group(1)}-T{match.group(2).zfill(2)}"
-    match = re.fullmatch(r"chps_of_(\d+)", text)
-    if match:
-        return f"CHPS-OF-{match.group(1)}"
-    match = re.fullmatch(r"sco_ch_(\d+)", text)
-    if match:
-        return f"SCO-CH-{match.group(1)}"
-    match = re.fullmatch(r"dev_scan_(\d+)", text)
-    if match:
-        return f"DEV-SCAN-{match.group(1).zfill(2)}"
-    match = re.fullmatch(r"cdl_ma_(\d+)", text)
-    if match:
-        return f"CDL-MA-{match.group(1)}"
-    match = re.fullmatch(r"ar_(\d{4})_(\d+)", text)
-    if match:
-        return f"AR-{match.group(1)}-{match.group(2)}"
-    match = re.fullmatch(r"cn_(\d{4})_(\d{2})_(\d{2})", text)
-    if match:
-        return f"CN-{match.group(1)}-{match.group(2)}-{match.group(3)}"
-    match = re.fullmatch(r"bwcf_mg_(\d{4})_s", text)
-    if match:
-        return f"BWCF-MG-{match.group(1)}-S"
-    match = re.fullmatch(r"bwcf_cp_(\d{4})", text)
-    if match:
-        return f"BWCF-CP-{match.group(1)}"
-    match = re.fullmatch(r"sc_(\d{4})_(\d{2})_(\d{2})", text)
-    if match:
-        return f"SC-{match.group(1)}-{match.group(2)}-{match.group(3)}"
-    match = re.fullmatch(r"rc_(\d{4})_(\d{2})_(\d{2})_([a-z])", text)
-    if match:
-        return f"RC-{match.group(1)}-{match.group(2)}-{match.group(3)}-{match.group(4).upper()}"
-    match = re.fullmatch(r"ap_(\d{4})_(\d{4})_([a-z])", text)
-    if match:
-        return f"AP-{match.group(1)}-{match.group(2)}-{match.group(3).upper()}"
-    match = re.fullmatch(r"mpp_l4_inc_(\d{4})_(\d{4})", text)
-    if match:
-        return f"MPP-L4-INC-{match.group(1)}-{match.group(2)}"
-    match = re.fullmatch(r"mpp_comp_(\d{4})_(\d{4})", text)
-    if match:
-        return f"MPP-COMP-{match.group(1)}-{match.group(2)}"
-    match = re.fullmatch(r"mms_t_(\d{4})_(\d{4})_(\d+)", text)
-    if match:
-        return f"MMS-T-{match.group(1)}-{match.group(2)}-{match.group(3)}"
-    match = re.fullmatch(r"lab_(\d{4})_(\d{4})_s(\d+)", text)
-    if match:
-        return f"LAB-{match.group(1)}-{match.group(2)}-S{match.group(3)}"
-    match = re.fullmatch(r"qhp_(\d+)", text)
-    if match:
-        return f"QHP-{match.group(1)}"
-    match = re.fullmatch(r"b_(\d{4})_(\d{4})_(\d+)", text)
-    if match:
-        return f"B-{match.group(1)}-{match.group(2)}-{match.group(3)}"
-    match = re.fullmatch(r"hum_d_(\d+)", text)
-    if match:
-        return f"HUM-D-{match.group(1).zfill(2)}"
-    match = re.fullmatch(r"qis_opt_(\d+)", text)
-    if match:
-        return f"QIS-OPT-{match.group(1)}"
-    match = re.fullmatch(r"dry_dl_(\d+)", text)
-    if match:
-        return f"DRY-DL-{match.group(1).zfill(2)}"
+    if _is_generic_source_metadata_identifier(text):
+        return "-".join(part.upper() for part in text.split("_") if part)
     match = re.fullmatch(r"([a-z])_(\d+)", text)
     if match:
         return f"{match.group(1).upper()}-{match.group(2)}"
@@ -7361,8 +7340,7 @@ def _authority_custody_companion(
                 "kind": "query-only-companion",
                 "note": (
                     "derived archive authority/custody support, labeling generic admitted-predicate "
-                    "joins as clean-helper rows and older fixture-family source/text recognizers "
-                    "as candidate-helper rows"
+                    "joins as clean rows and older source-text recognizers as tentative rows"
                 ),
                 "trigger_predicate": predicate,
             },
@@ -7798,7 +7776,6 @@ def _industrial_sensor_companion(
         "event_timestamp",
         "evidence_missing",
         "operator_note",
-        "packet_identifier",
         "procedure_identifier",
         "sensor_certified_scope",
         "sensor_id",
@@ -7848,10 +7825,21 @@ def _industrial_sensor_companion(
         for row in sensor_rows
         if str(row.get("Sensor", "")).strip()
     }
-    if not any(
-        token in " ".join(text_by_row.values())
-        for token in ["hum_d_04", "qis_opt_12", "dry_dl_04", "mpp_comp_2026_0427", "ev_08"]
-    ) and not any(_field_value(fields, "event_id").startswith("ev_") for fields in source_fields.values()):
+    text_corpus = " ".join(text_by_row.values()).lower()
+    has_event_fields = any(_field_value(fields, "event_id") for fields in source_fields.values())
+    has_sensor_or_instrument_context = bool(sensor_ids) or any(
+        marker in text_corpus
+        for marker in (
+            "calibration",
+            "corrected_time",
+            "corrected_timestamp",
+            "recorded_time",
+            "sensor",
+            "system_time",
+            "wall_clock",
+        )
+    )
+    if not has_event_fields and not has_sensor_or_instrument_context:
         return None
 
     out_rows: list[dict[str, str]] = []
@@ -7970,7 +7958,13 @@ def _industrial_sensor_companion(
     for event_id, event_row in sorted(raw_events.items(), key=lambda item: _event_sort_key(item[0])):
         description = event_row.get("description", "")
         source_row = event_row.get("source_row", "")
-        for batch_id in re.findall(r"b_\d{4}_\d{4}_\d+", description):
+        for batch_match in re.finditer(
+            r"(?:^|_)batch_(?P<identifier>[a-z][a-z0-9]*(?:_[a-z0-9]+){1,7})(?:_|$)",
+            description,
+        ):
+            batch_id = _trim_metadata_identifier_candidate(batch_match.group("identifier"))
+            if not _is_generic_source_metadata_identifier(batch_id):
+                continue
             add(
                 "event_batch_identifier",
                 _display_event_id(event_id),
@@ -7978,29 +7972,19 @@ def _industrial_sensor_companion(
                 f"{_display_event_id(event_id)} description includes batch {_display_source_atom(batch_id)}.",
                 source_row,
             )
-        for ticket_id in re.findall(r"mms_t_\d{4}_\d{4}_\d+", description):
+        for ticket_match in re.finditer(
+            r"(?:^|_)(?:ticket|maintenance_ticket)_(?P<identifier>[a-z][a-z0-9]*(?:_[a-z0-9]+){1,7})(?:_|$)",
+            description,
+        ):
+            ticket_id = _trim_metadata_identifier_candidate(ticket_match.group("identifier"))
+            if not _is_generic_source_metadata_identifier(ticket_id):
+                continue
             add(
                 "event_maintenance_ticket",
                 _display_event_id(event_id),
                 _display_source_atom(ticket_id),
                 f"{_display_event_id(event_id)} description includes maintenance ticket {_display_source_atom(ticket_id)}.",
                 source_row,
-            )
-
-    for start_event, end_event, support_kind in [
-        ("ev_08", "ev_09", "corrected_response_interval"),
-        ("ev_10", "ev_14", "line_stop_duration"),
-    ]:
-        start_time = corrected_events.get(start_event, {}).get("time", "")
-        end_time = corrected_events.get(end_event, {}).get("time", "")
-        duration = _duration_between_atoms(start_time, end_time)
-        if duration:
-            add(
-                support_kind,
-                f"{_display_event_id(start_event)}->{_display_event_id(end_event)}",
-                duration,
-                f"{_display_event_id(start_event)} {_display_datetime_atom(start_time)} to {_display_event_id(end_event)} {_display_datetime_atom(end_time)} = {duration}",
-                corrected_events.get(start_event, {}).get("source_row", ""),
             )
 
     for source_row, labels in sorted(labels_by_row.items()):
@@ -8048,8 +8032,9 @@ def _industrial_sensor_companion(
                     f"Next calibration due {_display_datetime_atom(due_date)}.",
                     source_row,
                 )
-            ticket_match = re.fullmatch(r"mms_t_\d{4}_\d{4}_\d+", label)
-            if ticket_match and "calibration" in section_atom:
+            if _is_generic_source_metadata_identifier(label) and (
+                "ticket" in label or "ticket" in text_by_row.get(source_row, "") or "calibration" in text_by_row.get(source_row, "")
+            ) and "calibration" in section_atom:
                 add(
                     "sensor_calibration_ticket",
                     _display_source_atom(current_sensor),
@@ -8083,7 +8068,10 @@ def _industrial_sensor_companion(
             break
 
     for source_row, text_atom in text_by_row.items():
-        data_loss_match = re.search(r"buffer_overflow_on_(?P<system>dry_dl_\d+)_confirmed.*no_recovery", text_atom)
+        data_loss_match = re.search(
+            r"buffer_overflow_on_(?P<system>[a-z][a-z0-9]*(?:_[a-z0-9]+){1,5})_confirmed.*no_recovery",
+            text_atom,
+        )
         if data_loss_match:
             system = _display_source_atom(data_loss_match.group("system"))
             add(
@@ -8121,27 +8109,6 @@ def _industrial_sensor_companion(
                     source_row,
                 )
                 operator_origin_clean_added = True
-        if (
-            "of_ev_08_or_ev_12_those_originated_from_qis_opt_12_automatic_flagging" in text_atom
-            and not operator_origin_clean_added
-        ):
-            add_candidate(
-                "operator_not_originating_events",
-                "R. Kim",
-                "EV-08, EV-12",
-                "R. Kim did not originate EV-08 or EV-12; those originated from QIS-OPT-12 automatic flagging.",
-                source_row,
-            )
-        packet_match = re.search(r"compliance_packet_id_(?P<packet>mpp_comp_\d{4}_\d{4})", text_atom)
-        if packet_match:
-            packet_id = _display_source_atom(packet_match.group("packet"))
-            add(
-                "regulatory_packet_identifier",
-                "regulatory_report",
-                packet_id,
-                f"Regulatory incident report packet ID {packet_id}.",
-                source_row,
-            )
         clock_authority_match = re.search(r"(?P<system>sys_[a-z0-9]+)_timestamps_are_accepted_as_wall_clock", text_atom)
         if clock_authority_match:
             system = _display_system_atom(clock_authority_match.group("system"))
@@ -8236,8 +8203,7 @@ def _industrial_sensor_companion(
                 "kind": "query-only-companion",
                 "note": (
                     "derived clean raw-event/corrected-timeline support from admitted "
-                    "source-record ledger rows and labeled fixture-family sensor/ticket "
-                    "recognizers as candidate-helper rows"
+                    "source-record ledger rows and generic instrument-record recognizers"
                 ),
                 "original_query": query,
                 "trigger_predicate": predicate,
@@ -14216,7 +14182,7 @@ def run_evidence_bundle_plan_queries(
     evidence_plan: dict[str, Any],
     kb_inventory: dict[str, Any],
     helper_companions_enabled: bool = True,
-    include_legacy_native_helpers: bool = True,
+    include_legacy_native_helpers: bool = False,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -14592,7 +14558,7 @@ def _run_single_goal_post_filter(
     bundle_id: str,
     purpose: str,
     helper_companions_enabled: bool = True,
-    include_legacy_native_helpers: bool = True,
+    include_legacy_native_helpers: bool = False,
 ) -> dict[str, Any]:
     predicate = str(filter_spec["predicate"])
     args = [str(arg) for arg in filter_spec["args"]]
@@ -14663,7 +14629,7 @@ def _run_source_record_contains_filter(
     bundle_id: str,
     purpose: str,
     helper_companions_enabled: bool = True,
-    include_legacy_native_helpers: bool = True,
+    include_legacy_native_helpers: bool = False,
 ) -> dict[str, Any]:
     predicate = str(filter_spec["predicate"])
     args = [str(arg) for arg in filter_spec["args"]]

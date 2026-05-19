@@ -1877,7 +1877,11 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
             {"restriction_applied", "status_at"}
         ):
             return 6.0
-    if asks_count and "students" in question and ("field trip" in question or "return coach" in question):
+    if (
+        asks_count
+        and any(marker in question for marker in ("student", "participant", "attendee"))
+        and any(marker in question for marker in ("attendance", "attended", "final", "return", "trip", "session"))
+    ):
         if "attendance_final" in direct_predicates:
             return 9.0
         if "attendance_final" in predicates:
@@ -1890,14 +1894,13 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
     if (
         "why" in question
         and ("leave" in question or "depart" in question)
-        and "jostad" in question
         and "event_occurs" in direct_predicates
         and any("emergency" in atom for atom in sample_atoms)
     ):
         return 7.0
     if (
         "group designations" in question
-        and "beach survey" in question
+        and any(marker in question for marker in ("maintained", "changed", "during", "session", "event"))
         and predicates.issuperset({"event_occurs", "group_membership"})
         and "event_occurs" in direct_predicates
         and 0 < direct_rows <= 25

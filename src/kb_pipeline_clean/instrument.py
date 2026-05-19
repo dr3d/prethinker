@@ -61,7 +61,7 @@ def instrument_manifest() -> dict[str, Any]:
             {
                 "name": "story_world_rule_activation_transfer",
                 "command": "python scripts/summarize_rule_activation_transfer.py --comparison <label=mode_comparison.json>",
-                "reason": "Summarizes Sable/Avalon-style activation rescues, regressions, and volatile rows.",
+                "reason": "Summarizes rule-activation transfer rescues, regressions, and volatile rows.",
                 "reads": ["rule activation mode-comparison JSON"],
                 "writes": ["tmp/rule_activation_transfer/*.json", "tmp/rule_activation_transfer/*.md"],
             },
