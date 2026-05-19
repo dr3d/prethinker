@@ -451,6 +451,14 @@ Recent transfer work supports the current direction:
   for `event_measurement/4`: the candidate carrier existed, but only
   `event_description` rows were emitted. That makes this a delivery/preservation
   problem, not merely a vocabulary problem.
+- Profile delivery telemetry now carries that distinction inside the compile
+  artifact. When profile admission offers a direct quantity carrier and the
+  source has quantity-event pressure, `profile_delivery` records whether emitted
+  facts actually populated the carrier. Missing delivery raises
+  `quantity_carrier_offered_but_undelivered` in compile health; successful
+  delivery leaves the artifact healthy. This prepares the next layer for
+  retry/consensus decisions based on compile health rather than a later audit
+  script alone.
 - Source-reference pressure now has the same audit shape.
   `source_attributed_claim_contract` detects source-record prose that attributes
   a status, finding, authority, or unresolved claim to a memo, report, statement,

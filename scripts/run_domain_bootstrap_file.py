@@ -2970,11 +2970,23 @@ def _attach_profile_admission_report(
         return
     report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
     source_compile["profile_admission"] = report
-    warning_flags = [
+    delivery_report = _profile_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=parsed_profile,
+        admission_report=report,
+    )
+    source_compile["profile_delivery"] = delivery_report
+    admission_warning_flags = [
         str(item.get("class", "")).strip()
         for item in report.get("findings", [])
         if isinstance(item, dict) and str(item.get("class", "")).strip()
     ]
+    delivery_warning_flags = [
+        str(item.get("class", "")).strip()
+        for item in delivery_report.get("findings", [])
+        if isinstance(item, dict) and str(item.get("class", "")).strip()
+    ]
+    warning_flags = admission_warning_flags + delivery_warning_flags
     if not warning_flags:
         return
     health = source_compile.get("compile_health")
@@ -2999,8 +3011,10 @@ def _attach_profile_admission_report(
         for item in health.get("unhealthy_passes", [])
         if str(item).strip()
     ] if isinstance(health.get("unhealthy_passes"), list) else []
-    if "profile_admission" not in unhealthy_passes:
+    if admission_warning_flags and "profile_admission" not in unhealthy_passes:
         unhealthy_passes.append("profile_admission")
+    if delivery_warning_flags and "profile_delivery" not in unhealthy_passes:
+        unhealthy_passes.append("profile_delivery")
     health["flag_counts"] = flag_counts
     health["unhealthy_passes"] = unhealthy_passes
     health["unhealthy_pass_count"] = len(unhealthy_passes)
@@ -3008,6 +3022,65 @@ def _attach_profile_admission_report(
         health["verdict"] = "warning"
         health["recommendation"] = "run_qa_but_treat_thin_lens_results_as_diagnostic"
     source_compile["compile_health"] = health
+
+
+def _profile_delivery_report(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    admission_report: dict[str, Any],
+) -> dict[str, Any]:
+    """Check whether offered carrier predicates were actually emitted.
+
+    Profile admission answers "does the palette have a suitable shape?" This
+    report answers the next compile-stability question: when the source has
+    quantity-event pressure and the palette offers a direct carrier, did emitted
+    facts populate any of those carrier predicates?
+    """
+
+    candidates = parsed_profile.get("candidate_predicates")
+    candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    quantity_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_quantity_event_unit(item)
+    ]
+    carrier_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
+    emitted_predicates = {
+        parsed[0]
+        for fact in _clause_list(source_compile.get("facts", []))
+        if (parsed := _parse_fact_clause(fact)) is not None and not parsed[0].startswith("source_record")
+    }
+    delivered_carriers = sorted(carrier_predicates & emitted_predicates)
+    source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
+    quantity_signal_count = (
+        int(source_signal_counts.get("quantity_event") or 0)
+        if isinstance(source_signal_counts, dict)
+        else 0
+    )
+    findings: list[dict[str, Any]] = []
+    if quantity_signal_count and quantity_carriers and not delivered_carriers:
+        findings.append(
+            {
+                "class": "quantity_carrier_offered_but_undelivered",
+                "source_signal_count": quantity_signal_count,
+                "offered_carriers": quantity_carriers[:12],
+                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+            }
+        )
+    return {
+        "schema_version": "profile_delivery_contracts_v1",
+        "source_signal_counts": {
+            "quantity_event": quantity_signal_count,
+        },
+        "offered_carriers": {
+            "quantity_event": quantity_carriers[:12],
+        },
+        "delivered_carriers": {
+            "quantity_event": delivered_carriers[:12],
+        },
+        "findings": findings,
+    }
 
 
 def _profile_bootstrap_admission_context(
@@ -3901,6 +3974,7 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
     lines.extend([f"- {item}" for item in risks] or ["- none"])
     if compile_record:
         profile_admission = compile_record.get("profile_admission") if isinstance(compile_record.get("profile_admission"), dict) else {}
+        profile_delivery = compile_record.get("profile_delivery") if isinstance(compile_record.get("profile_delivery"), dict) else {}
         profile_admission_lines: list[str] = []
         if profile_admission:
             findings = profile_admission.get("findings", []) if isinstance(profile_admission.get("findings"), list) else []
@@ -3921,6 +3995,27 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                         f"candidates={finding.get('candidate_count', '')}, nearby={finding.get('nearby_signatures', [])}"
                     )
             profile_admission_lines.append("")
+        profile_delivery_lines: list[str] = []
+        if profile_delivery:
+            delivery_findings = profile_delivery.get("findings", []) if isinstance(profile_delivery.get("findings"), list) else []
+            profile_delivery_lines.extend(
+                [
+                    "### Profile Delivery",
+                    "",
+                    f"- Schema: `{profile_delivery.get('schema_version', '')}`",
+                    f"- Source signals: `{profile_delivery.get('source_signal_counts', {})}`",
+                    f"- Offered carriers: `{profile_delivery.get('offered_carriers', {})}`",
+                    f"- Delivered carriers: `{profile_delivery.get('delivered_carriers', {})}`",
+                    f"- Finding count: `{len(delivery_findings)}`",
+                ]
+            )
+            for finding in delivery_findings:
+                if isinstance(finding, dict):
+                    profile_delivery_lines.append(
+                        f"- `{finding.get('class', '')}`: source_signals={finding.get('source_signal_count', '')}, "
+                        f"offered={finding.get('offered_carriers', [])}, emitted_sample={finding.get('emitted_predicate_sample', [])}"
+                    )
+            profile_delivery_lines.append("")
         contribution_lines = [
             "| "
             + " | ".join(
@@ -3955,6 +4050,7 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 f"- Semantic progress action: `{(((compile_record.get('compile_health') or {}).get('semantic_progress') or {}).get('recommended_action', ''))}`",
                 "",
                 *profile_admission_lines,
+                *profile_delivery_lines,
                 "### Surface Contribution",
                 "",
                 "| Pass | Unique | Duplicates | Facts | Rules | Queries | Health | Purpose |",

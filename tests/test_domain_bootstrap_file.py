@@ -1107,6 +1107,98 @@ def test_profile_admission_warning_updates_compile_health() -> None:
     assert "profile_admission" in health["unhealthy_passes"]
 
 
+def test_profile_delivery_flags_offered_quantity_carrier_without_emitted_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "event_description(ev_01, feed_rate_increased_to_18_kg_min).",
+            "event_description(ev_02, setpoint_changed_from_480_k_to_495_k).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="instrument readings and measurement events",
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "event_measurement/4",
+                    "args": ["event_id", "measure", "value", "unit"],
+                },
+            ]
+        },
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["findings"][0]["class"] == "quantity_carrier_offered_but_undelivered"
+    assert delivery["offered_carriers"]["quantity_event"] == ["event_measurement/4"]
+    assert delivery["delivered_carriers"]["quantity_event"] == []
+    health = source_compile["compile_health"]
+    assert health["verdict"] == "warning"
+    assert health["flag_counts"]["quantity_carrier_offered_but_undelivered"] == 1
+    assert "profile_delivery" in health["unhealthy_passes"]
+    assert "profile_admission" not in health["unhealthy_passes"]
+
+
+def test_profile_delivery_accepts_emitted_quantity_carrier_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 2,
+        "facts": [
+            "event_measurement(ev_01, feed_rate, 18, kg_min).",
+            "event_measurement(ev_02, setpoint, 495, k).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="instrument readings and measurement events",
+        source_text=(
+            "EV-01 2026-04-22 feed rate increased to 18 kg min.\n"
+            "EV-02 2026-04-22 setpoint changed from 480 k to 495 k."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "event_measurement/4",
+                    "args": ["event_id", "measure", "value", "unit"],
+                },
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["quantity_event"] == ["event_measurement"]
+    assert source_compile["compile_health"]["verdict"] == "healthy"
+
+
 def test_profile_admission_warning_is_operational_context_bounded() -> None:
     source_compile = {
         "unique_fact_count": 5,
