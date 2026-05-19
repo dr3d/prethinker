@@ -371,6 +371,24 @@ def test_audit_compile_surface_invariants_passes_quantity_value_delivery_surface
     assert contract["direct_predicates"] == ["application_count", "review_threshold"]
 
 
+def test_audit_compile_surface_invariants_accepts_specific_two_slot_quantity_predicate(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, lot_alpha_initial_count_40_plants).",
+            "lot_initial_count(lot_alpha, 40).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["direct_predicates"] == ["lot_initial_count"]
+
+
 def test_audit_compile_surface_invariants_ignores_source_line_numbers_as_quantity_values(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

@@ -1045,7 +1045,7 @@ def _is_direct_quantity_value_row(row: dict[str, Any]) -> bool:
     if predicate.startswith("source_record") or _is_vague_wrapper_row(row):
         return False
     args = [str(arg) for arg in row.get("args", [])]
-    if len(args) < 3 or not _row_has_numeric_value(row):
+    if len(args) < 2 or not _row_has_numeric_value(row):
         return False
     tokens = _tokens_for_row(row)
     quantity_terms = {
@@ -1076,11 +1076,14 @@ def _is_direct_quantity_value_row(row: dict[str, Any]) -> bool:
         "measurement_value",
         "metric_observation",
     }
-    if predicate in known_quantity_predicates:
+    if predicate in known_quantity_predicates and len(args) >= 3:
         return True
-    if not (tokens & quantity_terms or any(term in predicate for term in quantity_terms)):
+    predicate_tokens = set(TOKEN_RE.findall(predicate))
+    if not (predicate_tokens & quantity_terms or any(term in predicate for term in quantity_terms)):
         return False
     non_value_args = [arg for arg in args if not _text_has_numeric_value(arg)]
+    if len(args) == 2 and (predicate_tokens & quantity_terms or any(term in predicate for term in quantity_terms)):
+        return len(non_value_args) >= 1
     return len(non_value_args) >= 2
 
 
@@ -1104,7 +1107,18 @@ def _arg_has_quantity_numeric_value(arg: str) -> bool:
 def _text_has_numeric_value(text: str) -> bool:
     lowered = str(text or "").lower()
     tokens = set(TOKEN_RE.findall(lowered))
-    return bool(re.search(r"\b\d+(?:[._]\d+)?\b", lowered) or tokens & NUMBER_WORDS)
+    return bool(
+        re.search(r"\b\d+(?:[._]\d+)?\b", lowered)
+        or re.search(
+            r"(?:amount|balance|count|cost|duration|hour|hours|days|second|seconds|limit|measure|measurement|metric|minimum|maximum|percent|quantity|rate|reading|score|threshold|total|value|kg|cm|mm|meters)_[0-9]",
+            lowered,
+        )
+        or re.search(
+            r"[0-9]_(?:amount|count|cost|hours|days|seconds|kg|cm|mm|meters|percent|score|value)",
+            lowered,
+        )
+        or tokens & NUMBER_WORDS
+    )
 
 
 def _audit_participant_statement_status_contract(

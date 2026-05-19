@@ -443,8 +443,8 @@ Recent transfer work supports the current direction:
   quantities, rates, durations, thresholds, or monetary values that remain only
   in source-record text or broad wrappers instead of admitted rows with subject,
   value, and measure/unit slots. A calibration pass over the latest native
-  compile artifacts found `23` passes, `16` missing direct quantity delivery,
-  `6` shallow wrapper-only cases, and `11` not applicable after stripping
+  compile artifacts found `22` passes, `15` missing direct quantity delivery,
+  `9` shallow wrapper-only cases, and `10` not applicable after stripping
   source-row coordinates such as headings, labels, and table-row numbers. That
   gives the next pressure a compile-side meter without adding fixture-specific
   predicates.
