@@ -118,3 +118,8 @@ def test_source_coordinate_hint_recognizes_according_to_and_per() -> None:
         utterance="Per the signed order, what activity may continue?",
         kb_inventory=kb_inventory,
     )[-1] == "source_record_text_atom(SourceRow, TextAtom)."
+
+    assert _source_coordinate_hint_queries(
+        utterance="What is the packet ID associated with this source within the packet?",
+        kb_inventory=kb_inventory,
+    )[3] == "source_record_field(SourceRow, Field, Value)."

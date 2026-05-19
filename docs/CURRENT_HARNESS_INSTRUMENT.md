@@ -257,13 +257,14 @@ Recent transfer work supports the current direction:
   zero compatibility rows, zero writes, and zero residual query fallback
   signals. This is query routing, not a license to leave recurring answer
   distinctions stranded in source text forever.
-- Source-coordinate wording now treats `according to ...` and `per the ...` as
-  explicit requests for deterministic source addressability. On the 17-row
-  native source-reference stranded slice, the query-only replay moved from
-  `7/1/9` to `12/0/5` on the same frozen compile artifacts, with zero
-  compatibility rows. The remaining misses are stronger evidence for direct
-  compile-surface or join repairs, because the cheap source-coordinate route
-  has already been tried.
+- Source-coordinate wording now treats `according to ...`, `per the ...`,
+  source-within-packet, packet-id, ticket, and reported-by phrasing as explicit
+  requests for deterministic source addressability. On the 17-row native
+  source-reference stranded slice, query-only replay moved from `7/1/9` to
+  `16/0/1` on the same frozen compile artifacts, with zero compatibility rows.
+  The one remaining miss asks for a title-transfer requirement from an
+  authority memo, which is stronger evidence for a direct rule surface than for
+  broader source-coordinate routing.
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.

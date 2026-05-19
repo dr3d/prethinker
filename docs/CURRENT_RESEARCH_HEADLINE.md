@@ -42,8 +42,9 @@ The most recent focused replays show why the next work stays layer-specific:
   query routing exposed source-attribution carriers, event-description rows,
   and current-state source ledgers.
 - A native 17-row source-reference stranded slice moved from `7/1/9` to
-  `12/0/5` after source-coordinate wording recognized `according to` and
-  `per the` as addressability requests.
+  `16/0/1` after source-coordinate wording recognized `according to`,
+  `per the`, source-within-packet, packet-id, ticket, and reported-by phrasing
+  as addressability requests.
 - Both replays used frozen compile artifacts and delivered zero compatibility
   rows, so they are query-layer evidence rather than compile-stamp evidence.
 
