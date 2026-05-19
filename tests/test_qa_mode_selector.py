@@ -1012,14 +1012,14 @@ def test_snapshot_state_guard_falls_back_to_sampler_state_surface() -> None:
     assert selected["selection_source"] == "hybrid_structural"
 
 
-def test_clear_sample_clock_snapshot_focus_prefers_pause_helper_surface() -> None:
+def test_clear_sample_clock_snapshot_focus_prefers_interval_duration_surface() -> None:
     row = {
         "id": "q029",
         "question": "What was the state of the clear-sample clock at 2026-05-01 10:00 according to the snapshot table, and how many hours had been counted?",
         "modes": [
             _mode_with_predicates("entity", ["event_description", "event_timestamp", "sampler_state"], rows=64, relaxed=True),
             {
-                "mode": "pause_helper",
+                "mode": "interval_duration_surface",
                 "query_evidence": {
                     "executed_results": [
                         {
@@ -1045,14 +1045,14 @@ def test_clear_sample_clock_snapshot_focus_prefers_pause_helper_surface() -> Non
 
     selected = hybrid_selector(
         row=row,
-        mode_labels=["entity", "pause_helper"],
+        mode_labels=["entity", "interval_duration_surface"],
         margin=1,
         min_score=4,
         fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
         guard_disable_regex=compile_guard_disable_regex("clear-sample clock snapshot question"),
     )
 
-    assert selected["selected_mode"] == "pause_helper"
+    assert selected["selected_mode"] == "interval_duration_surface"
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
     assert "disabled_guard_reasons" not in selected
@@ -1069,13 +1069,13 @@ def test_lift_notification_clock_begin_focus_prefers_trigger_timestamp_surface()
                 ["deadline_trigger", "event_as_logged", "deadline_original", "deadline_adjusted"],
                 rows=2,
             ),
-            _mode_with_predicates("pause_helper", ["deadline_trigger", "event_as_logged", "deadline_rule"], rows=2),
+            _mode_with_predicates("interval_duration_surface", ["deadline_trigger", "event_as_logged", "deadline_rule"], rows=2),
         ],
     }
 
     selected = hybrid_selector(
         row=row,
-        mode_labels=["memory_ledger_combo", "parallel", "pause_helper"],
+        mode_labels=["memory_ledger_combo", "parallel", "interval_duration_surface"],
         margin=1,
         min_score=4,
         fallback_selector=lambda *, row, mode_labels: (_ for _ in ()).throw(AssertionError("fallback called")),
@@ -1115,18 +1115,18 @@ def test_temporal_full_replay_blocker_focuses_use_answer_bearing_surfaces() -> N
             "What was the total active duration of BWN-2026-04-28-A from issuance to lift?",
             [
                 _mode_with_predicates("cold", ["event_description", "event_id"], rows=14),
-                _mode_with_predicates("pause_helper", ["notice_issued", "notice_lifted"], rows=4, relaxed=True),
+                _mode_with_predicates("interval_duration_surface", ["notice_issued", "notice_lifted"], rows=4, relaxed=True),
             ],
-            "pause_helper",
+            "interval_duration_surface",
         ),
         (
             "q018",
             "What was the total active duration of RUN-2026-04-28-B from issuance to lift?",
             [
                 _mode_with_predicates("cold", ["event_description", "event_id"], rows=28),
-                _mode_with_predicates("pause_helper", ["notice_issued", "notice_lifted"], rows=9, relaxed=True),
+                _mode_with_predicates("interval_duration_surface", ["notice_issued", "notice_lifted"], rows=9, relaxed=True),
             ],
-            "pause_helper",
+            "interval_duration_surface",
         ),
         (
             "q019",
@@ -1134,13 +1134,13 @@ def test_temporal_full_replay_blocker_focuses_use_answer_bearing_surfaces() -> N
             [
                 _mode_with_predicates("cold", ["event_corrected_from", "event_description"], rows=3),
                 _mode_with_predicates(
-                    "pause_helper",
+                    "interval_duration_surface",
                     ["clear_sample_clock_pause_support", "sampler_offline_interval"],
                     rows=25,
                     relaxed=True,
                 ),
             ],
-            "pause_helper",
+            "interval_duration_surface",
         ),
         (
             "q036",
@@ -1581,28 +1581,28 @@ def test_physical_custody_item_count_guard_is_retired() -> None:
         "question": "How many items remain in Pellico's physical custody as of 2026-04-30?",
         "modes": [
             _mode_with_predicates("parallel", ["physical_custodian"], rows=3),
-            _mode_with_predicates("authority_helper", ["archive_authority_custody_support", "physical_custody"], rows=7),
+            _mode_with_predicates("custody_authority_surface", ["archive_authority_custody_support", "physical_custody"], rows=7),
         ],
     }
 
     override = structural_specialized_answer_surface_override(
         row=row,
-        scored=structural_mode_scores(row=row, mode_labels=["parallel", "authority_helper"]),
-        mode_labels=["parallel", "authority_helper"],
+        scored=structural_mode_scores(row=row, mode_labels=["parallel", "custody_authority_surface"]),
+        mode_labels=["parallel", "custody_authority_surface"],
         structural_choice="parallel",
     )
 
     assert override is None
 
 
-def test_hybrid_selector_prefers_physical_custody_count_helper_without_guard() -> None:
+def test_hybrid_selector_prefers_physical_custody_count_surface_without_guard() -> None:
     row = {
         "id": "q022",
         "question": "How many items remain in Pellico's physical custody as of 2026-04-30?",
         "modes": [
             _mode_with_predicates("parallel", ["physical_custodian"], rows=3),
             {
-                "mode": "authority_helper",
+                "mode": "custody_authority_surface",
                 "query_evidence": {
                     "executed_results": [
                         {
@@ -1629,14 +1629,14 @@ def test_hybrid_selector_prefers_physical_custody_count_helper_without_guard() -
 
     selected = hybrid_selector(
         row=row,
-        mode_labels=["parallel", "authority_helper", "source_record_facts_v2"],
+        mode_labels=["parallel", "custody_authority_surface", "source_record_facts_v2"],
         margin=1.0,
         min_score=4.0,
         guard_disable_regex=compile_guard_disable_regex("physical-custody item-count question"),
         fallback_selector=lambda **_kwargs: (_ for _ in ()).throw(AssertionError("fallback called")),
     )
 
-    assert selected["selected_mode"] == "authority_helper"
+    assert selected["selected_mode"] == "custody_authority_surface"
     assert selected["selection_source"] == "hybrid_structural"
     assert selected["hybrid_decision"] == "structural_confident"
 
@@ -2637,7 +2637,7 @@ def test_hybrid_selector_prefers_open_item_surface_without_guard() -> None:
         "id": "q026",
         "question": "How many open items are listed at packet close?",
         "modes": [
-            _mode_with_predicates("temporal_helper_fix", ["deadline_rule", "notice_id"], rows=15),
+            _mode_with_predicates("temporal_interval_surface", ["deadline_rule", "notice_id"], rows=15),
             _mode_with_predicates("source_record", ["open_item_id", "open_item_status"], rows=3),
         ],
     }
@@ -2646,11 +2646,11 @@ def test_hybrid_selector_prefers_open_item_surface_without_guard() -> None:
     def fallback_selector(**_kwargs):
         nonlocal fallback_calls
         fallback_calls += 1
-        return {"selected_mode": "temporal_helper_fix"}
+        return {"selected_mode": "temporal_interval_surface"}
 
     selected = hybrid_selector(
         row=row,
-        mode_labels=["temporal_helper_fix", "source_record"],
+        mode_labels=["temporal_interval_surface", "source_record"],
         margin=1.0,
         min_score=4.0,
         fallback_selector=fallback_selector,
@@ -12028,7 +12028,7 @@ def test_temporary_role_guard_prefers_roster_state_role_hints() -> None:
                 },
             },
             {
-                "mode": "station_helper",
+                "mode": "station_role_surface",
                 "query_evidence": {
                     "executed_results": [
                         {"status": "success", "num_rows": 2, "predicate": "group_member"},
@@ -12043,13 +12043,13 @@ def test_temporary_role_guard_prefers_roster_state_role_hints() -> None:
 
     selected = hybrid_selector(
         row=row,
-        mode_labels=["station_role", "station_helper"],
+        mode_labels=["station_role", "station_role_surface"],
         margin=1.0,
         min_score=4.0,
         fallback_selector=lambda **_kwargs: {"selected_mode": "station_role"},
     )
 
-    assert selected["selected_mode"] == "station_helper"
+    assert selected["selected_mode"] == "station_role_surface"
     assert selected.get("specialized_guard_reason", "") == ""
 
 

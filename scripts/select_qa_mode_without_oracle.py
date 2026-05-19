@@ -3125,9 +3125,9 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         and ("run-2026-04-28-b" in question or "bwn-2026-04-28-a" in question)
         and predicates.intersection({"notice_issued", "notice_issued_at"})
         and predicates.intersection({"notice_lifted", "notice_lifted_at"})
-        and label in {"temporal_helper_fix", "pause_helper"}
+        and label in {"temporal_interval_surface", "interval_duration_surface"}
     ):
-        return 9.5 if label == "pause_helper" else 8.0
+        return 9.5 if label == "interval_duration_surface" else 8.0
     if "sampler-offline interval" in question and any(marker in question for marker in ["duration", "how long"]):
         if predicates.intersection({"clear_sample_clock_pause_support"}) and predicates.intersection(
             {"sampler_offline_interval"}
@@ -3149,7 +3149,7 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         and predicates.intersection({"deadline_original"})
         and predicates.intersection({"deadline_adjusted"})
         and predicates.intersection({"notice_issued"})
-        and label in {"parallel", "pause_helper"}
+        and label in {"parallel", "interval_duration_surface"}
     ):
         return 5.5 if label == "parallel" else 4.5
     if (
@@ -3450,7 +3450,7 @@ def structural_source_record_facts_demotion_override(
     """Prefer semantic answer surfaces over deterministic source-record fact scaffolds.
 
     The source-record-facts lane pins literal source addressability, which is useful
-    context for compilers and helpers. It should not win a primary answer-surface
+    context for compilers and deterministic query support. It should not win a primary answer-surface
     selection merely because exact source rows create a high structural score.
     """
     if not scored:
