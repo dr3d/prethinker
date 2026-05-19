@@ -520,7 +520,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "relation_contracts": [
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
-            _audit_quantity_value_delivery_contract(source_facts, direct_rows),
+            _audit_quantity_value_delivery_contract(source_facts, direct_rows, candidate_predicates),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
             _audit_status_state_scope_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
@@ -910,6 +910,7 @@ def _is_financial_structural_row(row: dict[str, Any]) -> bool:
 def _audit_quantity_value_delivery_contract(
     source_facts: list[str],
     direct_rows: list[dict[str, Any]],
+    candidate_predicates: list[str],
 ) -> dict[str, Any]:
     """Detect stranded numeric value surfaces in source-record text.
 
@@ -923,6 +924,9 @@ def _audit_quantity_value_delivery_contract(
     source_rows = _source_record_text_rows(source_facts)
     source_mentions = _quantity_value_source_mentions(source_rows)
     complete_rows = [row for row in direct_rows if _is_direct_quantity_value_row(row)]
+    candidate_carriers = sorted(
+        signature for signature in candidate_predicates if _candidate_signature_can_carry_quantity_value(signature)
+    )
     wrapper_rows = [row for row in direct_rows if _is_vague_wrapper_row(row)]
     direct_predicates = sorted({str(row["predicate"]) for row in complete_rows})
     wrapper_predicates = sorted({str(row["predicate"]) for row in wrapper_rows})
@@ -931,6 +935,8 @@ def _audit_quantity_value_delivery_contract(
         status = "not_applicable"
     elif complete_rows:
         status = "pass"
+    elif candidate_carriers:
+        status = "quantity_palette_offered_but_undelivered"
     elif wrapper_rows:
         status = "shallow_quantity_value_delivery"
     else:
@@ -946,6 +952,7 @@ def _audit_quantity_value_delivery_contract(
         "missing_keys": missing,
         "source_signal_count": len(source_mentions),
         "complete_quantity_row_count": len(complete_rows),
+        "candidate_quantity_carriers": candidate_carriers,
         "wrapper_row_count": len(wrapper_rows),
         "direct_predicates": direct_predicates,
         "wrapper_predicates": wrapper_predicates,
@@ -1038,6 +1045,40 @@ def _strip_source_record_coordinate_prefix(text: str) -> str:
         count=1,
         flags=re.IGNORECASE,
     )
+
+
+def _candidate_signature_can_carry_quantity_value(signature: str) -> bool:
+    name, _, arity_text = str(signature or "").strip().lower().partition("/")
+    try:
+        arity = int(arity_text)
+    except ValueError:
+        arity = 0
+    known = {"event_measurement", "event_quantity", "reading_value", "measurement_value", "metric_observation"}
+    if name in known:
+        return arity >= 3
+    quantity_terms = {
+        "amount",
+        "balance",
+        "count",
+        "cost",
+        "duration",
+        "limit",
+        "measure",
+        "measurement",
+        "metric",
+        "minimum",
+        "maximum",
+        "percent",
+        "quantity",
+        "rate",
+        "reading",
+        "score",
+        "threshold",
+        "total",
+        "value",
+    }
+    tokens = set(TOKEN_RE.findall(name))
+    return arity >= 2 and bool(tokens & quantity_terms or any(term in name for term in quantity_terms))
 
 
 def _is_direct_quantity_value_row(row: dict[str, Any]) -> bool:
@@ -1535,6 +1576,7 @@ def _is_vague_wrapper_row(row: dict[str, Any]) -> bool:
         "answer_detail",
         "detail",
         "event",
+        "event_description",
         "event_detail",
         "record_detail",
         "source_detail",

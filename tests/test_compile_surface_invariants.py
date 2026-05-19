@@ -350,6 +350,26 @@ def test_audit_compile_surface_invariants_detects_quantity_value_delivery_gap(tm
     assert contract["wrapper_predicates"] == ["answer_detail"]
 
 
+def test_audit_compile_surface_invariants_detects_offered_quantity_carrier_not_delivered(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, ev_01_feed_rate_increased_to_18_kg_min).",
+            "event_description(ev_01, feed_rate_increased_to_18_kg_min).",
+        ],
+        candidate_predicates=["event_description/2", "event_measurement/4"],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "quantity_palette_offered_but_undelivered"
+    assert contract["candidate_quantity_carriers"] == ["event_measurement/4"]
+    assert contract["wrapper_predicates"] == ["event_description"]
+
+
 def test_audit_compile_surface_invariants_passes_quantity_value_delivery_surface(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",
