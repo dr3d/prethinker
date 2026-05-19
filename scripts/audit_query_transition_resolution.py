@@ -2,7 +2,7 @@
 """Audit not-exact QA rows for query/transition resolution residue.
 
 This is a diagnostic audit over QA artifacts. It does not change query
-planning, compile guidance, helper delivery, or selector behavior.
+planning, compile guidance, compatibility-row delivery, or selector behavior.
 """
 
 from __future__ import annotations

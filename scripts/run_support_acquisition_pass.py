@@ -433,9 +433,9 @@ def _support_guidance_context(*, lens: str) -> list[str]:
             *common,
             "For body_fact lens, emit only assert operations using the active allowed body-fact predicates.",
             "Do not emit rules, queries, generic entity_property fallbacks, or generic rationale predicates such as support_reason/2, support_effect/2, support_tradeoff/3, support_exception/2, or support_positive_counterpart/2.",
-            "Do not treat allowed vote predicates such as supported/2 as banned generic support_* rows; if supported/2 is active, it is a source-stated body fact for vote-count helpers.",
-            "Do not reject explicit instance rows merely because the backbone also has an aggregate result. Body-fact lenses intentionally expose atomic rows needed by helper predicates and later executable rule bodies.",
-            "If the active palette can represent an explicit source-stated instance needed by a helper or rule body, emit that row even when it is also implied by a summary line.",
+            "Do not treat allowed vote predicates such as supported/2 as banned generic support_* rows; if supported/2 is active, it is a source-stated body fact for vote-count support predicates.",
+            "Do not reject explicit instance rows merely because the backbone also has an aggregate result. Body-fact lenses intentionally expose atomic rows needed by deterministic support predicates and later executable rule bodies.",
+            "If the active palette can represent an explicit source-stated instance needed by deterministic support or a rule body, emit that row even when it is also implied by a summary line.",
             "Emit no rows when the active allowed predicate palette cannot represent the source span.",
         ]
     return [
@@ -459,7 +459,7 @@ def _support_system_prompt(*, lens: str) -> str:
         return (
             base
             + "Your only job is to propose source-grounded body facts using the active allowed predicates, "
-            + "so later helper predicates and executable rule bodies can bind to explicit rows."
+            + "so later deterministic support predicates and executable rule bodies can bind to explicit rows."
         )
     return (
         base

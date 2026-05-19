@@ -468,7 +468,7 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "Complementary-relation policy" in source
     assert "Anchor-answer policy" in source
     assert "Causal-chain policy" in source
-    assert "Causal-helper policy" in source
+    assert "Causal support policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
     assert "Identifier-metadata policy" in source
@@ -2995,7 +2995,7 @@ def test_run_query_plan_dedupes_repeated_helper_companion_rows() -> None:
     assert companions[0]["result"]["num_rows"] == 3
 
 
-def test_helper_companion_row_limit_prefers_question_relevant_support_rows() -> None:
+def test_compatibility_row_limit_prefers_question_relevant_support_rows() -> None:
     results = [
         {
             "result": {
@@ -3036,7 +3036,7 @@ def test_helper_companion_row_limit_prefers_question_relevant_support_rows() -> 
             "Value": "14 days",
         }
     ]
-    assert filtered[0]["result"]["reasoning_basis"]["delivery_filter"] == "query_relevance_helper_row_budget"
+    assert filtered[0]["result"]["reasoning_basis"]["delivery_filter"] == "query_relevance_compatibility_row_budget"
 
 
 def test_helper_companion_row_limit_zero_suppresses_helper_results_only() -> None:

@@ -3,7 +3,7 @@
 This is a pre-QA readiness check. It reads domain-bootstrap compile JSON and
 asks whether generic surface families visible in the source-record ledger also
 appear as admitted non-source-record facts. The goal is to catch compile
-sparsity before spending QA/judge cycles or falling back to legacy helpers.
+sparsity before spending QA/judge cycles or falling back to legacy compatibility adapters.
 """
 
 from __future__ import annotations

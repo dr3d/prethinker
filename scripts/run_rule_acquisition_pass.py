@@ -114,57 +114,57 @@ RULE_BODY_HELPER_PREDICATES = [
     {
         "signature": "value_greater_than/2",
         "args": ["entity", "threshold"],
-        "description": "Query-only deterministic helper: entity_property(Entity, value, Value) and Value > Threshold.",
-        "why": "rule_acquisition_numeric_helper",
+        "description": "Query-only deterministic support predicate: entity_property(Entity, value, Value) and Value > Threshold.",
+        "why": "rule_acquisition_numeric_support",
         "admission_notes": ["Use only in rule bodies; runtime resolves it from admitted value facts."],
     },
     {
         "signature": "value_at_most/2",
         "args": ["entity", "threshold"],
-        "description": "Query-only deterministic helper: entity_property(Entity, value, Value) and Value =< Threshold.",
-        "why": "rule_acquisition_numeric_helper",
+        "description": "Query-only deterministic support predicate: entity_property(Entity, value, Value) and Value =< Threshold.",
+        "why": "rule_acquisition_numeric_support",
         "admission_notes": ["Use only in rule bodies; runtime resolves it from admitted value facts."],
     },
     {
         "signature": "hours_at_least/3",
         "args": ["start_time", "end_time", "threshold_hours"],
-        "description": "Query-only deterministic helper: true when End is at least ThresholdHours after Start.",
-        "why": "rule_acquisition_temporal_helper",
+        "description": "Query-only deterministic support predicate: true when End is at least ThresholdHours after Start.",
+        "why": "rule_acquisition_temporal_support",
         "admission_notes": ["Use only in rule bodies for source-stated minimum-hour spacing conditions."],
     },
     {
         "signature": "number_greater_than/2",
         "args": ["value", "threshold"],
-        "description": "Query-only deterministic helper: true when an already-bound numeric Value is greater than Threshold.",
-        "why": "rule_acquisition_numeric_helper",
+        "description": "Query-only deterministic support predicate: true when an already-bound numeric Value is greater than Threshold.",
+        "why": "rule_acquisition_numeric_support",
         "admission_notes": ["Use only after a prior body goal binds Value to a number."],
     },
     {
         "signature": "number_at_most/2",
         "args": ["value", "threshold"],
-        "description": "Query-only deterministic helper: true when an already-bound numeric Value is at most Threshold.",
-        "why": "rule_acquisition_numeric_helper",
+        "description": "Query-only deterministic support predicate: true when an already-bound numeric Value is at most Threshold.",
+        "why": "rule_acquisition_numeric_support",
         "admission_notes": ["Use only after a prior body goal binds Value to a number."],
     },
     {
         "signature": "support_count_at_least/2",
         "args": ["proposal", "threshold"],
-        "description": "Query-only deterministic helper: true when supported(Proposal, Officer) has at least Threshold distinct officers.",
-        "why": "rule_acquisition_aggregation_helper",
+        "description": "Query-only deterministic support predicate: true when supported(Proposal, Officer) has at least Threshold distinct officers.",
+        "why": "rule_acquisition_aggregation_support",
         "admission_notes": ["Use only in rule bodies for source-stated vote-count thresholds."],
     },
     {
         "signature": "percent_at_least/3",
         "args": ["part_value", "whole_value", "threshold_percent"],
-        "description": "Query-only deterministic helper: true when PartValue is at least ThresholdPercent percent of WholeValue.",
-        "why": "rule_acquisition_ratio_helper",
+        "description": "Query-only deterministic support predicate: true when PartValue is at least ThresholdPercent percent of WholeValue.",
+        "why": "rule_acquisition_ratio_support",
         "admission_notes": ["Use only after body goals bind numeric part and whole variables, such as Match and Amount."],
     },
     {
         "signature": "percent_below/3",
         "args": ["part_value", "whole_value", "threshold_percent"],
-        "description": "Query-only deterministic helper: true when PartValue is below ThresholdPercent percent of WholeValue.",
-        "why": "rule_acquisition_ratio_helper",
+        "description": "Query-only deterministic support predicate: true when PartValue is below ThresholdPercent percent of WholeValue.",
+        "why": "rule_acquisition_ratio_support",
         "admission_notes": ["Use only for explicit below-threshold or insufficient-percentage conditions."],
     },
 ]
@@ -499,7 +499,7 @@ def _rule_acquisition_profile(
         *[str(item) for item in out.get("admission_risks", []) if str(item).strip()],
         "Rule acquisition must not add ordinary facts.",
         "Rule clauses must use only allowed predicates and simple conjunctions supported by the runtime.",
-        "A rule that needs negation, arithmetic, aggregation, or source priority should be deferred unless it can be expressed with admitted helper predicates.",
+        "A rule that needs negation, arithmetic, aggregation, or source priority should be deferred unless it can be expressed with admitted deterministic support predicates.",
     ]
     out["self_check"] = {
         **(out.get("self_check") if isinstance(out.get("self_check"), dict) else {}),
@@ -719,7 +719,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "For numeric variables already bound by prior body goals, use number_greater_than/2 or number_at_most/2 instead of value_greater_than/2 or value_at_most/2.",
         "For percent_at_least/3, use numeric variables after they are bound by prior body goals: percent_at_least(PartValue, WholeValue, ThresholdPercent). Do not use it as a final outcome by itself.",
         "For insufficient percentage or below-threshold exception branches, use percent_below(PartValue, WholeValue, ThresholdPercent), not percent_at_least/3 with a negative status.",
-        "For support_count_at_least/2, do not add extra supported(Proposal, role_label) goals unless the source explicitly makes that officer role a condition. The helper already proves the threshold count from supported/2 rows.",
+        "For support_count_at_least/2, do not add extra supported(Proposal, role_label) goals unless the source explicitly makes that officer role a condition. The support predicate already proves the threshold count from supported/2 rows.",
         "Set source='direct' only because the source document explicitly states the rule.",
     ]
     if "aggregation" in str(rule_class).casefold():
@@ -728,14 +728,14 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
                 "For aggregation rule classes, prefer derived_condition/3 heads such as derived_condition(Proposal, support_threshold_met, council_vote).",
                 "Do not derive final passed/failed outcome from the aggregation lens when veto, override, exception, or priority rules also affect the outcome.",
                 "Use support_count_at_least(Proposal, Threshold) as the body proof for threshold_met and stop there.",
-                "The head scope must come from the current raw_source_text rule span. Do not emit sibling scopes from other charter rules, profile summaries, or admitted backbone context just because they share the same threshold helper.",
+                "The head scope must come from the current raw_source_text rule span. Do not emit sibling scopes from other charter rules, profile summaries, or admitted backbone context just because they share the same threshold support predicate.",
                 "For vote-count aggregation, use one intermediate condition atom such as support_threshold_met. Do not emit neighboring interpretations such as majority_support, mayor_vote_not_required, recall_threshold_met, or final passage/failure labels unless raw_source_text explicitly states that exact condition as the rule target.",
             ]
         )
     if "dependency" in str(rule_class).casefold() or "composition" in str(rule_class).casefold():
         core.extend(
             [
-                "For dependency-composition rule classes, consume existing upstream derived_condition/3 or derived_status/3 rows in the body instead of re-proving their source logic with helper predicates.",
+                "For dependency-composition rule classes, consume existing upstream derived_condition/3 or derived_status/3 rows in the body instead of re-proving their source logic with deterministic support predicates.",
                 "Do not re-emit an upstream intermediate condition that already exists in existing_admitted_backbone. Emit only the downstream composed rule for the current pass.",
                 "If the final status requires an upstream condition that is not already admitted, emit no rule rather than recreating the missing upstream branch in this pass.",
             ]
@@ -753,7 +753,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         *core,
         "Do not use other charter rules visible in profile summaries or admitted backbone context as direct rule evidence.",
         "Each clause must be a single-line JSON string. Do not put literal line breaks, comments, markdown, bullets, or explanatory prose inside candidate_operations[].clause.",
-        "For this first rule-lens trial, prefer runtime-simple clauses: Head :- Body1, Body2. Avoid negation, arithmetic, comparisons, lists, disjunction, aggregation, and nested structures unless the existing runtime explicitly supports the helper predicate.",
+        "For this first rule-lens trial, prefer runtime-simple clauses: Head :- Body1, Body2. Avoid negation, arithmetic, comparisons, lists, disjunction, aggregation, and nested structures unless the existing runtime explicitly supports the deterministic support predicate.",
         "Do not write a lowercase generic placeholder like repair_order when you mean a variable.",
         "Prefer copying body goals directly from existing_admitted_backbone clauses. Preserve the admitted predicate, argument positions, property keys, and property values instead of rewriting them into a nearby semantic shape.",
         "Prefer clauses that can actually fire against the current admitted backbone when the source contains an instance. General dormant rules are allowed only when the body predicates and argument contracts are visibly present but no current instance is stated.",
@@ -765,7 +765,7 @@ def _rule_guidance_context(*, target: int, rule_class: str, compact: bool) -> li
         "Do not infer permission from occurrence. An event_at row that someone entered, signed, recovered, baked, arrived, or voted is not by itself a rule body proving the action was permitted or authorized.",
         "Do not invert exception-summary predicates. If a row says taxable_if(lamp_rice, relief_cargo, exempt), that supports an exempt status, not a taxable status.",
         "Rules must be grounded in explicit source-stated rule language in raw_source_text and should use admitted backbone predicates as body support.",
-        "If a charter rule requires negation or exception semantics that cannot be expressed safely, do not force it. Add a short self_check note naming the missing helper instead.",
+        "If a charter rule requires negation or exception semantics that cannot be expressed safely, do not force it. Add a short self_check note naming the missing support predicate instead.",
         "If current_pass.rule_class names an exception-bearing rule class, prefer one explicit exception-branch clause when raw_source_text states the exception and existing_admitted_backbone contains matching support rows.",
         "Claim/finding, permission/event, and source-priority boundaries must survive: do not write a rule that turns a claim into a finding or permission into occurrence.",
         "Keep self_check tiny: at most one note under eight words. Do not explain each rule. Spend output on valid JSON candidate_operations only.",

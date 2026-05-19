@@ -388,10 +388,10 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For maritime witness questions, the word 'Master' usually means the vessel's master/captain, not a harbour master. Query witness_statement(Speaker, Language, Subject, Content, Source) with Speaker as a variable unless the exact canonical speaker atom appears in relevant_clauses.",
         "For marine-insurance witness or expert statement count questions, do not bind the second witness_statement/5 slot to the literal constant language. Query witness_statement(Speaker, Language, Subject, Content, Source), then add survey_report/4, legal_position/5, source_detail/4, and citation_support/4 only if the question asks for expert/legal statements beyond witness rows.",
         "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
-        "For temporal helper chains, emit prerequisite helper queries before dependent helper queries: add_hours(StartTime, Hours, ThresholdTime) must appear before elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 for answers that may be less than one whole hour, then convert to hours/minutes in the concise answer.",
-        "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal helpers with unbound invented lowercase constants.",
-        "For duration questions asking how long an entity was inside, active, held, processing, in custody, offline, or otherwise in a named interval/state, bind the start-event and end-event timestamp variables first, then call elapsed_minutes(StartTime, EndTime, Minutes). If the KB has event-description or event-type rows for start/end, ingress/egress, opened/closed, began/ended, or entered/exited labels, query those rows with shared event variables before the temporal helper. Never call elapsed_minutes(start, end, duration) with lowercase placeholders.",
-        "For within-window or deadline-compliance questions, retrieve three pieces before computing: the start event/time, the target event/time, and the policy deadline/interval. Then call elapsed_minutes/3, elapsed_hours/3, or add_hours/3 with those bound variables. Do not ask a temporal helper with an unbound Starttime if the relevant start event predicate exists in the compiled inventory.",
+        "For temporal virtual-predicate chains, emit prerequisite virtual-predicate queries before dependent virtual-predicate queries: add_hours(StartTime, Hours, ThresholdTime) must appear before elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 for answers that may be less than one whole hour, then convert to hours/minutes in the concise answer.",
+        "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal virtual predicates with unbound invented lowercase constants.",
+        "For duration questions asking how long an entity was inside, active, held, processing, in custody, offline, or otherwise in a named interval/state, bind the start-event and end-event timestamp variables first, then call elapsed_minutes(StartTime, EndTime, Minutes). If the KB has event-description or event-type rows for start/end, ingress/egress, opened/closed, began/ended, or entered/exited labels, query those rows with shared event variables before elapsed_minutes/3. Never call elapsed_minutes(start, end, duration) with lowercase placeholders.",
+        "For within-window or deadline-compliance questions, retrieve three pieces before computing: the start event/time, the target event/time, and the policy deadline/interval. Then call elapsed_minutes/3, elapsed_hours/3, or add_hours/3 with those bound variables. Do not call a temporal virtual predicate with an unbound Starttime if the relevant start event predicate exists in the compiled inventory.",
         "For elapsed-time questions between two named event descriptions, do not emit only a broad event_start(Event, Time, Source) scan followed by elapsed_minutes(X, Y, Z). Bind the start and end timestamps with separate event/status/source queries first, using distinct variables such as StartTime and EndTime, then call elapsed_minutes(StartTime, EndTime, Minutes).",
         "When a question asks elapsed time between a derived threshold moment and a later event, compute the threshold moment with add_hours(StartTime, ThresholdHours, ThresholdTime) before calling elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 over elapsed_hours/3 unless the question explicitly requires whole hours only.",
         "For inspection-current or validity-window questions expressed in days, retrieve the inspection row and authorization row with shared variables, then call elapsed_days(InspectionDate, AuthorizationTime, ElapsedDays). Do not use add_hours/3 with a days-validity value.",
@@ -603,7 +603,7 @@ def main() -> int:
         "Treat the current utterance as a probe against existing KB state unless it explicitly states a correction or new assertion.",
         "For ordinary questions, emit query candidate_operations, not writes.",
         "Use the actual compiled KB predicate inventory exactly. Do not invent a new query predicate when the KB already has a predicate with the needed meaning.",
-        "The QA runtime exposes virtual temporal predicates add_hours/3, elapsed_minutes/3, elapsed_hours/3, and elapsed_days/3. They are query-only runtime helpers for deriving time anchors and durations from admitted timestamp facts; they are not durable KB writes.",
+        "The QA runtime exposes virtual temporal predicates add_hours/3, elapsed_minutes/3, elapsed_hours/3, and elapsed_days/3. They are query-only runtime virtual predicates for deriving time anchors and durations from admitted timestamp facts; they are not durable KB writes.",
         "For a query over a predicate, keep the predicate's full arity from compiled_predicate_inventory. If a slot is unspecified, fill it with an uppercase variable.",
         "Copy constants from relevant_clauses exactly. If the user question mentions only a surname, title, role, initials, or a paraphrased object/facility name, do not invent a lowercase atom for it; query with variables and let the compiled KB surface reveal the canonical constant.",
         "Role labels are not person constants. Query predicates such as inspection/3, bypass_authorization/3, coliform_reading/4, notification/5, or boil_water_notice_lifted/2 with Person/Actor variables, then use person_role/2 only to filter or explain those returned people.",
@@ -614,7 +614,7 @@ def main() -> int:
         "For who/what/which/where/when/why questions, leave the requested answer position as a variable. Do not fill that slot with a likely answer from relevant_clauses unless the user question itself names that value.",
         "Never put lowercase generic placeholder words into query arguments when you want the KB to return a value. This includes label words such as grievance_label, method_detail, explanation_detail, candidate, label, title, description, content, value, status, authority, and institution.",
         "compiled_query_templates shows legal query shapes. Prefer those templates and then bind only the slots that are clearly named in the question.",
-        "compiled_surface_alias_inventory shows predicate families actually present in this compile. Use it to find sibling or decomposed surfaces before falling back to helpers or source-record text.",
+        "compiled_surface_alias_inventory shows predicate families actually present in this compile. Use it to find sibling or decomposed surfaces before falling back to compatibility adapters or source-record text.",
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For explicit table membership or member-count questions, if compiled_query_templates includes explicit_table_membership/4, prefer explicit_table_membership(SourceRow, Version, Group, Member) for direct grouping/member table evidence before sparse semantic member predicates. Legacy roster_table_member/4 is compatibility-only.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
@@ -840,9 +840,9 @@ def build_cache_context(
         "evidence_bundle_context_filter": bool(evidence_bundle_context_filter),
         "evidence_bundle_context_max_clauses": int(evidence_bundle_context_max_clauses or 0),
         "evidence_bundle_context_broad_floor": int(evidence_bundle_context_broad_floor or 0),
-        "helper_companion_row_limit": helper_companion_row_limit,
-        "helper_companion_budget_ranker": "lexical_query_overlap_v1",
-        "include_legacy_native_helper_adapters": bool(include_legacy_native_helper_adapters),
+        "compatibility_adapter_row_limit": helper_companion_row_limit,
+        "compatibility_adapter_budget_ranker": "lexical_query_overlap_v1",
+        "include_retired_native_compatibility_adapters": bool(include_legacy_native_helper_adapters),
         "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
@@ -1981,7 +1981,7 @@ def _source_record_table_count_hint_queries(
 ) -> list[str]:
     """Add structural table-row evidence for explicit table/list count questions.
 
-    This is intentionally a routing hint, not an answer helper. It only exposes
+    This is intentionally a routing hint, not an answer surface. It only exposes
     deterministic source-record table rows so the existing
     source_record_table_body_count_support companion can decide whether there is
     usable body-row evidence.
@@ -2045,7 +2045,7 @@ def _source_text_question_token_hint_queries(
 ) -> list[str]:
     """Add filtered source-text lookups for named-object attribute questions.
 
-    This is query routing, not an answer helper. It uses only tokens already in
+    This is query routing, not an answer surface. It uses only tokens already in
     the question and deterministic source-record text rows; it does not inspect
     the source document, gold answers, or fixture names.
     """
@@ -2187,7 +2187,7 @@ def _source_coordinate_hint_queries(
 ) -> list[str]:
     """Expose source-coordinate rows for source/location/role questions.
 
-    This is a query-evidence hint, not a helper. It does not parse source text or
+    This is a query-evidence hint, not an answer surface. It does not parse source text or
     name fixture-local coordinates; it only retrieves compiled source-record
     addressability surfaces when the question itself asks for a source
     coordinate or a source-stated role/capacity.
@@ -2738,8 +2738,8 @@ def _dedupe_helper_companion_rows(
     filtered_result["rows"] = kept_rows
     filtered_result["num_rows"] = len(kept_rows)
     reasoning_basis = dict(filtered_result.get("reasoning_basis", {}) or {})
-    reasoning_basis["delivery_filter"] = "query_plan_helper_row_dedupe"
-    reasoning_basis["deduped_helper_rows"] = skipped
+    reasoning_basis["delivery_filter"] = "query_plan_compatibility_row_dedupe"
+    reasoning_basis["deduped_compatibility_rows"] = skipped
     filtered_result["reasoning_basis"] = reasoning_basis
     return {**companion, "result": filtered_result}
 
@@ -2821,10 +2821,10 @@ def _limit_helper_query_results(
                     "num_rows": len(kept_rows),
                     "reasoning_basis": {
                         **reasoning_basis,
-                        "delivery_filter": "query_relevance_helper_row_budget",
-                        "helper_companion_row_limit": row_limit,
-                        "helper_companion_original_rows": len(rows),
-                        "helper_companion_budget_ranker": "lexical_query_overlap_v1",
+                        "delivery_filter": "query_relevance_compatibility_row_budget",
+                        "compatibility_adapter_row_limit": row_limit,
+                        "compatibility_adapter_original_rows": len(rows),
+                        "compatibility_adapter_budget_ranker": "lexical_query_overlap_v1",
                     },
                 },
             }
@@ -2869,7 +2869,7 @@ def _helper_budget_row_score(
 
 
 def _helper_companions_enabled(row_limit: int | None) -> bool:
-    """Return whether retired query-helper companions should be assembled."""
+    """Return whether retired query-only compatibility adapters should be assembled."""
 
     if row_limit is None:
         return True
@@ -4920,7 +4920,7 @@ def _mark_legacy_native_helper_adapter(companion: dict[str, Any]) -> dict[str, A
                 **basis,
                 "adapter_status": "legacy_native_compatibility_adapter",
                 "default_delivery": "disabled",
-                "replacement_direction": "prefer direct compile-surface predicates over query-time helper bridges",
+                "replacement_direction": "prefer direct compile-surface predicates over query-time compatibility adapters",
             },
         },
     }
@@ -7266,7 +7266,7 @@ def _authority_custody_companion(
 ) -> dict[str, Any] | None:
     """Expose archive custody/access/clause support from admitted rows.
 
-    This is a query-only helper. It does not read source prose. It joins
+    This is a query-only compatibility adapter. It does not read source prose. It joins
     admitted custody, access-log, reserved-right, and source-record text atoms
     when a question has already asked for one of those surfaces.
     """
@@ -9428,7 +9428,7 @@ def _clear_sample_clock_pause_companion(
 ) -> dict[str, Any] | None:
     """Expose pause-aware clear-sample clock support from admitted rows.
 
-    This helper does not infer from source prose. It joins admitted
+    This compatibility adapter does not infer from source prose. It joins admitted
     clear_sample_segment/4 rows with admitted sampler_offline_interval/4 rows.
     When a clear-sample counted segment ends exactly as a sampler-offline
     interval begins, the clock is paused during that interval and the counted
@@ -15173,7 +15173,7 @@ def _disambiguate_relaxed_temporal_join_variables(selected: list[str], *, helper
     Relaxed fallback queries name widened constants by argument position
     (`Relaxed1`, `Relaxed2`, ...). When two different predicates both widen a
     non-key source slot at the same position, joining them later can falsely
-    require the two unrelated slots to have the same value. Temporal helpers
+    require the two unrelated slots to have the same value. Temporal virtual predicates
     only need their explicit start/end variables plus whatever key variable the
     relaxed query shares; source/provenance relaxed slots should remain local to
     each prior query. The same issue appears when the model uses a repeated
@@ -15218,7 +15218,7 @@ def _temporal_subset_join(
     query_for_join: str,
     derived_query: str,
 ) -> dict[str, Any] | None:
-    """Recover when an extra prior temporal query over-constrains a helper.
+    """Recover when an extra prior temporal query over-constrains a virtual predicate.
 
     The LLM sometimes emits both an event row and a deadline row with the same
     variable name, but the compiled KB may use different date atom surfaces in
@@ -15244,7 +15244,7 @@ def _temporal_subset_join(
                         **result,
                         "reasoning_basis": {
                             "kind": "core-local",
-                            "note": "temporal helper support query recovered by dropping an over-constraining prior query",
+                            "note": "temporal virtual-predicate query recovered by dropping an over-constraining prior query",
                         },
                     },
                     "derived_from_queries": [*subset, derived_query],
@@ -15360,11 +15360,11 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
             "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",
             "Causal-chain policy: for questions asking what caused, triggered, led to, or brought about an ending, a chain such as led_to(Cause, EndingEvent) plus ended(EndingEvent, EndedState), caused_by(EndingEvent, Cause) plus ended(EndingEvent, EndedState), or triggered(Cause, EndingEvent) plus ended(EndingEvent, EndedState) can directly support Cause as the answer. Do not downgrade solely because ended/2 returns the immediate ending event when the question asks for the upstream cause.",
-            "Causal-helper policy: a clean causal_end_state_support row is answer-bearing for cause-of-ending questions. If Cause matches the reference answer and EndedState binds the asked state/process, mark exact even when the primitive ended/2 query also returns the immediate EndingEvent.",
-            "Method-frame policy: a clean method_frame_purpose_support row is answer-bearing for method-use questions when Method binds the asked method, Agent binds the asked user or role, and FramePurpose or FrameText binds the broader source-stated task/purpose. Do not downgrade solely because method_action or method_produces_metric rows also expose lower-level measurements.",
+            "Causal support policy: a direct causal_end_state_support row is answer-bearing for cause-of-ending questions. If Cause matches the reference answer and EndedState binds the asked state/process, mark exact even when the primitive ended/2 query also returns the immediate EndingEvent.",
+            "Method-frame policy: a direct method_frame_purpose_support row is answer-bearing for method-use questions when Method binds the asked method, Agent binds the asked user or role, and FramePurpose or FrameText binds the broader source-stated task/purpose. Do not downgrade solely because method_action or method_produces_metric rows also expose lower-level measurements.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
-            "Identifier-metadata policy: clean source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
-            "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, clean helper rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped helper row directly matches the reference answer.",
+            "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
+            "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
@@ -15547,7 +15547,7 @@ def classify_failure_surface(
         "surface_definitions": {
             "compile_surface_gap": "The query plan is reasonable, but the compiled KB appears to lack the facts/rules/relations needed to support the reference answer.",
             "query_surface_gap": "The compiled KB appears to contain useful support, but the emitted query plan did not retrieve it or used neighboring/wrong predicates or overbound constants.",
-            "hybrid_join_gap": "Relevant rows were retrieved or appear available, but answering requires a multi-hop join, temporal helper, set difference, aggregation, arithmetic, or evidence bundle that the current query/runtime did not assemble.",
+            "hybrid_join_gap": "Relevant rows were retrieved or appear available, but answering requires a multi-hop join, temporal virtual predicate, set difference, aggregation, arithmetic, or evidence bundle that the current query/runtime did not assemble.",
             "answer_surface_gap": "The query results contain enough support, but the final judge/answer rendering did not recognize or express it cleanly.",
             "judge_uncertain": "There is not enough information in this row to separate the failure surfaces confidently.",
         },
