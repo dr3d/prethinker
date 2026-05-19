@@ -494,6 +494,13 @@ Recent transfer work supports the current direction:
   but never populated. This keeps source/reference repair in the same measured
   architecture as quantity and status/state, rather than adding another
   after-the-fact special case.
+- Source-authority delivery now has the same compile-health signal. When a
+  source states that an authority, rule, order, policy, source, or body governs
+  an action/status/finding/scope and a compatible authority carrier is offered,
+  missing emitted rows raise `source_authority_carrier_offered_but_undelivered`.
+  The recognizer is intentionally stricter than provenance: plain `source`
+  wording does not make a claim row authority-like unless authority, governing,
+  order, policy, or rule semantics are also present.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record

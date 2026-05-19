@@ -1272,6 +1272,27 @@ def test_source_attributed_claim_does_not_satisfy_status_state_palette() -> None
     assert "shallow_status_state_palette" in {finding["class"] for finding in report["findings"]}
 
 
+def test_source_authority_does_not_satisfy_source_attributed_claim_palette() -> None:
+    report = _profile_admission_report(
+        source_text=(
+            "Rivera memo says device alpha status is active.\n"
+            "Field report notes claim beta remains unresolved."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_authority/3",
+                    "args": ["subject_id", "authority_or_source", "scope_or_action"],
+                },
+            ]
+        },
+    )
+
+    assert report["candidate_contract_counts"]["source_authority_capable"] == 1
+    assert report["candidate_contract_counts"]["source_attributed_claim_capable"] == 0
+    assert "shallow_source_attributed_claim_palette" in {finding["class"] for finding in report["findings"]}
+
+
 def test_profile_admission_accepts_complete_status_state_palette() -> None:
     report = _profile_admission_report(
         source_text=(
@@ -1437,6 +1458,86 @@ def test_profile_delivery_flags_offered_source_claim_carrier_without_emitted_row
     health = source_compile["compile_health"]
     assert health["flag_counts"]["source_claim_carrier_offered_but_undelivered"] == 1
     assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_flags_offered_source_authority_carrier_without_emitted_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "recipient_action(item_7, access_granted).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source authority governing source",
+        source_text="Court order approval is authority for item 7 access status.",
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_authority/3",
+                    "args": ["subject_id", "authority_or_source", "scope_or_action"],
+                },
+            ]
+        },
+    )
+
+    delivery = source_compile["profile_delivery"]
+    assert delivery["findings"][0]["class"] == "source_authority_carrier_offered_but_undelivered"
+    assert delivery["offered_carriers"]["source_authority"] == ["source_authority/3"]
+    assert delivery["delivered_carriers"]["source_authority"] == []
+    assert source_compile["compile_health"]["flag_counts"]["source_authority_carrier_offered_but_undelivered"] == 1
+
+
+def test_profile_delivery_accepts_emitted_source_authority_carrier_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "source_authority(item_7, court_order, access_status).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source authority governing source",
+        source_text="Court order approval is authority for item 7 access status.",
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_authority/3",
+                    "args": ["subject_id", "authority_or_source", "scope_or_action"],
+                },
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["source_authority"] == ["source_authority"]
+    assert source_compile["compile_health"]["verdict"] == "healthy"
 
 
 def test_profile_delivery_accepts_emitted_source_claim_carrier_rows() -> None:

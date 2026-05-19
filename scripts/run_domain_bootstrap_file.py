@@ -3244,6 +3244,11 @@ def _profile_delivery_report(
 
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    source_authority_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_source_authority_unit(item)
+    ]
     source_claim_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
@@ -3259,6 +3264,7 @@ def _profile_delivery_report(
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_can_carry_quantity_event_unit(item)
     ]
+    source_authority_predicates = {signature.split("/", 1)[0] for signature in source_authority_carriers}
     source_claim_predicates = {signature.split("/", 1)[0] for signature in source_claim_carriers}
     status_state_predicates = {signature.split("/", 1)[0] for signature in status_state_carriers}
     quantity_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
@@ -3267,10 +3273,16 @@ def _profile_delivery_report(
         for fact in _clause_list(source_compile.get("facts", []))
         if (parsed := _parse_fact_clause(fact)) is not None and not parsed[0].startswith("source_record")
     }
+    delivered_source_authority = sorted(source_authority_predicates & emitted_predicates)
     delivered_source_claim = sorted(source_claim_predicates & emitted_predicates)
     delivered_status_state = sorted(status_state_predicates & emitted_predicates)
     delivered_quantity = sorted(quantity_predicates & emitted_predicates)
     source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
+    source_authority_signal_count = (
+        int(source_signal_counts.get("source_authority") or 0)
+        if isinstance(source_signal_counts, dict)
+        else 0
+    )
     source_claim_signal_count = (
         int(source_signal_counts.get("source_attributed_claim") or 0)
         if isinstance(source_signal_counts, dict)
@@ -3287,6 +3299,15 @@ def _profile_delivery_report(
         else 0
     )
     findings: list[dict[str, Any]] = []
+    if source_authority_signal_count and source_authority_carriers and not delivered_source_authority:
+        findings.append(
+            {
+                "class": "source_authority_carrier_offered_but_undelivered",
+                "source_signal_count": source_authority_signal_count,
+                "offered_carriers": source_authority_carriers[:12],
+                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+            }
+        )
     if source_claim_signal_count and source_claim_carriers and not delivered_source_claim:
         findings.append(
             {
@@ -3317,16 +3338,19 @@ def _profile_delivery_report(
     return {
         "schema_version": "profile_delivery_contracts_v1",
         "source_signal_counts": {
+            "source_authority": source_authority_signal_count,
             "source_attributed_claim": source_claim_signal_count,
             "status_state": status_state_signal_count,
             "quantity_event": quantity_signal_count,
         },
         "offered_carriers": {
+            "source_authority": source_authority_carriers[:12],
             "source_attributed_claim": source_claim_carriers[:12],
             "status_state": status_state_carriers[:12],
             "quantity_event": quantity_carriers[:12],
         },
         "delivered_carriers": {
+            "source_authority": delivered_source_authority[:12],
             "source_attributed_claim": delivered_source_claim[:12],
             "status_state": delivered_status_state[:12],
             "quantity_event": delivered_quantity[:12],
@@ -3392,6 +3416,15 @@ def _profile_bootstrap_admission_context(
             "source statement",
         )
     )
+    has_source_authority_pressure = any(
+        token in label
+        for token in (
+            "authority source",
+            "governing source",
+            "source authority",
+            "source-authority",
+        )
+    )
     has_quantity_pressure = any(
         token in label
         for token in (
@@ -3455,6 +3488,20 @@ def _profile_bootstrap_admission_context(
                     "Do not offer only source_note/2, report_text/2, statement/2, note/2, description/2, or split "
                     "claim_status/2 plus source metadata for source-attributed claim pressure. Those surfaces are "
                     "shallow unless another candidate can carry source, content/status, and source scope in a joined row."
+                ),
+            ]
+        )
+    if has_source_authority_pressure:
+        context.extend(
+            [
+                (
+                    "Profile delivery rule: when a source states that an authority, rule, order, policy, source, "
+                    "or body governs an action, status, access, finding, deadline, or scoped decision, a direct "
+                    "source-authority carrier should be offered and populated when compatible."
+                ),
+                (
+                    "Do not leave governing authority only in source text, rule prose, record labels, or recipient/action "
+                    "rows. Keep governed subject or scope, authority/source, and action/status/decision joinable."
                 ),
             ]
         )
@@ -3576,6 +3623,7 @@ def _profile_admission_retry_context(report: dict[str, Any]) -> list[str]:
 
 def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: str) -> dict[str, Any]:
     source_mentions = _operational_lifecycle_source_mentions(source_text)
+    source_authority_mentions = _source_authority_mentions(source_text)
     source_claim_mentions = _source_attributed_claim_mentions(source_text)
     status_state_mentions = _status_state_source_mentions(source_text)
     quantity_mentions = _quantity_event_source_mentions(source_text)
@@ -3585,6 +3633,11 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         _candidate_signature(item)
         for item in candidate_rows
         if _candidate_can_carry_operational_lifecycle_unit(item)
+    ]
+    source_authority_capable = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_can_carry_source_authority_unit(item)
     ]
     source_claim_capable = [
         _candidate_signature(item)
@@ -3679,18 +3732,21 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
         "schema_version": "profile_admission_contracts_v1",
         "source_signal_counts": {
             "operational_lifecycle": len(source_mentions),
+            "source_authority": len(source_authority_mentions),
             "source_attributed_claim": len(source_claim_mentions),
             "status_state": len(status_state_mentions),
             "quantity_event": len(quantity_mentions),
         },
         "candidate_contract_counts": {
             "operational_lifecycle_capable": len(lifecycle_capable),
+            "source_authority_capable": len(source_authority_capable),
             "source_attributed_claim_capable": len(source_claim_capable),
             "status_state_capable": len(status_state_capable),
             "quantity_event_capable": len(quantity_capable),
         },
         "capable_signatures": {
             "operational_lifecycle": lifecycle_capable[:12],
+            "source_authority": source_authority_capable[:12],
             "source_attributed_claim": source_claim_capable[:12],
             "status_state": status_state_capable[:12],
             "quantity_event": quantity_capable[:12],
@@ -3711,6 +3767,15 @@ def _operational_lifecycle_source_mentions(source_text: str) -> list[str]:
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_STATE_SLOTS
             or _profile_admission_tokens(lowered) & PROFILE_ADMISSION_LIFECYCLE_TERMS
         ):
+            mentions.append(line[:240])
+    return mentions
+
+
+def _source_authority_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if line and SOURCE_AUTHORITY_TEXT_RE.search(line):
             mentions.append(line[:240])
     return mentions
 
@@ -3785,9 +3850,27 @@ def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -
     return has_subject and has_state and has_date and _operational_lifecycle_text(signature + " " + " ".join(args))
 
 
+def _candidate_can_carry_source_authority_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    if not signature:
+        return False
+    if _has_specific_source_authority_carrier({signature}):
+        return True
+    name = signature.split("/", 1)[0]
+    args = _candidate_args(candidate)
+    tokens = _profile_admission_tokens(name + " " + " ".join(args).lower())
+    return bool(
+        len(args) >= 3
+        and tokens & {"authority", "authorized", "authorised", "governing", "order", "policy", "rule"}
+        and tokens & {"action", "claim", "decision", "finding", "scope", "status", "subject"}
+    )
+
+
 def _candidate_can_carry_source_attributed_claim_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     name = signature.split("/", 1)[0]
+    if _candidate_can_carry_source_authority_unit(candidate):
+        return False
     if name in {"reported_finding", "source_attributed_claim", "source_claim", "statement_claim"}:
         return True
     args = _candidate_args(candidate)
