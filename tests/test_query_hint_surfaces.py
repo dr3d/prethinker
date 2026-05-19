@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_qa import (
     _current_state_source_text_hint_queries,
     _event_description_hint_queries,
+    _source_coordinate_hint_queries,
     _source_attribution_hint_queries,
 )
 
@@ -89,3 +90,31 @@ def test_current_state_source_text_hint_is_bounded_to_current_value_questions() 
         )
         == []
     )
+
+
+def test_source_coordinate_hint_recognizes_according_to_and_per() -> None:
+    kb_inventory = {
+        "signatures": [
+            "source_record_section/2",
+            "source_record_label/2",
+            "source_record_line/2",
+            "source_record_field/3",
+            "source_record_text_atom/2",
+        ]
+    }
+
+    assert _source_coordinate_hint_queries(
+        utterance="According to the chronology, what date was the event?",
+        kb_inventory=kb_inventory,
+    ) == [
+        "source_record_section(SourceRow, Section).",
+        "source_record_label(SourceRow, Label).",
+        "source_record_line(SourceRow, Line).",
+        "source_record_field(SourceRow, Field, Value).",
+        "source_record_text_atom(SourceRow, TextAtom).",
+    ]
+
+    assert _source_coordinate_hint_queries(
+        utterance="Per the signed order, what activity may continue?",
+        kb_inventory=kb_inventory,
+    )[-1] == "source_record_text_atom(SourceRow, TextAtom)."

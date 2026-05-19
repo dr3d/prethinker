@@ -2198,6 +2198,7 @@ def _source_coordinate_hint_queries(
             "which heading",
             "what heading",
             "where in the",
+            "according to",
             "contains the",
             "sets out",
             "set out",
@@ -2207,6 +2208,7 @@ def _source_coordinate_hint_queries(
             "basis for",
         )
     )
+    asks_source_coordinate = asks_source_coordinate or bool(re.search(r"\bper\s+(?:the|a|an)\b", text))
     asks_source_stated_role = any(
         marker in text
         for marker in (
