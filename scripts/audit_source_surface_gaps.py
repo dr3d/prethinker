@@ -320,6 +320,8 @@ def _coordinate_class(
         or bool(re.search(r"[$£€]|\b\d+(?:,\d{3})+\b", answer_text))
     ):
         return "quantity_or_duration"
+    if _is_explicit_source_reference_question(question_text):
+        return "source_reference"
     if _has_any(
         question_text,
         (
@@ -647,7 +649,16 @@ def _has_any(text: str, needles: tuple[str, ...]) -> bool:
 
 
 def _is_source_reference_question(question_text: str) -> bool:
-    if _has_any(
+    if _is_explicit_source_reference_question(question_text):
+        return True
+    return bool(
+        re.search(r"\b(?:document|packet|report|memo|order|section|exhibit|appendix)\b", question_text)
+        and re.search(r"\b(?:which|what|where|source|according|per|recorded|authority|binding)\b", question_text)
+    )
+
+
+def _is_explicit_source_reference_question(question_text: str) -> bool:
+    return _has_any(
         question_text,
         (
             "according to",
@@ -664,11 +675,6 @@ def _is_source_reference_question(question_text: str) -> bool:
             "document recorded",
             "document that recorded",
         ),
-    ):
-        return True
-    return bool(
-        re.search(r"\b(?:document|packet|report|memo|order|section|exhibit|appendix)\b", question_text)
-        and re.search(r"\b(?:which|what|where|source|according|per|recorded|authority|binding)\b", question_text)
     )
 
 

@@ -391,15 +391,16 @@ Recent transfer work supports the current direction:
   sharply. A classifier leak where the substring `id ` matched ordinary
   question text such as `did ` was removed. The old 43-row
   `other_answer_bearing_detail` bucket now resolves into concrete pressure
-  classes such as `point_in_time_status` (15), `count_or_total` (9),
-  `official_or_staff_role_identity` (9), `deadline_or_duration_arithmetic`
-  (8), `monetary_rate_or_amount` (7), participant statements (6), source
-  stated facts (5), set/list detail (5), and true compact identifiers (4).
+  classes such as `point_in_time_status` (14), `source_actor_or_authority`
+  (10), `count_or_total` (9), `official_or_staff_role_identity` (8),
+  `deadline_or_duration_arithmetic` (8), `monetary_rate_or_amount` (7),
+  participant statements (6), source stated facts (5), set/list detail (5),
+  and true compact identifiers (4).
   A second pass removed source-reference substring traps such as `report`
-  matching `reported` and `date` matching `update`, collapsing the broad
-  source-reference bucket from 24 rows to 5. The lesson is that the next repair
-  should follow the refined coordinate, not a generic prompt broadening for
-  "details."
+  matching `reported` and `date` matching `update`, while preserving explicit
+  source-addressability questions ahead of status/rule words inside the quoted
+  statement. The lesson is that the next repair should follow the refined
+  coordinate, not a generic prompt broadening for "details."
 - A focused status-heavy replay tested the refined pressure against a fresh
   current compile. The new compile emitted direct status-transition and lab
   result surfaces that the older stamp compile had missed, and a tiny QA replay
