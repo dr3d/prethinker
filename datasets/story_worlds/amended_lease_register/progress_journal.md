@@ -91,3 +91,38 @@ were original expiry, pre-amendment rent, original parking allocation, and early
 termination effective date. This is not a new global lease lens yet; it is a
 row-gated state repair surface that should transfer to another amended-register
 fixture before promotion.
+
+## ALR-003 - Bounded Preservation Candidate Replay
+
+Date: 2026-05-19
+
+Evidence lane: `multi_draw_preservation_candidate`
+
+The profile-delivery stability audit found that source-authority and
+source-claim carriers were offered but intermittently undelivered across
+multiple compile draws. A bounded preservation candidate kept one anchor
+compile's source-record ledger and imported only direct facts matching volatile
+carrier signatures that had been delivered in sibling draws.
+
+Artifacts:
+
+- Stability audit: `tmp\source_authority_profile_delivery_stability_20260519.json`
+- Preservation candidate: `tmp\source_authority_preservation_candidate_20260519.json`
+- QA replay: `tmp\source_authority_preservation_candidate_qa_20260519\domain_bootstrap_qa_20260519T071656043525Z_qa_qwen-qwen3-6-35b-a3b.json`
+
+Result:
+
+- Selected signatures: `source_attributed_claim/4`, `source_authority/3`
+- Added direct facts: `9`
+- QA: `33 exact / 3 partial / 4 miss`
+- Failure surface counts: `3 compile_surface_gap`, `3 query_surface_gap`,
+  `1 hybrid_join_gap`
+- Writes/errors: `0` / `0`
+
+Meaning lesson:
+
+Bounded multi-draw preservation can recover volatile direct carriers without
+unioning an entire compile set, but this replay did not by itself lift QA. The
+remaining misses are mostly current-state temporal joins, correction reasons,
+and pre-amendment state resolution. This points to row-level preservation as a
+promising substrate stabilizer, not a complete query-layer repair.

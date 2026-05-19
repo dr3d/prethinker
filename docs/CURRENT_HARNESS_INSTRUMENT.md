@@ -626,6 +626,12 @@ Recent transfer work supports the current direction:
   direct facts to the anchor rather than unioning the whole compile set. This
   is not default admission; it is a disciplined replay artifact for testing
   whether row-level preservation can beat prompt-only retry.
+- The first QA replay of that bounded preservation candidate scored `33/3/4`
+  on the 40-question authority/claim/status fixture. It recovered the volatile
+  carriers without runtime errors or writes, but did not lift QA by itself. The
+  residuals were current-state temporal joins, correction reasons, and
+  pre-amendment state resolution. So preservation is a substrate stabilizer;
+  answer gains still need query composition or missing direct state surfaces.
 
 The main weak surface is no longer "can the model understand the document?" It
 is often "did the admitted state become addressable, composable, and queryable
