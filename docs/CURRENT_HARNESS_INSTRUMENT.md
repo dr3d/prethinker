@@ -438,6 +438,16 @@ Recent transfer work supports the current direction:
   six rows all classified as compile-surface gaps. This bucket should move next
   through compile-surface preservation and profile delivery, not QA-side numeric
   patching.
+- Quantity/value preservation now has an audit contract rather than another
+  query patch. `quantity_value_delivery_contract` detects source-stated counts,
+  quantities, rates, durations, thresholds, or monetary values that remain only
+  in source-record text or broad wrappers instead of admitted rows with subject,
+  value, and measure/unit slots. A calibration pass over the latest native
+  compile artifacts found `23` passes, `16` missing direct quantity delivery,
+  `6` shallow wrapper-only cases, and `11` not applicable after stripping
+  source-row coordinates such as headings, labels, and table-row numbers. That
+  gives the next pressure a compile-side meter without adding fixture-specific
+  predicates.
 - Transfer validation is mixed and active. Model/provider variation is treated
   as variance evidence, not as a replacement for structural delivery contracts.
   The next compile-layer pressure is preserving direct identity, role,

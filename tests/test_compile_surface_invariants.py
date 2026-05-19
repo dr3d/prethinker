@@ -330,6 +330,83 @@ def test_audit_compile_surface_invariants_passes_financial_baseline_surface(tmp_
     assert contract["status"] == "pass"
 
 
+def test_audit_compile_surface_invariants_detects_quantity_value_delivery_gap(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, packet_alpha_total_applications_six_threshold_four).",
+            "answer_detail(packet_alpha, count_summary).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "shallow_quantity_value_delivery"
+    assert contract["source_signal_count"] == 1
+    assert contract["complete_quantity_row_count"] == 0
+    assert contract["wrapper_predicates"] == ["answer_detail"]
+
+
+def test_audit_compile_surface_invariants_passes_quantity_value_delivery_surface(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, packet_alpha_total_applications_six_threshold_four).",
+            "application_count(packet_alpha, total_applications, 6, source_line_001).",
+            "review_threshold(packet_alpha, minimum_applications, 4, source_line_001).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "pass"
+    assert contract["source_signal_count"] == 1
+    assert contract["complete_quantity_row_count"] == 2
+    assert contract["direct_predicates"] == ["application_count", "review_threshold"]
+
+
+def test_audit_compile_surface_invariants_ignores_source_line_numbers_as_quantity_values(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_002, section_2_has_heading_overview).",
+            "section_title(section_2, overview).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
+def test_audit_compile_surface_invariants_ignores_record_heading_numbers_and_labels(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "compile.json",
+        [
+            "source_record_text_atom(src_line_001, heading 3 subject_after_hours_access_log).",
+            "source_record_text_atom(src_line_002, labeled_line 5 compiled_by_registrar).",
+            "source_record_text_atom(src_line_003, table_row 7 date).",
+            "access_log(log_alpha).",
+        ],
+    )
+
+    report = audit_compile(compile_json)
+
+    contract = next(
+        row for row in report["relation_contracts"] if row["contract"] == "quantity_value_delivery_contract"
+    )
+    assert contract["status"] == "not_applicable"
+
+
 def test_audit_compile_surface_invariants_detects_participant_statement_gap(tmp_path: Path) -> None:
     compile_json = _write_compile(
         tmp_path / "compile.json",

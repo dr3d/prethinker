@@ -18,6 +18,29 @@ from typing import Any
 
 FACT_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 TOKEN_RE = re.compile(r"[a-z0-9]+")
+NUMBER_WORDS = {
+    "zero",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "seven",
+    "eight",
+    "nine",
+    "ten",
+    "eleven",
+    "twelve",
+    "thirteen",
+    "fourteen",
+    "fifteen",
+    "sixteen",
+    "seventeen",
+    "eighteen",
+    "nineteen",
+    "twenty",
+}
 PROMOTABLE_SOURCE_RECORD_MARKERS = {
     "abandoned",
     "access",
@@ -497,6 +520,7 @@ def audit_compile(path: Path) -> dict[str, Any]:
         "relation_contracts": [
             *[_audit_relation_contract(spec, direct_rows) for spec in RELATION_CONTRACTS],
             _audit_financial_baseline_derivation_contract(source_facts, direct_rows),
+            _audit_quantity_value_delivery_contract(source_facts, direct_rows),
             _audit_participant_statement_status_contract(source_facts, direct_rows),
             _audit_status_state_scope_contract(source_facts, direct_rows),
             _audit_vague_wrapper_backbone_contract(source_facts, direct_rows, families),
@@ -881,6 +905,206 @@ def _is_financial_structural_row(row: dict[str, Any]) -> bool:
     }
     predicate = str(row["predicate"])
     return bool((financial_terms & tokens) or (arithmetic_terms & tokens) or "balance" in predicate)
+
+
+def _audit_quantity_value_delivery_contract(
+    source_facts: list[str],
+    direct_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Detect stranded numeric value surfaces in source-record text.
+
+    The profile-admission audit can tell us whether the proposed predicate
+    palette has a suitable quantity-bearing shape. This compile-side contract
+    asks the next question: did any admitted non-source row actually bind the
+    stated value to a subject and measure/unit, or did the value remain only in
+    source-record text or broad prose wrappers?
+    """
+
+    source_rows = _source_record_text_rows(source_facts)
+    source_mentions = _quantity_value_source_mentions(source_rows)
+    complete_rows = [row for row in direct_rows if _is_direct_quantity_value_row(row)]
+    wrapper_rows = [row for row in direct_rows if _is_vague_wrapper_row(row)]
+    direct_predicates = sorted({str(row["predicate"]) for row in complete_rows})
+    wrapper_predicates = sorted({str(row["predicate"]) for row in wrapper_rows})
+
+    if not source_mentions:
+        status = "not_applicable"
+    elif complete_rows:
+        status = "pass"
+    elif wrapper_rows:
+        status = "shallow_quantity_value_delivery"
+    else:
+        status = "missing_quantity_value_delivery"
+
+    missing = [] if complete_rows else [row["excerpt"] for row in source_mentions[:12]]
+    return {
+        "contract": "quantity_value_delivery_contract",
+        "description": "source-stated counts, quantities, rates, durations, thresholds, or monetary values should be admitted as direct value rows with subject and measure/unit slots",
+        "status": status,
+        "required_key_count": len(source_mentions),
+        "companion_key_count": len(complete_rows),
+        "missing_keys": missing,
+        "source_signal_count": len(source_mentions),
+        "complete_quantity_row_count": len(complete_rows),
+        "wrapper_row_count": len(wrapper_rows),
+        "direct_predicates": direct_predicates,
+        "wrapper_predicates": wrapper_predicates,
+        "triggered_groups": {
+            "source_signals": [row["groups"] for row in source_mentions[:12]],
+        },
+    }
+
+
+def _quantity_value_source_mentions(source_rows: list[str]) -> list[dict[str, Any]]:
+    mentions: list[dict[str, Any]] = []
+    group_terms = {
+        "count_or_total": {
+            "count",
+            "counts",
+            "total",
+            "totals",
+            "manifest",
+            "quantity",
+            "quantities",
+        },
+        "rate_or_amount": {
+            "amount",
+            "amounts",
+            "rate",
+            "rates",
+            "cost",
+            "costs",
+            "price",
+            "prices",
+            "balance",
+            "reserve",
+            "fund",
+            "dollar",
+            "dollars",
+        },
+        "duration_or_threshold": {
+            "duration",
+            "hour",
+            "hours",
+            "days",
+            "second",
+            "seconds",
+            "deadline",
+            "threshold",
+            "limit",
+            "minimum",
+            "maximum",
+        },
+        "measurement_or_percent": {
+            "measurement",
+            "measure",
+            "metric",
+            "reading",
+            "readings",
+            "score",
+            "percent",
+            "percentage",
+            "kg",
+            "cm",
+            "mm",
+            "meters",
+            "seconds",
+        },
+    }
+    for row in source_rows:
+        payload = _strip_source_record_coordinate_prefix(_source_record_payload_text(row)).lower()
+        tokens = set(TOKEN_RE.findall(payload))
+        groups: dict[str, list[str]] = {}
+        for group, terms in group_terms.items():
+            hits = sorted(tokens & terms)
+            if hits:
+                groups[group] = hits
+        if groups and _text_has_numeric_value(payload):
+            mentions.append(
+                {
+                    "excerpt": payload[:180],
+                    "groups": groups,
+                }
+            )
+    return mentions
+
+
+def _strip_source_record_coordinate_prefix(text: str) -> str:
+    stripped = str(text or "").strip()
+    return re.sub(
+        r"^(?:heading|labeled_line|anchored_line|paragraph_line|continuation_line|list_row|table_row)\s+\d+[a-z]?\s+",
+        "",
+        stripped,
+        count=1,
+        flags=re.IGNORECASE,
+    )
+
+
+def _is_direct_quantity_value_row(row: dict[str, Any]) -> bool:
+    predicate = str(row.get("predicate") or "").lower()
+    if predicate.startswith("source_record") or _is_vague_wrapper_row(row):
+        return False
+    args = [str(arg) for arg in row.get("args", [])]
+    if len(args) < 3 or not _row_has_numeric_value(row):
+        return False
+    tokens = _tokens_for_row(row)
+    quantity_terms = {
+        "amount",
+        "balance",
+        "count",
+        "cost",
+        "duration",
+        "limit",
+        "measure",
+        "measurement",
+        "metric",
+        "minimum",
+        "maximum",
+        "percent",
+        "quantity",
+        "rate",
+        "reading",
+        "score",
+        "threshold",
+        "total",
+        "value",
+    }
+    known_quantity_predicates = {
+        "event_measurement",
+        "event_quantity",
+        "reading_value",
+        "measurement_value",
+        "metric_observation",
+    }
+    if predicate in known_quantity_predicates:
+        return True
+    if not (tokens & quantity_terms or any(term in predicate for term in quantity_terms)):
+        return False
+    non_value_args = [arg for arg in args if not _text_has_numeric_value(arg)]
+    return len(non_value_args) >= 2
+
+
+def _row_has_numeric_value(row: dict[str, Any]) -> bool:
+    return any(_arg_has_quantity_numeric_value(str(arg)) for arg in row.get("args", []))
+
+
+def _arg_has_quantity_numeric_value(arg: str) -> bool:
+    norm = _normalize_arg(arg)
+    if not norm:
+        return False
+    if norm.startswith(("src_", "source_", "source_line_", "line_")):
+        return False
+    if re.fullmatch(r"(?:19|20)\d{2}(?:_[01]\d(?:_[0-3]\d(?:_[0-2]\d(?:_[0-5]\d)?)?)?)?", norm):
+        return False
+    if re.fullmatch(r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*_(?:19|20)\d{2}", norm):
+        return False
+    return _text_has_numeric_value(norm)
+
+
+def _text_has_numeric_value(text: str) -> bool:
+    lowered = str(text or "").lower()
+    tokens = set(TOKEN_RE.findall(lowered))
+    return bool(re.search(r"\b\d+(?:[._]\d+)?\b", lowered) or tokens & NUMBER_WORDS)
 
 
 def _audit_participant_statement_status_contract(
