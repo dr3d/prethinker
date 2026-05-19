@@ -249,6 +249,14 @@ Recent transfer work supports the current direction:
   simple equality constraints, list membership, and contains-style filters are
   executed only after a deterministic or admitted surface has already bound the
   row. These repairs add no facts, no compatibility rows, and no fixture vocabulary.
+- Current query routing can now expose source-attribution carriers, event
+  description rows, and deterministic current-state source text when the
+  question language asks for source-stated reasons, responsibility,
+  availability, correction, or current values. On the amended-register replay,
+  this moved the preserved compile artifact from `33/3/4` to `40/0/0` with
+  zero compatibility rows, zero writes, and zero residual query fallback
+  signals. This is query routing, not a license to leave recurring answer
+  distinctions stranded in source text forever.
 - Compile-surface stability is now measured at the palette and delivery level:
   candidate-palette churn, predicate arity drift, zero-yield signatures, and
   row delivery collapse are first-class telemetry.

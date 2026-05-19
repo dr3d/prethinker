@@ -362,6 +362,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For source_record_field(Row, Field, Value) surfaces, the first argument is the source row or line id, not the event/entity id. To retrieve fields about an event/entity value, first bind the row with source_record_field(Row, event, Event) or source_record_field(Row, identifier, Entity), then query sibling fields with the same Row, such as source_record_field(Row, description, Description). Do not query source_record_field(Event, key, Value).",
         "For packet headers, signed lines, source notes, and other one-line key/value metadata, source_record_field/3 may not split every key. If source_record_text_atom/2 exists, include source_record_text_atom(Row, TextAtom) for the same source row or a broad source-record text query before declaring the field absent.",
         "For source-coordinate questions asking which source, section, heading, title, note, or line states, sets out, records, supports, or corroborates a fact, discover the source row with variables before binding a section or label. Query broad surfaces such as source_record_section(SourceRow, Section), source_record_label(SourceRow, Label), source_record_line(SourceRow, Line), source_record_field(SourceRow, Field, Value), and source_record_text_atom(SourceRow, TextAtom). Do not hardcode a guessed section/label atom unless that exact atom was returned by an earlier query or appears verbatim in relevant_clauses.",
+        "For questions asking who stated, claimed, noted, found, explained, authorized, corrected, blamed, denied, or gave the reason for a source-stated condition, query direct source-attribution carriers when they exist, such as source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope), source_claim(Source, Subject, Claim, Status), claim_made(Source, Claim, Scope), or source_authority(SubjectOrScope, Authority, Action). Pair them with source-record rows only as addressability support.",
         "For questions asking who is identified by a source as holding a role, title, office, signer position, reporter role, author role, or other source-stated capacity, query direct role predicates when they exist, but also include source-record text/field rows with Person/Actor and Role/Title slots as variables when the direct predicate is absent or returns only an organization-level role. Source-stated role lines are evidence; do not answer from a neighboring organization-role predicate alone.",
         "For item-description questions, treat evidence_item(Item, Description) as an equivalent descriptive surface to item_description(Item, Description) when both predicates appear in the inventory. Query whichever predicate exists, and prefer broad variables when the question names the item in natural language.",
         "For subgrant purpose questions, query the financial support bundle together: subgrant(Subgrant, ParentGrant, Recipient), subgrant_purpose(Subgrant, Purpose), subgrant_amount(Subgrant, Amount), subgrant_expended(Subgrant, Expended), subgrant_remaining(Subgrant, Remaining), and subgrant_status(Subgrant, Status, Date) when available.",
@@ -615,6 +616,7 @@ def main() -> int:
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For explicit table membership or member-count questions, if compiled_query_templates includes explicit_table_membership/4, prefer explicit_table_membership(SourceRow, Version, Group, Member) for direct grouping/member table evidence before sparse semantic member predicates. Legacy roster_table_member/4 is compatibility-only.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
+        "For source-stated reasons, responsibility, correction notes, unresolved claims, non-fault statements, or availability claims, query direct attribution predicates when present, such as source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope), source_claim(Source, Subject, Claim, Status), claim_made(Source, Claim, Scope), or source_authority(SubjectOrScope, Authority, Action). Source-record text or fields can corroborate addressability, but direct attribution rows are the answer-bearing surface when the question asks what a source said or who gave the reason.",
         "For ledger/record/institution questions, pair the descriptive event predicate with the likely container predicate using the same variable name, such as grievance_method(Grievance, Method) plus grievance_target(Grievance, Institution).",
         "Do not lock onto a single grievance/document id before discovering answer-bearing rows; duplicate compiled records may contain different detail levels.",
         "For reporter questions, include grievance_reporter(Grievance, Reporter) and a content-bearing predicate with the same Grievance variable; the thing reported may appear in an explanation or method label rather than in grievance_target.",
@@ -1727,8 +1729,11 @@ def run_one_question(
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_text_question_token_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_current_state_source_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_field_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_attribution_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_event_description_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_complementary_relation_hint_queries(
@@ -2069,6 +2074,29 @@ def _is_quantity_source_text_question(text: str) -> bool:
     )
 
 
+def _current_state_source_text_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose deterministic source text for current-state value questions."""
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_text_atom/2" not in signatures:
+        return []
+    text = str(utterance or "").casefold()
+    asks_current_state = bool(re.search(r"\b(?:current|currently|latest|final|as\s+of)\b", text))
+    asks_value_or_state = bool(
+        re.search(
+            r"\b(?:rent|amount|value|status|state|condition|effective|available|assignment|allocation|date)\b",
+            text,
+        )
+    )
+    if not asks_current_state or not asks_value_or_state:
+        return []
+    return ["source_record_text_atom(SourceRow, TextAtom)."]
+
+
 def _source_text_question_needles(utterance: str) -> list[str]:
     raw = str(utterance or "")
     tokens = _query_atom_tokens(raw)
@@ -2208,6 +2236,111 @@ def _source_coordinate_hint_queries(
     if "source_record_text_atom/2" in signatures:
         out.append("source_record_text_atom(SourceRow, TextAtom).")
     return out[:5]
+
+
+_SOURCE_ATTRIBUTION_HINT_MARKERS = (
+    "stated",
+    "states",
+    "said",
+    "says",
+    "claimed",
+    "claims",
+    "noted",
+    "note",
+    "found",
+    "finding",
+    "explained",
+    "reason",
+    "why",
+    "responsible",
+    "fault",
+    "denied",
+    "authorized",
+    "corrected",
+    "available",
+)
+
+
+def _source_attribution_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose direct source-attribution carriers for source-stated questions.
+
+    The trigger is question language about stated/reason/authority surfaces plus
+    the compiled inventory. It never inspects fixture names or answer strings.
+    """
+
+    text = str(utterance or "").casefold()
+    asks_source_stated_use = bool(re.search(r"\b(?:can|could|may)\b.{0,80}\buse\b", text))
+    if not asks_source_stated_use and not any(marker in text for marker in _SOURCE_ATTRIBUTION_HINT_MARKERS):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "source_attributed_claim/4" in signatures:
+        out.append("source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope).")
+    if "source_claim/4" in signatures:
+        out.append("source_claim(Source, Subject, Claim, Status).")
+    if "claim_made/3" in signatures:
+        out.append("claim_made(Source, Claim, Scope).")
+    if "source_authority/3" in signatures and any(
+        marker in text for marker in ("authoriz", "authority", "responsible", "govern", "source", "why")
+    ):
+        out.append("source_authority(SubjectOrScope, Authority, Action).")
+    if "source_record_text_atom/2" in signatures:
+        out.append("source_record_text_atom(SourceRow, TextAtom).")
+    return out
+
+
+_EVENT_DESCRIPTION_HINT_MARKERS = (
+    "why",
+    "reason",
+    "corrected",
+    "correction",
+    "effective date",
+    "took effect",
+    "takes effect",
+    "superseded",
+    "retracted",
+    "terminated",
+    "what happened",
+)
+
+
+def _event_description_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose event description rows for reason/correction/state-change questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in _EVENT_DESCRIPTION_HINT_MARKERS):
+        return []
+    out: list[str] = []
+    for signature in kb_inventory.get("signatures", []):
+        signature_text = str(signature).strip()
+        if "/" not in signature_text:
+            continue
+        predicate, arity_text = signature_text.rsplit("/", 1)
+        try:
+            arity = int(arity_text)
+        except Exception:
+            continue
+        predicate = predicate.strip()
+        if not predicate or predicate.startswith("source_record_"):
+            continue
+        if arity < 4 or arity > 6:
+            continue
+        if predicate != "event" and not predicate.endswith("_event"):
+            continue
+        query = query_template_for_signature(signature_text)
+        if query:
+            out.append(query)
+        if len(out) >= 4:
+            break
+    return out
 
 
 def _location_floor_hint_queries(

@@ -163,3 +163,39 @@ The repair converts a real class of query-layer misses into exact answers while
 staying below the compile architecture. It does not solve missing correction
 reason, outdoor-use state, first-extension rent, or parking-responsibility
 surfaces. Those remain direct-surface or join-composition pressures.
+
+## ALR-005 - Source Attribution And Current-State Ledger Query Hints
+
+Date: 2026-05-19
+
+Evidence lane: `query_surface_residual_repair`
+
+The remaining ALR residuals split between planner omissions over already
+compiled event/source-attribution rows and current-state values whose effective
+date was stranded in deterministic source-record text. The query runtime now
+adds inventory-gated hints for source-attribution carriers, event-description
+surfaces, and current-state source text when the question language calls for
+those shapes.
+
+Artifacts:
+
+- Targeted attribution replay: `tmp\source_authority_source_text_hint_slice_20260519\domain_bootstrap_qa_20260519T101851935636Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Targeted current-state replay: `tmp\source_authority_current_state_hint_q007_20260519\domain_bootstrap_qa_20260519T102834598969Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Full replay: `tmp\source_authority_current_state_hint_full_20260519\domain_bootstrap_qa_20260519T103601390037Z_qa_qwen-qwen3-6-35b-a3b.json`
+- Residual audit: `tmp\source_authority_current_state_hint_full_residuals_20260519.json`
+
+Result:
+
+- Targeted residual slice: `6 exact / 0 partial / 0 miss`
+- Full replay: `40 exact / 0 partial / 0 miss`
+- Query residual fallback rows after full replay: `0`
+- Compatibility rows / writes / runtime load errors: `0` / `0` / `0`
+
+Meaning lesson:
+
+This repair did not add facts and did not teach the harness lease vocabulary.
+It exposed existing direct attribution/event carriers and deterministic source
+ledgers when question language asked for source-stated reasons, responsibility,
+availability, or current-state values. The remaining architectural lesson is
+that source-record-only distinctions can be answered safely at query time, but
+high-volume recurrence should still graduate into direct compile surfaces.
