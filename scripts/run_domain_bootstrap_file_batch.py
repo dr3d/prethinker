@@ -374,6 +374,7 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "generic_predicate_count": score.get("generic_predicate_count"),
         "detail_wrapper_drift_flags": _detail_wrapper_drift_flags(payload),
         "compile_surface_contract_flags": _compile_surface_contract_flags(payload),
+        "profile_delivery_flags": _profile_delivery_flags(payload),
     }
 
 
@@ -452,6 +453,35 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "description, note, docket text, or source_record row is additive only and must not be the only "
                 "carrier for an explicit authority constraint."
             )
+        if "profile_delivery:source_authority_carrier_offered_but_undelivered:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile offered a direct source-authority carrier but emitted no "
+                "matching rows. In this retry, populate source_authority/3 or an equivalent allowed carrier for "
+                "source-stated authority/rule/order/policy constraints, keeping governed subject or scope, "
+                "authority/source, and authorized action/status joinable."
+            )
+        if "profile_delivery:source_claim_carrier_offered_but_undelivered:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile offered a direct source-attributed claim carrier but emitted "
+                "no matching rows. In this retry, populate source_attributed_claim/4 or an equivalent allowed carrier "
+                "for source-stated reports, notes, statements, findings, opinions, or unresolved claims, keeping "
+                "source/speaker, content/status/finding, and source row or scope joinable."
+            )
+        if "profile_delivery:status_state_carrier_offered_but_undelivered:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile offered a direct status/state carrier but emitted no matching "
+                "rows. In this retry, populate status_state_at/4, *_status_at/3-4, *_state_at/3-4, or an equivalent "
+                "allowed carrier for point-in-time status, current condition, availability, pending resolution, "
+                "supersession, or scoped population state. Keep subject/subset, state value, and temporal/source scope "
+                "together."
+            )
+        if "profile_delivery:quantity_carrier_offered_but_undelivered:" in reason:
+            add(
+                "QUALITY GATE RETRY: the prior compile offered a direct quantity/event carrier but emitted no matching "
+                "rows. In this retry, populate event_measurement/4, event_quantity/4, reading_value/4, "
+                "measurement_value/4, metric_observation/4, or an equivalent allowed carrier for source-stated "
+                "numeric values, keeping event/record id, measure, value, and unit/basis together."
+            )
     return lines
 
 
@@ -474,6 +504,28 @@ def _compile_surface_contract_flags(payload: dict[str, Any]) -> list[str]:
         source_signal_count = _optional_int(report.get("source_signal_count")) or 0
         direct_surface_count = _optional_int(report.get("direct_surface_count")) or 0
         flags.append(f"{contract}:{status}:source={source_signal_count}:direct={direct_surface_count}")
+    return flags
+
+
+def _profile_delivery_flags(payload: dict[str, Any]) -> list[str]:
+    source_compile = payload.get("source_compile", {}) if isinstance(payload.get("source_compile"), dict) else {}
+    delivery = source_compile.get("profile_delivery", {}) if isinstance(source_compile.get("profile_delivery"), dict) else {}
+    findings = delivery.get("findings", []) if isinstance(delivery.get("findings"), list) else []
+    flags: list[str] = []
+    for finding in findings:
+        if not isinstance(finding, dict):
+            continue
+        cls = str(finding.get("class") or "").strip()
+        if not cls:
+            continue
+        source_signal_count = _optional_int(finding.get("source_signal_count")) or 0
+        offered = [
+            str(item).strip()
+            for item in finding.get("offered_carriers", [])
+            if str(item).strip()
+        ] if isinstance(finding.get("offered_carriers"), list) else []
+        offered_label = ",".join(offered[:6]) if offered else "none"
+        flags.append(f"{cls}:source={source_signal_count}:offered={offered_label}")
     return flags
 
 
@@ -620,6 +672,13 @@ def _quality_gate_result(
     ] if isinstance(item.get("compile_surface_contract_flags"), list) else []
     if contract_flags:
         reasons.extend(f"compile_surface_contract:{flag}" for flag in contract_flags)
+    profile_delivery_flags = [
+        str(flag)
+        for flag in item.get("profile_delivery_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("profile_delivery_flags"), list) else []
+    if profile_delivery_flags:
+        reasons.extend(f"profile_delivery:{flag}" for flag in profile_delivery_flags)
     admitted = _optional_int(item.get("compile_admitted")) or 0
     skipped = _optional_int(item.get("compile_skipped")) or 0
     if admitted <= 0:
@@ -638,6 +697,7 @@ def _quality_gate_result(
         "compile_json": str(result.get("compile_json", "")),
         "detail_wrapper_drift_flags": detail_wrapper_flags,
         "compile_surface_contract_flags": contract_flags,
+        "profile_delivery_flags": profile_delivery_flags,
     }
 
 

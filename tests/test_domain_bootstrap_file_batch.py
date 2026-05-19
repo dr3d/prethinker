@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_file_batch import (
     _detail_wrapper_drift_flags,
     _extract_compile_summary,
+    _profile_delivery_flags,
     _quality_gate_result,
     _quality_retry_context_lines,
     _render_md,
@@ -72,6 +73,35 @@ def test_compile_batch_summary_flags_ledger_only_surface_contract() -> None:
 
     assert summary["compile_surface_contract_flags"] == [
         "operational_lifecycle_preservation:ledger_only:source=2:direct=0"
+    ]
+
+
+def test_compile_batch_summary_extracts_profile_delivery_flags() -> None:
+    payload = {
+        "parsed_ok": True,
+        "parsed": {"candidate_predicates": [{"signature": "status_state_at/4"}]},
+        "source_compile": {
+            "admitted_count": 9,
+            "skipped_count": 1,
+            "profile_delivery": {
+                "findings": [
+                    {
+                        "class": "status_state_carrier_offered_but_undelivered",
+                        "source_signal_count": 2,
+                        "offered_carriers": ["status_state_at/4"],
+                    }
+                ]
+            },
+        },
+        "score": {"rough_score": 0.9, "risk_count": 2},
+    }
+
+    assert _profile_delivery_flags(payload) == [
+        "status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
+    ]
+    summary = _extract_compile_summary(payload)
+    assert summary["profile_delivery_flags"] == [
+        "status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
     ]
 
 
@@ -224,6 +254,33 @@ def test_compile_quality_gate_holds_surface_contract_flag() -> None:
     ]
 
 
+def test_compile_quality_gate_holds_profile_delivery_flag() -> None:
+    result = {
+        "fixture": "fixture_profile_delivery",
+        "returncode": 0,
+        "compile_json": "compile.json",
+        "summary": {
+            "parsed_ok": True,
+            "rough_score": 0.9,
+            "risk_count": 2,
+            "candidate_predicates": 12,
+            "compile_admitted": 30,
+            "compile_skipped": 0,
+            "profile_delivery_flags": [
+                "status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
+            ],
+        },
+    }
+
+    gate = _quality_gate_result(result, min_rough_score=0.775, max_risk_count=5)
+
+    assert gate["passed"] is False
+    assert gate["decision"] == "hold"
+    assert gate["reasons"] == [
+        "profile_delivery:status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
+    ]
+
+
 def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds() -> None:
     lines = _quality_retry_context_lines(
         {
@@ -231,6 +288,7 @@ def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds
                 "detail_wrapper_drift:location_backbone_missing_with_wrapper:source_detail",
                 "compile_surface_contract:operational_lifecycle_preservation:ledger_only:source=2:direct=0",
                 "compile_surface_contract:source_authority_pair_preservation:ledger_only:source=1:direct=0",
+                "profile_delivery:status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4",
             ]
         }
     )
@@ -238,6 +296,7 @@ def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds
     assert any("missing location backbone surface" in line for line in lines)
     assert any("complete direct lifecycle units" in line for line in lines)
     assert any("direct source-authority surface" in line for line in lines)
+    assert any("direct status/state carrier" in line for line in lines)
     joined = "\n".join(lines).casefold()
     assert "fixture" not in joined
     assert "source_detail, event, context, note, or summary row is additive only" in joined

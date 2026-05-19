@@ -501,6 +501,12 @@ Recent transfer work supports the current direction:
   The recognizer is intentionally stricter than provenance: plain `source`
   wording does not make a claim row authority-like unless authority, governing,
   order, policy, or rule semantics are also present.
+- Batch quality gates now read profile-delivery findings directly. A replay
+  with quality retry repaired the source-authority delivery gap by emitting
+  `source_authority/3`, but the final artifact still had a status/state delivery
+  warning. That result matters: quality retries can repair delivery failures,
+  and the gate now treats remaining profile-delivery warnings as hold reasons
+  instead of allowing a superficially clean pass.
 - The compile-surface audit now reports relation-contract status counts in its
   top-level summary, so pressure boards no longer need ad hoc counting scripts
   for quantity delivery, source attribution, status scope, repeated-record
