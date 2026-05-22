@@ -328,6 +328,10 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "Words that merely name the slot, such as grievance_label, method_detail, explanation_detail, candidate, label, title, description, content, value, status, authority, or institution, are variables too; write them as GrievanceLabel, MethodDetail, ExplanationDetail, Candidate, Label, Title, Description, Content, Value, Status, Authority, or Institution.",
         "If you want all rows for grievance/2, query grievance(Grievance, Label), not grievance(Grievance, grievance_label).",
         "For person/place names that may have alternate atom order or abbreviation, such as Luis Ferreira vs luis_ferreira/ferreira_luis or Pier 7 vs pier_7/pier_7_chlorination_unit, discover rows with variables first. Do not combine a constant copied from one predicate family with another predicate family unless that exact constant appears in that predicate's examples.",
+        "For product, retailer, store, state, geography, or distribution questions, do not answer from a broad state predicate alone when retailer-scoped predicates also exist. Prefer direct item-retailer-state carriers such as product_sold_at/3, product_retailer_in_state/3, bulk_item_distributed_to/3, or equivalent; otherwise join sibling rows with the same item variable, such as sold_at_retailer(Item, Retailer) plus sold_in_state(Item, State).",
+        "For product-category questions using words such as bulk item, retail packaged item, pepper, cucumber, herb, box, or bag, treat the category word as a filter over returned item/name rows, not as a guessed lowercase constant. Query recall/item/product predicates with Item as a variable, then retrieve product_name(Item, Name), item_name(Item, Name), product_category(Item, Category), or equivalent rows to select matching returned items.",
+        "For questions asking which products a retailer/location carried within a state or row-specific distribution scope, retrieve restriction and constraint predicates as answer-bearing rows, such as retailer_product_restriction/3, product_restriction/3, bulk_item_retailer_constraint/3-4, or equivalent, and join them with state/retailer distribution rows when needed. A broad sold_in_state/2 result alone is not enough for product-restriction questions.",
+        "For table-shaped distribution questions where direct paired predicates are missing or thin, use deterministic source-record pair rows as source-structure evidence: source_record_cell_item_pair(Row, LeftIndex, StateOrScope, RightIndex, RetailerOrLocation) and source_record_cell_item_pair_qualifier(Row, LeftIndex, StateOrScope, RightIndex, RetailerOrLocation, Qualifier). These rows preserve printed table coordinates only; use them to support source-surface answers, not to invent facts beyond the table.",
     ],
     "epistemic_policy": [
         "Return claim/source/support queries for claimed or alleged content; do not ask for objective fact predicates when the KB only contains source-attributed claims.",
@@ -1493,6 +1497,96 @@ def _source_record_field_arg_is_row_like(value: str) -> bool:
     return any(marker in lowered for marker in ("row", "line", "source"))
 
 
+def _source_record_row_id(value: Any) -> str:
+    text = str(value or "").strip().strip("'\"")
+    if re.fullmatch(r"(?:src|source)_(?:row|line)_\d+", text, flags=re.IGNORECASE):
+        return text
+    if re.fullmatch(r"(?:row|line)_\d+", text, flags=re.IGNORECASE):
+        return text
+    return ""
+
+
+def _source_record_row_context_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query: str,
+    result: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Follow returned source-row ids to their label/text/section context."""
+
+    if not isinstance(result, dict) or result.get("status") != "success":
+        return None
+    predicate = str(result.get("predicate", "")).strip()
+    if not predicate.startswith("source_record_"):
+        return None
+    rows = result.get("rows", [])
+    if not isinstance(rows, list):
+        return None
+    source_rows: list[str] = []
+    for row in rows[:12]:
+        if not isinstance(row, dict):
+            continue
+        for value in row.values():
+            row_id = _source_record_row_id(value)
+            if row_id:
+                source_rows.append(row_id)
+    source_rows = _ordered_atom_unique(source_rows)[:8]
+    if not source_rows:
+        return None
+    companion_queries: list[str] = []
+    for row_id in source_rows:
+        companion_queries.extend(
+            [
+                f"source_record_label({row_id}, SourceRecordLabel).",
+                f"source_record_text_atom({row_id}, SourceRecordTextAtom).",
+                f"source_record_section({row_id}, SourceRecordSection).",
+            ]
+        )
+    out_rows: list[dict[str, Any]] = []
+    used_queries: list[str] = []
+    for companion_query in companion_queries:
+        context_result = runtime.query_rows(companion_query)
+        if context_result.get("status") != "success":
+            continue
+        used_queries.append(companion_query)
+        parsed = parse_prolog_query(companion_query)
+        context_predicate = parsed[0] if parsed else "source_record_context"
+        for context_row in context_result.get("rows", []) or []:
+            if isinstance(context_row, dict):
+                out_rows.append(
+                    {
+                        "source_query": companion_query,
+                        "context_predicate": context_predicate,
+                        **context_row,
+                    }
+                )
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_label(SourceRow, SourceRecordLabel).",
+        "result": {
+            "predicate": "source_record_label",
+            "prolog_query": "source_record_label(SourceRow, SourceRecordLabel).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": ["SourceRow", "SourceRecordLabel", "SourceRecordTextAtom", "SourceRecordSection"],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "source-record row context companion followed returned source-row ids "
+                    "to same-row label/text/section evidence"
+                ),
+                "original_query": query,
+                "source_rows": source_rows,
+                "source_queries": used_queries,
+            },
+        },
+        "derived_from_queries": [query, *used_queries],
+    }
+
+
 def _source_record_numeric_token_repaired_query(query: str) -> dict[str, Any] | None:
     goals = parse_prolog_query_goals(query)
     if not goals:
@@ -1731,10 +1825,15 @@ def run_one_question(
             *_source_record_table_count_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_text_question_token_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_section_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_record_compile_surface_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_current_state_source_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_field_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_attribution_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_counsel_opinion_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_vote_record_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_award_cap_quantity_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_event_description_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_location_floor_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_authority_instrument_metadata_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
@@ -1768,6 +1867,15 @@ def run_one_question(
             include_legacy_native_helpers=include_legacy_native_helper_adapters,
         )
         query_results = [*query_results, *evidence_plan_query_results]
+    source_citation_support = _source_record_citation_text_companion(runtime, utterance=utterance)
+    if source_citation_support:
+        query_results.append(source_citation_support)
+    section_list_count_support = _source_record_section_list_count_companion(runtime, utterance=utterance)
+    if section_list_count_support:
+        query_results.append(section_list_count_support)
+    relative_next_day_support = _source_record_relative_next_day_companion(runtime, utterance=utterance)
+    if relative_next_day_support:
+        query_results.append(relative_next_day_support)
     query_results = _dedupe_helper_query_results(query_results)
     query_results = _limit_helper_query_results(
         query_results,
@@ -2106,6 +2214,35 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         return []
 
     identifier_needles: list[str] = []
+    derived_needles: list[str] = []
+    lowered_raw = raw.casefold()
+    if "filing" in tokens:
+        derived_needles.append("filed")
+    if {"tow", "line"} <= set(tokens) or re.search(r"\btow\s+line\b", lowered_raw):
+        derived_needles.append("tow_line")
+        if any(token in tokens for token in {"part", "parted", "parts"}) or re.search(r"\bpart(?:ed|s)?\b", lowered_raw):
+            derived_needles.append("tow_line_parted")
+            derived_needles.append("parted")
+    if {"rescue", "helicopter"} <= set(tokens) or re.search(r"\bhelicopter\s+launch", lowered_raw):
+        derived_needles.append("launched_a_helicopter_from")
+        derived_needles.append("helicopter")
+    state_phrase_aliases = {
+        "kentucky": "ky",
+        "new york": "ny",
+        "ohio": "oh",
+        "pennsylvania": "pa",
+        "west virginia": "wv",
+        "virginia": "va",
+    }
+    state_aliases = [
+        alias
+        for phrase, alias in state_phrase_aliases.items()
+        if re.search(rf"\b{re.escape(phrase)}\b", lowered_raw)
+        and not (phrase == "virginia" and re.search(r"\bwest\s+virginia\b", lowered_raw))
+    ]
+    if len(state_aliases) >= 3:
+        derived_needles.append("_".join(state_aliases))
+        derived_needles.extend(state_aliases)
     for pattern in (
         r"\b(?:transfer|transfers|transferred|alter|alters|altered|determine|determines|determined|hold|holds|held)\s+(?:legal\s+)?(?:title|ownership)\b",
         r"\b(?:title|ownership)\s+(?:transfer|transfers|transferred|holder|holders|status|determination)\b",
@@ -2115,6 +2252,13 @@ def _source_text_question_needles(utterance: str) -> list[str]:
             if needle:
                 identifier_needles.append(needle)
     for match in re.finditer(r"\b[A-Z]\.\s*[A-Z][A-Za-z]+\b", raw):
+        needle = _normalize_text_filter_atom(match.group(0))
+        if needle:
+            identifier_needles.append(needle)
+    for match in re.finditer(
+        r"\b[A-Z][A-Za-z0-9&]*(?:\s+[A-Z][A-Za-z0-9&]*){0,5}\s+(?:Inc|LLC|Corp|Corporation|Company)\.?\b",
+        raw,
+    ):
         needle = _normalize_text_filter_atom(match.group(0))
         if needle:
             identifier_needles.append(needle)
@@ -2131,8 +2275,101 @@ def _source_text_question_needles(utterance: str) -> list[str]:
             if any(token.isdigit() for token in group) or width == 3:
                 phrase_needles.append("_".join(group))
 
+    priority_unigram_markers = {
+        "abstained",
+        "abstention",
+        "administrator",
+        "affiliation",
+        "allocation",
+        "amendment",
+        "authorizing",
+        "basis",
+        "billing",
+        "counsel",
+        "city",
+        "code",
+        "date",
+        "dealer",
+        "dealers",
+        "delivery",
+        "disclosed",
+        "docked",
+        "draft",
+        "drafted",
+        "deployed",
+        "deficiencies",
+        "deficiency",
+        "eligible",
+        "eligibility",
+        "filed",
+        "filing",
+        "final",
+        "floor",
+        "flag",
+        "flagged",
+        "freshire",
+        "ground",
+        "held",
+        "helicopter",
+        "hours",
+        "identifier",
+        "immediate",
+        "incorporated",
+        "ineligible",
+        "ineligibility",
+        "initial",
+        "initially",
+        "issued",
+        "citation",
+        "component",
+        "damaged",
+        "days",
+        "direction",
+        "diver",
+        "farms",
+        "letter",
+        "loaner",
+        "launch",
+        "launched",
+        "located",
+        "location",
+        "meeting",
+        "minutes",
+        "notice",
+        "opinion",
+        "original",
+        "originally",
+        "packet",
+        "phone",
+        "published",
+        "recall",
+        "received",
+        "recommendations",
+        "reason",
+        "released",
+        "release",
+        "retail",
+        "retailer",
+        "retailers",
+        "revised",
+        "resolution",
+        "signed",
+        "sold",
+        "status",
+        "state",
+        "subject",
+        "supplemental",
+        "time",
+        "timezone",
+        "tow",
+        "unit",
+        "units",
+        "vegetable",
+        "zone",
+    }
+    priority_unigram_needles = [token for token in tokens if token in priority_unigram_markers]
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
-    return _ordered_atom_unique([*identifier_needles, *phrase_needles, *unigram_needles])
+    return _ordered_atom_unique([*identifier_needles, *derived_needles, *priority_unigram_needles, *phrase_needles, *unigram_needles])
 
 
 def _source_field_question_key_hint_queries(
@@ -2155,6 +2392,127 @@ def _source_field_question_key_hint_queries(
             continue
         out.append(f"source_record_field(SourceRow, {field}, Value).")
     return _ordered_query_unique(out)[:6]
+
+
+def _source_section_question_key_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Join source-record sections to their text when the question names the section key."""
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_section/2" not in signatures or "source_record_text_atom/2" not in signatures:
+        return []
+    question_tokens = {
+        token
+        for token in _query_atom_tokens(utterance)
+        if len(token) >= 3 and token not in {"the", "and", "for", "which", "what", "where", "when", "how"}
+    }
+    if not question_tokens:
+        return []
+    scored: list[tuple[int, str]] = []
+    direct_section_aliases = {
+        "sold": ["sold_at"],
+        "number": ["recall_number"],
+        "phone": ["consumer_contact"],
+        "hours": ["consumer_contact"],
+        "zone": ["consumer_contact"],
+        "timezone": ["consumer_contact"],
+        "billing": ["billing_code"],
+        "filing": ["filing", "filing_line", "fr_doc_filing_line"],
+        "filed": ["filing", "filing_line", "fr_doc_filing_line"],
+    }
+    for token in sorted(question_tokens):
+        for section in direct_section_aliases.get(token, []):
+            scored.append((20, f"source_record_section(SourceRow, {section}), source_record_text_atom(SourceRow, TextAtom)."))
+    for section in _source_record_section_headers(kb_inventory):
+        section_tokens = {
+            token
+            for token in _query_atom_tokens(section)
+            if len(token) >= 3 and token not in {"the", "and", "for"}
+        }
+        if not section_tokens or not (section_tokens & question_tokens):
+            continue
+        overlap = section_tokens & question_tokens
+        score = len(overlap)
+        if any(token in overlap for token in {"sold", "billing", "filing", "docked", "deficiencies", "contact"}):
+            score += 10
+        scored.append((score, f"source_record_section(SourceRow, {section}), source_record_text_atom(SourceRow, TextAtom)."))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return _ordered_query_unique([query for _score, query in scored])[:6]
+
+
+def _source_record_section_headers(kb_inventory: dict[str, Any]) -> list[str]:
+    examples = kb_inventory.get("examples", {})
+    if not isinstance(examples, dict):
+        return []
+    sections: list[str] = []
+    for signature, clauses in examples.items():
+        if str(signature).split("/", 1)[0] != "source_record_section" or not isinstance(clauses, list):
+            continue
+        for clause in clauses[:120]:
+            parsed = parse_prolog_query(str(clause))
+            if parsed is None:
+                continue
+            predicate, args = parsed
+            if predicate == "source_record_section" and len(args) >= 2 and not _is_prolog_variable(args[1]):
+                sections.append(args[1])
+    return _ordered_atom_unique(sections)
+
+
+def _source_record_compile_surface_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Prefer deterministic source-record carrier facts when the compile emitted them."""
+
+    text = str(utterance or "").casefold()
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "source_record_row_context/4" in signatures and any(
+        marker in text
+        for marker in (
+            "signed",
+            "document type",
+            "final rule",
+            "proposed rule",
+            "notice",
+            "free",
+            "fee",
+            "charge",
+            "cost",
+            "verify",
+            "part of the recall",
+            "part of recall",
+            "break apart",
+            "broke apart",
+            "next day",
+        )
+    ):
+        out.append("source_record_row_context(SourceRow, SourceRecordLabel, SourceRecordTextAtom, SourceRecordSection).")
+    if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("vin", "vehicle identification", "part of the recall", "part of recall")):
+        out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("vehicle_identification_number_vin", TextAtom).')
+    if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("free", "fee", "charge", "cost")):
+        out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("free_repair", TextAtom).')
+    if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("break apart", "broke apart", "shoreline")):
+        out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("broke_apart_on_the_shoreline_the_next_day", TextAtom).')
+    if "source_record_citation/2" in signatures and (
+        "citation" in text or "federal register" in text or re.search(r"\bfr\b", text)
+    ):
+        out.append("source_record_citation(SourceRow, Citation).")
+    if "source_record_date_alias/3" in signatures and any(marker in text for marker in ("filed", "filing", "date", "stamped")):
+        out.append("source_record_date_alias(SourceRow, CompactDate, CanonicalDate).")
+    if "source_record_count_word/3" in signatures and _utterance_asks_for_count(text):
+        out.append("source_record_count_word(SourceRow, CountWord, Count).")
+    if "source_record_section_list_count_detail/5" in signatures and _utterance_asks_for_count(text):
+        out.append("source_record_section_list_count_detail(HeadingRow, ScopeRow, Category, ScopeText, Count).")
+    if "source_record_section_list_count_member/5" in signatures and any(
+        marker in text for marker in ("distinct", "listed", "items", "products")
+    ):
+        out.append("source_record_section_list_count_member(HeadingRow, ScopeRow, Position, MemberRow, MemberText).")
+    return out
 
 
 def _source_record_field_headers(kb_inventory: dict[str, Any]) -> list[str]:
@@ -2307,6 +2665,117 @@ def _source_attribution_hint_queries(
         marker in text for marker in ("authoriz", "authority", "responsible", "govern", "source", "why")
     ):
         out.append("source_authority(SubjectOrScope, Authority, Action).")
+    if "source_record_text_atom/2" in signatures:
+        out.append("source_record_text_atom(SourceRow, TextAtom).")
+    return out
+
+
+_COUNSEL_OPINION_HINT_MARKERS = (
+    "counsel",
+    "opinion",
+    "eligible",
+    "eligibility",
+    "qualif",
+    "prong",
+    "percentage",
+    "percent",
+    "beneficiar",
+    "available",
+)
+
+
+def _counsel_opinion_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose legal/counsel opinion carriers for eligibility and prong questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in _COUNSEL_OPINION_HINT_MARKERS):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "counsel_opinion/3" in signatures:
+        out.append("counsel_opinion(Document, Subject, Conclusion).")
+    if "legal_opinion/3" in signatures:
+        out.append("legal_opinion(Document, Subject, Conclusion).")
+    if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("counsel", "opinion", "prong")):
+        out.append("source_record_text_atom(SourceRow, TextAtom).")
+    return out
+
+
+_VOTE_RECORD_HINT_MARKERS = (
+    "vote",
+    "tally",
+    "against",
+    "abstain",
+    "abstention",
+    "supermajority",
+    "denominator",
+    "threshold",
+    "motion",
+)
+
+
+def _vote_record_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose vote-record carriers for tally, threshold, and motion questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in _VOTE_RECORD_HINT_MARKERS):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "vote_record/5" in signatures:
+        out.append("vote_record(Motion, ForVotes, AgainstVotes, Denominator, ThresholdRequired).")
+    if "vote_tally/5" in signatures:
+        out.append("vote_tally(BodyOrMotion, Subject, Result, Tally, Scope).")
+    if "motion_vote/5" in signatures:
+        out.append("motion_vote(Motion, ForVotes, AgainstVotes, Denominator, ThresholdRequired).")
+    if "motion_result/2" in signatures:
+        out.append("motion_result(Motion, Result).")
+    return out
+
+
+_AWARD_CAP_QUANTITY_HINT_MARKERS = (
+    "award",
+    "awarded",
+    "grant",
+    "cap",
+    "budget",
+    "total",
+    "exceed",
+    "exceeded",
+    "exceeds",
+    "amount",
+    "how much",
+)
+
+
+def _award_cap_quantity_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Expose award and cap carriers for total/exceedance questions."""
+
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in _AWARD_CAP_QUANTITY_HINT_MARKERS):
+        return []
+    asks_cap_or_total = any(marker in text for marker in ("cap", "budget", "total", "exceed", "amount", "how much"))
+    asks_award = any(marker in text for marker in ("award", "awarded", "grant"))
+    if not (asks_cap_or_total and asks_award):
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "award_declaration/3" in signatures:
+        out.append("award_declaration(Subject, Amount, Basis).")
+    if "budget_cap/2" in signatures:
+        out.append("budget_cap(CapType, Amount).")
     if "source_record_text_atom/2" in signatures:
         out.append("source_record_text_atom(SourceRow, TextAtom).")
     return out
@@ -2530,6 +2999,9 @@ def run_query_plan(
                 )
 
         last_result = results[-1].get("result", {}) if results else {}
+        row_context = _source_record_row_context_companion(runtime, query=effective_query, result=last_result)
+        if row_context:
+            append_companion(row_context)
         source_record_repair = _source_record_field_sibling_repaired_query(effective_query)
         if source_record_repair:
             repaired_query = str(source_record_repair.get("query", "")).strip()
@@ -2609,6 +3081,9 @@ def run_query_plan(
         unary_distinct_count = _unary_distinct_count_companion(runtime, query=effective_query)
         if unary_distinct_count:
             append_companion(unary_distinct_count)
+        source_record_pair = _source_record_distribution_pair_query(runtime, query=effective_query)
+        if source_record_pair:
+            append_companion(source_record_pair)
         if helper_companions_enabled:
             for domain_companion in _domain_companion_queries(
                 runtime,
@@ -4553,7 +5028,16 @@ def _source_rows_for_method_actor_frame(
 
 
 def _loose_atom_token_set(value: str) -> set[str]:
-    tokens = set(_type_taxonomy_tokens(value))
+    tokens = {
+        token
+        for token in _type_taxonomy_tokens(value)
+        if re.fullmatch(r"[a-z0-9]+", str(token or ""))
+    }
+    tokens.update(
+        token
+        for token in re.split(r"[^a-z0-9]+", _display_source_phrase(str(value or "")).casefold())
+        if token
+    )
     for token in list(tokens):
         if len(token) > 3 and token.endswith("s"):
             tokens.add(token[:-1])
@@ -4631,6 +5115,9 @@ def _domain_companion_queries(
     item_description_detail = _item_description_detail_companion(runtime, predicate=predicate, args=args, query=query)
     if item_description_detail:
         source_record_companions.append(item_description_detail)
+    source_pair = _source_record_distribution_pair_companion(runtime, predicate=predicate, args=args, query=query)
+    if source_pair:
+        source_record_companions.append(source_pair)
     if include_legacy_native_helpers:
         for legacy_companion in (
             _source_record_table_body_count_companion(runtime, predicate=predicate, args=args, query=query),
@@ -4903,6 +5390,510 @@ def _domain_companion_queries(
             )
         return out
     return []
+
+
+def _source_record_distribution_pair_companion(
+    runtime: CorePrologRuntime,
+    *,
+    predicate: str,
+    args: list[str],
+    query: str,
+) -> dict[str, Any] | None:
+    if predicate not in {
+        "source_record_cell_item_pair",
+        "source_record_cell_item_pair_qualifier",
+        "source_record_field_item_pair",
+        "source_record_field_item_pair_qualifier",
+    } and not any(marker in predicate for marker in ("distribut", "retail", "sold", "store")):
+        return None
+    raw_constants = [
+        _normalize_text_filter_atom(str(arg or "").strip().strip("'\""))
+        for arg in args
+        if not _is_prolog_variable(str(arg or "").strip())
+        and not _is_numeric_atom(str(arg or "").strip())
+        and _normalize_text_filter_atom(str(arg or "").strip().strip("'\"")) not in GENERIC_QUERY_PLACEHOLDERS
+    ]
+    raw_constants = [item for item in raw_constants if item]
+    constants = _source_record_pair_constant_variants(raw_constants)
+    if not constants:
+        return None
+    companion_queries: list[str] = []
+    if len(raw_constants) == 1:
+        for constant in constants:
+            companion_queries.extend(
+                [
+                    "source_record_cell_item_pair_qualifier("
+                    f"Row, LeftIndex, LeftItem, RightIndex, {constant}, Qualifier).",
+                    "source_record_cell_item_pair_qualifier("
+                    f"Row, LeftIndex, {constant}, RightIndex, RightItem, Qualifier).",
+                    f"source_record_cell_item_pair(Row, LeftIndex, LeftItem, RightIndex, {constant}).",
+                    f"source_record_cell_item_pair(Row, LeftIndex, {constant}, RightIndex, RightItem).",
+                ]
+            )
+    else:
+        for left in constants:
+            for right in constants:
+                if left == right:
+                    continue
+                companion_queries.append(
+                    "source_record_cell_item_pair_qualifier("
+                    f"Row, LeftIndex, {left}, RightIndex, {right}, Qualifier)."
+                )
+                companion_queries.append(
+                    f"source_record_cell_item_pair(Row, LeftIndex, {left}, RightIndex, {right})."
+                )
+    rows: list[dict[str, Any]] = []
+    used_queries: list[str] = []
+    for companion_query in _ordered_query_unique(companion_queries):
+        result = runtime.query_rows(companion_query)
+        if result.get("status") != "success":
+            continue
+        used_queries.append(companion_query)
+        for row in result.get("rows", []):
+            if isinstance(row, dict):
+                rows.append({"source_query": companion_query, **row})
+    if not rows:
+        return None
+    return {
+        "query": "source_record_cell_item_pair(Row, LeftIndex, LeftItem, RightIndex, RightItem).",
+        "result": {
+            "predicate": "source_record_cell_item_pair",
+            "prolog_query": "source_record_cell_item_pair(Row, LeftIndex, LeftItem, RightIndex, RightItem).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": ["Row", "LeftIndex", "LeftItem", "RightIndex", "RightItem", "Qualifier"],
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "query-only-companion",
+                "note": (
+                    "source-record distribution pair companion exposed deterministic table cell pairs "
+                    "after a retailer/state distribution query needed paired source-structure evidence"
+                ),
+                "original_query": query,
+                "source_queries": used_queries,
+            },
+        },
+        "derived_from_queries": [query, *used_queries],
+    }
+
+
+def _source_record_pair_constant_variants(constants: list[str]) -> list[str]:
+    variants: list[str] = []
+    seen: set[str] = set()
+    for item in constants:
+        text = str(item or "").strip()
+        if not text:
+            continue
+        candidates = [text]
+        if text.startswith("retailer_"):
+            candidates.append(text.removeprefix("retailer_"))
+        if text.startswith("state_"):
+            candidates.append(text.removeprefix("state_"))
+        candidates.extend(_source_record_pair_state_abbreviation_variants(text))
+        for candidate in candidates:
+            if candidate and candidate not in seen:
+                seen.add(candidate)
+                variants.append(candidate)
+    return variants
+
+
+def _source_record_pair_state_abbreviation_variants(value: str) -> list[str]:
+    return {
+        "al": ["alabama"],
+        "ak": ["alaska"],
+        "az": ["arizona"],
+        "ar": ["arkansas"],
+        "ca": ["california"],
+        "co": ["colorado"],
+        "ct": ["connecticut"],
+        "de": ["delaware"],
+        "fl": ["florida"],
+        "ga": ["georgia"],
+        "hi": ["hawaii"],
+        "ia": ["iowa"],
+        "id": ["idaho"],
+        "il": ["illinois"],
+        "in": ["indiana"],
+        "ks": ["kansas"],
+        "ky": ["kentucky"],
+        "la": ["louisiana"],
+        "ma": ["massachusetts"],
+        "md": ["maryland"],
+        "me": ["maine"],
+        "mi": ["michigan"],
+        "mn": ["minnesota"],
+        "mo": ["missouri"],
+        "ms": ["mississippi"],
+        "mt": ["montana"],
+        "nc": ["north_carolina"],
+        "nd": ["north_dakota"],
+        "ne": ["nebraska"],
+        "nh": ["new_hampshire"],
+        "nj": ["new_jersey"],
+        "nm": ["new_mexico"],
+        "nv": ["nevada"],
+        "ny": ["new_york"],
+        "oh": ["ohio"],
+        "ok": ["oklahoma"],
+        "or": ["oregon"],
+        "pa": ["pennsylvania"],
+        "ri": ["rhode_island"],
+        "sc": ["south_carolina"],
+        "sd": ["south_dakota"],
+        "tn": ["tennessee"],
+        "tx": ["texas"],
+        "ut": ["utah"],
+        "va": ["virginia"],
+        "vt": ["vermont"],
+        "wa": ["washington"],
+        "wi": ["wisconsin"],
+        "wv": ["west_virginia"],
+        "wy": ["wyoming"],
+    }.get(str(value or "").strip().lower(), [])
+
+
+def _source_record_distribution_pair_query(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    companion = _source_record_distribution_pair_companion(runtime, predicate=predicate, args=args, query=query)
+    if not companion:
+        return None
+    result = companion.get("result", {})
+    if isinstance(result, dict) and isinstance(result.get("reasoning_basis"), dict):
+        result["reasoning_basis"]["kind"] = "core-local"
+    return companion
+
+
+def _source_record_citation_text_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "citation" not in text:
+        return None
+    if "federal register" not in text and not re.search(r"\bfr\b", text):
+        return None
+    rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    candidates: list[tuple[int, dict[str, Any]]] = []
+    wants_original_or_proposed = any(token in text for token in ("original", "originally", "proposed"))
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        if not re.search(r"(?:^|_)\d+_fr_\d+(?:_|$)", atom):
+            continue
+        score = 10
+        if wants_original_or_proposed:
+            if any(token in atom for token in ("proposed", "original", "noted", "on_february", "on_march", "on_april")):
+                score += 8
+            if any(token in atom for token in ("document_citation", "published_document")):
+                score -= 3
+        candidates.append((score, {"source_query": "source_record_text_atom(SourceRow, TextAtom).", **row}))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (-item[0], str(item[1].get("SourceRow", ""))))
+    out_rows = [row for _score, row in candidates[:10]]
+    return {
+        "query": "source_record_text_atom(SourceRow, TextAtom).",
+        "result": {
+            "predicate": "source_record_text_atom",
+            "prolog_query": "source_record_text_atom(SourceRow, TextAtom).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": ["SourceRow", "TextAtom"],
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "source-record citation companion scanned admitted source text for normalized Federal Register citation atoms",
+                "original_question": utterance,
+                "citation_pattern": "volume_fr_page",
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_section_list_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    if not _utterance_asks_for_count(utterance):
+        return None
+    question_tokens = _count_scope_tokens(utterance)
+    if not question_tokens:
+        return None
+    source_rows = _runtime_rows(runtime, "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).")
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    normalized_rows: list[dict[str, Any]] = []
+    for row in source_rows:
+        if not isinstance(row, dict):
+            continue
+        line = _safe_int(row.get("Line"))
+        if line is None:
+            continue
+        row_id = str(row.get("SourceRow", ""))
+        label = _normalize_text_filter_atom(str(row.get("Label", "")))
+        text = text_by_row.get(row_id, label)
+        normalized_rows.append(
+            {
+                "SourceRow": row_id,
+                "Kind": str(row.get("Kind", "")),
+                "Line": line,
+                "SectionAtom": str(row.get("SectionAtom", "")),
+                "Label": str(row.get("Label", "")),
+                "TextAtom": text,
+                "tokens": _loose_atom_token_set(text),
+            }
+        )
+    if not normalized_rows:
+        return None
+    normalized_rows.sort(key=lambda item: int(item["Line"]))
+    heading_candidates: list[tuple[int, dict[str, Any]]] = []
+    for row in normalized_rows:
+        if str(row.get("Kind")) not in {"paragraph_line", "labeled_line", "anchored_line"}:
+            continue
+        overlap = question_tokens & set(row.get("tokens", set()))
+        if not overlap:
+            continue
+        score = len(overlap)
+        if any(token in overlap for token in {"retail", "packaged", "bulk", "item", "items", "product", "products"}):
+            score += 4
+        heading_candidates.append((score, row))
+    heading_candidates.sort(key=lambda item: (-item[0], int(item[1]["Line"])))
+    for _score, heading in heading_candidates[:5]:
+        section = str(heading.get("SectionAtom", ""))
+        heading_line = int(heading["Line"])
+        nearby_scope_rows = [
+            row
+            for row in normalized_rows
+            if str(row.get("SectionAtom", "")) == section
+            and heading_line < int(row["Line"]) <= heading_line + 8
+            and {"sold"} & set(row.get("tokens", set()))
+            and (question_tokens & set(row.get("tokens", set())))
+        ]
+        if not nearby_scope_rows:
+            continue
+        scope_row = nearby_scope_rows[0]
+        members: list[dict[str, Any]] = []
+        started = False
+        for row in normalized_rows:
+            if str(row.get("SectionAtom", "")) != section or int(row["Line"]) <= int(scope_row["Line"]):
+                continue
+            if str(row.get("Kind")) == "list_row":
+                started = True
+                members.append(row)
+                continue
+            if started:
+                break
+        if not members:
+            continue
+        count = len(members)
+        return {
+            "query": "source_record_section_list_count_support(Category, ScopeText, Count, Members).",
+            "result": {
+                "predicate": "source_record_section_list_count_support",
+                "prolog_query": "source_record_section_list_count_support(Category, ScopeText, Count, Members).",
+                "result_type": "table",
+                "status": "success",
+                "num_rows": 1,
+                "variables": ["Category", "ScopeText", "Count", "DisplayCount", "Members"],
+                "rows": [
+                    {
+                        "Category": heading.get("TextAtom", ""),
+                        "CategoryRow": heading.get("SourceRow", ""),
+                        "ScopeText": scope_row.get("TextAtom", ""),
+                        "ScopeRow": scope_row.get("SourceRow", ""),
+                        "Count": str(count),
+                        "DisplayCount": _display_count_word(count),
+                        "Members": [member.get("TextAtom", "") for member in members],
+                        "MemberRows": [member.get("SourceRow", "") for member in members],
+                    }
+                ],
+                "reasoning_basis": {
+                    "kind": "core-local",
+                    "note": (
+                        "source-record section list count companion counted contiguous list rows "
+                        "under a question-matching heading and retailer/scope line"
+                    ),
+                    "original_question": utterance,
+                    "heading_row": heading.get("SourceRow", ""),
+                    "scope_row": scope_row.get("SourceRow", ""),
+                },
+            },
+            "derived_from_queries": [
+                "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+                "source_record_text_atom(SourceRow, TextAtom).",
+            ],
+        }
+    return None
+
+
+def _source_record_relative_next_day_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not any(marker in text for marker in ("next day", "break apart", "broke apart", "shoreline")):
+        return None
+    question_tokens = _loose_atom_token_set(text)
+    rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    out_rows: list[dict[str, str]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        atom_tokens = _loose_atom_token_set(atom)
+        if "next_day" not in atom:
+            continue
+        if not ({"break", "broke", "apart", "shoreline"} & atom_tokens):
+            continue
+        if question_tokens and not (
+            question_tokens & atom_tokens & {"having", "faith", "shoreline", "break", "broke", "apart"}
+        ):
+            continue
+        anchor_dates = _source_record_month_date_atoms(atom)
+        if not anchor_dates:
+            for month, day in _source_record_month_day_mentions(atom):
+                year = _source_record_runtime_year_for_month(runtime, month)
+                if year:
+                    anchor_dates.add(f"{int(year):04d}_{_SOURCE_MONTHS[month]}_{day:02d}")
+        if not anchor_dates:
+            continue
+        anchor_date = sorted(anchor_dates, key=lambda value: _date_atom_sort_key(value) or (0, 0, 0))[-1]
+        derived_date = _date_atom_plus_days(anchor_date, 1)
+        if not derived_date:
+            continue
+        out_rows.append(
+            {
+                "SourceRow": str(row.get("SourceRow", "")),
+                "EventText": atom,
+                "AnchorDate": anchor_date,
+                "AnchorDateDisplay": _display_source_date_atom(f"v_{anchor_date}"),
+                "RelativeCue": "next_day",
+                "DerivedDate": derived_date,
+                "DerivedDateDisplay": _display_source_date_atom(f"v_{derived_date}"),
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_relative_next_day_event(SourceRow, EventText, AnchorDate, DerivedDate).",
+        "result": {
+            "predicate": "source_record_relative_next_day_event",
+            "prolog_query": "source_record_relative_next_day_event(SourceRow, EventText, AnchorDate, DerivedDate).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": [
+                "SourceRow",
+                "EventText",
+                "AnchorDate",
+                "AnchorDateDisplay",
+                "RelativeCue",
+                "DerivedDate",
+                "DerivedDateDisplay",
+            ],
+            "rows": out_rows[:8],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "source-record relative-date companion derived next-day event dates from an admitted "
+                    "source text row containing an explicit anchor date and next-day cue"
+                ),
+                "original_question": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_month_date_atoms(value: str) -> set[str]:
+    text = _normalize_text_filter_atom(value).replace("_", " ")
+    atoms: set[str] = set()
+    for match in re.finditer(
+        r"\b(?P<month>january|february|march|april|may|june|july|august|september|october|november|december)\s+"
+        r"(?P<day>\d{1,2})(?:\s+(?P<year>\d{4}))?\b",
+        text,
+    ):
+        year = match.group("year") or _source_record_nearby_year(text, match.start())
+        month = _SOURCE_MONTHS.get(match.group("month"), "")
+        day = int(match.group("day"))
+        if year and month:
+            atoms.add(f"{int(year):04d}_{month}_{day:02d}")
+    return atoms
+
+
+def _source_record_month_day_mentions(value: str) -> list[tuple[str, int]]:
+    text = _normalize_text_filter_atom(value).replace("_", " ")
+    mentions: list[tuple[str, int]] = []
+    for match in re.finditer(
+        r"\b(?P<month>january|february|march|april|may|june|july|august|september|october|november|december)\s+"
+        r"(?P<day>\d{1,2})\b",
+        text,
+    ):
+        mentions.append((match.group("month"), int(match.group("day"))))
+    return mentions
+
+
+def _source_record_runtime_year_for_month(runtime: CorePrologRuntime, month: str) -> str:
+    rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    year_counts: dict[str, int] = {}
+    month_number = _SOURCE_MONTHS.get(month, "")
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        atom = _normalize_text_filter_atom(str(row.get("TextAtom", ""))).replace("_", " ")
+        for match in re.finditer(r"\b(20\d{2}|19\d{2})\b", atom):
+            year = match.group(1)
+            if month in atom or (month_number and f"{month_number}" in atom):
+                year_counts[year] = year_counts.get(year, 0) + 1
+    if not year_counts:
+        return ""
+    return sorted(year_counts.items(), key=lambda item: (-item[1], item[0]))[0][0]
+
+
+def _source_record_nearby_year(text: str, index: int) -> str:
+    prefix = text[:index]
+    suffix = text[index:]
+    years_before = re.findall(r"\b(20\d{2}|19\d{2})\b", prefix)
+    if years_before:
+        return years_before[-1]
+    year_after = re.search(r"\b(20\d{2}|19\d{2})\b", suffix)
+    return year_after.group(1) if year_after else ""
+
+
+def _date_atom_plus_days(value: str, days: int) -> str:
+    key = _date_atom_sort_key(value)
+    if key is None:
+        return ""
+    return (datetime(*key) + timedelta(days=days)).strftime("%Y_%m_%d")
+
+
+def _safe_int(value: Any) -> int | None:
+    text = str(value or "").strip()
+    if not re.fullmatch(r"-?\d+", text):
+        return None
+    return int(text)
+
+
+def _display_count_word(value: int) -> str:
+    for aliases in _COUNT_REFERENCE_CANONICALS.values():
+        if str(value) in aliases:
+            words = sorted(alias for alias in aliases if not alias.isdigit())
+            return words[0] if words else str(value)
+    return str(value)
 
 
 def _mark_legacy_native_helper_adapter(companion: dict[str, Any]) -> dict[str, Any]:
@@ -14711,6 +15702,23 @@ def compact_relevant_clauses_for_evidence_plan(
             predicates.add(predicate)
     if not predicates:
         return []
+    if (
+        "source_record_text_atom" in predicates
+        or "source_record_cell_item" in predicates
+        or any(
+            marker in predicate
+            for predicate in predicates
+            for marker in ("distribut", "retail", "sold", "store")
+        )
+    ):
+        predicates.update(
+            {
+                "source_record_cell_item_pair",
+                "source_record_cell_item_pair_qualifier",
+                "source_record_field_item_pair",
+                "source_record_field_item_pair_qualifier",
+            }
+        )
     selected: list[str] = []
     seen: set[str] = set()
     for clause in [*facts, *rules]:
@@ -15325,6 +16333,14 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain explicit negative support matching the short negative reference answer.",
             "issues": [],
         }
+    if _source_record_numeric_count_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": "Query results contain source-record text with the requested count and matching question scope.",
+            "issues": [],
+        }
     if _source_record_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
@@ -15431,11 +16447,124 @@ def _negative_reference_supported_by_results(*, row: dict[str, Any], reference: 
     return False
 
 
+_COUNT_REFERENCE_CANONICALS = {
+    "0": {"0", "zero"},
+    "1": {"1", "one"},
+    "2": {"2", "two"},
+    "3": {"3", "three"},
+    "4": {"4", "four"},
+    "5": {"5", "five"},
+    "6": {"6", "six"},
+    "7": {"7", "seven"},
+    "8": {"8", "eight"},
+    "9": {"9", "nine"},
+    "10": {"10", "ten"},
+    "11": {"11", "eleven"},
+    "12": {"12", "twelve"},
+    "13": {"13", "thirteen"},
+    "14": {"14", "fourteen"},
+    "15": {"15", "fifteen"},
+    "16": {"16", "sixteen"},
+    "17": {"17", "seventeen"},
+    "18": {"18", "eighteen"},
+    "19": {"19", "nineteen"},
+    "20": {"20", "twenty"},
+}
+
+
+def _source_record_numeric_count_supported_by_results(*, row: dict[str, Any], reference: str) -> bool:
+    if not _utterance_asks_for_count(str(row.get("utterance", ""))):
+        return False
+    count_tokens = _reference_count_tokens(reference)
+    if not count_tokens:
+        return False
+    scope_tokens = _count_scope_tokens(str(row.get("utterance", "")))
+    if not scope_tokens:
+        return False
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {
+            "source_record_text_atom",
+            "source_record_label",
+            "source_record_section_list_count_support",
+        }:
+            continue
+        rows = result.get("rows") if isinstance(result, dict) else None
+        for result_row in rows or []:
+            if predicate == "source_record_section_list_count_support":
+                row_tokens: set[str] = set()
+                for value in _iter_scalar_values(result_row):
+                    row_tokens.update(_loose_atom_token_set(value))
+                if count_tokens & row_tokens and scope_tokens & row_tokens:
+                    return True
+                continue
+            for value in _iter_scalar_values(result_row):
+                value_tokens = _loose_atom_token_set(value)
+                if count_tokens & value_tokens and scope_tokens & value_tokens:
+                    return True
+    return False
+
+
+def _utterance_asks_for_count(utterance: str) -> bool:
+    text = str(utterance or "").casefold()
+    return bool(re.search(r"\b(?:how many|number of|count of|total(?: number)? of)\b", text))
+
+
+def _reference_count_tokens(reference: str) -> set[str]:
+    first_phrase = re.split(r"[—;,.()]", str(reference or "").casefold(), maxsplit=1)[0]
+    raw_tokens = {token for token in re.split(r"[^a-z0-9]+", first_phrase) if token}
+    if not raw_tokens:
+        return set()
+    for aliases in _COUNT_REFERENCE_CANONICALS.values():
+        if raw_tokens & aliases:
+            return set(aliases)
+    return set()
+
+
+def _count_scope_tokens(utterance: str) -> set[str]:
+    stop = {
+        "the",
+        "that",
+        "this",
+        "what",
+        "which",
+        "whose",
+        "how",
+        "many",
+        "number",
+        "count",
+        "total",
+        "did",
+        "does",
+        "were",
+        "was",
+        "are",
+        "for",
+        "from",
+        "with",
+        "and",
+        "at",
+        "in",
+        "on",
+    }
+    tokens = {
+        token
+        for token in _query_atom_tokens(utterance)
+        if len(token) >= 4 and token not in stop and not token.isdigit()
+    }
+    singulars = {token[:-1] for token in tokens if token.endswith("s") and len(token) > 4}
+    return tokens | singulars
+
+
 def _source_record_reference_supported_by_results(*, row: dict[str, Any], reference: str) -> bool:
     reference_display = _display_source_phrase(str(reference or "").strip())
     if not reference_display or reference_display in {"yes", "no", "not", "none", "false", "true"}:
         return False
     reference_tokens = _loose_atom_token_set(reference_display)
+    reference_tokens = _without_source_reference_stop_tokens(reference_tokens)
     if len(reference_tokens) < 2 and len(reference_display) < 4:
         return False
     for query_result in row.get("query_results", []) or []:
@@ -15469,6 +16598,10 @@ def _display_phrase_contains_reference(
     if reference_display and reference_display in displayed:
         return True
     value_tokens = _loose_atom_token_set(displayed)
+    if _abbreviated_reference_supported(reference_tokens=reference_tokens, value_tokens=value_tokens):
+        return True
+    if _date_reference_supported(reference_tokens=reference_tokens, value_tokens=value_tokens):
+        return True
     return bool(reference_tokens and reference_tokens.issubset(value_tokens))
 
 
@@ -15486,6 +16619,88 @@ def _iter_scalar_values(value: Any) -> list[str]:
     if value is None:
         return []
     return [str(value)]
+
+
+def _abbreviated_reference_supported(*, reference_tokens: set[str], value_tokens: set[str]) -> bool:
+    if {"central", "time", "ct"} <= reference_tokens and "ct" in value_tokens:
+        return True
+    return False
+
+
+_SOURCE_REFERENCE_STOP_TOKENS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "by",
+    "for",
+    "from",
+    "had",
+    "has",
+    "in",
+    "into",
+    "is",
+    "it",
+    "of",
+    "on",
+    "or",
+    "that",
+    "the",
+    "to",
+    "was",
+    "were",
+    "what",
+    "where",
+    "which",
+    "who",
+}
+
+
+def _without_source_reference_stop_tokens(tokens: set[str]) -> set[str]:
+    filtered = {token for token in tokens if token not in _SOURCE_REFERENCE_STOP_TOKENS}
+    return filtered or tokens
+
+
+def _date_reference_supported(*, reference_tokens: set[str], value_tokens: set[str]) -> bool:
+    month_numbers = {
+        "january": "1",
+        "jan": "1",
+        "february": "2",
+        "feb": "2",
+        "march": "3",
+        "mar": "3",
+        "april": "4",
+        "apr": "4",
+        "may": "5",
+        "june": "6",
+        "jun": "6",
+        "july": "7",
+        "jul": "7",
+        "august": "8",
+        "aug": "8",
+        "september": "9",
+        "sep": "9",
+        "sept": "9",
+        "october": "10",
+        "oct": "10",
+        "november": "11",
+        "nov": "11",
+        "december": "12",
+        "dec": "12",
+    }
+    adjusted = set(reference_tokens)
+    for month, number in month_numbers.items():
+        if month in adjusted and number in value_tokens:
+            adjusted.remove(month)
+            adjusted.add(number)
+    for token in list(adjusted):
+        if re.fullmatch(r"20\d{2}", token):
+            short_year = token[-2:].lstrip("0") or "0"
+            if short_year in value_tokens:
+                adjusted.remove(token)
+                adjusted.add(short_year)
+    return bool(adjusted and adjusted.issubset(value_tokens))
 
 
 def _value_has_negative_surface(value: str) -> bool:

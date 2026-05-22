@@ -1,152 +1,89 @@
 # Prethinker Roadmap
 
-Last updated: 2026-05-04
+Last updated: 2026-05-22
 
 This is a secondary planning note. Treat
-[PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md)
-and [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
+[PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md),
+[docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md),
+and [docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
 as the current truth surfaces.
 
 ## Current Positioning
 
-Prethinker is a local research workbench for governed semantic compilation:
+Prethinker is a governed document-compile and QA workbench:
 
 ```text
-natural language
-  -> semantic workspace proposal
+source document
+  -> semantic compile candidates
   -> deterministic mapper/admission gate
-  -> Prolog-like KB mutation, query, clarification, quarantine, or rejection
+  -> compiled Prolog KB artifact package
+  -> governed QA over admitted state, deterministic ledgers, selectors, and guards
 ```
 
-The authority boundary remains the core thesis. Neural models may interpret;
-deterministic runtime code decides what can become durable state.
+The authority boundary remains the core thesis. Neural models may interpret,
+compile, plan, and judge rows; deterministic runtime code decides what can
+become durable state and whether a QA run stayed inside the allowed evidence
+surface.
 
-## Current Center Of Gravity
+## Current Measurement Anchor
 
-The active frontier is:
+The current public measurement stack is:
 
-- `semantic_router_v1` as the model-owned context/profile planner
-- `semantic_ir_v1` as the intermediate semantic workspace
-- `qwen/qwen3.6-35b-a3b` as the main local semantic workspace model
-- LM Studio/OpenAI-compatible structured output for schema-constrained JSON
-- deterministic mapper/admission diagnostics in `src/semantic_ir.py`
-- live console demos through `process_utterance()`
-- bounded `medical@v0`, `legal_courtlistener@v0`, and `sec_contracts@v0`
-- local UMLS Semantic Network assets
-- hint-free raw-file/profile bootstrapping through `intake_plan_v1` and
-  `profile_bootstrap_v1`
-- multi-pass semantic compilation: backbone, support/source, temporal/status,
-  and rule lenses whose mapper-admitted fragments can be safely accumulated
+- Native restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163`
+  rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors,
+  and `0` QA write proposals.
+- Real-world external four-fixture spotcheck: latest fixture-level
+  `160 / 0 / 0`, with `4 / 4` compile gates clean.
+- Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
+  exact).
+- Earlier cold transfer baseline: `177 / 10 / 53` over `240` rows (`73.75%`
+  exact).
 
-## What Recent Evidence Says
-
-The most useful recent finding is qualitative and structural: the router/semantic
-IR path often preserves meaning that the older parser path needed Python rescue
-code to recover, and the mapper can keep that richer workspace behind the same
-authority boundary.
-
-Latest local verification:
-
-- Focused helper/selector verification: `153 passed`; rerun the full suite
-  before updating any full-suite headline.
-- Edge runtime A/B: semantic IR `20/20`, `0.976` avg score, `0` non-mapper parse rescues
-- Weak-edge runtime A/B: semantic IR `10/10`, `1.000` avg score, `0` non-mapper parse rescues
-- Policy/reimbursement demo: `4/4` parsed, `4/4` apply-error-free, `4/4`
-  expected query matches, no derived violation write leak
-- Multilingual router probe: `10/10` router choices and `10/10` compiler JSON
-- Profile bootstrap closed loop: `8/8` valid workspaces, `7/8`
-  expected-boundary hits
-- Anaplan Polaris: multi-support safe-surface accumulation reached
-  `42 exact / 1 partial / 0 miss` on a 43-question enterprise-guidance battery
-- Sable Creek and Avalon: rule lenses now transfer across fresh governance
-  fixtures, with mapper gates blocking unsafe rule constructs before durable
-  admission
-- Clarification Eagerness source-context check: `40/40` correct with `0`
-  unsafe candidates and `0` context-write violations after the latest rule work
-
-The remaining weak points are not JSON shape or basic routing. They are
-row-level activation of accumulated surfaces, richer rule composition helpers,
-temporal/deadline semantics, predicate canonicalization/query planning,
-truth-maintenance dependency depth, and safe partial-operation handling.
+The caveats are part of the roadmap: native compile-gate noise increased from
+`26 / 30` pass/hold to `9 / 47`, query-surface gaps rose from `20` to `29`, and
+the clearest current regressions are `black_lantern_maze`,
+`identifier_ledger_torture`, and `lantern_school_field_trip`.
 
 ## Near-Term Priorities
 
-1. **Mapper policy and diagnostics**
-   - Tighten when `mixed`, `answer`, `clarify`, `quarantine`, and `reject` are
-     projected from model IR.
-   - Keep all policy changes structural. Avoid story-specific or English-phrase
-     patches.
-   - Make every admitted/skipped operation explain why it exists.
+1. **Gate calibration without gate collapse**
+   - Explain why the native quality gate now holds `47` fixtures while QA
+     improved.
+   - Separate over-sensitive diagnostic flags from true answer-bearing source
+     surface failures.
+   - Keep source-claim, source-authority, vote-tally, quantity, and coexistence
+     checks strict when they correspond to real misses.
 
-2. **Temporal fact representation**
-   - Preserve dates, intervals, corrections, relative-time anchors, and event
-     scope as durable facts when admitted.
-   - Keep temporal extraction separate from full temporal proof claims.
-   - Build queryable interval examples before claiming temporal reasoning.
+2. **Query-surface gap investigation**
+   - Read the rows behind the `20 -> 29` query-surface increase.
+   - Prefer structural query planner or selector-policy fixes over fixture
+     phrasing patches.
+   - Preserve compatibility adapters as forensic tools only.
 
-3. **Rule admission and composition**
-   - Keep durable LLM-authored rules in helper-composed Horn form.
-   - Keep raw negation, disjunction, arithmetic, equality, and comparison out
-     of durable candidate rules unless a deterministic helper substrate owns the
-     semantics.
-   - Distinguish candidate, mapper-admitted, runtime-loadable, firing,
-     promotion-ready, and durable rules.
-   - Add focused tests before allowing new durable rule shapes.
+3. **Regressed fixture reading**
+   - Start with `black_lantern_maze`, `identifier_ledger_torture`, and
+     `lantern_school_field_trip`.
+   - Compare current misses against the 2026-05-20 native baseline and the
+     current compile-gate reasons.
+   - Promote only repairs that survive unlike probes.
 
-4. **Noisy and multilingual semantic pressure**
-   - Keep Silverton, Harbor, story-world, and raw-document lanes hard.
-   - Preserve historical mixed-domain calibration packs in Git history, not as
-     the active frontier.
-   - Add small batteries for typos, code-switching, foreign fragments, and
-     ambiguous initials/pronouns.
-   - Score semantic preservation separately from final admission policy.
+4. **Messy-document transfer**
+   - Keep the four externally sourced real-world fixtures as transfer evidence,
+     not native baseline material.
+   - Ask for or stage messier external fixtures only after the current gate and
+     query-surface lessons are understood.
 
-5. **Hint-free predicate/profile discovery**
-   - Keep `intake_plan_v1` and `profile_bootstrap_v1` LLM-owned.
-   - Use human Prolog targets only as calibration, not product-time hints.
-   - Measure whether proposed predicate surfaces support later QA and safe
-     mapper admission.
-
-6. **Row-level activation**
-   - Safe accumulated surfaces can rescue rows but also perturb good answers.
-   - Build non-oracle structural signals for when to activate alternate
-     evidence/rule surfaces.
-   - Treat judge-label perfect selectors as diagnostic upper bounds only.
-
-7. **Medical/UMLS bounded demos**
-   - Use UMLS as a semantic-type and normalization bridge, not a diagnosis
-     oracle.
-   - Make demos explain why a term was treated as medication, lab/procedure,
-     symptom/finding, condition, allergy, or physiologic state.
-   - Expand `medical@v0` only when a predicate earns its place through tests and
-     a clear demo.
-
-8. **Public docs hygiene**
-   - Keep `PROJECT_STATE.md` and `docs/PUBLIC_DOCS_GUIDE.md` current.
-   - Let Git history carry older direction notes.
-   - Keep internal handoff notes, old parser-ladder context, and dated
-     run clutter out of the front-door docs.
-
-## Acceptance Criteria For The Next Good Checkpoint
-
-- Full pytest suite is green.
-- Public docs and docs hub describe semantic IR as the active research center.
-- The console docs/demo surface has at least one semantic-IR-oriented walkthrough that shows:
-  - claim versus fact
-  - clarification rather than bad commit
-  - admitted versus skipped operations
-  - temporal extraction limits
-- A small temporal mutation representation exists and is queryable.
-- No-language-handling discipline remains intact: new improvements come from
-  model workspace quality, context/profile contracts, or structural mapper
-  checks, not Python phrase patches.
+5. **Public docs hygiene**
+   - Keep root docs and `docs/` aligned with the current measurement claim.
+   - Keep long worksheets and generated reports out of the public front door.
+   - Use `C:\prethinker_tmp_archive` and Git history for old run archaeology.
 
 ## Still Out Of Scope
 
-- Production medical advice or diagnosis.
 - Letting model output directly authorize KB writes.
 - Treating structured JSON as proof of truth.
-- Broad claims of multilingual or temporal reasoning before the runtime can
-  query those structures.
-- Full fine-tuning as the primary path before prompt/runtime baselines are
-  better understood.
+- Tuning to fixture names, row ids, answer strings, local people, or
+  story-specific phrasing.
+- Production medical, legal, regulatory, or financial advice claims.
+- Full fine-tuning as the primary path before the governed compile/QA
+  instrument is better characterized.

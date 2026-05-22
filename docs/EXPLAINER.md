@@ -198,10 +198,12 @@ Truth lives in the compiled KB. Rows are where the system tests whether that
 truth can be retrieved, selected, and answered under pressure.
 
 Current evidence gives that claim some teeth. The native direct-surface
-instrument has been restamped over `2163` judged rows at `1934 / 64 / 162`
-exact/partial/miss (`89.41%` exact), with zero compatibility rows, zero runtime
-load errors, and zero write proposals. External and unlike-probe work continues
-to test whether those surfaces transfer beyond the fixtures that exposed them.
+instrument has been restamped over `2163` judged rows at `1997 / 46 / 120`
+exact/partial/miss (`92.33%` exact), with zero compatibility rows, zero runtime
+load errors, and zero write proposals. External and unlike-probe work now
+includes a clean four-fixture real-world spotcheck (`160 / 0 / 0`) and sealed
+unseen authored transfer at `152 / 1 / 6` over `160` rows (`95.0%` exact).
+Those numbers are claims with caveats, not a declaration of finished work.
 
 That is not perfection. Compile-surface gaps, source-fidelity preservation,
 hybrid joins, language transfer, and palette stability are still frontier work.
@@ -327,11 +329,11 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 12, 2026:
+As of May 22, 2026:
 
 ### Internal Health
 
-- full local cleanup verification is green at `996 passed, 2 subtests passed`
+- the full-suite verification headline is maintained in `PROJECT_STATE.md`
 - focused direct-surface/selector verification is green at `428 passed`; rerun the
   full suite before updating any full-suite headline
 - the console is the canonical interactive front door
@@ -342,8 +344,8 @@ As of May 12, 2026:
 
 ### Evidence Snapshot
 
-- the prior surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
-- the native direct-surface restamp spans `2163` judged rows and currently sits at `1934 exact / 64 partial / 162 miss` (`89.41%`), with no compatibility rows or write proposals
+- a historical surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
+- the native direct-surface restamp spans `2163` judged rows and currently sits at `1997 exact / 46 partial / 120 miss` (`92.33%`), with no compatibility rows or write proposals
 - the current residual pressure is compile-surface and source-fidelity coverage: answer-bearing distinctions must become admitted predicates or deterministic ledgers, not hidden query-time archaeology
 - enterprise-guidance and clarification probes show that safe-surface accumulation and ask/no-ask governance can be measured separately from ordinary QA
 - rule-ingestion transfer now uses separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering

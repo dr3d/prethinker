@@ -1,6 +1,6 @@
 # Product And Palette Governance
 
-Last updated: 2026-05-18
+Last updated: 2026-05-22
 
 Prethinker has two related governance problems that should be kept together:
 
@@ -169,9 +169,9 @@ Success criteria:
 ### First Audit Result
 
 An initial coordinate-level proxy audit was run on 2026-05-18 against six
-unstable native direct-surface fixtures from the latest stamp-candidate run. Scope:
-49 boundary rows, 948 candidate registry signatures, `k=5/10/20`, no compiler
-behavior change.
+unstable native direct-surface fixtures from the then-current stamp-candidate
+run. Scope: 49 boundary rows, 948 candidate registry signatures, `k=5/10/20`,
+no compiler behavior change.
 
 With the whole global registry, `k=20` was weak:
 
@@ -238,6 +238,22 @@ with 121 unstable candidate signatures, 3 predicate-arity drift rows, 118
 signature-delivery drift rows, and 18 candidate zero-yield signatures. This is
 still a small diagnostic slice, not a corpus stamp, but it is enough to promote
 palette/delivery stability from suspicion to active architecture work.
+
+## 2026-05-22 Status
+
+Palette and delivery stability remain live governance concerns, but they are no
+longer the release-blocking proof question by themselves. The 2026-05-22 native
+restamp reached `1997 exact / 46 partial / 120 miss` over `2163` rows
+(`92.33%` exact), while the four-fixture real-world spotcheck reached `160 / 0 /
+0` with `4 / 4` compile gates clean. That says the current instrument can
+generalize despite known palette variance.
+
+The unresolved pressure is more specific: the native compile gate shifted from
+`26 / 30` pass/hold in the prior baseline to `9 / 47`, and query-surface gaps
+rose from `20` to `29`. Palette governance should now support that diagnosis:
+which unstable candidate signatures affect answer-bearing surfaces, which are
+only diagnostic noise, and which deserve profile-local retrieval, multi-draw
+priors, or direct compile-surface promotion.
 
 The response path should stay audit-first:
 

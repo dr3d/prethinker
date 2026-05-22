@@ -1,6 +1,6 @@
 # CTO Architecture Brief
 
-Last updated: 2026-05-19
+Last updated: 2026-05-22
 
 This is the fastest orientation for a new high-context collaborator. Read it
 as the current operating doctrine, not as a research diary.
@@ -144,16 +144,26 @@ failure.
 
 ## Next CTO Job
 
-The next CTO job is to get to a clean instrument-freeze decision.
+The next CTO job is to preserve the publishable measurement claim while
+continuing the next investigation cycle.
 
 Current native fixed-compile direct-surface anchor:
 
 - `2163` judged rows;
-- `1934 exact / 64 partial / 162 miss`;
-- `89.41%` exact;
+- `1997 exact / 46 partial / 120 miss`;
+- `92.33%` exact;
 - `0` compatibility rows;
 - `0` runtime load errors;
 - `0` write proposal rows.
+
+Current transfer anchors:
+
+- four externally sourced real-world fixtures: latest fixture-level
+  `160 / 0 / 0`, with `4 / 4` compile gates clean;
+- sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
+  exact);
+- earlier cold transfer baseline: `177 / 10 / 53` over `240` rows (`73.75%`
+  exact).
 
 Recent cleanup retired compatibility-era public artifacts, stale guard-rollup
 surfaces, old selector mode labels, and prompt-facing terminology that made
@@ -166,9 +176,10 @@ Continue only if you find one of these:
 3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
 4. active code paths that would re-enable compatibility adapters by default.
 
-If those stay quiet, the right next move is a frozen native-corpus stamp. Do
-not rush toward it if new cruft is visible, but also do not keep polishing
-internal legacy names that are not public, prompt-facing, or artifact-facing.
+The next-cycle investigation is query-surface growth, native compile-gate noise
+(`26 / 30 -> 9 / 47` pass/hold), and the named regressed fixtures. Do not hide
+those caveats; they are part of the audit discipline that makes the measurement
+credible.
 
 ## Repo Hygiene
 

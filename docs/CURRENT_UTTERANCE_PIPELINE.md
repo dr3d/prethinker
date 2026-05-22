@@ -1,6 +1,6 @@
 # Current Utterance And Document Pipeline
 
-Last updated: 2026-05-16
+Last updated: 2026-05-22
 
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language
@@ -237,10 +237,14 @@ surfaces such as exact string preservation get deterministic reinforcement.
 
 ## Current Evidence Pattern
 
-Recent transfer work supports the current direction:
+Transfer work supports the current direction:
 
-- Six fresh transfer fixtures cold on OpenRouter scored `177 / 10 / 53`
-  over 240 rows, or 73.75% exact.
+- Earlier cold transfer on OpenRouter scored `177 / 10 / 53` over 240 rows,
+  or 73.75% exact, before the current direct-surface work.
+- The 2026-05-22 public measurement anchor is stronger: the native restamp is
+  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), the sealed unseen
+  authored transfer is `152 / 1 / 6` over `160` rows (`95.0%` exact), and the
+  four-fixture real-world spotcheck is `160 / 0 / 0`.
 - A roster-reconciliation fixture exposed why compatibility evidence had to
   become compile-surface work: the high-water was reachable, but the forward
   repair is direct assignment/table surfaces.

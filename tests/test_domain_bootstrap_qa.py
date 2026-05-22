@@ -9,7 +9,9 @@ from scripts.run_domain_bootstrap_qa import (
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
     _anchor_relation_hint_queries,
+    _award_cap_quantity_hint_queries,
     _authority_instrument_metadata_hint_queries,
+    _counsel_opinion_hint_queries,
     _classification_deferral_effect_companion,
     _complementary_relation_hint_queries,
     _conversion_assessment_delta_companion,
@@ -21,7 +23,12 @@ from scripts.run_domain_bootstrap_qa import (
     _location_floor_hint_queries,
     _negative_join_with_previous,
     _negative_reference_supported_by_results,
+    _source_record_citation_text_companion,
+    _source_record_compile_surface_hint_queries,
+    _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
+    _source_record_relative_next_day_companion,
+    _source_record_section_list_count_companion,
     _default_openrouter_title,
     _chat_headers,
     _method_frame_purpose_companion,
@@ -31,12 +38,16 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_field_sibling_repaired_query,
     _source_coordinate_hint_queries,
     _source_column_text_hint_queries,
+    _source_section_question_key_hint_queries,
     _source_record_table_count_hint_queries,
+    _source_text_question_token_hint_queries,
     _temporal_join_with_previous,
     _urlopen_json_with_transient_retries,
     _vacancy_voting_eligibility_companion,
+    _vote_record_hint_queries,
     cache_key_for_question,
     clause_signature,
+    compact_relevant_clauses_for_evidence_plan,
     compiled_kb_contracts,
     compiled_kb_inventory,
     hash_text,
@@ -393,6 +404,12 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("policy_requirement/3" in item for item in strategy["epistemic_policy"])
     assert "elapsed_days" in " ".join(strategy["epistemic_policy"])
     assert any("alternate atom order" in item for item in strategy["arity_and_variable_policy"])
+    assert any("product, retailer, store, state" in item for item in strategy["arity_and_variable_policy"])
+    assert any("sold_at_retailer(Item, Retailer) plus sold_in_state(Item, State)" in item for item in strategy["arity_and_variable_policy"])
+    assert any("bulk item, retail packaged item" in item for item in strategy["arity_and_variable_policy"])
+    assert any("restriction and constraint predicates as answer-bearing rows" in item for item in strategy["arity_and_variable_policy"])
+    assert any("source_record_cell_item_pair(Row" in item for item in strategy["arity_and_variable_policy"])
+    assert any("source_record_cell_item_pair_qualifier(Row" in item for item in strategy["arity_and_variable_policy"])
     assert any("federal_agency_authority" in item for item in strategy["epistemic_policy"])
     assert any("conflict_policy" in item for item in strategy["epistemic_policy"])
     assert any("witness_statement(Speaker, Language" in item for item in strategy["epistemic_policy"])
@@ -703,6 +720,100 @@ def test_evidence_bundle_plan_repairs_multiple_source_text_memberchk_filters() -
     ]
 
 
+def test_evidence_context_filter_carries_source_record_pair_rows_for_source_text_plans() -> None:
+    facts = [
+        "retailer_sold_in(foodland, pennsylvania, cucumber_only).",
+        "source_record_text_atom(src_line_0096, west_virginia_foodland_cucumber_green_bell_pepper).",
+        "source_record_cell_item_pair(src_line_0096, 1, west_virginia, 2, foodland).",
+        (
+            "source_record_cell_item_pair_qualifier(src_line_0096, 1, west_virginia, 2, "
+            "foodland, cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+        ),
+    ]
+
+    clauses = compact_relevant_clauses_for_evidence_plan(
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_text",
+                    "purpose": "Find source table support.",
+                    "query_templates": ["source_record_text_atom(Row, TextAtom)."],
+                }
+            ]
+        },
+        facts=facts,
+        rules=[],
+        max_clauses=4,
+        broad_floor=0,
+    )
+
+    assert "source_record_cell_item_pair(src_line_0096, 1, west_virginia, 2, foodland)." in clauses
+    assert (
+        "source_record_cell_item_pair_qualifier(src_line_0096, 1, west_virginia, 2, "
+        "foodland, cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in clauses
+
+
+def test_distribution_pair_companion_exposes_source_record_pair_qualifier_after_miss() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    facts = [
+        (
+            "source_record_cell_item_pair_qualifier(src_line_0096, 1, west_virginia, 2, "
+            "foodland, cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+        ),
+        "source_record_cell_item_pair(src_line_0096, 1, west_virginia, 2, foodland).",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ["retailer_sold_in(foodland, west_virginia, scope)."],
+        helper_companions_enabled=True,
+    )
+
+    companion = next(
+        item
+        for item in results
+        if item.get("result", {}).get("predicate") == "source_record_cell_item_pair"
+    )
+    rows = companion["result"]["rows"]
+    assert rows
+    assert companion["result"]["reasoning_basis"]["kind"] == "core-local"
+    assert rows[0]["Row"] == "src_line_0096"
+    assert rows[0]["Qualifier"] == "cucumber_green_bell_pepper_and_pickling_cucumber_only"
+
+
+def test_distribution_pair_companion_uses_single_retailer_constant() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    facts = [
+        (
+            "source_record_cell_item_pair_qualifier(src_line_0096, 1, west_virginia, 2, "
+            "foodland, cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+        ),
+        "source_record_cell_item_pair(src_line_0096, 1, west_virginia, 2, foodland).",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        ["product_sold_at(ProductID, retailer_foodland)."],
+        helper_companions_enabled=True,
+    )
+
+    companion = next(
+        item
+        for item in results
+        if item.get("result", {}).get("predicate") == "source_record_cell_item_pair"
+    )
+    rows = companion["result"]["rows"]
+    assert rows
+    assert companion["result"]["reasoning_basis"]["kind"] == "core-local"
+    assert rows[0]["LeftItem"] == "west_virginia"
+    assert rows[0]["Qualifier"] == "cucumber_green_bell_pepper_and_pickling_cucumber_only"
+
+
 def test_evidence_bundle_plan_repairs_source_text_string_contains_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -994,6 +1105,172 @@ def test_source_record_reference_supports_embedded_reference_answer() -> None:
 
     assert _source_record_reference_supported_by_results(row=row, reference="dock vibration") is True
     assert _source_record_reference_supported_by_results(row=row, reference="generator readiness") is False
+
+
+def test_source_record_reference_support_tokenizes_natural_phrases() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_atom",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0058",
+                            "TextAtom": "polaris_industries_inc_of_medina_minnesota",
+                        },
+                        {
+                            "SourceRow": "src_line_0030",
+                            "TextAtom": "polaris_at_800_765_2747_from_7_a_m_to_7_p_m_ct_monday_through_friday",
+                        },
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(row=row, reference="Medina, Minnesota") is True
+    assert _source_record_reference_supported_by_results(row=row, reference="Central Time (CT)") is True
+    assert _source_record_reference_supported_by_results(row=row, reference="Boston, Massachusetts") is False
+
+
+def test_source_record_reference_support_handles_dates_and_connector_words() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_atom",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0159",
+                            "TextAtom": "fr_doc_2024_06370_filed_3_25_24_8_45_am",
+                        },
+                        {
+                            "SourceRow": "src_line_0056",
+                            "TextAtom": "at_0713_the_carol_jean_was_about_7_5_miles_northwest_of_where_it_had_originally_anchored",
+                        },
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="3-25-24 (March 25, 2024); the FR Doc was filed at 8:45 am",
+    )
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="Northwest — by 0713 the Carol Jean was about 7.5 miles northwest of where it had originally anchored",
+    )
+
+
+def test_source_record_numeric_count_supports_source_text_count_scope() -> None:
+    row = {
+        "utterance": "How many deficiencies did the Coast Guard issue for the Carol Jean at that examination?",
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_atom",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0080",
+                            "TextAtom": "the_coast_guard_issued_ten_deficiencies_for_the_carol_jean",
+                        }
+                    ],
+                }
+            }
+        ],
+    }
+
+    assert _source_record_numeric_count_supported_by_results(row=row, reference="Ten") is True
+
+    row["query_results"][0]["result"]["rows"][0]["TextAtom"] = "the_hearing_lasted_ten_days"
+    assert _source_record_numeric_count_supported_by_results(row=row, reference="Ten") is False
+
+
+def test_source_record_row_context_companion_follows_source_row_ids() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0157, solicitor_federal_register_liaison).",
+        "source_record_label(src_line_0157, thomas_tso).",
+        "source_record_section(src_line_0157, signature_block).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = _run_query_plan(
+        runtime,
+        ["source_record_text_atom(X, solicitor_federal_register_liaison)."],
+        helper_companions_enabled=False,
+    )
+
+    companion = next(
+        item
+        for item in results
+        if item.get("result", {}).get("predicate") == "source_record_label"
+        and item.get("result", {}).get("reasoning_basis", {}).get("kind") == "core-local"
+    )
+    rows = companion["result"]["rows"]
+    assert any(row.get("SourceRecordLabel") == "thomas_tso" for row in rows)
+
+
+def test_source_record_citation_companion_scans_federal_register_citations() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0011, document_citation_89_fr_20843).",
+        (
+            "source_record_text_atom(src_line_0046, "
+            "on_february_16_2024_in_89_fr_12287_the_agency_noted_the_proposed_change)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_citation_text_companion(
+        runtime,
+        utterance="At what Federal Register citation was the proposed rule originally published?",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["SourceRow"] == "src_line_0046"
+    assert any(row.get("TextAtom", "").startswith("on_february_16_2024_in_89_fr_12287") for row in rows)
+
+
+def test_source_record_section_list_count_companion_counts_scoped_list_block() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    facts = [
+        "source_record_row(src_line_0039, paragraph_line, 39, company_announcement, retail_packaged_items).",
+        "source_record_text_atom(src_line_0039, retail_packaged_items).",
+        "source_record_row(src_line_0041, paragraph_line, 41, company_announcement, sold_at_select_walmart_stores).",
+        "source_record_text_atom(src_line_0041, sold_at_select_walmart_stores_in_ct_de_and_wv).",
+        "source_record_row(src_line_0043, list_row, 43, company_announcement, item_a).",
+        "source_record_text_atom(src_line_0043, wiers_farm_item_a).",
+        "source_record_row(src_line_0044, list_row, 44, company_announcement, item_b).",
+        "source_record_text_atom(src_line_0044, wiers_farm_item_b).",
+        "source_record_row(src_line_0045, list_row, 45, company_announcement, item_c).",
+        "source_record_text_atom(src_line_0045, wiers_farm_item_c).",
+        "source_record_row(src_line_0053, paragraph_line, 53, company_announcement, sold_at_aldi_stores).",
+        "source_record_text_atom(src_line_0053, sold_at_aldi_stores_in_ky).",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_section_list_count_companion(
+        runtime,
+        utterance="How many distinct retail-packaged items sold at Walmart are listed in the announcement?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["Count"] == "3"
+    assert row["DisplayCount"] == "three"
+    assert row["MemberRows"] == ["src_line_0043", "src_line_0044", "src_line_0045"]
+    assert _source_record_numeric_count_supported_by_results(
+        row={
+            "utterance": "How many distinct retail-packaged items sold at Walmart are listed in the announcement?",
+            "query_results": [companion],
+        },
+        reference="Three",
+    )
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:
@@ -4850,6 +5127,219 @@ def test_authority_instrument_metadata_hint_routes_source_authority_questions() 
     ) == []
 
 
+def test_counsel_opinion_hint_routes_eligibility_prong_questions() -> None:
+    inventory = {"signatures": ["counsel_opinion/3", "source_record_text_atom/2"]}
+
+    assert _counsel_opinion_hint_queries(
+        utterance="Which percentage made the applicant eligible under the geographic prong?",
+        kb_inventory=inventory,
+    ) == [
+        "counsel_opinion(Document, Subject, Conclusion).",
+        "source_record_text_atom(SourceRow, TextAtom).",
+    ]
+
+    assert _counsel_opinion_hint_queries(
+        utterance="Which counsel opinion explains the available award basis?",
+        kb_inventory=inventory,
+    ) == [
+        "counsel_opinion(Document, Subject, Conclusion).",
+        "source_record_text_atom(SourceRow, TextAtom).",
+    ]
+
+
+def test_vote_record_hint_routes_tally_and_motion_questions() -> None:
+    inventory = {"signatures": ["vote_record/5", "motion_result/2"]}
+
+    assert _vote_record_hint_queries(
+        utterance="What was the vote tally on the exception motion?",
+        kb_inventory=inventory,
+    ) == [
+        "vote_record(Motion, ForVotes, AgainstVotes, Denominator, ThresholdRequired).",
+        "motion_result(Motion, Result).",
+    ]
+
+    assert _vote_record_hint_queries(
+        utterance="Which source authorizes the release?",
+        kb_inventory=inventory,
+    ) == []
+
+
+def test_award_cap_quantity_hint_routes_total_exceedance_questions() -> None:
+    inventory = {"signatures": ["award_declaration/3", "budget_cap/2", "source_record_text_atom/2"]}
+
+    assert _award_cap_quantity_hint_queries(
+        utterance="By how much did the awarded grants exceed the original budget cap?",
+        kb_inventory=inventory,
+    ) == [
+        "award_declaration(Subject, Amount, Basis).",
+        "budget_cap(CapType, Amount).",
+        "source_record_text_atom(SourceRow, TextAtom).",
+    ]
+
+    assert _award_cap_quantity_hint_queries(
+        utterance="Which applicant received the grant?",
+        kb_inventory=inventory,
+    ) == []
+
+
+def test_source_text_question_hints_prioritize_source_stated_unigrams() -> None:
+    inventory = {"signatures": ["source_record_text_atom/2"]}
+
+    flag_hints = _source_text_question_token_hint_queries(
+        utterance="Which applicant was initially flagged as ineligible by the Grants Administrator?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("initially", TextAtom).' in flag_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("flagged", TextAtom).' in flag_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("ineligible", TextAtom).' in flag_hints
+
+    abstention_hints = _source_text_question_token_hint_queries(
+        utterance="Which member abstained on the motion to award APP-S26-001, and on what basis?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("app_s26_001", TextAtom).' in abstention_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("abstained", TextAtom).' in abstention_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("basis", TextAtom).' in abstention_hints
+
+    authority_hints = _source_text_question_token_hint_queries(
+        utterance="What is the identifier of the board resolution authorizing the supplemental allocation?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("identifier", TextAtom).' in authority_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("resolution", TextAtom).' in authority_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("allocation", TextAtom).' in authority_hints
+
+    sold_hints = _source_text_question_token_hint_queries(
+        utterance="Where broadly were the recalled vehicles sold?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("sold", TextAtom).' in sold_hints
+
+    phone_hints = _source_text_question_token_hint_queries(
+        utterance="In which time zone are Polaris' phone hours given?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("phone", TextAtom).' in phone_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("zone", TextAtom).' in phone_hints
+
+    company_hints = _source_text_question_token_hint_queries(
+        utterance="In what city and state is Polaris Industries Inc. located?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("polaris_industries_inc", TextAtom).' in company_hints
+
+    state_abbrev_hints = _source_text_question_token_hint_queries(
+        utterance="Which retail chain in Kentucky, New York, Ohio, Pennsylvania, and West Virginia carried the items?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("ky_ny_oh_pa_wv", TextAtom).' in state_abbrev_hints
+
+    filing_hints = _source_text_question_token_hint_queries(
+        utterance="What was the filing date stamped on the Federal Register document?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("filed", TextAtom).' in filing_hints
+
+    final_rule_hints = _source_text_question_token_hint_queries(
+        utterance="What is the document type — proposed rule, final rule, or notice?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("final", TextAtom).' in final_rule_hints
+
+    tow_line_hints = _source_text_question_token_hint_queries(
+        utterance="At what time did the tow line part?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("tow_line", TextAtom).' in tow_line_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("tow_line_parted", TextAtom).' in tow_line_hints
+
+    helicopter_hints = _source_text_question_token_hint_queries(
+        utterance="From which city did the rescue helicopter launch?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("launched_a_helicopter_from", TextAtom).' in helicopter_hints
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("helicopter", TextAtom).' in helicopter_hints
+
+
+def test_source_section_question_key_hint_routes_sold_at_section_text() -> None:
+    inventory = {
+        "signatures": ["source_record_section/2", "source_record_text_atom/2"],
+        "examples": {
+            "source_record_section/2": [
+                "source_record_section(src_line_0052, sold_at).",
+                "source_record_section(src_line_0058, importer_s).",
+            ]
+        },
+    }
+
+    assert _source_section_question_key_hint_queries(
+        utterance="Where broadly were the recalled vehicles sold?",
+        kb_inventory=inventory,
+    ) == ["source_record_section(SourceRow, sold_at), source_record_text_atom(SourceRow, TextAtom)."]
+
+
+def test_source_record_compile_surface_hints_route_new_ledger_carriers() -> None:
+    inventory = {
+        "signatures": [
+            "source_record_row_context/4",
+            "source_record_citation/2",
+            "source_record_date_alias/3",
+            "source_record_count_word/3",
+            "source_record_section_list_count_detail/5",
+            "source_record_section_list_count_member/5",
+        ]
+    }
+
+    assert "source_record_citation(SourceRow, Citation)." in _source_record_compile_surface_hint_queries(
+        utterance="At what Federal Register citation was the proposed rule originally published?",
+        kb_inventory=inventory,
+    )
+    assert "source_record_date_alias(SourceRow, CompactDate, CanonicalDate)." in _source_record_compile_surface_hint_queries(
+        utterance="What was the filing date stamped on the Federal Register document?",
+        kb_inventory=inventory,
+    )
+    count_hints = _source_record_compile_surface_hint_queries(
+        utterance="How many distinct retail-packaged items sold at Walmart are listed in the announcement?",
+        kb_inventory=inventory,
+    )
+    assert "source_record_section_list_count_detail(HeadingRow, ScopeRow, Category, ScopeText, Count)." in count_hints
+    assert "source_record_section_list_count_member(HeadingRow, ScopeRow, Position, MemberRow, MemberText)." in count_hints
+
+    vin_hints = _source_record_compile_surface_hint_queries(
+        utterance="To verify if a vehicle is part of the recall, what should the consumer check?",
+        kb_inventory={"signatures": ["source_record_text_atom/2", "source_record_row_context/4"]},
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("vehicle_identification_number_vin", TextAtom).' in vin_hints
+
+    free_hints = _source_record_compile_surface_hint_queries(
+        utterance="Was the repair offered free of charge or for a fee?",
+        kb_inventory={"signatures": ["source_record_text_atom/2", "source_record_row_context/4"]},
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("free_repair", TextAtom).' in free_hints
+
+
+def test_source_record_relative_next_day_companion_derives_event_date() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact("source_record_text_atom(src_line_0040, on_march_14_2023_the_captain_purchased_the_having_faith).")
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0066, "
+        "on_march_18_at_1418_the_coast_guard_helicopter_located_the_having_faith_which_was_aground_"
+        "on_a_jetty_at_st_phillips_island_georgia_the_having_faith_broke_apart_on_the_shoreline_the_next_day)."
+    )
+
+    companion = _source_record_relative_next_day_companion(
+        runtime,
+        utterance="On what date did the Having Faith break apart on the shoreline?",
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "source_record_relative_next_day_event"
+    assert result["rows"][0]["AnchorDate"] == "2023_03_18"
+    assert result["rows"][0]["DerivedDate"] == "2023_03_19"
+    assert result["rows"][0]["DerivedDateDisplay"] == "2023-03-19"
+
+
 def test_source_record_packet_metadata_links_access_authority_to_court_order() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -4873,6 +5363,35 @@ def test_source_record_packet_metadata_links_access_authority_to_court_order() -
         and "2026-02-14" in row.get("DisplayValue", "")
         and row.get("HelperClass") == "clean-helper"
         for row in result_rows
+    )
+
+
+def test_source_record_pair_core_bridge_handles_state_abbreviation() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_cell_item_pair(src_line_0096, 1, west_virginia, 2, foodland).",
+        "source_record_cell_item_pair_qualifier(src_line_0096, 1, west_virginia, 2, foodland, cucumbers_green_bell_peppers_and_pickling_cucumbers).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = _run_query_plan(
+        runtime,
+        ["source_record_cell_item_pair(row, stateindex, wv, retailerindex, foodland)."],
+        helper_companions_enabled=False,
+    )
+
+    companion = next(
+        item
+        for item in rows
+        if item["result"].get("predicate") == "source_record_cell_item_pair"
+        and item["result"].get("reasoning_basis", {}).get("kind") == "core-local"
+        and item["result"].get("rows")
+    )
+    assert any(
+        "west_virginia" in row.get("source_query", "")
+        and "foodland" in row.get("source_query", "")
+        and row.get("Qualifier") == "cucumbers_green_bell_peppers_and_pickling_cucumbers"
+        for row in companion["result"]["rows"]
     )
 
 

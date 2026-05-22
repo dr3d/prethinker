@@ -4,9 +4,10 @@
 
 **A governed write layer between natural language and a deterministic knowledge base.**
 
-Prethinker is a governed semantic-intake layer for turning natural-language claims into auditable symbolic state.
+Prethinker is a multi-lens semantic compile and governed QA system for turning
+natural-language claims into auditable symbolic state.
 
-The core bet is simple: **the model may propose, but deterministic code decides what becomes truth**. A capable LLM builds a rich semantic workspace from messy language; the mapper admits only candidate operations that survive schema, predicate-contract, provenance, and consistency checks; the Prolog KB remains the durable state layer.
+The core bet is simple: **the model may propose, but deterministic code decides what becomes truth**. A capable LLM builds rich semantic workspaces and query plans from messy language; deterministic gates admit only operations that survive schema, predicate-contract, provenance, and consistency checks; the Prolog KB and audit summaries remain the durable state and measurement layers.
 
 This is not "English to Prolog by vibes." It is a research workbench for controlled memory admission: how much semantic understanding can a strong model contribute while a deterministic runtime prevents unsafe writes, ambiguity collapse, and claim/fact confusion?
 
@@ -33,17 +34,17 @@ propagation = visible recomputation, not hidden belief
 ## Read First
 
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
+- [Audit grammar measurement note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md) - the current public measurement claim, caveats included.
 - [CTO architecture brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - the current operating doctrine for new high-context collaborators.
 - [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
-- [Current harness instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, direct-surface policy, selectors, risk gates, and repair queues.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
+- [QA instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
 - [Boundary probe method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed without fixture-vocabulary leakage.
-- [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the reader/control lenses and how they differ.
+- [Semantic lens roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - current lens vocabulary and calibration doctrine.
 - [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
 - [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
-- [Docs and evidence hub](https://dr3d.github.io/prethinker/) - public docs, current research map, and curated evidence.
 - [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.
 
 ## Current Research Headline
@@ -58,13 +59,19 @@ scored encounter where a question tests whether that state is present,
 retrievable, and safe to answer from. The selector is the steering wheel; guards
 are the rumble strips that stop tempting but wrong surfaces from winning.
 
-The newest hard problem is no longer "can we add another lens?" It is where
-the current semantic interior gets blurry on unlike source shapes. Guard
-compression is archived; boundary probing, direct compile-surface stability,
-lens audits, and instrument stamping are the active work. The
-current cycle separates compile-surface gaps from selector, query,
-answer-surface, and legacy adapter gaps, then extends the system only with
-generic repairs that survive replay on unlike rows.
+The current public claim is now measurement-backed across several evidence
+classes: a 2026-05-22 native restamp reached `1997 exact / 46 partial / 120
+miss` over `2163` rows (`92.33%` exact), a four-fixture externally sourced
+real-world spotcheck reached latest fixture-level `160 / 0 / 0` with `4 / 4`
+compile gates clean, and a sealed unseen authored batch reached `152 / 1 / 6`
+over `160` rows (`95.0%` exact). All three current measurements held `0`
+compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+
+The caveats are part of the claim: the native compile gate grew noisier
+(`26 / 30 -> 9 / 47` pass/hold), the native corpus is same named fixtures rather
+than proven byte-identical to the prior stamp, and query-surface gaps rose even
+as compile-surface, hybrid-join, answer-surface, and judge-uncertain gaps
+improved.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
@@ -106,15 +113,14 @@ The short version:
 ## Useful Entry Points
 
 - [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - what Prethinker is and why the authority boundary matters.
-- [Docs hub](https://dr3d.github.io/prethinker/) - GitHub Pages index for public docs and evidence.
 - [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
-- [docs/CURRENT_HARNESS_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - current harness/instrument machinery for scorecards, selector comparison, and repair queues.
 - [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current research headline and newest public framing.
 - [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - current work map and freeze readiness.
 - [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - boundary-coordinate and transfer-safe fixture method.
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
+- [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA pipeline and failure-surface interpretation.
 - [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public instrument spec for lenses, guards, uncertainty states, and calibration evidence.
-- [docs/TWELVE_LENSES_EXPLAINED.md](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md) - plain-language explanation of the twelve reader/control lenses.
+- [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - current semantic lens roster and transfer discipline.
 - [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax and safe-surface accumulation.
 - [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md) - fast onboarding for coding agents.
 - [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - current domain-aware, recent-context, KB-seeded utterance path.
@@ -135,14 +141,10 @@ Open `http://127.0.0.1:8765` for the live console.
 
 ## Reproducibility Notes
 
-The latest full local verification after the retired-lane cleanup is:
+The current full-suite verification headline is kept in
+[PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
-```powershell
-python -m pytest
-# 996 passed, 2 subtests passed
-```
-
-Current focused local verification for the newest compile-surface and guard work:
+Focused local verification for the newest compile-surface and guard work:
 
 ```powershell
 python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_qa_mode_selector.py tests\test_selector_guard_families.py -q
@@ -152,6 +154,10 @@ python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap
 Current high-signal evidence:
 
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
+- Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+- Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
+- Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
+- Earlier cold transfer baseline: six fresh transfer fixtures scored `177 / 10 / 53` over `240` rows (`73.75%` exact) before the current direct-surface work.
 - Weak-edge pass: `10/10` decision labels, `1.000` average score.
 - Multilingual router probe: `10/10` router choices and `10/10` compiler JSON on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
 - Profile-owned predicate aliases now canonicalize candidate-operation predicate surfaces before palette admission, with an audit trail such as `dad_of/2 -> parent/2`; this is registry/context authority, not Python prose parsing.
@@ -161,7 +167,7 @@ Current high-signal evidence:
 - Grant-committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while body-supported matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
 - Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
 - Cold generalization evidence: the 2026-05-07 sealed 10-fixture story batch has a row-gated high-water of `361 exact / 16 partial / 23 miss` across `400` QA rows (`90.25%`), with zero QA write proposals in the contributing runs.
-- Incoming-6 full-40 evidence: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.
+- Incoming-6 full-40 evidence remains useful history: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.
 - Selector guard family rollup: `5` active guard return sites, `5` unique reasons, `4` semantic families, `0` unclassified reasons. Detailed retired/scar ledger output is generated under `tmp` when needed.
 - Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
 - Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.

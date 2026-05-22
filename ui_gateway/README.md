@@ -26,8 +26,8 @@ Then open:
 http://127.0.0.1:8765
 ```
 
-For a compact governed-rules walkthrough, see the
-current root README and docs hub.
+For compact governed-system orientation, start with the root `README.md` and
+`docs/PUBLIC_DOCS_GUIDE.md`.
 
 Direct file-open also works now:
 

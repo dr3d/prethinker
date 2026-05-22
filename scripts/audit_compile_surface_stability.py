@@ -27,8 +27,12 @@ SURFACE_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
 PALETTE_DELIVERY_REPEATED_MIN = 3
 PALETTE_DELIVERY_COLLAPSE_RATIO = 0.55
 QUANTITY_EVENT_CARRIER_PREDICATES = {
+    "duration_between",
+    "event_duration",
     "event_measurement",
     "event_quantity",
+    "interval_duration",
+    "line_stop_duration",
     "measurement_value",
     "metric_observation",
     "reading_value",
@@ -40,6 +44,10 @@ QUANTITY_EVENT_WRAPPER_PREDICATES = {
     "source_detail",
 }
 NUMBER_RE = re.compile(r"(?:^|[_\W])\d+(?:[._]\d+)?(?:[_\W]|$)")
+SENSOR_IDENTIFIER_NUMBER_RE = re.compile(
+    r"(?:^|_)(?:sensor|probe|device|instrument)_[a-z]{1,8}(?:_[a-z])?_\d{1,4}(?=$|_)",
+    re.IGNORECASE,
+)
 QUANTITY_TERM_RE = re.compile(
     r"(?:^|[_\W])(?:kg|min|minute|hour|day|days|k|kw|percent|ratio|rate|threshold|setpoint|value|duration|offset|score|reading|acre|acres|sq_ft|foot|feet|unit|units|count|amount|humidity|temperature)(?:[_\W]|$)",
     re.IGNORECASE,
@@ -47,6 +55,10 @@ QUANTITY_TERM_RE = re.compile(
 SOURCE_LOCATOR_RE = re.compile(r"^(?:src|source)?_?line_?\d+$|^l\d+$|^line_?\d+$", re.IGNORECASE)
 EVENT_WRAPPER_CONTEXT_RE = re.compile(
     r"(?:^|_)(?:event|events|log|logs|reading|readings|measurement|measurements|metric|metrics)(?:_|$)",
+    re.IGNORECASE,
+)
+SOURCE_DETAIL_EVENT_CONTEXT_RE = re.compile(
+    r"(?:^|_)(?:event|events|log|logs|reading|readings|metric|metrics)(?:_|$)",
     re.IGNORECASE,
 )
 QUANTITY_FIELD_CONTEXT_RE = re.compile(
@@ -95,6 +107,7 @@ def _expand_compile_paths(inputs: list[Path]) -> list[Path]:
 
 def _load_draw(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    _refresh_profile_delivery_reports(payload)
     parsed = payload.get("parsed") if isinstance(payload.get("parsed"), dict) else {}
     facts = _facts_from_compile(payload)
     direct_facts = sorted(fact for fact in facts if not _predicate_name(fact).startswith("source_record"))
@@ -128,6 +141,29 @@ def _load_draw(path: Path) -> dict[str, Any]:
         "profile_delivery_findings": _profile_delivery_findings(payload),
         "contracts": _contract_reports(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
     }
+
+
+def _refresh_profile_delivery_reports(payload: dict[str, Any]) -> None:
+    source_compile = payload.get("source_compile")
+    parsed_profile = payload.get("parsed")
+    if not isinstance(source_compile, dict) or not isinstance(parsed_profile, dict):
+        return
+    text_path = Path(str(payload.get("text_file") or ""))
+    if not text_path.is_file():
+        return
+    try:
+        source_text = text_path.read_text(encoding="utf-8")
+    except OSError:
+        return
+    from scripts.run_domain_bootstrap_file import _attach_profile_admission_report
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint=str(payload.get("domain_hint") or ""),
+        intake_plan=payload.get("intake_plan") if isinstance(payload.get("intake_plan"), dict) else None,
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+    )
 
 
 def _facts_from_compile(payload: dict[str, Any]) -> list[str]:
@@ -578,9 +614,9 @@ def _quantity_event_delivery_telemetry(
         if str(row.get("predicate", "")).strip() in QUANTITY_EVENT_CARRIER_PREDICATES
     ]
     carrier_subjects = {
-        str((row.get("args") or [""])[0]).strip()
+        subject
         for row in carrier_rows
-        if isinstance(row.get("args"), list) and row.get("args")
+        for subject in _quantity_carrier_subjects(row)
     }
     numeric_wrappers = [
         row
@@ -622,21 +658,30 @@ def _is_numeric_event_wrapper(row: dict[str, Any]) -> bool:
         return False
     text = " ".join(_quantity_content_args(predicate, args))
     if predicate == "source_detail":
-        return bool(NUMBER_RE.search(text) and _source_detail_has_quantity_event_context(args, text))
-    return bool(NUMBER_RE.search(text) and QUANTITY_TERM_RE.search(text))
+        return bool(_has_quantity_number(text) and _source_detail_has_quantity_event_context(args, text))
+    return bool(_has_quantity_number(text) and QUANTITY_TERM_RE.search(text))
+
+
+def _has_quantity_number(text: str) -> bool:
+    without_sensor_ids = SENSOR_IDENTIFIER_NUMBER_RE.sub("_", str(text or ""))
+    return bool(NUMBER_RE.search(without_sensor_ids))
 
 
 def _source_detail_has_quantity_event_context(args: list[Any], text: str) -> bool:
     values = [str(arg).strip() for arg in args]
     if len(values) < 3:
         return False
-    subject = values[0]
-    field = values[1]
+    subject = values[0].lower()
+    field = values[1].lower()
     if DATE_TIME_FIELD_RE.search(field):
         return False
-    has_event_context = bool(EVENT_WRAPPER_CONTEXT_RE.search(subject) or EVENT_WRAPPER_CONTEXT_RE.search(field))
+    has_event_context = bool(
+        SOURCE_DETAIL_EVENT_CONTEXT_RE.search(subject)
+        or SOURCE_DETAIL_EVENT_CONTEXT_RE.search(field)
+        or re.fullmatch(r"ev(?:ent)?_?\d+", subject)
+    )
     has_quantity_context = bool(QUANTITY_FIELD_CONTEXT_RE.search(field) or QUANTITY_TERM_RE.search(text))
-    return (has_event_context or has_quantity_context) and has_quantity_context
+    return has_event_context and has_quantity_context
 
 
 def _quantity_content_args(predicate: str, args: list[Any]) -> list[str]:
@@ -651,6 +696,16 @@ def _quantity_content_args(predicate: str, args: list[Any]) -> list[str]:
 def _wrapper_subject_has_quantity_carrier(row: dict[str, Any], carrier_subjects: set[str]) -> bool:
     args = row.get("args") if isinstance(row.get("args"), list) else []
     return bool(args and str(args[0]).strip() in carrier_subjects)
+
+
+def _quantity_carrier_subjects(row: dict[str, Any]) -> set[str]:
+    predicate = str(row.get("predicate", "")).strip()
+    args = [str(arg).strip() for arg in row.get("args", [])] if isinstance(row.get("args"), list) else []
+    if not args:
+        return set()
+    if predicate in {"duration_between", "event_duration"} and len(args) >= 3:
+        return {args[1], args[2]}
+    return {args[0]}
 
 
 def _row_to_fact_like(row: dict[str, Any]) -> str:
@@ -716,6 +771,7 @@ def _contract_reports(
         _parallel_assignment_contract(source_texts=source_texts, direct_rows=direct_rows),
         _source_authority_pair_contract(source_texts=source_texts, source_rows=source_rows, direct_rows=direct_rows),
         _operational_lifecycle_contract(source_texts=source_texts, direct_rows=direct_rows),
+        _scheduled_maintenance_due_date_contract(source_texts=source_texts, direct_rows=direct_rows),
     ]
 
 
@@ -753,8 +809,7 @@ def _source_authority_pair_contract(
     source_mentions = [
         text
         for text in source_texts
-        if any(marker in text for marker in ("authority", "authorized", "authoriz", "court_order", "policy", "governing"))
-        and any(marker in text for marker in ("access", "finding", "status", "action", "subject", "item", "party"))
+        if _is_source_authority_source_text(text)
     ]
     source_units = _source_authority_source_units(source_rows)
     complete_units, partial_units = _source_authority_direct_units(direct_rows)
@@ -769,6 +824,41 @@ def _source_authority_pair_contract(
             "direct_complete_count": len(complete_units),
             "direct_partial_count": len(partial_units),
         },
+    )
+
+
+def _is_source_authority_source_text(text: str) -> bool:
+    normalized = str(text or "").lower()
+    if not any(
+        marker in normalized
+        for marker in ("authority", "authorized", "authoriz", "court_order", "policy", "governing")
+    ):
+        return False
+    if not any(marker in normalized for marker in ("access", "finding", "status", "action", "subject", "item", "party")):
+        return False
+    return not _source_authority_text_is_claim_or_request(normalized)
+
+
+def _source_authority_text_is_claim_or_request(text: str) -> bool:
+    return any(
+        marker in text
+        for marker in (
+            "crew_log",
+            "our_crew",
+            "we_were_not_informed",
+            "we_were_not_notified",
+            "operated_under",
+            "objects_to",
+            "objected_to",
+            "objection",
+            "request_enforcement",
+            "we_request",
+            "requested_enforcement",
+            "claim_",
+            "claims_",
+            "claimed_",
+            "unauthorized_removal",
+        )
     )
 
 
@@ -871,9 +961,12 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
     for predicate in (
         "source_authority",
         "authority_source",
+        "authorization_rule",
         "authorized_by",
+        "authorized_by_role",
         "governing_source",
         "authority_for",
+        "permit_authorization",
         "source_for_authority",
     ):
         for args in by_predicate.get(predicate, []):
@@ -881,6 +974,10 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
                 complete.add((predicate, args[0], args[1]))
             elif len(args) >= 2 and args[0] and args[1]:
                 partial.add((predicate, args[0], args[1]))
+
+    for args in by_predicate.get("event_authorizer", []):
+        if len(args) >= 2 and args[0] and args[1]:
+            partial.add(("event_authorizer", args[0], args[1]))
 
     return complete, partial
 
@@ -949,6 +1046,57 @@ def _operational_lifecycle_direct_units(
         if subject not in typed_event_by_subject:
             split.add(("split_lifecycle_surface", subject))
     return complete, partial, split
+
+
+def _scheduled_maintenance_due_date_contract(
+    *, source_texts: list[str], direct_rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    source_mentions = [
+        text
+        for text in source_texts
+        if _is_scheduled_maintenance_due_source_text(text)
+    ]
+    complete_units, partial_units = _scheduled_maintenance_direct_units(direct_rows)
+    return _contract_status(
+        contract="scheduled_maintenance_due_date_preservation",
+        source_signal_count=len(source_mentions),
+        direct_surface_count=len(complete_units),
+        required_when_source_count_at_least=1,
+        extra={
+            "source_text_mention_count": len(source_mentions),
+            "direct_complete_count": len(complete_units),
+            "direct_partial_count": len(partial_units),
+        },
+    )
+
+
+def _scheduled_maintenance_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[set[tuple[str, ...]], set[tuple[str, ...]]]:
+    complete: set[tuple[str, ...]] = set()
+    partial: set[tuple[str, ...]] = set()
+    for index, row in enumerate(direct_rows):
+        predicate = str(row.get("predicate") or "").lower()
+        args = [str(arg).strip().lower() for arg in row.get("args", [])]
+        text = " ".join([predicate, *args])
+        if _is_calibration_history_due_surface(predicate, args):
+            complete.add((predicate, str(index), *(args[:4])))
+            continue
+        if not _has_scheduled_maintenance_marker(text):
+            continue
+        key = (predicate, str(index), *(args[:4]))
+        if _has_temporal_marker(text) and len([arg for arg in args if arg]) >= 2:
+            complete.add(key)
+        else:
+            partial.add(key)
+    return complete, partial
+
+
+def _is_calibration_history_due_surface(predicate: str, args: list[str]) -> bool:
+    if "calibration" not in str(predicate or ""):
+        return False
+    if len([arg for arg in args if arg]) < 3:
+        return False
+    temporal_arg_count = sum(1 for arg in args if _has_temporal_marker(str(arg)))
+    return temporal_arg_count >= 2
 
 
 def _has_lifecycle_marker(text: str) -> bool:
@@ -1042,6 +1190,18 @@ def _is_schedule_or_deadline_text(text: str) -> bool:
             "rescheduled",
         )
     )
+
+
+def _is_scheduled_maintenance_due_source_text(text: str) -> bool:
+    text = str(text).casefold()
+    return _has_temporal_marker(text) and _has_scheduled_maintenance_marker(text)
+
+
+def _has_scheduled_maintenance_marker(text: str) -> bool:
+    normalized = str(text).casefold().replace("-", "_")
+    maintenance = ("calibration", "maintenance", "service", "inspection")
+    schedule = ("next", "due", "scheduled", "planned", "set")
+    return any(marker in normalized for marker in maintenance) and any(marker in normalized for marker in schedule)
 
 
 def _is_static_status_snapshot_text(text: str) -> bool:

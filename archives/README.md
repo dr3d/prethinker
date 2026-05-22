@@ -16,7 +16,8 @@ but do not belong on the public docs front door.
 
 ## Promotion Pattern
 
-1. Keep docs hub curated (latest/high-signal runs only).
+1. Keep `docs/README.md` and `docs/PUBLIC_DOCS_GUIDE.md` curated
+   (latest/high-signal runs only).
 2. Keep complete large scratch traces in the external archive unless they are
    intentionally promoted.
 3. Promote only curated artifacts that need to be shared; leave bulk scratch
@@ -29,3 +30,5 @@ Recent repo-cleanup sweeps moved bulky or stale local material to:
 - `C:\prethinker_tmp_archive\repo_doc_retire_20260514`
 - `C:\prethinker_tmp_archive\repo_stale_assets_20260514`
 - `C:\prethinker_tmp_archive\tmp_sweep_20260514`
+- `C:\prethinker_tmp_archive\tmp_lean_markdown_docs_cleanup_20260522`
+- `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522`

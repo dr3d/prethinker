@@ -52,6 +52,8 @@ def test_source_record_ledger_context_is_guidance_not_truth() -> None:
     assert "Do not infer ownership" in context
     assert "Exhibit C-1" in context
     assert "plain paragraph lines" in context
+    assert "source_record_cell_item" in context
+    assert "source_record_cell_item_pair" in context
 
 
 def test_source_record_ledger_preserves_plain_prose_lines_without_anchors() -> None:
@@ -128,6 +130,145 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
 
     assert field_result.get("status") == "success"
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
+
+
+def test_source_record_ledger_emits_row_context_citations_dates_and_count_words() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Federal Register",
+                "On February 16, 2024, in 89 FR 12287, the agency proposed the rule.",
+                "FR Doc. 2024-06370 Filed 3-25-24; 8:45 am",
+                "The Coast Guard issued ten deficiencies for the vessel.",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert (
+        "source_record_row_context(src_line_0002, on_february_16_2024_in_89_fr_12287_the_agency_proposed_the_rule, "
+        "on_february_16_2024_in_89_fr_12287_the_agency_proposed_the_rule, federal_register)."
+    ) in facts
+    assert "source_record_citation(src_line_0002, v_89_fr_12287)." in facts
+    assert "source_record_citation_parts(src_line_0002, v_89, fr, v_12287)." in facts
+    assert "source_record_date_alias(src_line_0003, v_3_25_24, v_2024_03_25)." in facts
+    assert "source_record_date_parts(src_line_0003, 2024, 3, 25)." in facts
+    assert "source_record_count_word(src_line_0004, ten, 10)." in facts
+
+
+def test_source_record_ledger_emits_section_list_count_surfaces() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Announcement",
+                "Retail packaged items",
+                "Sold at select Walmart stores in CT, DE, and WV.",
+                "- Wiers Farm item A",
+                "- Wiers Farm item B",
+                "- Wiers Farm item C",
+                "Bulk retail items sold individually",
+                "- Loose cucumber",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_section_list_count(src_line_0002, src_line_0003, 3)." in facts
+    assert (
+        "source_record_section_list_count_detail(src_line_0002, src_line_0003, "
+        "retail_packaged_items, sold_at_select_walmart_stores_in_ct_de_and_wv, 3)."
+    ) in facts
+    assert (
+        "source_record_section_list_count_member(src_line_0002, src_line_0003, 1, "
+        "src_line_0004, wiers_farm_item_a)."
+    ) in facts
+    assert (
+        "source_record_section_list_count_member(src_line_0002, src_line_0003, 3, "
+        "src_line_0006, wiers_farm_item_c)."
+    ) in facts
+
+
+def test_source_record_ledger_decomposes_table_cell_lists_and_qualifiers() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "| State | Retailers |",
+                "| --- | --- |",
+                "| Maryland | Walmart, Save-a-Lot, Shop N Save (cucumber, green bell pepper and pickling cucumber only) |",
+                "| Pennsylvania | Shoppers Value (cucumber only); Franklin Foods Inc. (Kitanning, PA) (cucumber only) |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_cell_item(src_line_0003, 2, walmart)." in facts
+    assert "source_record_cell_item(src_line_0003, 2, save_a_lot)." in facts
+    assert "source_record_cell_item(src_line_0003, 2, shop_n_save)." in facts
+    assert "source_record_cell_item_pair(src_line_0003, 1, maryland, 2, walmart)." in facts
+    assert "source_record_field_item_pair(src_line_0003, state, maryland, retailers, walmart)." in facts
+    assert (
+        "source_record_cell_item_pair_qualifier(src_line_0003, 1, maryland, 2, shop_n_save, "
+        "cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in facts
+    assert (
+        "source_record_field_item_pair_qualifier(src_line_0003, state, maryland, retailers, shop_n_save, "
+        "cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in facts
+    assert (
+        "source_record_cell_item_qualifier(src_line_0003, 2, shop_n_save, "
+        "cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in facts
+    assert "source_record_field_item(src_line_0003, retailers, shop_n_save)." in facts
+    assert (
+        "source_record_field_item_qualifier(src_line_0003, retailers, shop_n_save, "
+        "cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in facts
+    assert "source_record_cell_item(src_line_0004, 2, shoppers_value)." in facts
+    assert "source_record_cell_item_qualifier(src_line_0004, 2, shoppers_value, cucumber_only)." in facts
+    assert "source_record_cell_item(src_line_0004, 2, franklin_foods_inc_kitanning_pa)." in facts
+    assert (
+        "source_record_cell_item_qualifier(src_line_0004, 2, franklin_foods_inc_kitanning_pa, "
+        "cucumber_only)."
+    ) in facts
+
+
+def test_source_record_ledger_keeps_long_distribution_cells() -> None:
+    long_cell = (
+        "Walmart; Save-a-Lot; Shop N Save and Shop N Save Express "
+        "(cucumber, green bell pepper and pickling cucumber only); "
+        "Shoppers Value Masontown, PA (cucumber only); "
+        "Franklin Foods Inc. Kitanning, PA (cucumber only); "
+        "Grove City Country Market Grove City, PA (green bell pepper and pickling cucumber only); "
+        "Fas Chek Market (cucumber only); "
+        "Foodland (cucumber, green bell pepper and pickling cucumber only); "
+        "Market Basket Johnstown, PA (pickling cucumber only)"
+    )
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "| State | Retailers |",
+                "| --- | --- |",
+                f"| Pennsylvania | {long_cell} |",
+            ]
+        )
+    )
+
+    rows = ledger["rows"]
+    table_row = next(row for row in rows if row.get("line") == 3)
+    assert "Market Basket Johnstown" in table_row["cells"][1]
+
+    facts = source_record_ledger_facts(ledger)
+    assert "source_record_cell_item(src_line_0003, 2, fas_chek_market)." in facts
+    assert "source_record_cell_item_qualifier(src_line_0003, 2, fas_chek_market, cucumber_only)." in facts
+    assert "source_record_cell_item(src_line_0003, 2, foodland)." in facts
+    assert (
+        "source_record_cell_item_qualifier(src_line_0003, 2, foodland, "
+        "cucumber_green_bell_pepper_and_pickling_cucumber_only)."
+    ) in facts
+    assert "source_record_cell_item(src_line_0003, 2, market_basket_johnstown_pa)." in facts
 
 
 def test_source_record_ledger_emits_inline_key_value_fields() -> None:
@@ -412,6 +553,7 @@ def test_source_record_ledger_emits_parenthetical_alias_surfaces() -> None:
                 "The Harbor Review League (HRL) convened the meeting.",
                 "The Maritime Audit Council (MAC) observed but did not vote.",
                 "The event named the parent body as part of the National Football League (NFL).",
+                "The Michigan Department of Agriculture (MDARD) reported the traceback result.",
                 "N. Park 206 (medical-coverage station) stayed unchanged.",
             ]
         )
@@ -424,6 +566,7 @@ def test_source_record_ledger_emits_parenthetical_alias_surfaces() -> None:
     assert "source_record_alias(src_line_0003, harbor_review_league, hrl)." in facts
     assert "source_record_parenthetical_alias(src_line_0004, mac, maritime_audit_council)." in facts
     assert "source_record_parenthetical_alias(src_line_0005, nfl, national_football_league)." in facts
+    assert "source_record_parenthetical_alias(src_line_0006, mdard, michigan_department_of_agriculture)." in facts
     assert not any(
         fact.startswith(("source_record_parenthetical_alias(", "source_record_alias("))
         and "of_the_national_football_league" in fact
@@ -434,6 +577,18 @@ def test_source_record_ledger_emits_parenthetical_alias_surfaces() -> None:
         and "medical_coverage_station" in fact
         for fact in facts
     )
+
+
+def test_source_record_ledger_preserves_semicolon_field_values() -> None:
+    ledger = extract_source_record_ledger(
+        "Product Type: Food & Beverages; Vegetable Products; Foodborne Illness"
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_field(src_line_0001, product_type, food_beverages)." in facts
+    assert "source_record_field(src_line_0001, product_type, vegetable_products)." in facts
+    assert "source_record_field(src_line_0001, product_type, foodborne_illness)." in facts
 
 
 def test_source_record_ledger_keeps_root_cause_scope_refusal() -> None:

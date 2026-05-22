@@ -272,6 +272,40 @@ def test_quantity_event_telemetry_ignores_source_line_locators(tmp_path: Path) -
     assert report["summary"]["quantity_event_delivery_issue_count"] == 0
 
 
+def test_quantity_event_telemetry_ignores_non_event_source_detail_quantities(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_municipal" / "domain_bootstrap_file_a.json",
+        [
+            "source_detail(site_a, area, 0_8_acres, src_line_0012).",
+            "source_detail(exhibit_t_1, measurement_method, standardized_dbh_height_4_5_feet, src_line_0060).",
+            "source_detail(permit_a, original_count, 6, src_line_0026).",
+        ],
+        candidate_predicates=["source_detail/4"],
+    )
+
+    report = audit_paths([draw])
+
+    telemetry = report["fixtures"][0]["delivery_telemetry"][0]
+    assert telemetry["status"] == "not_applicable"
+    assert telemetry["numeric_wrapper_counts"] == [0]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 0
+
+
+def test_quantity_event_telemetry_ignores_sensor_identifier_numbers(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_sensor" / "domain_bootstrap_file_a.json",
+        ["event_description(ev_03, drying_chamber_humidity_alarm_sensor_hum_d_04)."],
+        candidate_predicates=["event_description/2"],
+    )
+
+    report = audit_paths([draw])
+
+    telemetry = report["fixtures"][0]["delivery_telemetry"][0]
+    assert telemetry["status"] == "not_applicable"
+    assert telemetry["numeric_wrapper_counts"] == [0]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 0
+
+
 def test_quantity_event_telemetry_allows_event_log_source_detail(tmp_path: Path) -> None:
     draw = _write_compile(
         tmp_path / "draw1" / "fixture_log" / "domain_bootstrap_file_a.json",
@@ -301,6 +335,26 @@ def test_quantity_event_telemetry_ignores_date_only_event_source_detail(tmp_path
     telemetry = fixture["delivery_telemetry"][0]
     assert telemetry["status"] == "not_applicable"
     assert telemetry["numeric_wrapper_counts"] == [0]
+    assert report["summary"]["quantity_event_delivery_issue_count"] == 0
+
+
+def test_quantity_event_telemetry_accepts_event_duration_carrier(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_duration" / "domain_bootstrap_file_a.json",
+        [
+            "source_detail(ev_10, duration, 17_hours_45_minutes_52_seconds, src_line_0130).",
+            "event_duration(17_hours_45_minutes_52_seconds, ev_10, ev_14).",
+        ],
+        candidate_predicates=["source_detail/4", "event_duration/3"],
+    )
+
+    report = audit_paths([draw])
+
+    fixture = report["fixtures"][0]
+    telemetry = fixture["delivery_telemetry"][0]
+    assert telemetry["status"] == "delivered"
+    assert telemetry["carrier_row_counts"] == [1]
+    assert telemetry["stranded_numeric_wrapper_counts"] == [0]
     assert report["summary"]["quantity_event_delivery_issue_count"] == 0
 
 
@@ -359,6 +413,35 @@ def test_source_authority_contract_prefers_structured_source_field_units(tmp_pat
     assert contract["source_text_mention_count"] == 1
 
 
+def test_source_authority_contract_ignores_claim_and_request_source_text(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_claim_text" / "domain_bootstrap_file_a.json",
+        [
+            (
+                "source_record_text_atom(src_line_1, "
+                "per_our_crew_log_tree_19_was_felled_as_part_of_routine_site_clearance_authorized_under_tr_2026_014_"
+                "we_were_not_informed_and_our_crew_operated_under_the_permit_copy_in_our_possession)."
+            ),
+            (
+                "source_record_text_atom(src_line_2, "
+                "brookhaven_tree_advocates_objects_to_the_removal_and_we_request_enforcement_action_under_ordinance_18_15_"
+                "because_unauthorized_removal_requires_replacement)."
+            ),
+            "source_attributed_claim(claim_1, kowalski_sons, operated_under_original_permit, exhibit_k_1).",
+            "source_attributed_claim(claim_2, brookhaven_tree_advocates, removal_was_unauthorized, exhibit_o_1).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "not_applicable"
+    assert contract["source_signal_count"] == 0
+    assert contract["source_field_unit_count"] == 0
+    assert contract["source_text_mention_count"] == 0
+
+
 def test_source_authority_contract_accepts_authorized_access_source_pair(tmp_path: Path) -> None:
     draw = _write_compile(
         tmp_path / "draw1" / "fixture_access" / "domain_bootstrap_file_a.json",
@@ -378,6 +461,63 @@ def test_source_authority_contract_accepts_authorized_access_source_pair(tmp_pat
     assert contract["status"] == "pass"
     assert contract["direct_complete_count"] == 1
     assert contract["direct_partial_count"] == 0
+
+
+def test_source_authority_contract_accepts_event_authorizer_role_rows(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_event_authority" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_field(src_line_1, subject_id, amend_a1).",
+            "source_record_field(src_line_1, authorized_by, corr).",
+            "source_record_field(src_line_1, authorizing_source, property_manager_role).",
+            "event_authorizer(amend_a1, corr).",
+            "authorized_by_role(amend_a1, corr, property_manager).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1
+    assert contract["direct_partial_count"] == 1
+
+
+def test_source_authority_contract_accepts_permit_authorization_rows(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_permit_authority" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_field(src_line_1, subject_id, tree_19).",
+            "source_record_field(src_line_1, authorized_action, remove).",
+            "source_record_field(src_line_1, authority_source, permit_tr_2026_014).",
+            "permit_authorization(permit_tr_2026_014, tree_19, remove).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1
+
+
+def test_source_authority_contract_accepts_authorization_rule_rows(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw1" / "fixture_authorization_rule" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, policy_authorized_action_for_item_a_party_reader_one).",
+            "authorization_rule(property_manager, standard_amendments, under_50_000_annually).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][1]
+    assert contract["contract"] == "source_authority_pair_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1
 
 
 def test_source_authority_contract_counts_direct_custody_and_title_surfaces(tmp_path: Path) -> None:
@@ -598,3 +738,56 @@ def test_operational_lifecycle_contract_ignores_temporal_correction_and_storage_
     contract = report["fixtures"][0]["draws"][0]["contracts"][2]
     assert contract["status"] == "not_applicable"
     assert contract["source_signal_count"] == 0
+
+
+def test_scheduled_maintenance_due_date_contract_flags_source_only_due_date(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_sensor" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, hum_d_04_last_calibration_2026_01_12_next_calibration_due_2026_07_12).",
+            "sensor_id(hum_d_04).",
+            "sensor_certified_scope(hum_d_04, relative_humidity).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][3]
+    assert contract["contract"] == "scheduled_maintenance_due_date_preservation"
+    assert contract["status"] == "ledger_only"
+    assert contract["source_signal_count"] == 1
+    assert contract["direct_complete_count"] == 0
+
+
+def test_scheduled_maintenance_due_date_contract_accepts_scheduled_event_surface(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_sensor" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, hum_d_04_last_calibration_2026_01_12_next_calibration_due_2026_07_12).",
+            "scheduled_event(hum_d_04, calibration, 2026_07_12, sensor_register).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][3]
+    assert contract["contract"] == "scheduled_maintenance_due_date_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1
+
+
+def test_scheduled_maintenance_due_date_contract_accepts_sensor_calibration_history_due_surface(tmp_path: Path) -> None:
+    draw = _write_compile(
+        tmp_path / "draw" / "fixture_sensor" / "domain_bootstrap_file_a.json",
+        [
+            "source_record_text_atom(src_line_1, hum_d_04_last_calibration_2026_01_12_next_calibration_due_2026_07_12).",
+            "sensor_calibration(hum_d_04, 2026_01_12, 2026_07_12).",
+        ],
+    )
+
+    report = audit_paths([draw])
+
+    contract = report["fixtures"][0]["draws"][0]["contracts"][3]
+    assert contract["contract"] == "scheduled_maintenance_due_date_preservation"
+    assert contract["status"] == "pass"
+    assert contract["direct_complete_count"] == 1

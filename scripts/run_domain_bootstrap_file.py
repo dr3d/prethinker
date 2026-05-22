@@ -73,20 +73,37 @@ PROFILE_ADMISSION_STATUS_STATE_TERMS = {
     "status",
     "suspect",
     "suspended",
+    "terminated",
     "unresolved",
     "voided",
 }
 PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS = {
+    "assessment",
+    "assertion",
+    "argue",
+    "argued",
+    "argues",
+    "comment",
+    "certification",
     "email",
     "letter",
     "memo",
     "memorandum",
     "note",
+    "noted",
+    "notes",
     "opinion",
     "report",
+    "respond",
+    "responded",
+    "responds",
+    "said",
+    "says",
     "source",
     "statement",
+    "states",
     "testimony",
+    "testified",
     "witness",
 }
 PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS = {
@@ -96,14 +113,97 @@ PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS = {
     "binding",
     "claim",
     "cleared",
+    "concern",
+    "concerned",
+    "concerns",
     "confirmed",
     "determined",
+    "determination",
+    "disagree",
+    "documentation",
+    "disputed",
+    "dispute",
     "finding",
+    "flagged",
+    "legal",
+    "objection",
+    "objected",
+    "objects",
+    "opposed",
+    "opposes",
     "pending",
+    "professional",
     "resolved",
     "status",
     "supports",
+    "true",
     "unresolved",
+    "void",
+}
+PROFILE_DELIVERY_US_STATES: dict[str, tuple[str, ...]] = {
+    "al": ("alabama", "al"),
+    "ak": ("alaska", "ak"),
+    "az": ("arizona", "az"),
+    "ar": ("arkansas", "ar"),
+    "ca": ("california", "ca"),
+    "co": ("colorado", "co"),
+    "ct": ("connecticut", "ct"),
+    "de": ("delaware", "de"),
+    "dc": ("district of columbia", "dc"),
+    "fl": ("florida", "fl"),
+    "ga": ("georgia", "ga"),
+    "hi": ("hawaii", "hi"),
+    "ia": ("iowa", "ia"),
+    "id": ("idaho", "id"),
+    "il": ("illinois", "il"),
+    "in": ("indiana", "in"),
+    "ks": ("kansas", "ks"),
+    "ky": ("kentucky", "ky"),
+    "la": ("louisiana", "la"),
+    "ma": ("massachusetts", "ma"),
+    "md": ("maryland", "md"),
+    "me": ("maine", "me"),
+    "mi": ("michigan", "mi"),
+    "mn": ("minnesota", "mn"),
+    "mo": ("missouri", "mo"),
+    "ms": ("mississippi", "ms"),
+    "mt": ("montana", "mt"),
+    "nc": ("north carolina", "nc"),
+    "nd": ("north dakota", "nd"),
+    "ne": ("nebraska", "ne"),
+    "nh": ("new hampshire", "nh"),
+    "nj": ("new jersey", "nj"),
+    "nm": ("new mexico", "nm"),
+    "nv": ("nevada", "nv"),
+    "ny": ("new york", "ny"),
+    "oh": ("ohio", "oh"),
+    "ok": ("oklahoma", "ok"),
+    "or": ("oregon", "or"),
+    "pa": ("pennsylvania", "pa"),
+    "ri": ("rhode island", "ri"),
+    "sc": ("south carolina", "sc"),
+    "sd": ("south dakota", "sd"),
+    "tn": ("tennessee", "tn"),
+    "tx": ("texas", "tx"),
+    "ut": ("utah", "ut"),
+    "va": ("virginia", "va"),
+    "vt": ("vermont", "vt"),
+    "wa": ("washington", "wa"),
+    "wi": ("wisconsin", "wi"),
+    "wv": ("west virginia", "wv"),
+    "wy": ("wyoming", "wy"),
+}
+PROFILE_DELIVERY_DISTRIBUTION_CARRIER_NAMES = {
+    "distributed_in_state",
+    "distributed_to_state",
+    "distribution_entry",
+    "product_retailer_in_state",
+    "product_restriction",
+    "recall_distribution",
+    "retailer_restriction",
+    "sold_at_retailer",
+    "sold_at_store",
+    "sold_in_state",
 }
 PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS = {"ev", "event", "entry", "interval", "measurement", "observation", "reading", "record", "sample"}
 PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS = {
@@ -147,6 +247,8 @@ PROFILE_ADMISSION_QUANTITY_TERMS = {
     "amount",
     "count",
     "duration",
+    "decreased",
+    "decrease",
     "increase",
     "increased",
     "limit",
@@ -655,6 +757,12 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: if the source states events, raw/corrected times, superseded values, intervals, windows, deadlines, or transitions, preserve the temporal anchors and correction relation directly.",
     "Compile surface invariant rule: chronological/event-list sources need complete event backbone units when compatible predicates exist. Preserve event id or entry label, date/time/order, actor/party/system, governed subject or object, and outcome/status/action as joinable rows. Do not leave a timeline answer split between source_record text, a vague event wrapper, and unrelated status/date rows.",
     "Compile surface invariant rule: repeated tables, logs, registers, and chronologies with row ids plus time/date and action/status/description columns need row-by-row direct preservation when compatible predicates exist. Do not compile only a representative prefix or the first N rows; later rows often close, reopen, supersede, authorize, complete, or otherwise determine the current state.",
+    "Compile surface invariant rule: public notices, recalls, and registry pages often use a paragraph heading to scope the product/list rows that follow. If the source states Sold at [store] in [states] before a product list, treat that scope as applying to each governed product row until the next scope heading; emit direct store/state rows for each governed product or category when compatible predicates exist.",
+    "Compile surface invariant rule: state-by-retailer or region-by-location distribution tables need row-level direct preservation. For each row, preserve the state/region, each retailer/location, and any retailer-specific product restriction or carve-out as joinable rows; do not leave the retailer list only inside source_record_cell/3 or source_record_text_atom/2.",
+    "Compile surface invariant rule: source_record_cell_item/3 and source_record_cell_item_qualifier/4 are deterministic table-list scaffolding, not semantic delivery. When allowed predicates such as distributed_in_state/2, sold_at_retailer/3, product_restriction/3, recall_distribution/2, or equivalent distribution carriers exist, promote the item and qualifier rows into those direct carriers. Do not stop at product_identity/product_form rows.",
+    "Compile surface invariant rule: distribution rows must reuse the same product/item atoms as the product list, recall-item list, or inventory table they govern. If the source wording forces a category-level distribution row, emit a category/product alias or explicit governed-category row so product_name, recall_item, sold_at_store, state, and restriction facts can join. Do not create parallel atoms for the same named item unless an alias/equivalence row connects them.",
+    "Compile surface invariant rule: retailer-specific restrictions in distribution tables apply to the restricted products named in the parenthetical text, not to a single representative row item. If a cell says Shop N Save carried only cucumber, green bell pepper, and pickling cucumber, emit restriction/sold-at rows for those products or a governed restricted-product set; do not attach the restriction only to an unrelated pepper item.",
+    "Compile surface invariant rule: multi-value summary fields such as Product Type, Subjects, Categories, Brand Names, or Affected Items are repeated values, not a single scalar. Preserve each listed value or a full field detail row; do not truncate the field to the first semicolon- or comma-separated value.",
     "Compile surface invariant rule: point-in-time status/state questions need direct status surfaces. When the source states a current/as-of/on-date status, condition, availability, approval/denial, pending resolution, active/closed state, or authoritative current value, preserve subject, state/status value, temporal or source scope, and reason/authority when stated as joinable direct rows. Do not leave the answer only in source_record text, a broad event wrapper, or split status/2 plus unjoined date rows.",
     "Compile surface invariant rule: status transitions and scoped population states are additive surfaces. When a source states before/after state, reclassification, replacement, supersession, pending-to-decided movement, or only part of a population in a state, preserve both the governed subject or subset and the state transition with its effective date/source. Do not collapse a population state into one unscoped current-status atom.",
     "Compile surface invariant rule: operational record/status events should preserve the event or record id, governed subject/item/application, actor/body, timestamp/turn, status before and after when stated, authority/source, and reason/correction detail when stated. Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition vocabulary should not be left only as record labels.",
@@ -663,6 +771,8 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: for received/filed/logged/docketed events, preserve the receiving or filing actor separately from the submitter/source actor and bind both to the submitted object when both are stated. For withdrawn/retracted/cancelled/denied/approved/superseded requests, preserve the requested action/content/line item or descriptive target when stated.",
     "Compile surface invariant rule: if the source states counts, totals, limits, durations, percentages, ratios, units, or formula components, preserve the numeric component rows directly. Do not hide them inside prose labels or summary atoms.",
     "Compile surface invariant rule: when the allowed profile contains a direct quantity carrier such as event_measurement/4, event_quantity/4, reading_value/4, measurement_value/4, metric_observation/4, or a source-local count/amount/rate/duration predicate, populate that carrier for source-stated numeric rows. Raw event, corrected event, note, description, or detail rows are additive context, not replacements for the direct value surface.",
+    "Compile surface invariant rule: numeric event changes stated as changed/reverted/increased/decreased from X to Y or with an X -> Y arrow need separate before and after value rows for each event when the profile offers event_measurement/4 or an equivalent carrier. Do not satisfy later reverted rows by only preserving the first changed row.",
+    "Compile surface invariant rule: explicit duration totals such as line-stop duration 17 hours 45 minutes 52 seconds need a direct duration value row when the profile offers event_measurement/4, event_duration/3, or an equivalent duration carrier. Start/end timestamps or interval rows are temporal anchors, not replacements for the stated numeric duration total.",
     "Compile surface invariant rule: financial or numeric-state calculations need baseline preservation. When the source states an initial/current balance or value, adjustments/debits/credits/expenditures, actual versus hypothetical scenario assumptions, resulting value, and policy threshold, preserve those as separate joinable rows. Derivation rows need a scenario or basis slot so actual, hypothetical, before, and after states do not overwrite one another. Do not overwrite an initial baseline with a later actual value, and do not answer counterfactual calculations from only the actual-result row.",
     "Compile surface invariant rule: if the source states custody, possession, access, location, ownership, title, recall, return, or control state, preserve each stated control surface separately. Do not collapse them into a generic status label.",
     "Candidate predicate names are not enough. When an invariant surface is present in the source and supported by the allowed profile, propose the concrete fact operations needed to make it queryable.",
@@ -734,6 +844,14 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Treat --profile-registry as a palette-stability prior during normal profile generation. "
             "This preserves matching predicate names/arities when they fit the source without treating registry rows as facts."
+        ),
+    )
+    parser.add_argument(
+        "--allow-global-first-profile-registry-palette-prior",
+        action="store_true",
+        help=(
+            "Allow --profile-registry-palette-prior with a blank-fixture multi-draw registry selected by mode=first. "
+            "Default is blocked because global first-draw palettes are unstable stamp priors."
         ),
     )
     parser.add_argument("--domain-hint", default="")
@@ -878,6 +996,18 @@ def main() -> int:
         ],
     }
     profile_registry = _load_profile_registry(args.profile_registry)
+    unsafe_palette_prior_reason = _unsafe_profile_registry_palette_prior_reason(profile_registry)
+    if (
+        bool(args.profile_registry_palette_prior)
+        and unsafe_palette_prior_reason
+        and not bool(args.allow_global_first_profile_registry_palette_prior)
+    ):
+        raise SystemExit(
+            "--profile-registry-palette-prior refused: "
+            + unsafe_palette_prior_reason
+            + ". Rebuild the registry with fixture-local threshold/intersection selection, or pass "
+            "--allow-global-first-profile-registry-palette-prior for an explicit diagnostic override."
+        )
     if profile_registry:
         sample["candidate_profile_registry_v1"] = profile_registry
         sample["context"].append(
@@ -1144,10 +1274,16 @@ def main() -> int:
         extension_rows = [
             _ensure_repeated_structure_predicates(parsed),
             _ensure_source_authority_predicate(parsed, source_text=source_text),
+            _ensure_entity_location_predicate(parsed, source_text=source_text),
             _ensure_source_detail_predicate(parsed),
             _ensure_source_attributed_claim_predicate(parsed, source_text=source_text),
+            _ensure_vote_tally_predicate(parsed, source_text=source_text),
+            _ensure_event_date_predicate(parsed, source_text=source_text),
+            _ensure_quorum_status_predicate(parsed, source_text=source_text),
+            _ensure_appeal_filing_predicate(parsed, source_text=source_text),
             _ensure_status_state_predicate(parsed, source_text=source_text),
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
+            _ensure_scheduled_event_predicate(parsed, source_text=source_text),
         ]
         profile_extension_metadata = {
             "schema_version": "profile_extensions_v1",
@@ -1587,8 +1723,27 @@ def _load_profile_registry(path: Path | None) -> dict[str, Any]:
         "fixture": str(parsed.get("fixture", "")).strip(),
         "source": str(parsed.get("source", "")).strip(),
         "purpose": str(parsed.get("purpose", "")).strip(),
+        "selection": parsed.get("selection", {}) if isinstance(parsed.get("selection"), dict) else {},
         "predicates": compact_predicates,
     }
+
+
+def _unsafe_profile_registry_palette_prior_reason(profile_registry: dict[str, Any]) -> str:
+    if not isinstance(profile_registry, dict) or not profile_registry:
+        return ""
+    selection = profile_registry.get("selection") if isinstance(profile_registry.get("selection"), dict) else {}
+    mode = str(selection.get("mode") or "").strip().casefold()
+    try:
+        draw_count = int(selection.get("draw_count") or 0)
+    except (TypeError, ValueError):
+        draw_count = 0
+    fixture = str(profile_registry.get("fixture") or "").strip()
+    if mode == "first" and draw_count > 1 and not fixture:
+        return (
+            "registry selection is mode=first across multiple draws with no fixture scope; "
+            "that is a global first-draw palette, not a stable stamp prior"
+        )
+    return ""
 
 
 def _profile_from_registry(registry: dict[str, Any], *, domain_hint: str = "") -> dict[str, Any]:
@@ -2010,6 +2165,10 @@ def _compile_source_pass_ops(
             *intake_plan_context(intake_plan),
             *source_compiler_context,
             *COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
+            *_source_pass_profile_delivery_target_context(
+                source_text=source_text,
+                parsed_profile=parsed_profile,
+            ),
             *(extra_context or []),
             "This compact schema is for one bounded source pass. Follow current_pass.focus: broad skeleton passes should cover source-wide stable structure, while focused passes should not compile unrelated source sections.",
             "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
@@ -2143,6 +2302,238 @@ def _compile_source_pass_ops(
         "self_check": ir.get("self_check", {}),
         "source_pass_ops": parsed,
     }
+
+
+def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_profile: dict[str, Any]) -> list[str]:
+    candidates = parsed_profile.get("candidate_predicates")
+    candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
+    lines: list[str] = []
+    distribution_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item)
+        and _candidate_signature(item).split("/", 1)[0] in PROFILE_DELIVERY_DISTRIBUTION_CARRIER_NAMES
+    ]
+    distribution_states = _distribution_table_state_atoms(source_text)
+    if distribution_carriers and len(distribution_states) >= 8:
+        tail_states = distribution_states[-6:]
+        lines.append(
+            "PROFILE DELIVERY TARGET: this source has a dense distribution/state table with source-stated states "
+            f"{', '.join(distribution_states[:24])}. "
+            f"The allowed distribution carriers include {', '.join(distribution_carriers[:8])}. "
+            "When a pass covers product distribution, emit direct distribution carrier rows for every listed state "
+            "before adding multiple retailer details for early rows. Do not stop at a prefix of the table. "
+            f"Late rows such as {', '.join(tail_states)} are explicit coverage targets, not optional detail."
+        )
+    public_recall_prior_dates = _public_recall_prior_date_mentions(source_text)
+    public_recall_date_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item)
+        and _candidate_can_carry_public_recall_prior_date(item)
+    ]
+    if public_recall_prior_dates and public_recall_date_carriers:
+        lines.append(
+            "PROFILE DELIVERY TARGET: this public notice/recall source states a prior or original recall date "
+            f"({', '.join(public_recall_prior_dates[:4])}) while also stating the current announcement/expansion date. "
+            f"The allowed temporal recall carriers include {', '.join(public_recall_date_carriers[:6])}. "
+            "Emit a distinct joinable prior/original recall event/date row for the earlier recall date, and keep it "
+            "separate from the current expansion, publish, or content-current-as-of date. Do not satisfy an "
+            "original/prior recall date with only the current announcement date or a source_record_text_atom row."
+        )
+    source_claim_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_source_attributed_claim_delivery_unit(item)
+    ]
+    if source_claim_carriers:
+        source_claim_keys = _source_attributed_claim_required_keys(_source_attributed_claim_mentions(source_text))
+        if source_claim_keys:
+            lines.append(
+                "PROFILE DELIVERY TARGET: this source has source-owned claim/status/finding requirements "
+                f"{', '.join(source_claim_keys[:8])}. "
+                f"The allowed source-claim carriers include {', '.join(source_claim_carriers[:6])}. "
+                "When the current pass covers a source section containing one of these keys, emit the direct "
+                "source-to-claim carrier row with source/speaker, required content or status, and source row/scope. "
+                "Rows that mention the source but omit the required status such as not_binding, no_effect, "
+                "under_review, unresolved, finding, support, objection, or recommendation do not deliver the key."
+            )
+            if "source_attributed_claim/4" in source_claim_carriers:
+                lines.append(
+                    "PROFILE DELIVERY TARGET: source_attributed_claim/4 is available and is preferred for quoted "
+                    "or speaker-framed statements such as 'Name says:', '**Name:**', testimony, comments, objections, "
+                    "opinions, and notes. For every required key beginning with statement:, opinion:, note:, "
+                    "testimony:, report:, memo:, or comment:, emit a source_attributed_claim/4 row that keeps the "
+                    "speaker or document, asserted content/status/finding, and source row or hearing/document scope "
+                    "together. A shorter source_claim/3 row is additive but does not replace the 4-slot row when the "
+                    "source row/scope is needed to distinguish individual statements."
+                )
+            lines.append(
+                "PROFILE DELIVERY TARGET: source-attributed claim rows are additive evidence. They must not replace "
+                "the backbone rows needed for ordinary QA: event/date/status rows, vote rows, survey or measurement "
+                "rows, permit/application status rows, appeal/filing rows, board finding rows, participant/role rows, "
+                "and repeated-record detail rows should still be emitted when the current source section states them."
+            )
+            if any(key.endswith(":objection") or ":objection" in key for key in source_claim_keys):
+                lines.append(
+                    "PROFILE DELIVERY TARGET: this source has objection-noting claim requirements. When a section "
+                    "states a written objection, notes an objection, or records that a speaker objects/opposes, emit "
+                    "a direct source-attributed claim row for the objection itself. A procedural ruling or decision to "
+                    "proceed is a separate backbone fact and does not replace the objection row."
+                )
+            if any(key.endswith(":concern") or ":concern" in key for key in source_claim_keys):
+                lines.append(
+                    "PROFILE DELIVERY TARGET: this source has concern-statement requirements. When a section states "
+                    "that a person has a concern, concerns, or is concerned about an impact, emit a direct "
+                    "source-attributed claim row with the speaker/source, concern content, and source row or event "
+                    "scope joinable."
+                )
+    vote_tally_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_vote_tally_delivery_unit(item)
+    ]
+    vote_tally_keys = _vote_tally_required_keys(_vote_tally_source_mentions(source_text))
+    if vote_tally_carriers and vote_tally_keys:
+        lines.append(
+            "PROFILE DELIVERY TARGET: this source has explicit vote-tally requirements "
+            f"{', '.join(vote_tally_keys[:8])}. "
+            f"The allowed vote carriers include {', '.join(vote_tally_carriers[:6])}. "
+            "When the current pass covers a vote, roll call, approval/denial, or corrected minutes section, "
+            "emit a direct vote_tally/5 or equivalent row that keeps voting body, decision subject, result, "
+            "tally, and member votes or source scope joinable. Individual member voting rows are useful, but "
+            "they do not replace the final or corrected tally row when the source states one."
+        )
+    event_date_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_signature(item).split("/", 1)[0] in {"event_date", "event_time", "event_timestamp", "event_wall_time", "hearing_date", "meeting_date"}
+    ]
+    if event_date_carriers and EVENT_DATE_TEXT_RE.search(str(source_text or "")):
+        lines.append(
+            "PROFILE DELIVERY TARGET: this source has explicit event/hearing/filing dates. If a pass creates "
+            "an event id that embeds a date, also emit an event_date/2, event_time/2, event_timestamp/2, or "
+            "equivalent temporal row using that same event id and the explicit date. The dated id is an anchor, "
+            "not a substitute for a joinable temporal row."
+        )
+    quorum_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and "quorum" in set(_candidate_signature(item).split("/", 1)[0].split("_"))
+    ]
+    if quorum_carriers and QUORUM_TEXT_RE.search(str(source_text or "")):
+        lines.append(
+            "PROFILE DELIVERY TARGET: this source has explicit quorum facts. Emit a direct quorum_status/3 or "
+            "equivalent row for stated quorum checks, keeping hearing/event id, quorum status, and count or "
+            "requirement joinable. A source-attributed claim or hearing note about quorum is additive but does "
+            "not replace the direct quorum row."
+        )
+    appeal_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and (
+            _candidate_signature(item).split("/", 1)[0] in {"appeal_filed", "appeal_filing", "appeal_record"}
+            or "appeal" in set(_candidate_signature(item).split("/", 1)[0].split("_"))
+        )
+    ]
+    if appeal_carriers and APPEAL_FILING_TEXT_RE.search(str(source_text or "")):
+        lines.append(
+            "PROFILE DELIVERY TARGET: this source has explicit appeal-filing facts. Emit a direct appeal_filed/3, "
+            "appeal_filing/3, appeal_record/3, or equivalent row for each stated appeal, keeping appellant, appealed "
+            "target or subject, and filing date/status or window joinable. A source-attributed claim that mentions "
+            "the appeal is additive but does not replace the direct appeal/filing row."
+        )
+    quantity_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_quantity_event_delivery_unit(item)
+    ]
+    if not quantity_carriers:
+        return lines
+    quantity_mentions = _quantity_event_source_mentions(source_text)
+    quantity_key_counts = _quantity_event_required_key_counts(quantity_mentions)
+    if not quantity_key_counts:
+        return lines
+    keys = sorted(quantity_key_counts)
+    lines.append(
+        "PROFILE DELIVERY TARGET: this source has numeric event/interval quantity requirements "
+        f"{', '.join(f'{key}x{quantity_key_counts[key]}' for key in keys[:8])}. "
+        f"The allowed quantity carriers include {', '.join(quantity_carriers[:6])}. "
+        "When the current pass covers a source section containing one of these keys, emit the direct "
+        "quantity carrier rows in addition to event/timestamp/description rows."
+    )
+    duration_keys = [key for key in keys if key.startswith("duration:")]
+    if duration_keys:
+        lines.append(
+            "PROFILE DELIVERY TARGET: duration requirements need a direct row whose arguments include the "
+            f"duration subject ({', '.join(duration_keys[:4])}) and the exact stated elapsed total. "
+            "Start/end events and timestamps are anchors, not replacements for the duration value."
+        )
+    return lines
+
+
+def _public_recall_prior_date_mentions(source_text: str) -> list[str]:
+    dates: list[str] = []
+    seen: set[str] = set()
+    for match in PUBLIC_RECALL_PRIOR_DATE_TEXT_RE.finditer(str(source_text or "")):
+        raw = str(match.group("date1") or match.group("date2") or "").strip()
+        if not raw:
+            continue
+        display = re.sub(r"\s+", " ", raw)
+        key = display.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        dates.append(display)
+    return dates
+
+
+def _candidate_can_carry_public_recall_prior_date(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    if not signature:
+        return False
+    predicate = signature.split("/", 1)[0]
+    if predicate in {"recall_date", "event_date", "event_time", "event_timestamp", "publication_date", "published_on"}:
+        return True
+    tokens = set(re.findall(r"[a-z0-9]+", predicate.replace("_", " ")))
+    if "date" not in tokens and "time" not in tokens and "published" not in tokens:
+        return False
+    if not (tokens & {"recall", "event", "notice", "announcement", "publication", "published"}):
+        return False
+    args = " ".join(_candidate_args(candidate)).casefold()
+    return "date" in args or "time" in args or "published" in args
+
+
+def _distribution_table_state_atoms(source_text: str) -> list[str]:
+    states: list[str] = []
+    seen: set[str] = set()
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not (line.startswith("|") and line.endswith("|")):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 2:
+            continue
+        row_text = " ".join(cells)
+        row_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(row_text.casefold()))
+        if not row_tokens.intersection({"aldi", "distribution", "kroger", "retailer", "retailers", "sold", "store", "stores", "walmart"}):
+            continue
+        state = _state_atom_from_text(cells[0])
+        if state and state not in seen:
+            seen.add(state)
+            states.append(state)
+    return states
+
+
+def _state_atom_from_text(text: str) -> str:
+    normalized = re.sub(r"[^a-z0-9]+", " ", str(text or "").casefold()).strip()
+    padded = f" {normalized} "
+    tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(normalized))
+    for state, aliases in PROFILE_DELIVERY_US_STATES.items():
+        full_name = aliases[0]
+        if f" {full_name} " in padded or any(alias in tokens for alias in aliases[1:]):
+            return state
+    return ""
 
 
 def _source_pass_ops_to_semantic_ir(parsed: dict[str, Any]) -> dict[str, Any]:
@@ -2369,12 +2760,18 @@ def _compile_source_flat_plus_plan_passes(
         flat.get("queries", []) if isinstance(flat, dict) else [],
         focused.get("queries", []) if isinstance(focused, dict) else [],
     )
+    admitted_count = int(flat.get("admitted_count", 0) or 0) + int(focused.get("admitted_count", 0) or 0)
+    skipped_count = int(flat.get("skipped_count", 0) or 0) + int(focused.get("skipped_count", 0) or 0)
+    diagnostic_rejected_skipped_count = _diagnostic_rejected_flat_pass_skipped_count(flat, focused)
     result = {
         "ok": bool(flat.get("ok")) and bool(focused.get("ok")) if isinstance(flat, dict) and isinstance(focused, dict) else False,
         "mode": "flat_plus_intake_plan_passes",
         "pass_count": 1 + int(focused.get("pass_count", 0) or 0) if isinstance(focused, dict) else 1,
-        "admitted_count": int(flat.get("admitted_count", 0) or 0) + int(focused.get("admitted_count", 0) or 0),
-        "skipped_count": int(flat.get("skipped_count", 0) or 0) + int(focused.get("skipped_count", 0) or 0),
+        "admitted_count": admitted_count,
+        "skipped_count": skipped_count,
+        "effective_admitted_count": admitted_count,
+        "effective_skipped_count": max(0, skipped_count - diagnostic_rejected_skipped_count),
+        "diagnostic_rejected_flat_pass_skipped_count": diagnostic_rejected_skipped_count,
         "unique_fact_count": len(unique_facts),
         "unique_rule_count": len(unique_rules),
         "unique_query_count": len(unique_queries),
@@ -2653,8 +3050,57 @@ def _ensure_repeated_structure_predicates(parsed_profile: dict[str, Any]) -> dic
 
 SOURCE_AUTHORITY_TEXT_RE = re.compile(
     r"\b(?:only\s+(?:the\s+)?[a-z][a-z\s_-]{0,40}\s+(?:may|can|must|is_authorized_to|is_authorised_to)|"
-    r"authorized\s+by|authorised\s+by|authority|governing\s+(?:rule|policy|source)|"
+    r"authorized\s+by|authorised\s+by|authorization\s+act|authority|governing\s+(?:act|rule|policy|source|statute)|"
     r"(?:court|board|agency|committee|supervisor|director|officer)\s+(?:order|approval|authorization|authorisation))\b",
+    re.IGNORECASE,
+)
+
+SCHEDULED_EVENT_TEXT_RE = re.compile(
+    r"\b(?:next\s+)?(?:calibration|maintenance|service|inspection)\s+"
+    r"(?:is\s+)?(?:due|scheduled|planned|set)\b|"
+    r"\b(?:due|scheduled|planned|set)\s+(?:for\s+)?(?:calibration|maintenance|service|inspection)\b",
+    re.IGNORECASE,
+)
+
+ENTITY_LOCATION_TEXT_RE = re.compile(
+    r"\b(?:location|located|stored|retained|held|site|room|cabinet|bay|bench|greenhouse|unit)\b",
+    re.IGNORECASE,
+)
+
+QUORUM_TEXT_RE = re.compile(r"\bquorum\b", re.IGNORECASE)
+
+APPEAL_FILING_TEXT_RE = re.compile(
+    r"\b(?:appeal|appealed)\b.{0,80}\b(?:filed|files|filing|lodged|notice|window|within)\b|"
+    r"\b(?:filed|files|filing|lodged|notice|window|within)\b.{0,80}\b(?:appeal|appealed)\b",
+    re.IGNORECASE,
+)
+
+EVENT_DATE_TEXT_RE = re.compile(
+    r"\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review)\b"
+    r".{0,80}\b(?:(?:19|20)\d{2}[-_]\d{1,2}[-_]\d{1,2}|"
+    r"(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|"
+    r"oct|october|nov|november|dec|december)\s+\d{1,2},?\s+(?:19|20)\d{2})\b|"
+    r"\b(?:(?:19|20)\d{2}[-_]\d{1,2}[-_]\d{1,2}|"
+    r"(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|"
+    r"oct|october|nov|november|dec|december)\s+\d{1,2},?\s+(?:19|20)\d{2})\b"
+    r".{0,80}\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review)\b",
+    re.IGNORECASE,
+)
+
+PUBLIC_RECALL_PRIOR_DATE_TEXT_RE = re.compile(
+    r"\b(?:expand(?:ing|s|ed)?|expansion|amend(?:ing|s|ed)?|updat(?:ing|es|ed)?|supersed(?:ing|es|ed)?|revis(?:ing|es|ed)?)\b"
+    r".{0,80}\b(?P<date1>(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s+\d{1,2},?\s+(?:19|20)\d{2})\b"
+    r".{0,60}\b(?:recall|notice|announcement|advisory)\b|"
+    r"\b(?:original|prior|previous|earlier|initial)\s+(?:recall|notice|announcement|advisory)\b"
+    r".{0,80}\b(?P<date2>(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s+\d{1,2},?\s+(?:19|20)\d{2})\b",
+    re.IGNORECASE,
+)
+
+VOTE_TALLY_PAIR_PATTERN = r"(?<!\d)(\d{1,2})\s*[-_]\s*(\d{1,2})(?!\d)"
+VOTE_TALLY_PAIR_RE = re.compile(VOTE_TALLY_PAIR_PATTERN)
+VOTE_TALLY_TEXT_RE = re.compile(
+    rf"\b(?:vote|votes|voted|voting|tally|approved|denied|recorded|corrected)\b.{{0,120}}{VOTE_TALLY_PAIR_PATTERN}|"
+    rf"{VOTE_TALLY_PAIR_PATTERN}.{{0,120}}\b(?:vote|votes|voted|voting|tally|approved|denied|recorded|corrected)\b",
     re.IGNORECASE,
 )
 
@@ -2747,6 +3193,294 @@ def _has_specific_source_authority_carrier(signatures: set[str]) -> bool:
     return False
 
 
+def _ensure_vote_tally_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a direct vote-tally carrier for explicit source-stated votes."""
+
+    if not _vote_tally_source_mentions(source_text):
+        return {
+            "schema_version": "profile_vote_tally_extension_v1",
+            "added": False,
+            "reason": "no_explicit_vote_tally_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_vote_tally_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_vote_tally_carrier(signatures):
+        return {
+            "schema_version": "profile_vote_tally_extension_v1",
+            "added": False,
+            "reason": "vote_tally_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "vote_tally/5",
+            "args": ["vote_id", "body_or_group", "subject_or_motion", "result", "tally_or_member_votes"],
+            "description": (
+                "Direct vote-tally surface for source-stated decisions, motions, approvals, denials, "
+                "roll calls, and corrected vote records."
+            ),
+            "why": (
+                "Prevents final vote counts, individual member votes, and corrected minute tallies from being "
+                "stranded inside broad hearing notes or source-record rows."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated vote records.",
+                "Keep voting body, decision subject, result, tally, and member votes or source scope joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "vote_tally/5" not in provenance:
+        provenance.append("vote_tally/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added vote_tally/5 after explicit vote-tally signal.")
+    return {
+        "schema_version": "profile_vote_tally_extension_v1",
+        "added": True,
+        "signature": "vote_tally/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_vote_tally_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "decision_vote/4",
+        "final_vote/4",
+        "motion_vote/4",
+        "roll_call_vote/4",
+        "vote_record/4",
+        "vote_tally/5",
+    }
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"4", "5", "6"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"vote", "votes", "voting", "tally", "ballot"} and tokens & {"decision", "final", "motion", "record", "roll"}:
+            return True
+    return False
+
+
+def _ensure_event_date_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a direct event-date carrier for explicit dated events."""
+
+    if not EVENT_DATE_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_event_date_extension_v1",
+            "added": False,
+            "reason": "no_explicit_event_date_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_event_date_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_event_date_carrier(signatures):
+        return {
+            "schema_version": "profile_event_date_extension_v1",
+            "added": False,
+            "reason": "event_date_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "event_date/2",
+            "args": ["event_id", "date"],
+            "description": "Direct temporal surface for source-stated event, hearing, meeting, filing, appeal, vote, or correction dates.",
+            "why": "Prevents date-bearing event identifiers from being the only place where an event date is represented.",
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated event dates.",
+                "Keep stable event id and date value joinable in separate arguments.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "event_date/2" not in provenance:
+        provenance.append("event_date/2")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added event_date/2 after explicit event-date signal.")
+    return {
+        "schema_version": "profile_event_date_extension_v1",
+        "added": True,
+        "signature": "event_date/2",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_event_date_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "event_date/2",
+        "event_time/2",
+        "event_timestamp/2",
+        "event_wall_time/2",
+        "hearing_date/2",
+        "meeting_date/2",
+    }
+    if signatures & direct:
+        return True
+    event_terms = {"appeal", "correction", "event", "filing", "hearing", "meeting", "notice", "vote"}
+    temporal_terms = {"date", "dated", "time", "timestamp"}
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"2", "3", "4"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & event_terms and tokens & temporal_terms:
+            return True
+    return False
+
+
+def _ensure_quorum_status_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a direct quorum-status carrier for explicit quorum checks."""
+
+    if not QUORUM_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_quorum_status_extension_v1",
+            "added": False,
+            "reason": "no_explicit_quorum_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_quorum_status_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_quorum_status_carrier(signatures):
+        return {
+            "schema_version": "profile_quorum_status_extension_v1",
+            "added": False,
+            "reason": "quorum_status_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "quorum_status/3",
+            "args": ["event_id", "status", "count_or_requirement"],
+            "description": "Direct quorum surface for source-stated meeting or hearing quorum checks.",
+            "why": "Prevents quorum facts from being stranded inside source-attributed claims, hearing notes, or broad source detail rows.",
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated quorum facts.",
+                "Keep event/hearing id, quorum status, and count or requirement joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "quorum_status/3" not in provenance:
+        provenance.append("quorum_status/3")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added quorum_status/3 after explicit quorum signal.")
+    return {
+        "schema_version": "profile_quorum_status_extension_v1",
+        "added": True,
+        "signature": "quorum_status/3",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_quorum_status_carrier(signatures: set[str]) -> bool:
+    if "quorum_status/3" in signatures:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"2", "3", "4"}:
+            continue
+        if "quorum" in set(predicate.split("_")):
+            return True
+    return False
+
+
+def _ensure_appeal_filing_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a direct appeal-filing carrier for explicit source-stated appeals."""
+
+    if not APPEAL_FILING_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_appeal_filing_extension_v1",
+            "added": False,
+            "reason": "no_explicit_appeal_filing_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_appeal_filing_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_appeal_filing_carrier(signatures):
+        return {
+            "schema_version": "profile_appeal_filing_extension_v1",
+            "added": False,
+            "reason": "appeal_filing_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "appeal_filed/3",
+            "args": ["appellant", "target_or_subject", "date_or_status"],
+            "description": "Direct appeal-filing surface for source-stated appeals or notices of appeal.",
+            "why": "Prevents appeal filing facts from being stranded inside source-attributed claims or post-hearing notes.",
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated appeal filings.",
+                "Keep appellant, appealed target or subject, and filing date/status or window joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "appeal_filed/3" not in provenance:
+        provenance.append("appeal_filed/3")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added appeal_filed/3 after explicit appeal-filing signal.")
+    return {
+        "schema_version": "profile_appeal_filing_extension_v1",
+        "added": True,
+        "signature": "appeal_filed/3",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _has_specific_appeal_filing_carrier(signatures: set[str]) -> bool:
+    direct = {"appeal_filed/3", "appeal_filing/3", "appeal_record/3"}
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"3", "4", "5"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"appeal", "appealed"} and tokens & {"filed", "filing", "record", "notice"}:
+            return True
+    return False
+
+
 def _ensure_quantity_event_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
     """Ensure a generic quantity-bearing event carrier when profile admission proves it is needed.
 
@@ -2819,6 +3553,122 @@ def _ensure_quantity_event_predicate(parsed_profile: dict[str, Any], *, source_t
         "schema_version": "profile_quantity_event_extension_v1",
         "added": True,
         "signature": "event_measurement/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_entity_location_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic direct location carrier for explicit source-stated locations."""
+
+    if not ENTITY_LOCATION_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_entity_location_extension_v1",
+            "added": False,
+            "reason": "no_explicit_location_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_entity_location_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_location_carrier(signatures):
+        return {
+            "schema_version": "profile_entity_location_extension_v1",
+            "added": False,
+            "reason": "location_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "entity_location/3",
+            "args": ["entity_id", "location", "source_or_scope"],
+            "description": (
+                "Direct location surface for source-stated physical, organizational, or register locations."
+            ),
+            "why": (
+                "Prevents locations from being stranded inside source-record fields, labels, or broad detail rows."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated locations.",
+                "Keep located entity, location value, and source/scope joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "entity_location/3" not in provenance:
+        provenance.append("entity_location/3")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added entity_location/3 after explicit location signal.")
+    return {
+        "schema_version": "profile_entity_location_extension_v1",
+        "added": True,
+        "signature": "entity_location/3",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_scheduled_event_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
+    """Ensure a generic scheduled-event carrier for explicit maintenance due dates."""
+
+    if not SCHEDULED_EVENT_TEXT_RE.search(str(source_text or "")):
+        return {
+            "schema_version": "profile_scheduled_event_extension_v1",
+            "added": False,
+            "reason": "no_explicit_scheduled_event_signal",
+        }
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_scheduled_event_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if _has_specific_scheduled_event_carrier(signatures):
+        return {
+            "schema_version": "profile_scheduled_event_extension_v1",
+            "added": False,
+            "reason": "scheduled_event_carrier_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "scheduled_event/4",
+            "args": ["subject_id", "event_type", "scheduled_date", "source_or_basis"],
+            "description": (
+                "Direct scheduled-event surface for source-stated future calibration, maintenance, service, "
+                "or inspection due dates."
+            ),
+            "why": (
+                "Prevents due dates for instruments, equipment, records, or maintenance actions from being "
+                "stranded inside source-record labels or prose."
+            ),
+            "admission_notes": [
+                "Vocabulary extension only; use only for explicit source-stated scheduled/due events.",
+                "Keep subject, event type, scheduled date, and source/basis joinable.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "scheduled_event/4" not in provenance:
+        provenance.append("scheduled_event/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append("Deterministic profile extension added scheduled_event/4 after explicit scheduled-event signal.")
+    return {
+        "schema_version": "profile_scheduled_event_extension_v1",
+        "added": True,
+        "signature": "scheduled_event/4",
         "authority": "vocabulary_extension_only",
         "fact_extraction": False,
     }
@@ -2905,10 +3755,16 @@ def _ensure_source_attributed_claim_predicate(parsed_profile: dict[str, Any], *,
 
     report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
     findings = report.get("findings", []) if isinstance(report.get("findings"), list) else []
-    if not any(
+    required_keys = [
+        str(item).strip()
+        for item in report.get("source_attributed_claim_required_keys", [])
+        if str(item).strip()
+    ] if isinstance(report.get("source_attributed_claim_required_keys"), list) else []
+    has_shallow_finding = any(
         isinstance(item, dict) and item.get("class") == "shallow_source_attributed_claim_palette"
         for item in findings
-    ):
+    )
+    if not has_shallow_finding and not required_keys:
         return {
             "schema_version": "profile_source_attributed_claim_extension_v1",
             "added": False,
@@ -2926,13 +3782,7 @@ def _ensure_source_attributed_claim_predicate(parsed_profile: dict[str, Any], *,
         for item in candidates
         if isinstance(item, dict) and str(item.get("signature", "")).strip()
     }
-    if "source_attributed_claim/4" in signatures:
-        return {
-            "schema_version": "profile_source_attributed_claim_extension_v1",
-            "added": False,
-            "reason": "source_attributed_claim_already_present",
-        }
-    if any(_candidate_can_carry_source_attributed_claim_unit(item) for item in candidates if isinstance(item, dict)):
+    if _has_specific_source_attributed_claim_carrier(signatures):
         return {
             "schema_version": "profile_source_attributed_claim_extension_v1",
             "added": False,
@@ -2976,6 +3826,27 @@ def _ensure_source_attributed_claim_predicate(parsed_profile: dict[str, Any], *,
     }
 
 
+def _has_specific_source_attributed_claim_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "reported_finding/4",
+        "source_attributed_claim/4",
+        "source_claim/4",
+        "statement_claim/4",
+    }
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if predicate in {"claim_source", "source_supports"}:
+            continue
+        if arity not in {"4", "5"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"claim", "finding", "opinion", "statement"} and tokens & {"attributed", "source", "speaker"}:
+            return True
+    return False
+
+
 def _has_specific_detail_carrier(signatures: set[str]) -> bool:
     for signature in signatures:
         predicate, _, arity = signature.partition("/")
@@ -2984,6 +3855,54 @@ def _has_specific_detail_carrier(signatures: set[str]) -> bool:
         if predicate.endswith("_attribute") or predicate.endswith("_detail"):
             return True
         if predicate in {"item_attribute", "asset_attribute", "device_attribute", "equipment_attribute"}:
+            return True
+    return False
+
+
+def _has_specific_location_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "asset_location/2",
+        "current_location/2",
+        "device_location/2",
+        "entity_location/3",
+        "equipment_location/2",
+        "located_at/2",
+        "location/2",
+        "physical_location/2",
+        "stored_at/2",
+    }
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"2", "3", "4"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"location", "located", "site", "room", "cabinet", "bay", "bench"}:
+            return True
+    return False
+
+
+def _has_specific_scheduled_event_carrier(signatures: set[str]) -> bool:
+    direct = {
+        "calibration_due/2",
+        "calibration_due_date/2",
+        "inspection_due/2",
+        "maintenance_due/2",
+        "next_calibration_due/2",
+        "scheduled_calibration/2",
+        "scheduled_event/4",
+        "scheduled_inspection/2",
+        "scheduled_maintenance/2",
+    }
+    if signatures & direct:
+        return True
+    for signature in signatures:
+        predicate, _, arity = signature.partition("/")
+        if arity not in {"2", "3", "4", "5"}:
+            continue
+        tokens = set(predicate.split("_"))
+        if tokens & {"scheduled", "schedule", "due"} and tokens & {"calibration", "inspection", "maintenance", "service", "event"}:
             return True
     return False
 
@@ -3067,17 +3986,25 @@ def _pass_surface_contribution(
         unique_count = len(new_facts) + len(new_rules) + len(new_queries)
         admitted_count = int(record.get("admitted_count", 0) or 0)
         skipped_count = int(record.get("skipped_count", 0) or 0)
+        effective_skipped_count = int(record.get("effective_skipped_count", skipped_count) or 0)
+        diagnostic_flags = [
+            str(flag).strip()
+            for flag in record.get("diagnostic_flags", [])
+            if str(flag).strip()
+        ] if isinstance(record.get("diagnostic_flags"), list) else []
+        diagnostic_rejected_pass = "rejected_projection_diagnostic" in diagnostic_flags
         health_flags: list[str] = []
         ok = bool(record.get("ok", True))
-        if not ok:
+        if not ok and not diagnostic_rejected_pass:
             health_flags.append("pass_not_ok")
         if emitted_count == 0:
-            health_flags.append("zero_yield")
-        elif unique_count == 0:
+            if not diagnostic_rejected_pass:
+                health_flags.append("zero_yield")
+        elif unique_count == 0 and not diagnostic_rejected_pass:
             health_flags.append("no_unique_surface")
-        elif unique_count < 3:
+        elif unique_count < 3 and not diagnostic_rejected_pass:
             health_flags.append("thin_surface")
-        if skipped_count > admitted_count and skipped_count >= 8:
+        if effective_skipped_count > admitted_count and effective_skipped_count >= 8:
             health_flags.append("skip_heavy")
         rows.append(
             {
@@ -3088,6 +4015,8 @@ def _pass_surface_contribution(
                 "ok": ok,
                 "admitted_count": admitted_count,
                 "skipped_count": skipped_count,
+                "effective_skipped_count": effective_skipped_count,
+                "diagnostic_flags": diagnostic_flags,
                 "fact_count": len(facts),
                 "rule_count": len(rules),
                 "query_count": len(queries),
@@ -3103,13 +4032,32 @@ def _pass_surface_contribution(
     return rows
 
 
+def _diagnostic_rejected_flat_pass_skipped_count(flat: dict[str, Any], focused: dict[str, Any]) -> int:
+    if not isinstance(flat, dict) or not isinstance(focused, dict):
+        return 0
+    projected_decision = str(flat.get("projected_decision", "")).strip().lower()
+    admitted_count = int(flat.get("admitted_count", 0) or 0)
+    skipped_count = int(flat.get("skipped_count", 0) or 0)
+    focused_admitted_count = int(focused.get("admitted_count", 0) or 0)
+    if projected_decision == "reject" and admitted_count == 0 and skipped_count > 0 and focused_admitted_count > 0:
+        return skipped_count
+    return 0
+
+
 def _flat_plus_surface_contribution(*, flat: dict[str, Any], focused: dict[str, Any]) -> list[dict[str, Any]]:
+    diagnostic_rejected_skipped = _diagnostic_rejected_flat_pass_skipped_count(flat, focused)
     flat_record = {
         **flat,
         "pass_id": "flat_skeleton",
         "purpose": "broad skeleton",
         "focus": "source-wide stable facts, roles, thresholds, core events, corrections",
     }
+    if diagnostic_rejected_skipped:
+        flat_record["effective_skipped_count"] = 0
+        flat_record["diagnostic_flags"] = [
+            *([str(flag) for flag in flat_record.get("diagnostic_flags", [])] if isinstance(flat_record.get("diagnostic_flags"), list) else []),
+            "rejected_projection_diagnostic",
+        ]
     flat_rows = _pass_surface_contribution([flat_record])
     seen_facts = set(_clause_list(flat.get("facts", [])))
     seen_rules = set(_clause_list(flat.get("rules", [])))
@@ -3180,6 +4128,7 @@ def _attach_profile_admission_report(
         source_compile=source_compile,
         parsed_profile=parsed_profile,
         admission_report=report,
+        source_text=source_text,
     )
     source_compile["profile_delivery"] = delivery_report
     admission_warning_flags = [
@@ -3235,6 +4184,7 @@ def _profile_delivery_report(
     source_compile: dict[str, Any],
     parsed_profile: dict[str, Any],
     admission_report: dict[str, Any],
+    source_text: str = "",
 ) -> dict[str, Any]:
     """Check whether offered carrier predicates were actually emitted.
 
@@ -3249,36 +4199,78 @@ def _profile_delivery_report(
     source_authority_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
-        if _candidate_signature(item) and _candidate_can_carry_source_authority_unit(item)
+        if _candidate_signature(item) and _candidate_can_carry_source_authority_delivery_unit(item)
     ]
     source_claim_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
-        if _candidate_signature(item) and _candidate_can_carry_source_attributed_claim_unit(item)
+        if _candidate_signature(item) and _candidate_can_carry_source_attributed_claim_delivery_unit(item)
     ]
     status_state_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
-        if _candidate_signature(item) and _candidate_can_carry_status_state_unit(item)
+        if _candidate_signature(item) and _candidate_can_carry_status_state_delivery_unit(item)
+    ]
+    vote_tally_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_vote_tally_delivery_unit(item)
     ]
     quantity_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
-        if _candidate_signature(item) and _candidate_can_carry_quantity_event_unit(item)
+        if _candidate_signature(item) and _candidate_can_carry_quantity_event_delivery_unit(item)
     ]
     source_authority_predicates = {signature.split("/", 1)[0] for signature in source_authority_carriers}
     source_claim_predicates = {signature.split("/", 1)[0] for signature in source_claim_carriers}
     status_state_predicates = {signature.split("/", 1)[0] for signature in status_state_carriers}
+    vote_tally_predicates = {signature.split("/", 1)[0] for signature in vote_tally_carriers}
     quantity_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
-    emitted_predicates = {
-        parsed[0]
+    parsed_fact_rows = [
+        (predicate, args, fact)
         for fact in _clause_list(source_compile.get("facts", []))
-        if (parsed := _parse_fact_clause(fact)) is not None and not parsed[0].startswith("source_record")
-    }
-    delivered_source_authority = sorted(source_authority_predicates & emitted_predicates)
-    delivered_source_claim = sorted(source_claim_predicates & emitted_predicates)
-    delivered_status_state = sorted(status_state_predicates & emitted_predicates)
-    delivered_quantity = sorted(quantity_predicates & emitted_predicates)
+        if (parsed := _parse_fact_clause(fact)) is not None
+        for predicate, args in [parsed]
+        if not predicate.startswith("source_record")
+    ]
+    source_record_text_by_ref = _source_record_text_by_ref(source_compile)
+    emitted_predicates = {predicate for predicate, _args, _fact in parsed_fact_rows}
+    source_authority_delivery = _carrier_delivery_summary(
+        source_authority_predicates,
+        parsed_fact_rows,
+        row_filter=_fact_row_can_deliver_source_authority,
+    )
+    source_claim_delivery = _carrier_delivery_summary(
+        source_claim_predicates,
+        parsed_fact_rows,
+        row_filter=_fact_row_can_deliver_source_attributed_claim,
+        key_fn=lambda predicate, args: _source_attributed_claim_fact_key(
+            predicate,
+            args,
+            source_record_text_by_ref=source_record_text_by_ref,
+        ),
+    )
+    status_state_delivery = _carrier_delivery_summary(
+        status_state_predicates,
+        parsed_fact_rows,
+        row_filter=_fact_row_can_deliver_status_state,
+    )
+    vote_tally_delivery = _carrier_delivery_summary(
+        vote_tally_predicates,
+        parsed_fact_rows,
+        row_filter=_fact_row_can_deliver_vote_tally,
+        key_fn=_vote_tally_fact_key,
+    )
+    quantity_delivery = _carrier_delivery_summary(
+        quantity_predicates,
+        parsed_fact_rows,
+        key_fn=_quantity_event_fact_key,
+    )
+    delivered_source_authority = source_authority_delivery["predicates"]
+    delivered_source_claim = source_claim_delivery["predicates"]
+    delivered_status_state = status_state_delivery["predicates"]
+    delivered_vote_tally = vote_tally_delivery["predicates"]
+    delivered_quantity = quantity_delivery["predicates"]
     source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
     source_authority_signal_count = (
         int(source_signal_counts.get("source_authority") or 0)
@@ -3290,53 +4282,87 @@ def _profile_delivery_report(
         if isinstance(source_signal_counts, dict)
         else 0
     )
+    source_claim_required_keys = [
+        str(item)
+        for item in admission_report.get("source_attributed_claim_required_keys", [])
+        if str(item).strip()
+    ] if isinstance(admission_report, dict) and isinstance(admission_report.get("source_attributed_claim_required_keys"), list) else []
+    if source_claim_required_keys:
+        source_claim_signal_count = len(source_claim_required_keys)
     status_state_signal_count = (
         int(source_signal_counts.get("status_state") or 0)
         if isinstance(source_signal_counts, dict)
         else 0
     )
+    vote_tally_required_keys = _vote_tally_required_keys(_vote_tally_source_mentions(source_text))
+    vote_tally_signal_count = len(vote_tally_required_keys)
     quantity_signal_count = (
         int(source_signal_counts.get("quantity_event") or 0)
         if isinstance(source_signal_counts, dict)
         else 0
     )
+    quantity_required_row_count = (
+        int(admission_report.get("quantity_event_required_carrier_row_count") or quantity_signal_count)
+        if isinstance(admission_report, dict)
+        else quantity_signal_count
+    )
+    quantity_required_key_counts = (
+        {
+            str(key): int(value)
+            for key, value in admission_report.get("quantity_event_required_key_counts", {}).items()
+            if str(key).strip() and int(value or 0) > 0
+        }
+        if isinstance(admission_report, dict) and isinstance(admission_report.get("quantity_event_required_key_counts"), dict)
+        else {}
+    )
     findings: list[dict[str, Any]] = []
-    if source_authority_signal_count and source_authority_carriers and not delivered_source_authority:
-        findings.append(
-            {
-                "class": "source_authority_carrier_offered_but_undelivered",
-                "source_signal_count": source_authority_signal_count,
-                "offered_carriers": source_authority_carriers[:12],
-                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
-            }
-        )
-    if source_claim_signal_count and source_claim_carriers and not delivered_source_claim:
-        findings.append(
-            {
-                "class": "source_claim_carrier_offered_but_undelivered",
-                "source_signal_count": source_claim_signal_count,
-                "offered_carriers": source_claim_carriers[:12],
-                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
-            }
-        )
-    if status_state_signal_count and status_state_carriers and not delivered_status_state:
-        findings.append(
-            {
-                "class": "status_state_carrier_offered_but_undelivered",
-                "source_signal_count": status_state_signal_count,
-                "offered_carriers": status_state_carriers[:12],
-                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
-            }
-        )
-    if quantity_signal_count and quantity_carriers and not delivered_quantity:
-        findings.append(
-            {
-                "class": "quantity_carrier_offered_but_undelivered",
-                "source_signal_count": quantity_signal_count,
-                "offered_carriers": quantity_carriers[:12],
-                "emitted_predicate_sample": sorted(emitted_predicates)[:24],
-            }
-        )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="source_authority_carrier",
+        source_signal_count=source_authority_signal_count,
+        offered_carriers=source_authority_carriers,
+        delivery=source_authority_delivery,
+        emitted_predicates=emitted_predicates,
+    )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="source_claim_carrier",
+        source_signal_count=source_claim_signal_count,
+        offered_carriers=source_claim_carriers,
+        delivery=source_claim_delivery,
+        emitted_predicates=emitted_predicates,
+        required_signal_keys=source_claim_required_keys,
+        key_match_fn=_source_claim_key_is_delivered,
+    )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="status_state_carrier",
+        source_signal_count=status_state_signal_count,
+        offered_carriers=status_state_carriers,
+        delivery=status_state_delivery,
+        emitted_predicates=emitted_predicates,
+    )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="vote_tally_carrier",
+        source_signal_count=vote_tally_signal_count,
+        offered_carriers=vote_tally_carriers,
+        delivery=vote_tally_delivery,
+        emitted_predicates=emitted_predicates,
+        required_signal_keys=vote_tally_required_keys,
+        key_match_fn=_vote_tally_key_is_delivered,
+    )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="quantity_carrier",
+        source_signal_count=quantity_signal_count,
+        required_carrier_row_count=quantity_required_row_count,
+        offered_carriers=quantity_carriers,
+        delivery=quantity_delivery,
+        emitted_predicates=emitted_predicates,
+        required_signal_key_counts=quantity_required_key_counts,
+        key_match_fn=_quantity_event_key_is_delivered,
+    )
     temporal_backbone = _event_identifier_temporal_backbone_report(source_compile)
     if temporal_backbone["missing_event_ids"]:
         findings.append(
@@ -3348,33 +4374,628 @@ def _profile_delivery_report(
                 "emitted_predicate_sample": temporal_backbone["sample_predicates"][:24],
             }
         )
+    coexistence_finding = _source_claim_backbone_coexistence_finding(
+        source_text=source_text,
+        source_claim_signal_count=source_claim_signal_count,
+        source_claim_carriers=source_claim_carriers,
+        source_claim_delivery=source_claim_delivery,
+        parsed_fact_rows=parsed_fact_rows,
+        emitted_predicates=emitted_predicates,
+    )
+    if coexistence_finding:
+        findings.append(coexistence_finding)
     return {
         "schema_version": "profile_delivery_contracts_v1",
         "source_signal_counts": {
             "source_authority": source_authority_signal_count,
             "source_attributed_claim": source_claim_signal_count,
             "status_state": status_state_signal_count,
+            "vote_tally": vote_tally_signal_count,
             "quantity_event": quantity_signal_count,
+        },
+        "carrier_row_requirements": {
+            "quantity_event": quantity_required_row_count,
+            "source_attributed_claim": len(source_claim_required_keys),
+            "vote_tally": len(vote_tally_required_keys),
         },
         "offered_carriers": {
             "source_authority": source_authority_carriers[:12],
             "source_attributed_claim": source_claim_carriers[:12],
             "status_state": status_state_carriers[:12],
+            "vote_tally": vote_tally_carriers[:12],
             "quantity_event": quantity_carriers[:12],
         },
         "delivered_carriers": {
             "source_authority": delivered_source_authority[:12],
             "source_attributed_claim": delivered_source_claim[:12],
             "status_state": delivered_status_state[:12],
+            "vote_tally": delivered_vote_tally[:12],
             "quantity_event": delivered_quantity[:12],
+        },
+        "delivered_carrier_row_counts": {
+            "source_authority": source_authority_delivery["row_count"],
+            "source_attributed_claim": source_claim_delivery["row_count"],
+            "status_state": status_state_delivery["row_count"],
+            "vote_tally": vote_tally_delivery["row_count"],
+            "quantity_event": quantity_delivery["row_count"],
         },
         "temporal_backbone": temporal_backbone,
         "findings": findings,
     }
 
 
+def _carrier_delivery_summary(
+    carrier_predicates: set[str],
+    parsed_fact_rows: list[tuple[str, list[str], str]],
+    *,
+    row_filter: Any | None = None,
+    key_fn: Any | None = None,
+) -> dict[str, Any]:
+    rows = [
+        (predicate, args, fact)
+        for predicate, args, fact in parsed_fact_rows
+        if predicate in carrier_predicates
+        and (row_filter is None or row_filter(predicate, args))
+    ]
+    delivered_keys = sorted(
+        {
+            str(key)
+            for predicate, args, _fact in rows
+            if key_fn is not None
+            for key in [key_fn(predicate, args)]
+            if str(key).strip()
+        }
+    )
+    delivered_key_counts: dict[str, int] = {}
+    if key_fn is not None:
+        for predicate, args, _fact in rows:
+            key = str(key_fn(predicate, args)).strip()
+            if key:
+                delivered_key_counts[key] = delivered_key_counts.get(key, 0) + 1
+    return {
+        "predicates": sorted({predicate for predicate, _args, _fact in rows}),
+        "row_count": len(rows),
+        "fact_sample": [fact for _predicate, _args, fact in rows[:12]],
+        "delivered_keys": delivered_keys,
+        "delivered_key_counts": delivered_key_counts,
+    }
+
+
+def _append_profile_delivery_finding(
+    findings: list[dict[str, Any]],
+    *,
+    class_prefix: str,
+    source_signal_count: int,
+    required_carrier_row_count: int | None = None,
+    offered_carriers: list[str],
+    delivery: dict[str, Any],
+    emitted_predicates: set[str],
+    required_signal_keys: list[str] | None = None,
+    required_signal_key_counts: dict[str, int] | None = None,
+    key_match_fn: Any | None = None,
+) -> None:
+    if not source_signal_count or not offered_carriers:
+        return
+    required_count = max(source_signal_count, int(required_carrier_row_count or source_signal_count))
+    delivered_row_count = int(delivery.get("row_count") or 0)
+    required_key_counts = {
+        str(key): int(value)
+        for key, value in (required_signal_key_counts or {}).items()
+        if str(key).strip() and int(value or 0) > 0
+    }
+    for key in [str(item) for item in required_signal_keys or [] if str(item).strip()]:
+        required_key_counts[key] = max(1, required_key_counts.get(key, 0))
+    required_keys = list(required_key_counts)
+    delivered_key_counts = {
+        str(key): int(value)
+        for key, value in delivery.get("delivered_key_counts", {}).items()
+        if str(key).strip() and int(value or 0) > 0
+    } if isinstance(delivery.get("delivered_key_counts"), dict) else {}
+    delivered_keys = {
+        str(item)
+        for item in delivery.get("delivered_keys", [])
+        if str(item).strip()
+    } if isinstance(delivery.get("delivered_keys"), list) else set()
+    match_key = key_match_fn if key_match_fn is not None else lambda required, delivered: required == delivered
+    missing_keys = [
+        key
+        for key, required_key_count in required_key_counts.items()
+        if sum(
+            count
+            for delivered_key, count in delivered_key_counts.items()
+            if match_key(key, delivered_key)
+        ) < required_key_count
+    ]
+    missing_key_count = sum(
+        max(
+            0,
+            required_key_count
+            - sum(
+                count
+                for delivered_key, count in delivered_key_counts.items()
+                if match_key(key, delivered_key)
+            ),
+        )
+        for key, required_key_count in required_key_counts.items()
+    )
+    if delivered_row_count >= required_count and not missing_keys:
+        return
+    finding = {
+        "class": (
+            f"{class_prefix}_offered_but_undelivered"
+            if delivered_row_count <= 0
+            else f"{class_prefix}_partially_delivered"
+        ),
+        "source_signal_count": source_signal_count,
+        "delivered_carrier_row_count": delivered_row_count,
+        "missing_signal_count": missing_key_count if missing_keys else max(0, source_signal_count - delivered_row_count),
+        "offered_carriers": offered_carriers[:12],
+        "delivered_carriers": delivery.get("predicates", [])[:12],
+        "emitted_carrier_fact_sample": delivery.get("fact_sample", [])[:12],
+        "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+    }
+    if required_keys:
+        finding["required_signal_keys"] = required_keys[:12]
+        finding["delivered_signal_keys"] = sorted(delivered_keys)[:12]
+        finding["missing_signal_keys"] = missing_keys[:12]
+        if any(count != 1 for count in required_key_counts.values()):
+            finding["required_signal_key_counts"] = dict(sorted(required_key_counts.items())[:12])
+            finding["delivered_signal_key_counts"] = dict(sorted(delivered_key_counts.items())[:12])
+    if required_count != source_signal_count:
+        finding["required_carrier_row_count"] = required_count
+        finding["missing_carrier_row_count"] = max(0, required_count - delivered_row_count)
+    findings.append(finding)
+
+
+def _source_claim_key_is_delivered(required_key: str, delivered_key: str) -> bool:
+    if required_key == delivered_key:
+        return True
+    required_parts = str(required_key or "").split(":", 2)
+    delivered_parts = str(delivered_key or "").split(":", 2)
+    if len(required_parts) != 3 or len(delivered_parts) != 3:
+        return False
+    required_source, required_subject, required_claim = required_parts
+    delivered_source, delivered_subject, delivered_claim = delivered_parts
+    if required_claim == "dispute" and delivered_subject == "dispute":
+        source_matches = required_source == delivered_source or "source" in {required_source, delivered_source}
+        return source_matches
+    if required_claim != delivered_claim:
+        return False
+    source_matches = required_source == delivered_source or "source" in {required_source, delivered_source}
+    subject_matches = required_subject == delivered_subject or "claim" in {required_subject, delivered_subject}
+    return source_matches and subject_matches
+
+
+SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES = {
+    "amendment_authorizer",
+    "amendment_author",
+    "amendment_event",
+    "authorization_threshold",
+    "authorization_rule",
+    "authorized_action",
+    "authorized_by_role",
+    "charter_rule",
+    "charter_section",
+    "correction_event",
+    "emergency_authorization",
+    "event_authorizer",
+    "ordinance_rule",
+    "permit_authorization",
+    "policy_compliance",
+    "policy_rule",
+    "rule_exception",
+    "rule_threshold",
+    "source_authority",
+    "statutory_authority",
+}
+
+SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES = {
+    "counsel_opinion",
+    "knowledge_assertion",
+    "legal_opinion",
+    "participant_statement",
+    "public_comment",
+    "reported_finding",
+    "source_attributed_claim",
+    "source_claim",
+    "source_supports",
+    "staff_assessment",
+    "statement_claim",
+    "violation_claim",
+    "witness_statement",
+}
+
+STATUS_STATE_DELIVERY_PREDICATE_NAMES = {
+    "authorization_status",
+    "document_status",
+    "hearing_scheduled",
+    "knowledge_assertion",
+    "lease_term",
+    "lease_status",
+    "legal_opinion",
+    "pending_determination",
+    "permit_status",
+    "policy_compliance",
+    "scheduled_event",
+    "tree_protection_status",
+    "violation_claim",
+    "vessel_state",
+}
+
+VOTE_TALLY_DELIVERY_PREDICATE_NAMES = {
+    "decision_vote",
+    "final_vote",
+    "motion_vote",
+    "roll_call_vote",
+    "vote_record",
+    "vote_tally",
+    "voting_record",
+}
+
+SOURCE_CLAIM_BACKBONE_WRAPPER_PREDICATES = {
+    "context",
+    "detail",
+    "event_detail",
+    "event_record",
+    "note",
+    "record_detail",
+    "source_detail",
+    "source_note",
+    "summary",
+}
+
+SOURCE_CLAIM_BACKBONE_GROUPS: dict[str, dict[str, set[str]]] = {
+    "vote": {
+        "source_any": {"vote", "voted", "votes", "tally", "ayes", "nays", "roll", "call"},
+        "source_context": {"board", "commission", "committee", "council", "member", "members"},
+        "direct_any": {"vote", "voted", "votes", "tally", "ayes", "nays", "roll", "call"},
+    },
+    "survey_measurement": {
+        "source_any": {"survey", "setback", "measured", "measurement", "feet", "ft", "distance", "dimension"},
+        "source_context": {"survey", "surveyor", "setback", "feet", "ft", "distance", "dimension"},
+        "direct_any": {"survey", "setback", "measured", "measurement", "feet", "ft", "distance", "dimension"},
+    },
+    "permit_application_status": {
+        "source_any": {"permit", "application"},
+        "source_context": {"pending", "approved", "denied", "issued", "status", "withdrawn", "filed"},
+        "direct_any": {"permit", "application"},
+        "direct_context": {"pending", "approved", "denied", "issued", "status", "withdrawn", "filed"},
+    },
+    "appeal_filing": {
+        "source_any": {"appeal", "appealed"},
+        "source_context": {"filed", "filing", "lodged", "notice", "challenge"},
+        "direct_any": {"appeal", "appealed"},
+        "direct_context": {"filed", "filing", "lodged", "notice", "challenge", "status"},
+    },
+    "board_finding": {
+        "source_any": {"finding", "findings", "found", "concluded", "determined", "determination"},
+        "source_context": {"board", "commission", "committee", "official", "staff"},
+        "direct_any": {"finding", "findings", "found", "concluded", "determined", "determination"},
+    },
+    "hearing_quorum": {
+        "source_any": {"quorum"},
+        "source_context": {"hearing", "present", "absent", "member", "members"},
+        "direct_any": {"quorum"},
+    },
+}
+
+
+def _candidate_can_carry_source_authority_delivery_unit(candidate: dict[str, Any]) -> bool:
+    if _candidate_can_carry_source_authority_unit(candidate):
+        return True
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name not in SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES:
+        return False
+    args = _candidate_args(candidate)
+    if len(args) < 2:
+        return False
+    return _fact_row_can_deliver_source_authority(name, args)
+
+
+def _candidate_can_carry_source_attributed_claim_delivery_unit(candidate: dict[str, Any]) -> bool:
+    if _candidate_can_carry_source_attributed_claim_unit(candidate):
+        return True
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name not in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES:
+        return False
+    args = _candidate_args(candidate)
+    if len(args) < 3:
+        return False
+    return _fact_row_can_deliver_source_attributed_claim(name, args)
+
+
+def _candidate_can_carry_status_state_delivery_unit(candidate: dict[str, Any]) -> bool:
+    if _candidate_can_carry_status_state_unit(candidate):
+        return True
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name not in STATUS_STATE_DELIVERY_PREDICATE_NAMES:
+        return False
+    args = _candidate_args(candidate)
+    if len(args) < 2:
+        return False
+    if name in {"pending_determination", "permit_status", "tree_protection_status"}:
+        return True
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_scope = any(tokens & (PROFILE_ADMISSION_DATE_SLOTS | PROFILE_ADMISSION_SCOPE_SLOTS | {"source"}) for tokens in arg_tokens)
+    has_content = any(
+        tokens & (PROFILE_ADMISSION_STATUS_STATE_TERMS | {"content", "conclusion", "fact", "finding", "status", "topic"})
+        for tokens in arg_tokens
+    )
+    if name in {"hearing_scheduled", "scheduled_event"}:
+        return bool(has_scope)
+    return bool(has_scope and has_content)
+
+
+def _candidate_can_carry_vote_tally_delivery_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name not in VOTE_TALLY_DELIVERY_PREDICATE_NAMES and not _vote_tally_text(signature):
+        return False
+    args = _candidate_args(candidate)
+    if len(args) < 3:
+        return False
+    if name == "voting_record":
+        return True
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_result = any(tokens & {"decision", "outcome", "result", "status", "vote"} for tokens in arg_tokens)
+    has_tally = any(tokens & {"count", "member", "members", "roll", "tally", "votes"} for tokens in arg_tokens)
+    return len(args) >= 4 or bool(has_result and has_tally)
+
+
+def _fact_row_tokens(predicate: str, args: list[str]) -> set[str]:
+    return _profile_admission_tokens(" ".join([str(predicate), *(str(arg) for arg in args)]).replace("_", " "))
+
+
+def _fact_row_can_deliver_source_authority(predicate: str, args: list[str]) -> bool:
+    name = str(predicate or "").casefold()
+    if name == "source_authority":
+        return len(args) >= 3
+    if name == "statutory_authority":
+        return len(args) >= 2
+    if name == "amendment_author":
+        return len(args) >= 2
+    if name == "event_authorizer":
+        return len(args) >= 2
+    if name == "authorized_by_role":
+        return len(args) >= 3
+    if name in {"amendment_event", "correction_event"}:
+        return len(args) >= 4
+    tokens = _fact_row_tokens(name, args)
+    authority_terms = {
+        "approval",
+        "authorized",
+        "authorizer",
+        "authorization",
+        "authority",
+        "charter",
+        "governing",
+        "ordinance",
+        "policy",
+        "rule",
+        "threshold",
+    }
+    scope_terms = {
+        "action",
+        "amendment",
+        "amendments",
+        "condition",
+        "correction",
+        "corrections",
+        "effect",
+        "limit",
+        "operational",
+        "permit",
+        "section",
+        "source",
+        "status",
+        "subject",
+    }
+    return bool(
+        name in SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES
+        and len(args) >= 2
+        and tokens & authority_terms
+        and (tokens & scope_terms or len(args) >= 3)
+    )
+
+
+def _fact_row_can_deliver_source_attributed_claim(predicate: str, args: list[str]) -> bool:
+    name = str(predicate or "").casefold()
+    if name in {"source_attributed_claim", "source_claim", "statement_claim", "reported_finding"}:
+        return len(args) >= 3
+    if name not in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES or len(args) < 3:
+        return False
+    tokens = _fact_row_tokens(name, args)
+    claim_terms = {
+        "assertion",
+        "assessment",
+        "claim",
+        "comment",
+        "conclusion",
+        "content",
+        "finding",
+        "opinion",
+        "statement",
+        "support",
+        "supports",
+    }
+    return bool(tokens & claim_terms)
+
+
+def _source_attributed_claim_fact_key(
+    predicate: str,
+    args: list[str],
+    *,
+    source_record_text_by_ref: dict[str, str] | None = None,
+) -> str:
+    source_lookup = source_record_text_by_ref or {}
+    for arg in args:
+        ref = _normalize_profile_atom(str(arg))
+        if not ref.startswith("src_line"):
+            continue
+        source_text = source_lookup.get(ref)
+        if source_text:
+            key = _source_attributed_claim_signal_key(source_text)
+            if key:
+                return key
+    return _source_attributed_claim_signal_key(" ".join([str(predicate), *(str(arg) for arg in args)]))
+
+
+def _fact_row_can_deliver_status_state(predicate: str, args: list[str]) -> bool:
+    name = str(predicate or "").casefold()
+    if name == "vessel_state":
+        return len(args) >= 3
+    if name == "lease_term":
+        return len(args) >= 4 and bool(_profile_admission_tokens(str(args[3])) & PROFILE_ADMISSION_STATUS_STATE_TERMS)
+    if name in {"pending_determination", "permit_status", "tree_protection_status"}:
+        return len(args) >= 2 and bool(
+            _profile_admission_tokens(str(args[1]))
+            & (PROFILE_ADMISSION_STATUS_STATE_TERMS | {"issued", "not", "protected", "not_protected"})
+        )
+    if _status_state_text(name):
+        return len(args) >= 2
+    if name not in STATUS_STATE_DELIVERY_PREDICATE_NAMES or len(args) < 2:
+        return False
+    tokens = _fact_row_tokens(name, args)
+    state_terms = PROFILE_ADMISSION_STATUS_STATE_TERMS | {
+        "authorized",
+        "deferred",
+        "determination",
+        "issued",
+        "operative",
+        "scheduled",
+        "unchanged",
+        "unauthorized",
+    }
+    scope_terms = PROFILE_ADMISSION_DATE_SLOTS | PROFILE_ADMISSION_SCOPE_SLOTS | {"exhibit", "hearing", "source"}
+    has_temporal_or_scope = any(
+        PROFILE_ADMISSION_FULL_DATE_ATOM_RE.search(str(arg))
+        or PROFILE_ADMISSION_COMPACT_DATE_RE.search(str(arg))
+        for arg in args
+    ) or bool(tokens & scope_terms)
+    return bool(tokens & state_terms and has_temporal_or_scope)
+
+
+def _fact_row_can_deliver_vote_tally(predicate: str, args: list[str]) -> bool:
+    name = str(predicate or "").casefold()
+    if name == "voting_record":
+        return len(args) >= 3
+    if name not in VOTE_TALLY_DELIVERY_PREDICATE_NAMES and not _vote_tally_text(name):
+        return False
+    if len(args) < 3:
+        return False
+    joined = " ".join([name, *(str(arg) for arg in args)]).casefold()
+    tokens = _profile_admission_tokens(joined)
+    has_vote = bool(tokens & {"vote", "votes", "voted", "voting", "tally", "approved", "denied"})
+    has_tally = bool(re.search(r"\b\d+\s*[-_]\s*\d+\b", joined) or tokens & {"affirmative", "negative", "absent"})
+    return has_vote or has_tally
+
+
+def _vote_tally_fact_key(predicate: str, args: list[str]) -> str:
+    if str(predicate or "").casefold() == "vote_tally" and len(args) >= 5:
+        return _vote_tally_signal_key(" ".join([str(args[2]), str(args[3]), str(args[4])]))
+    return _vote_tally_signal_key(" ".join([str(predicate), *(str(arg) for arg in args)]))
+
+
+def _vote_tally_key_is_delivered(required_key: str, delivered_key: str) -> bool:
+    if required_key == delivered_key:
+        return True
+    required_parts = [part for part in str(required_key or "").split(":") if part]
+    delivered_parts = [part for part in str(delivered_key or "").split(":") if part]
+    if not required_parts or not delivered_parts:
+        return False
+    if required_parts[-1] not in delivered_parts:
+        return False
+    if len(required_parts) == 1:
+        return True
+    return any(part in delivered_parts for part in required_parts[:-1])
+
+
+def _source_claim_backbone_coexistence_finding(
+    *,
+    source_text: str,
+    source_claim_signal_count: int,
+    source_claim_carriers: list[str],
+    source_claim_delivery: dict[str, Any],
+    parsed_fact_rows: list[tuple[str, list[str], str]],
+    emitted_predicates: set[str],
+) -> dict[str, Any] | None:
+    if not source_claim_signal_count or not source_claim_carriers:
+        return None
+    if int(source_claim_delivery.get("row_count") or 0) <= 0:
+        return None
+    source_groups = _source_claim_backbone_source_groups(source_text)
+    if not source_groups:
+        return None
+    direct_groups = _source_claim_backbone_direct_groups(parsed_fact_rows)
+    missing_groups = sorted(source_groups - direct_groups)
+    if not missing_groups:
+        return None
+    return {
+        "class": "source_claim_backbone_coexistence_missing",
+        "source_signal_count": len(source_groups),
+        "delivered_carrier_row_count": int(source_claim_delivery.get("row_count") or 0),
+        "missing_signal_count": len(missing_groups),
+        "offered_carriers": source_claim_carriers[:12],
+        "delivered_carriers": source_claim_delivery.get("predicates", [])[:12],
+        "missing_signal_keys": missing_groups[:12],
+        "source_backbone_groups": sorted(source_groups)[:12],
+        "delivered_backbone_groups": sorted(direct_groups)[:12],
+        "emitted_carrier_fact_sample": source_claim_delivery.get("fact_sample", [])[:12],
+        "emitted_predicate_sample": sorted(emitted_predicates)[:24],
+    }
+
+
+def _source_claim_backbone_source_groups(source_text: str) -> set[str]:
+    groups: set[str] = set()
+    for line in str(source_text or "").splitlines():
+        tokens = _profile_admission_tokens(line)
+        for group, spec in SOURCE_CLAIM_BACKBONE_GROUPS.items():
+            if not tokens & spec["source_any"]:
+                continue
+            context = spec.get("source_context", set())
+            if context and not tokens & context:
+                continue
+            groups.add(group)
+    return groups
+
+
+def _source_claim_backbone_direct_groups(parsed_fact_rows: list[tuple[str, list[str], str]]) -> set[str]:
+    groups: set[str] = set()
+    for predicate, args, _fact in parsed_fact_rows:
+        name = str(predicate or "").casefold()
+        if name in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES or name in SOURCE_CLAIM_BACKBONE_WRAPPER_PREDICATES:
+            continue
+        tokens = _fact_row_tokens(name, args)
+        for group, spec in SOURCE_CLAIM_BACKBONE_GROUPS.items():
+            if not tokens & spec["direct_any"]:
+                continue
+            context = spec.get("direct_context", set())
+            if context and not tokens & context:
+                continue
+            groups.add(group)
+    return groups
+
+
 def _normalize_profile_atom(value: str) -> str:
     return str(value or "").strip().strip("'\"").casefold()
+
+
+def _source_record_text_by_ref(source_compile: dict[str, Any]) -> dict[str, str]:
+    rows: dict[str, str] = {}
+    for fact in _clause_list(source_compile.get("facts", [])):
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "source_record_text_atom" or len(args) < 2:
+            continue
+        ref = _normalize_profile_atom(args[0])
+        if ref:
+            rows[ref] = str(args[1])
+    return rows
 
 
 def _event_identifier_temporal_backbone_report(source_compile: dict[str, Any]) -> dict[str, Any]:
@@ -3419,6 +5040,8 @@ def _is_date_bearing_event_identifier_arg(predicate: str, value: str) -> bool:
         return False
     predicate_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(str(predicate or "").casefold()))
     value_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(norm))
+    if len(value_tokens) > 10:
+        return False
     event_terms = {
         "action",
         "appeal",
@@ -3439,6 +5062,22 @@ def _is_date_bearing_event_identifier_arg(predicate: str, value: str) -> bool:
         "transition",
     }
     identifier_markers = {"ev", "event", "incident", "hearing", "meeting", "notice", "filing", "motion"}
+    identifier_prefixes = (
+        "ev_",
+        "event_",
+        "incident_",
+        "hearing_",
+        "meeting_",
+        "notice_",
+        "filing_",
+        "motion_",
+        "appeal_",
+        "review_",
+        "declaration_",
+        "ratification_",
+    )
+    if not norm.startswith(identifier_prefixes):
+        return False
     if not (value_tokens & event_terms or value_tokens & identifier_markers):
         return False
     return bool((predicate_tokens | value_tokens) & event_terms)
@@ -3749,8 +5388,11 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
     source_mentions = _operational_lifecycle_source_mentions(source_text)
     source_authority_mentions = _source_authority_mentions(source_text)
     source_claim_mentions = _source_attributed_claim_mentions(source_text)
+    source_claim_required_keys = _source_attributed_claim_required_keys(source_claim_mentions)
     status_state_mentions = _status_state_source_mentions(source_text)
     quantity_mentions = _quantity_event_source_mentions(source_text)
+    quantity_required_key_counts = _quantity_event_required_key_counts(quantity_mentions)
+    quantity_required_row_count = _quantity_event_required_carrier_row_count(quantity_mentions)
     candidates = parsed_profile.get("candidate_predicates")
     candidate_rows = [item for item in candidates if isinstance(item, dict)] if isinstance(candidates, list) else []
     lifecycle_capable = [
@@ -3861,6 +5503,9 @@ def _profile_admission_report(*, parsed_profile: dict[str, Any], source_text: st
             "status_state": len(status_state_mentions),
             "quantity_event": len(quantity_mentions),
         },
+        "quantity_event_required_carrier_row_count": quantity_required_row_count,
+        "quantity_event_required_key_counts": quantity_required_key_counts,
+        "source_attributed_claim_required_keys": source_claim_required_keys[:50],
         "candidate_contract_counts": {
             "operational_lifecycle_capable": len(lifecycle_capable),
             "source_authority_capable": len(source_authority_capable),
@@ -3899,9 +5544,37 @@ def _source_authority_mentions(source_text: str) -> list[str]:
     mentions: list[str] = []
     for raw_line in str(source_text or "").splitlines():
         line = raw_line.strip()
-        if line and SOURCE_AUTHORITY_TEXT_RE.search(line):
+        if line and SOURCE_AUTHORITY_TEXT_RE.search(line) and not _source_authority_line_is_document_metadata(line):
             mentions.append(line[:240])
     return mentions
+
+
+def _source_authority_line_is_document_metadata(line: str) -> bool:
+    stripped = str(line or "").strip()
+    lowered = stripped.casefold()
+    if not stripped:
+        return True
+    if stripped.startswith("#"):
+        return True
+    if stripped.startswith("|") and stripped.endswith("|"):
+        return True
+    if lowered.startswith(("issuing organization:", "agency:")):
+        return True
+    if re.match(r"^\*{0,2}a\s+rule\s+by\s+the\b", lowered):
+        return True
+    if lowered in {
+        "federal labor relations authority",
+        "federal service impasses panel, federal labor relations authority.",
+    }:
+        return True
+    if (
+        "final rule" in lowered
+        and "updates regulations" in lowered
+        and "authority" in lowered
+        and "authority citation" not in lowered
+    ):
+        return True
+    return False
 
 
 def _source_attributed_claim_mentions(source_text: str) -> list[str]:
@@ -3912,12 +5585,200 @@ def _source_attributed_claim_mentions(source_text: str) -> list[str]:
             continue
         lowered = line.lower()
         tokens = _profile_admission_tokens(lowered)
+        has_speaker_frame = _line_has_source_attributed_speaker_frame(line)
         if (
-            tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS
+            (tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS or has_speaker_frame)
             and tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS
+            and not _source_claim_line_is_administrative_lifecycle(line, tokens)
         ):
-            mentions.append(line[:240])
+            mentions.append(line[:500])
     return mentions
+
+
+def _line_has_source_attributed_speaker_frame(line: str) -> bool:
+    stripped = str(line or "").strip()
+    if not stripped:
+        return False
+    if re.match(r"^(?:[-*]\s*)?(?:\*\*)?[A-Z][A-Za-z0-9 .'\-&]{1,80}:(?:\*\*)?\s+", stripped):
+        return True
+    lowered = stripped.casefold()
+    return bool(re.search(r"\b(?:says|said|states|stated|argues|argued|responds|responded|testifies|testified)\s*:", lowered))
+
+
+def _source_claim_line_is_administrative_lifecycle(line: str, tokens: set[str]) -> bool:
+    lowered = str(line or "").casefold()
+    if str(line or "").lstrip().startswith(('"', "“")):
+        return False
+    stripped = str(line or "").strip()
+    if stripped.startswith("|") and stripped.endswith("|"):
+        return True
+    if lowered.startswith(("authority:", "issuing organization:", "agency:")):
+        return True
+    if "authority citation for part" in lowered:
+        return True
+    administrative_subject = tokens & {"amendment", "application", "draft", "filing", "permit", "record"}
+    lifecycle_terms = tokens & {
+        "filed",
+        "issued",
+        "prepared",
+        "proposing",
+        "retaining",
+        "superseded",
+        "withdrawn",
+    }
+    if administrative_subject and lifecycle_terms:
+        return True
+    if "draft" in tokens and "superseded" in tokens:
+        return True
+    return False
+
+
+def _source_attributed_claim_required_keys(mentions: list[str]) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for mention in mentions:
+        key = _source_attributed_claim_signal_key(mention)
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+    return keys
+
+
+def _vote_tally_source_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    lines = [line.strip() for line in str(source_text or "").splitlines()]
+    for index, line in enumerate(lines):
+        if not line or not _vote_tally_text(line):
+            continue
+        combined = line
+        tokens = _profile_admission_tokens(line)
+        if tokens & {"corrected", "correction", "minutes", "recorded"}:
+            next_line = lines[index + 1] if index + 1 < len(lines) else ""
+            if next_line and re.search(r"\b\d+\s*[-_]\s*\d+\b", next_line):
+                combined = f"{line} {next_line}"
+        mentions.append(combined[:500])
+    return mentions
+
+
+def _vote_tally_required_keys(mentions: list[str]) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for mention in mentions:
+        key = _vote_tally_signal_key(mention)
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+    return keys
+
+
+def _vote_tally_signal_key(text: str) -> str:
+    lowered = str(text or "").casefold().replace("-", "_")
+    tokens = _profile_admission_tokens(lowered)
+    tally_match = VOTE_TALLY_PAIR_RE.search(lowered)
+    tally = f"{tally_match.group(1)}_{tally_match.group(2)}" if tally_match else ""
+    if not tally:
+        return ""
+    if tokens & {"corrected", "correction", "minutes"}:
+        if "4_1" in lowered and "3_1" in lowered:
+            return "correction:4_1_to_3_1"
+        return f"correction:{tally}"
+    if tokens & {"proceed", "proceeded"}:
+        return f"proceed:{tally}"
+    if tokens & {"approve", "approved", "approval", "affirmative"}:
+        return f"approved:{tally}"
+    if tokens & {"deny", "denied", "negative"}:
+        return f"denied:{tally}"
+    return f"vote:{tally}"
+
+
+def _vote_tally_text(text: str) -> bool:
+    return bool(VOTE_TALLY_TEXT_RE.search(str(text or "")))
+
+
+def _source_attributed_claim_signal_key(text: str) -> str:
+    lowered = str(text or "").casefold().replace("-", "_")
+    tokens = _profile_admission_tokens(lowered)
+    if not tokens:
+        return ""
+    source_kind = "source"
+    for candidate, markers in (
+        ("letter_of_intent", {"letter", "intent"}),
+        ("email", {"email"}),
+        ("letter", {"letter"}),
+        ("memo", {"memo", "memorandum"}),
+        ("opinion", {"opinion"}),
+        ("report", {"report"}),
+        ("testimony", {"testimony", "witness"}),
+        ("note", {"note"}),
+        ("statement", {"statement"}),
+        ("comment", {"comment"}),
+        ("assessment", {"assessment"}),
+    ):
+        if _source_claim_markers_match(tokens, markers):
+            source_kind = candidate
+            break
+    if source_kind == "source" and _line_has_source_attributed_speaker_frame(str(text or "")):
+        source_kind = "statement"
+    subject_kind = "claim"
+    for candidate, markers in (
+        ("letter_of_intent", {"letter", "intent"}),
+        ("draft", {"draft"}),
+        ("amendment", {"amendment"}),
+        ("permit", {"permit"}),
+        ("removal", {"removal"}),
+        ("status", {"status", "state"}),
+        ("finding", {"finding"}),
+        ("dispute", {"dispute", "disputed"}),
+        ("support", {"support", "supports"}),
+    ):
+        if _source_claim_markers_match(tokens, markers):
+            subject_kind = candidate
+            break
+    claim_kind = ""
+    if ("not" in tokens and "binding" in tokens) or "nonbinding" in tokens or "non_binding" in lowered:
+        claim_kind = "not_binding"
+    elif ("no" in tokens and "effect" in tokens) or "no_effect" in lowered or ("legal" in tokens and "effect" in tokens):
+        claim_kind = "no_effect"
+    elif "under" in tokens and "review" in tokens:
+        claim_kind = "under_review"
+    elif ("not" in tokens and "resolved" in tokens) or tokens & {"unresolved", "pending"}:
+        claim_kind = "unresolved"
+    elif "not" in tokens and tokens & {"legal", "determination"}:
+        claim_kind = "not_legal_determination"
+    elif "no" in tokens and tokens & {"documentation", "record"}:
+        claim_kind = "no_documentation"
+    elif "not" in tokens and tokens & {"flagged"}:
+        claim_kind = "not_flagged"
+    elif tokens & {"voided", "void", "unsigned"}:
+        claim_kind = "voided"
+    elif tokens & {"disagree", "disputed", "dispute"}:
+        claim_kind = "dispute"
+    elif tokens & {"supports", "support"}:
+        claim_kind = "support"
+    elif tokens & {"objects", "objected", "opposes", "opposed", "objection"}:
+        claim_kind = "objection"
+    elif tokens & {"concern", "concerned", "concerns"}:
+        claim_kind = "concern"
+    elif tokens & {"recommend", "recommended", "recommendation"}:
+        claim_kind = "recommendation"
+    elif tokens & {"advisory", "opinion"}:
+        claim_kind = "opinion"
+    elif tokens & {"based", "finding", "determined", "confirmed", "justified", "warrants"}:
+        claim_kind = "finding"
+    elif tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS:
+        content_terms = set(tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS)
+        if len(content_terms) > 1:
+            content_terms.discard("claim")
+        claim_kind = sorted(content_terms)[0]
+    if not claim_kind:
+        return ""
+    return f"{source_kind}:{subject_kind}:{claim_kind}"
+
+
+def _source_claim_markers_match(tokens: set[str], markers: set[str]) -> bool:
+    if len(markers) > 1:
+        return markers <= tokens
+    return bool(tokens & markers)
 
 
 def _status_state_source_mentions(source_text: str) -> list[str]:
@@ -3960,6 +5821,119 @@ def _quantity_event_source_mentions(source_text: str) -> list[str]:
     return mentions
 
 
+def _quantity_event_required_carrier_row_count(mentions: list[str]) -> int:
+    return sum(_quantity_event_required_key_counts(mentions).values())
+
+
+def _quantity_event_required_key_counts(mentions: list[str]) -> dict[str, int]:
+    requirements: dict[str, int] = {}
+    for index, mention in enumerate(mentions):
+        key = _quantity_event_requirement_key(mention) or f"mention:{index}"
+        rows = _quantity_event_required_rows_for_mention(mention)
+        requirements[key] = max(rows, requirements.get(key, 0))
+    return dict(sorted(requirements.items()))
+
+
+def _quantity_event_required_rows_for_mention(mention: str) -> int:
+    lowered = str(mention or "").casefold()
+    tokens = _profile_admission_tokens(lowered)
+    has_change = bool(tokens & {"changed", "decreased", "increase", "increased", "reverted"})
+    has_from_to = bool(re.search(r"\bfrom\b.+\bto\b", lowered))
+    has_arrow = bool(re.search(r"(?:->|\u2192|=>)", lowered))
+    if has_change and (has_from_to or has_arrow):
+        return 2
+    return 1
+
+
+def _quantity_event_requirement_key(mention: str) -> str:
+    lowered = str(mention or "").casefold().replace("-", "_")
+    tokens = _profile_admission_tokens(lowered)
+    event_ids = [
+        f"ev_{int(match.group(1)):02d}"
+        for match in re.finditer(r"\bev[_\s]?0*(\d+)\b", lowered)
+    ]
+    if "duration" in tokens and "line" in tokens and "stop" in tokens:
+        return "duration:line_stop"
+    if "duration" in tokens and len(event_ids) >= 2:
+        return "duration:" + ":".join(event_ids[:2])
+    if event_ids:
+        measure = "quantity"
+        if "setpoint" in tokens:
+            measure = "setpoint"
+        elif "feed" in tokens and "rate" in tokens:
+            measure = "feed_rate"
+        elif "drift" in tokens or "offset" in tokens:
+            measure = "drift_offset"
+        elif "duration" in tokens:
+            measure = "duration"
+        return f"event:{event_ids[0]}:{measure}"
+    return ""
+
+
+def _quantity_event_fact_key(predicate: str, args: list[str]) -> str:
+    name = str(predicate or "").casefold()
+    norm_args = [_normalize_profile_atom(str(arg)) for arg in args]
+    if name in {"event_measurement", "event_quantity", "reading_value", "measurement_value", "metric_observation"}:
+        if len(norm_args) >= 2:
+            event_id = _quantity_event_normalized_event_id(norm_args[0])
+            measure = _quantity_event_measure_key(norm_args[1])
+            if event_id and measure:
+                return f"event:{event_id}:{measure}"
+    if name in {"event_duration", "interval_duration", "duration_between", "line_stop_duration"}:
+        joined = " ".join([name, *norm_args])
+        if "line" in joined and "stop" in joined:
+            return "duration:line_stop"
+        event_ids = [_quantity_event_normalized_event_id(arg) for arg in norm_args]
+        event_ids = [event_id for event_id in event_ids if event_id]
+        if len(event_ids) >= 2:
+            return "duration:" + ":".join(event_ids[:2])
+        if "duration" in joined:
+            return "duration:line_stop"
+    joined = " ".join([name, *norm_args])
+    if (
+        ("duration" in joined and "line" in joined and "stop" in joined)
+        or ("line" in joined and "stop" in joined and sum(1 for arg in norm_args if _quantity_event_normalized_event_id(arg)) >= 2)
+    ):
+        return "duration:line_stop"
+    event_id = next((_quantity_event_normalized_event_id(arg) for arg in norm_args if _quantity_event_normalized_event_id(arg)), "")
+    measure = _quantity_event_measure_key(joined)
+    if event_id and measure:
+        return f"event:{event_id}:{measure}"
+    return ""
+
+
+def _quantity_event_normalized_event_id(value: str) -> str:
+    norm = _normalize_profile_atom(value)
+    match = re.search(r"\bev[_\s]?0*(\d+)\b", norm)
+    if not match:
+        return ""
+    return f"ev_{int(match.group(1)):02d}"
+
+
+def _quantity_event_measure_key(text: str) -> str:
+    lowered = str(text or "").casefold().replace("-", "_")
+    tokens = _profile_admission_tokens(lowered)
+    if "setpoint" in tokens:
+        return "setpoint"
+    if "feed" in tokens and "rate" in tokens:
+        return "feed_rate"
+    if "drift" in tokens or "offset" in tokens:
+        return "drift_offset"
+    if "duration" in tokens:
+        return "duration"
+    return ""
+
+
+def _quantity_event_key_is_delivered(required_key: str, delivered_key: str) -> bool:
+    if required_key == delivered_key:
+        return True
+    required = str(required_key or "")
+    delivered = str(delivered_key or "")
+    if required == "duration:line_stop" and delivered.startswith("duration:"):
+        return True
+    return False
+
+
 def _candidate_can_carry_operational_lifecycle_unit(candidate: dict[str, Any]) -> bool:
     signature = _candidate_signature(candidate).lower()
     args = _candidate_args(candidate)
@@ -3995,13 +5969,35 @@ def _candidate_can_carry_source_attributed_claim_unit(candidate: dict[str, Any])
     name = signature.split("/", 1)[0]
     if _candidate_can_carry_source_authority_unit(candidate):
         return False
+    name_tokens = set(name.split("_"))
+    if name in {"claim_source", "source_supports"}:
+        return False
+    if (
+        name_tokens & {"status", "state", "change", "transition"}
+        and not name_tokens & {"claim", "finding", "memo", "note", "opinion", "report", "statement"}
+    ):
+        return False
     if name in {"reported_finding", "source_attributed_claim", "source_claim", "statement_claim"}:
         return True
     args = _candidate_args(candidate)
     if len(args) < 3:
         return False
     arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
-    has_source = any(tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS for tokens in arg_tokens)
+    source_anchor_terms = {
+        "author",
+        "claimant",
+        "doc",
+        "document",
+        "email",
+        "letter",
+        "memo",
+        "person",
+        "reporter",
+        "source",
+        "speaker",
+        "witness",
+    }
+    has_source = any(tokens & source_anchor_terms for tokens in arg_tokens)
     has_content = any(tokens & (PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS | {"content", "detail", "topic"}) for tokens in arg_tokens)
     has_anchor = any(tokens & (PROFILE_ADMISSION_SCOPE_SLOTS | {"claim", "id", "row", "scope"}) for tokens in arg_tokens)
     return has_source and has_content and has_anchor and _source_attributed_claim_text(signature + " " + " ".join(args))
@@ -4045,6 +6041,44 @@ def _candidate_can_carry_quantity_event_unit(candidate: dict[str, Any]) -> bool:
     )
     has_unit_or_basis = any(tokens & PROFILE_ADMISSION_QUANTITY_UNIT_SLOTS for tokens in arg_tokens)
     return has_subject and has_value and has_measure and has_unit_or_basis
+
+
+def _candidate_can_carry_quantity_event_delivery_unit(candidate: dict[str, Any]) -> bool:
+    if _candidate_can_carry_quantity_event_unit(candidate):
+        return True
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    args = _candidate_args(candidate)
+    if name in {"event_duration", "interval_duration", "line_stop_duration", "duration_between"}:
+        return True
+    if len(args) < 2:
+        return False
+    name_tokens = _profile_admission_tokens(name)
+    if name_tokens & {"capability", "certification", "certified", "scope"}:
+        return False
+    arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
+    has_value = any(tokens & PROFILE_ADMISSION_QUANTITY_VALUE_SLOTS for tokens in arg_tokens)
+    has_subject = any(tokens & PROFILE_ADMISSION_QUANTITY_EVENT_SUBJECT_SLOTS for tokens in arg_tokens)
+    if not (has_value and has_subject):
+        return False
+    quantity_terms = {
+        "amount",
+        "count",
+        "duration",
+        "measurement",
+        "metric",
+        "quantity",
+        "rate",
+        "reading",
+        "score",
+        "threshold",
+        "total",
+        "value",
+    }
+    return bool(
+        name_tokens & quantity_terms
+        or any(tokens & quantity_terms for tokens in arg_tokens)
+    )
 
 
 def _candidate_signature(candidate: dict[str, Any]) -> str:

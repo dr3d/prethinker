@@ -1334,13 +1334,18 @@ def _is_source_attributed_claim_row(row: dict[str, Any]) -> bool:
     if predicate.startswith("source_record") or len(args) < 3:
         return False
     if predicate in {
+        "knowledge_assertion",
         "participant_statement",
+        "public_comment",
+        "staff_assessment",
         "witness_statement",
         "legal_opinion",
         "source_authority",
         "source_attributed_claim",
         "source_detail",
+        "source_supports",
         "statement_detail",
+        "violation_claim",
     }:
         return True
     tokens = _tokens_for_row(row)
@@ -1353,9 +1358,14 @@ def _is_source_attributed_claim_row(row: dict[str, Any]) -> bool:
         "memorandum",
         "note",
         "opinion",
+        "comment",
+        "assessment",
+        "assertion",
         "report",
         "source",
         "statement",
+        "support",
+        "supports",
         "testimony",
         "witness",
     }
@@ -2085,10 +2095,47 @@ def _is_status_state_structural_row(row: dict[str, Any]) -> bool:
         "voided",
     }
     condition_context = "condition" in predicate_tokens and bool(predicate_tokens & {"current", "state", "status"})
+    source_local_status_predicates = {
+        "authorization_status",
+        "hearing_scheduled",
+        "knowledge_assertion",
+        "lease_status",
+        "legal_opinion",
+        "policy_compliance",
+        "scheduled_event",
+        "violation_claim",
+    }
+    state_terms = {
+        "active",
+        "approved",
+        "available",
+        "authorized",
+        "cleared",
+        "closed",
+        "current",
+        "deferred",
+        "denied",
+        "failed",
+        "hold",
+        "issued",
+        "operative",
+        "pending",
+        "resolved",
+        "scheduled",
+        "state",
+        "status",
+        "suspect",
+        "suspended",
+        "unchanged",
+        "unauthorized",
+        "unresolved",
+        "voided",
+    }
     return bool(
         predicate.endswith(("_status_at", "_state_at", "_condition_at", "_status_on", "_state_on"))
         or bool(predicate_tokens & predicate_markers)
         or condition_context
+        or (predicate in source_local_status_predicates and bool(_tokens_for_row(row) & state_terms))
     )
 
 

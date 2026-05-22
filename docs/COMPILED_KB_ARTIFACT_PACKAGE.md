@@ -1,6 +1,6 @@
 # Compiled KB Artifact Package
 
-Last updated: 2026-05-16
+Last updated: 2026-05-22
 
 ## The Core Doctrine
 
@@ -88,6 +88,13 @@ to remember or paraphrase it.
 is direct-surface QA: admitted predicates, deterministic ledgers, direct compile
 surfaces, selectors, and guards are in-bounds. Retired compatibility adapters
 belong only to explicit historical replay.
+
+Direct-surface QA is not model-free. A model may still propose query operations,
+evidence plans, reference-answer judgments, or failure classifications. The
+policy boundary is that deterministic code controls which compiled surfaces may
+be queried, which operations can execute, and whether the row stayed inside the
+governed path. See
+[QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md).
 
 ## Manifest
 

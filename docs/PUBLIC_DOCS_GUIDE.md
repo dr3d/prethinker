@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-18
+Last updated: 2026-05-22
 
 This is the public reading map. It should stay short and current. Git history
 and `C:\prethinker_tmp_archive` keep older research diaries, prompt snapshots,
@@ -11,13 +11,14 @@ dated run reports, and retired product lanes.
 1. [README](https://github.com/dr3d/prethinker/blob/main/README.md) - project entry point.
 2. [Docs README](https://github.com/dr3d/prethinker/blob/main/docs/README.md) - documentation map.
 3. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current empirical claim and pressure.
-4. [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - operating doctrine for high-context collaborators.
-5. [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md) - scorecards, freeze readiness, direct-surface work, and repair queues.
+4. [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md) - current public measurement claim and caveats.
+5. [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - operating doctrine for high-context collaborators.
 
 ## Core Architecture
 
 - [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
+- [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
 - [Current Utterance And Document Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
 - [Semantic IR Mapper Specification](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
@@ -25,12 +26,12 @@ dated run reports, and retired product lanes.
 ## Research Method
 
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)
 
 ## Lens And Product Story
 
-- [The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
 - [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
 - [Prethinker Design Overview](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md)

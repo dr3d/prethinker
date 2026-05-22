@@ -1,8 +1,8 @@
 # Current Research Headline
 
-Last updated: 2026-05-19
+Last updated: 2026-05-22
 
-## Direct-Surface Instrument, Compile-Stability Pressure
+## Publishable Direct-Surface Measurement
 
 Prethinker now has a measurable direct-surface instrument:
 
@@ -21,41 +21,50 @@ as direct admitted surfaces without leaking fixture vocabulary.
 
 ## Current Empirical Anchor
 
-The latest native fixed-compile QA restamp measured the direct-surface path at:
+The 2026-05-22 native restamp measured the direct-surface path at:
 
 ```text
 2163 judged rows
-1934 exact / 64 partial / 162 miss
-89.41% exact
+1997 exact / 46 partial / 120 miss
+92.33% exact
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
 ```
 
-That score is an anchor, not a finish line. It says the query layer is strong
-enough that remaining misses are mostly compile-surface, source-fidelity,
-hybrid-join, or answer-surface coordinates.
+That score is an anchor, not a finish line. It says the instrument can now be
+described publicly with caveats intact: compatibility adapters stayed off,
+runtime stayed clean, and the answer path improved while the failure taxonomy
+remained inspectable.
 
-The most recent focused replays show why the next work stays layer-specific:
+The current measurement stack is:
 
-- A preserved amended-register compile moved from `33/3/4` to `40/0/0` after
-  query routing exposed source-attribution carriers, event-description rows,
-  and current-state source ledgers.
-- A native 17-row source-reference stranded slice moved from `7/1/9` to
-  `17/0/0` after source-coordinate wording recognized `according to`,
-  `per the`, source-within-packet, packet-id, ticket, and reported-by phrasing
-  as addressability requests, while preserving legal title phrases in
-  source-text retrieval.
-- Both replays used frozen compile artifacts and delivered zero compatibility
-  rows, so they are query-layer evidence rather than compile-stamp evidence.
-- Quantity/duration remains a compile-delivery pressure: a QA-only replay of
-  the old 26-row queue scored `8/3/15`, and the query-surface subset did not
-  improve under a bounded source-text-access experiment. One hybrid row did
-  earn a generic deterministic repair: admitted category/count/date rows plus
-  an admitted total-count surface can now produce `category_count_ratio_support`.
-  That moved the March 15 accounted-unit percentage to exact on replay, while a
-  fresh 40-row fixture smoke held zero compatibility rows and no runtime
-  errors.
+- Native restamp: `1997 / 46 / 120` on `2163` rows (`92.33%` exact), with
+  `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
+- Real-world external spotcheck: four externally sourced fixtures at latest
+  fixture-level `160 / 0 / 0`, with `4 / 4` compile gates clean.
+- Sealed unseen authored transfer: `152 / 1 / 6` on `160` rows (`95.0%`
+  exact), with `0` compatibility rows.
+- Earlier cold transfer baseline: six fresh transfer fixtures at
+  `177 / 10 / 53` on `240` rows (`73.75%` exact).
+
+## Caveats That Travel With The Claim
+
+- The native restamp used the same 56 fixture names as the 2026-05-20 baseline
+  and a clean git dataset tree, but no prior per-file hash manifest was found.
+  The comparability claim is same named corpus, not proven byte-identical
+  corpus.
+- Compile quality gate noise increased from `26 / 30` pass/hold to `9 / 47`.
+  QA improved anyway, so this is a gate-calibration and diagnostic issue, not a
+  reason to suppress the measurement.
+- Failure surfaces improved overall except query-surface gaps:
+  `compile_surface_gap 116 -> 96`, `hybrid_join_gap 47 -> 39`,
+  `query_surface_gap 20 -> 29`, `answer_surface_gap 5 -> 1`,
+  `judge_uncertain 4 -> 1`.
+- The clearest fixture regressions are `black_lantern_maze`,
+  `identifier_ledger_torture`, and `lantern_school_field_trip`.
+- The diagnostic rejected flat-pass skip count changed from `128 -> 0`, which
+  is useful but should be read together with the gate-calibration shift.
 
 ## What Changed
 
@@ -72,22 +81,22 @@ The recent architecture moved from guard compression to surface discipline:
 
 ## Active Pressure
 
-The highest-value current work is compile-surface stability:
+The highest-value next work is release-followup discipline, not delaying the
+claim:
 
-1. Find rows where answer text is stranded only in source-record ledgers.
-2. Promote only generic direct surfaces that recover those rows on unlike
-   documents.
-3. Detect candidate palettes that offer useful predicates but fail to deliver
-   admitted rows.
-4. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+1. Investigate query-surface gap growth without changing the published stamp.
+2. Explain the `9 / 47` native compile-gate distribution and calibrate the gate
+   against answer-bearing impact.
+3. Read the three regressed fixtures for structural causes.
+4. Preserve the real-world four-fixture batch as transfer evidence, not native
+   baseline material.
+5. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
-5. Use QA-only restamps when work is query-layer only; use full recompiles only
-   when compile behavior changed.
 
 ## Read Next
 
-- [Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
 - [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+- [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)

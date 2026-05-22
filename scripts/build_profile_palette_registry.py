@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -23,12 +24,24 @@ def build_registry(
     purpose: str = "",
     mode: str = "threshold",
     min_draw_share: float = 1.0,
+    require_delivered: bool = False,
 ) -> dict[str, Any]:
     draws = [_load_compile(path) for path in _expand_paths(paths)]
     if not draws:
-        return _registry([], fixture=fixture, purpose=purpose, mode=mode, min_draw_share=min_draw_share, draw_count=0)
+        return _registry(
+            [],
+            fixture=fixture,
+            purpose=purpose,
+            mode=mode,
+            min_draw_share=min_draw_share,
+            draw_count=0,
+            require_delivered=require_delivered,
+        )
 
-    signatures_by_draw = [set(draw["predicates"]) for draw in draws]
+    signatures_by_draw = [
+        set(draw["delivered_predicates"] if require_delivered else draw["predicates"])
+        for draw in draws
+    ]
     counts: Counter[str] = Counter()
     for signature_set in signatures_by_draw:
         counts.update(signature_set)
@@ -40,7 +53,7 @@ def build_registry(
     elif mode == "intersection":
         selected = set.intersection(*signatures_by_draw) if signatures_by_draw else set()
     elif mode == "threshold":
-        threshold = max(1, int(round(len(draws) * max(0.0, min(1.0, min_draw_share)) + 0.000001)))
+        threshold = max(1, int(math.ceil(len(draws) * max(0.0, min(1.0, min_draw_share)) - 0.000001)))
         selected = {signature for signature, count in counts.items() if count >= threshold}
     else:
         raise ValueError(f"Unknown mode: {mode}")
@@ -50,7 +63,15 @@ def build_registry(
         candidates = [row for draw in draws for row in draw["predicates"].get(signature, [])]
         rows.append(_registry_row(signature, candidates, draw_count=counts.get(signature, 0), total_draws=len(draws)))
 
-    return _registry(rows, fixture=fixture or _common_fixture(draws), purpose=purpose, mode=mode, min_draw_share=min_draw_share, draw_count=len(draws))
+    return _registry(
+        rows,
+        fixture=fixture or _common_fixture(draws),
+        purpose=purpose,
+        mode=mode,
+        min_draw_share=min_draw_share,
+        draw_count=len(draws),
+        require_delivered=require_delivered,
+    )
 
 
 def _expand_paths(paths: list[Path]) -> list[Path]:
@@ -71,6 +92,7 @@ def _expand_paths(paths: list[Path]) -> list[Path]:
 def _load_compile(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8-sig"))
     parsed = payload.get("parsed") if isinstance(payload.get("parsed"), dict) else {}
+    delivered_signatures = _delivered_signatures(payload)
     rows: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in parsed.get("candidate_predicates", []) if isinstance(parsed.get("candidate_predicates"), list) else []:
         if not isinstance(item, dict):
@@ -82,6 +104,7 @@ def _load_compile(path: Path) -> dict[str, Any]:
         "path": str(path),
         "fixture": path.parent.name,
         "predicates": dict(rows),
+        "delivered_predicates": {signature: rows.get(signature, []) for signature in delivered_signatures if signature in rows},
     }
 
 
@@ -94,6 +117,23 @@ def _signature(item: dict[str, Any]) -> str:
     if name and re.fullmatch(r"[a-z][a-z0-9_]*", name) and isinstance(args, list) and 1 <= len(args) <= 5:
         return f"{name}/{len(args)}"
     return ""
+
+
+def _delivered_signatures(payload: dict[str, Any]) -> set[str]:
+    source_compile = payload.get("source_compile") if isinstance(payload.get("source_compile"), dict) else {}
+    facts = source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []
+    out: set[str] = set()
+    for fact in facts:
+        match = re.match(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\.\s*$", str(fact))
+        if not match:
+            continue
+        predicate = match.group(1).strip().casefold()
+        if predicate.startswith("source_record"):
+            continue
+        args = [part for part in match.group(2).split(",") if part.strip()]
+        if 1 <= len(args) <= 5:
+            out.add(f"{predicate}/{len(args)}")
+    return out
 
 
 def _registry_row(signature: str, candidates: list[dict[str, Any]], *, draw_count: int, total_draws: int) -> dict[str, Any]:
@@ -169,6 +209,7 @@ def _registry(
     mode: str,
     min_draw_share: float,
     draw_count: int,
+    require_delivered: bool,
 ) -> dict[str, Any]:
     return {
         "schema": "candidate_profile_registry_v1",
@@ -179,6 +220,7 @@ def _registry(
             "mode": mode,
             "min_draw_share": min_draw_share,
             "draw_count": draw_count,
+            "require_delivered": require_delivered,
         },
         "predicates": rows,
     }
@@ -198,6 +240,7 @@ def render_markdown(registry: dict[str, Any]) -> str:
         f"- Predicate count: `{len(registry.get('predicates', [])) if isinstance(registry.get('predicates'), list) else 0}`",
         f"- Selection mode: `{selection.get('mode', '')}`",
         f"- Draw count: `{selection.get('draw_count', 0)}`",
+        f"- Require delivered: `{selection.get('require_delivered', False)}`",
         "",
         "This registry is vocabulary-only. It does not contain facts, answers, expected rows, or source authority.",
         "",
@@ -216,6 +259,11 @@ def main() -> int:
     parser.add_argument("--compile-json", action="append", type=Path, default=[])
     parser.add_argument("--mode", choices=["first", "union", "intersection", "threshold"], default="threshold")
     parser.add_argument("--min-draw-share", type=float, default=1.0)
+    parser.add_argument(
+        "--require-delivered",
+        action="store_true",
+        help="Select only predicate signatures that were both offered by the profile and delivered as direct facts.",
+    )
     parser.add_argument("--fixture", default="")
     parser.add_argument("--purpose", default="")
     parser.add_argument("--out-json", type=Path, required=True)
@@ -228,6 +276,7 @@ def main() -> int:
         purpose=str(args.purpose or ""),
         mode=str(args.mode),
         min_draw_share=float(args.min_draw_share),
+        require_delivered=bool(args.require_delivered),
     )
     out_json = args.out_json if args.out_json.is_absolute() else (REPO_ROOT / args.out_json).resolve()
     out_json.parent.mkdir(parents=True, exist_ok=True)

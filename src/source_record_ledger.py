@@ -30,6 +30,11 @@ LABEL_RE = re.compile(
     r"[A-Z][A-Z0-9]{0,11}(?:-[A-Za-z0-9]{1,16}){1,6}"
     r")\b"
 )
+STATE_ABBR_RE = re.compile(
+    r"^\s*(?:A[LKZR]|C[AOT]|D[CE]|FL|GA|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|"
+    r"P[AWR]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])\b(?:\s*(?:\(|[,;|]|$))",
+    re.IGNORECASE,
+)
 
 
 def extract_source_record_ledger(
@@ -77,7 +82,7 @@ def extract_source_record_ledger(
                 )
             )
         elif TABLE_RE.match(line):
-            cells = [_clean_text(part, max_chars=180) for part in line.strip().strip("|").split("|")]
+            cells = [_clean_text(part, max_chars=min(max_chars_per_row, 700)) for part in line.strip().strip("|").split("|")]
             if _is_table_separator(cells):
                 if pending_table_header:
                     active_table_header = pending_table_header
@@ -194,11 +199,12 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
     return [
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
-        "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation.",
+        "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation. It also exposes printed table-cell list items, cross-cell item pairs, and parenthetical qualifiers as source_record_cell_item/source_record_cell_item_pair/source_record_cell_item_qualifier rows.",
         "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
+        "For heading/scope/list blocks, source_record_section_list_count/* counts contiguous printed source-list rows only. It is a source structure count, not a semantic claim that all listed items share any fact beyond the printed heading/scope text.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
         "Prefer stable row ids, exact printed labels, source section names, row_display_label, row_source_name, record_row, row_value, source_line, source_record_field, document_identifier, and status-at-row predicates when the profile supports them.",
-        "Do not infer ownership, authority, status, causality, or counts from this ledger. It only pins source row addressability and exact row text.",
+        "Do not infer ownership, authority, status, causality, or semantic totals from this ledger. It only pins source row addressability, exact row text, and deterministic printed-row structure.",
         "source_record_ledger_v1_payload: " + json.dumps(ledger, ensure_ascii=False, sort_keys=True),
     ]
 
@@ -222,6 +228,7 @@ def source_record_ledger_facts(
     if not isinstance(rows, list):
         return []
     facts: list[str] = []
+    normalized_rows: list[dict[str, object]] = []
     for raw in rows[: max(0, int(max_rows))]:
         if not isinstance(raw, dict):
             continue
@@ -243,14 +250,28 @@ def source_record_ledger_facts(
         section_text = _atom(str(raw.get("section", "")))
         exact = _atom(str(raw.get("exact", "")))
         exact_key = _text_key(str(raw.get("exact", "")))
+        normalized_rows.append(
+            {
+                "row_id": row_id,
+                "kind": kind,
+                "line": line,
+                "section": section,
+                "label": label_atom,
+                "text": exact,
+            }
+        )
         if label:
             facts.append(f"source_record_label({row_id}, {label}).")
         if section_text:
             facts.append(f"source_record_section({row_id}, {section_text}).")
         if exact:
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
+            facts.append(f"source_record_row_context({row_id}, {label_atom}, {exact}, {section}).")
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
+        facts.extend(_citation_facts(str(raw.get("exact", "")), row_id=row_id))
+        facts.extend(_compact_date_facts(str(raw.get("exact", "")), row_id=row_id))
+        facts.extend(_count_word_facts(str(raw.get("exact", "")), row_id=row_id))
         for field_name, field_value in _inline_key_value_fields(str(raw.get("exact", ""))):
             facts.append(f"source_record_inline_field({row_id}, {field_name}, {field_value}).")
             facts.append(f"source_record_field({row_id}, {field_name}, {field_value}).")
@@ -260,6 +281,8 @@ def source_record_ledger_facts(
             header_atoms: list[str] = []
             if isinstance(headers, list):
                 header_atoms = [_atom(str(header_raw)) for header_raw in headers]
+            cell_items_by_index: dict[int, list[str]] = {}
+            cell_qualifiers_by_index_item: dict[tuple[int, str], list[str]] = {}
             for index, cell_raw in enumerate(cells, start=1):
                 cell = _atom(str(cell_raw))
                 if not cell:
@@ -272,11 +295,199 @@ def source_record_ledger_facts(
                 cell_key = _text_key(str(cell_raw))
                 if cell_key:
                     facts.append(f"source_record_cell_text_key({row_id}, {index}, {cell_key}).")
+                for item, qualifier in _cell_list_items(str(cell_raw)):
+                    cell_items_by_index.setdefault(index, []).append(item)
+                    facts.append(f"source_record_cell_item({row_id}, {index}, {item}).")
+                    if header_atom:
+                        facts.append(f"source_record_field_item({row_id}, {header_atom}, {item}).")
+                    if qualifier:
+                        cell_qualifiers_by_index_item.setdefault((index, item), []).append(qualifier)
+                        facts.append(f"source_record_cell_item_qualifier({row_id}, {index}, {item}, {qualifier}).")
+                        if header_atom:
+                            facts.append(
+                                f"source_record_field_item_qualifier({row_id}, {header_atom}, {item}, {qualifier})."
+                            )
+            facts.extend(
+                _cross_cell_item_pair_facts(
+                    row_id=row_id,
+                    header_atoms=header_atoms,
+                    cell_items_by_index=cell_items_by_index,
+                    cell_qualifiers_by_index_item=cell_qualifiers_by_index_item,
+                )
+            )
             facts.extend(_explicit_table_membership_facts(raw, row_id=row_id))
         for token in _numeric_tokens(str(raw.get("exact", ""))):
             facts.append(f"source_record_numeric_token({row_id}, {token}).")
         facts.extend(_parenthetical_alias_facts(str(raw.get("exact", "")), row_id=row_id))
+    facts.extend(_section_list_count_facts(normalized_rows))
     return _dedupe(facts)
+
+
+def _cross_cell_item_pair_facts(
+    *,
+    row_id: str,
+    header_atoms: list[str],
+    cell_items_by_index: dict[int, list[str]],
+    cell_qualifiers_by_index_item: dict[tuple[int, str], list[str]],
+) -> list[str]:
+    facts: list[str] = []
+    indexes = sorted(cell_items_by_index)
+    for left_index in indexes:
+        for right_index in indexes:
+            if right_index <= left_index:
+                continue
+            for left_item in cell_items_by_index.get(left_index, []):
+                for right_item in cell_items_by_index.get(right_index, []):
+                    facts.append(
+                        "source_record_cell_item_pair("
+                        f"{row_id}, {left_index}, {left_item}, {right_index}, {right_item})."
+                    )
+                    left_header = header_atoms[left_index - 1] if left_index <= len(header_atoms) else ""
+                    right_header = header_atoms[right_index - 1] if right_index <= len(header_atoms) else ""
+                    if left_header and right_header:
+                        facts.append(
+                            "source_record_field_item_pair("
+                            f"{row_id}, {left_header}, {left_item}, {right_header}, {right_item})."
+                        )
+                    for qualifier in cell_qualifiers_by_index_item.get((right_index, right_item), []):
+                        facts.append(
+                            "source_record_cell_item_pair_qualifier("
+                            f"{row_id}, {left_index}, {left_item}, {right_index}, {right_item}, {qualifier})."
+                        )
+                        if left_header and right_header:
+                            facts.append(
+                                "source_record_field_item_pair_qualifier("
+                                f"{row_id}, {left_header}, {left_item}, {right_header}, {right_item}, {qualifier})."
+                            )
+    return facts
+
+
+def _citation_facts(text: str, *, row_id: str) -> list[str]:
+    facts: list[str] = []
+    for match in re.finditer(r"\b(?P<volume>\d{1,4})\s+FR\s+(?P<page>\d{1,7})\b", str(text or ""), flags=re.IGNORECASE):
+        volume = _atom(match.group("volume"))
+        page = _atom(match.group("page"))
+        citation = _atom(f"{match.group('volume')}_fr_{match.group('page')}")
+        if volume and page and citation:
+            facts.append(f"source_record_citation({row_id}, {citation}).")
+            facts.append(f"source_record_citation_parts({row_id}, {volume}, fr, {page}).")
+    return facts
+
+
+def _compact_date_facts(text: str, *, row_id: str) -> list[str]:
+    facts: list[str] = []
+    for match in re.finditer(r"\b(?P<month>\d{1,2})[-/](?P<day>\d{1,2})[-/](?P<year>\d{2,4})\b", str(text or "")):
+        month = int(match.group("month"))
+        day = int(match.group("day"))
+        year = match.group("year")
+        if not (1 <= month <= 12 and 1 <= day <= 31):
+            continue
+        full_year = int(year) + 2000 if len(year) == 2 else int(year)
+        compact = _atom(match.group(0))
+        canonical = _atom(f"{full_year:04d}_{month:02d}_{day:02d}")
+        if compact and canonical:
+            facts.append(f"source_record_date_alias({row_id}, {compact}, {canonical}).")
+            facts.append(f"source_record_date_parts({row_id}, {full_year}, {month}, {day}).")
+    return facts
+
+
+_COUNT_WORDS = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
+}
+
+
+def _count_word_facts(text: str, *, row_id: str) -> list[str]:
+    facts: list[str] = []
+    for match in re.finditer(
+        r"\b(" + "|".join(re.escape(word) for word in sorted(_COUNT_WORDS, key=len, reverse=True)) + r")\b",
+        str(text or ""),
+        flags=re.IGNORECASE,
+    ):
+        word = _atom(match.group(1))
+        count = _COUNT_WORDS.get(match.group(1).casefold())
+        if word and count is not None:
+            facts.append(f"source_record_count_word({row_id}, {word}, {count}).")
+    return facts
+
+
+def _section_list_count_facts(rows: list[dict[str, object]]) -> list[str]:
+    facts: list[str] = []
+    ordered = sorted(
+        [row for row in rows if row.get("row_id") and isinstance(row.get("line"), int)],
+        key=lambda row: int(row.get("line", 0)),
+    )
+    for index, heading in enumerate(ordered):
+        if heading.get("kind") not in {"paragraph_line", "labeled_line", "anchored_line"}:
+            continue
+        heading_text = str(heading.get("text", ""))
+        if not _looks_like_list_count_heading(heading_text):
+            continue
+        scope = None
+        members: list[dict[str, object]] = []
+        for candidate in ordered[index + 1 :]:
+            if candidate.get("section") != heading.get("section"):
+                continue
+            if int(candidate.get("line", 0)) > int(heading.get("line", 0)) + 18:
+                break
+            if scope is None and candidate.get("kind") != "list_row":
+                if _looks_like_list_scope_text(str(candidate.get("text", ""))):
+                    scope = candidate
+                continue
+            if candidate.get("kind") == "list_row":
+                if scope is None:
+                    continue
+                members.append(candidate)
+                continue
+            if members:
+                break
+        if scope is None or not members:
+            continue
+        count = len(members)
+        heading_row = str(heading.get("row_id", ""))
+        scope_row = str(scope.get("row_id", ""))
+        facts.append(f"source_record_section_list_count({heading_row}, {scope_row}, {count}).")
+        facts.append(
+            "source_record_section_list_count_detail("
+            f"{heading_row}, {scope_row}, {str(heading.get('text', ''))}, {str(scope.get('text', ''))}, {count})."
+        )
+        for position, member in enumerate(members, start=1):
+            facts.append(
+                "source_record_section_list_count_member("
+                f"{heading_row}, {scope_row}, {position}, {str(member.get('row_id', ''))}, {str(member.get('text', ''))})."
+            )
+    return facts
+
+
+def _looks_like_list_count_heading(text: str) -> bool:
+    tokens = set(_atom(str(text or "")).split("_"))
+    return bool(tokens & {"item", "items", "product", "products"}) and bool(
+        tokens & {"retail", "packaged", "bulk", "listed", "affected"}
+    )
+
+
+def _looks_like_list_scope_text(text: str) -> bool:
+    tokens = set(_atom(str(text or "")).split("_"))
+    return bool(tokens & {"sold", "distributed", "shipped", "available", "listed"}) and len(tokens) >= 3
 
 
 def _ledger(rows: Iterable[SourceRecordRow], *, truncated: bool) -> dict[str, object]:
@@ -432,10 +643,15 @@ def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
 
     clean = re.sub(r"\*\*([^*]+)\*\*", r"\1", str(text or ""))
     out: list[tuple[str, str]] = []
+    active_key_raw = ""
     for segment in re.split(r"[;|]", clean):
-        if ":" not in segment:
+        if ":" not in segment and not active_key_raw:
             continue
-        key_raw, value_raw = segment.split(":", 1)
+        if ":" in segment:
+            key_raw, value_raw = segment.split(":", 1)
+        else:
+            key_raw = active_key_raw
+            value_raw = segment
         key_raw = re.split(r"\s+(?:—|–|--)\s*", key_raw)[-1].strip()
         value_raw = value_raw.strip(" .")
         if not key_raw or not value_raw:
@@ -450,8 +666,87 @@ def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
         value = _atom(value_raw)
         if not key or not value or key == value:
             continue
+        active_key_raw = key_raw
         out.append((key, value))
     return _dedupe_pairs(out)
+
+
+def _cell_list_items(text: str) -> list[tuple[str, str]]:
+    """Preserve printed table-cell list structure without interpreting it."""
+
+    raw = str(text or "").strip()
+    if not raw or len(raw) > 700:
+        return []
+    parts = _split_top_level_list(raw)
+    out: list[tuple[str, str]] = []
+    for part in parts:
+        item_raw, qualifier_raw = _trailing_parenthetical(part.strip())
+        item = _atom(item_raw)
+        qualifier = _atom(qualifier_raw) if qualifier_raw else ""
+        if not item:
+            continue
+        out.append((item, qualifier))
+    return _dedupe_pairs(out)
+
+
+def _split_top_level_list(text: str) -> list[str]:
+    parts: list[str] = []
+    current: list[str] = []
+    depth = 0
+    index = 0
+    raw = str(text or "")
+    while index < len(raw):
+        char = raw[index]
+        if char == "(":
+            depth += 1
+            current.append(char)
+            index += 1
+            continue
+        if char == ")" and depth > 0:
+            depth -= 1
+            current.append(char)
+            index += 1
+            continue
+        if depth == 0 and char == "," and not _comma_stays_inside_location(raw, index):
+            _append_list_part(parts, current)
+            current = []
+            index += 1
+            continue
+        if depth == 0 and char == ";":
+            _append_list_part(parts, current)
+            current = []
+            index += 1
+            continue
+        if depth == 0 and raw[index : index + 5].casefold() == " and ":
+            _append_list_part(parts, current)
+            current = []
+            index += 5
+            continue
+        current.append(char)
+        index += 1
+    _append_list_part(parts, current)
+    return parts or [raw]
+
+
+def _comma_stays_inside_location(text: str, comma_index: int) -> bool:
+    return bool(STATE_ABBR_RE.match(str(text or "")[comma_index + 1 :]))
+
+
+def _append_list_part(parts: list[str], current: list[str]) -> None:
+    part = "".join(current).strip()
+    if part:
+        parts.append(part)
+
+
+def _trailing_parenthetical(text: str) -> tuple[str, str]:
+    match = re.match(r"^(?P<item>.+?)\s*\((?P<qualifier>[^()]*)\)\s*$", str(text or "").strip())
+    if not match:
+        return text, ""
+    item = match.group("item").strip()
+    qualifier = match.group("qualifier").strip()
+    if not item or not qualifier:
+        return text, ""
+    return item, qualifier
 
 
 def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
@@ -459,7 +754,8 @@ def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
 
     This is deterministic source scaffolding, not a global synonym claim. The
     trigger is intentionally narrow: a short uppercase parenthetical token whose
-    letters match the initials of the immediately preceding capitalized phrase.
+    letters match, or agency-style prefix-match, the initials of the immediately
+    preceding capitalized phrase.
     """
 
     out: list[str] = []
@@ -511,8 +807,17 @@ def _parenthetical_alias_expansion(before: str, abbr: str) -> str:
         return ""
     initials = "".join(token[0] for token in phrase_tokens if token[:1].isupper()).upper()
     normalized_abbr = re.sub(r"[^A-Z0-9]", "", abbr.upper())
-    if not normalized_abbr or initials != normalized_abbr:
+    if not normalized_abbr:
         return ""
+    if initials != normalized_abbr:
+        prefix_match = (
+            len(initials) >= 3
+            and len(normalized_abbr) > len(initials)
+            and len(normalized_abbr) - len(initials) <= 4
+            and normalized_abbr.startswith(initials)
+        )
+        if not prefix_match:
+            return ""
     return " ".join(phrase_tokens)
 
 

@@ -2,11 +2,17 @@
 
 ## What This Document Is
 
-Prethinker compiles natural language documents into governed knowledge bases.
-This document describes the *instrument* - the collection of semantic lenses,
-selector guards, deterministic ledgers, direct query surfaces, and uncertainty
-distinctions that the system uses to read documents from multiple angles and
-decide what can be answered from admitted state.
+Prethinker compiles natural language documents into governed knowledge bases,
+then runs governed QA over the frozen artifacts. This document describes the
+*instrument* - the collection of semantic lenses, selector guards,
+deterministic ledgers, direct query surfaces, and uncertainty distinctions that
+the system uses to read documents from multiple angles and decide what can be
+answered from admitted state.
+
+The load-bearing unit is a governed semantic pass: an LLM proposes structure
+inside deterministic constraints, and deterministic artifacts record what
+happened. Compile passes and QA passes share this shape; they differ in what
+the model is allowed to propose and what the deterministic harness is measuring.
 
 Think of it as the spec sheet for a scientific instrument. A spectrometer has wavelength ranges, resolution limits, and calibration procedures. Prethinker has semantic lenses, selector guards, and an uncertainty vocabulary. Both instruments get sharper through calibration against known samples.
 
@@ -115,6 +121,13 @@ source provenance, and current object state. Different questions need different
 surfaces. The selector chooses without seeing the correct answer; it uses
 structural signals about what kind of evidence each question needs.
 
+The QA stage is also governed rather than deterministic-only: model calls may
+propose query plans or judge answer rows, while deterministic code controls the
+compiled evidence, query execution, adapter policy, write blocking, and row
+accounting. See
+[QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
+for the exact split.
+
 ---
 
 ## Selector Guards
@@ -124,10 +137,9 @@ A **selector guard** is a named rule that prevents the selector from choosing th
 ### Guard Families
 
 Guard-family rollups were useful during compression, but they are no longer the
-active public surface. Current guard accounting belongs in
-[Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md)
-and active research notes. Detailed retired/scar ledgers are generated under
-`tmp` when needed and are kept out of the public docs tree.
+active public surface. Current guard accounting belongs in compact active
+research notes and stamp worksheets. Detailed retired/scar ledgers are generated
+under `tmp` when needed and are kept out of the public docs tree.
 
 | Family | What It Prevents | Example |
 |--------|-----------------|---------|
@@ -176,16 +188,19 @@ The live evidence anchor is the native direct-surface fixed-compile QA restamp:
 
 ```text
 2163 judged rows
-1934 exact / 64 partial / 162 miss
-89.41% exact
+1997 exact / 46 partial / 120 miss
+92.33% exact
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
 ```
 
-The detailed score history lives in
-[Current Harness Instrument](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_HARNESS_INSTRUMENT.md).
-This document keeps the instrument vocabulary, not a rolling results ledger.
+The current measurement note adds transfer context: a four-fixture real-world
+spotcheck at `160 / 0 / 0`, sealed unseen authored transfer at `152 / 1 / 6`,
+and an earlier cold-transfer baseline at `177 / 10 / 53`. Detailed score
+history belongs in Git history, local cold archive, or the current stamp
+worksheet. This document keeps the instrument vocabulary, not a rolling results
+ledger.
 
 Current lessons:
 
@@ -209,8 +224,8 @@ probing, and a tighter contract, not public promotion.
 
 ## Companion Documents
 
-- **[The Twelve Lenses](https://github.com/dr3d/prethinker/blob/main/docs/TWELVE_LENSES_EXPLAINED.md)** - plain-language guide to the reader/control lenses and how they differ.
-- **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - deeper lab calibration notes for the active lens roster, guardrail names, archival row ledger, and uncertainty vocabulary.
+- **[Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)** - current lens vocabulary, calibration doctrine, and transfer discipline.
+- **[QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)** - governed QA pipeline, deterministic boundaries, and query/selector/answer failure facets.
 - **[Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)** - the current fixture/probe methodology for boundary coordinates, resolution ladders, and transfer-safe repair pressure
 - **[Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)** - compact map of current work without worksheet sediment
 
