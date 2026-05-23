@@ -3,11 +3,13 @@
   "dataset_version": "1.0",
   "dataset_id": "sherlock_holmes_pilot_2026_05",
   "created_date": "2026-05-23",
-  "description": "One-document narrative-fiction transfer thermometer for Prethinker using Arthur Conan Doyle's The Red-Headed League.",
-  "purpose": "Test whether audit grammar can extract narrative facts from prose without external ground truth, while respecting dialogue, embedded testimony, aliases, first-person narration, and retrospective deduction.",
+  "description": "One-document narrative-fiction and known-prose containment thermometer for Prethinker using Arthur Conan Doyle's The Red-Headed League.",
+  "purpose": "Test whether audit grammar can extract narrative facts from prose while staying source-bound when the underlying model may already know the famous public-domain story.",
+  "research_lens": "source_bounded_prior_containment",
   "genre": "detective_fiction",
   "public_domain": true,
   "expected_transfer_ceiling": "60-70% exact (per pre-test consultation)",
+  "score_interpretation": "Mechanism probe for narrative reasoning and prior-knowledge containment; not clean unseen transfer evidence.",
   "out_of_scope": [
     "symbolism",
     "unreliable_narration",
@@ -61,6 +63,12 @@
     "extraction_fidelity": "HTML to Markdown while preserving paragraph order, dialogue, punctuation, and italic spans",
     "answer_grounding": "Oracle answers reference in-text spans only; no external verification injected",
     "oracle_format": "JSONL with id, source_id, category, reference_answer, supporting_source_spans, difficulty",
-    "thermometer_scope": "One document only; narrative mechanism probe, not real-world-transfer or native-corpus score contribution"
+    "thermometer_scope": "One document only; narrative mechanism probe, not real-world-transfer or native-corpus score contribution",
+    "prior_containment_questions": [
+      "Does compile import remembered facts that are absent from source.md?",
+      "Does query answer from compiled source evidence rather than remembered plot?",
+      "Does the instrument preserve source-local aliases and fabricated in-story claims?",
+      "Does it respect Watson's narrator limits before Holmes's retrospective explanation?"
+    ]
   }
 }

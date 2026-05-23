@@ -11,6 +11,7 @@
   "author": "Arthur Conan Doyle",
   "source_format": "html_to_markdown",
   "narrator": "Dr. John H. Watson (first person)",
+  "research_lens": "source_bounded_prior_containment",
   "narrative_structure": {
     "linear_timeline": true,
     "unreliable_narrator": false,
@@ -23,6 +24,13 @@
     "First-person narration is Watson's account; Holmes's reasoning is reconstructed through dialogue",
     "Story is fiction; no facts to verify externally - internal consistency is the only ground truth",
     "Some character details (Ezekiah Hopkins, the League's bequest) are themselves fabrications within the story",
-    "Geographical and temporal references are Victorian London; some terms require period context"
+    "Geographical and temporal references are Victorian London; some terms require period context",
+    "The Red-Headed League is a famous public-domain story and may be partly known to the model before source ingestion"
+  ],
+  "prior_containment_risks": [
+    "Importing remembered plot details that are not present in the supplied source excerpt",
+    "Resolving aliases from model memory before the source text establishes the identity link",
+    "Treating fabricated in-story claims as externally true facts",
+    "Answering from Holmes-story prior knowledge instead of compiled source evidence"
   ]
 }

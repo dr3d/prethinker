@@ -1,10 +1,10 @@
 # Sherlock Holmes Thermometer Pilot 2026-05
 
 This is a one-document narrative-fiction transfer test for Prethinker. It lives
-under `datasets/narrative_transfer` because it is a narrative reasoning probe,
-not real-world transfer evidence. It pressures audit grammar on fiction, where
-there is no external ground truth and internal textual consistency is the only
-answer authority.
+under `datasets/narrative_transfer` because it is a narrative reasoning and
+known-prose containment probe, not real-world transfer evidence. It pressures
+audit grammar on fiction, where there is no external ground truth and internal
+textual consistency is the only answer authority.
 
 The pilot contains one document and 25 QA items drawn from Arthur Conan Doyle's "The Red-Headed League" in *The Adventures of Sherlock Holmes*.
 
@@ -12,11 +12,28 @@ The pilot contains one document and 25 QA items drawn from Arthur Conan Doyle's 
 
 "The Red-Headed League" is linear, deterministic, and deduction-forward. It contains explicit testimony, aliases, stated rules, a revealed causal mechanism, and a first-person narrator whose knowledge is bounded by observation and later explanation. That makes it a useful first fiction thermometer before trying harder literary structures.
 
+Because this is a famous public-domain story, scores should not be treated as
+clean unseen evidence. That is part of the point: the useful question is whether
+Prethinker remains source-bound when the underlying model may already know the
+story.
+
 Expected transfer ceiling for this pilot is 60-70% exact, per pre-test
 consultation. This expected ceiling is not a target score; it is a reminder
 that prose fiction applies different pressure than regulatory or investigative
-documents. Because this is a famous public-domain story, scores should not be
-treated as clean unseen evidence.
+documents.
+
+## Prior-Containment Lens
+
+This fixture should be read as a source-bounded prior-contamination probe:
+
+- Does compile import remembered Sherlock facts that are not in `source.md`?
+- Does it preserve source-local aliases, such as Duncan Ross / William Morris
+  and Vincent Spaulding / John Clay, without collapsing them too early?
+- Does it distinguish the fabricated Red-Headed League backstory from facts
+  established by the story world?
+- Does it respect Watson's limited first-person viewpoint before Holmes's later
+  explanation?
+- Does it answer from compiled source evidence rather than from remembered plot?
 
 ## What It Tests
 
@@ -27,6 +44,7 @@ treated as clean unseen evidence.
 - Stated-rule handling inside a fictional employment scheme
 - Counting and quantity handling without external verification
 - Source limitation awareness for first-person narration
+- Prior-knowledge containment on a well-known public-domain text
 
 ## What It Does Not Test
 
