@@ -101,6 +101,7 @@ probe verdict after repair: exact
 compatibility rows: 0
 runtime load errors: 0
 QA write proposal rows: 0
+artifact archive: C:\prethinker_tmp_archive\ntsb_two_doc_range_recovery_support_20260523
 ```
 
 Interpretation:
@@ -546,3 +547,33 @@ Read: this is exactly the kind of unlike-document transfer signal we wanted.
 The repair is not NTSB-specific; it strengthens messy-document duration
 questions where the compile surface preserves source rows but not every
 possible event relation as a typed durable predicate.
+
+### Follow-Up Blocker Clearance
+
+Cleared both `ntsb_002` partials with two transfer-safe query-surface repairs:
+
+- q019: added query-only source-record numeric range support for range/comparison
+  questions. It extracts compact source-text ranges such as `85_100_mph`,
+  `74_87_knots`, `48_62_knots`, and `22_27_miles` from retrieved source rows
+  and presents them as deterministic evidence rows.
+- q024: added a narrow source-text vocabulary bridge from `salvage` language to
+  `recovery` / `recovery_activities`, which lets the source-record route reach
+  the answer-bearing row without inventing an evidence-completeness predicate.
+
+Final replay:
+
+```text
+50 judged rows
+50 exact / 0 partial / 0 miss
+100.0% exact
+ntsb_001: 25 / 0 / 0
+ntsb_002: 25 / 0 / 0
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+Read: this should not be turned into a broad claim that Prethinker is now
+"100%" on messy documents. It is a tiny pilot. The useful claim is narrower and
+stronger: two unlike-document blocker shapes were found, repaired with general
+query-only evidence support, and recovered without compatibility pressure.

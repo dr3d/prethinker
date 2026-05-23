@@ -4,6 +4,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_text_question_needles,
     _source_text_question_token_hint_queries,
     _source_record_clock_duration_companion,
+    _source_record_numeric_range_companion,
     _source_coordinate_hint_queries,
     _source_attribution_hint_queries,
 )
@@ -145,6 +146,15 @@ def test_source_text_needles_include_common_travel_event_inflections() -> None:
     assert needles.index("accident") < 10
 
 
+def test_source_text_needles_bridge_salvage_to_recovery_language() -> None:
+    needles = _source_text_question_needles(
+        "What impact did salvage operations have on the physical evidence examination?"
+    )
+
+    assert "recovery" in needles
+    assert "recovery_activities" in needles
+
+
 def test_temporal_source_text_numeric_hints_cover_both_duration_anchors() -> None:
     queries = _source_text_question_token_hint_queries(
         utterance="How many minutes elapsed between departure from Seattle and the accident?",
@@ -194,3 +204,33 @@ def test_source_record_clock_duration_companion_pairs_endpoint_clock_tokens() ->
     row = companion["result"]["rows"][0]
     assert row["DurationMinutes"] == "172"
     assert row["Duration"] == "2 hours 52 minutes"
+
+
+def test_source_record_numeric_range_companion_extracts_range_support() -> None:
+    results = [
+        {
+            "query": "source_record_text_atom(SourceRow, TextAtom).",
+            "result": {
+                "status": "success",
+                "rows": [
+                    {
+                        "SourceRow": "src_line_0001",
+                        "TextAtom": (
+                            "captain_estimated_winds_were_about_85_100_mph_about_74_87_knots_"
+                            "and_the_closest_location_reported_winds_gusting_up_to_48_62_knots_"
+                            "22_27_miles_from_the_site"
+                        ),
+                    }
+                ],
+            },
+        }
+    ]
+
+    companion = _source_record_numeric_range_companion(
+        results,
+        utterance="What were the respective wind speed ranges reported by the crew and station?",
+    )
+
+    assert companion is not None
+    ranges = {row["Range"] for row in companion["result"]["rows"]}
+    assert {"85-100 mph", "74-87 knots", "48-62 knots", "22-27 miles"} <= ranges

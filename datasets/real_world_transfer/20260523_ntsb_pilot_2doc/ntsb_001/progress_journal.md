@@ -18,3 +18,6 @@ rows contained both clock endpoints (1328 and 1620), but the KB did not have a
 durable accident event fact for the endpoint. After adding general
 source-record clock-duration support, replay QA was 25 exact / 0 partial / 0
 miss with 0 compatibility rows, runtime load errors, or write proposal rows.
+
+The follow-up full two-document replay after range/recovery query-surface
+repairs stayed clean for this fixture: 25 exact / 0 partial / 0 miss.

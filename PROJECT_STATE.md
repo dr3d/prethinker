@@ -63,7 +63,7 @@ Current transfer anchors:
 ```text
 real-world external four-fixture spotcheck: 160 / 0 / 0, 4 / 4 compile gates clean
 sealed unseen authored transfer: 152 / 1 / 6 over 160 rows, 95.0% exact
-NTSB two-document pilot transfer: 48 / 2 / 0 over 50 rows, 96.0% exact
+NTSB two-document pilot transfer: 50 / 0 / 0 over 50 rows, 100.0% exact
 earlier cold transfer baseline: 177 / 10 / 53 over 240 rows, 73.75% exact
 ```
 
@@ -78,7 +78,7 @@ should remain distinct from externally sourced real-world documents.
 The current full-suite verification is:
 
 ```text
-1625 passed, 2 subtests passed
+1627 passed, 2 subtests passed
 ```
 
 These numbers are the current public measurement anchor, not a permanent

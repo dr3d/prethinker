@@ -26,3 +26,11 @@ estimate as a distinct source. q024 now has source support for salvage dates
 and recovery-activity damage, but the question asks about physical-evidence
 completeness, which still wants an explicit evidence-integrity/source-surface
 relation rather than a loose causal inference.
+
+## 2026-05-23 Partial Clearance
+
+Follow-up repairs cleared both remaining partials. q019 recovered after adding
+query-only source-record numeric range support for range/comparison questions.
+q024 recovered after adding a narrow source-text vocabulary bridge from salvage
+language to recovery-activity language. Replay QA was 25 exact / 0 partial / 0
+miss with 0 compatibility rows, runtime load errors, or write proposal rows.

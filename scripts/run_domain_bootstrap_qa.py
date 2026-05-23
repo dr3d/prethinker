@@ -1892,6 +1892,9 @@ def run_one_question(
     relative_next_day_support = _source_record_relative_next_day_companion(runtime, utterance=utterance)
     if relative_next_day_support:
         query_results.append(relative_next_day_support)
+    source_numeric_ranges = _source_record_numeric_range_companion(query_results, utterance=utterance)
+    if source_numeric_ranges:
+        query_results.append(source_numeric_ranges)
     query_results = _dedupe_helper_query_results(query_results)
     query_results = _limit_helper_query_results(
         query_results,
@@ -2254,6 +2257,8 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     lowered_raw = raw.casefold()
     if "filing" in tokens:
         derived_needles.append("filed")
+    if "salvage" in tokens or "salvaged" in tokens:
+        derived_needles.extend(["recovery", "recovery_activities"])
     if _is_temporal_source_text_question(raw):
         temporal_event_aliases = {
             "arrival": ["arrived"],
@@ -14085,6 +14090,180 @@ def _display_minutes_duration(value: int) -> str:
     if not parts:
         parts.append("0 minutes")
     return " ".join(parts)
+
+
+def _source_record_numeric_range_companion(
+    results: list[dict[str, Any]],
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    if not _asks_source_record_numeric_range(utterance):
+        return None
+    query_tokens = {
+        token
+        for token in _query_atom_tokens(utterance)
+        if len(token) >= 3 and token not in GENERIC_QUERY_PLACEHOLDERS
+    }
+    source_rows = _source_text_rows_from_query_results(results)
+    if not source_rows:
+        return None
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for source_row, text_atom in source_rows:
+        text = str(text_atom or "")
+        row_tokens = set(_query_atom_tokens(text))
+        overlap = query_tokens & row_tokens
+        direct_ranges = _numeric_unit_ranges_from_text_atom(text)
+        if not direct_ranges:
+            continue
+        if query_tokens and not overlap and not {"range", "ranges", "different", "respective"} & row_tokens:
+            continue
+        for range_item in direct_ranges:
+            key = (
+                source_row,
+                range_item["Unit"],
+                range_item["Start"],
+                range_item["End"],
+                range_item["Surface"],
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_numeric_range",
+                    "SourceRow": source_row,
+                    "Unit": range_item["Unit"],
+                    "Start": range_item["Start"],
+                    "End": range_item["End"],
+                    "Range": range_item["Range"],
+                    "Surface": range_item["Surface"],
+                    "QuestionOverlap": ",".join(sorted(overlap)),
+                    "SourceTextAtom": text,
+                }
+            )
+    if not support_rows:
+        return None
+
+    def sort_key(row: dict[str, str]) -> tuple[int, int, str, str]:
+        overlap_count = len([token for token in row.get("QuestionOverlap", "").split(",") if token])
+        unit_bonus = -2 if row.get("Unit") in {"knots", "mph", "miles"} else 0
+        return (-overlap_count, unit_bonus, row.get("SourceRow", ""), row.get("Unit", ""))
+
+    support_rows.sort(key=sort_key)
+    support_rows = support_rows[:24]
+    return {
+        "query": "source_record_numeric_range_support(SourceRow, Unit, Start, End, Range, Surface).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_numeric_range_support",
+            "prolog_query": "source_record_numeric_range_support(SourceRow, Unit, Start, End, Range, Surface).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only range support extracted compact numeric-unit ranges from source-record "
+                    "text rows already retrieved for a range/comparison question; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [str(item.get("query", "")) for item in results if isinstance(item, dict)],
+    }
+
+
+def _asks_source_record_numeric_range(utterance: str) -> bool:
+    text = str(utterance or "").casefold()
+    return bool(
+        re.search(r"\b(?:range|ranges|between|respectively|respective|different|compare|compared)\b", text)
+        and re.search(r"\b(?:what|which|how|reported|estimated|estimate|value|speed|distance|amount|count)\b", text)
+    )
+
+
+def _source_text_rows_from_query_results(results: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for item in results:
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            source_row = str(row.get("SourceRow", "") or row.get("Line", "")).strip()
+            text_atom = str(row.get("TextAtom", "") or row.get("SourceRecordTextAtom", "")).strip()
+            if not source_row:
+                source_query = str(row.get("source_query", ""))
+                match = re.search(r"\bsource_record_text_atom\(([^,\s]+),", source_query)
+                if match:
+                    source_row = match.group(1)
+            if not source_row or not text_atom:
+                continue
+            key = (source_row, text_atom)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(key)
+    return out
+
+
+def _numeric_unit_ranges_from_text_atom(text_atom: str) -> list[dict[str, str]]:
+    units = (
+        "knots",
+        "kts",
+        "mph",
+        "miles",
+        "mi",
+        "feet",
+        "ft",
+        "hours",
+        "hour",
+        "minutes",
+        "minute",
+        "days",
+        "day",
+        "percent",
+    )
+    unit_pattern = "|".join(re.escape(unit) for unit in units)
+    out: list[dict[str, str]] = []
+    for match in re.finditer(rf"(?<!\d)(?P<start>\d+)_(?P<end>\d+)_(?P<unit>{unit_pattern})(?=$|_)", str(text_atom or "")):
+        start_text = match.group("start")
+        end_text = match.group("end")
+        if len(end_text) < 2 or start_text == "0":
+            continue
+        start = int(start_text)
+        end = int(end_text)
+        if end <= start:
+            continue
+        unit = _canonical_numeric_range_unit(match.group("unit"))
+        out.append(
+            {
+                "Start": str(start),
+                "End": str(end),
+                "Unit": unit,
+                "Range": f"{start}-{end} {unit}",
+                "Surface": match.group(0),
+            }
+        )
+    return out
+
+
+def _canonical_numeric_range_unit(unit: str) -> str:
+    text = str(unit or "").casefold()
+    return {
+        "kts": "knots",
+        "mi": "miles",
+        "ft": "feet",
+        "hour": "hours",
+        "minute": "minutes",
+        "day": "days",
+    }.get(text, text)
 
 
 def _defined_interval_duration_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:

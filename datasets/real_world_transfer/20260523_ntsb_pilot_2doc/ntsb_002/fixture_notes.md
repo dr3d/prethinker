@@ -17,3 +17,10 @@ The canonical `qa.md` was converted from incoming `q001:` markers to numbered ma
 ## 2026-05-23 q024 Oracle Wording
 
 Adjusted the q024 reference answer to stay inside source text. The incoming wording said recovery damage complicated impact-damage analysis; the source supports the narrower statement that post-casualty investigators found fractures and indentations that appeared to be from recovery activities.
+
+## 2026-05-23 Spotcheck Lesson
+
+q019 pressured range aggregation across source rows and q024 pressured
+synonymy between salvage and recovery-activity language. Both repairs stayed
+query-only and should not introduce any NTSB-specific fixture vocabulary into
+the harness.
