@@ -318,6 +318,38 @@ rows back on. The fix is mechanism-level: quantity questions now probe both
 question-order and source-normalized-order compounds when looking up admitted
 `source_record_text_atom/2` rows.
 
+## Status-On-Date Interval Hybrid Lane
+
+The next hybrid row showed an interior-date status question where the compiled
+KB had transition anchors before and after the requested date, but the query
+surface used a `*_status_on_date/3` predicate name. Existing interval support
+already handled `*_status_at_date/3`, generic `*_status/3`, and
+`*_status_at/3`, but not the `on_date` naming variant.
+
+Repair:
+
+- Added `*_status_on_date`, `*_state_on_date`, and `*_condition_on_date`
+  variants to the active interval-support companion.
+- Preserved the entity/date/status argument order used by `on_date` predicates.
+- Kept the output as query-only interval support over admitted transition
+  anchors; no durable status fact is written.
+
+Verification:
+
+```text
+single-row frozen native hybrid replay: 1 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+full pytest: 1613 passed
+artifact archive: C:\prethinker_tmp_archive\product_95_status_on_date_interval_20260523
+```
+
+Read: this recovered an interval-style native hybrid miss by broadening the
+generic naming grammar for active temporal status support. It should transfer
+to status/state/condition ledgers that express point observations as
+`on_date` rows while still requiring admitted before/after anchors.
+
 ## Next Moves
 
 1. Continue hybrid-join triage on frozen native misses, preferring active

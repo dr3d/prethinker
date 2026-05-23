@@ -6480,6 +6480,34 @@ def test_status_at_date_query_derives_interval_support_from_transition_anchors()
     assert result_row["ObservedEntity"] == "lot_5b"
 
 
+def test_status_on_date_query_derives_interval_support_from_transition_anchors() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "asset_status_on_date(asset_42, 2026_01_03, baseline_hold).",
+        "asset_status_on_date(asset_42, 2026_01_10, escalated_hold).",
+        "asset_status_on_date(asset_42, 2026_01_22, released).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["asset_status_on_date(asset_42, 2026_01_15, Status)."],
+    )
+    companion = [
+        row
+        for row in rows
+        if row.get("query")
+        == "asset_status_on_date_interval_support(QueryEntity, RequestedDate, Status, EffectiveFrom, EffectiveUntil)."
+    ]
+
+    assert companion
+    result_row = companion[0]["result"]["rows"][0]
+    assert result_row["Status"] == "escalated_hold"
+    assert result_row["EffectiveFrom"] == "2026_01_10"
+    assert result_row["EffectiveUntil"] == "2026_01_22"
+    assert result_row["ObservedEntity"] == "asset_42"
+
+
 def test_status_at_query_derives_interval_support_from_transition_anchors() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
