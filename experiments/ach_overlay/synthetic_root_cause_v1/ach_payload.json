@@ -1,0 +1,158 @@
+{
+  "schema_version": "ach_overlay_v1",
+  "id": "synthetic_root_cause_v1",
+  "name": "Synthetic Root Cause ACH Probe",
+  "hypotheses": [
+    {
+      "id": "h_procedure_drift",
+      "label": "Procedure drift caused the incident"
+    },
+    {
+      "id": "h_equipment_failure",
+      "label": "Equipment failure caused the incident"
+    },
+    {
+      "id": "h_external_interference",
+      "label": "External interference caused the incident"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e_recent_bypass",
+      "label": "Two operators documented bypassing the standard handoff checklist",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_fact",
+        "predicate": "source_record_field"
+      }
+    },
+    {
+      "id": "e_sensor_nominal",
+      "label": "Sensor diagnostics remained nominal during the event window",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_fact",
+        "predicate": "status_at_time"
+      }
+    },
+    {
+      "id": "e_access_clean",
+      "label": "Access logs show only scheduled staff during the event window",
+      "diagnosticity": "medium",
+      "source": {
+        "kind": "admitted_fact",
+        "predicate": "source_record_field"
+      }
+    },
+    {
+      "id": "e_prior_warning",
+      "label": "A prior audit warned that the handoff checklist was inconsistently used",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_fact",
+        "predicate": "source_attributed_claim"
+      }
+    },
+    {
+      "id": "e_replaced_part",
+      "label": "The affected component was replaced two weeks before the incident",
+      "diagnosticity": "low",
+      "source": {
+        "kind": "admitted_fact",
+        "predicate": "event_occurred"
+      }
+    }
+  ],
+  "judgments": [
+    {
+      "evidence_id": "e_recent_bypass",
+      "hypothesis_id": "h_procedure_drift",
+      "assessment": "consistent",
+      "rationale": "Recent checklist bypasses are directly compatible with procedure drift."
+    },
+    {
+      "evidence_id": "e_recent_bypass",
+      "hypothesis_id": "h_equipment_failure",
+      "assessment": "neutral",
+      "rationale": "Checklist bypasses do not directly establish or disconfirm equipment failure."
+    },
+    {
+      "evidence_id": "e_recent_bypass",
+      "hypothesis_id": "h_external_interference",
+      "assessment": "neutral",
+      "rationale": "The bypasses do not by themselves address external interference."
+    },
+    {
+      "evidence_id": "e_sensor_nominal",
+      "hypothesis_id": "h_procedure_drift",
+      "assessment": "consistent",
+      "rationale": "Nominal sensors are compatible with a procedural cause."
+    },
+    {
+      "evidence_id": "e_sensor_nominal",
+      "hypothesis_id": "h_equipment_failure",
+      "assessment": "inconsistent",
+      "rationale": "Nominal diagnostics strongly disconfirm a sensor or component failure explanation."
+    },
+    {
+      "evidence_id": "e_sensor_nominal",
+      "hypothesis_id": "h_external_interference",
+      "assessment": "neutral",
+      "rationale": "Nominal sensors do not exclude every external-interference path."
+    },
+    {
+      "evidence_id": "e_access_clean",
+      "hypothesis_id": "h_procedure_drift",
+      "assessment": "consistent",
+      "rationale": "Clean access logs fit an internal process explanation."
+    },
+    {
+      "evidence_id": "e_access_clean",
+      "hypothesis_id": "h_equipment_failure",
+      "assessment": "neutral",
+      "rationale": "Access logs do not decide equipment condition."
+    },
+    {
+      "evidence_id": "e_access_clean",
+      "hypothesis_id": "h_external_interference",
+      "assessment": "inconsistent",
+      "rationale": "Clean access logs disconfirm physical external interference in this scenario."
+    },
+    {
+      "evidence_id": "e_prior_warning",
+      "hypothesis_id": "h_procedure_drift",
+      "assessment": "consistent",
+      "rationale": "The prior audit gives independent support for a procedure-drift pattern."
+    },
+    {
+      "evidence_id": "e_prior_warning",
+      "hypothesis_id": "h_equipment_failure",
+      "assessment": "neutral",
+      "rationale": "The audit warning does not address component condition."
+    },
+    {
+      "evidence_id": "e_prior_warning",
+      "hypothesis_id": "h_external_interference",
+      "assessment": "neutral",
+      "rationale": "The warning does not address external access or interference."
+    },
+    {
+      "evidence_id": "e_replaced_part",
+      "hypothesis_id": "h_procedure_drift",
+      "assessment": "neutral",
+      "rationale": "The replacement is background context for the procedure question."
+    },
+    {
+      "evidence_id": "e_replaced_part",
+      "hypothesis_id": "h_equipment_failure",
+      "assessment": "consistent",
+      "rationale": "A recently replaced component is compatible with a component-failure hypothesis."
+    },
+    {
+      "evidence_id": "e_replaced_part",
+      "hypothesis_id": "h_external_interference",
+      "assessment": "not_applicable",
+      "rationale": "The replacement does not bear on external interference."
+    }
+  ]
+}

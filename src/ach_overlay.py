@@ -1,0 +1,299 @@
+"""Deterministic Analysis of Competing Hypotheses overlay.
+
+The overlay scores an ACH matrix that has already been populated with
+evidence-vs-hypothesis judgments. It does not call an LLM, read source text, or
+write KB state; it only enforces matrix completeness and ranks hypotheses by
+least disconfirming evidence.
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from typing import Any
+
+
+VALID_ASSESSMENTS = {"consistent", "inconsistent", "neutral", "not_applicable"}
+DEFAULT_DIAGNOSTIC_WEIGHTS = {
+    "low": 1,
+    "medium": 2,
+    "high": 3,
+    "critical": 5,
+}
+
+
+def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
+    """Return a deterministic ACH report for a populated matrix payload."""
+
+    hypotheses = _indexed_items(payload.get("hypotheses", []), "hypotheses")
+    evidence = _indexed_items(payload.get("evidence", []), "evidence")
+    hypothesis_ids = list(hypotheses)
+    evidence_ids = list(evidence)
+
+    matrix: dict[str, dict[str, dict[str, Any]]] = {
+        evidence_id: {} for evidence_id in evidence_ids
+    }
+    warnings: list[dict[str, Any]] = []
+    seen_judgments: set[tuple[str, str]] = set()
+
+    for judgment in payload.get("judgments", []):
+        if not isinstance(judgment, dict):
+            warnings.append({"kind": "invalid_judgment", "judgment": judgment})
+            continue
+        hypothesis_id = str(judgment.get("hypothesis_id", "")).strip()
+        evidence_id = str(judgment.get("evidence_id", "")).strip()
+        if hypothesis_id not in hypotheses or evidence_id not in evidence:
+            warnings.append(
+                {
+                    "kind": "unknown_judgment_reference",
+                    "hypothesis_id": hypothesis_id,
+                    "evidence_id": evidence_id,
+                }
+            )
+            continue
+        key = (evidence_id, hypothesis_id)
+        if key in seen_judgments:
+            warnings.append(
+                {
+                    "kind": "duplicate_judgment",
+                    "hypothesis_id": hypothesis_id,
+                    "evidence_id": evidence_id,
+                }
+            )
+            continue
+        seen_judgments.add(key)
+        assessment = _assessment(judgment.get("assessment"))
+        matrix[evidence_id][hypothesis_id] = {
+            "assessment": assessment,
+            "weight": _judgment_weight(judgment, evidence[evidence_id]),
+            "rationale": str(judgment.get("rationale", "")).strip(),
+        }
+
+    missing_judgments: list[dict[str, str]] = []
+    for evidence_id in evidence_ids:
+        for hypothesis_id in hypothesis_ids:
+            if hypothesis_id in matrix[evidence_id]:
+                continue
+            missing_judgments.append({"evidence_id": evidence_id, "hypothesis_id": hypothesis_id})
+            matrix[evidence_id][hypothesis_id] = {
+                "assessment": "missing",
+                "weight": _evidence_weight(evidence[evidence_id]),
+                "rationale": "",
+            }
+    if missing_judgments:
+        warnings.append({"kind": "missing_judgments", "items": missing_judgments})
+
+    hypothesis_scores = _score_hypotheses(
+        hypotheses=hypotheses,
+        evidence=evidence,
+        matrix=matrix,
+    )
+    sensitivity = _sensitivity_analysis(
+        hypotheses=hypotheses,
+        evidence=evidence,
+        matrix=matrix,
+        baseline_scores=hypothesis_scores,
+    )
+
+    return {
+        "schema_version": "ach_overlay_report_v1",
+        "hypothesis_count": len(hypotheses),
+        "evidence_count": len(evidence),
+        "judgment_count": len(seen_judgments),
+        "matrix_complete": not missing_judgments,
+        "warnings": warnings,
+        "hypotheses": list(hypotheses.values()),
+        "evidence": list(evidence.values()),
+        "matrix": matrix,
+        "hypothesis_scores": hypothesis_scores,
+        "diagnostic_evidence": _diagnostic_evidence(evidence=evidence, matrix=matrix),
+        "sensitivity": sensitivity,
+        "surviving_hypotheses": [
+            item
+            for item in hypothesis_scores
+            if item["rank"] == 1 and item["missing_judgment_count"] == 0
+        ],
+    }
+
+
+def _indexed_items(items: Any, field_name: str) -> dict[str, dict[str, Any]]:
+    if not isinstance(items, list) or not items:
+        raise ValueError(f"{field_name} must be a non-empty list")
+    indexed: dict[str, dict[str, Any]] = {}
+    for item in items:
+        if not isinstance(item, dict):
+            raise ValueError(f"{field_name} entries must be objects")
+        item_id = str(item.get("id", "")).strip()
+        if not item_id:
+            raise ValueError(f"{field_name} entries require id")
+        if item_id in indexed:
+            raise ValueError(f"{field_name} contains duplicate id: {item_id}")
+        indexed[item_id] = {**item, "id": item_id}
+    return indexed
+
+
+def _assessment(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    aliases = {
+        "c": "consistent",
+        "+": "consistent",
+        "i": "inconsistent",
+        "-": "inconsistent",
+        "n/a": "not_applicable",
+        "na": "not_applicable",
+        "not applicable": "not_applicable",
+        "not-applicable": "not_applicable",
+    }
+    text = aliases.get(text, text)
+    if text not in VALID_ASSESSMENTS:
+        raise ValueError(f"invalid ACH assessment: {value!r}")
+    return text
+
+
+def _judgment_weight(judgment: dict[str, Any], evidence_item: dict[str, Any]) -> int:
+    if "weight" in judgment:
+        return _positive_int(judgment["weight"], field_name="judgment.weight")
+    return _evidence_weight(evidence_item)
+
+
+def _evidence_weight(evidence_item: dict[str, Any]) -> int:
+    if "weight" in evidence_item:
+        return _positive_int(evidence_item["weight"], field_name="evidence.weight")
+    diagnosticity = str(evidence_item.get("diagnosticity", "medium")).strip().casefold()
+    return DEFAULT_DIAGNOSTIC_WEIGHTS.get(diagnosticity, DEFAULT_DIAGNOSTIC_WEIGHTS["medium"])
+
+
+def _positive_int(value: Any, *, field_name: str) -> int:
+    try:
+        out = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a positive integer") from exc
+    if out <= 0:
+        raise ValueError(f"{field_name} must be a positive integer")
+    return out
+
+
+def _score_hypotheses(
+    *,
+    hypotheses: dict[str, dict[str, Any]],
+    evidence: dict[str, dict[str, Any]],
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    omitted_evidence_id: str | None = None,
+) -> list[dict[str, Any]]:
+    counters: dict[str, dict[str, int]] = {
+        hypothesis_id: defaultdict(int) for hypothesis_id in hypotheses
+    }
+    for evidence_id in evidence:
+        if evidence_id == omitted_evidence_id:
+            continue
+        for hypothesis_id in hypotheses:
+            judgment = matrix[evidence_id][hypothesis_id]
+            assessment = judgment["assessment"]
+            weight = int(judgment["weight"])
+            if assessment == "inconsistent":
+                counters[hypothesis_id]["inconsistency_weight"] += weight
+                counters[hypothesis_id]["inconsistent_count"] += 1
+            elif assessment == "consistent":
+                counters[hypothesis_id]["consistency_weight"] += weight
+                counters[hypothesis_id]["consistent_count"] += 1
+            elif assessment == "neutral":
+                counters[hypothesis_id]["neutral_count"] += 1
+            elif assessment == "not_applicable":
+                counters[hypothesis_id]["not_applicable_count"] += 1
+            elif assessment == "missing":
+                counters[hypothesis_id]["missing_judgment_count"] += 1
+
+    scored = []
+    for hypothesis_id, hypothesis in hypotheses.items():
+        item = {
+            "hypothesis_id": hypothesis_id,
+            "label": str(hypothesis.get("label", hypothesis_id)),
+            "inconsistency_weight": int(counters[hypothesis_id]["inconsistency_weight"]),
+            "inconsistent_count": int(counters[hypothesis_id]["inconsistent_count"]),
+            "consistency_weight": int(counters[hypothesis_id]["consistency_weight"]),
+            "consistent_count": int(counters[hypothesis_id]["consistent_count"]),
+            "neutral_count": int(counters[hypothesis_id]["neutral_count"]),
+            "not_applicable_count": int(counters[hypothesis_id]["not_applicable_count"]),
+            "missing_judgment_count": int(counters[hypothesis_id]["missing_judgment_count"]),
+        }
+        scored.append(item)
+
+    scored.sort(
+        key=lambda item: (
+            item["inconsistency_weight"],
+            item["missing_judgment_count"],
+            -item["consistency_weight"],
+            item["hypothesis_id"],
+        )
+    )
+    previous_key: tuple[int, int, int] | None = None
+    rank = 0
+    for index, item in enumerate(scored, start=1):
+        key = (
+            item["inconsistency_weight"],
+            item["missing_judgment_count"],
+            -item["consistency_weight"],
+        )
+        if key != previous_key:
+            rank = index
+            previous_key = key
+        item["rank"] = rank
+    return scored
+
+
+def _diagnostic_evidence(
+    *,
+    evidence: dict[str, dict[str, Any]],
+    matrix: dict[str, dict[str, dict[str, Any]]],
+) -> list[dict[str, Any]]:
+    rows = []
+    for evidence_id, evidence_item in evidence.items():
+        assessments = [judgment["assessment"] for judgment in matrix[evidence_id].values()]
+        inconsistency_count = assessments.count("inconsistent")
+        distinct = {item for item in assessments if item not in {"missing", "not_applicable"}}
+        weight = _evidence_weight(evidence_item)
+        rows.append(
+            {
+                "evidence_id": evidence_id,
+                "label": str(evidence_item.get("label", evidence_id)),
+                "weight": weight,
+                "inconsistent_hypothesis_count": inconsistency_count,
+                "assessment_spread": sorted(distinct),
+                "diagnostic_score": weight * (inconsistency_count + max(0, len(distinct) - 1)),
+            }
+        )
+    rows.sort(key=lambda item: (-item["diagnostic_score"], item["evidence_id"]))
+    return rows
+
+
+def _sensitivity_analysis(
+    *,
+    hypotheses: dict[str, dict[str, Any]],
+    evidence: dict[str, dict[str, Any]],
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    baseline_scores: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    baseline_top = {
+        item["hypothesis_id"]
+        for item in baseline_scores
+        if item["rank"] == 1
+    }
+    sensitivity_rows = []
+    for evidence_id in evidence:
+        rescored = _score_hypotheses(
+            hypotheses=hypotheses,
+            evidence=evidence,
+            matrix=matrix,
+            omitted_evidence_id=evidence_id,
+        )
+        new_top = {item["hypothesis_id"] for item in rescored if item["rank"] == 1}
+        if new_top != baseline_top:
+            sensitivity_rows.append(
+                {
+                    "evidence_id": evidence_id,
+                    "label": str(evidence[evidence_id].get("label", evidence_id)),
+                    "baseline_top": sorted(baseline_top),
+                    "top_without_evidence": sorted(new_top),
+                    "reason": "top_hypothesis_set_changes_if_evidence_removed",
+                }
+            )
+    return sensitivity_rows
