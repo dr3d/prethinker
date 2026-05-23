@@ -30,13 +30,14 @@ dataset label. Promote only when the principle survives unlike probes.
 
 | Priority | Lane | Question | Current Surface |
 | --- | --- | --- | --- |
-| 1 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces instead of query-time compatibility bridges? | `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`, active worksheets |
-| 2 | Instrument stamp | What does the current direct-surface instrument score across internal and external corpora when measured as a frozen system? | Current stamp worksheet; scorecards under `tmp` during active runs |
-| 3 | Lens vocabulary audit | Do lens terms fire on unlike documents because they are structural, or because they still carry corpus-shaped trigger conditions? | `docs/SEMANTIC_LENS_ROSTER.md`, targeted tests |
-| 4 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `src/transition_delta_normalizer.py`, focused tests |
-| 5 | Dataset transfer | How far does the instrument transfer across RACE, SQuAD, contract, privacy-policy, and other external QA corpora without dataset-specific tuning? | current scorecards and compact active notes |
-| 6 | Language transfer | Which parts of the harness assume English surface forms, date formats, role verbs, or section conventions? | `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, focused language probes |
-| 7 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete plans, generated artifact strata, or misleading history? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
+| 1 | Product 95 repair lane | Can the native score move toward 95% through mechanism repairs that also survive transfer, rather than fixture-specific answer chasing? | `docs/PRODUCT_95_WORKSHEET.md`, focused row replays |
+| 2 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces instead of query-time compatibility bridges? | `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`, active worksheets |
+| 3 | Instrument stamp | What does the current direct-surface instrument score across internal and external corpora when measured as a frozen system? | Current stamp worksheet; scorecards under `tmp` during active runs |
+| 4 | Lens vocabulary audit | Do lens terms fire on unlike documents because they are structural, or because they still carry corpus-shaped trigger conditions? | `docs/SEMANTIC_LENS_ROSTER.md`, targeted tests |
+| 5 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `src/transition_delta_normalizer.py`, focused tests |
+| 6 | Dataset transfer | How far does the instrument transfer across RACE, SQuAD, contract, privacy-policy, and other external QA corpora without dataset-specific tuning? | current scorecards and compact active notes |
+| 7 | Language transfer | Which parts of the harness assume English surface forms, date formats, role verbs, or section conventions? | `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, focused language probes |
+| 8 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete plans, generated artifact strata, or misleading history? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
 
 ## Current Architecture Pressure
 

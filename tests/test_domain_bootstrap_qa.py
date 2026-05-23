@@ -720,6 +720,124 @@ def test_evidence_bundle_plan_repairs_multiple_source_text_memberchk_filters() -
     ]
 
 
+def test_evidence_bundle_plan_repairs_source_row_context_token_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_row_context(src_1, applicant_narrative, "
+            "we_believe_project_is_consistent_with_housing_element, section_a)."
+        ),
+        (
+            "source_record_row_context(src_2, opposition_letter, "
+            "neighbor_disputes_general_plan_consistency, section_b)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_row_context/4"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "row_context_text_filter",
+                    "purpose": "Find row-context text containing the requested source phrase.",
+                    "query_templates": [
+                        "source_record_row_context(Line, Label, Text, Section), "
+                        "memberchk(consistent_with_housing_element, Text_tokens)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "single_goal_post_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {
+            "Label": "applicant_narrative",
+            "Line": "src_1",
+            "Section": "section_a",
+            "Text": "we_believe_project_is_consistent_with_housing_element",
+        }
+    ]
+
+
+def test_evidence_bundle_plan_repairs_conjunctive_source_text_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_attributed_claim(claim_a, src_1, fdr_hold, context_a).",
+        "source_attributed_claim(claim_b, src_2, receipt_notice, context_b).",
+        "source_record_text_atom(src_1, fdr_hold_was_released_after_review).",
+        "source_record_text_atom(src_2, biogenix_received_the_order_on_october_23).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_attributed_claim/4", "source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "claim_source_text_filter",
+                    "purpose": "Find source-attributed claims whose source text contains a requested token.",
+                    "query_templates": [
+                        "source_attributed_claim(Claim, Source, Detail, Context), "
+                        "source_record_text_atom(Source, Text), "
+                        "memberchk('biogenix', Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "single_goal_post_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {
+            "Claim": "claim_b",
+            "Context": "context_b",
+            "Detail": "receipt_notice",
+            "Source": "src_2",
+            "Text": "biogenix_received_the_order_on_october_23",
+        }
+    ]
+
+
+def test_evidence_bundle_plan_repairs_atom_chars_member_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_1, project_consistent_with_housing_element).",
+        "source_record_text_atom(src_2, project_consistent_with_general_plan_only).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "atom_chars_text_filter",
+                    "purpose": "Find source text containing both requested tokens.",
+                    "query_templates": [
+                        "source_record_text_atom(Line, Text), "
+                        "memberchk(consistent, atom_chars(Text, Chars)), "
+                        "memberchk(housing_element, atom_chars(Text, Chars))."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_text_contains_filter_repaired"
+    assert results[0]["result"]["reasoning_basis"]["contains_needles"] == ["consistent", "housing_element"]
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_1", "Text": "project_consistent_with_housing_element"}
+    ]
+
+
 def test_evidence_context_filter_carries_source_record_pair_rows_for_source_text_plans() -> None:
     facts = [
         "retailer_sold_in(foodland, pennsylvania, cucumber_only).",

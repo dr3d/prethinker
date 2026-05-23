@@ -15467,7 +15467,7 @@ def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
 def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
     variable_pattern = re.escape(str(text_var or ""))
     member_match = re.fullmatch(
-        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}(?:\s*,\s*['\"][^'\"]*['\"])?\s*\)|string_list\(\s*{variable_pattern}\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
+        rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}(?:\s*,\s*['\"][^'\"]*['\"])?\s*\)|string_list\(\s*{variable_pattern}\s*\)|atom_chars\(\s*{variable_pattern}\s*,\s*[A-Za-z_][A-Za-z0-9_]*\s*\)|atom_codes\(\s*{variable_pattern}\s*,\s*[A-Za-z_][A-Za-z0-9_]*\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
         str(goal or ""),
     )
     if member_match:
@@ -15504,34 +15504,46 @@ def _single_goal_post_filter_repair(query: str) -> dict[str, Any] | None:
     parts = split_top_level_args(text.rstrip(". "))
     if len(parts) < 2:
         return None
-    parsed = parse_prolog_query(parts[0])
-    if parsed is None:
-        return None
-    predicate, args = parsed
-    target_vars = [arg for arg in args if _is_prolog_variable(arg)]
-    if not target_vars:
-        return None
+    goals: list[tuple[str, list[str]]] = []
+    target_vars: list[str] = []
     filters: list[dict[str, Any]] = []
-    for part in parts[1:]:
-        condition = _post_filter_condition(part, target_vars)
-        if condition is None:
+    for part in parts:
+        condition = _post_filter_condition(part, target_vars) if target_vars else None
+        if condition is not None:
+            filters.append(condition)
+            continue
+        parsed = parse_prolog_query(part)
+        if parsed is None:
             return None
-        filters.append(condition)
-    if not filters:
+        predicate, args = parsed
+        goals.append((predicate, args))
+        for arg in args:
+            if _is_prolog_variable(arg) and arg not in target_vars:
+                target_vars.append(arg)
+    if not goals or not filters:
         return None
-    return {"predicate": predicate, "args": args, "filters": filters}
+    return {"goals": goals, "filters": filters}
 
 
 def _post_filter_condition(goal: str, target_vars: list[str]) -> dict[str, Any] | None:
     text = str(goal or "").strip()
     for target_var in target_vars:
-        needle = _source_text_contains_filter_needle(text, target_var)
+        filter_vars = _post_filter_variable_aliases(target_var)
+        needle = ""
+        for filter_var in filter_vars:
+            needle = _source_text_contains_filter_needle(text, filter_var)
+            if needle:
+                break
         if needle:
             return {"kind": "contains", "variable": target_var, "needle": needle}
-        member_match = re.fullmatch(
-            rf"\s*member(?:chk)?\(\s*{re.escape(target_var)}\s*,\s*\[([^\]]+)\]\s*\)\s*\.?\s*",
-            text,
-        )
+        member_match = None
+        for filter_var in filter_vars:
+            member_match = re.fullmatch(
+                rf"\s*member(?:chk)?\(\s*{re.escape(filter_var)}\s*,\s*\[([^\]]+)\]\s*\)\s*\.?\s*",
+                text,
+            )
+            if member_match:
+                break
         if member_match:
             values = [
                 _normalize_text_filter_atom(item.strip().strip("'\""))
@@ -15541,6 +15553,16 @@ def _post_filter_condition(goal: str, target_vars: list[str]) -> dict[str, Any] 
             if values:
                 return {"kind": "member_of", "variable": target_var, "values": _ordered_atom_unique(values)}
     return None
+
+
+def _post_filter_variable_aliases(variable: str) -> list[str]:
+    text = str(variable or "").strip()
+    if not text:
+        return []
+    aliases = [text]
+    for suffix in ("_tokens", "_Tokens"):
+        aliases.append(f"{text}{suffix}")
+    return _ordered_atom_unique(aliases)
 
 
 def _run_single_goal_post_filter(
@@ -15553,10 +15575,17 @@ def _run_single_goal_post_filter(
     helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = False,
 ) -> dict[str, Any]:
-    predicate = str(filter_spec["predicate"])
-    args = [str(arg) for arg in filter_spec["args"]]
+    goals = [
+        (str(predicate), [str(arg) for arg in args])
+        for predicate, args in filter_spec.get("goals", [])
+    ]
+    if not goals:
+        predicate = str(filter_spec["predicate"])
+        args = [str(arg) for arg in filter_spec["args"]]
+        goals = [(predicate, args)]
+    predicate = goals[0][0]
     filters = [item for item in filter_spec.get("filters", []) if isinstance(item, dict)]
-    repaired_query = format_prolog_query_goals([(predicate, args)])
+    repaired_query = format_prolog_query_goals(goals)
     item = run_query_plan(
         runtime,
         [repaired_query],
