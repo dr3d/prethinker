@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prethinker Docs</title>
+  <meta name="description" content="Current public documentation and measurement evidence for Prethinker, a governed semantic compile and QA system.">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f5ef;
+      --ink: #202124;
+      --muted: #5c626a;
+      --line: #d7d0c2;
+      --panel: #fffdf8;
+      --panel-2: #ebe8df;
+      --accent: #2f766d;
+      --accent-2: #a84f30;
+      --good: #2d7c48;
+      --warn: #9a6a18;
+      --shadow: 0 18px 48px rgba(44, 38, 28, 0.12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111416;
+        --ink: #f4f1e8;
+        --muted: #b9b4aa;
+        --line: #333a3f;
+        --panel: #181d20;
+        --panel-2: #20272a;
+        --accent: #69c4b8;
+        --accent-2: #e18a63;
+        --good: #80d898;
+        --warn: #e1bd68;
+        --shadow: 0 20px 56px rgba(0, 0, 0, 0.34);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    a { color: var(--accent); }
+    a:hover { color: var(--accent-2); }
+
+    .hero {
+      min-height: 68vh;
+      display: grid;
+      align-items: end;
+      position: relative;
+      overflow: hidden;
+      background: #111a1d;
+      color: #fffaf1;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(17, 26, 29, 0.96) 0%, rgba(17, 26, 29, 0.78) 46%, rgba(17, 26, 29, 0.42) 100%),
+        url("assets/prethinker-semantic-ir-workspace.png") right center / cover no-repeat;
+      opacity: 0.7;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 10px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .hero-inner,
+    .wrap {
+      width: min(1120px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      padding: 28px 0 46px;
+    }
+
+    .topline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 10px;
+      border: 1px solid rgba(255, 250, 241, 0.32);
+      border-radius: 999px;
+      color: #fffaf1;
+      background: rgba(0, 0, 0, 0.26);
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.06;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 900px;
+      font-size: clamp(40px, 7vw, 76px);
+    }
+
+    .lede {
+      max-width: 780px;
+      margin: 18px 0 0;
+      color: rgba(255, 250, 241, 0.88);
+      font-size: clamp(18px, 2.2vw, 24px);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 1px solid rgba(255, 250, 241, 0.36);
+      border-radius: 6px;
+      color: #fffaf1;
+      background: rgba(0, 0, 0, 0.34);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      background: #fffaf1;
+      color: #15201e;
+      border-color: #fffaf1;
+    }
+
+    main {
+      padding: 34px 0 68px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: -24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .metric,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .metric {
+      min-height: 128px;
+      padding: 16px;
+      border-radius: 8px;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 10px;
+      color: var(--ink);
+      font-size: clamp(22px, 4vw, 34px);
+      line-height: 1;
+    }
+
+    .metric small {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .section {
+      margin-top: 34px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+
+    .section-head p {
+      max-width: 620px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    h2 {
+      font-size: clamp(26px, 4vw, 40px);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .panel {
+      min-height: 160px;
+      padding: 18px;
+      border-radius: 8px;
+    }
+
+    .panel h3 {
+      font-size: 20px;
+    }
+
+    .panel p {
+      margin: 10px 0 0;
+      color: var(--muted);
+    }
+
+    .panel a {
+      font-weight: 800;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
+    .wide {
+      grid-column: span 2;
+    }
+
+    .callout {
+      margin-top: 18px;
+      padding: 16px;
+      border-left: 5px solid var(--warn);
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+
+    .callout strong { color: var(--warn); }
+
+    footer {
+      margin-top: 42px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .hero { min-height: 74vh; }
+      .status,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .wide { grid-column: auto; }
+      .section-head {
+        display: block;
+      }
+      .section-head p {
+        margin-top: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <nav class="topline" aria-label="Primary">
+        <a class="chip" href="../README.md">README</a>
+        <a class="chip" href="CURRENT_RESEARCH_HEADLINE.md">Current Headline</a>
+        <a class="chip" href="AUDIT_GRAMMAR_MEASUREMENT_NOTE.md">Measurement Note</a>
+        <a class="chip" href="PUBLIC_DOCS_GUIDE.md">Docs Guide</a>
+      </nav>
+      <h1>Prethinker Docs</h1>
+      <p class="lede">
+        Current public documentation for a governed semantic compile and QA
+        system: model proposals, deterministic admission, frozen KB artifacts,
+        and measured evidence paths.
+      </p>
+      <div class="hero-actions">
+        <a class="button primary" href="CURRENT_RESEARCH_HEADLINE.md">Read The Current Claim</a>
+        <a class="button" href="SEMANTIC_INSTRUMENT.md">Study The Instrument</a>
+        <a class="button" href="QA_INSTRUMENT.md">QA Boundary</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <section class="status" aria-label="Current measurement summary">
+        <article class="metric">
+          <span>Native Restamp</span>
+          <strong>92.33%</strong>
+          <small>1997 exact / 46 partial / 120 miss over 2163 rows</small>
+        </article>
+        <article class="metric">
+          <span>Real-World Spotcheck</span>
+          <strong>160 / 0 / 0</strong>
+          <small>Four externally sourced fixtures, 4 / 4 compile gates clean</small>
+        </article>
+        <article class="metric">
+          <span>Sealed Unseen</span>
+          <strong>95.0%</strong>
+          <small>152 exact / 1 partial / 6 miss over 160 rows</small>
+        </article>
+        <article class="metric">
+          <span>Cleanliness</span>
+          <strong>0 / 0 / 0</strong>
+          <small>compatibility rows / runtime load errors / QA write proposals</small>
+        </article>
+      </section>
+
+      <section class="section" id="read-first">
+        <div class="section-head">
+          <h2>Read First</h2>
+          <p>The active docs surface is intentionally short. Older worksheets,
+            generated reports, and scratch artifacts live in Git history or
+            <code>C:\prethinker_tmp_archive</code>.</p>
+        </div>
+        <div class="grid">
+          <article class="panel wide">
+            <h3><a href="CURRENT_RESEARCH_HEADLINE.md">Current Research Headline</a></h3>
+            <p>The compact state of the project: current measurements, caveats,
+              and next pressure surfaces.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="AUDIT_GRAMMAR_MEASUREMENT_NOTE.md">Audit Grammar Measurement Note</a></h3>
+            <p>The public measurement claim with native, real-world, sealed
+              unseen, and cold-transfer anchors.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="CTO_ARCHITECTURE_BRIEF.md">CTO Architecture Brief</a></h3>
+            <p>Operating doctrine for high-context collaborators and future
+              research work.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="ACTIVE_RESEARCH_LANES.md">Active Research Lanes</a></h3>
+            <p>The current work map without worksheet sediment.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="../PROJECT_STATE.md">Project State</a></h3>
+            <p>Compact snapshot of the repo, current instrument state, and
+              verification headline.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="instrument">
+        <div class="section-head">
+          <h2>Instrument</h2>
+          <p>Prethinker compiles source documents into governed KB packages,
+            then runs governed QA over admitted state and deterministic ledgers.</p>
+        </div>
+        <div class="grid">
+          <article class="panel">
+            <h3><a href="SEMANTIC_INSTRUMENT.md">Semantic Instrument</a></h3>
+            <p>Lens facets, selector guards, uncertainty vocabulary, and
+              measurement discipline.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="COMPILED_KB_ARTIFACT_PACKAGE.md">Compiled KB Artifact Package</a></h3>
+            <p>What the compiled document product contains and what Q&A may use.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="QA_INSTRUMENT.md">QA Instrument</a></h3>
+            <p>Why QA is a governed semantic pass rather than a deterministic-only replay.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="SEMANTIC_LENS_ROSTER.md">Semantic Lens Roster</a></h3>
+            <p>The current lens vocabulary and transfer discipline.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="MULTI_PASS_SEMANTIC_COMPILER.md">Multi-Pass Semantic Compiler</a></h3>
+            <p>Semantic parallax, safe-surface accumulation, and rule-lens work.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="SEMANTIC_IR_MAPPER_SPEC.md">Semantic IR Mapper Spec</a></h3>
+            <p>The deterministic mapper and admission contract.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="method">
+        <div class="section-head">
+          <h2>Method</h2>
+          <p>The project treats high scores as evidence only when the run shape,
+            cleanliness counters, and transfer caveats are visible.</p>
+        </div>
+        <div class="grid">
+          <article class="panel">
+            <h3><a href="BOUNDARY_PROBE_RESEARCH_METHOD.md">Boundary Probe Method</a></h3>
+            <p>How fixtures are designed as pressure instruments rather than
+              random ingestion samples.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="PRODUCT_AND_PALETTE_GOVERNANCE.md">Product And Palette Governance</a></h3>
+            <p>Palette priors, product state, and conservative admission doctrine.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="CURRENT_UTTERANCE_PIPELINE.md">Current Pipeline</a></h3>
+            <p>The live utterance and document path through router, context,
+              Semantic IR, mapper, QA, and repair pressure.</p>
+          </article>
+        </div>
+        <div class="callout">
+          <strong>Caveat kept visible:</strong> the native compile quality gate
+          moved from 26 / 30 pass-hold to 9 / 47, even while QA improved. The
+          next cycle investigates gate calibration, query-surface growth, and
+          named regressed fixtures rather than hiding the noise.
+        </div>
+      </section>
+
+      <section class="section" id="worksheets">
+        <div class="section-head">
+          <h2>Current Worksheets</h2>
+          <p>Worksheets are lab notes. They are useful for current run context,
+            but they should not become the public project map.</p>
+        </div>
+        <div class="grid">
+          <article class="panel">
+            <h3><a href="NATIVE_RESTAMP_WORKSHEET.md">Native Restamp Worksheet</a></h3>
+            <p>The May 22 native stamp setup, result, comparison, and readout.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="SOURCE_LEDGER_COMPILE_SURFACE_WORKSHEET.md">Source Ledger Compile Surface Worksheet</a></h3>
+            <p>The real-world four-fixture source-ledger and compile-gate pass.</p>
+          </article>
+          <article class="panel">
+            <h3><a href="PUBLIC_DOCS_GUIDE.md">Public Docs Guide</a></h3>
+            <p>The maintained reading order and rules for keeping old material out of the front door.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer>
+        <p>Last updated: 2026-05-22. Source repository:
+          <a href="https://github.com/dr3d/prethinker">github.com/dr3d/prethinker</a>.
+          This page is a compact index, not a replacement for the audit notes.</p>
+      </footer>
+    </div>
+  </main>
+</body>
+</html>
