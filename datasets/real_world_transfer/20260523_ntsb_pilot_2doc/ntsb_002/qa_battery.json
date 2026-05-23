@@ -281,7 +281,7 @@
     "difficulty": "hard",
     "id": "q024",
     "question": "What impact did salvage operations have on the completeness of the physical evidence examination?",
-    "reference_answer": "Salvage operations from May 18 to June 15 produced multiple fractures and indentations that appeared to be from recovery activities, complicating the analysis of impact damage",
+    "reference_answer": "Salvage operations were conducted from May 18 to June 15; after the casualty, NTSB investigators found multiple fractures and indentations on the vessel superstructure that appeared to be from recovery activities.",
     "source_id": "ntsb_002:q024",
     "supporting_source_spans": [
       "Additional Information section, Damage subsection"

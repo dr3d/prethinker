@@ -481,3 +481,68 @@ real-world dataset retention tests: 6 passed
 full pytest: 1622 passed, 2 subtests passed
 raw intake archive: C:\prethinker_tmp_archive\ntsb_two_doc_intake_20260523
 ```
+
+## NTSB Two-Document Transfer Spotcheck
+
+Ran the corrected two-document NTSB pilot from
+`datasets/real_world_transfer/20260523_ntsb_pilot_2doc` with OpenRouter
+`qwen/qwen3.6-35b-a3b` and 2 QA lanes.
+
+Compile:
+
+```text
+2 / 2 fixtures parsed
+88 candidate predicates
+71 compile admitted / 70 skipped
+diagnostic rejected flat-pass skips: 0
+compile quality gate: 0 passed / 2 held
+ntsb_001 hold: source-claim carrier/backbone coexistence delivery
+ntsb_002 hold: risk_count>5
+```
+
+Initial QA:
+
+```text
+50 judged rows
+46 exact / 2 partial / 2 miss
+92.0% exact
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+The misses taught two different lessons. `ntsb_001` q009 needed a general
+source-record duration bridge: the source rows had departure and accident clock
+tokens, but there was no durable accident event fact to bind through
+`elapsed_minutes/3`. I added a query-only `source_record_clock_duration_support`
+companion that pairs clock-like numeric tokens from question-matched source
+rows without writing facts or compatibility rows. `ntsb_002` q024 exposed an
+oracle wording problem; the incoming answer implied "complicating analysis,"
+while the source supports only the narrower recovery-activity damage statement.
+
+Post-repair QA:
+
+```text
+50 judged rows
+48 exact / 2 partial / 0 miss
+96.0% exact
+ntsb_001: 25 / 0 / 0
+ntsb_002: 23 / 2 / 0
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+artifact archive: C:\prethinker_tmp_archive\ntsb_two_doc_clock_duration_spotcheck_20260523
+```
+
+Remaining partials:
+
+- `ntsb_002` q019: hybrid aggregation of crew wind estimate with two separate
+  weather-station rows into a 48-62 knot / 22-27 mile range.
+- `ntsb_002` q024: source has salvage dates and recovery-activity damage, but
+  the question asks about physical-evidence completeness; this remains a
+  compile/source-surface relation gap, not a scoring miss.
+
+Read: this is exactly the kind of unlike-document transfer signal we wanted.
+The repair is not NTSB-specific; it strengthens messy-document duration
+questions where the compile surface preserves source rows but not every
+possible event relation as a typed durable predicate.

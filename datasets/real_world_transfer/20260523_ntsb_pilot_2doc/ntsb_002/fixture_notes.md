@@ -13,3 +13,7 @@ Received as part of `prethinker_ntsb_pilot_2026_05.zip` on May 23, 2026. The inc
 ## Normalization
 
 The canonical `qa.md` was converted from incoming `q001:` markers to numbered markdown so `scripts/run_domain_bootstrap_qa.py` can parse it. Reference answers remain isolated in scoring-only files.
+
+## 2026-05-23 q024 Oracle Wording
+
+Adjusted the q024 reference answer to stay inside source text. The incoming wording said recovery damage complicated impact-damage analysis; the source supports the narrower statement that post-casualty investigators found fractures and indentations that appeared to be from recovery activities.

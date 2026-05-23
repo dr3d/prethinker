@@ -2,6 +2,8 @@ from scripts.run_domain_bootstrap_qa import (
     _current_state_source_text_hint_queries,
     _event_description_hint_queries,
     _source_text_question_needles,
+    _source_text_question_token_hint_queries,
+    _source_record_clock_duration_companion,
     _source_coordinate_hint_queries,
     _source_attribution_hint_queries,
 )
@@ -132,3 +134,63 @@ def test_source_text_needles_preserve_legal_title_phrase() -> None:
     )
 
     assert needles[0] == "transfer_title"
+
+
+def test_source_text_needles_include_common_travel_event_inflections() -> None:
+    needles = _source_text_question_needles(
+        "How many minutes elapsed between departure from Seattle and the accident?"
+    )
+
+    assert "departed" in needles
+    assert needles.index("accident") < 10
+
+
+def test_temporal_source_text_numeric_hints_cover_both_duration_anchors() -> None:
+    queries = _source_text_question_token_hint_queries(
+        utterance="How many minutes elapsed between departure from Seattle and the accident?",
+        kb_inventory={"signatures": ["source_record_text_atom/2", "source_record_numeric_token/2"]},
+    )
+
+    assert (
+        'source_record_text_atom(SourceRow, TextAtom), memberchk("departed", TextAtom), '
+        "source_record_numeric_token(SourceRow, NumericToken)."
+    ) in queries
+    assert (
+        'source_record_text_atom(SourceRow, TextAtom), memberchk("accident", TextAtom), '
+        "source_record_numeric_token(SourceRow, NumericToken)."
+    ) in queries
+
+
+def test_source_record_clock_duration_companion_pairs_endpoint_clock_tokens() -> None:
+    results = [
+        {
+            "query": 'source_record_text_atom(SourceRow, TextAtom), memberchk("departed", TextAtom), source_record_numeric_token(SourceRow, NumericToken).',
+            "result": {
+                "status": "success",
+                "rows": [
+                    {"SourceRow": "src_line_0001", "NumericToken": "v_1328"},
+                ],
+                "reasoning_basis": {"contains_needles": ["departed"]},
+            },
+        },
+        {
+            "query": 'source_record_text_atom(SourceRow, TextAtom), memberchk("accident", TextAtom), source_record_numeric_token(SourceRow, NumericToken).',
+            "result": {
+                "status": "success",
+                "rows": [
+                    {"SourceRow": "src_line_0002", "NumericToken": "v_1620"},
+                ],
+                "reasoning_basis": {"contains_needles": ["accident"]},
+            },
+        },
+    ]
+
+    companion = _source_record_clock_duration_companion(
+        results=results,
+        query='source_record_text_atom(SourceRow, TextAtom), memberchk("accident", TextAtom), source_record_numeric_token(SourceRow, NumericToken).',
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["DurationMinutes"] == "172"
+    assert row["Duration"] == "2 hours 52 minutes"

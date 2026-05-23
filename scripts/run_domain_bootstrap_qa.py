@@ -2189,7 +2189,7 @@ def _source_text_question_token_hint_queries(
     needle_limit = 10 if _is_quantity_source_text_question(text) else 6
     out = [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:needle_limit]]
     if _is_temporal_source_text_question(text) and "source_record_numeric_token/2" in signatures:
-        for needle in needles[: min(needle_limit, 6)]:
+        for needle in needles[:needle_limit]:
             out.append(
                 f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom), '
                 "source_record_numeric_token(SourceRow, NumericToken)."
@@ -2201,7 +2201,13 @@ def _is_temporal_source_text_question(text: str) -> bool:
     normalized = str(text or "")
     if re.search(r"\btime\s+zone\b", normalized, re.IGNORECASE):
         return False
-    return bool(re.search(r"\b(?:when|time|date|timestamp|hour|minute|day)\b", normalized, re.IGNORECASE))
+    return bool(
+        re.search(
+            r"\b(?:when|time|date|timestamp|hour|hours|minute|minutes|second|seconds|day|days|elapsed)\b",
+            normalized,
+            re.IGNORECASE,
+        )
+    )
 
 
 def _is_quantity_source_text_question(text: str) -> bool:
@@ -2249,6 +2255,14 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     if "filing" in tokens:
         derived_needles.append("filed")
     if _is_temporal_source_text_question(raw):
+        temporal_event_aliases = {
+            "arrival": ["arrived"],
+            "arrivals": ["arrived"],
+            "departure": ["departed"],
+            "departures": ["departed"],
+        }
+        for token in tokens:
+            derived_needles.extend(temporal_event_aliases.get(token, []))
         derived_needles.extend(_generic_question_token_inflection_needles(tokens))
     state_phrase_aliases = {
         "kentucky": "ky",
@@ -2391,6 +2405,8 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "vegetable",
         "zone",
     }
+    if _is_temporal_source_text_question(raw):
+        priority_unigram_markers.update({"accident", "arrival", "departure"})
     priority_unigram_needles = [token for token in tokens if token in priority_unigram_markers]
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
     return _ordered_atom_unique([*identifier_needles, *derived_needles, *priority_unigram_needles, *phrase_needles, *unigram_needles])
@@ -2437,16 +2453,35 @@ def _quantity_phrase_order_needles(tokens: list[str]) -> list[str]:
 
 def _generic_question_token_inflection_needles(tokens: list[str]) -> list[str]:
     out: list[str] = []
+    irregular_aliases = {
+        "arrival": ["arrived"],
+        "departure": ["departed"],
+    }
     skip = {
         "what",
         "when",
         "where",
         "which",
+        "how",
+        "many",
+        "much",
         "time",
         "date",
+        "hour",
+        "hours",
+        "minute",
+        "minutes",
+        "second",
+        "seconds",
+        "day",
+        "days",
+        "approximately",
         "does",
+        "and",
+        "the",
         "with",
         "from",
+        "between",
         "that",
         "this",
         "than",
@@ -2458,7 +2493,12 @@ def _generic_question_token_inflection_needles(tokens: list[str]) -> list[str]:
     for token in tokens:
         if len(token) < 4 or token in skip or token.isdigit():
             continue
-        if token.endswith("e"):
+        out.extend(irregular_aliases.get(token, []))
+        if token in irregular_aliases:
+            continue
+        if token.endswith("ed"):
+            out.append(token)
+        elif token.endswith("e"):
             out.append(f"{token}d")
         elif token.endswith("y") and len(token) > 4:
             out.append(f"{token[:-1]}ied")
@@ -3091,6 +3131,9 @@ def run_query_plan(
                     fallback_query = str(fallback_item.get("query", "")).strip()
                     if fallback_query and fallback_query not in previous_queries:
                         previous_queries.append(fallback_query)
+            source_clock_duration = _source_record_clock_duration_companion(results=results, query=query)
+            if source_clock_duration:
+                append_companion(source_clock_duration)
             continue
         post_filter = _single_goal_post_filter_repair(query)
         if post_filter:
@@ -3105,6 +3148,9 @@ def run_query_plan(
                     include_legacy_native_helpers=include_legacy_native_helpers,
                 )
             )
+            source_clock_duration = _source_record_clock_duration_companion(results=results, query=query)
+            if source_clock_duration:
+                append_companion(source_clock_duration)
             continue
         numeric_token_repair = _source_record_numeric_token_repaired_query(query)
         if numeric_token_repair:
@@ -3175,6 +3221,9 @@ def run_query_plan(
         row_context = _source_record_row_context_companion(runtime, query=effective_query, result=last_result)
         if row_context:
             append_companion(row_context)
+        source_clock_duration = _source_record_clock_duration_companion(results=results, query=effective_query)
+        if source_clock_duration:
+            append_companion(source_clock_duration)
         source_record_repair = _source_record_field_sibling_repaired_query(effective_query)
         if source_record_repair:
             repaired_query = str(source_record_repair.get("query", "")).strip()
@@ -13875,6 +13924,167 @@ def _compact_interval_duration_companion(
                 "derived_from_queries": [str(item.get("query", "")), query],
             }
     return None
+
+
+def _source_record_clock_duration_companion(
+    *,
+    results: list[dict[str, Any]],
+    query: str,
+) -> dict[str, Any] | None:
+    if "source_record_numeric_token" not in str(query or ""):
+        return None
+    endpoint_rows: list[dict[str, str]] = []
+    for item in results:
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        basis = result.get("reasoning_basis")
+        if not isinstance(basis, dict):
+            continue
+        needle = _source_record_contains_needle_from_basis(basis)
+        if not needle:
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            token = str(row.get("NumericToken", "")).strip()
+            minutes = _clock_minutes_from_source_numeric_token(token)
+            source_row = str(row.get("SourceRow", "")).strip()
+            if minutes is None or not source_row:
+                continue
+            endpoint_rows.append(
+                {
+                    "Needle": needle,
+                    "SourceRow": source_row,
+                    "NumericToken": token,
+                    "ClockMinutes": str(minutes),
+                    "ClockDisplay": _display_clock_minutes(minutes),
+                }
+            )
+    if len(endpoint_rows) < 2:
+        return None
+    support_rows: list[dict[str, str]] = []
+    for start in endpoint_rows:
+        for end in endpoint_rows:
+            if start["Needle"] == end["Needle"] and start["SourceRow"] == end["SourceRow"]:
+                continue
+            start_minutes = int(start["ClockMinutes"])
+            end_minutes = int(end["ClockMinutes"])
+            duration_minutes = end_minutes - start_minutes
+            if duration_minutes <= 0 or duration_minutes > 24 * 60:
+                continue
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_clock_duration",
+                    "StartNeedle": start["Needle"],
+                    "EndNeedle": end["Needle"],
+                    "StartSourceRow": start["SourceRow"],
+                    "EndSourceRow": end["SourceRow"],
+                    "StartToken": start["NumericToken"],
+                    "EndToken": end["NumericToken"],
+                    "StartClock": start["ClockDisplay"],
+                    "EndClock": end["ClockDisplay"],
+                    "DurationMinutes": str(duration_minutes),
+                    "Duration": _display_minutes_duration(duration_minutes),
+                }
+            )
+    if not support_rows:
+        return None
+
+    def sort_key(row: dict[str, str]) -> tuple[int, int, str, str]:
+        start_needle = row.get("StartNeedle", "")
+        end_needle = row.get("EndNeedle", "")
+        endpoint_bonus = 0
+        if start_needle in {"departed", "departure", "started", "began"}:
+            endpoint_bonus -= 4
+        if end_needle in {"accident", "arrived", "arrival", "ended", "closed"}:
+            endpoint_bonus -= 4
+        return (endpoint_bonus, int(row.get("DurationMinutes", "0")), start_needle, end_needle)
+
+    support_rows.sort(key=sort_key)
+    support_rows = support_rows[:16]
+    return {
+        "query": (
+            "source_record_clock_duration_support(StartNeedle, EndNeedle, "
+            "StartClock, EndClock, DurationMinutes, Duration)."
+        ),
+        "result": {
+            "status": "success",
+            "predicate": "source_record_clock_duration_support",
+            "prolog_query": (
+                "source_record_clock_duration_support(StartNeedle, EndNeedle, "
+                "StartClock, EndClock, DurationMinutes, Duration)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only duration support paired clock-like numeric tokens from source-record "
+                    "rows retrieved by question-token endpoint hints; no durable fact was written"
+                ),
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query],
+    }
+
+
+def _source_record_contains_needle_from_basis(basis: dict[str, Any]) -> str:
+    contains_needles = basis.get("contains_needles")
+    if isinstance(contains_needles, list):
+        for item in contains_needles:
+            needle = str(item or "").strip()
+            if needle:
+                return needle
+    filters = basis.get("filters")
+    if isinstance(filters, list):
+        for item in filters:
+            if not isinstance(item, dict) or item.get("kind") != "contains":
+                continue
+            needle = str(item.get("needle", "")).strip()
+            if needle:
+                return needle
+    return ""
+
+
+def _clock_minutes_from_source_numeric_token(value: str) -> int | None:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    parts = _time_atom_to_parts(text)
+    if parts is None:
+        compact = re.sub(r"[^0-9]", "", text)
+        if not re.fullmatch(r"\d{3,4}", compact):
+            return None
+        parts = [compact[:-2], compact[-2:]]
+    hour = int(parts[0])
+    minute = int(parts[1])
+    if hour > 23 or minute > 59:
+        return None
+    return hour * 60 + minute
+
+
+def _display_clock_minutes(value: int) -> str:
+    hour, minute = divmod(int(value), 60)
+    return f"{hour:02d}:{minute:02d}"
+
+
+def _display_minutes_duration(value: int) -> str:
+    hours, minutes = divmod(int(value), 60)
+    parts: list[str] = []
+    if hours:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    if not parts:
+        parts.append("0 minutes")
+    return " ".join(parts)
 
 
 def _defined_interval_duration_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:
