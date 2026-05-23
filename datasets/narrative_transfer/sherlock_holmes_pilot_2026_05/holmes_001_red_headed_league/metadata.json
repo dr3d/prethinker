@@ -1,0 +1,28 @@
+{
+  "id": "holmes_001",
+  "domain": "narrative_fiction",
+  "mode": "detective_short_story",
+  "source_url": "https://www.gutenberg.org/files/1661/1661-h/1661-h.htm",
+  "retrieved_at": "2026-05-23",
+  "document_date": "1891-08",
+  "publication": "The Strand Magazine, August 1891",
+  "collection": "The Adventures of Sherlock Holmes (1892)",
+  "title": "The Red-Headed League",
+  "author": "Arthur Conan Doyle",
+  "source_format": "html_to_markdown",
+  "narrator": "Dr. John H. Watson (first person)",
+  "narrative_structure": {
+    "linear_timeline": true,
+    "unreliable_narrator": false,
+    "explicit_deduction": true,
+    "implicit_motivation": "low",
+    "symbolic_layer": "low",
+    "subtext_density": "low"
+  },
+  "known_caveats": [
+    "First-person narration is Watson's account; Holmes's reasoning is reconstructed through dialogue",
+    "Story is fiction; no facts to verify externally - internal consistency is the only ground truth",
+    "Some character details (Ezekiah Hopkins, the League's bequest) are themselves fabrications within the story",
+    "Geographical and temporal references are Victorian London; some terms require period context"
+  ]
+}

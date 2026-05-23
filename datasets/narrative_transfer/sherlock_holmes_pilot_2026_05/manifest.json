@@ -1,0 +1,66 @@
+{
+  "dataset_name": "Sherlock Holmes Thermometer Pilot 2026-05",
+  "dataset_version": "1.0",
+  "dataset_id": "sherlock_holmes_pilot_2026_05",
+  "created_date": "2026-05-23",
+  "description": "One-document narrative-fiction transfer thermometer for Prethinker using Arthur Conan Doyle's The Red-Headed League.",
+  "purpose": "Test whether audit grammar can extract narrative facts from prose without external ground truth, while respecting dialogue, embedded testimony, aliases, first-person narration, and retrospective deduction.",
+  "genre": "detective_fiction",
+  "public_domain": true,
+  "expected_transfer_ceiling": "60-70% exact (per pre-test consultation)",
+  "out_of_scope": [
+    "symbolism",
+    "unreliable_narration",
+    "non_linear_structure",
+    "subtext"
+  ],
+  "documents": [
+    {
+      "id": "holmes_001",
+      "fixture": "holmes_001_red_headed_league",
+      "domain": "narrative_fiction",
+      "mode": "detective_short_story",
+      "title": "The Red-Headed League",
+      "author": "Arthur Conan Doyle",
+      "source_url": "https://www.gutenberg.org/files/1661/1661-h/1661-h.htm",
+      "document_date": "1891-08",
+      "qa_items": 25,
+      "qa_categories": {
+        "direct_lookup": 5,
+        "timeline": 4,
+        "actor_action": 3,
+        "causal_chain": 3,
+        "policy_rule": 2,
+        "count_table": 2,
+        "contradiction": 2,
+        "unresolved_issue": 1,
+        "as_of_date": 1,
+        "source_limitation": 2
+      },
+      "path": "datasets/narrative_transfer/sherlock_holmes_pilot_2026_05/holmes_001_red_headed_league",
+      "source_original": "source_original.txt",
+      "source": "source.md",
+      "qa_file": "qa.md",
+      "oracle_jsonl": "oracle.jsonl",
+      "status": "staged_transfer_thermometer"
+    }
+  ],
+  "total_qa_items": 25,
+  "file_structure": {
+    "manifest.json": "Dataset manifest",
+    "README.md": "Dataset overview and discipline notes",
+    "holmes_001_red_headed_league/source_original.txt": "Raw extracted Gutenberg story text, Adventure II only",
+    "holmes_001_red_headed_league/source.md": "Faithful Markdown rendering of Adventure II only",
+    "holmes_001_red_headed_league/metadata.json": "Document metadata and narrative caveats",
+    "holmes_001_red_headed_league/qa.md": "25 questions only",
+    "holmes_001_red_headed_league/oracle.jsonl": "25 answer rows with source spans and difficulty",
+    "holmes_001_red_headed_league/provenance.md": "Source, extraction, copyright, and span notes"
+  },
+  "data_discipline": {
+    "source_authenticity": "Project Gutenberg public-domain text; Adventure II only",
+    "extraction_fidelity": "HTML to Markdown while preserving paragraph order, dialogue, punctuation, and italic spans",
+    "answer_grounding": "Oracle answers reference in-text spans only; no external verification injected",
+    "oracle_format": "JSONL with id, source_id, category, reference_answer, supporting_source_spans, difficulty",
+    "thermometer_scope": "One document only; narrative mechanism probe, not real-world-transfer or native-corpus score contribution"
+  }
+}
