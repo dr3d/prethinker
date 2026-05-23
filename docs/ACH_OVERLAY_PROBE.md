@@ -158,15 +158,50 @@ surviving_hypotheses
 
 ## Probe Plan
 
-1. Keep the initial overlay deterministic and unit-tested.
+1. Keep the initial overlay deterministic and unit-tested. Done.
 2. Build one tiny synthetic fixture with three hypotheses and five evidence
-   rows where the intended disconfirming evidence is obvious.
+   rows where the intended disconfirming evidence is obvious. Done.
 3. Build one source-record probe from an existing compiled artifact, manually
-   selecting evidence rows from admitted source facts.
+   selecting evidence rows from admitted source facts. Done:
+   `experiments/ach_overlay/ntsb_marine_weather_v1`.
 4. Only after the deterministic matrix behaves well, add an optional planner
    that proposes hypotheses and evidence-query templates.
 5. Keep the planner separate from the scorer: model proposes, deterministic ACH
    code audits the matrix.
+
+## 2026-05-23 Real-Document Probe
+
+Payload:
+
+```text
+experiments/ach_overlay/ntsb_marine_weather_v1/ach_payload.json
+```
+
+Run artifact:
+
+```text
+C:\prethinker_tmp_archive\work_20260523_record_narrative_ach\ach_overlay_runs\ntsb_marine_weather_v1
+```
+
+Result:
+
+```text
+hypotheses: 4
+evidence rows: 6
+judgments: 24
+matrix complete: true
+warnings: 0
+top hypothesis: h_weather_towline_force
+surviving hypotheses: 1
+sensitivity rows: 0
+```
+
+Read: the deterministic overlay behaves well on a real incident-report payload.
+It ranks the NTSB weather/towline-force explanation by least disconfirmation
+without turning that ranking into a KB fact or contaminating QA metrics. The
+next ACH step is a small payload-proposer that suggests candidate evidence rows
+from admitted source-record and claim surfaces while leaving final judgments to
+review/audit.
 
 ## Open Questions
 

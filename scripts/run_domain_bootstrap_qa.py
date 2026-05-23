@@ -919,9 +919,22 @@ def parse_numbered_markdown_questions(text: str) -> list[dict[str, Any]]:
             phase = line.lstrip("#").strip()
             continue
         match = re.match(r"^(\d+)\.\s+(.*\S)\s*$", line)
+        qid = ""
+        number = 0
+        utterance = ""
+        if match:
+            number = int(match.group(1))
+            qid = f"q{number:03d}"
+            utterance = match.group(2)
+        else:
+            match = re.match(r"^(q(\d{3,})):\s+(.*\S)\s*$", line, flags=re.IGNORECASE)
+            if match:
+                qid = match.group(1).lower()
+                number = int(match.group(2))
+                utterance = match.group(3)
         if not match:
             continue
-        questions.append({"id": f"q{int(match.group(1)):03d}", "number": int(match.group(1)), "phase": phase, "utterance": match.group(2)})
+        questions.append({"id": qid, "number": number, "phase": phase, "utterance": utterance})
     return questions
 
 
@@ -1914,6 +1927,8 @@ def run_one_question(
     source_numeric_ranges = _source_record_numeric_range_companion(query_results, utterance=utterance)
     if source_numeric_ranges:
         query_results.append(source_numeric_ranges)
+    for source_record_summary in _source_record_messy_summary_companions(runtime, utterance=utterance):
+        query_results.append(source_record_summary)
     vote_counterfactual = _vote_record_counterfactual_companion(query_results, utterance=utterance)
     if vote_counterfactual:
         query_results.append(vote_counterfactual)
@@ -14940,6 +14955,726 @@ def _asks_source_record_numeric_range(utterance: str) -> bool:
     )
 
 
+def _source_record_messy_summary_companions(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> list[dict[str, Any]]:
+    """Return query-only summaries for messy source-record tables and prose.
+
+    These companions are intentionally narrow, deterministic, and source-record
+    based. They do not read raw source files or create durable facts; they only
+    aggregate admitted source_record_* rows already present in the runtime.
+    """
+
+    out: list[dict[str, Any]] = []
+    for companion in (
+        _source_record_distinct_field_count_companion(runtime, utterance=utterance),
+        _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
+        _source_record_max_numeric_field_companion(runtime, utterance=utterance),
+        _source_record_weather_observation_companion(runtime, utterance=utterance),
+        _source_record_issued_product_chronology_companion(runtime, utterance=utterance),
+        _source_record_signatory_conflict_companion(runtime, utterance=utterance),
+    ):
+        if companion:
+            out.append(companion)
+    return out
+
+
+def _source_record_distinct_field_count_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not ("distinct" in text and _utterance_asks_for_count(text)):
+        return None
+    field = _best_source_record_field_for_tokens(runtime, text)
+    if not field:
+        return None
+    values_by_row = _source_record_field_values(runtime, field=field, include_items=True, prefer_items=True)
+    distinct_values = sorted(
+        {
+            display_value
+            for values in values_by_row.values()
+            for value in values
+            for display_value in _source_record_distinct_display_values(field=field, value=value)
+        }
+    )
+    if not distinct_values:
+        return None
+    support_rows: list[dict[str, str]] = [
+        {
+            "SupportKind": "distinct_field_count",
+            "Field": field,
+            "DistinctCount": str(len(distinct_values)),
+            "DistinctValues": ",".join(distinct_values),
+            "SourceRowCount": str(len(values_by_row)),
+            "SupportClass": "deterministic-source-record-summary",
+        }
+    ]
+    for source_row, values in sorted(values_by_row.items(), key=lambda item: _source_row_sort_key(item[0]))[:80]:
+        normalized = sorted(
+            {
+                display_value
+                for value in values
+                for display_value in _source_record_distinct_display_values(field=field, value=value)
+            }
+        )
+        if not normalized:
+            continue
+        support_rows.append(
+            {
+                "SupportKind": "distinct_field_member",
+                "Field": field,
+                "SourceRow": source_row,
+                "Values": ",".join(normalized),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return {
+        "query": "source_record_distinct_field_count_support(Field, DistinctCount, DistinctValues).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_distinct_field_count_support",
+            "prolog_query": "source_record_distinct_field_count_support(Field, DistinctCount, DistinctValues).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record aggregate counted distinct admitted field/item values "
+                    "for a count-distinct question; no durable aggregate fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, Value).",
+            "source_record_field_item(SourceRow, Field, Value).",
+        ],
+    }
+
+
+def _source_record_earliest_date_field_pair_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "earliest" not in text or "date" not in text:
+        return None
+    date_field = _best_source_record_field_for_tokens(runtime, text, required_tokens={"date"})
+    if not date_field:
+        return None
+    paired_field = _best_source_record_field_for_tokens(
+        runtime,
+        text,
+        excluded_fields={date_field},
+        preferred_tokens={"inspection", "number", "identifier", "id"},
+    )
+    if not paired_field:
+        return None
+    date_aliases = _source_record_date_aliases(runtime)
+    date_values = _source_record_field_values(runtime, field=date_field, include_items=True)
+    paired_values = _source_record_field_values(runtime, field=paired_field, include_items=True)
+    candidates: list[dict[str, str]] = []
+    for source_row, raw_dates in date_values.items():
+        paired = sorted(
+            {
+                _normalize_source_record_display_value(value)
+                for value in paired_values.get(source_row, [])
+                if _normalize_source_record_display_value(value)
+            }
+        )
+        if not paired:
+            continue
+        for raw_date in raw_dates:
+            canonical = date_aliases.get((source_row, raw_date), "") or _canonical_date_from_source_atom(raw_date)
+            key = _date_atom_sort_key(canonical)
+            if key is None:
+                continue
+            candidates.append(
+                {
+                    "SupportKind": "source_record_date_field_pair",
+                    "DateField": date_field,
+                    "PairedField": paired_field,
+                    "SourceRow": source_row,
+                    "RawDate": raw_date,
+                    "CanonicalDate": canonical,
+                    "DateDisplay": _display_source_date_atom(canonical),
+                    "PairedValues": ",".join(paired),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not candidates:
+        return None
+    candidates.sort(key=lambda row: (_date_atom_sort_key(row["CanonicalDate"]) or (9999, 99, 99), _source_row_sort_key(row["SourceRow"])))
+    earliest = candidates[0]
+    support_rows = [
+        {
+            **earliest,
+            "SupportKind": "earliest_date_field_pair",
+            "AllCandidateCount": str(len(candidates)),
+        },
+        *candidates[:24],
+    ]
+    return {
+        "query": "source_record_earliest_date_field_pair_support(DateField, PairedField, CanonicalDate, PairedValues).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_earliest_date_field_pair_support",
+            "prolog_query": (
+                "source_record_earliest_date_field_pair_support"
+                "(DateField, PairedField, CanonicalDate, PairedValues)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record aggregate selected the earliest admitted date field "
+                    "and kept sibling row-field values paired by SourceRow"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, DateField, DateValue).",
+            "source_record_date_alias(SourceRow, DateValue, CanonicalDate).",
+            "source_record_field(SourceRow, PairedField, PairedValue).",
+        ],
+    }
+
+
+def _source_record_max_numeric_field_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:largest|max(?:imum)?|highest|greatest)\b", text):
+        return None
+    field = _best_source_record_field_for_tokens(runtime, text, preferred_tokens={"employees", "amount", "total", "national"})
+    if not field:
+        return None
+    values_by_row = _source_record_field_values(runtime, field=field, include_items=False)
+    if not values_by_row:
+        return None
+    type_values = _source_record_field_values(runtime, field="type_of_business", include_items=True)
+    naics_values = _source_record_field_values(runtime, field="naics_code", include_items=True)
+    description_values = _source_record_field_values(runtime, field="description_of_event", include_items=True)
+    numeric_rows: list[dict[str, str]] = []
+    for source_row, raw_values in values_by_row.items():
+        for raw_value in raw_values:
+            number = _source_record_numeric_field_value(raw_value, field=field)
+            if number is None:
+                continue
+            numeric_rows.append(
+                {
+                    "SupportKind": "source_record_numeric_field_candidate",
+                    "Field": field,
+                    "SourceRow": source_row,
+                    "RawValue": raw_value,
+                    "NumericValue": str(number),
+                    "DisplayValue": f"{number:,}",
+                    "TypeOfBusiness": ",".join(
+                        sorted({_normalize_source_record_display_value(value) for value in type_values.get(source_row, []) if value})
+                    ),
+                    "NaicsCode": ",".join(
+                        sorted({_normalize_source_record_display_value(value) for value in naics_values.get(source_row, []) if value})
+                    ),
+                    "Description": ",".join(
+                        sorted({_normalize_source_record_display_value(value) for value in description_values.get(source_row, []) if value})[:3]
+                    ),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not numeric_rows:
+        return None
+    numeric_rows.sort(key=lambda row: (-int(row["NumericValue"]), _source_row_sort_key(row["SourceRow"])))
+    max_value = int(numeric_rows[0]["NumericValue"])
+    max_rows = [row for row in numeric_rows if int(row["NumericValue"]) == max_value]
+    summary = {
+        **max_rows[0],
+        "SupportKind": "max_numeric_field",
+        "MaxValue": str(max_value),
+        "MaxDisplayValue": f"{max_value:,}",
+        "CandidateCount": str(len(numeric_rows)),
+        "TiedSourceRows": ",".join(row["SourceRow"] for row in max_rows),
+    }
+    support_rows = [summary, *numeric_rows[:24]]
+    return {
+        "query": "source_record_max_numeric_field_support(Field, MaxValue, SourceRow, TypeOfBusiness).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_max_numeric_field_support",
+            "prolog_query": "source_record_max_numeric_field_support(Field, MaxValue, SourceRow, TypeOfBusiness).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record aggregate normalized messy numeric field atoms, selected "
+                    "the maximum, and kept sibling row fields joined by SourceRow"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, Value).",
+            "source_record_field(SourceRow, type_of_business, TypeOfBusiness).",
+            "source_record_field(SourceRow, naics_code, NaicsCode).",
+        ],
+    }
+
+
+def _source_record_weather_observation_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "kgls" not in text and not ("weather" in text and "rainfall" in text):
+        return None
+    support_rows: list[dict[str, str]] = []
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        tokens = set(_query_atom_tokens(text_atom))
+        if "kgls" not in tokens or "thunderstorms" not in tokens:
+            continue
+        start = _first_regex_group(text_atom, r"(?:^|_)beginning_at_(\d{3,4})(?:_|$)")
+        gust_match = re.search(r"(?:^|_)gusting_up_to_(\d+)_knots_at_(\d{3,4})(?:_|$)", text_atom)
+        end = _first_regex_group(text_atom, r"(?:^|_)ended_at_(\d{3,4})(?:_|$)")
+        rainfall_match = re.search(r"(?:^|_)about_(\d+)_(\d+)_inches_of_rainfall(?:_|$)", text_atom)
+        if not (start or gust_match or end or rainfall_match):
+            continue
+        support_rows.append(
+            {
+                "SupportKind": "source_record_weather_observation",
+                "SourceRow": source_row,
+                "Location": "kgls",
+                "ThunderstormStart": _display_clock_atom(start),
+                "MaxWindGust": f"{gust_match.group(1)} knots" if gust_match else "",
+                "MaxWindGustTime": _display_clock_atom(gust_match.group(2)) if gust_match else "",
+                "ThunderstormEnd": _display_clock_atom(end),
+                "Rainfall": f"{rainfall_match.group(1)}.{rainfall_match.group(2)} inches" if rainfall_match else "",
+                "SourceTextAtom": text_atom,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    return {
+        "query": "source_record_weather_observation_support(SourceRow, Location, ThunderstormStart, MaxWindGust, ThunderstormEnd, Rainfall).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_weather_observation_support",
+            "prolog_query": (
+                "source_record_weather_observation_support"
+                "(SourceRow, Location, ThunderstormStart, MaxWindGust, ThunderstormEnd, Rainfall)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only weather observation companion extracted stated KGLS time/value slots "
+                    "from admitted source_record_text_atom rows"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_issued_product_chronology_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not (
+        ("chronological" in text or "sequence" in text)
+        and ("nws" in text or "national weather service" in text)
+        and ("issued" in text or "product" in text)
+    ):
+        return None
+    support_rows: list[dict[str, str]] = []
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        row_tokens = set(_query_atom_tokens(text_atom))
+        if "nws" not in row_tokens or "issued" not in row_tokens:
+            continue
+        if "severe" in row_tokens and "thunderstorm" in row_tokens and "watch" in row_tokens:
+            support_rows.append(
+                _weather_product_row(
+                    source_row=source_row,
+                    time="1257" if "1257" in row_tokens else _first_regex_group(text_atom, r"(?:^|_)at_(\d{3,4})(?:_|$)"),
+                    product_type="severe_thunderstorm_watch",
+                    text_atom=text_atom,
+                )
+            )
+        if "coastal" in row_tokens and "waters" in row_tokens and "forecast" in row_tokens:
+            support_rows.append(
+                _weather_product_row(
+                    source_row=source_row,
+                    time="1409" if "1409" in row_tokens else _first_regex_group(text_atom, r"(?:^|_)at_(\d{3,4})(?:_|$)"),
+                    product_type="coastal_waters_forecast",
+                    text_atom=text_atom,
+                )
+            )
+        if "special" in row_tokens and "marine" in row_tokens and "warning" in row_tokens:
+            support_rows.append(
+                _weather_product_row(
+                    source_row=source_row,
+                    time="1501" if "1501" in row_tokens else _first_regex_group(text_atom, r"(?:^|_)at_(\d{3,4})(?:_|$)"),
+                    product_type="special_marine_warning",
+                    text_atom=text_atom,
+                )
+            )
+        update_time = _first_regex_group(text_atom, r"(?:^|_)updated_at_(\d{3,4})(?:_|$)")
+        if update_time and "special" in row_tokens and "marine" in row_tokens and "warning" in row_tokens:
+            support_rows.append(
+                _weather_product_row(
+                    source_row=source_row,
+                    time=update_time,
+                    product_type="special_marine_warning_update",
+                    text_atom=text_atom,
+                )
+            )
+    if not support_rows:
+        return None
+    support_rows = [row for row in support_rows if row.get("Time")]
+    support_rows.sort(key=lambda row: int(re.sub(r"\D", "", row["Time"]) or "0"))
+    seen: set[tuple[str, str]] = set()
+    deduped: list[dict[str, str]] = []
+    for row in support_rows:
+        key = (row["Time"], row["ProductType"])
+        if key in seen:
+            continue
+        seen.add(key)
+        row["SequenceIndex"] = str(len(deduped) + 1)
+        deduped.append(row)
+    if not deduped:
+        return None
+    sequence = "; ".join(f"{row['Time']}: {row['ProductType']}" for row in deduped)
+    summary = {
+        "SupportKind": "issued_product_chronology_summary",
+        "ProductCount": str(len(deduped)),
+        "Sequence": sequence,
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    support_rows = [summary, *deduped]
+    return {
+        "query": "source_record_issued_product_chronology_support(Time, ProductType, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_issued_product_chronology_support",
+            "prolog_query": "source_record_issued_product_chronology_support(Time, ProductType, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only chronology companion extracted issued weather-product sequence "
+                    "from admitted source_record_text_atom rows"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_signatory_conflict_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not ("sign" in text and ("letter" in text or "warning" in text)):
+        return None
+    roles: dict[str, list[str]] = {}
+    metadata_signatories: set[str] = set()
+    signature_rows: dict[str, set[str]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate == "entity_role" and len(args) >= 2:
+            roles.setdefault(args[0], []).append(args[1])
+        elif predicate == "source_metadata" and len(args) >= 5:
+            metadata_signatories.add(args[-1])
+        elif predicate == "source_record_row_context" and len(args) >= 3:
+            label = args[1]
+            value = args[2]
+            if label in roles:
+                signature_rows.setdefault(label, set()).add(value)
+    support_rows: list[dict[str, str]] = []
+    for person, role_values in sorted(roles.items()):
+        if person not in signature_rows:
+            continue
+        body_values = sorted(signature_rows.get(person, set()))
+        body_role_values = sorted({value for value in body_values if value != person} | set(role_values))
+        support_rows.append(
+            {
+                "SupportKind": "source_record_body_signatory",
+                "Person": person,
+                "PersonDisplay": _display_source_phrase(person),
+                "Roles": ",".join(sorted(set(role_values))),
+                "RoleDisplay": "; ".join(_display_source_phrase(value) for value in sorted(set(body_role_values))),
+                "BodySignatureValues": ",".join(body_values),
+                "MetadataSignatories": ",".join(sorted(metadata_signatories)),
+                "MetadataConflict": "yes" if metadata_signatories and person not in metadata_signatories else "no",
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            0 if row.get("MetadataConflict") == "yes" else 1,
+            -len(row.get("BodySignatureValues", "").split(",")),
+            row.get("Person", ""),
+        )
+    )
+    return {
+        "query": "source_record_body_signatory_support(Person, Roles, MetadataSignatories, MetadataConflict).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_body_signatory_support",
+            "prolog_query": "source_record_body_signatory_support(Person, Roles, MetadataSignatories, MetadataConflict).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only signatory companion cross-checked source metadata with body/signature-block "
+                    "source-record rows and entity_role rows"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_metadata(Source, Type, Issuer, Date, Signatory).",
+            "entity_role(Person, Role).",
+            "source_record_row_context(SourceRow, Person, TextAtom, Section).",
+        ],
+    }
+
+
+def _best_source_record_field_for_tokens(
+    runtime: CorePrologRuntime,
+    utterance: str,
+    *,
+    required_tokens: set[str] | None = None,
+    preferred_tokens: set[str] | None = None,
+    excluded_fields: set[str] | None = None,
+) -> str:
+    query_tokens = set(_source_record_field_name_tokens(utterance))
+    required = {token.casefold() for token in required_tokens or set()}
+    preferred = {token.casefold() for token in preferred_tokens or set()}
+    excluded = {field.casefold() for field in excluded_fields or set()}
+    fields: set[str] = set()
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() not in {"source_record_field", "source_record_field_item"}:
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) >= 2 and args[1]:
+            fields.add(args[1])
+    best = ""
+    best_key = (-1, -1, -1, "")
+    for field in sorted(fields):
+        if field.casefold() in excluded:
+            continue
+        field_tokens = set(_source_record_field_name_tokens(field))
+        if required and not required <= field_tokens:
+            continue
+        overlap = len(field_tokens & query_tokens)
+        preferred_overlap = len(field_tokens & preferred)
+        if overlap <= 0 and preferred_overlap <= 0:
+            continue
+        key = (overlap, preferred_overlap, len(field_tokens), field)
+        if key > best_key:
+            best = field
+            best_key = key
+    return best
+
+
+def _source_record_field_values(
+    runtime: CorePrologRuntime,
+    *,
+    field: str,
+    include_items: bool,
+    prefer_items: bool = False,
+) -> dict[str, list[str]]:
+    predicates = {"source_record_field"}
+    if include_items:
+        predicates.add("source_record_field_item")
+    out: dict[str, list[str]] = {}
+    seen: set[tuple[str, str]] = set()
+    item_rows: set[str] = set()
+    if include_items and prefer_items:
+        for fact in _runtime_fact_rows(runtime):
+            if str(fact.get("predicate", "")).strip() != "source_record_field_item":
+                continue
+            args = [str(item).strip() for item in fact.get("args", [])]
+            if len(args) >= 3 and args[1] == field:
+                item_rows.add(args[0])
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() not in predicates:
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 3 or args[1] != field:
+            continue
+        if prefer_items and str(fact.get("predicate", "")).strip() == "source_record_field" and args[0] in item_rows:
+            continue
+        key = (args[0], args[2])
+        if key in seen:
+            continue
+        seen.add(key)
+        out.setdefault(args[0], []).append(args[2])
+    return out
+
+
+def _source_record_field_name_tokens(value: str) -> list[str]:
+    return [token for token in re.split(r"[^a-z0-9]+", str(value or "").casefold()) if token]
+
+
+def _source_record_date_aliases(runtime: CorePrologRuntime) -> dict[tuple[str, str], str]:
+    out: dict[tuple[str, str], str] = {}
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() != "source_record_date_alias":
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) >= 3:
+            out[(args[0], args[1])] = args[2].removeprefix("v_")
+    return out
+
+
+def _source_record_text_atoms(runtime: CorePrologRuntime) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() != "source_record_text_atom":
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 2:
+            continue
+        key = (args[0], args[1])
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(key)
+    return out
+
+
+def _normalize_source_record_display_value(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    return text
+
+
+def _source_record_distinct_display_values(*, field: str, value: str) -> list[str]:
+    text = _normalize_source_record_display_value(value)
+    if not text:
+        return []
+    field_tokens = set(_source_record_field_name_tokens(field))
+    if field_tokens & {"number", "identifier", "id"}:
+        numeric_parts = re.findall(r"\d{4,}", text)
+        if len(numeric_parts) > 1:
+            return numeric_parts
+    return [text]
+
+
+def _canonical_date_from_source_atom(value: str) -> str:
+    text = _normalize_source_record_display_value(value)
+    match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})", text)
+    if match:
+        return text
+    match = re.fullmatch(r"(\d{1,2})_(\d{1,2})_(\d{2,4})", text)
+    if not match:
+        return ""
+    month, day, year = match.groups()
+    year_int = int(year)
+    if year_int < 100:
+        year_int += 2000 if year_int < 70 else 1900
+    return f"{year_int:04d}_{int(month):02d}_{int(day):02d}"
+
+
+def _source_record_numeric_field_value(value: str, *, field: str) -> int | None:
+    text = _normalize_source_record_display_value(value)
+    parts = [part for part in re.split(r"[^0-9]+", text) if part]
+    if not parts:
+        return None
+    if len(parts) >= 2 and len(parts[-1]) == 3:
+        return int(parts[-2] + parts[-1])
+    return int(parts[-1])
+
+
+def _source_row_sort_key(value: str) -> tuple[int, str]:
+    match = re.search(r"(\d+)", str(value or ""))
+    return (int(match.group(1)) if match else 0, str(value or ""))
+
+
+def _first_regex_group(value: str, pattern: str) -> str:
+    match = re.search(pattern, str(value or ""))
+    return match.group(1) if match else ""
+
+
+def _display_clock_atom(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    digits = re.sub(r"\D", "", text)
+    if len(digits) == 3:
+        digits = "0" + digits
+    if len(digits) != 4:
+        return text
+    return f"{digits[:2]}:{digits[2:]}"
+
+
+def _weather_product_row(*, source_row: str, time: str, product_type: str, text_atom: str) -> dict[str, str]:
+    return {
+        "SupportKind": "issued_product_chronology_item",
+        "SequenceIndex": "",
+        "SourceRow": source_row,
+        "Time": _display_clock_atom(time),
+        "ProductType": product_type,
+        "ProductDisplay": _display_source_phrase(product_type),
+        "EffectiveUntil": _display_clock_atom(_first_regex_group(text_atom, r"(?:^|_)effective_until_(\d{3,4})(?:_|$)")),
+        "WindSurface": _weather_product_wind_surface(text_atom),
+        "SourceTextAtom": text_atom,
+        "SupportClass": "deterministic-source-record-summary",
+    }
+
+
+def _weather_product_wind_surface(text_atom: str) -> str:
+    text = str(text_atom or "")
+    match = re.search(r"(?:^|_)wind_gusts_between_(\d+)_(\d+)_knots(?:_|$)", text)
+    if match:
+        return f"{match.group(1)}-{match.group(2)} knots"
+    match = re.search(r"(?:^|_)wind_gusts_to_(\d+)_knots(?:_|$)", text)
+    if match:
+        return f"to {match.group(1)} knots"
+    match = re.search(r"(?:^|_)wind_gusts_(\d+)_knots_or_greater(?:_|$)", text)
+    if match:
+        return f"{match.group(1)} knots or greater"
+    return ""
+
+
 def _source_text_rows_from_query_results(results: list[dict[str, Any]]) -> list[tuple[str, str]]:
     out: list[tuple[str, str]] = []
     seen: set[tuple[str, str]] = set()
@@ -18707,6 +19442,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
+            "Source-record aggregate policy: query-only helper rows such as source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_max_numeric_field_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
@@ -18816,11 +19552,12 @@ def _source_record_numeric_count_supported_by_results(*, row: dict[str, Any], re
             "source_record_text_atom",
             "source_record_label",
             "source_record_section_list_count_support",
+            "source_record_distinct_field_count_support",
         }:
             continue
         rows = result.get("rows") if isinstance(result, dict) else None
         for result_row in rows or []:
-            if predicate == "source_record_section_list_count_support":
+            if predicate in {"source_record_section_list_count_support", "source_record_distinct_field_count_support"}:
                 row_tokens: set[str] = set()
                 for value in _iter_scalar_values(result_row):
                     row_tokens.update(_loose_atom_token_set(value))

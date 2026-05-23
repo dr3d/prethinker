@@ -36,6 +36,7 @@ from scripts.run_domain_bootstrap_qa import (
     _placeholder_repaired_query,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
+    _source_record_messy_summary_companions,
     _source_coordinate_hint_queries,
     _source_column_text_hint_queries,
     _source_section_question_key_hint_queries,
@@ -97,6 +98,20 @@ def test_parse_numbered_markdown_questions_keeps_phase_labels() -> None:
     assert rows[0]["phase"] == "Phase 1 - Straight Queries"
     assert rows[2]["phase"] == "Phase 2 - Ambiguity"
     assert rows[2]["utterance"] == "Who is K. Lume?"
+
+
+def test_parse_numbered_markdown_questions_accepts_explicit_qid_lines() -> None:
+    text = """# Narrative Probe
+
+q001: What is the client's name?
+q025: How does the reader learn the plan?
+"""
+
+    rows = parse_numbered_markdown_questions(text)
+
+    assert [row["id"] for row in rows] == ["q001", "q025"]
+    assert [row["number"] for row in rows] == [1, 25]
+    assert rows[1]["utterance"] == "How does the reader learn the plan?"
 
 
 def test_parse_markdown_answer_key_reads_answer_section_only() -> None:
@@ -1468,6 +1483,158 @@ def test_source_record_section_list_count_companion_counts_scoped_list_block() -
         },
         reference="Three",
     )
+
+
+def test_source_record_messy_summary_counts_distinct_field_items() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, fatality_inspection_number, v_318199429).",
+        "source_record_field_item(src_line_0020, fatality_inspection_number, v_318199429).",
+        "source_record_field(src_line_0022, fatality_inspection_number, v_318201902_318202009).",
+        "source_record_field_item(src_line_0022, fatality_inspection_number, v_318201902).",
+        "source_record_field_item(src_line_0022, fatality_inspection_number, v_318202009).",
+        "source_record_field(src_line_0024, fatality_inspection_number, v_318206794_318206802).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="How many distinct fatality inspection numbers appear in the document?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_distinct_field_count_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["Field"] == "fatality_inspection_number"
+    assert summary["DistinctCount"] == "5"
+    assert "318202009" in summary["DistinctValues"]
+    assert "318206802" in summary["DistinctValues"]
+    assert _source_record_numeric_count_supported_by_results(
+        row={
+            "utterance": "How many distinct fatality inspection numbers appear in the document?",
+            "query_results": [companion],
+        },
+        reference="5 distinct fatality inspection numbers",
+    )
+
+
+def test_source_record_messy_summary_pairs_earliest_date_with_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, fatality_inspection_number, v_318199429).",
+        "source_record_field(src_line_0020, date_of_incident, v_10_05_23).",
+        "source_record_date_alias(src_line_0020, v_10_05_23, v_2023_10_05).",
+        "source_record_field(src_line_0024, fatality_inspection_number, v_318201712).",
+        "source_record_field(src_line_0024, date_of_incident, v_9_27_23).",
+        "source_record_date_alias(src_line_0024, v_9_27_23, v_2023_09_27).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='What is the earliest "Date of incident" and which fatality inspection number is paired with that date?',
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_earliest_date_field_pair_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["CanonicalDate"] == "2023_09_27"
+    assert summary["PairedValues"] == "318201712"
+
+
+def test_source_record_messy_summary_normalizes_max_numeric_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, total_employees_national, v_3_000).",
+        "source_record_field(src_line_0020, type_of_business, fruit_and_vegetable_canning).",
+        "source_record_field(src_line_0028, total_employees_national, v_30_8_000).",
+        "source_record_field(src_line_0028, type_of_business, other_foundation_structure_and_building_exterior_contractors_238190).",
+        "source_record_field(src_line_0028, naics_code, v_238190).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='What is the largest "Total employees (national)" figure listed for any single establishment?',
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_max_numeric_field_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["MaxValue"] == "8000"
+    assert summary["MaxDisplayValue"] == "8,000"
+    assert "other_foundation_structure" in summary["TypeOfBusiness"]
+
+
+def test_source_record_messy_summary_extracts_weather_and_product_chronology() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0126, "
+            "the_closest_national_weather_service_nws_weather_reporting_location_to_the_casualty_site_was_scholes_"
+            "international_airport_at_galveston_kgls_thunderstorms_were_reported_at_kgls_beginning_at_1554_with_"
+            "heavy_rain_and_winds_gusting_up_to_48_knots_at_1724_thunderstorms_ended_at_1734_with_about_0_85_inches_of_rainfall)."
+        ),
+        (
+            "source_record_text_atom(src_line_0138, "
+            "on_the_day_of_the_sinking_at_1257_the_nws_issued_a_severe_thunderstorm_watch_effective_until_2000_"
+            "that_evening_the_watch_warned_of_wind_gusts_between_60_80_knots)."
+        ),
+        (
+            "source_record_text_atom(src_line_0140, "
+            "at_1409_the_nws_issued_a_coastal_waters_forecast_for_high_island_to_the_matagorda_ship_channel_out_60_miles)."
+        ),
+        (
+            "source_record_text_atom(src_line_0144, "
+            "at_1501_the_nws_issued_a_special_marine_warning_for_severe_thunderstorms_capable_of_wind_gusts_to_40_knots_"
+            "the_special_marine_warning_was_updated_at_1544_to_report_strong_thunderstorms_with_wind_gusts_34_knots_or_greater)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    weather = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What conditions were reported at KGLS regarding thunderstorm start time, maximum wind gust, end time, and rainfall?",
+    )
+    weather_companion = next(item for item in weather if item["result"]["predicate"] == "source_record_weather_observation_support")
+    weather_row = weather_companion["result"]["rows"][0]
+    assert weather_row["ThunderstormStart"] == "15:54"
+    assert weather_row["MaxWindGust"] == "48 knots"
+    assert weather_row["ThunderstormEnd"] == "17:34"
+    assert weather_row["Rainfall"] == "0.85 inches"
+
+    chronology = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Reconstruct the chronological sequence of National Weather Service products issued by NWS.",
+    )
+    chronology_companion = next(
+        item for item in chronology if item["result"]["predicate"] == "source_record_issued_product_chronology_support"
+    )
+    sequence = chronology_companion["result"]["rows"][0]["Sequence"]
+    assert "12:57: severe_thunderstorm_watch" in sequence
+    assert "14:09: coastal_waters_forecast" in sequence
+    assert "15:44: special_marine_warning_update" in sequence
+
+
+def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_metadata(fda_wl, warning_letter, fda_office, 2025_02_26, dr_krishna_prasad_chigurupati).",
+        "entity_role(francis_godwin, director_office_of_manufacturing_quality).",
+        "source_record_row_context(src_line_0127, francis_godwin, francis_godwin, warning_letter).",
+        "source_record_row_context(src_line_0128, francis_godwin, director, warning_letter).",
+        "source_record_row_context(src_line_0129, francis_godwin, office_of_manufacturing_quality, warning_letter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Who signed the warning letter, and what role within FDA do they hold?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_body_signatory_support")
+    row = companion["result"]["rows"][0]
+    assert row["Person"] == "francis_godwin"
+    assert row["MetadataConflict"] == "yes"
+    assert "director_office_of_manufacturing_quality" in row["Roles"]
+    assert len(companion["result"]["rows"]) == 1
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:

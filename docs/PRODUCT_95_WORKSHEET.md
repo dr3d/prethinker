@@ -874,3 +874,58 @@ Next product work before another large stamp:
   authority facts in the body text.
 - Keep requesting more messy real-world fixtures after these mechanisms have a
   targeted replay, especially table/list-heavy enforcement summaries.
+
+## 2026-05-23 Wild Record-Layer Repair
+
+Goal: repair the concrete record-layer failures from the 95.2% wild batch
+without doing another full compile or full stamp.
+
+Implemented deterministic current-query summaries over admitted
+`source_record_*` rows:
+
+- distinct field/item counts with composite identifier splitting
+- earliest date selection paired to sibling row fields
+- max numeric field selection with messy atom normalization
+- KGLS weather observation extraction from admitted source-record text atoms
+- NWS issued-product chronology extraction from admitted source-record text
+  atoms
+- body-signatory support that cross-checks source metadata against source-record
+  signature-block context
+
+These are marked as deterministic source-record summaries, not retired
+compatibility helpers, so default compatibility row count remains 0.
+
+Targeted replay:
+
+```text
+original affected rows: 0 exact / 1 partial / 5 miss
+after repair:           6 exact / 0 partial / 0 miss
+compatibility rows:     0
+runtime load errors:    0
+QA write proposals:     0
+```
+
+Rows cleared:
+
+- FDA q017 signatory/body metadata conflict
+- NTSB marine q011 weather-product chronology
+- NTSB marine q015 KGLS thunderstorm/gust/rainfall observation
+- OSHA q011 earliest incident date paired to fatality inspection number
+- OSHA q013 largest national employee count with row-paired business type
+- OSHA q014 distinct fatality inspection number count
+
+Validation:
+
+```text
+tests/test_domain_bootstrap_qa.py: 245 passed
+```
+
+Artifact archive:
+
+```text
+C:\prethinker_tmp_archive\work_20260523_record_narrative_ach
+```
+
+Read: the wild batch exposed a product-grade mechanism, not just six isolated
+answers. Messy real documents need a record-layer query surface that can safely
+aggregate admitted rows when compile predicates are too narrow or malformed.
