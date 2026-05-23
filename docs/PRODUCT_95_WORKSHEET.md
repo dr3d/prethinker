@@ -634,3 +634,72 @@ Read: the live native query-surface blocker in this slice is cleared, and the
 transfer vote guard caught a real adjacent product issue before the change was
 declared done. The remaining native query-surface rows should be treated as a
 compile-surface queue unless a future replay shows otherwise.
+
+## Native Compile-Surface Queue Triage
+
+The next pass took the six rows that the native query-surface replay reclassified
+as compile-surface pressure and replayed them against the frozen 2026-05-22 native
+compile artifacts.
+
+Initial source-window repair:
+
+- Added query-only source-record companions for question-overlap rows, bounded list
+  windows, named-speaker windows, and discrepancy-list rows.
+- These companions only read admitted `source_record_*` predicates. They do not
+  write durable facts or compatibility rows.
+
+Result:
+
+```text
+six-row slice after source windows:
+4 exact / 1 partial / 1 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+Recovered exact rows:
+
+- `arts_grant_panel_reconsideration` q014
+- `count_composition_roster` q036
+- `municipal_tree_permit_amendment` q032
+- `veridia_intake` q019
+
+Additional generic repairs:
+
+- Added an unbound `scope_discrepancy/6` inventory hint for discrepancy/conflict
+  questions so mapper-bound document constants do not hide same-predicate rows.
+- Added `scope_discrepancy_completion_support` rows that compare admitted
+  source-record discrepancy rows with existing `scope_discrepancy/6` rows and mark
+  source-only completions.
+- Added condition-finding support for `condition (x)` questions from admitted
+  `board_finding/3` and source-attributed claim rows.
+
+Final read on the two remaining blockers:
+
+```text
+northbridge_authority_packet q040: partial, compile/query boundary pressure
+thornfield_variance q015: miss, compile-surface gap
+full pytest: 1638 passed, 2 subtests passed
+```
+
+Northbridge now surfaces the broader discrepancy evidence cleanly:
+
+- `scope_discrepancy/6` unbound returns pipe length, pipe diameter, and timeline.
+- Source-record discrepancy rows also surface reporting frequency and fire
+  hydrants, and mark customer notification as one-sided/not a discrepancy.
+- The durable `scope_discrepancy/6` emission still lacks reporting frequency and
+  fire hydrants, so this remains compile-emission work rather than a query-only
+  win.
+
+Thornfield is a cleaner compile gap:
+
+- The source document contains Kowalski's condition-b objection about missing
+  architect documentation.
+- The compiled KB available to QA does not retain that attribution as a
+  condition-b source claim/source row. It retains procedural Kowalski objections
+  and majority condition-b findings, which are not enough to answer q015.
+
+Next blocker before another native stamp: improve compile emission for
+condition-scoped speaker objections and multi-document discrepancy lists, then
+replay these two rows before deciding whether a full native restamp is earned.

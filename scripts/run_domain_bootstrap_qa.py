@@ -1847,6 +1847,7 @@ def run_one_question(
             *_source_field_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_coordinate_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_attribution_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_scope_discrepancy_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_counsel_opinion_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_vote_record_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_award_cap_quantity_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
@@ -1892,6 +1893,24 @@ def run_one_question(
     relative_next_day_support = _source_record_relative_next_day_companion(runtime, utterance=utterance)
     if relative_next_day_support:
         query_results.append(relative_next_day_support)
+    source_overlap_support = _source_record_question_overlap_companion(runtime, utterance=utterance)
+    if source_overlap_support:
+        query_results.append(source_overlap_support)
+    source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
+    if source_list_window:
+        query_results.append(source_list_window)
+    source_speaker_window = _source_record_speaker_window_companion(runtime, utterance=utterance)
+    if source_speaker_window:
+        query_results.append(source_speaker_window)
+    discrepancy_list = _source_record_discrepancy_list_companion(runtime, utterance=utterance)
+    if discrepancy_list:
+        query_results.append(discrepancy_list)
+    discrepancy_completion = _scope_discrepancy_completion_companion(runtime, utterance=utterance)
+    if discrepancy_completion:
+        query_results.append(discrepancy_completion)
+    condition_finding = _condition_finding_companion(runtime, utterance=utterance)
+    if condition_finding:
+        query_results.append(condition_finding)
     source_numeric_ranges = _source_record_numeric_range_companion(query_results, utterance=utterance)
     if source_numeric_ranges:
         query_results.append(source_numeric_ranges)
@@ -2891,6 +2910,25 @@ def _source_attribution_hint_queries(
         out.append("source_authority(SubjectOrScope, Authority, Action).")
     if "source_record_text_atom/2" in signatures:
         out.append("source_record_text_atom(SourceRow, TextAtom).")
+    return out
+
+
+def _scope_discrepancy_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    text = str(utterance or "").casefold()
+    if "discrepanc" not in text and "conflict" not in text:
+        return []
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    out: list[str] = []
+    if "scope_discrepancy/6" in signatures:
+        out.append("scope_discrepancy(Issue, LeftValue, LeftRecord, RightValue, RightRecord, Basis).")
+    elif "scope_discrepancy/5" in signatures:
+        out.append("scope_discrepancy(Issue, LeftValue, LeftRecord, RightValue, RightRecord).")
+    if "conflict_between/4" in signatures:
+        out.append("conflict_between(Subject, LeftRecord, RightRecord, Basis).")
     return out
 
 
@@ -5857,6 +5895,719 @@ def _source_record_citation_text_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_question_overlap_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    if not _asks_for_source_record_overlap_support(utterance):
+        return None
+    question_tokens = _source_record_overlap_question_tokens(utterance)
+    section_targets = _turn_section_targets_from_utterance(utterance)
+    if len(question_tokens) < 2 and not section_targets:
+        return None
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    if not text_rows:
+        return None
+    row_meta = _source_record_row_metadata(runtime)
+    identifier_keys = _source_record_overlap_identifier_keys(utterance)
+    scored: list[tuple[int, int, str, dict[str, str]]] = []
+    for row in text_rows:
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        if not source_row or not text_atom:
+            continue
+        meta = row_meta.get(source_row, {})
+        section_atom = _normalize_text_filter_atom(str(meta.get("SectionAtom", "")))
+        label = _normalize_text_filter_atom(str(meta.get("Label", "")))
+        combined = "_".join(part for part in (text_atom, section_atom, label) if part)
+        row_tokens = set(_query_atom_tokens(combined))
+        overlap = sorted(question_tokens & row_tokens)
+        identifier_hits = sorted(key for key in identifier_keys if key and key in _compact_identifier_key(combined))
+        section_hit = bool(section_targets and section_atom in section_targets)
+        if not overlap and not identifier_hits and not section_hit:
+            continue
+        score = len(overlap) * 10 + len(identifier_hits) * 14 + (18 if section_hit else 0)
+        if "recus" in combined and any(token.startswith("recus") for token in question_tokens):
+            score += 10
+        if any(token in combined for token in ("correction", "notice", "reconciled", "reconciliation")) and (
+            {"correction", "notice", "reconciled", "reconciliation"} & question_tokens
+        ):
+            score += 8
+        if "protected" in combined and "protected" in question_tokens:
+            score += 8
+        if "discrepanc" in combined and any(token.startswith("discrepanc") for token in question_tokens):
+            score += 8
+        if score < 18:
+            continue
+        line = _safe_int(meta.get("Line"))
+        out_row = {
+            "SupportKind": "source_record_question_overlap",
+            "SourceRow": source_row,
+            "Line": "" if line is None else str(line),
+            "Section": str(meta.get("SectionAtom", "")),
+            "Label": str(meta.get("Label", "")),
+            "TextAtom": text_atom,
+            "QuestionOverlap": ",".join(overlap),
+            "IdentifierHits": ",".join(identifier_hits),
+            "Score": str(score),
+        }
+        scored.append((score, 0 if section_hit else 1, source_row, out_row))
+    if not scored:
+        return None
+    scored.sort(key=lambda item: (-item[0], item[1], item[2]))
+    out_rows = [item[3] for item in scored[:18]]
+    return {
+        "query": "source_record_question_overlap_support(SourceRow, TextAtom, QuestionOverlap, IdentifierHits, Score).",
+        "result": {
+            "predicate": "source_record_question_overlap_support",
+            "prolog_query": "source_record_question_overlap_support(SourceRow, TextAtom, QuestionOverlap, IdentifierHits, Score).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record overlap support ranked admitted source text rows by "
+                    "question token, identifier, and bounded-section overlap; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _asks_for_source_record_overlap_support(utterance: str) -> bool:
+    text = str(utterance or "").casefold()
+    return bool(
+        re.search(
+            r"\b(?:which|what|when|why|list|after|before|between|records?|reconciled|recusal|"
+            r"protected|discrepanc|dissent|commit|status|application|notice|turn)\b",
+            text,
+        )
+    )
+
+
+def _source_record_overlap_question_tokens(utterance: str) -> set[str]:
+    stopwords = {
+        "the",
+        "a",
+        "an",
+        "and",
+        "or",
+        "of",
+        "to",
+        "for",
+        "with",
+        "from",
+        "on",
+        "in",
+        "by",
+        "all",
+        "any",
+        "which",
+        "what",
+        "when",
+        "why",
+        "did",
+        "does",
+        "was",
+        "were",
+        "is",
+        "are",
+        "be",
+        "been",
+        "should",
+        "system",
+        "record",
+        "records",
+    }
+    tokens = set(_query_atom_tokens(utterance))
+    tokens.update(_source_text_question_needles(utterance)[:12])
+    if "recusal" in tokens:
+        tokens.add("recused")
+    if "dissent" in tokens:
+        tokens.add("dissented")
+    if "reconciliation" in tokens:
+        tokens.add("reconciled")
+    return {token for token in tokens if len(token) >= 3 and token not in stopwords and token not in GENERIC_QUERY_PLACEHOLDERS}
+
+
+def _source_record_overlap_identifier_keys(utterance: str) -> list[str]:
+    out: list[str] = []
+    for match in re.finditer(r"\b[A-Za-z]+(?:[-_][A-Za-z0-9]+){1,}\b|#\s*\d+\b|\b\d{4}[-_/]\d{2}[-_/]\d{2}\b", str(utterance or "")):
+        key = _compact_identifier_key(match.group(0))
+        if key and key not in out:
+            out.append(key)
+    return out[:12]
+
+
+def _turn_section_targets_from_utterance(utterance: str) -> set[str]:
+    numbers = [int(match.group(1)) for match in re.finditer(r"\bturn\s+(\d{1,3})\b", str(utterance or ""), re.IGNORECASE)]
+    if not numbers:
+        return set()
+    if len(numbers) >= 2:
+        start, end = min(numbers[:2]), max(numbers[:2])
+        if end - start <= 16:
+            return {f"turn_{value:02d}" for value in range(start, end + 1)}
+    return {f"turn_{value:02d}" for value in numbers}
+
+
+def _source_record_row_metadata(runtime: CorePrologRuntime) -> dict[str, dict[str, Any]]:
+    rows = _runtime_rows(runtime, "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).")
+    out: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", "")).strip()
+        if source_row:
+            out[source_row] = row
+    return out
+
+
+def _source_record_list_window_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:list|which|what)\b", text) or not re.search(r"\b(?:all|ids?|items?|codes?)\b", text):
+        return None
+    question_tokens = _source_record_overlap_question_tokens(utterance)
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    row_meta = _source_record_row_metadata(runtime)
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    normalized: list[dict[str, Any]] = []
+    for source_row, meta in row_meta.items():
+        line = _safe_int(meta.get("Line"))
+        if line is None:
+            continue
+        text_atom = text_by_row.get(source_row, _normalize_text_filter_atom(str(meta.get("Label", ""))))
+        normalized.append(
+            {
+                "SourceRow": source_row,
+                "Line": line,
+                "Kind": str(meta.get("Kind", "")),
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": str(meta.get("Label", "")),
+                "TextAtom": text_atom,
+                "Tokens": set(_query_atom_tokens("_".join([text_atom, str(meta.get("Label", "")), str(meta.get("SectionAtom", ""))]))),
+            }
+        )
+    if not normalized:
+        return None
+    normalized.sort(key=lambda row: int(row["Line"]))
+    candidates: list[dict[str, str]] = []
+    for index, row in enumerate(normalized):
+        row_tokens = set(row["Tokens"])
+        if not ({"listed", "list", "original", "protected", "current"} & row_tokens):
+            continue
+        if len(question_tokens & row_tokens) < 2 and not ({"listed", "list"} & row_tokens and question_tokens & row_tokens):
+            continue
+        section = str(row["Section"])
+        for follower in normalized[index + 1 : index + 12]:
+            if str(follower["Section"]) != section:
+                break
+            if str(follower["Kind"]) not in {"table_row", "continuation_line", "anchored_line"}:
+                if int(follower["Line"]) - int(row["Line"]) > 3:
+                    break
+            item_id = _source_record_list_item_id(follower["TextAtom"], follower["Label"])
+            if not item_id:
+                continue
+            candidates.append(
+                {
+                    "SupportKind": "source_record_list_window",
+                    "SourceRow": str(follower["SourceRow"]),
+                    "HeaderSourceRow": str(row["SourceRow"]),
+                    "Line": str(follower["Line"]),
+                    "Section": section,
+                    "ItemId": item_id,
+                    "DisplayItemId": _display_source_record_item_id(item_id),
+                    "TextAtom": str(follower["TextAtom"]),
+                    "HeaderTextAtom": str(row["TextAtom"]),
+                }
+            )
+    for row in normalized:
+        text_atom = str(row["TextAtom"])
+        for match in re.finditer(r"(?:^|_)(?:plus|add(?:ed)?|including)_([a-z]+_\d{1,4}|v_\d{1,4})(?:_|$)", text_atom):
+            candidates.append(
+                {
+                    "SupportKind": "source_record_list_delta",
+                    "SourceRow": str(row["SourceRow"]),
+                    "HeaderSourceRow": "",
+                    "Line": str(row["Line"]),
+                    "Section": str(row["Section"]),
+                    "ItemId": match.group(1),
+                    "DisplayItemId": _display_source_record_item_id(match.group(1)),
+                    "TextAtom": text_atom,
+                    "HeaderTextAtom": "",
+                }
+            )
+    if not candidates:
+        return None
+    seen: set[tuple[str, str]] = set()
+    out_rows: list[dict[str, str]] = []
+    for row in candidates:
+        key = (row["SourceRow"], row["ItemId"])
+        if key in seen:
+            continue
+        seen.add(key)
+        out_rows.append(row)
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_list_window_support(SourceRow, HeaderSourceRow, ItemId, TextAtom).",
+        "result": {
+            "predicate": "source_record_list_window_support",
+            "prolog_query": "source_record_list_window_support(SourceRow, HeaderSourceRow, ItemId, TextAtom).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows[:24]),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only list-window support followed admitted source list/table headers and delta rows; no durable fact was written",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _source_record_list_item_id(text_atom: str, label: str) -> str:
+    for value in (str(label or ""), str(text_atom or "")):
+        match = re.search(r"\b([a-z]+_\d{1,4})\b", value)
+        if match:
+            return match.group(1)
+        match = re.search(r"\b(?:tree_|item_|tag_|code_|v_)?(\d{1,4})\b", value)
+        if match:
+            prefix = "v" if re.search(r"\bv_\d", value) else "item"
+            return f"{prefix}_{int(match.group(1))}"
+    return ""
+
+
+def _display_source_record_item_id(item_id: str) -> str:
+    match = re.fullmatch(r"(?:v|tree|item)_(\d{1,4})", str(item_id or ""))
+    if match:
+        return f"#{int(match.group(1))}"
+    return str(item_id or "")
+
+
+def _source_record_speaker_window_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    speaker = _speaker_name_from_why_question(utterance)
+    if not speaker:
+        return None
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    row_meta = _source_record_row_metadata(runtime)
+    ordered: list[dict[str, Any]] = []
+    text_by_row: dict[str, str] = {}
+    for row in text_rows:
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", ""))
+        text_atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        text_by_row[source_row] = text_atom
+    for source_row, meta in row_meta.items():
+        line = _safe_int(meta.get("Line"))
+        if line is None:
+            continue
+        ordered.append(
+            {
+                "SourceRow": source_row,
+                "Line": line,
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": str(meta.get("Label", "")),
+                "TextAtom": text_by_row.get(source_row, _normalize_text_filter_atom(str(meta.get("Label", "")))),
+            }
+        )
+    ordered.sort(key=lambda row: int(row["Line"]))
+    speaker_key = _compact_identifier_key(speaker)
+    question_tokens = _source_record_overlap_question_tokens(utterance)
+    selected: list[dict[str, str]] = []
+    for index, row in enumerate(ordered):
+        combined_key = _compact_identifier_key("_".join([str(row["Label"]), str(row["TextAtom"])]))
+        if speaker_key not in combined_key:
+            continue
+        window = ordered[max(0, index - 3) : min(len(ordered), index + 4)]
+        for item in window:
+            item_tokens = set(_query_atom_tokens("_".join([str(item["TextAtom"]), str(item["Label"]), str(item["Section"])])))
+            selected.append(
+                {
+                    "SupportKind": "source_record_speaker_window",
+                    "Speaker": speaker,
+                    "SourceRow": str(item["SourceRow"]),
+                    "Line": str(item["Line"]),
+                    "Section": str(item["Section"]),
+                    "Label": str(item["Label"]),
+                    "TextAtom": str(item["TextAtom"]),
+                    "QuestionOverlap": ",".join(sorted(question_tokens & item_tokens)),
+                }
+            )
+    if not selected:
+        return None
+    seen: set[str] = set()
+    out_rows: list[dict[str, str]] = []
+    for row in selected:
+        key = row["SourceRow"]
+        if key in seen:
+            continue
+        seen.add(key)
+        out_rows.append(row)
+    return {
+        "query": "source_record_speaker_window_support(Speaker, SourceRow, TextAtom, QuestionOverlap).",
+        "result": {
+            "predicate": "source_record_speaker_window_support",
+            "prolog_query": "source_record_speaker_window_support(Speaker, SourceRow, TextAtom, QuestionOverlap).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows[:24]),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only speaker-window support returned admitted source rows around named-speaker rows; no durable fact was written",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _speaker_name_from_why_question(utterance: str) -> str:
+    match = re.search(r"\bwhy\s+did\s+([A-Z][A-Za-z0-9_.-]*)\b", str(utterance or ""), re.IGNORECASE)
+    if match:
+        return _simple_query_atom(match.group(1))
+    match = re.search(r"\bwhat\s+did\s+([A-Z][A-Za-z0-9_.-]*)\s+say\b", str(utterance or ""), re.IGNORECASE)
+    if match:
+        return _simple_query_atom(match.group(1))
+    return ""
+
+
+def _source_record_discrepancy_list_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "discrepanc" not in text and "conflict" not in text:
+        return None
+    out_rows = _source_record_discrepancy_rows(runtime)
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_discrepancy_list_support(SourceRow, DiscrepancyStatus, TextAtom).",
+        "result": {
+            "predicate": "source_record_discrepancy_list_support",
+            "prolog_query": "source_record_discrepancy_list_support(SourceRow, DiscrepancyStatus, TextAtom).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows[:24]),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only discrepancy-list support surfaced admitted source rows that compare two governing records; no durable fact was written",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _scope_discrepancy_completion_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "discrepanc" not in text and "conflict" not in text:
+        return None
+    source_rows = _source_record_discrepancy_rows(runtime)
+    if not source_rows:
+        return None
+    existing_issues: set[str] = set()
+    for row in _runtime_rows(runtime, "scope_discrepancy(Issue, LeftValue, LeftRecord, RightValue, RightRecord, Basis)."):
+        if isinstance(row, dict):
+            existing_issues.add(_normalize_discrepancy_issue(str(row.get("Issue", ""))))
+    out_rows: list[dict[str, str]] = []
+    for row in source_rows:
+        if row.get("DiscrepancyStatus") != "candidate_discrepancy":
+            continue
+        issue = _discrepancy_issue_from_source_row(row)
+        if not issue:
+            continue
+        status = "already_structured" if issue in existing_issues else "source_record_completion"
+        left_value, right_value = _discrepancy_side_summaries(str(row.get("TextAtom", "")))
+        out_rows.append(
+            {
+                "SupportKind": "scope_discrepancy_completion",
+                "Issue": issue,
+                "CompletionStatus": status,
+                "LeftValue": left_value,
+                "RightValue": right_value,
+                "SourceRow": str(row.get("SourceRow", "")),
+                "Line": str(row.get("Line", "")),
+                "TextAtom": str(row.get("TextAtom", "")),
+            }
+        )
+    if not out_rows:
+        return None
+    out_rows.sort(key=lambda row: (0 if row["CompletionStatus"] == "source_record_completion" else 1, _safe_int(row["Line"]) or 999999))
+    return {
+        "query": "scope_discrepancy_completion_support(Issue, CompletionStatus, LeftValue, RightValue, SourceRow).",
+        "result": {
+            "predicate": "scope_discrepancy_completion_support",
+            "prolog_query": "scope_discrepancy_completion_support(Issue, CompletionStatus, LeftValue, RightValue, SourceRow).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows[:24]),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only completion support compared admitted source discrepancy rows with existing scope_discrepancy rows; no durable fact was written",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "scope_discrepancy(Issue, LeftValue, LeftRecord, RightValue, RightRecord, Basis).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _source_record_discrepancy_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    row_meta = _source_record_row_metadata(runtime)
+    out_rows: list[dict[str, str]] = []
+    for row in text_rows:
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", "")).strip()
+        text_atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        if not source_row or not text_atom:
+            continue
+        meta = row_meta.get(source_row, {})
+        combined_atom = "_".join(
+            part
+            for part in (text_atom, str(meta.get("SectionAtom", "")), str(meta.get("Label", "")))
+            if part
+        )
+        row_tokens = set(_query_atom_tokens(text_atom))
+        combined_tokens = set(_query_atom_tokens(combined_atom))
+        comparison_tokens = {
+            "states",
+            "specifies",
+            "requires",
+            "does",
+            "mention",
+            "addressed",
+            "differs",
+            "discrepancy",
+            "conflict",
+        }
+        if not (comparison_tokens & row_tokens or "does_not_mention" in text_atom or "not_addressed" in text_atom):
+            continue
+        if len({"resolution", "agreement"} & combined_tokens) < 2 and "discrepanc" not in text_atom:
+            continue
+        if "not_addressed" in text_atom and "discretion" in text_atom:
+            status = "one_sided_not_discrepancy"
+        elif any(token in text_atom for token in ("does_not_mention", "requires", "states", "specifies", "differs", "discrepancy")):
+            status = "candidate_discrepancy"
+        else:
+            status = "context"
+        out_rows.append(
+            {
+                "SupportKind": "source_record_discrepancy_list",
+                "SourceRow": source_row,
+                "Line": str(meta.get("Line", "")),
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": str(meta.get("Label", "")),
+                "DiscrepancyStatus": status,
+                "TextAtom": text_atom,
+            }
+        )
+    out_rows.sort(key=lambda row: (_safe_int(row.get("Line")) if _safe_int(row.get("Line")) is not None else 999999))
+    return out_rows
+
+
+def _discrepancy_issue_from_source_row(row: Mapping[str, str]) -> str:
+    for value in (str(row.get("Label", "")), str(row.get("TextAtom", ""))):
+        atom = _normalize_text_filter_atom(value)
+        match = re.match(r"v_\d+_([a-z0-9_]+?)(?:_the_|$)", atom)
+        if match:
+            issue = _normalize_discrepancy_issue(match.group(1))
+            if not re.fullmatch(r"v_\d+", issue):
+                return issue
+        match = re.match(r"([a-z0-9_]+?)(?:_the_resolution|_resolution|_the_|$)", atom)
+        if match and match.group(1) not in {"v", "the", "this"}:
+            issue = _normalize_discrepancy_issue(match.group(1))
+            if not re.fullmatch(r"v_\d+", issue):
+                return issue
+    return ""
+
+
+def _normalize_discrepancy_issue(value: str) -> str:
+    atom = _normalize_text_filter_atom(value)
+    atom = re.sub(r"^v_\d+_", "", atom)
+    atom = re.sub(r"_(?:the_)?(?:resolution|agreement|swifa|loan).*$", "", atom)
+    aliases = {
+        "progress_reports": "reporting_frequency",
+        "project_timeline": "timeline",
+        "fire_hydrants": "fire_hydrants",
+        "pipe_length": "pipe_length",
+        "pipe_diameter": "pipe_diameter",
+    }
+    return aliases.get(atom, atom)
+
+
+def _discrepancy_side_summaries(text_atom: str) -> tuple[str, str]:
+    atom = _normalize_text_filter_atom(text_atom)
+    left = ""
+    right = ""
+    left_match = re.search(r"resolution_(?:states|specifies|requires|does_not_mention)_([a-z0-9_]+?)(?:_the_swifa|_the_agreement|_swifa_agreement|_agreement|$)", atom)
+    if left_match:
+        left = left_match.group(1)
+    right_match = re.search(r"(?:swifa_)?agreement_(?:states|specifies|requires)_([a-z0-9_]+?)(?:_the_|_i_|$)", atom)
+    if right_match:
+        right = right_match.group(1)
+    if "does_not_mention" in atom and not left:
+        left = "not_mentioned"
+    return left[:120], right[:120]
+
+
+def _condition_finding_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    condition = _condition_label_from_utterance(utterance)
+    if not condition:
+        return None
+    speaker = _speaker_name_from_why_question(utterance)
+    question_tokens = _source_record_overlap_question_tokens(utterance)
+    out_rows: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "board_finding(ActorOrHearing, Condition, Finding)."):
+        if not isinstance(row, dict):
+            continue
+        actor = _normalize_text_filter_atom(str(row.get("ActorOrHearing", "")))
+        row_condition = _normalize_text_filter_atom(str(row.get("Condition", "")))
+        finding = _normalize_text_filter_atom(str(row.get("Finding", "")))
+        combined = "_".join([actor, row_condition, finding])
+        if condition not in row_condition and condition not in combined:
+            continue
+        tokens = set(_query_atom_tokens(combined))
+        speaker_alignment = ""
+        if speaker:
+            speaker_key = _compact_identifier_key(speaker)
+            speaker_alignment = "speaker_matched" if speaker_key in _compact_identifier_key(combined) else "speaker_unattributed"
+        out_rows.append(
+            {
+                "SupportKind": "condition_finding",
+                "ActorOrHearing": actor,
+                "Condition": row_condition,
+                "Finding": finding,
+                "SpeakerAlignment": speaker_alignment,
+                "QuestionOverlap": ",".join(sorted(question_tokens & tokens)),
+            }
+        )
+    for row in _runtime_rows(runtime, "source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope)."):
+        if not isinstance(row, dict):
+            continue
+        values = {
+            "SourceOrSpeaker": _normalize_text_filter_atom(str(row.get("SourceOrSpeaker", ""))),
+            "Subject": _normalize_text_filter_atom(str(row.get("Subject", ""))),
+            "ClaimOrFinding": _normalize_text_filter_atom(str(row.get("ClaimOrFinding", ""))),
+            "Scope": _normalize_text_filter_atom(str(row.get("Scope", ""))),
+        }
+        combined = "_".join(values.values())
+        if condition not in combined:
+            continue
+        if speaker and _compact_identifier_key(speaker) not in _compact_identifier_key(combined):
+            continue
+        tokens = set(_query_atom_tokens(combined))
+        out_rows.append(
+            {
+                "SupportKind": "condition_finding_source_claim",
+                "ActorOrHearing": values["SourceOrSpeaker"],
+                "Condition": condition,
+                "Finding": values["ClaimOrFinding"] or values["Subject"],
+                "SpeakerAlignment": "speaker_matched" if speaker else "",
+                "QuestionOverlap": ",".join(sorted(question_tokens & tokens)),
+            }
+        )
+    if not out_rows:
+        return None
+    seen: set[tuple[str, str, str]] = set()
+    deduped: list[dict[str, str]] = []
+    for row in out_rows:
+        key = (row["ActorOrHearing"], row["Condition"], row["Finding"])
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(row)
+    deduped.sort(key=lambda row: (0 if row.get("SpeakerAlignment") == "speaker_matched" else 1, row["Condition"], row["ActorOrHearing"]))
+    return {
+        "query": "condition_finding_support(ActorOrHearing, Condition, Finding, SpeakerAlignment).",
+        "result": {
+            "predicate": "condition_finding_support",
+            "prolog_query": "condition_finding_support(ActorOrHearing, Condition, Finding, SpeakerAlignment).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(deduped[:18]),
+            "variables": list(deduped[0].keys()),
+            "rows": deduped[:18],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only condition-finding support exposed admitted condition-specific findings and source claims; no durable fact was written",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "board_finding(ActorOrHearing, Condition, Finding).",
+            "source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope).",
+        ],
+    }
+
+
+def _condition_label_from_utterance(utterance: str) -> str:
+    text = str(utterance or "")
+    match = re.search(r"\bcondition\s*(?:\(|\[)?\s*([a-z])\s*(?:\)|\])?", text, re.IGNORECASE)
+    if match:
+        return f"condition_{match.group(1).casefold()}"
+    match = re.search(r"\bcondition_([a-z])\b", text, re.IGNORECASE)
+    if match:
+        return f"condition_{match.group(1).casefold()}"
+    return ""
 
 
 def _source_record_section_list_count_companion(
