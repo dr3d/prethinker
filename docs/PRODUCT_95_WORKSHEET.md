@@ -286,9 +286,43 @@ source-field/source-text fallback. The two rows that had previously moved only
 to partial also resolved exactly in this replay. This remains a targeted
 variance check over frozen native compiles, not a native stamp.
 
+## Quantity Phrase Order Hybrid-Join Lane
+
+The first hybrid-join pass found rows where the relevant source-record text was
+present but the question-token source hint looked for the quantity phrase in
+the question's word order while the deterministic source ledger had normalized
+the same phrase in the opposite order.
+
+Repair:
+
+- Added a generic quantity phrase-order hint for source-text probes.
+- Scoped the reorder to concrete quantity markers (`total`, `count`, `amount`,
+  `number`, `quantity`, `sum`) so ordinary `how many` questions keep their
+  unigram budget.
+- Kept the path in clean source-record query routing, with compatibility
+  adapters still disabled.
+
+Verification:
+
+```text
+two-row frozen native hybrid replay: 2 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+full pytest: 1612 passed
+artifact archive: C:\prethinker_tmp_archive\product_95_quantity_phrase_hybrid_join_20260523
+```
+
+Read: this recovered two native hybrid rows without turning retired helper
+rows back on. The fix is mechanism-level: quantity questions now probe both
+question-order and source-normalized-order compounds when looking up admitted
+`source_record_text_atom/2` rows.
+
 ## Next Moves
 
-1. Move to hybrid-join partials after the event/date/time source carrier is
-   scoped.
-2. Hold compile-only event-time probing unless a later row shows the query
+1. Continue hybrid-join triage on frozen native misses, preferring active
+   source-record/query routing fixes over retired compatibility helpers.
+2. Re-run the recovered slices inside the next native stamp instead of treating
+   targeted replay as a corpus score.
+3. Hold compile-only event-time probing unless a later row shows the query
    surface still cannot use admitted source-record text/numeric rows.

@@ -2250,6 +2250,8 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     if len(state_aliases) >= 3:
         derived_needles.append("_".join(state_aliases))
         derived_needles.extend(state_aliases)
+    if _is_quantity_source_text_question(raw):
+        derived_needles.extend(_quantity_phrase_order_needles(tokens))
     for pattern in (
         r"\b(?:transfer|transfers|transferred|alter|alters|altered|determine|determines|determined|hold|holds|held)\s+(?:legal\s+)?(?:title|ownership)\b",
         r"\b(?:title|ownership)\s+(?:transfer|transfers|transferred|holder|holders|status|determination)\b",
@@ -2375,6 +2377,45 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     priority_unigram_needles = [token for token in tokens if token in priority_unigram_markers]
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
     return _ordered_atom_unique([*identifier_needles, *derived_needles, *priority_unigram_needles, *phrase_needles, *unigram_needles])
+
+
+def _quantity_phrase_order_needles(tokens: list[str]) -> list[str]:
+    quantity_markers = {
+        "amount",
+        "count",
+        "counts",
+        "number",
+        "quantity",
+        "sum",
+        "total",
+    }
+    stop = {
+        "are",
+        "did",
+        "does",
+        "for",
+        "how",
+        "in",
+        "is",
+        "of",
+        "the",
+        "to",
+        "was",
+        "were",
+        "what",
+        "which",
+    }
+    out: list[str] = []
+    for index in range(0, max(0, len(tokens) - 1)):
+        left, right = tokens[index], tokens[index + 1]
+        if left in stop or right in stop or left.isdigit() or right.isdigit():
+            continue
+        if left not in quantity_markers and right not in quantity_markers:
+            continue
+        out.append(f"{left}_{right}")
+        if left != right:
+            out.append(f"{right}_{left}")
+    return out
 
 
 def _generic_question_token_inflection_needles(tokens: list[str]) -> list[str]:

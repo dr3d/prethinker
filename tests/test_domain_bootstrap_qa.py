@@ -5528,6 +5528,12 @@ def test_source_text_question_hints_prioritize_source_stated_unigrams() -> None:
         "source_record_numeric_token(SourceRow, NumericToken)."
     ) in timed_event_hints
 
+    quantity_hints = _source_text_question_token_hint_queries(
+        utterance="How many devices total are active in batch v2?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("total_devices", TextAtom).' in quantity_hints
+
 
 def test_source_section_question_key_hint_routes_sold_at_section_text() -> None:
     inventory = {
