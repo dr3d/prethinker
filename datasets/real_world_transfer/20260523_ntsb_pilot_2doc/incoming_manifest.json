@@ -1,0 +1,90 @@
+{
+  "dataset_name": "NTSB Thermometer Pilot 2026-05",
+  "dataset_version": "1.0",
+  "dataset_id": "ntsb_pilot_2026_05",
+  "created_date": "2026-05-23",
+  "description": "Two-document NTSB real-world accident investigation reports for Prethinker transfer testing. One aviation accident (Robinson R44 II), one marine accident (towing vessel capsizing). No invented content; all source documents are official public NTSB records.",
+  "purpose": "Real-world messy documents for testing Prethinker's ability to extract structured facts from complex investigative narratives with incomplete information, competing evidence, and source limitations.",
+  "documents": [
+    {
+      "id": "ntsb_001",
+      "mode": "aviation",
+      "type": "Preliminary Report",
+      "accident_number": "WPR24FA200",
+      "title": "Robinson Helicopter R44 II Accident, Bluestem, Washington",
+      "date": "2024-06-19",
+      "fatalities": 2,
+      "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/194501/pdf",
+      "qa_items": 25,
+      "qa_categories": [
+        "direct_lookup",
+        "timeline",
+        "actor_action",
+        "causal_chain",
+        "policy_rule",
+        "count_table",
+        "unresolved_issue",
+        "as_of_date",
+        "source_limitation"
+      ]
+    },
+    {
+      "id": "ntsb_002",
+      "mode": "marine",
+      "type": "Final Report",
+      "accident_number": "DCA24FM038",
+      "report_number": "MIR-25-21",
+      "title": "Capsizing and Sinking of Towing Vessel Baylor J. Tregre",
+      "date": "2024-05-13",
+      "report_issued": "2025-05-15",
+      "fatalities": 0,
+      "injuries": 1,
+      "crew_aboard": 4,
+      "crew_rescued": 4,
+      "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/MIR2521.pdf",
+      "qa_items": 25,
+      "qa_categories": [
+        "direct_lookup",
+        "timeline",
+        "actor_action",
+        "causal_chain",
+        "policy_rule",
+        "count_table",
+        "contradiction",
+        "unresolved_issue",
+        "as_of_date",
+        "source_limitation"
+      ]
+    }
+  ],
+  "total_qa_items": 50,
+  "file_structure": {
+    "manifest.json": "This file",
+    "README.md": "Dataset overview and authoring guidelines",
+    "ntsb_001/source_original.pdf": "Original PDF from NTSB (aviation accident)",
+    "ntsb_001/source.md": "Faithful markdown conversion of source PDF",
+    "ntsb_001/metadata.json": "Document metadata and caveats",
+    "ntsb_001/qa.md": "25 questions (no answers)",
+    "ntsb_001/oracle.jsonl": "25 answers with supporting spans and difficulty",
+    "ntsb_001/provenance.md": "Source verification and data quality notes",
+    "ntsb_002/source_original.pdf": "Original PDF from NTSB (marine accident)",
+    "ntsb_002/source.md": "Faithful markdown conversion of source PDF",
+    "ntsb_002/metadata.json": "Document metadata and caveats",
+    "ntsb_002/qa.md": "25 questions (no answers)",
+    "ntsb_002/oracle.jsonl": "25 answers with supporting spans and difficulty",
+    "ntsb_002/provenance.md": "Source verification and data quality notes"
+  },
+  "data_discipline": {
+    "source_authenticity": "Real public documents; no invented content",
+    "extraction_fidelity": "Faithful conversion preserving structure, tables, and narrative organization",
+    "answer_grounding": "All answers reference supporting source spans; no external knowledge injected",
+    "oracle_format": "JSONL with id, source_id, category, reference_answer, supporting_source_spans, difficulty",
+    "messy_reality": "Documents preserve original messiness: incomplete investigations, competing evidence, source limitations, uncertainties"
+  },
+  "known_caveats": [
+    "ntsb_001: Preliminary report; probable cause not determined; investigation ongoing",
+    "ntsb_002: Marine final report; weather stations 22-27 nm from casualty site; salvage operations modified wreckage before examination",
+    "Both: Some phenomena (storm type, exact wind speeds) not definitively confirmed despite crew observations",
+    "Both: Crew recall and communication chains introduce inherent uncertainty"
+  ]
+}

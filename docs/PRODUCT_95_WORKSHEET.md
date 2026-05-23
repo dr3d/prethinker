@@ -440,7 +440,7 @@ final rough NTSB pilot QA: 25 exact / 0 partial / 0 miss
 compatibility rows: 0
 runtime load errors: 0
 QA write proposal rows: 0
-full pytest: 1620 passed, 2 subtests passed
+full pytest: 1622 passed, 2 subtests passed
 artifact archive: C:\prethinker_tmp_archive\ntsb_pilot_shakedown_20260523
 ```
 
@@ -448,3 +448,36 @@ Read: the pilot was messy enough to find a real product-facing weakness without
 requiring a new compile policy. The compile gate hold remains a separate signal;
 the QA path is operationally clean on this one rough document after the
 source-record routing repair.
+
+## Corrected NTSB Two-Document Intake
+
+Claude's corrected NTSB pilot package was received as
+`prethinker_ntsb_pilot_2026_05.zip` and normalized into
+`datasets/real_world_transfer/20260523_ntsb_pilot_2doc`.
+
+Intake verdict:
+
+```text
+fixtures: 2
+QA rows: 25 + 25
+oracle JSONL: valid, IDs match QA
+answer separation: mostly clean
+source_original.pdf in archive: missing
+canonical fix: fetched PDFs from official NTSB URLs
+QA format in archive: q001: markers
+canonical fix: numbered runner-compatible qa.md, incoming retained as qa_authored.md
+```
+
+Read: this package followed the important instruction: real public NTSB source
+documents, source/provenance/metadata separated from question and oracle files,
+and no expected predicates or compile solutions. It missed two mechanical
+details, both corrected during intake. It is ready for a compile/QA spotcheck
+when we choose to spend the OpenRouter time.
+
+Verification:
+
+```text
+real-world dataset retention tests: 6 passed
+full pytest: 1622 passed, 2 subtests passed
+raw intake archive: C:\prethinker_tmp_archive\ntsb_two_doc_intake_20260523
+```

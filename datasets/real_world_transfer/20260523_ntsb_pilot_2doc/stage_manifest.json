@@ -1,0 +1,63 @@
+{
+  "fixtures": [
+    {
+      "categories": {
+        "actor_action": 2,
+        "as_of_date": 1,
+        "causal_chain": 2,
+        "count_table": 2,
+        "direct_lookup": 5,
+        "policy_rule": 2,
+        "source_limitation": 4,
+        "timeline": 5,
+        "unresolved_issue": 2
+      },
+      "fixture": "ntsb_001",
+      "oracle_jsonl": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_001\\oracle.jsonl",
+      "path": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_001",
+      "qa_file": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_001\\qa.md",
+      "qa_rows": 25,
+      "source": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_001\\source.md",
+      "status": "staged_pending_compile"
+    },
+    {
+      "categories": {
+        "actor_action": 2,
+        "as_of_date": 1,
+        "causal_chain": 2,
+        "contradiction": 2,
+        "count_table": 2,
+        "direct_lookup": 5,
+        "policy_rule": 2,
+        "source_limitation": 3,
+        "timeline": 5,
+        "unresolved_issue": 1
+      },
+      "fixture": "ntsb_002",
+      "oracle_jsonl": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_002\\oracle.jsonl",
+      "path": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_002",
+      "qa_file": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_002\\qa.md",
+      "qa_rows": 25,
+      "source": "datasets\\real_world_transfer\\20260523_ntsb_pilot_2doc\\ntsb_002\\source.md",
+      "status": "staged_pending_compile"
+    }
+  ],
+  "generated_at": "2026-05-23T01:55:00-04:00",
+  "intake_caveats": [
+    "Incoming package did not include source_original.pdf files despite naming them in the manifest.",
+    "Incoming qa.md used q-id markers rather than the current runner-compatible numbered markdown format."
+  ],
+  "policy": [
+    "Copies source and notes as authored where possible.",
+    "Writes qa.md with runner-compatible questions only.",
+    "Writes oracle.jsonl with reference answers for after-the-fact scoring.",
+    "Does not interpret source prose or answers."
+  ],
+  "schema_version": "incoming_fixture_stage_manifest_v1",
+  "summary": {
+    "failed_fixture_count": 0,
+    "fixture_count": 2,
+    "qa_rows": 50,
+    "staged_fixture_count": 2
+  }
+}

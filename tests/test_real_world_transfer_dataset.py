@@ -7,6 +7,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260521"
 PILOT_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260523"
+NTSB_TWO_DOC_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260523_ntsb_pilot_2doc"
 
 EXPECTED_FIXTURES = {
     "cpsc_recall_polaris_rzr200_2023",
@@ -87,3 +88,50 @@ def test_real_world_transfer_pilot_keeps_twenty_five_row_shape() -> None:
     assert [row["id"] for row in question_rows] == [f"q{i:03d}" for i in range(1, 26)]
     assert all("reference_answer" not in row for row in question_rows)
     assert all("reference_answer" in row for row in qa_battery)
+
+
+def test_real_world_transfer_ntsb_two_doc_pilot_is_retained() -> None:
+    for fixture in ("ntsb_001", "ntsb_002"):
+        fixture_root = NTSB_TWO_DOC_ROOT / fixture
+
+        assert fixture_root.is_dir()
+        for name in (
+            "source.md",
+            "source_original.pdf",
+            "story.md",
+            "qa.md",
+            "qa_authored.md",
+            "oracle.jsonl",
+            "qa_questions.jsonl",
+            "qa_battery.json",
+            "metadata.json",
+            "provenance.md",
+            "README.md",
+            "fixture_notes.md",
+            "anti_leakage_manifest.md",
+        ):
+            assert (fixture_root / name).is_file(), f"{fixture} missing {name}"
+
+
+def test_real_world_transfer_ntsb_two_doc_pilot_keeps_twenty_five_row_shape() -> None:
+    for fixture in ("ntsb_001", "ntsb_002"):
+        fixture_root = NTSB_TWO_DOC_ROOT / fixture
+        oracle_rows = [
+            json.loads(line)
+            for line in (fixture_root / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        question_rows = [
+            json.loads(line)
+            for line in (fixture_root / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        qa_battery = json.loads((fixture_root / "qa_battery.json").read_text(encoding="utf-8"))
+
+        assert len(oracle_rows) == 25
+        assert len(question_rows) == 25
+        assert len(qa_battery) == 25
+        assert [row["id"] for row in oracle_rows] == [f"q{i:03d}" for i in range(1, 26)]
+        assert [row["id"] for row in question_rows] == [f"q{i:03d}" for i in range(1, 26)]
+        assert all("reference_answer" not in row for row in question_rows)
+        assert all("reference_answer" in row for row in qa_battery)

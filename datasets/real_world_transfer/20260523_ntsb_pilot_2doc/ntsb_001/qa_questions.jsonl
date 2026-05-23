@@ -1,0 +1,25 @@
+{"category": "direct_lookup", "id": "q001", "question": "What was the registration number of the helicopter involved in this accident?", "source_id": "ntsb_001:q001"}
+{"category": "direct_lookup", "id": "q002", "question": "On what date did the accident occur?", "source_id": "ntsb_001:q002"}
+{"category": "direct_lookup", "id": "q003", "question": "What was the make and model of the helicopter?", "source_id": "ntsb_001:q003"}
+{"category": "direct_lookup", "id": "q004", "question": "What was the exact time of the accident (local time)?", "source_id": "ntsb_001:q004"}
+{"category": "direct_lookup", "id": "q005", "question": "In what state did this accident occur?", "source_id": "ntsb_001:q005"}
+{"category": "timeline", "id": "q006", "question": "What time did the helicopter depart Seattle (BFI)?", "source_id": "ntsb_001:q006"}
+{"category": "timeline", "id": "q007", "question": "How long was the helicopter on the ground at Ellensburg (ELN)?", "source_id": "ntsb_001:q007"}
+{"category": "timeline", "id": "q008", "question": "What time did the helicopter depart Ellensburg?", "source_id": "ntsb_001:q008"}
+{"category": "timeline", "id": "q009", "question": "Approximately how many minutes elapsed between departure from Seattle and the accident?", "source_id": "ntsb_001:q009"}
+{"category": "timeline", "id": "q010", "question": "At what time did the observation facility (KSKA) record meteorological conditions?", "source_id": "ntsb_001:q010"}
+{"category": "actor_action", "id": "q011", "question": "Who was in command of the helicopter at the time of departure from Seattle?", "source_id": "ntsb_001:q011"}
+{"category": "actor_action", "id": "q012", "question": "How many occupants were on board the helicopter?", "source_id": "ntsb_001:q012"}
+{"category": "causal_chain", "id": "q013", "question": "What type of terrain did the helicopter impact?", "source_id": "ntsb_001:q013"}
+{"category": "causal_chain", "id": "q014", "question": "In what condition was the fuselage after the accident?", "source_id": "ntsb_001:q014"}
+{"category": "policy_rule", "id": "q015", "question": "Under what Federal Aviation Regulations was this flight conducted?", "source_id": "ntsb_001:q015"}
+{"category": "policy_rule", "id": "q016", "question": "What type of flight plan was filed for this flight?", "source_id": "ntsb_001:q016"}
+{"category": "count_table", "id": "q017", "question": "How many gallons of fuel did the pilot purchase at Ellensburg?", "source_id": "ntsb_001:q017"}
+{"category": "count_table", "id": "q018", "question": "How far was the tail rotor assembly found from the main fuselage?", "source_id": "ntsb_001:q018"}
+{"category": "unresolved_issue", "id": "q019", "question": "What was the probable cause of this accident at the time this report was issued?", "source_id": "ntsb_001:q019"}
+{"category": "unresolved_issue", "id": "q020", "question": "Why did the helicopter impact the terrain according to the preliminary investigation?", "source_id": "ntsb_001:q020"}
+{"category": "as_of_date", "id": "q021", "question": "As of the date this preliminary report was issued, what investigation status or conclusion was definitively stated?", "source_id": "ntsb_001:q021"}
+{"category": "source_limitation", "id": "q022", "question": "What does the report indicate about the completeness of the investigation as of the report date?", "source_id": "ntsb_001:q022"}
+{"category": "source_limitation", "id": "q023", "question": "What additional examinations were planned for the wreckage?", "source_id": "ntsb_001:q023"}
+{"category": "source_limitation", "id": "q024", "question": "How complete was the meteorological data coverage for the accident location?", "source_id": "ntsb_001:q024"}
+{"category": "source_limitation", "id": "q025", "question": "What limitation is noted regarding the availability of final conclusions in this report?", "source_id": "ntsb_001:q025"}

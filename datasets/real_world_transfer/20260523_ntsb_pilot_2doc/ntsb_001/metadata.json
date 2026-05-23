@@ -1,0 +1,23 @@
+{
+  "id": "ntsb_001",
+  "domain": "ntsb",
+  "mode": "aviation",
+  "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/194501/pdf",
+  "retrieved_at": "2026-05-23",
+  "document_date": "2024-06-19",
+  "title": "Robinson Helicopter R44 II Accident, Bluestem, Washington",
+  "source_format": "pdf",
+  "accident_number": "WPR24FA200",
+  "aircraft_make_model": "Robinson Helicopter Company R44 II",
+  "registration": "N323TT",
+  "location": "Bluestem, WA (47.546733, -118.15535)",
+  "fatalities": 2,
+  "injuries_nonfatal": 0,
+  "investigation_class": "Class 3",
+  "known_caveats": [
+    "This is a preliminary report; conclusions and probable cause are not yet determined",
+    "No final report is available as of May 2026",
+    "Wreckage was transported to secure facility for further examination",
+    "Limited narrative detail available in preliminary format"
+  ]
+}

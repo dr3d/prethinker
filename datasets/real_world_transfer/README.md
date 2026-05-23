@@ -16,6 +16,10 @@ baseline.
 - `20260523`: one rough NTSB aviation pilot fixture promoted from an incoming
   tmp package. This is useful for harness shakedown, but it is not a polished
   transfer thermometer batch.
+- `20260523_ntsb_pilot_2doc`: two externally sourced NTSB pilot fixtures
+  promoted from the corrected May 23 intake package. The package followed the
+  source/QA/oracle separation rule; the canonical copy normalizes QA formatting
+  and fetches the missing original PDFs.
 
 ## Harness Use
 

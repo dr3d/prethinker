@@ -1,0 +1,25 @@
+{"category": "direct_lookup", "id": "q001", "question": "What was the name of the towing vessel that capsized?", "source_id": "ntsb_002:q001"}
+{"category": "direct_lookup", "id": "q002", "question": "What was the date of the casualty?", "source_id": "ntsb_002:q002"}
+{"category": "direct_lookup", "id": "q003", "question": "What barge was being towed at the time of the incident?", "source_id": "ntsb_002:q003"}
+{"category": "direct_lookup", "id": "q004", "question": "How many crewmembers were aboard the Baylor J. Tregre?", "source_id": "ntsb_002:q004"}
+{"category": "direct_lookup", "id": "q005", "question": "In what year was the Baylor J. Tregre originally built?", "source_id": "ntsb_002:q005"}
+{"category": "timeline", "id": "q006", "question": "At what time did the vessel depart from Houma?", "source_id": "ntsb_002:q006"}
+{"category": "timeline", "id": "q007", "question": "When did the mate notice the squall forming?", "source_id": "ntsb_002:q007"}
+{"category": "timeline", "id": "q008", "question": "At what time did the mate make the distress call?", "source_id": "ntsb_002:q008"}
+{"category": "timeline", "id": "q009", "question": "How many minutes elapsed between the vessel losing electrical power and the last AIS transmission?", "source_id": "ntsb_002:q009"}
+{"category": "timeline", "id": "q010", "question": "At what time did the Coast Guard recover all four crew members?", "source_id": "ntsb_002:q010"}
+{"category": "actor_action", "id": "q011", "question": "Who ordered the mate to \"turn the barge loose\"?", "source_id": "ntsb_002:q011"}
+{"category": "actor_action", "id": "q012", "question": "Which crew member was the first to notice the vessel heeling 45° to port?", "source_id": "ntsb_002:q012"}
+{"category": "causal_chain", "id": "q013", "question": "What caused the vessel to heel to port according to crew testimony?", "source_id": "ntsb_002:q013"}
+{"category": "causal_chain", "id": "q014", "question": "What factor prevented the mate from releasing the tow when instructed to do so?", "source_id": "ntsb_002:q014"}
+{"category": "policy_rule", "id": "q015", "question": "Under what regulatory code was the Baylor J. Tregre required to demonstrate compliance?", "source_id": "ntsb_002:q015"}
+{"category": "policy_rule", "id": "q016", "question": "Was an emergency release function required by regulation for the tow winch in the wheelhouse?", "source_id": "ntsb_002:q016"}
+{"category": "count_table", "id": "q017", "question": "How long was the tow wire connecting the Baylor J. Tregre to MARMAC 27?", "source_id": "ntsb_002:q017"}
+{"category": "count_table", "id": "q018", "question": "What was the estimated property damage to the Baylor J. Tregre?", "source_id": "ntsb_002:q018"}
+{"category": "contradiction", "id": "q019", "question": "The crew reported different wind speed estimates than the nearest weather station; what were the respective ranges?", "source_id": "ntsb_002:q019"}
+{"category": "contradiction", "id": "q020", "question": "What conflicting evidence exists regarding whether Special Marine Warnings reached the vessel?", "source_id": "ntsb_002:q020"}
+{"category": "unresolved_issue", "id": "q021", "question": "Was the phenomenon observed by the mate (wind gust, wind shear, possible waterspout) definitively identified in the investigation?", "source_id": "ntsb_002:q021"}
+{"category": "as_of_date", "id": "q022", "question": "As of the final report date, what was the status of the investigation and conclusions?", "source_id": "ntsb_002:q022"}
+{"category": "source_limitation", "id": "q023", "question": "How far was the closest weather reporting station (KGLS) from the actual casualty site?", "source_id": "ntsb_002:q023"}
+{"category": "source_limitation", "id": "q024", "question": "What impact did salvage operations have on the completeness of the physical evidence examination?", "source_id": "ntsb_002:q024"}
+{"category": "source_limitation", "id": "q025", "question": "Why was the mate's contact with subsequent weather broadcasts over VHF radio uncertain?", "source_id": "ntsb_002:q025"}
