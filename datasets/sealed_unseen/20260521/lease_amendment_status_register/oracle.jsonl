@@ -1,0 +1,40 @@
+{"category": "current_status", "id": "q001", "reference_answer": "ACTIVE-AMENDED (active as amended by AMD-2026-014).", "source_id": "lease_amendment_status_register:q001"}
+{"category": "current_status", "id": "q002", "reference_answer": "$4,650 per month.", "source_id": "lease_amendment_status_register:q002"}
+{"category": "current_status", "id": "q003", "reference_answer": "March 30, 2031.", "source_id": "lease_amendment_status_register:q003"}
+{"category": "current_status", "id": "q004", "reference_answer": "Unit 4B, 1718 Catalpa Trace.", "source_id": "lease_amendment_status_register:q004"}
+{"category": "current_status", "id": "q005", "reference_answer": "Bridgemarrow Properties LP.", "source_id": "lease_amendment_status_register:q005"}
+{"category": "current_status", "id": "q006", "reference_answer": "Quillvale Tea & Provisions Co.", "source_id": "lease_amendment_status_register:q006"}
+{"category": "current_status", "id": "q007", "reference_answer": "April 7, 2026 (the execution date of AMD-2026-014; the 'later of April 1, 2026 or execution date' rule applies).", "source_id": "lease_amendment_status_register:q007"}
+{"category": "current_status", "id": "q008", "reference_answer": "Unit 4D.", "source_id": "lease_amendment_status_register:q008"}
+{"category": "source_attributed_claim", "id": "q009", "reference_answer": "That the amendment draft is preliminary in form and has no legal effect until executed by both parties and recorded in this register; no encumbrance, right, or obligation arises from the draft as such.", "source_id": "lease_amendment_status_register:q009"}
+{"category": "source_attributed_claim", "id": "q010", "reference_answer": "Honora Pelhambridge, Office of Register Clerk.", "source_id": "lease_amendment_status_register:q010"}
+{"category": "source_attributed_claim", "id": "q011", "reference_answer": "Brindly Achterheim, Managing Partner, Quillvale Tea & Provisions Co.", "source_id": "lease_amendment_status_register:q011"}
+{"category": "source_attributed_claim", "id": "q012", "reference_answer": "The letter's footer expressly stating: 'This letter is a statement of intent only and is expressly non-binding upon either party. No legal obligation, encumbrance, right of first refusal, rent escalation, or extension of term arises from this letter...'", "source_id": "lease_amendment_status_register:q012"}
+{"category": "source_attributed_claim", "id": "q013", "reference_answer": "That TLOI-2026-019 is non-binding on its face and does not bind the landlord; the landlord retains full discretion to negotiate further, withdraw, or modify the amendment terms prior to execution.", "source_id": "lease_amendment_status_register:q013"}
+{"category": "source_attributed_claim", "id": "q014", "reference_answer": "Mortlock Estavanico, Esq., outside counsel to Bridgemarrow Properties LP.", "source_id": "lease_amendment_status_register:q014"}
+{"category": "source_attributed_claim", "id": "q015", "reference_answer": "Counsel recommended including an execution deadline beyond which the proposed amendment expires.", "source_id": "lease_amendment_status_register:q015"}
+{"category": "source_attributed_claim", "id": "q016", "reference_answer": "Unit 4C.", "source_id": "lease_amendment_status_register:q016"}
+{"category": "correction_amendment_effect", "id": "q017", "reference_answer": "Unit 4C (this was a transcription error; corrected to Unit 4D by CORR-2026-008).", "source_id": "lease_amendment_status_register:q017"}
+{"category": "correction_amendment_effect", "id": "q018", "reference_answer": "Corrected the Right of First Refusal unit from Unit 4C to Unit 4D, to conform to the page-7 final-execution language of AMD-2026-014. No other terms of the initial entry were changed.", "source_id": "lease_amendment_status_register:q018"}
+{"category": "correction_amendment_effect", "id": "q019", "reference_answer": "Unit 4D.", "source_id": "lease_amendment_status_register:q019"}
+{"category": "correction_amendment_effect", "id": "q020", "reference_answer": "REG-E-2026-061-R (the corrected register entry).", "source_id": "lease_amendment_status_register:q020"}
+{"category": "correction_amendment_effect", "id": "q021", "reference_answer": "PA-2026-014-D2 (the revised draft of March 18, 2026); PA-2026-014-D1 was already superseded by PA-2026-014-D2 and is further marked void by VD-2026-003.", "source_id": "lease_amendment_status_register:q021"}
+{"category": "correction_amendment_effect", "id": "q022", "reference_answer": "VD-2026-003 (voided document notice, dated April 16, 2026).", "source_id": "lease_amendment_status_register:q022"}
+{"category": "correction_amendment_effect", "id": "q023", "reference_answer": "No. It is superseded and formally voided; it has no legal effect for any purpose.", "source_id": "lease_amendment_status_register:q023"}
+{"category": "correction_amendment_effect", "id": "q024", "reference_answer": "None. It is non-binding upon either party by its own express terms and is treated as non-binding by counsel opinion and by the Register.", "source_id": "lease_amendment_status_register:q024"}
+{"category": "event_date_provenance", "id": "q025", "reference_answer": "March 31, 2024.", "source_id": "lease_amendment_status_register:q025"}
+{"category": "event_date_provenance", "id": "q026", "reference_answer": "April 7, 2026.", "source_id": "lease_amendment_status_register:q026"}
+{"category": "event_date_provenance", "id": "q027", "reference_answer": "April 14, 2026.", "source_id": "lease_amendment_status_register:q027"}
+{"category": "event_date_provenance", "id": "q028", "reference_answer": "April 8, 2026.", "source_id": "lease_amendment_status_register:q028"}
+{"category": "event_date_provenance", "id": "q029", "reference_answer": "February 12, 2026.", "source_id": "lease_amendment_status_register:q029"}
+{"category": "event_date_provenance", "id": "q030", "reference_answer": "March 4, 2026.", "source_id": "lease_amendment_status_register:q030"}
+{"category": "event_date_provenance", "id": "q031", "reference_answer": "April 16, 2026.", "source_id": "lease_amendment_status_register:q031"}
+{"category": "event_date_provenance", "id": "q032", "reference_answer": "HYP-REG-2026-0419.", "source_id": "lease_amendment_status_register:q032"}
+{"category": "identifier_register_row", "id": "q033", "reference_answer": "ROW-LSE-001.", "source_id": "lease_amendment_status_register:q033"}
+{"category": "identifier_register_row", "id": "q034", "reference_answer": "ROW-AMD-003.", "source_id": "lease_amendment_status_register:q034"}
+{"category": "identifier_register_row", "id": "q035", "reference_answer": "ROW-CN-001.", "source_id": "lease_amendment_status_register:q035"}
+{"category": "identifier_register_row", "id": "q036", "reference_answer": "ROW-OP-001.", "source_id": "lease_amendment_status_register:q036"}
+{"category": "identifier_register_row", "id": "q037", "reference_answer": "REG-E-2026-061-R.", "source_id": "lease_amendment_status_register:q037"}
+{"category": "identifier_register_row", "id": "q038", "reference_answer": "PA-2026-014-D1.", "source_id": "lease_amendment_status_register:q038"}
+{"category": "identifier_register_row", "id": "q039", "reference_answer": "PA-2026-014-D2.", "source_id": "lease_amendment_status_register:q039"}
+{"category": "identifier_register_row", "id": "q040", "reference_answer": "VD-2026-003.", "source_id": "lease_amendment_status_register:q040"}

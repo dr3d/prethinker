@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "event_date",
+    "id": "q001",
+    "question": "On what date was the BZBA hearing on docket VAR-2026-019 held?",
+    "reference_answer": "March 26, 2026.",
+    "source_id": "civic_hearing_correction_packet:q001"
+  },
+  {
+    "behavior": "",
+    "category": "event_date",
+    "id": "q002",
+    "question": "On what date were the draft minutes DM-2026-0326 adopted by the Board?",
+    "reference_answer": "April 1, 2026.",
+    "source_id": "civic_hearing_correction_packet:q002"
+  },
+  {
+    "behavior": "",
+    "category": "current_status",
+    "id": "q003",
+    "question": "What is the current status of the variance application VAR-2026-019 per the packet's status register?",
+    "reference_answer": "APPROVED, PENDING APPEAL.",
+    "source_id": "civic_hearing_correction_packet:q003"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q004",
+    "question": "Under the operative correction notices, is appeal AP-2026-005 timely or untimely?",
+    "reference_answer": "Timely. Confirmed by CORR-BZBA-2026-002 and re-affirmed by CORR-BZBA-2026-003.",
+    "source_id": "civic_hearing_correction_packet:q004"
+  },
+  {
+    "behavior": "",
+    "category": "event_date",
+    "id": "q005",
+    "question": "On what date was Notice of Appeal AP-2026-005 filed?",
+    "reference_answer": "April 21, 2026.",
+    "source_id": "civic_hearing_correction_packet:q005"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q006",
+    "question": "Under the corrected appeal window, on what date did the appeal period close?",
+    "reference_answer": "April 25, 2026 (thirty days from the March 26, 2026 decision).",
+    "source_id": "civic_hearing_correction_packet:q006"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q007",
+    "question": "After CORR-BZBA-2026-001 was issued, was Alternate Castelletti's vote counted in the official record?",
+    "reference_answer": "No. His vote was voided by CORR-BZBA-2026-001.",
+    "source_id": "civic_hearing_correction_packet:q007"
+  },
+  {
+    "behavior": "",
+    "category": "event_date",
+    "id": "q008",
+    "question": "On what date was the first correction notice CORR-BZBA-2026-001 issued?",
+    "reference_answer": "April 8, 2026.",
+    "source_id": "civic_hearing_correction_packet:q008"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q009",
+    "question": "What was the vote tally as originally recorded in draft minutes DM-2026-0326 before any correction?",
+    "reference_answer": "4 in favor (Persaud, Klessig, Vong, Castelletti), 1 against (Halvorsen), 1 recused (Bromberg). Tally 4–1, motion carried.",
+    "source_id": "civic_hearing_correction_packet:q009"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q010",
+    "question": "What is the corrected vote tally on the motion to approve VAR-2026-019 after CORR-BZBA-2026-001?",
+    "reference_answer": "3 in favor (Persaud, Klessig, Vong), 1 against (Halvorsen), 1 recused (Bromberg), Castelletti's vote voided. Tally 3–1, motion carried.",
+    "source_id": "civic_hearing_correction_packet:q010"
+  },
+  {
+    "behavior": "",
+    "category": "quorum_status",
+    "id": "q011",
+    "question": "How many members are required to constitute a quorum under BZBA Rules of Procedure §2.3?",
+    "reference_answer": "Four (4) members.",
+    "source_id": "civic_hearing_correction_packet:q011"
+  },
+  {
+    "behavior": "",
+    "category": "quorum_status",
+    "id": "q012",
+    "question": "How many regular board members participated in the corrected vote on VAR-2026-019?",
+    "reference_answer": "Four regular members (Persaud, Klessig, Vong, Halvorsen). Quorum maintained.",
+    "source_id": "civic_hearing_correction_packet:q012"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q013",
+    "question": "Which board member voted against the motion to approve VAR-2026-019?",
+    "reference_answer": "Linnea Halvorsen.",
+    "source_id": "civic_hearing_correction_packet:q013"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q014",
+    "question": "Which board member recused himself from docket VAR-2026-019?",
+    "reference_answer": "Octavio Bromberg, Vice Chair.",
+    "source_id": "civic_hearing_correction_packet:q014"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q015",
+    "question": "What reason did Vice Chair Bromberg give for his recusal from VAR-2026-019?",
+    "reference_answer": "A pre-existing engineering services contract between his consulting firm, Bromberg Civil Associates, and the applicant Quintrell Holdings LLC, executed in 2024 for unrelated work.",
+    "source_id": "civic_hearing_correction_packet:q015"
+  },
+  {
+    "behavior": "",
+    "category": "quorum_status",
+    "id": "q016",
+    "question": "Was Alternate Castelletti present at the March 26, 2026 hearing?",
+    "reference_answer": "Yes, present at roll call.",
+    "source_id": "civic_hearing_correction_packet:q016"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q017",
+    "question": "Which public objector resides at the property directly abutting 88 Heron Ridge Road?",
+    "reference_answer": "Beulah Mainwaring, 92 Heron Ridge Road.",
+    "source_id": "civic_hearing_correction_packet:q017"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q018",
+    "question": "What specific concern did Carwyn Tjelmeland raise on behalf of the Heron Ridge Neighborhood Association?",
+    "reference_answer": "That the variance would set an undesirable precedent for other lots on the road; requested a written non-precedent finding as a condition.",
+    "source_id": "civic_hearing_correction_packet:q018"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q019",
+    "question": "What recommendation did Town Planner Suniti Aravamudan make regarding VAR-2026-019?",
+    "reference_answer": "Approval with conditions.",
+    "source_id": "civic_hearing_correction_packet:q019"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q020",
+    "question": "Who co-signed Staff Report SR-VAR-2026-019 with the Town Planner?",
+    "reference_answer": "Building Inspector Dirk Ozolins.",
+    "source_id": "civic_hearing_correction_packet:q020"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q021",
+    "question": "To which portion of the variance application did Yusra Penhollow object?",
+    "reference_answer": "The lot-coverage exceedance only; she did not object to the setback portion.",
+    "source_id": "civic_hearing_correction_packet:q021"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q022",
+    "question": "Which public commenter cited prior variances on Beech Court and Tamarack Lane in support of the application?",
+    "reference_answer": "Manfred Stenglein, 102 Heron Ridge Road.",
+    "source_id": "civic_hearing_correction_packet:q022"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q023",
+    "question": "What primary concern did Beulah Mainwaring state in her objection?",
+    "reference_answer": "A 'wall effect' along the shared property line and impaired natural drainage during spring runoff.",
+    "source_id": "civic_hearing_correction_packet:q023"
+  },
+  {
+    "behavior": "",
+    "category": "source_attributed_claim",
+    "id": "q024",
+    "question": "Who is the Building Inspector named in the staff report?",
+    "reference_answer": "Dirk Ozolins.",
+    "source_id": "civic_hearing_correction_packet:q024"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q025",
+    "question": "What did the Clerk's initial informal communication on April 22, 2026 say about the timeliness of Ms. Mainwaring's appeal?",
+    "reference_answer": "That the appeal was untimely because the twenty-day appeal window from the March 26 decision had closed on April 15, 2026.",
+    "source_id": "civic_hearing_correction_packet:q025"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q026",
+    "question": "What did CORR-BZBA-2026-002 change about the Clerk's earlier position on the appeal window?",
+    "reference_answer": "It corrected the appeal window to thirty days under BZBA Bylaws §6.2 (adopted October 2017), making the April 21 appeal timely.",
+    "source_id": "civic_hearing_correction_packet:q026"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q027",
+    "question": "Following CORR-BZBA-2026-001, what is the operative vote tally of record on VAR-2026-019?",
+    "reference_answer": "3 in favor, 1 against, 1 recused. Motion carried 3–1.",
+    "source_id": "civic_hearing_correction_packet:q027"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q028",
+    "question": "For what procedural reason was Alternate Castelletti's vote voided?",
+    "reference_answer": "BZBA Rules of Procedure §2.4(c) requires that an alternate's seating be made by motion of the Chair reflected in the minutes; that motion was not made at the point of the substantive vote.",
+    "source_id": "civic_hearing_correction_packet:q028"
+  },
+  {
+    "behavior": "",
+    "category": "correction_current_value",
+    "id": "q029",
+    "question": "What is the current applicable appeal window length for BZBA matters under the operative correction record?",
+    "reference_answer": "Thirty (30) days.",
+    "source_id": "civic_hearing_correction_packet:q029"
+  },
+  {
+    "behavior": "",
+    "category": "current_status",
+    "id": "q030",
+    "question": "Is the variance VAR-2026-019 currently in effect, suspended, or denied?",
+    "reference_answer": "In effect; approved with conditions, pending appeal.",
+    "source_id": "civic_hearing_correction_packet:q030"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q031",
+    "question": "What state statute is referenced in CORR-BZBA-2026-002 as the source of the appeal-window rule?",
+    "reference_answer": "RSA 677:2.",
+    "source_id": "civic_hearing_correction_packet:q031"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q032",
+    "question": "What is the source of the thirty-day appeal window applied to AP-2026-005?",
+    "reference_answer": "BZBA Bylaws §6.2, adopted October 2017.",
+    "source_id": "civic_hearing_correction_packet:q032"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_or_label_detail",
+    "id": "q033",
+    "question": "What is the packet identifier for this BZBA hearing packet?",
+    "reference_answer": "BZBA-PKT-2026-0411.",
+    "source_id": "civic_hearing_correction_packet:q033"
+  },
+  {
+    "behavior": "",
+    "category": "identifier_or_label_detail",
+    "id": "q034",
+    "question": "What is the docket number assigned to the Quintrell Holdings LLC variance application?",
+    "reference_answer": "VAR-2026-019.",
+    "source_id": "civic_hearing_correction_packet:q034"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q035",
+    "question": "Who issued correction notice CORR-BZBA-2026-003?",
+    "reference_answer": "Town Clerk Halsey Drummond.",
+    "source_id": "civic_hearing_correction_packet:q035"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q036",
+    "question": "In which packet section are the draft minutes' motion and vote text recorded?",
+    "reference_answer": "§6, Motion and Vote (in DM-2026-0326 as recorded April 1, 2026).",
+    "source_id": "civic_hearing_correction_packet:q036"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q037",
+    "question": "In which packet document is the staff approval recommendation documented?",
+    "reference_answer": "Document SR-VAR-2026-019 (Staff Report), dated March 19, 2026.",
+    "source_id": "civic_hearing_correction_packet:q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q038",
+    "question": "Who is identified as Town Counsel in the packet?",
+    "reference_answer": "Marisol Gathwright, Esq.",
+    "source_id": "civic_hearing_correction_packet:q038"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q039",
+    "question": "Who is identified as the Town Clerk in the packet?",
+    "reference_answer": "Halsey Drummond.",
+    "source_id": "civic_hearing_correction_packet:q039"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q040",
+    "question": "What type of document is BZBA-PKT-2026-0411?",
+    "reference_answer": "A BZBA hearing packet compiled by the Office of the Town Clerk, Town of Brassfield, NH.",
+    "source_id": "civic_hearing_correction_packet:q040"
+  }
+]

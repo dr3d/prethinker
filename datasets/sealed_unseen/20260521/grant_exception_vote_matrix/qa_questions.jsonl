@@ -1,0 +1,40 @@
+{"category": "rule_authority", "id": "q001", "question": "Which charter section sets the standard maximum award for a single grant?", "source_id": "grant_exception_vote_matrix:q001"}
+{"category": "rule_authority", "id": "q002", "question": "What is the standard maximum award under Charter §3.04?", "source_id": "grant_exception_vote_matrix:q002"}
+{"category": "rule_authority", "id": "q003", "question": "Which charter section establishes the hard exception cap?", "source_id": "grant_exception_vote_matrix:q003"}
+{"category": "rule_authority", "id": "q004", "question": "Which charter section sets the committee quorum?", "source_id": "grant_exception_vote_matrix:q004"}
+{"category": "rule_authority", "id": "q005", "question": "Which charter section governs how abstentions are counted relative to vote thresholds?", "source_id": "grant_exception_vote_matrix:q005"}
+{"category": "rule_authority", "id": "q006", "question": "What supermajority threshold is required to approve an exception under Charter §3.05?", "source_id": "grant_exception_vote_matrix:q006"}
+{"category": "rule_authority", "id": "q007", "question": "Who is identified as Committee Counsel of record?", "source_id": "grant_exception_vote_matrix:q007"}
+{"category": "rule_authority", "id": "q008", "question": "What is the identifier of the counsel memorandum addressing the eligibility questions for APP-S26-002 and APP-S26-003?", "source_id": "grant_exception_vote_matrix:q008"}
+{"category": "applicant_eligibility", "id": "q009", "question": "Which applicant was initially flagged as ineligible by the Grants Administrator?", "source_id": "grant_exception_vote_matrix:q009"}
+{"category": "applicant_eligibility", "id": "q010", "question": "Under the corrected counsel interpretation, is Coppertown Maritime Heritage Society eligible?", "source_id": "grant_exception_vote_matrix:q010"}
+{"category": "applicant_eligibility", "id": "q011", "question": "Under which prong of Charter §3.07 does Heatherton Youth Mentoring qualify geographically?", "source_id": "grant_exception_vote_matrix:q011"}
+{"category": "applicant_eligibility", "id": "q012", "question": "Did Pelican Bay Conservation Trust's exception request as filed fail by threshold arithmetic?", "source_id": "grant_exception_vote_matrix:q012"}
+{"category": "applicant_eligibility", "id": "q013", "question": "Which applicant is incorporated in a state outside New England?", "source_id": "grant_exception_vote_matrix:q013"}
+{"category": "applicant_eligibility", "id": "q014", "question": "What percentage of Heatherton Youth Mentoring's mentees reside in Massachusetts and Vermont combined?", "source_id": "grant_exception_vote_matrix:q014"}
+{"category": "applicant_eligibility", "id": "q015", "question": "What was the original ground for the initial-ineligibility flag against Coppertown Maritime Heritage Society?", "source_id": "grant_exception_vote_matrix:q015"}
+{"category": "applicant_eligibility", "id": "q016", "question": "Do all five applicants currently hold 501(c)(3) tax status per the packet?", "source_id": "grant_exception_vote_matrix:q016"}
+{"category": "vote_tally", "id": "q017", "question": "What was the vote tally on the motion to award APP-S26-001?", "source_id": "grant_exception_vote_matrix:q017"}
+{"category": "vote_tally", "id": "q018", "question": "Which member abstained on the motion to award APP-S26-001, and on what basis?", "source_id": "grant_exception_vote_matrix:q018"}
+{"category": "vote_tally", "id": "q019", "question": "What was the vote tally on the exception motion for APP-S26-002?", "source_id": "grant_exception_vote_matrix:q019"}
+{"category": "vote_tally", "id": "q020", "question": "Did the exception motion for APP-S26-002 carry?", "source_id": "grant_exception_vote_matrix:q020"}
+{"category": "vote_tally", "id": "q021", "question": "What was the vote tally on the exception motion for APP-S26-003?", "source_id": "grant_exception_vote_matrix:q021"}
+{"category": "vote_tally", "id": "q022", "question": "Did the exception motion for APP-S26-003 carry?", "source_id": "grant_exception_vote_matrix:q022"}
+{"category": "vote_tally", "id": "q023", "question": "What was the vote tally on the alternative motion for APP-S26-004 ($125,000)?", "source_id": "grant_exception_vote_matrix:q023"}
+{"category": "vote_tally", "id": "q024", "question": "What was the vote tally on the motion to award APP-S26-005?", "source_id": "grant_exception_vote_matrix:q024"}
+{"category": "numeric_cap", "id": "q025", "question": "What is the dollar amount of the exception cap under Charter §3.05?", "source_id": "grant_exception_vote_matrix:q025"}
+{"category": "numeric_cap", "id": "q026", "question": "What was the original budget cap for the Spring 2026 cycle?", "source_id": "grant_exception_vote_matrix:q026"}
+{"category": "numeric_cap", "id": "q027", "question": "What is the corrected (operative) budget cap for the Spring 2026 cycle?", "source_id": "grant_exception_vote_matrix:q027"}
+{"category": "numeric_cap", "id": "q028", "question": "What is the total dollar amount awarded in the Spring 2026 cycle?", "source_id": "grant_exception_vote_matrix:q028"}
+{"category": "numeric_cap", "id": "q029", "question": "By how much would the total awarded have exceeded the original cap?", "source_id": "grant_exception_vote_matrix:q029"}
+{"category": "numeric_cap", "id": "q030", "question": "What dollar amount was awarded to Heatherton Youth Mentoring after the exception failed?", "source_id": "grant_exception_vote_matrix:q030"}
+{"category": "numeric_cap", "id": "q031", "question": "What dollar amount was awarded to Pelican Bay Conservation Trust?", "source_id": "grant_exception_vote_matrix:q031"}
+{"category": "numeric_cap", "id": "q032", "question": "With seven members present and zero abstentions, how many \"for\" votes are required to carry a §3.05 exception?", "source_id": "grant_exception_vote_matrix:q032"}
+{"category": "table_reference", "id": "q033", "question": "What is the row identifier for Coppertown Maritime Heritage Society's application?", "source_id": "grant_exception_vote_matrix:q033"}
+{"category": "table_reference", "id": "q034", "question": "What is the row identifier for Pelican Bay Conservation Trust's application?", "source_id": "grant_exception_vote_matrix:q034"}
+{"category": "table_reference", "id": "q035", "question": "What is the packet identifier for the Spring 2026 cycle?", "source_id": "grant_exception_vote_matrix:q035"}
+{"category": "table_reference", "id": "q036", "question": "What cycle does packet HFF-GRC-2026-S-PKT-04 cover?", "source_id": "grant_exception_vote_matrix:q036"}
+{"category": "table_reference", "id": "q037", "question": "What is the identifier of the counsel memorandum confirming the corrected budget cap?", "source_id": "grant_exception_vote_matrix:q037"}
+{"category": "table_reference", "id": "q038", "question": "What is the identifier of the board resolution authorizing the supplemental allocation?", "source_id": "grant_exception_vote_matrix:q038"}
+{"category": "table_reference", "id": "q039", "question": "Who is the chair of the Grants Review Committee?", "source_id": "grant_exception_vote_matrix:q039"}
+{"category": "table_reference", "id": "q040", "question": "On what date was the Spring 2026 cycle meeting held?", "source_id": "grant_exception_vote_matrix:q040"}

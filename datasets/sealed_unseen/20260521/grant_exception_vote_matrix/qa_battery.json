@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q001",
+    "question": "Which charter section sets the standard maximum award for a single grant?",
+    "reference_answer": "Charter §3.04.",
+    "source_id": "grant_exception_vote_matrix:q001"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q002",
+    "question": "What is the standard maximum award under Charter §3.04?",
+    "reference_answer": "$75,000 per single grant.",
+    "source_id": "grant_exception_vote_matrix:q002"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q003",
+    "question": "Which charter section establishes the hard exception cap?",
+    "reference_answer": "Charter §3.05.",
+    "source_id": "grant_exception_vote_matrix:q003"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q004",
+    "question": "Which charter section sets the committee quorum?",
+    "reference_answer": "Charter §4.02.",
+    "source_id": "grant_exception_vote_matrix:q004"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q005",
+    "question": "Which charter section governs how abstentions are counted relative to vote thresholds?",
+    "reference_answer": "Charter §4.05.",
+    "source_id": "grant_exception_vote_matrix:q005"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q006",
+    "question": "What supermajority threshold is required to approve an exception under Charter §3.05?",
+    "reference_answer": "Two-thirds (2/3) of voting committee members; rounded up to the next whole number when fractional.",
+    "source_id": "grant_exception_vote_matrix:q006"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q007",
+    "question": "Who is identified as Committee Counsel of record?",
+    "reference_answer": "Eustaquia Brindlemoore, JD, of Brindlemoore & Halverson LLP.",
+    "source_id": "grant_exception_vote_matrix:q007"
+  },
+  {
+    "behavior": "",
+    "category": "rule_authority",
+    "id": "q008",
+    "question": "What is the identifier of the counsel memorandum addressing the eligibility questions for APP-S26-002 and APP-S26-003?",
+    "reference_answer": "HFF-CC-2026-0415, dated April 15, 2026.",
+    "source_id": "grant_exception_vote_matrix:q008"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q009",
+    "question": "Which applicant was initially flagged as ineligible by the Grants Administrator?",
+    "reference_answer": "Coppertown Maritime Heritage Society (APP-S26-002).",
+    "source_id": "grant_exception_vote_matrix:q009"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q010",
+    "question": "Under the corrected counsel interpretation, is Coppertown Maritime Heritage Society eligible?",
+    "reference_answer": "Yes. Continuous operations established from 2019 (predecessor unincorporated association) meets the §3.06 three-year requirement; the 501(c)(3) status date is not the controlling fact.",
+    "source_id": "grant_exception_vote_matrix:q010"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q011",
+    "question": "Under which prong of Charter §3.07 does Heatherton Youth Mentoring qualify geographically?",
+    "reference_answer": "§3.07(b), the 'principally serves' prong, because more than 60% of beneficiaries (78%) reside in Massachusetts and Vermont.",
+    "source_id": "grant_exception_vote_matrix:q011"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q012",
+    "question": "Did Pelican Bay Conservation Trust's exception request as filed fail by threshold arithmetic?",
+    "reference_answer": "Yes. The $135,000 request exceeds the §3.05 hard cap of $125,000, so the request as filed cannot be granted regardless of vote outcome.",
+    "source_id": "grant_exception_vote_matrix:q012"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q013",
+    "question": "Which applicant is incorporated in a state outside New England?",
+    "reference_answer": "Heatherton Youth Mentoring (APP-S26-003), incorporated in the State of New York.",
+    "source_id": "grant_exception_vote_matrix:q013"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q014",
+    "question": "What percentage of Heatherton Youth Mentoring's mentees reside in Massachusetts and Vermont combined?",
+    "reference_answer": "78%.",
+    "source_id": "grant_exception_vote_matrix:q014"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q015",
+    "question": "What was the original ground for the initial-ineligibility flag against Coppertown Maritime Heritage Society?",
+    "reference_answer": "Its 501(c)(3) status was granted January 15, 2023, less than three years before the April 18, 2026 meeting; the Grants Administrator initially read §3.06 as requiring three years of 501(c)(3) status.",
+    "source_id": "grant_exception_vote_matrix:q015"
+  },
+  {
+    "behavior": "",
+    "category": "applicant_eligibility",
+    "id": "q016",
+    "question": "Do all five applicants currently hold 501(c)(3) tax status per the packet?",
+    "reference_answer": "Yes; Charter §3.06 requires current 501(c)(3) status and the packet treats all five applicants as currently holding it (Coppertown's status was granted January 15, 2023).",
+    "source_id": "grant_exception_vote_matrix:q016"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q017",
+    "question": "What was the vote tally on the motion to award APP-S26-001?",
+    "reference_answer": "For 6, against 0, abstain 1. Motion carried.",
+    "source_id": "grant_exception_vote_matrix:q017"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q018",
+    "question": "Which member abstained on the motion to award APP-S26-001, and on what basis?",
+    "reference_answer": "Mahalia Drewes, on the basis of a current board affiliation with Northbrook Literacy Alliance, under Charter §4.05.",
+    "source_id": "grant_exception_vote_matrix:q018"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q019",
+    "question": "What was the vote tally on the exception motion for APP-S26-002?",
+    "reference_answer": "For 5, against 1, abstain 1 (Fairweather). Denominator excluding abstention is 6; 2/3 of 6 is 4; 5 ≥ 4.",
+    "source_id": "grant_exception_vote_matrix:q019"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q020",
+    "question": "Did the exception motion for APP-S26-002 carry?",
+    "reference_answer": "Yes. Exception carried; $110,000 awarded.",
+    "source_id": "grant_exception_vote_matrix:q020"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q021",
+    "question": "What was the vote tally on the exception motion for APP-S26-003?",
+    "reference_answer": "For 4, against 3, abstain 0. Denominator 7; 2/3 of 7 is 4.67, rounded up to 5; 4 < 5.",
+    "source_id": "grant_exception_vote_matrix:q021"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q022",
+    "question": "Did the exception motion for APP-S26-003 carry?",
+    "reference_answer": "No. Exception failed. A fall-back standard motion at $75,000 then carried 7-0-0.",
+    "source_id": "grant_exception_vote_matrix:q022"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q023",
+    "question": "What was the vote tally on the alternative motion for APP-S26-004 ($125,000)?",
+    "reference_answer": "For 6, against 1, abstain 0. Threshold 5; carried.",
+    "source_id": "grant_exception_vote_matrix:q023"
+  },
+  {
+    "behavior": "",
+    "category": "vote_tally",
+    "id": "q024",
+    "question": "What was the vote tally on the motion to award APP-S26-005?",
+    "reference_answer": "For 7, against 0, abstain 0. Motion carried.",
+    "source_id": "grant_exception_vote_matrix:q024"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q025",
+    "question": "What is the dollar amount of the exception cap under Charter §3.05?",
+    "reference_answer": "$125,000 (hard cap).",
+    "source_id": "grant_exception_vote_matrix:q025"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q026",
+    "question": "What was the original budget cap for the Spring 2026 cycle?",
+    "reference_answer": "$400,000.",
+    "source_id": "grant_exception_vote_matrix:q026"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q027",
+    "question": "What is the corrected (operative) budget cap for the Spring 2026 cycle?",
+    "reference_answer": "$450,000.",
+    "source_id": "grant_exception_vote_matrix:q027"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q028",
+    "question": "What is the total dollar amount awarded in the Spring 2026 cycle?",
+    "reference_answer": "$440,000.",
+    "source_id": "grant_exception_vote_matrix:q028"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q029",
+    "question": "By how much would the total awarded have exceeded the original cap?",
+    "reference_answer": "By $40,000.",
+    "source_id": "grant_exception_vote_matrix:q029"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q030",
+    "question": "What dollar amount was awarded to Heatherton Youth Mentoring after the exception failed?",
+    "reference_answer": "$75,000 (the fall-back §3.04 standard award after the exception failed).",
+    "source_id": "grant_exception_vote_matrix:q030"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q031",
+    "question": "What dollar amount was awarded to Pelican Bay Conservation Trust?",
+    "reference_answer": "$125,000 (the §3.05 hard cap; the originally requested $135,000 could not be awarded).",
+    "source_id": "grant_exception_vote_matrix:q031"
+  },
+  {
+    "behavior": "",
+    "category": "numeric_cap",
+    "id": "q032",
+    "question": "With seven members present and zero abstentions, how many \"for\" votes are required to carry a §3.05 exception?",
+    "reference_answer": "Five (5). 2/3 of 7 is 4.67, rounded up to 5.",
+    "source_id": "grant_exception_vote_matrix:q032"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q033",
+    "question": "What is the row identifier for Coppertown Maritime Heritage Society's application?",
+    "reference_answer": "APP-S26-002.",
+    "source_id": "grant_exception_vote_matrix:q033"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q034",
+    "question": "What is the row identifier for Pelican Bay Conservation Trust's application?",
+    "reference_answer": "APP-S26-004.",
+    "source_id": "grant_exception_vote_matrix:q034"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q035",
+    "question": "What is the packet identifier for the Spring 2026 cycle?",
+    "reference_answer": "HFF-GRC-2026-S-PKT-04.",
+    "source_id": "grant_exception_vote_matrix:q035"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q036",
+    "question": "What cycle does packet HFF-GRC-2026-S-PKT-04 cover?",
+    "reference_answer": "Spring 2026.",
+    "source_id": "grant_exception_vote_matrix:q036"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q037",
+    "question": "What is the identifier of the counsel memorandum confirming the corrected budget cap?",
+    "reference_answer": "HFF-CC-2026-0416, dated April 16, 2026.",
+    "source_id": "grant_exception_vote_matrix:q037"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q038",
+    "question": "What is the identifier of the board resolution authorizing the supplemental allocation?",
+    "reference_answer": "Board Resolution 2025-Q4-031 (initial cycle cap); the supplemental allocation is Board Supplemental Allocation 2026-S-01.",
+    "source_id": "grant_exception_vote_matrix:q038"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q039",
+    "question": "Who is the chair of the Grants Review Committee?",
+    "reference_answer": "Wilberforce Tannenbaum.",
+    "source_id": "grant_exception_vote_matrix:q039"
+  },
+  {
+    "behavior": "",
+    "category": "table_reference",
+    "id": "q040",
+    "question": "On what date was the Spring 2026 cycle meeting held?",
+    "reference_answer": "April 18, 2026.",
+    "source_id": "grant_exception_vote_matrix:q040"
+  }
+]

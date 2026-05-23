@@ -1,0 +1,40 @@
+{"category": "event_date", "id": "q001", "question": "On what date was the BZBA hearing on docket VAR-2026-019 held?", "source_id": "civic_hearing_correction_packet:q001"}
+{"category": "event_date", "id": "q002", "question": "On what date were the draft minutes DM-2026-0326 adopted by the Board?", "source_id": "civic_hearing_correction_packet:q002"}
+{"category": "current_status", "id": "q003", "question": "What is the current status of the variance application VAR-2026-019 per the packet's status register?", "source_id": "civic_hearing_correction_packet:q003"}
+{"category": "correction_current_value", "id": "q004", "question": "Under the operative correction notices, is appeal AP-2026-005 timely or untimely?", "source_id": "civic_hearing_correction_packet:q004"}
+{"category": "event_date", "id": "q005", "question": "On what date was Notice of Appeal AP-2026-005 filed?", "source_id": "civic_hearing_correction_packet:q005"}
+{"category": "correction_current_value", "id": "q006", "question": "Under the corrected appeal window, on what date did the appeal period close?", "source_id": "civic_hearing_correction_packet:q006"}
+{"category": "correction_current_value", "id": "q007", "question": "After CORR-BZBA-2026-001 was issued, was Alternate Castelletti's vote counted in the official record?", "source_id": "civic_hearing_correction_packet:q007"}
+{"category": "event_date", "id": "q008", "question": "On what date was the first correction notice CORR-BZBA-2026-001 issued?", "source_id": "civic_hearing_correction_packet:q008"}
+{"category": "vote_tally", "id": "q009", "question": "What was the vote tally as originally recorded in draft minutes DM-2026-0326 before any correction?", "source_id": "civic_hearing_correction_packet:q009"}
+{"category": "vote_tally", "id": "q010", "question": "What is the corrected vote tally on the motion to approve VAR-2026-019 after CORR-BZBA-2026-001?", "source_id": "civic_hearing_correction_packet:q010"}
+{"category": "quorum_status", "id": "q011", "question": "How many members are required to constitute a quorum under BZBA Rules of Procedure §2.3?", "source_id": "civic_hearing_correction_packet:q011"}
+{"category": "quorum_status", "id": "q012", "question": "How many regular board members participated in the corrected vote on VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q012"}
+{"category": "vote_tally", "id": "q013", "question": "Which board member voted against the motion to approve VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q013"}
+{"category": "vote_tally", "id": "q014", "question": "Which board member recused himself from docket VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q014"}
+{"category": "source_attributed_claim", "id": "q015", "question": "What reason did Vice Chair Bromberg give for his recusal from VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q015"}
+{"category": "quorum_status", "id": "q016", "question": "Was Alternate Castelletti present at the March 26, 2026 hearing?", "source_id": "civic_hearing_correction_packet:q016"}
+{"category": "source_attributed_claim", "id": "q017", "question": "Which public objector resides at the property directly abutting 88 Heron Ridge Road?", "source_id": "civic_hearing_correction_packet:q017"}
+{"category": "source_attributed_claim", "id": "q018", "question": "What specific concern did Carwyn Tjelmeland raise on behalf of the Heron Ridge Neighborhood Association?", "source_id": "civic_hearing_correction_packet:q018"}
+{"category": "source_attributed_claim", "id": "q019", "question": "What recommendation did Town Planner Suniti Aravamudan make regarding VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q019"}
+{"category": "source_attributed_claim", "id": "q020", "question": "Who co-signed Staff Report SR-VAR-2026-019 with the Town Planner?", "source_id": "civic_hearing_correction_packet:q020"}
+{"category": "source_attributed_claim", "id": "q021", "question": "To which portion of the variance application did Yusra Penhollow object?", "source_id": "civic_hearing_correction_packet:q021"}
+{"category": "source_attributed_claim", "id": "q022", "question": "Which public commenter cited prior variances on Beech Court and Tamarack Lane in support of the application?", "source_id": "civic_hearing_correction_packet:q022"}
+{"category": "source_attributed_claim", "id": "q023", "question": "What primary concern did Beulah Mainwaring state in her objection?", "source_id": "civic_hearing_correction_packet:q023"}
+{"category": "source_attributed_claim", "id": "q024", "question": "Who is the Building Inspector named in the staff report?", "source_id": "civic_hearing_correction_packet:q024"}
+{"category": "correction_current_value", "id": "q025", "question": "What did the Clerk's initial informal communication on April 22, 2026 say about the timeliness of Ms. Mainwaring's appeal?", "source_id": "civic_hearing_correction_packet:q025"}
+{"category": "correction_current_value", "id": "q026", "question": "What did CORR-BZBA-2026-002 change about the Clerk's earlier position on the appeal window?", "source_id": "civic_hearing_correction_packet:q026"}
+{"category": "correction_current_value", "id": "q027", "question": "Following CORR-BZBA-2026-001, what is the operative vote tally of record on VAR-2026-019?", "source_id": "civic_hearing_correction_packet:q027"}
+{"category": "correction_current_value", "id": "q028", "question": "For what procedural reason was Alternate Castelletti's vote voided?", "source_id": "civic_hearing_correction_packet:q028"}
+{"category": "correction_current_value", "id": "q029", "question": "What is the current applicable appeal window length for BZBA matters under the operative correction record?", "source_id": "civic_hearing_correction_packet:q029"}
+{"category": "current_status", "id": "q030", "question": "Is the variance VAR-2026-019 currently in effect, suspended, or denied?", "source_id": "civic_hearing_correction_packet:q030"}
+{"category": "source_reference", "id": "q031", "question": "What state statute is referenced in CORR-BZBA-2026-002 as the source of the appeal-window rule?", "source_id": "civic_hearing_correction_packet:q031"}
+{"category": "source_reference", "id": "q032", "question": "What is the source of the thirty-day appeal window applied to AP-2026-005?", "source_id": "civic_hearing_correction_packet:q032"}
+{"category": "identifier_or_label_detail", "id": "q033", "question": "What is the packet identifier for this BZBA hearing packet?", "source_id": "civic_hearing_correction_packet:q033"}
+{"category": "identifier_or_label_detail", "id": "q034", "question": "What is the docket number assigned to the Quintrell Holdings LLC variance application?", "source_id": "civic_hearing_correction_packet:q034"}
+{"category": "source_reference", "id": "q035", "question": "Who issued correction notice CORR-BZBA-2026-003?", "source_id": "civic_hearing_correction_packet:q035"}
+{"category": "source_reference", "id": "q036", "question": "In which packet section are the draft minutes' motion and vote text recorded?", "source_id": "civic_hearing_correction_packet:q036"}
+{"category": "source_reference", "id": "q037", "question": "In which packet document is the staff approval recommendation documented?", "source_id": "civic_hearing_correction_packet:q037"}
+{"category": "source_reference", "id": "q038", "question": "Who is identified as Town Counsel in the packet?", "source_id": "civic_hearing_correction_packet:q038"}
+{"category": "source_reference", "id": "q039", "question": "Who is identified as the Town Clerk in the packet?", "source_id": "civic_hearing_correction_packet:q039"}
+{"category": "source_reference", "id": "q040", "question": "What type of document is BZBA-PKT-2026-0411?", "source_id": "civic_hearing_correction_packet:q040"}

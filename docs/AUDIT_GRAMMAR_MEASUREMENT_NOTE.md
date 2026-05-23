@@ -72,6 +72,8 @@ runtime writes rescue weak compiles.
 - Native restamp worksheet: `docs/NATIVE_RESTAMP_WORKSHEET.md`
 - Real-world fixture inputs:
   `datasets/real_world_transfer/20260521`
+- Sealed unseen fixture inputs:
+  `datasets/sealed_unseen/20260521`
 - Native compile summary:
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_compile_stamp_20260522_current_summary.json`
 - Native QA summary:

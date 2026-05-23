@@ -31,6 +31,10 @@ The externally sourced four-fixture real-world transfer inputs are retained at
 `datasets/real_world_transfer/20260521`; they remain separate from the native
 `datasets/story_worlds` baseline.
 
+The project-authored sealed unseen inputs are retained at
+`datasets/sealed_unseen/20260521`; they remain separate from both the native
+baseline and the externally sourced real-world fixtures.
+
 ## What "Audit Grammar" Means
 
 The audit grammar is the measurement language of the instrument. It is the set

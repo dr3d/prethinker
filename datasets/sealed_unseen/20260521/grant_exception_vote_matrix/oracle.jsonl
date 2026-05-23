@@ -1,0 +1,40 @@
+{"category": "rule_authority", "id": "q001", "reference_answer": "Charter §3.04.", "source_id": "grant_exception_vote_matrix:q001"}
+{"category": "rule_authority", "id": "q002", "reference_answer": "$75,000 per single grant.", "source_id": "grant_exception_vote_matrix:q002"}
+{"category": "rule_authority", "id": "q003", "reference_answer": "Charter §3.05.", "source_id": "grant_exception_vote_matrix:q003"}
+{"category": "rule_authority", "id": "q004", "reference_answer": "Charter §4.02.", "source_id": "grant_exception_vote_matrix:q004"}
+{"category": "rule_authority", "id": "q005", "reference_answer": "Charter §4.05.", "source_id": "grant_exception_vote_matrix:q005"}
+{"category": "rule_authority", "id": "q006", "reference_answer": "Two-thirds (2/3) of voting committee members; rounded up to the next whole number when fractional.", "source_id": "grant_exception_vote_matrix:q006"}
+{"category": "rule_authority", "id": "q007", "reference_answer": "Eustaquia Brindlemoore, JD, of Brindlemoore & Halverson LLP.", "source_id": "grant_exception_vote_matrix:q007"}
+{"category": "rule_authority", "id": "q008", "reference_answer": "HFF-CC-2026-0415, dated April 15, 2026.", "source_id": "grant_exception_vote_matrix:q008"}
+{"category": "applicant_eligibility", "id": "q009", "reference_answer": "Coppertown Maritime Heritage Society (APP-S26-002).", "source_id": "grant_exception_vote_matrix:q009"}
+{"category": "applicant_eligibility", "id": "q010", "reference_answer": "Yes. Continuous operations established from 2019 (predecessor unincorporated association) meets the §3.06 three-year requirement; the 501(c)(3) status date is not the controlling fact.", "source_id": "grant_exception_vote_matrix:q010"}
+{"category": "applicant_eligibility", "id": "q011", "reference_answer": "§3.07(b), the 'principally serves' prong, because more than 60% of beneficiaries (78%) reside in Massachusetts and Vermont.", "source_id": "grant_exception_vote_matrix:q011"}
+{"category": "applicant_eligibility", "id": "q012", "reference_answer": "Yes. The $135,000 request exceeds the §3.05 hard cap of $125,000, so the request as filed cannot be granted regardless of vote outcome.", "source_id": "grant_exception_vote_matrix:q012"}
+{"category": "applicant_eligibility", "id": "q013", "reference_answer": "Heatherton Youth Mentoring (APP-S26-003), incorporated in the State of New York.", "source_id": "grant_exception_vote_matrix:q013"}
+{"category": "applicant_eligibility", "id": "q014", "reference_answer": "78%.", "source_id": "grant_exception_vote_matrix:q014"}
+{"category": "applicant_eligibility", "id": "q015", "reference_answer": "Its 501(c)(3) status was granted January 15, 2023, less than three years before the April 18, 2026 meeting; the Grants Administrator initially read §3.06 as requiring three years of 501(c)(3) status.", "source_id": "grant_exception_vote_matrix:q015"}
+{"category": "applicant_eligibility", "id": "q016", "reference_answer": "Yes; Charter §3.06 requires current 501(c)(3) status and the packet treats all five applicants as currently holding it (Coppertown's status was granted January 15, 2023).", "source_id": "grant_exception_vote_matrix:q016"}
+{"category": "vote_tally", "id": "q017", "reference_answer": "For 6, against 0, abstain 1. Motion carried.", "source_id": "grant_exception_vote_matrix:q017"}
+{"category": "vote_tally", "id": "q018", "reference_answer": "Mahalia Drewes, on the basis of a current board affiliation with Northbrook Literacy Alliance, under Charter §4.05.", "source_id": "grant_exception_vote_matrix:q018"}
+{"category": "vote_tally", "id": "q019", "reference_answer": "For 5, against 1, abstain 1 (Fairweather). Denominator excluding abstention is 6; 2/3 of 6 is 4; 5 ≥ 4.", "source_id": "grant_exception_vote_matrix:q019"}
+{"category": "vote_tally", "id": "q020", "reference_answer": "Yes. Exception carried; $110,000 awarded.", "source_id": "grant_exception_vote_matrix:q020"}
+{"category": "vote_tally", "id": "q021", "reference_answer": "For 4, against 3, abstain 0. Denominator 7; 2/3 of 7 is 4.67, rounded up to 5; 4 < 5.", "source_id": "grant_exception_vote_matrix:q021"}
+{"category": "vote_tally", "id": "q022", "reference_answer": "No. Exception failed. A fall-back standard motion at $75,000 then carried 7-0-0.", "source_id": "grant_exception_vote_matrix:q022"}
+{"category": "vote_tally", "id": "q023", "reference_answer": "For 6, against 1, abstain 0. Threshold 5; carried.", "source_id": "grant_exception_vote_matrix:q023"}
+{"category": "vote_tally", "id": "q024", "reference_answer": "For 7, against 0, abstain 0. Motion carried.", "source_id": "grant_exception_vote_matrix:q024"}
+{"category": "numeric_cap", "id": "q025", "reference_answer": "$125,000 (hard cap).", "source_id": "grant_exception_vote_matrix:q025"}
+{"category": "numeric_cap", "id": "q026", "reference_answer": "$400,000.", "source_id": "grant_exception_vote_matrix:q026"}
+{"category": "numeric_cap", "id": "q027", "reference_answer": "$450,000.", "source_id": "grant_exception_vote_matrix:q027"}
+{"category": "numeric_cap", "id": "q028", "reference_answer": "$440,000.", "source_id": "grant_exception_vote_matrix:q028"}
+{"category": "numeric_cap", "id": "q029", "reference_answer": "By $40,000.", "source_id": "grant_exception_vote_matrix:q029"}
+{"category": "numeric_cap", "id": "q030", "reference_answer": "$75,000 (the fall-back §3.04 standard award after the exception failed).", "source_id": "grant_exception_vote_matrix:q030"}
+{"category": "numeric_cap", "id": "q031", "reference_answer": "$125,000 (the §3.05 hard cap; the originally requested $135,000 could not be awarded).", "source_id": "grant_exception_vote_matrix:q031"}
+{"category": "numeric_cap", "id": "q032", "reference_answer": "Five (5). 2/3 of 7 is 4.67, rounded up to 5.", "source_id": "grant_exception_vote_matrix:q032"}
+{"category": "table_reference", "id": "q033", "reference_answer": "APP-S26-002.", "source_id": "grant_exception_vote_matrix:q033"}
+{"category": "table_reference", "id": "q034", "reference_answer": "APP-S26-004.", "source_id": "grant_exception_vote_matrix:q034"}
+{"category": "table_reference", "id": "q035", "reference_answer": "HFF-GRC-2026-S-PKT-04.", "source_id": "grant_exception_vote_matrix:q035"}
+{"category": "table_reference", "id": "q036", "reference_answer": "Spring 2026.", "source_id": "grant_exception_vote_matrix:q036"}
+{"category": "table_reference", "id": "q037", "reference_answer": "HFF-CC-2026-0416, dated April 16, 2026.", "source_id": "grant_exception_vote_matrix:q037"}
+{"category": "table_reference", "id": "q038", "reference_answer": "Board Resolution 2025-Q4-031 (initial cycle cap); the supplemental allocation is Board Supplemental Allocation 2026-S-01.", "source_id": "grant_exception_vote_matrix:q038"}
+{"category": "table_reference", "id": "q039", "reference_answer": "Wilberforce Tannenbaum.", "source_id": "grant_exception_vote_matrix:q039"}
+{"category": "table_reference", "id": "q040", "reference_answer": "April 18, 2026.", "source_id": "grant_exception_vote_matrix:q040"}

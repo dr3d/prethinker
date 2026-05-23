@@ -1,0 +1,85 @@
+{
+  "fixtures": [
+    {
+      "categories": {
+        "correction_current_value": 8,
+        "current_status": 2,
+        "event_date": 4,
+        "identifier_or_label_detail": 2,
+        "quorum_status": 3,
+        "source_attributed_claim": 9,
+        "source_reference": 8,
+        "vote_tally": 4
+      },
+      "fixture": "civic_hearing_correction_packet",
+      "oracle_jsonl": "tmp\\incoming_unseen_20260521_staged\\civic_hearing_correction_packet\\oracle.jsonl",
+      "path": "tmp\\incoming_unseen_20260521_staged\\civic_hearing_correction_packet",
+      "qa_file": "tmp\\incoming_unseen_20260521_staged\\civic_hearing_correction_packet\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\incoming_unseen_20260521_staged\\civic_hearing_correction_packet\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "correction_supersession": 8,
+        "current_status": 8,
+        "event_date": 3,
+        "identifier_or_label_detail": 9,
+        "quantity_value": 4,
+        "source_attributed_claim": 8
+      },
+      "fixture": "clinical_recall_source_packet",
+      "oracle_jsonl": "tmp\\incoming_unseen_20260521_staged\\clinical_recall_source_packet\\oracle.jsonl",
+      "path": "tmp\\incoming_unseen_20260521_staged\\clinical_recall_source_packet",
+      "qa_file": "tmp\\incoming_unseen_20260521_staged\\clinical_recall_source_packet\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\incoming_unseen_20260521_staged\\clinical_recall_source_packet\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "applicant_eligibility": 8,
+        "numeric_cap": 8,
+        "rule_authority": 8,
+        "table_reference": 8,
+        "vote_tally": 8
+      },
+      "fixture": "grant_exception_vote_matrix",
+      "oracle_jsonl": "tmp\\incoming_unseen_20260521_staged\\grant_exception_vote_matrix\\oracle.jsonl",
+      "path": "tmp\\incoming_unseen_20260521_staged\\grant_exception_vote_matrix",
+      "qa_file": "tmp\\incoming_unseen_20260521_staged\\grant_exception_vote_matrix\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\incoming_unseen_20260521_staged\\grant_exception_vote_matrix\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "correction_amendment_effect": 8,
+        "current_status": 8,
+        "event_date_provenance": 8,
+        "identifier_register_row": 8,
+        "source_attributed_claim": 8
+      },
+      "fixture": "lease_amendment_status_register",
+      "oracle_jsonl": "tmp\\incoming_unseen_20260521_staged\\lease_amendment_status_register\\oracle.jsonl",
+      "path": "tmp\\incoming_unseen_20260521_staged\\lease_amendment_status_register",
+      "qa_file": "tmp\\incoming_unseen_20260521_staged\\lease_amendment_status_register\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\incoming_unseen_20260521_staged\\lease_amendment_status_register\\source.md",
+      "status": "staged"
+    }
+  ],
+  "generated_at": "2026-05-21T08:47:37+00:00",
+  "policy": [
+    "Copies source and notes as authored.",
+    "Writes qa.md with questions only.",
+    "Writes oracle.jsonl with reference answers for after-the-fact scoring.",
+    "Does not interpret source prose or answers."
+  ],
+  "schema_version": "incoming_fixture_stage_manifest_v1",
+  "summary": {
+    "failed_fixture_count": 0,
+    "fixture_count": 4,
+    "staged_fixture_count": 4
+  }
+}

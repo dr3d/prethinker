@@ -1,0 +1,40 @@
+{"id":"q001","source_id":"clinical_recall_source_packet:q001","category":"identifier_or_label_detail","reference_answer":"TQ-9 portable infusion pump."}
+{"id":"q002","source_id":"clinical_recall_source_packet:q002","category":"identifier_or_label_detail","reference_answer":"Sayfield Biomedical, Inc."}
+{"id":"q003","source_id":"clinical_recall_source_packet:q003","category":"identifier_or_label_detail","reference_answer":"TQ9-LOT-2025-0521."}
+{"id":"q004","source_id":"clinical_recall_source_packet:q004","category":"identifier_or_label_detail","reference_answer":"SBI-FB-2026-114."}
+{"id":"q005","source_id":"clinical_recall_source_packet:q005","category":"identifier_or_label_detail","reference_answer":"SBI-FB-2026-114-S1."}
+{"id":"q006","source_id":"clinical_recall_source_packet:q006","category":"identifier_or_label_detail","reference_answer":"ROW-INV-006."}
+{"id":"q007","source_id":"clinical_recall_source_packet:q007","category":"identifier_or_label_detail","reference_answer":"Room 3B-188."}
+{"id":"q008","source_id":"clinical_recall_source_packet:q008","category":"identifier_or_label_detail","reference_answer":"Firmware v2.11.3."}
+{"id":"q009","source_id":"clinical_recall_source_packet:q009","category":"current_status","reference_answer":"Released to service. All five units from lot 0521 are released; no firmware patch required."}
+{"id":"q010","source_id":"clinical_recall_source_packet:q010","category":"current_status","reference_answer":"On hold. Six units on hold, awaiting v2.11.5 patch deployment scheduled April 22-23, 2026."}
+{"id":"q011","source_id":"clinical_recall_source_packet:q011","category":"current_status","reference_answer":"On hold. Three units on hold, awaiting v2.11.5 patch deployment."}
+{"id":"q012","source_id":"clinical_recall_source_packet:q012","category":"current_status","reference_answer":"Nine (9) units on hold (6 from lot 0312, 3 from lot 0418)."}
+{"id":"q013","source_id":"clinical_recall_source_packet:q013","category":"current_status","reference_answer":"Five (5) units."}
+{"id":"q014","source_id":"clinical_recall_source_packet:q014","category":"identifier_or_label_detail","reference_answer":"Firmware v2.11.5."}
+{"id":"q015","source_id":"clinical_recall_source_packet:q015","category":"current_status","reference_answer":"Two (2) loaner pumps."}
+{"id":"q016","source_id":"clinical_recall_source_packet:q016","category":"current_status","reference_answer":"June 8, 2026."}
+{"id":"q017","source_id":"clinical_recall_source_packet:q017","category":"quantity_value","reference_answer":"Six (6) loaner pumps."}
+{"id":"q018","source_id":"clinical_recall_source_packet:q018","category":"event_date","reference_answer":"April 9, 2026."}
+{"id":"q019","source_id":"clinical_recall_source_packet:q019","category":"quantity_value","reference_answer":"Fourteen (14) units."}
+{"id":"q020","source_id":"clinical_recall_source_packet:q020","category":"event_date","reference_answer":"April 4, 2026."}
+{"id":"q021","source_id":"clinical_recall_source_packet:q021","category":"event_date","reference_answer":"April 11, 2026."}
+{"id":"q022","source_id":"clinical_recall_source_packet:q022","category":"quantity_value","reference_answer":"Four (4) loaners."}
+{"id":"q023","source_id":"clinical_recall_source_packet:q023","category":"quantity_value","reference_answer":"Three (3) nurse reports (NR-2026-031 from Bibulwicz, NR-2026-033 from Kontoleon, NR-2026-035 from Indaharu)."}
+{"id":"q024","source_id":"clinical_recall_source_packet:q024","category":"current_status","reference_answer":"Two (2) lots: TQ9-LOT-2025-0312 and TQ9-LOT-2025-0418."}
+{"id":"q025","source_id":"clinical_recall_source_packet:q025","category":"source_attributed_claim","reference_answer":"RN Ojárrè Bibulwicz, Floor 2A. Report NR-2026-031."}
+{"id":"q026","source_id":"clinical_recall_source_packet:q026","category":"source_attributed_claim","reference_answer":"RN Phaedra Kontoleon, Floor 3B. Report NR-2026-033."}
+{"id":"q027","source_id":"clinical_recall_source_packet:q027","category":"source_attributed_claim","reference_answer":"RN Wamukota Indaharu, Floor 4C. Report NR-2026-035."}
+{"id":"q028","source_id":"clinical_recall_source_packet:q028","category":"source_attributed_claim","reference_answer":"Erskine Drabolwicz, PharmD."}
+{"id":"q029","source_id":"clinical_recall_source_packet:q029","category":"source_attributed_claim","reference_answer":"That all three reports are consistent with a firmware-level anomaly (alarm-generation and pressure-sensor polling) rather than a hardware fault; the Indaharu negative report does not exclude latent firmware vulnerability."}
+{"id":"q030","source_id":"clinical_recall_source_packet:q030","category":"source_attributed_claim","reference_answer":"April 3, 2026, at 03:14 local time."}
+{"id":"q031","source_id":"clinical_recall_source_packet:q031","category":"source_attributed_claim","reference_answer":"Two consecutive shifts: the April 5 day shift and the April 5 night shift, observed across handoff."}
+{"id":"q032","source_id":"clinical_recall_source_packet:q032","category":"source_attributed_claim","reference_answer":"RN Phaedra Kontoleon."}
+{"id":"q033","source_id":"clinical_recall_source_packet:q033","category":"correction_supersession","reference_answer":"The statement in SBI-FB-2026-114 that lot 0521 was affected; superseded by SBI-FB-2026-114-S1."}
+{"id":"q034","source_id":"clinical_recall_source_packet:q034","category":"correction_supersession","reference_answer":"Firmware v2.11.4."}
+{"id":"q035","source_id":"clinical_recall_source_packet:q035","category":"correction_supersession","reference_answer":"Because lot 0521 shipped from a separate production line using firmware v2.11.4, not the vulnerable v2.11.3."}
+{"id":"q036","source_id":"clinical_recall_source_packet:q036","category":"correction_supersession","reference_answer":"Sayfield Biomedical, Inc."}
+{"id":"q037","source_id":"clinical_recall_source_packet:q037","category":"correction_supersession","reference_answer":"Five (5) units (all lot-0521 units, rows ROW-INV-010 through ROW-INV-014)."}
+{"id":"q038","source_id":"clinical_recall_source_packet:q038","category":"correction_supersession","reference_answer":"Two (2): lots 0312 and 0418."}
+{"id":"q039","source_id":"clinical_recall_source_packet:q039","category":"correction_supersession","reference_answer":"Released."}
+{"id":"q040","source_id":"clinical_recall_source_packet:q040","category":"correction_supersession","reference_answer":"Erskine Drabolwicz, PharmD, Director of Pharmacy, via WAIC-CORR-2026-0411."}

@@ -70,6 +70,10 @@ The durable real-world fixture inputs live at
 `datasets/real_world_transfer/20260521`. They are transfer evidence, not part
 of the native `datasets/story_worlds` baseline.
 
+The sealed unseen authored fixture inputs live at
+`datasets/sealed_unseen/20260521`. They are useful transfer evidence, but they
+should remain distinct from externally sourced real-world documents.
+
 The current full-suite verification is:
 
 ```text

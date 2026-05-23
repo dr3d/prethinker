@@ -1,0 +1,40 @@
+{"category": "current_status", "id": "q001", "question": "What is the current status of lease LSE-2024-0331-007 per the Register?", "source_id": "lease_amendment_status_register:q001"}
+{"category": "current_status", "id": "q002", "question": "What is the current operative monthly base rent under the amended lease?", "source_id": "lease_amendment_status_register:q002"}
+{"category": "current_status", "id": "q003", "question": "On what date does the amended lease term end?", "source_id": "lease_amendment_status_register:q003"}
+{"category": "current_status", "id": "q004", "question": "What is the premises address of the subject lease?", "source_id": "lease_amendment_status_register:q004"}
+{"category": "current_status", "id": "q005", "question": "Who is the landlord of record?", "source_id": "lease_amendment_status_register:q005"}
+{"category": "current_status", "id": "q006", "question": "Who is the tenant of record?", "source_id": "lease_amendment_status_register:q006"}
+{"category": "current_status", "id": "q007", "question": "On what date does the operative rent escalation take effect?", "source_id": "lease_amendment_status_register:q007"}
+{"category": "current_status", "id": "q008", "question": "On which unit is the currently operative Right of First Refusal granted?", "source_id": "lease_amendment_status_register:q008"}
+{"category": "source_attributed_claim", "id": "q009", "question": "What does Clerk Note CN-2026-022 state about the legal effect of PA-2026-014-D1?", "source_id": "lease_amendment_status_register:q009"}
+{"category": "source_attributed_claim", "id": "q010", "question": "Who issued Clerk Note CN-2026-022?", "source_id": "lease_amendment_status_register:q010"}
+{"category": "source_attributed_claim", "id": "q011", "question": "Who signed Tenant Letter of Intent TLOI-2026-019?", "source_id": "lease_amendment_status_register:q011"}
+{"category": "source_attributed_claim", "id": "q012", "question": "What language in TLOI-2026-019 establishes its non-binding nature?", "source_id": "lease_amendment_status_register:q012"}
+{"category": "source_attributed_claim", "id": "q013", "question": "What did Counsel Opinion COP-2026-031 conclude about the legal effect of TLOI-2026-019 on the landlord?", "source_id": "lease_amendment_status_register:q013"}
+{"category": "source_attributed_claim", "id": "q014", "question": "Who authored Counsel Opinion COP-2026-031?", "source_id": "lease_amendment_status_register:q014"}
+{"category": "source_attributed_claim", "id": "q015", "question": "What did Counsel recommend regarding an execution deadline in the amendment?", "source_id": "lease_amendment_status_register:q015"}
+{"category": "source_attributed_claim", "id": "q016", "question": "On which unit was the Right of First Refusal originally drafted in PA-2026-014-D1?", "source_id": "lease_amendment_status_register:q016"}
+{"category": "correction_amendment_effect", "id": "q017", "question": "On which unit was the Right of First Refusal recorded in the initial register entry REG-E-2026-061?", "source_id": "lease_amendment_status_register:q017"}
+{"category": "correction_amendment_effect", "id": "q018", "question": "What did Register Correction CORR-2026-008 change about the initial register entry?", "source_id": "lease_amendment_status_register:q018"}
+{"category": "correction_amendment_effect", "id": "q019", "question": "What is the corrected (current) Right of First Refusal unit?", "source_id": "lease_amendment_status_register:q019"}
+{"category": "correction_amendment_effect", "id": "q020", "question": "Which register entry is currently authoritative?", "source_id": "lease_amendment_status_register:q020"}
+{"category": "correction_amendment_effect", "id": "q021", "question": "Which proposed amendment draft was superseded by the executed amendment AMD-2026-014?", "source_id": "lease_amendment_status_register:q021"}
+{"category": "correction_amendment_effect", "id": "q022", "question": "Which document voided PA-2026-014-D1 as legally operative?", "source_id": "lease_amendment_status_register:q022"}
+{"category": "correction_amendment_effect", "id": "q023", "question": "Is PA-2026-014-D1 currently legally operative?", "source_id": "lease_amendment_status_register:q023"}
+{"category": "correction_amendment_effect", "id": "q024", "question": "What is the legal effect of TLOI-2026-019 on either party?", "source_id": "lease_amendment_status_register:q024"}
+{"category": "event_date_provenance", "id": "q025", "question": "On what date was the original lease LSE-2024-0331-007 executed?", "source_id": "lease_amendment_status_register:q025"}
+{"category": "event_date_provenance", "id": "q026", "question": "On what date was the executed amendment AMD-2026-014 signed?", "source_id": "lease_amendment_status_register:q026"}
+{"category": "event_date_provenance", "id": "q027", "question": "On what date was the register correction CORR-2026-008 issued?", "source_id": "lease_amendment_status_register:q027"}
+{"category": "event_date_provenance", "id": "q028", "question": "On what date was the initial register entry REG-E-2026-061 recorded?", "source_id": "lease_amendment_status_register:q028"}
+{"category": "event_date_provenance", "id": "q029", "question": "On what date was Clerk Note CN-2026-022 issued?", "source_id": "lease_amendment_status_register:q029"}
+{"category": "event_date_provenance", "id": "q030", "question": "On what date was Counsel Opinion COP-2026-031 dated?", "source_id": "lease_amendment_status_register:q030"}
+{"category": "event_date_provenance", "id": "q031", "question": "On what date was the voided document notice VD-2026-003 issued?", "source_id": "lease_amendment_status_register:q031"}
+{"category": "event_date_provenance", "id": "q032", "question": "What is the identifier of the property register packet?", "source_id": "lease_amendment_status_register:q032"}
+{"category": "identifier_register_row", "id": "q033", "question": "What is the row label for the original lease?", "source_id": "lease_amendment_status_register:q033"}
+{"category": "identifier_register_row", "id": "q034", "question": "What is the row label for the executed amendment?", "source_id": "lease_amendment_status_register:q034"}
+{"category": "identifier_register_row", "id": "q035", "question": "What is the row label for the clerk's note?", "source_id": "lease_amendment_status_register:q035"}
+{"category": "identifier_register_row", "id": "q036", "question": "What is the row label for the counsel opinion?", "source_id": "lease_amendment_status_register:q036"}
+{"category": "identifier_register_row", "id": "q037", "question": "What is the identifier of the corrected register entry?", "source_id": "lease_amendment_status_register:q037"}
+{"category": "identifier_register_row", "id": "q038", "question": "What is the identifier of the original draft amendment?", "source_id": "lease_amendment_status_register:q038"}
+{"category": "identifier_register_row", "id": "q039", "question": "What is the identifier of the revised draft amendment that incorporated counsel's recommendations?", "source_id": "lease_amendment_status_register:q039"}
+{"category": "identifier_register_row", "id": "q040", "question": "What is the identifier of the voided document notice?", "source_id": "lease_amendment_status_register:q040"}

@@ -1,0 +1,40 @@
+{"category": "identifier_or_label_detail", "id": "q001", "question": "What device model is the subject of the field recall packet WAIC-RECALL-2026-0408?", "source_id": "clinical_recall_source_packet:q001"}
+{"category": "identifier_or_label_detail", "id": "q002", "question": "Who is the manufacturer of the TQ-9 portable infusion pump?", "source_id": "clinical_recall_source_packet:q002"}
+{"category": "identifier_or_label_detail", "id": "q003", "question": "Which production lot was initially named in the primary field bulletin but later confirmed NOT to be subject to the recall?", "source_id": "clinical_recall_source_packet:q003"}
+{"category": "identifier_or_label_detail", "id": "q004", "question": "What is the identifier of Sayfield's primary field bulletin?", "source_id": "clinical_recall_source_packet:q004"}
+{"category": "identifier_or_label_detail", "id": "q005", "question": "What is the identifier of Sayfield's supplemental field bulletin?", "source_id": "clinical_recall_source_packet:q005"}
+{"category": "identifier_or_label_detail", "id": "q006", "question": "Which inventory row corresponds to serial number TQ9-S/N-A7990?", "source_id": "clinical_recall_source_packet:q006"}
+{"category": "identifier_or_label_detail", "id": "q007", "question": "In which room is pump TQ9-S/N-A8104 assigned?", "source_id": "clinical_recall_source_packet:q007"}
+{"category": "identifier_or_label_detail", "id": "q008", "question": "Which firmware version was identified as the vulnerable version?", "source_id": "clinical_recall_source_packet:q008"}
+{"category": "current_status", "id": "q009", "question": "What is the current status of lot TQ9-LOT-2025-0521 in the Wheelock AIC inventory?", "source_id": "clinical_recall_source_packet:q009"}
+{"category": "current_status", "id": "q010", "question": "What is the current status of lot TQ9-LOT-2025-0312 in the Wheelock AIC inventory?", "source_id": "clinical_recall_source_packet:q010"}
+{"category": "current_status", "id": "q011", "question": "What is the current status of lot TQ9-LOT-2025-0418 in the Wheelock AIC inventory?", "source_id": "clinical_recall_source_packet:q011"}
+{"category": "current_status", "id": "q012", "question": "How many TQ-9 units in the Wheelock AIC inventory are currently on hold?", "source_id": "clinical_recall_source_packet:q012"}
+{"category": "current_status", "id": "q013", "question": "How many TQ-9 units from lot 0521 have been released to service following the correction?", "source_id": "clinical_recall_source_packet:q013"}
+{"category": "identifier_or_label_detail", "id": "q014", "question": "What firmware version is the patch that remediates the recall?", "source_id": "clinical_recall_source_packet:q014"}
+{"category": "current_status", "id": "q015", "question": "As of April 11, 2026, how many loaner pumps are deployed to floor 3B?", "source_id": "clinical_recall_source_packet:q015"}
+{"category": "current_status", "id": "q016", "question": "When does the loaner agreement LOAN-AGT-2026-0409 expire?", "source_id": "clinical_recall_source_packet:q016"}
+{"category": "quantity_value", "id": "q017", "question": "How many loaner pumps did Wheelock AIC receive from Sayfield Biomedical?", "source_id": "clinical_recall_source_packet:q017"}
+{"category": "event_date", "id": "q018", "question": "On what date were the loaner pumps received?", "source_id": "clinical_recall_source_packet:q018"}
+{"category": "quantity_value", "id": "q019", "question": "How many TQ-9 units total are in the Wheelock AIC inventory matching the lot ranges in the primary bulletin?", "source_id": "clinical_recall_source_packet:q019"}
+{"category": "event_date", "id": "q020", "question": "On what date was Sayfield's primary field bulletin issued?", "source_id": "clinical_recall_source_packet:q020"}
+{"category": "event_date", "id": "q021", "question": "On what date was the Wheelock AIC internal correction notice issued?", "source_id": "clinical_recall_source_packet:q021"}
+{"category": "quantity_value", "id": "q022", "question": "How many loaner pumps were deployed to floor 2A?", "source_id": "clinical_recall_source_packet:q022"}
+{"category": "quantity_value", "id": "q023", "question": "How many nurse reports were filed in connection with this recall window?", "source_id": "clinical_recall_source_packet:q023"}
+{"category": "current_status", "id": "q024", "question": "After the correction, how many lots remain on hold at Wheelock AIC?", "source_id": "clinical_recall_source_packet:q024"}
+{"category": "source_attributed_claim", "id": "q025", "question": "Which nurse filed the report describing an E-32 error code alarm on serial A7831?", "source_id": "clinical_recall_source_packet:q025"}
+{"category": "source_attributed_claim", "id": "q026", "question": "Which nurse reported pressure drift on pump TQ9-S/N-A8104?", "source_id": "clinical_recall_source_packet:q026"}
+{"category": "source_attributed_claim", "id": "q027", "question": "Which nurse reported that no anomalies were observed on serial TQ9-S/N-A7990?", "source_id": "clinical_recall_source_packet:q027"}
+{"category": "source_attributed_claim", "id": "q028", "question": "Who is the Director of Pharmacy at Wheelock AIC who issued the internal correction notice?", "source_id": "clinical_recall_source_packet:q028"}
+{"category": "source_attributed_claim", "id": "q029", "question": "What did BMET Trumbauer's note BMET-NOTE-2026-019 conclude about the three preceding nurse reports?", "source_id": "clinical_recall_source_packet:q029"}
+{"category": "source_attributed_claim", "id": "q030", "question": "On what date and at what local time does Bibulwicz's report state the alarm on serial A7831 occurred?", "source_id": "clinical_recall_source_packet:q030"}
+{"category": "source_attributed_claim", "id": "q031", "question": "Across which shifts did Kontoleon observe pressure drift on serial A8104?", "source_id": "clinical_recall_source_packet:q031"}
+{"category": "source_attributed_claim", "id": "q032", "question": "Which nurse works on floor 3B per the nurse report headers?", "source_id": "clinical_recall_source_packet:q032"}
+{"category": "correction_supersession", "id": "q033", "question": "Which manufacturer source statement about lot 0521 was superseded?", "source_id": "clinical_recall_source_packet:q033"}
+{"category": "correction_supersession", "id": "q034", "question": "What firmware version is installed on lot 0521 devices per the supplemental bulletin?", "source_id": "clinical_recall_source_packet:q034"}
+{"category": "correction_supersession", "id": "q035", "question": "According to the supplemental bulletin, why is lot 0521 not subject to the recall?", "source_id": "clinical_recall_source_packet:q035"}
+{"category": "correction_supersession", "id": "q036", "question": "Who issued the supplemental field bulletin SBI-FB-2026-114-S1?", "source_id": "clinical_recall_source_packet:q036"}
+{"category": "correction_supersession", "id": "q037", "question": "How many units changed status from on-hold to released following the internal correction notice?", "source_id": "clinical_recall_source_packet:q037"}
+{"category": "correction_supersession", "id": "q038", "question": "How many lots are confirmed currently subject to the recall at Wheelock AIC after the correction?", "source_id": "clinical_recall_source_packet:q038"}
+{"category": "correction_supersession", "id": "q039", "question": "Per the operative supersession in the packet, is lot 0521 currently released or on hold?", "source_id": "clinical_recall_source_packet:q039"}
+{"category": "correction_supersession", "id": "q040", "question": "Who internally confirmed the manufacturer's lot-0521 correction at Wheelock AIC?", "source_id": "clinical_recall_source_packet:q040"}
