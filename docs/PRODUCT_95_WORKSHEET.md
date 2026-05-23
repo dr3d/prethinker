@@ -350,6 +350,53 @@ generic naming grammar for active temporal status support. It should transfer
 to status/state/condition ledgers that express point observations as
 `on_date` rows while still requiring admitted before/after anchors.
 
+## Relaxed Frequency And Split Duration Hybrid Lane
+
+The next pass found two active-lane hybrid patterns that can be repaired before
+asking for more real-world thermometer documents:
+
+- A "most / highest count" question where the planner over-bound a table with
+  placeholder constants and then tried unsupported Prolog aggregation.
+- A duration question where a prior row stored start date and start time in
+  separate fields but the temporal join compared the date-only value against a
+  combined end timestamp, producing a plausible but wrong duration.
+
+Repairs:
+
+- Added a clean query-only frequency summary over successful relaxed table
+  queries when the relaxed column label is a role/source/person-style
+  placeholder. The support rows expose counts, max count, and tied max values
+  without writing aggregate facts.
+- Added split date/time duration support that combines a date field with its
+  sibling time field before computing elapsed minutes or hours.
+- Suppressed the misleading temporal join when a start-date variable has a
+  sibling start-time field available, so the wrong midnight-based duration is
+  not emitted beside the corrected support row.
+
+Verification:
+
+```text
+frozen native max-count replay: 1 exact / 0 partial / 0 miss
+frozen native split-duration replay: 1 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+full pytest: 1615 passed
+artifact archive: C:\prethinker_tmp_archive\product_95_relaxed_frequency_and_split_duration_20260523
+```
+
+Additional pre-stamp checks:
+
+```text
+identity source-context replay: 1 exact / 0 partial / 0 miss
+probate interval probe: no reference-answer row in that ad hoc replay; archived
+```
+
+Read: the frequency repair covers a common messy-document question shape:
+"which actor/source/category has the most rows?" The duration repair covers
+table ledgers that split date and time across adjacent fields. Both stay in the
+clean QA support layer and keep compatibility rows at zero.
+
 ## Next Moves
 
 1. Continue hybrid-join triage on frozen native misses, preferring active

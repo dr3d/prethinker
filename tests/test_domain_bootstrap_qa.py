@@ -3160,6 +3160,72 @@ def test_relaxed_constant_query_filters_token_subset_matches() -> None:
     assert relaxed["result"]["rows"] == [{"Item": "ex_001", "Relaxed2": "safestore_vault"}]
 
 
+def test_run_query_plan_combines_split_start_date_time_for_duration() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "window_record(window_a, 2026_01_01, 09_00, 2026_01_02_09_00).",
+        "window_record(window_a, 2026_01_04, 10_30, 2026_01_04_12_00).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(
+        runtime,
+        [
+            "window_record(window_a, Start_Date, Start_Time, End_Date).",
+            "elapsed_minutes(Start_Date, End_Date, Duration_Minutes).",
+        ],
+    )
+
+    companion = next(
+        item for item in results if item["result"].get("predicate") == "split_date_time_duration_support"
+    )
+    result_rows = companion["result"]["rows"]
+
+    assert result_rows[0]["Start"] == "2026_01_01_09_00"
+    assert result_rows[0]["End"] == "2026_01_02_09_00"
+    assert result_rows[0]["DurationMinutes"] == "1440"
+    assert result_rows[0]["Duration_Minutes"] == "1440"
+    assert all(
+        "window_record(window_a, Start_Date, Start_Time, End_Date), elapsed_minutes(Start_Date, End_Date"
+        not in item.get("query", "")
+        for item in results
+    )
+
+
+def test_run_query_plan_summarizes_relaxed_placeholder_frequencies() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "record_details(rec_1, item_a, analyst_one).",
+        "record_details(rec_2, item_b, analyst_two).",
+        "record_details(rec_3, item_c, analyst_one).",
+        "record_details(rec_4, item_d, analyst_two).",
+        "record_details(rec_5, item_e, analyst_three).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_query_plan(runtime, ["record_details(unknown, unknown, collector)."])
+
+    companion = next(
+        item for item in results if item["result"].get("predicate") == "relaxed_query_frequency_support"
+    )
+    rows = companion["result"]["rows"]
+
+    assert any(
+        row.get("GroupLabel") == "collector"
+        and row.get("Value") == "analyst_one"
+        and row.get("Count") == "2"
+        and row.get("IsMax") == "true"
+        and row.get("TiedMaxValues") == "analyst_one,analyst_two"
+        for row in rows
+    )
+    assert any(
+        row.get("Value") == "analyst_three"
+        and row.get("Count") == "1"
+        and row.get("IsMax") == "false"
+        for row in rows
+    )
+
+
 def test_run_query_plan_derives_recall_classification_at_date() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [

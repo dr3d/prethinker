@@ -3149,6 +3149,11 @@ def run_query_plan(
                 append_companion(defined_interval)
                 last_result = defined_interval.get("result", {})
         if isinstance(last_result, dict) and last_result.get("status") != "success":
+            split_datetime_duration = _split_date_time_duration_companion(results=results[:-1], query=effective_query)
+            if split_datetime_duration:
+                append_companion(split_datetime_duration)
+                last_result = split_datetime_duration.get("result", {})
+        if isinstance(last_result, dict) and last_result.get("status") != "success":
             status_interval = _status_at_date_interval_companion(runtime, query=effective_query)
             if status_interval:
                 append_companion(status_interval)
@@ -3182,6 +3187,9 @@ def run_query_plan(
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
                 results.append(relaxed)
+                relaxed_frequency = _relaxed_frequency_summary_companion(relaxed)
+                if relaxed_frequency:
+                    append_companion(relaxed_frequency)
                 effective_query = str(relaxed.get("query", query))
                 used_relaxed_fallback = True
                 last_result = relaxed.get("result", {})
@@ -15245,6 +15253,157 @@ def _status_at_date_interval_companion(runtime: CorePrologRuntime, *, query: str
     }
 
 
+def _split_date_time_duration_companion(
+    *,
+    results: list[dict[str, Any]],
+    query: str,
+) -> dict[str, Any] | None:
+    parsed = parse_prolog_query(query)
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate not in {"elapsed_minutes", "elapsed_hours"} or len(args) != 3:
+        return None
+    start_arg = str(args[0]).strip()
+    end_arg = str(args[1]).strip()
+    output_arg = str(args[2]).strip()
+    if not _is_prolog_variable(start_arg) or not _is_prolog_variable(end_arg):
+        return None
+    support_rows: list[dict[str, str]] = []
+    for item in reversed(results):
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            start_date = str(row.get(start_arg, "")).strip()
+            end_date = str(row.get(end_arg, "")).strip()
+            start_time_key, start_time = _datetime_sibling_time_value(row, start_arg)
+            end_time_key, end_time = _datetime_sibling_time_value(row, end_arg)
+            start = _combine_date_time_atom(start_date, start_time) or start_date
+            end = _combine_date_time_atom(end_date, end_time) or end_date
+            start_dt = _datetime_from_ledger_atom(start)
+            end_dt = _datetime_from_ledger_atom(end)
+            if not start_time or not start_dt or not end_dt or end_dt < start_dt:
+                continue
+            total_seconds = int((end_dt - start_dt).total_seconds())
+            minutes = total_seconds / 60
+            duration_value = (
+                _format_duration_number(minutes)
+                if predicate == "elapsed_minutes"
+                else _format_duration_number(total_seconds / 3600)
+            )
+            support_row = {
+                "SupportKind": "split_date_time_duration",
+                "SourcePredicate": str(result.get("predicate", "")),
+                "StartDate": start_date,
+                "StartTime": start_time,
+                "EndDate": end_date,
+                "EndTime": end_time,
+                "Start": start,
+                "End": end,
+                "DurationSeconds": str(total_seconds),
+                "DurationMinutes": _format_duration_number(minutes),
+                "DurationHours": _format_duration_number(total_seconds / 3600),
+                "Duration": _duration_between_atoms(start, end),
+                "StartTimeField": start_time_key,
+                "EndTimeField": end_time_key,
+                "HelperClass": "clean-helper",
+            }
+            if _is_prolog_variable(output_arg):
+                support_row[output_arg] = duration_value
+            support_rows.append(support_row)
+        if support_rows:
+            break
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: _runtime_sortable_datetime(row.get("Start", "")))
+    return {
+        "query": "split_date_time_duration_support(StartDate, StartTime, EndDate, DurationMinutes, Duration).",
+        "result": {
+            "status": "success",
+            "predicate": "split_date_time_duration_support",
+            "prolog_query": "split_date_time_duration_support(StartDate, StartTime, EndDate, DurationMinutes, Duration).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only duration support combined a date field with its sibling time field "
+                    "before comparing it to the end timestamp; no durable fact was written"
+                ),
+                "original_query": query,
+            },
+        },
+        "derived_from_queries": [query],
+    }
+
+
+def _datetime_sibling_time_value(row: dict[str, Any], date_key: str) -> tuple[str, str]:
+    normalized_date_key = re.sub(r"[^a-z0-9]", "", str(date_key or "").casefold())
+    candidate_keys: list[str] = []
+    for key in row.keys():
+        normalized_key = re.sub(r"[^a-z0-9]", "", str(key or "").casefold())
+        if not normalized_key or normalized_key == normalized_date_key:
+            continue
+        if normalized_date_key.endswith("date"):
+            expected = normalized_date_key[: -len("date")] + "time"
+            if normalized_key == expected:
+                candidate_keys.insert(0, str(key))
+                continue
+        if "start" in normalized_date_key and normalized_key in {"starttime", "time"}:
+            candidate_keys.append(str(key))
+        elif "end" in normalized_date_key and normalized_key == "endtime":
+            candidate_keys.append(str(key))
+    for key in candidate_keys:
+        value = str(row.get(key, "")).strip()
+        if _time_atom_to_parts(value) is not None:
+            return key, value
+    return "", ""
+
+
+def _combine_date_time_atom(date_atom: str, time_atom: str) -> str:
+    date_text = str(date_atom or "").strip().lower()
+    if date_text.startswith("v_"):
+        date_text = date_text[2:]
+    if _datetime_from_ledger_atom(date_text) is not None and not re.fullmatch(r"\d{4}_\d{2}_\d{2}", date_text):
+        return date_text
+    if not re.fullmatch(r"\d{4}_\d{2}_\d{2}", date_text):
+        return ""
+    parts = _time_atom_to_parts(time_atom)
+    if parts is None:
+        return ""
+    return f"{date_text}_{'_'.join(parts)}"
+
+
+def _time_atom_to_parts(value: str) -> list[str] | None:
+    text = str(value or "").strip().lower()
+    if text.startswith("v_"):
+        text = text[2:]
+    match = re.fullmatch(r"(?P<hour>\d{1,2})_(?P<minute>\d{2})(?:_(?P<second>\d{2}))?", text)
+    if not match:
+        return None
+    hour = int(match.group("hour"))
+    minute = int(match.group("minute"))
+    second = int(match.group("second") or 0)
+    if hour > 23 or minute > 59 or second > 59:
+        return None
+    parts = [f"{hour:02d}", f"{minute:02d}"]
+    if match.group("second") is not None:
+        parts.append(f"{second:02d}")
+    return parts
+
+
+def _runtime_sortable_datetime(value: str) -> datetime:
+    return _datetime_from_ledger_atom(str(value or "")) or datetime.min
+
+
 def _return_to_state_transition_companion(
     runtime: CorePrologRuntime,
     *,
@@ -16312,6 +16471,7 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
         "kind": "core-local",
         "note": "diagnostic relaxed query synthesized after an over-bound structured query returned no results",
         "original_query": text,
+        "relaxed_constants": relaxed_constants,
     }
     if token_filtered is not None:
         reasoning_basis.update(
@@ -16330,6 +16490,112 @@ def _relaxed_constant_query(runtime: CorePrologRuntime, *, query: str) -> dict[s
         },
         "derived_from_queries": [text],
     }
+
+
+def _relaxed_frequency_summary_companion(relaxed_item: dict[str, Any]) -> dict[str, Any] | None:
+    result = relaxed_item.get("result", {}) if isinstance(relaxed_item, dict) else {}
+    if not isinstance(result, dict) or result.get("status") != "success":
+        return None
+    rows = result.get("rows")
+    if not isinstance(rows, list) or len(rows) < 2:
+        return None
+    basis = result.get("reasoning_basis", {})
+    relaxed_constants = basis.get("relaxed_constants") if isinstance(basis, dict) else None
+    if not isinstance(relaxed_constants, list):
+        return None
+    parsed = parse_prolog_query(str(relaxed_item.get("query", "")))
+    predicate = parsed[0] if parsed is not None else str(result.get("predicate", "") or "")
+    out_rows: list[dict[str, str]] = []
+    for constant in relaxed_constants:
+        if not isinstance(constant, dict):
+            continue
+        variable = str(constant.get("variable", "")).strip()
+        label = str(constant.get("value", "")).strip()
+        if not variable or not _is_frequency_summary_label(label):
+            continue
+        counts: dict[str, int] = {}
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            value = str(row.get(variable, "")).strip()
+            if not value:
+                continue
+            counts[value] = counts.get(value, 0) + 1
+        if len(counts) < 2:
+            continue
+        max_count = max(counts.values())
+        tied_values = sorted(value for value, count in counts.items() if count == max_count)
+        for value, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))[:24]:
+            out_rows.append(
+                {
+                    "SupportKind": "relaxed_value_frequency",
+                    "SourcePredicate": predicate,
+                    "GroupSlot": variable,
+                    "GroupLabel": label,
+                    "Value": value,
+                    "Count": str(count),
+                    "IsMax": "true" if count == max_count else "false",
+                    "MaxCount": str(max_count),
+                    "TiedMaxValues": ",".join(tied_values),
+                    "DistinctValueCount": str(len(counts)),
+                    "TotalRowCount": str(len(rows)),
+                    "HelperClass": "clean-helper",
+                }
+            )
+    if not out_rows:
+        return None
+    return {
+        "query": "relaxed_query_frequency_support(GroupSlot, GroupLabel, Value, Count, IsMax).",
+        "result": {
+            "status": "success",
+            "result_type": "table",
+            "predicate": "relaxed_query_frequency_support",
+            "prolog_query": "relaxed_query_frequency_support(GroupSlot, GroupLabel, Value, Count, IsMax).",
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows,
+            "num_rows": len(out_rows),
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only frequency summary counted repeated values in placeholder columns "
+                    "from a successful relaxed table query; no durable aggregate fact was written"
+                ),
+                "original_query": str(basis.get("original_query", "")) if isinstance(basis, dict) else "",
+                "relaxed_query": str(relaxed_item.get("query", "")),
+            },
+        },
+        "derived_from_queries": [str(relaxed_item.get("query", ""))],
+    }
+
+
+def _is_frequency_summary_label(value: str) -> bool:
+    text = str(value or "").strip().lower()
+    if not text or text in {"unknown", "none", "null", "value", "x", "y", "z"}:
+        return False
+    tokens = {token for token in re.split(r"[^a-z0-9]+", text) if token}
+    if not tokens:
+        return False
+    summary_tokens = {
+        "actor",
+        "applicant",
+        "author",
+        "collector",
+        "customer",
+        "member",
+        "owner",
+        "party",
+        "person",
+        "provider",
+        "recipient",
+        "reviewer",
+        "source",
+        "speaker",
+        "staff",
+        "submitter",
+        "vendor",
+        "witness",
+    }
+    return bool(tokens & summary_tokens)
 
 
 def _runtime_predicate_arities(runtime: CorePrologRuntime) -> list[tuple[str, int]]:
@@ -16624,6 +16890,11 @@ def _temporal_join_with_previous(
     if not selected:
         return None
     selected_for_join = _disambiguate_relaxed_temporal_join_variables(selected, helper_args_text=args_text)
+    if predicate in {"elapsed_minutes", "elapsed_hours"} and _temporal_join_has_split_datetime_source(
+        selected_for_join,
+        args_text=args_text,
+    ):
+        return None
     query_for_join = query.strip()
     derived_from = [*selected, query]
     if predicate == "elapsed_hours":
@@ -16655,6 +16926,30 @@ def _temporal_join_with_previous(
     if subset_join is not None:
         return subset_join
     return None
+
+
+def _temporal_join_has_split_datetime_source(selected: list[str], *, args_text: str) -> bool:
+    args = [item.strip() for item in split_top_level_args(args_text)]
+    if len(args) < 2:
+        return False
+    start_arg = args[0]
+    if not _is_prolog_variable(start_arg):
+        return False
+    normalized_start = re.sub(r"[^a-z0-9]", "", start_arg.casefold())
+    if "date" not in normalized_start:
+        return False
+    for query in selected:
+        parsed = parse_prolog_query(query)
+        if parsed is None:
+            continue
+        _predicate, query_args = parsed
+        if start_arg not in query_args:
+            continue
+        normalized_args = {re.sub(r"[^a-z0-9]", "", str(arg).casefold()) for arg in query_args}
+        expected = normalized_start.replace("date", "time")
+        if expected in normalized_args or "starttime" in normalized_args:
+            return True
+    return False
 
 
 def _disambiguate_relaxed_temporal_join_variables(selected: list[str], *, helper_args_text: str) -> list[str]:
