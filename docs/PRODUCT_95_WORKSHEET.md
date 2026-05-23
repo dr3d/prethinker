@@ -115,6 +115,12 @@ Small row-targeted replay:
 draft_within_draft q007: partial/query_surface_gap -> exact
 ledger_at_calders_reach q027: miss/query_surface_gap -> exact
 veridia9_supply_chain_patent_dispute q025: partial/hybrid_join_gap -> exact
+fenmore_seedbank q017: miss/query_surface_gap -> exact
+nested_puppet_court q040: miss/query_surface_gap -> exact
+veridia_intake q019: miss/query_surface_gap -> exact
+lantern_school_field_trip q016: miss/compile_surface_gap -> partial
+university_lab_sample_chain q025: miss/compile_surface_gap -> partial
+draft_within_draft q015: remained miss/query_surface_gap
 
 all probes:
 0 compatibility rows
@@ -124,15 +130,69 @@ all probes:
 
 Interpretation:
 
-The repair appears to recover more than one brittle row, including one miss and
-two partials, but this is still a row-targeted sample. It justifies a slightly
-larger replay set over the same rejected-filter signature before any full stamp.
+The rejected-filter signature replay recovered six exact rows in a nine-row
+targeted sample, moved two additional misses to partial, and left one row
+unchanged. If the result held inside a full native rerun, the local delta would
+be approximately `+6 exact / +0 partial / -6 miss`. This is still row-targeted
+evidence, not a native score claim.
+
+## Transfer Guards
+
+After the query-filter repair, both retained transfer batches were rerun with
+current QA code against their frozen compile artifacts.
+
+Real-world external four-fixture guard:
+
+```text
+dataset: datasets/real_world_transfer/20260521
+compile root: real_world_transfer_stamp_20260521_compile_current
+QA root: transfer_guard_real_world_after_filter_repair_20260523
+artifact archive: C:\prethinker_tmp_archive\product_95_transfer_guards_after_filter_repair_20260523
+result: 159 exact / 0 partial / 1 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+The single miss was `ntsb_marine_carol_jean_2023 q021`, asking when the tow
+line parted. The source text contains "about 1800," but the compiled artifact
+lacks a direct time/date fact for the tow-line-part event. This is a
+compile-surface gap, not evidence that the query-filter repair damaged transfer.
+
+Sealed unseen authored four-fixture guard:
+
+```text
+dataset: datasets/sealed_unseen/20260521
+compile root: unseen_fixture_batch_20260521_compile_or4_selected
+QA root: transfer_guard_sealed_unseen_after_filter_repair_20260523
+artifact archive: C:\prethinker_tmp_archive\product_95_transfer_guards_after_filter_repair_20260523
+result: 159 exact / 0 partial / 1 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+The single miss was `civic_hearing_correction_packet q017`, asking which public
+objector resides at the property directly abutting 88 Heron Ridge Road. It was
+classified as a compile-surface gap.
+
+Transfer read:
+
+- The repair did not introduce compatibility pressure, runtime failures, or QA
+  writes.
+- Sealed unseen improved materially relative to the prior `152 / 1 / 6`
+  measurement under current QA.
+- Real-world moved from prior `160 / 0 / 0` to `159 / 0 / 1`; the miss is a
+  direct compile-surface carrier gap, so the next repair lane should not be
+  query-filter machinery but durable event/date/time source surfaces.
 
 ## Next Moves
 
-1. Build a slightly larger row-targeted replay set from non-exact rows that had
-   rejected `memberchk`/contains filter evidence-bundle queries.
-2. Rerun that set against the frozen native compile artifact.
-3. If the replay improves without compatibility pressure, run the real-world
-   and sealed-unseen fixture batches as transfer guards.
-4. Move to hybrid-join partials only after the query-surface repair is bounded.
+1. Investigate the remaining native query-surface row,
+   `draft_within_draft q015`, where source text has the answer but the planner
+   stayed inside `source_record_field/3` instead of reaching
+   `source_record_text_atom/2`.
+2. Start the durable event/date/time compile-surface lane exposed by
+   `ntsb_marine_carol_jean_2023 q021`.
+3. Move to hybrid-join partials only after the source-record text fallback is
+   bounded.
