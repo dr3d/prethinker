@@ -1,0 +1,282 @@
+[
+  {
+    "id": "q001",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What airport did UPS flight 2976 depart from on November 4, 2025, and from which runway?",
+    "category": "direct_lookup",
+    "reference_answer": "Louisville Muhammad Ali International Airport (SDF), runway 17R.",
+    "supporting_source_spans": [
+      "Page 1: 'shortly after takeoff from runway 17R at Louisville Muhammad Ali International Airport (SDF), Louisville, Kentucky'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q002",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What was the intended destination of UPS flight 2976?",
+    "category": "direct_lookup",
+    "reference_answer": "Daniel K. Inouye International Airport (HNL), Honolulu, Hawaii.",
+    "supporting_source_spans": [
+      "Page 1: 'a domestic cargo flight ... from SDF to Daniel K. Inouye International Airport (HNL), Honolulu, Hawaii'",
+      "Page 12 Meteorological Information and Flight Plan: 'Destination: Honolulu, HI (PHNL)'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q003",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What aircraft make, model, and registration was involved in the accident?",
+    "category": "direct_lookup",
+    "reference_answer": "McDonnell Douglas MD-11F (also described as Boeing (McDonnell-Douglas) MD-11F), registration N259UP.",
+    "supporting_source_spans": [
+      "Page 1 header: 'Aircraft: McDonnell Douglas MD-11F', 'Registration: N259UP'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q004",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What were the meteorological conditions reported at the accident site at the time of the accident (cloud, ceiling, visibility, wind, temperature/dew point, altimeter)?",
+    "category": "direct_lookup",
+    "reference_answer": "Visual meteorological conditions (VMC), day; scattered clouds at 20,000 ft AGL; broken ceiling at 25,000 ft AGL; visibility 10 miles; wind 6 knots from 120 degrees (no gusts); temperature 17 C, dew point 5 C; altimeter setting 30.22 inches Hg.",
+    "supporting_source_spans": [
+      "Page 12 Meteorological Information and Flight Plan table"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q005",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What engine series was the accident airplane equipped with?",
+    "category": "direct_lookup",
+    "reference_answer": "GE CF-6 series engines.",
+    "supporting_source_spans": [
+      "Page 5 Airplane and Operator Information: 'The accident airplane was equipped with GE CF-6 engines.'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q006",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What NTSB accident number was assigned to this investigation?",
+    "category": "identifier_entity",
+    "reference_answer": "DCA26MA024.",
+    "supporting_source_spans": [
+      "Page 1 header: 'Accident Number: DCA26MA024'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q007",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Which qualified parties did the NTSB invite to participate in the investigation?",
+    "category": "identifier_entity",
+    "reference_answer": "Federal Aviation Administration (FAA), UPS, The Boeing Company, Independent Pilots Association (IPA), General Electric (GE) Aerospace, and Teamsters Airline Division.",
+    "supporting_source_spans": [
+      "Page 1: 'These included the Federal Aviation Administration (FAA), UPS, The Boeing Company, Independent Pilots Association (IPA), General Electric (GE) Aerospace, and Teamsters Airline Division.'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q008",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Who is named as the Investigator in Charge (IIC) of the investigation?",
+    "category": "identifier_entity",
+    "reference_answer": "Shin, Chihoon.",
+    "supporting_source_spans": [
+      "Page 12 Administrative Information: 'Investigator In Charge (IIC): Shin, Chihoon'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q009",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "At what local time (EST) did the accident occur, and at what local time did UPS flight 2976 receive its takeoff clearance from SDF ATC tower?",
+    "category": "temporal_sequence",
+    "reference_answer": "The accident occurred at about 17:14 EST (1714 local) on November 4, 2025. UPS flight 2976 received takeoff clearance from SDF ATC tower at about 1711 EST.",
+    "supporting_source_spans": [
+      "Page 1 header: 'Date & Time: November 4, 2025, 17:14 Local'",
+      "Page 1 History of Flight: 'received their takeoff clearance from SDF ATC tower about 1711 and the flight crew acknowledged the takeoff clearance'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q010",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "According to the report, when did the flight data for the accident flight start and when did it end (per the FDR)?",
+    "category": "temporal_sequence",
+    "reference_answer": "The flight data started about 1707 EST and ended about 1713:30 EST. The takeoff roll began about 1712 EST.",
+    "supporting_source_spans": [
+      "Page 5 Recorders: 'The flight data for the accident flight started about 1707 EST, with the takeoff roll starting about 1712 EST. The flight data ended about 1713:30 EST.'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q011",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "List in chronological order the dates the two Emergency Airworthiness Directives were issued in response to this accident, including their AD numbers, and identify which superseded the other.",
+    "category": "temporal_sequence",
+    "reference_answer": "Emergency AD 2025-23-51 was issued by the FAA on November 8, 2025. Emergency AD 2025-23-53 was issued on November 14, 2025 and superseded Emergency AD 2025-23-51; the later AD also expanded scope to include DC-10 series airplanes based on their similar design to the MD-11.",
+    "supporting_source_spans": [
+      "Pages 10-11 Safety Actions section"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q012",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "When did the NTSB travel to SDF to begin documenting the accident site and collecting perishable data?",
+    "category": "temporal_sequence",
+    "reference_answer": "November 5, 2025.",
+    "supporting_source_spans": [
+      "Page 1: 'In response to the accident, the NTSB traveled to SDF on November 5, 2025'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q013",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "How many total injuries does the report attribute to this accident, broken down by severity and by whether they occurred among crew or on the ground?",
+    "category": "numeric_unit",
+    "reference_answer": "14 fatal, 2 serious, and 21 minor injuries. Crew: 3 fatal (all 3 crewmembers aboard). Ground: 11 fatal, 2 serious, 21 minor.",
+    "supporting_source_spans": [
+      "Page 1 header injury summary",
+      "Page 12 Wreckage and Impact Information table"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q014",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "How many total flight hours and cycles had N259UP accumulated at the time of the accident?",
+    "category": "numeric_unit",
+    "reference_answer": "About 92,992 total hours and 21,043 cycles.",
+    "supporting_source_spans": [
+      "Page 10 Maintenance and Inspections: 'N259UP had accumulated a total time of about 92,992 hours and 21,043 cycles'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q015",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "How many parameters did the FDR record, how many hours of recorded data did it contain, and how many flights did that data span?",
+    "category": "numeric_unit",
+    "reference_answer": "About 450 parameters; about 63 hours of FDR data spanning 24 flights, including the accident flight.",
+    "supporting_source_spans": [
+      "Page 5 Recorders section"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q016",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "According to the FDR radio altitude data, what was the maximum height above ground level the airplane reached after takeoff?",
+    "category": "numeric_unit",
+    "reference_answer": "About 30 ft above ground level (agl).",
+    "supporting_source_spans": [
+      "Page 2 History of Flight: 'The airplane initially climbed but did not get higher than about 30 ft above ground level (agl) according to radio altitude data from the FDR.'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q017",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Which witness reported that the takeoff speed appeared normal for the aircraft type but the climb rate was not normal, and specifically that the airplane did not climb above the tower's height?",
+    "category": "source_attribution",
+    "reference_answer": "A witness in the SDF ATC tower.",
+    "supporting_source_spans": [
+      "Page 4 History of Flight: 'A witness in the SDF ATC tower reported that the takeoff speed appeared normal for that type of aircraft; however, the climb rate was not normal, as the airplane did not climb above the tower's height of approximately 200 feet agl.'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q018",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Which agency issued Emergency Airworthiness Directive 2025-23-51, and which internal branch's approval was specified for corrective methods?",
+    "category": "source_attribution",
+    "reference_answer": "The Federal Aviation Administration (FAA) issued Emergency AD 2025-23-51. Corrective actions had to be performed using a method approved by the FAA Continued Operational Safety Branch (AIR-520).",
+    "supporting_source_spans": [
+      "Page 10 Safety Actions section"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q019",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "At whose recommendation did UPS ground its MD-11 fleet on November 7, 2025?",
+    "category": "source_attribution",
+    "reference_answer": "At the recommendation of Boeing. UPS grounded its MD-11 fleet on November 7, 2025 as a precautionary measure and at Boeing's recommendation.",
+    "supporting_source_spans": [
+      "Page 10 Safety Actions section"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q020",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "The report cites two different sources for the airplane's altitude after takeoff that do not match. What altitude does each source report?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "FDR radio altitude data indicates the airplane did not get higher than about 30 ft agl. FAA-provided ADS-B data, however, shows the last data point at 481 ft mean sea level (msl) and 100 ft agl. The report does not reconcile the two values.",
+    "supporting_source_spans": [
+      "Page 2 History of Flight: 'about 30 ft above ground level (agl) according to radio altitude data from the FDR. (Based on FAA-provided ADS-B data, the last data point showed 481 ft mean sea level [msl] and 100 ft agl.)'"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q021",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "The report describes special detailed inspection (SDI) cycle thresholds that the airplane had not yet reached. What were the thresholds for (a) the left pylon aft mount lugs and (b) the left wing clevis support, and how many cycles did the accident airplane have at the time of the accident?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "SDI of the left pylon aft mount lugs would have been due at 29,200 cycles; SDI of the left wing clevis support would have been due at 28,000 cycles. The accident airplane had accumulated 21,043 cycles. The report notes both SDI tasks had not been accomplished, but the airplane had not yet reached either threshold.",
+    "supporting_source_spans": [
+      "Page 10 Maintenance and Inspections: SDI cycles for left pylon aft mount lugs (29,200) and left wing clevis support (28,000); airplane cycles 21,043"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q022",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "The NTSB formed multiple specialized investigative groups but explicitly did not form one group despite having a specialist on site. Which group was not formed?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "An Air Traffic Controller (ATC) group was not formed, even though an NTSB ATC specialist was on site to collect ATC information.",
+    "supporting_source_spans": [
+      "Page 1: 'A NTSB Air Traffic Controller (ATC) specialist was on site to collect ATC information, but an ATC group was not formed.'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q023",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Does the preliminary report state a probable cause for the accident? If not, what status language does it use?",
+    "category": "negative_limitation",
+    "reference_answer": "No. The preliminary report does not state a probable cause. Every page is labeled 'This information is preliminary and subject to change,' and the report ends 'The NTSB's investigation of UPS flight 2976 is ongoing.'",
+    "supporting_source_spans": [
+      "Recurring page footer 'This information is preliminary and subject to change'",
+      "Page 11 closing line: 'The NTSB's investigation of UPS flight 2976 is ongoing.'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q024",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "What does the report state regarding passenger injuries for UPS flight 2976?",
+    "category": "negative_limitation",
+    "reference_answer": "The Passenger Injuries field in the Wreckage and Impact Information table is blank/not stated. The flight was a domestic cargo flight under Part 121 with only 3 crewmembers aboard; the 11 fatal, 2 serious, and 21 minor injuries reported are all ground injuries.",
+    "supporting_source_spans": [
+      "Page 12 Wreckage and Impact Information table: Passenger Injuries field blank"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q025",
+    "source_id": "ntsb_aviation_investigation_001",
+    "question": "Combining the History of Flight section for UPS 2976 with the Similar Events section about American Airlines flight 191 (May 25, 1979), what mechanical event do both accidents share, and what was the immediate altitude and roll consequence reported in each case?",
+    "category": "synthesis",
+    "reference_answer": "Both accidents involved separation of the left engine and pylon assembly from the left wing during or shortly after takeoff rotation. For UPS 2976 (Nov 4, 2025), the airplane initially climbed but did not get higher than about 30 ft agl per FDR radio altitude data, then stopped climbing and began to lose altitude before rolling slightly to the left. For American Airlines flight 191 (May 25, 1979, DC-10-10), the airplane continued to climb to about 325 ft agl, then began to roll to the left until the wings were past the vertical position, with the nose pitching down below the horizon.",
+    "supporting_source_spans": [
+      "Page 2 History of Flight (UPS 2976)",
+      "Page 11 Similar Events (AA 191, May 25, 1979, DCA79AA017 / AAR-79-17)"
+    ],
+    "difficulty": "hard"
+  }
+]

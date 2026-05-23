@@ -759,3 +759,118 @@ keeping because it caught exactly the product-relevant failure mode: a planned
 answer-bearing source section silently produced no ordinary facts.
 
 Artifact archive: `C:\prethinker_tmp_archive\native_compile_recovery_20260523`
+
+## 2026-05-23 Wild Real-World Transfer Batch
+
+Goal: pressure the current instrument against a small batch of external,
+real-world public-source documents before spending another native stamp.
+
+Dataset committed location:
+
+```text
+datasets/real_world_transfer/20260523_wild_01
+```
+
+Batch shape:
+
+- 5 fixtures
+- 25 QA rows per fixture
+- 125 judged rows total
+- Domains: FDA warning/recall, NTSB aviation, NTSB marine, OSHA/MNOSHA
+  incident/enforcement, SEC 8-K material event
+- Source documents are real public-source documents, assembled into normal
+  fixture shape. This is transfer evidence, not native-corpus evidence.
+
+Compile command used OpenRouter Qwen MoE with 5 lanes and the current source,
+flat-plus-plan, focused-pass ops schema, source-record ledger, source-record
+ledger facts, and compile quality gate/retry stack.
+
+Compile result:
+
+```text
+fixtures: 5
+parsed OK: 5
+compile gate: hold
+passed / held: 2 / 3
+admitted / skipped: 659 / 30
+compatibility/runtime/write: not applicable at compile stage
+```
+
+Gate holds:
+
+- `fda_warning_or_recall_001`: source-claim carrier offered but not fully
+  delivered for assessment/note/source claim variants.
+- `ntsb_aviation_investigation_001`: operational lifecycle preservation partial
+  delivery.
+- `sec_8k_material_event_001`: rough score below gate threshold despite later
+  25/25 QA.
+
+QA result on selected compile artifacts:
+
+```text
+questions: 125
+exact / partial / miss: 119 / 1 / 5
+exact rate: 95.2%
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+Per-fixture QA:
+
+```text
+sec_8k_material_event_001:        25 / 0 / 0
+ntsb_aviation_investigation_001:  25 / 0 / 0
+fda_warning_or_recall_001:        24 / 0 / 1
+ntsb_marine_investigation_001:    23 / 1 / 1
+osha_incident_or_enforcement_001: 22 / 0 / 3
+```
+
+Non-exact rows:
+
+- FDA q017, miss, query-surface gap: the correct signatory role was present,
+  but the query path preferred a flawed signatory value from source metadata
+  over the body text signatory.
+- NTSB marine q011, partial, compile-surface gap: source text retained the full
+  National Weather Service product sequence, but structured event rows only
+  covered the Special Marine Warning and update.
+- NTSB marine q015, miss, compile-surface gap: KGLS wind gust was structured,
+  but thunderstorm start, thunderstorm end, and rainfall were not emitted as
+  comparable weather facts.
+- OSHA q011, miss, hybrid-join gap: the earliest incident date and fatality
+  inspection number existed in source-record fields/date aliases, but the query
+  path did not join and sort the row-field representation correctly.
+- OSHA q013, miss, compile-surface gap: the 8,000 national-employee value was
+  present in source text but malformed in structured extraction as a combined
+  row/value token.
+- OSHA q014, miss, compile-surface gap/query aggregation boundary: fatality
+  inspection numbers existed as source-record fields/items, but the query plan
+  attempted unsupported aggregate predicates instead of using an admitted
+  deterministic count surface.
+
+Read:
+
+- This is the strongest messy-world spotcheck so far: 95.2% on 125 rows from
+  external public documents, with no compatibility rows, no runtime load errors,
+  and no QA writes.
+- The 3/5 compile-gate hold still matters. The gate is catching coverage and
+  structure concerns that did not always hit the sampled QA questions.
+- The main next mechanism is not "more prompt polish"; it is record-layer
+  discipline for messy tables/lists: field normalization, source-record item
+  joining, deterministic counts, chronology sequences, and source-metadata/body
+  conflict handling.
+- SEC and NTSB aviation both landing 25/25 argues that the architecture
+  transfers when record extraction is coherent. OSHA is the useful stressor.
+
+Next product work before another large stamp:
+
+- Add a deterministic aggregation surface for source-record fields/items:
+  distinct counts, min/max dates, and row-paired field joins.
+- Improve numeric field normalization for messy table rows so values such as
+  `8,000` do not merge with neighboring row fields.
+- Add chronology support for weather/advisory product sequences and similar
+  issued-product lists.
+- Add query-side caution when `source_metadata` conflicts with signatory or
+  authority facts in the body text.
+- Keep requesting more messy real-world fixtures after these mechanisms have a
+  targeted replay, especially table/list-heavy enforcement summaries.

@@ -1,0 +1,12 @@
+{
+  "fixture_name": "ntsb_aviation_investigation_001",
+  "domain": "aviation_safety",
+  "source_title": "Aviation Investigation Preliminary Report - DCA26MA024 (UPS Flight 2976, McDonnell Douglas MD-11F, N259UP, Louisville, KY)",
+  "source_url": "https://www.ntsb.gov/investigations/Documents/Preliminary%20Report%20DCA26MA024.pdf",
+  "issuing_body": "National Transportation Safety Board (NTSB)",
+  "document_date": "Preliminary report covering accident of 2025-11-04",
+  "retrieved_date": "2026-05-23",
+  "original_file": "source_original.txt",
+  "public_source": true,
+  "notes": "Preliminary report; pages repeatedly stamped 'This information is preliminary and subject to change'. Pressure points: temporal extraction (multiple EST timestamps), numeric/unit extraction (cycles, hours, altitudes, weather), conflicting altitude reporting (FDR vs ADS-B), preliminary-status caveats, source-attribution to specific parties (FAA, Boeing, UPS, IPA, GE, Teamsters), and absence of probable cause. Original was a PDF on www.ntsb.gov; egress proxy blocked direct PDF download, so source_original.txt is the verbatim text extracted via web_fetch on 2026-05-23. The companion NTSB investigation page is https://www.ntsb.gov/investigations/Pages/DCA26MA024.aspx."
+}

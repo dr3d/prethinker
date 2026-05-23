@@ -1,0 +1,21 @@
+# Provenance: osha_incident_or_enforcement_001
+
+- **Source URL:** https://dli.mn.gov/sites/default/files/pdf/24_FFY_fatality_log.pdf
+- **Document type:** PDF (multi-page table; tabular layout with repeating column header on each page).
+- **Issuing body:** Minnesota OSHA (MNOSHA), under the Minnesota Department of Labor and Industry. Minnesota OSHA is a federally approved state-plan OSHA program; this is a public state-plan OSHA record.
+- **Document date (most recent update shown on the document):** 2026-04-21
+- **Period covered:** Federal-fiscal-year 2024 (Oct. 1, 2023 – Sept. 30, 2024)
+- **Retrieval date:** 2026-05-23
+- **How obtained:** Retrieved by URL via the web_fetch tool. The PDF was fetched and text-extracted in the same call.
+- **How source.md was converted:** The PDF originally lays out the data as a wide multi-column table that wraps across page boundaries. To preserve the column relationships in Markdown without losing readability:
+  - The eight-column schema (Fatality inspection number, Date of incident, Worksite city or town, Type of business, NAICS code, Total employees (national), Description of event, Outcome of MNOSHA investigation) was rendered as a Markdown table on each of the five page sections.
+  - The two dual-employer entries (1/4/24 North Mankato; 5/30/24 Duluth) are rendered as single rows with both inspection numbers shown in the first cell separated by " / " and the two type-of-business / NAICS / employee-count values concatenated within their respective cells separated by " / ". The outcome column for these entries preserves the verbatim MNOSHA outcome text.
+  - The recurring page header line "Inspection data, including citations, can be viewed at osha.gov/data." was preserved as a standalone line above each page-section table.
+  - Blank inspection-number cells (4 entries — Mankato 12/7/23; Virginia 3/7/24; Apple Valley 5/21/24; Red Wing 9/21/24) were kept empty in the first cell of the corresponding row.
+- **Known extraction issues:**
+  - The original PDF table presents one column header row per page; in the Markdown rendering each page section repeats the header to keep the columns interpretable in linear text.
+  - Inconsistent singular/plural in the outcome column ("Citations issued" vs "Citation issued") is preserved verbatim from the source; it is not corrected.
+  - The hyphen variant in "No inspection – not work-related" / "No inspection – farm appropriations rider" uses the en-dash as it appears in the source.
+  - The PDF includes a recurring footer URL "http://www.osha.gov/data" (and in the original linked-form "http://www.osha.gov/oshstats/index.html" appears in some past versions of the same dataset family); only the text actually present in this document is preserved.
+- **Original source file retained:** `source_original.txt` (text capture of the same fetched content).
+- **License / public status:** Public Minnesota state agency record; published openly on dli.mn.gov.

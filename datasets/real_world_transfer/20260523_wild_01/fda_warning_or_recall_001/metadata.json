@@ -1,0 +1,12 @@
+{
+  "fixture_name": "fda_warning_or_recall_001",
+  "domain": "pharmaceutical_regulation",
+  "source_title": "FDA Warning Letter \u2014 Granules India Limited (MARCS-CMS 697115 / Warning Letter 320-25-48)",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/granules-india-limited-697115-02262025",
+  "issuing_body": "U.S. Food and Drug Administration, Center for Drug Evaluation and Research (CDER), Office of Compliance, Office of Manufacturing Quality",
+  "document_date": "2025-02-26",
+  "retrieved_date": "2026-05-23",
+  "original_file": "source_original.txt",
+  "public_source": true,
+  "notes": "Public FDA Warning Letter. Numerous (b)(4) redactions in the original are preserved verbatim. Three numbered CGMP violations (21 CFR 211.67(b), 211.58, 211.68(a)) plus a separate 'Concerns with CGMP records' finding. Firm response of September 27, 2024 was reviewed and judged inadequate for each numbered violation. No specific products or lot numbers are named; affected products, equipment, and components are redacted. Letter dated 2025-02-26, content current as of 2025-03-04 per FDA page footer."
+}

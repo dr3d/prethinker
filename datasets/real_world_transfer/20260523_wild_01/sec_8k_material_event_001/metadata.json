@@ -1,0 +1,12 @@
+{
+  "fixture_name": "sec_8k_material_event_001",
+  "domain": "securities_disclosure",
+  "source_title": "Hamilton Lane Incorporated — Form 8-K, Current Report (Date of earliest event reported: October 1, 2025)",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1433642/000143364225000110/hlne-20251001.htm",
+  "issuing_body": "Hamilton Lane Incorporated, filed with the U.S. Securities and Exchange Commission via EDGAR",
+  "document_date": "2025-10-01",
+  "retrieved_date": "2026-05-23",
+  "original_file": "source_original.txt",
+  "public_source": true,
+  "notes": "Public SEC EDGAR Form 8-K filing. CIK 1433642; accession 0001433642-25-000110; signed October 6, 2025 by Lydia A. Gavalis (GC/Secretary). Reports under Item 1.01 (material definitive agreement) and Item 2.03 (creation of direct financial obligation), with Item 2.03 incorporating Item 1.01 by reference. Discloses a Second Amendment to a Multi-Draw Term Loan and Security Agreement with JPMorgan Chase Bank, N.A. that reduces aggregate principal from $75M to $50M (subject to a $325M cap across all HLA-JPM agreements), changes unspecified interest-payment/repayment dates, and tightens the Prime-Rate spread from -1.50% to -1.35% while keeping the 3.00% floor. Exhibit 10.1 is filed with confidential information omitted. None of the four cover check boxes is selected."
+}

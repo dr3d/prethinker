@@ -1,0 +1,12 @@
+{
+  "fixture_name": "ntsb_marine_investigation_001",
+  "domain": "marine_safety",
+  "source_title": "Capsizing and Sinking of Towing Vessel Baylor J. Tregre (MIR-25-21 / NTSB case DCA24FM038)",
+  "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/MIR2521.pdf",
+  "issuing_body": "National Transportation Safety Board (NTSB), Office of Marine Safety",
+  "document_date": "2025-05-15",
+  "retrieved_date": "2026-05-23",
+  "original_file": "source_original.txt",
+  "public_source": true,
+  "notes": "Final NTSB marine investigation report including probable cause. Pressure points: layered timeline (May 11 departure, May 13 casualty, May 14 surveyor, May 15 tow wire cut, May 18-June 15 salvage, June 12 dock, July 9-10 examination); multiple-authority weather sourcing (NWS, KGLS, GNJT2, KGVW, GOES-16 via SSEC); entity disambiguation (Trinity Tugs, Coastal Towing, R&S Fabricators, McDonough Marine, Manson Construction, ABS, Coast Guard Sector Houston-Galveston, District 8, Station Freeport, Air Station Houston, Marine Safety Unit Texas City); explicit numeric/observational conflicts between captain's wind estimate and NWS observations; explicit negative facts (no pollution; survey gave no weather criteria limits; IMO and classification society N/A); three-factor reasoning in Analysis section. Original was a PDF on www.ntsb.gov; egress proxy blocked direct PDF binary, so source_original.txt is the verbatim text extracted via web_fetch on 2026-05-23. The report contains the NTSB-coined wording 'Gulf of America' as a place name, which is preserved verbatim."
+}

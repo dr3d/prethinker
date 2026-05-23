@@ -1,0 +1,12 @@
+{
+  "fixture_name": "osha_incident_or_enforcement_001",
+  "domain": "occupational_safety_enforcement",
+  "source_title": "Minnesota OSHA fatality investigation summary — Federal-fiscal-year 2024 (Oct. 1, 2023, through Sept. 30, 2024)",
+  "source_url": "https://dli.mn.gov/sites/default/files/pdf/24_FFY_fatality_log.pdf",
+  "issuing_body": "Minnesota OSHA (MNOSHA), under the Minnesota Department of Labor and Industry",
+  "document_date": "2026-04-21",
+  "retrieved_date": "2026-05-23",
+  "original_file": "source_original.txt",
+  "public_source": true,
+  "notes": "Public state-plan OSHA fatality summary published as a PDF by the Minnesota DLI. Period covered: Federal-fiscal-year 2024 (Oct. 1, 2023 through Sept. 30, 2024); document updated April 21, 2026. The dataset is intentionally sparse: 32 fatality entries with 30 unique inspection numbers (two entries list two contractor inspections each); 4 entries have no inspection number; outcome statuses span 'Citations issued' / 'Citation issued' / 'No citations issued' / 'Case open' / 'No inspection – not work-related' / 'No inspection – farm appropriations rider.' Entries do not include deceased employee names or specific employer/company names. The recurring page header directs readers to osha.gov/data for the underlying inspection and citation data."
+}

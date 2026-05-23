@@ -1,0 +1,288 @@
+[
+  {
+    "id": "q001",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What kind of agreement did Hamilton Lane Advisors, L.L.C. enter into on the reported event date?",
+    "category": "direct_lookup",
+    "reference_answer": "A Second Amendment to the Multi-Draw Term Loan and Security Agreement (the 'Second Amendment'), amending the Multi-Draw Term Loan and Security Agreement dated as of October 20, 2022 (the '2022 Term Loan Agreement').",
+    "supporting_source_spans": [
+      "Item 1.01 opening sentence: 'On October 1, 2025, Hamilton Lane Advisors, L.L.C. (HLA)... entered into a Second Amendment to the Multi-Draw Term Loan and Security Agreement (the Second Amendment)...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q002",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Who is the counterparty to the Second Amendment?",
+    "category": "direct_lookup",
+    "reference_answer": "JPMorgan Chase Bank, N.A. (defined in the filing as 'JPM').",
+    "supporting_source_spans": [
+      "Item 1.01: '...with JPMorgan Chase Bank, N.A. (JPM)...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q003",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Under what statutory authority is this Current Report being filed?",
+    "category": "direct_lookup",
+    "reference_answer": "Section 13 or 15(d) of the Securities Exchange Act of 1934.",
+    "supporting_source_spans": [
+      "Form 8-K cover: 'CURRENT REPORT Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q004",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Which two Form 8-K Items does this report disclose as substantive items (excluding the exhibits item)?",
+    "category": "direct_lookup",
+    "reference_answer": "Item 1.01 (Entry into a Material Definitive Agreement) and Item 2.03 (Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant). Item 9.01 is the Financial Statements and Exhibits item; the question excludes it.",
+    "supporting_source_spans": [
+      "Item 1.01 heading",
+      "Item 2.03 heading",
+      "(Item 9.01 listed separately as the exhibits item)"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q005",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What exchange is Hamilton Lane Incorporated's Class A Common Stock registered on, and what is its trading symbol?",
+    "category": "direct_lookup",
+    "reference_answer": "The Nasdaq Stock Market LLC; trading symbol HLNE; Class A Common Stock, $0.001 par value per share.",
+    "supporting_source_spans": [
+      "Securities registered pursuant to Section 12(b) of the Act table: Class A Common Stock, $0.001 par value per share | HLNE | The Nasdaq Stock Market LLC"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q006",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is Hamilton Lane Incorporated's IRS Employer Identification Number?",
+    "category": "identifier_entity",
+    "reference_answer": "26-2482738.",
+    "supporting_source_spans": [
+      "Cover-page entity table: 'Delaware | 001-38021 | 26-2482738' with the third column labeled '(IRS Employer Identification No.)'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q007",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is Hamilton Lane Incorporated's Commission File Number?",
+    "category": "identifier_entity",
+    "reference_answer": "001-38021.",
+    "supporting_source_spans": [
+      "Cover-page entity table: 'Delaware | 001-38021 | 26-2482738' with the middle column labeled '(Commission File No.)'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q008",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the SEC EDGAR Central Index Key (CIK) for Hamilton Lane Incorporated as reflected in the document URL/header metadata?",
+    "category": "identifier_entity",
+    "reference_answer": "1433642 (visible in the source URL path .../data/1433642/... and in the top-note metadata 'CIK: 1433642').",
+    "supporting_source_spans": [
+      "Top-note 'CIK:' line",
+      "Source URL path '/Archives/edgar/data/1433642/'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q009",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the \"Date of earliest event reported\" stated on the cover of the Form 8-K?",
+    "category": "temporal_sequence",
+    "reference_answer": "October 1, 2025.",
+    "supporting_source_spans": [
+      "Cover: 'Date of Report (Date of earliest event reported): October 1, 2025'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q010",
+    "source_id": "sec_8k_material_event_001",
+    "question": "On what date is the Form 8-K signed and reported as filed?",
+    "category": "temporal_sequence",
+    "reference_answer": "October 6, 2025.",
+    "supporting_source_spans": [
+      "Signatures block: 'Date: October 6, 2025'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q011",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the date of the original Multi-Draw Term Loan and Security Agreement that is being amended?",
+    "category": "temporal_sequence",
+    "reference_answer": "October 20, 2022.",
+    "supporting_source_spans": [
+      "Item 1.01: '...the Multi-Draw Term Loan and Security Agreement, dated as of October 20, 2022, between JPM and HLA...'",
+      "Exhibit 10.1 description: 'Multi-Draw Term Loan and Security Agreement, dated October 20, 2022...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q012",
+    "source_id": "sec_8k_material_event_001",
+    "question": "In what order do the following events appear on the document, from earliest to latest: (a) execution of the original 2022 Term Loan Agreement, (b) execution of the Second Amendment, (c) signing of the Form 8-K?",
+    "category": "temporal_sequence",
+    "reference_answer": "(a) execution of the original 2022 Term Loan Agreement on October 20, 2022; then (b) execution of the Second Amendment on October 1, 2025; then (c) signing of the Form 8-K on October 6, 2025.",
+    "supporting_source_spans": [
+      "Item 1.01: October 20, 2022 (original); October 1, 2025 (Second Amendment)",
+      "Signatures: October 6, 2025"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q013",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the aggregate principal amount of term loans provided for under the original (pre-amendment) 2022 Term Loan Agreement?",
+    "category": "numeric_unit",
+    "reference_answer": "$75 million.",
+    "supporting_source_spans": [
+      "Item 1.01: 'The 2022 Term Loan Agreement provides for term loans in the aggregate principal amount of $75 million...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q014",
+    "source_id": "sec_8k_material_event_001",
+    "question": "To what amount does the Second Amendment change the aggregate principal amount of term loans?",
+    "category": "numeric_unit",
+    "reference_answer": "$50 million (changed from $75 million), subject to the Cap.",
+    "supporting_source_spans": [
+      "Item 1.01: '(a) changes the aggregate principal amount of terms loans from $75 million to $50 million, subject to the Cap...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q015",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the aggregate cap on loans that may be outstanding under all of HLA's loan agreements with JPM?",
+    "category": "numeric_unit",
+    "reference_answer": "$325 million.",
+    "supporting_source_spans": [
+      "Item 1.01: '...subject to an aggregate cap of loans that may be outstanding under all of HLA's loan agreements with JPM of $325 million (the Cap).'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q016",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What is the post-amendment interest rate formula for borrowings under the 2022 Term Loan Agreement?",
+    "category": "numeric_unit",
+    "reference_answer": "The greater of (a) the Prime Rate minus 1.35% and (b) 3.00%.",
+    "supporting_source_spans": [
+      "Item 1.01: '(c) changes the interest rate for borrowings thereunder to equal the greater of (a) the Prime Rate minus 1.35% and (b) 3.00%.'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q017",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Who signed the Form 8-K on behalf of Hamilton Lane Incorporated, and in what capacity?",
+    "category": "source_attribution",
+    "reference_answer": "Lydia A. Gavalis, General Counsel and Secretary of Hamilton Lane Incorporated.",
+    "supporting_source_spans": [
+      "Signatures block: 'By: /s/ Lydia A. Gavalis | Name: Lydia A. Gavalis | Title: General Counsel and Secretary'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q018",
+    "source_id": "sec_8k_material_event_001",
+    "question": "According to the report, what is the relationship between Hamilton Lane Advisors, L.L.C. and Hamilton Lane Incorporated?",
+    "category": "source_attribution",
+    "reference_answer": "Hamilton Lane Advisors, L.L.C. ('HLA') is identified in the filing as the operating subsidiary of Hamilton Lane Incorporated.",
+    "supporting_source_spans": [
+      "Item 1.01: 'Hamilton Lane Advisors, L.L.C. (HLA), the operating subsidiary of Hamilton Lane Incorporated...'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q019",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Where does the report direct the reader for the complete terms of the amendment, rather than relying on the Form 8-K description?",
+    "category": "source_attribution",
+    "reference_answer": "Exhibit 10.1 to the Form 8-K \u2014 the Multi-Draw Term Loan and Security Agreement (conformed through Second Amendment), which is filed as the exhibit and is incorporated by reference. The filing notes that the foregoing description does not purport to be complete and is qualified in its entirety by reference to that agreement.",
+    "supporting_source_spans": [
+      "Item 1.01 closing paragraph: 'The foregoing description does not purport to be complete and is qualified in its entirety by reference to the new agreement, which is filed as Exhibit 10.1...'",
+      "Exhibit list row 10.1"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q020",
+    "source_id": "sec_8k_material_event_001",
+    "question": "How does the pre-amendment interest rate formula for borrowings differ from the post-amendment interest rate formula?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "Pre-amendment: the greater of (a) the Prime Rate minus 1.50% and (b) 3.00%. Post-amendment: the greater of (a) the Prime Rate minus 1.35% and (b) 3.00%. The Prime-Rate spread tightens by 15 basis points (from minus 1.50% to minus 1.35%) while the 3.00% floor is unchanged.",
+    "supporting_source_spans": [
+      "Item 1.01: 'Borrowings under the 2022 Term Loan Agreement accrue interest at a rate equal to the greater of (a) the Prime Rate (as defined therein) minus 1.50% and (b) 3.00%.'",
+      "Item 1.01: 'changes the interest rate for borrowings thereunder to equal the greater of (a) the Prime Rate minus 1.35% and (b) 3.00%.'"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q021",
+    "source_id": "sec_8k_material_event_001",
+    "question": "The report states that \"The information included in Item 1.01 of this Current Report on Form 8-K is incorporated by reference into this Item 2.03.\" What apparent overlap or non-overlap does this create between the substantive disclosures of Items 1.01 and 2.03?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "Item 2.03 contains no independent text; it explicitly states that 'The information included in Item 1.01 of this Current Report on Form 8-K is incorporated by reference into this Item 2.03.' The substantive disclosure under Item 2.03 is therefore identical in content to Item 1.01 \u2014 the same set of facts simultaneously satisfies two distinct disclosure triggers (a material definitive agreement and the creation of a direct financial obligation), and the filing creates no additional Item 2.03 facts beyond those already disclosed under Item 1.01.",
+    "supporting_source_spans": [
+      "Item 1.01 (full text describing the Second Amendment)",
+      "Item 2.03: 'The information included in Item 1.01 of this Current Report on Form 8-K is incorporated by reference into this Item 2.03.'"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q022",
+    "source_id": "sec_8k_material_event_001",
+    "question": "What caveat does the filing include about the completeness of its description of the new agreement?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "The filing states that 'The foregoing description does not purport to be complete and is qualified in its entirety by reference to the new agreement,' filed as Exhibit 10.1 and incorporated by reference. The description in Item 1.01 is therefore expressly limited and must yield to the actual agreement text.",
+    "supporting_source_spans": [
+      "Item 1.01 closing paragraph: 'The foregoing description does not purport to be complete and is qualified in its entirety by reference to the new agreement, which is filed as Exhibit 10.1...'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q023",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Has the filer indicated by any of the four cover-page check boxes that this 8-K is intended to simultaneously satisfy filing obligations under Rule 425, Rule 14a-12, Rule 14d-2(b), or Rule 13e-4(c)?",
+    "category": "negative_limitation",
+    "reference_answer": "No. All four cover-page check boxes (Rule 425; Rule 14a-12; Rule 14d-2(b); Rule 13e-4(c)) appear as unchecked '\u2610' boxes. The filer has not indicated that this 8-K simultaneously satisfies any of those filing obligations.",
+    "supporting_source_spans": [
+      "Cover-page check-box table immediately below 'Check the appropriate box below...' \u2014 four rows each beginning '\u2610'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q024",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Does the Form 8-K state the specific calendar dates that the Second Amendment changes for interest payments and repayments of the term loans?",
+    "category": "negative_limitation",
+    "reference_answer": "No. The filing states only that the Second Amendment '(b) changes certain dates related to interest payments and repayments of the term loans thereunder' \u2014 the specific changed dates are not given in the Form 8-K text and would be found in Exhibit 10.1.",
+    "supporting_source_spans": [
+      "Item 1.01: '(b) changes certain dates related to interest payments and repayments of the term loans thereunder'",
+      "Item 1.01: 'qualified in its entirety by reference to the new agreement, which is filed as Exhibit 10.1...'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q025",
+    "source_id": "sec_8k_material_event_001",
+    "question": "Drawing on Item 1.01, Item 2.03, and the Exhibit list together, summarize what the registrant has formally disclosed and the limits the registrant places on that disclosure.",
+    "category": "synthesis",
+    "reference_answer": "Under Item 1.01, the registrant discloses that on October 1, 2025 its operating subsidiary Hamilton Lane Advisors, L.L.C. entered into a Second Amendment to its October 20, 2022 Multi-Draw Term Loan and Security Agreement with JPMorgan Chase Bank, N.A., reducing the aggregate principal amount of term loans from $75 million to $50 million (still subject to the $325 million aggregate Cap on all HLA-JPM loan agreements), tightening the Prime-Rate spread from minus 1.50% to minus 1.35% while keeping the 3.00% floor, and changing certain (unspecified in the 8-K text) interest payment and repayment dates. Under Item 2.03, the same information is incorporated by reference to also disclose creation of a direct financial obligation. The registrant explicitly limits this disclosure in two ways: (i) the description does not purport to be complete and is qualified in its entirety by reference to the new agreement, and (ii) Exhibit 10.1 \u2014 the conformed agreement itself \u2014 is filed with 'confidential information... omitted,' so the public record of the underlying terms is intentionally redacted.",
+    "supporting_source_spans": [
+      "Item 1.01 (full text \u2014 parties, original agreement date, amount change, cap, rate change, date change, completeness caveat)",
+      "Item 2.03 (incorporation by reference into Item 2.03)",
+      "Item 9.01 exhibit list with Exhibit 10.1 and the footnote 'Confidential information in this exhibit has been omitted.'"
+    ],
+    "difficulty": "hard"
+  }
+]

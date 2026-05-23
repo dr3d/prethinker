@@ -1,0 +1,285 @@
+[
+  {
+    "id": "q001",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the document, what was the description of event for fatality inspection 318202041 (Waseca, 1/9/24)?",
+    "category": "direct_lookup",
+    "reference_answer": "Employee was found pulled into the rear auger of a salt/sand truck.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318202041, 1/9/24, Waseca, Other General Government Support"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q002",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What outcome did the MNOSHA investigation record for fatality inspection 318202157 (Isle, 1/12/24)?",
+    "category": "direct_lookup",
+    "reference_answer": "No citations issued.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318202157, 1/12/24, Isle, All Other Amusement and Recreation Industries"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q003",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What type of business is associated with NAICS code 311421 in this document?",
+    "category": "direct_lookup",
+    "reference_answer": "Fruit and Vegetable Canning.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318199429, 10/5/23, Montgomery, Type of business 'Fruit and Vegetable Canning' with NAICS code 311421"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q004",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the entry for fatality inspection 318210739 (Faribault), what was the description of event?",
+    "category": "direct_lookup",
+    "reference_answer": "Employee was overcome while working in a manhole.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318210739, 9/13/24, Faribault, Water and Sewer Line Related Structures Construction"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q005",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the entry for fatality inspection 318201571 (St. Paul, General Medical and Surgical Hospitals), what description of event is given and what outcome did MNOSHA record?",
+    "category": "direct_lookup",
+    "reference_answer": "Description of event: 'Employee diagnosed with COVID-19.' Outcome of MNOSHA investigation: 'No citations issued.'",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318201571, 12/13/23, St. Paul, General Medical and Surgical Hospitals (NAICS 622110)"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q006",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What two fatality inspection numbers are listed for the dual-employer roof-fall incident on 1/4/24 in North Mankato?",
+    "category": "identifier_entity",
+    "reference_answer": "318201902 and 318202009.",
+    "supporting_source_spans": [
+      "Table row for the 1/4/24 North Mankato roof-fall entry showing two fatality inspection numbers and a split outcome"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q007",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What two fatality inspection numbers are listed for the 5/30/24 electrocution incident in Duluth?",
+    "category": "identifier_entity",
+    "reference_answer": "318206794 and 318206802.",
+    "supporting_source_spans": [
+      "Table row for the 5/30/24 Duluth electrocution entry showing two fatality inspection numbers"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q008",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What NAICS code is given in the document for \"Plumbing, Heating, and Air-Conditioning Contractors\"?",
+    "category": "identifier_entity",
+    "reference_answer": "238220.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318202207, 1/16/24, Brooklyn Park, Plumbing, Heating, and Air-Conditioning Contractors"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q009",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What federal-fiscal-year period does this summary cover?",
+    "category": "temporal_sequence",
+    "reference_answer": "Federal-fiscal-year 2024 (Oct. 1, 2023, through Sept. 30, 2024).",
+    "supporting_source_spans": [
+      "Header line directly below the document title: 'Federal-fiscal-year 2024 (Oct. 1, 2023, through Sept. 30, 2024)'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q010",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the header of the document, on what date was this fatality investigation summary most recently updated?",
+    "category": "temporal_sequence",
+    "reference_answer": "April 21, 2026.",
+    "supporting_source_spans": [
+      "Document title line: 'Minnesota OSHA fatality investigation summary (updated April 21, 2026)'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q011",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What is the earliest \"Date of incident\" appearing anywhere in the document, and which fatality inspection number is paired with that date?",
+    "category": "temporal_sequence",
+    "reference_answer": "9/27/23 \u2014 fatality inspection number 318201712 (Fulda, Soybean Farming, NAICS 111110). Note that the document is not sorted strictly by date of incident: this entry appears mid-document, not first.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318201712 in the first page table, with Date of incident 9/27/23"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q012",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What is the latest \"Date of incident\" appearing in the document?",
+    "category": "temporal_sequence",
+    "reference_answer": "9/21/24 (the Red Wing Golf Courses and Country Clubs entry on the last page, which has no fatality inspection number listed and is marked 'Case open').",
+    "supporting_source_spans": [
+      "Last table row in the document: 9/21/24 Red Wing Golf Courses and Country Clubs entry, Case open"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q013",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "What is the largest \"Total employees (national)\" figure listed for any single establishment in the document, and what type of business is it associated with?",
+    "category": "numeric_unit",
+    "reference_answer": "8,000 (national) \u2014 associated with 'Other Foundation, Structure, and Building Exterior Contractors' (NAICS 238190), one of the two employers in the 1/4/24 North Mankato roof-fall entry (fatality inspection 318202009).",
+    "supporting_source_spans": [
+      "Table row for 1/4/24 North Mankato, the 318201902/318202009 dual-employer entry, where the second listed employer shows Total employees (national) = 8,000"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q014",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "How many distinct fatality inspection numbers appear in the document?",
+    "category": "numeric_unit",
+    "reference_answer": "30 distinct fatality inspection numbers (28 single-inspection entries plus two dual-inspection entries that each list 2 numbers: 318201902/318202009 and 318206794/318206802).",
+    "supporting_source_spans": [
+      "All inspection-number cells across all five page tables in the document"
+    ],
+    "difficulty": "hard"
+  },
+  {
+    "id": "q015",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "How many fatality entries in the document are listed without any fatality inspection number?",
+    "category": "numeric_unit",
+    "reference_answer": "4 entries have no fatality inspection number: 12/7/23 Mankato Roofing Contractors (Case open); 3/7/24 Virginia General Freight Trucking, Long-Distance, Truckload (Case open); 5/21/24 Apple Valley All Other Support Services (Case open); 9/21/24 Red Wing Golf Courses and Country Clubs (Case open).",
+    "supporting_source_spans": [
+      "First-page table: 12/7/23 Mankato row with blank inspection-number cell",
+      "Second-page table: 3/7/24 Virginia row with blank inspection-number cell",
+      "Third-page table: 5/21/24 Apple Valley row with blank inspection-number cell",
+      "Fifth-page table: 9/21/24 Red Wing row with blank inspection-number cell"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q016",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "For fatality inspection 318210655 (Maplewood, 8/5/24, \"Other General Government Support\"), what \"Total employees (national)\" figure does the document list?",
+    "category": "numeric_unit",
+    "reference_answer": "3,723.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318210655, 8/5/24, Maplewood, Other General Government Support"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q017",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "Which agency's investigation outcomes are summarized in the rightmost column of every entry in this document?",
+    "category": "source_attribution",
+    "reference_answer": "Minnesota OSHA (MNOSHA). The document title is 'Minnesota OSHA fatality investigation summary' and the rightmost column header reads 'Outcome of MNOSHA investigation.'",
+    "supporting_source_spans": [
+      "Document title line",
+      "Column schema header repeated above each page table: 'Outcome of MNOSHA investigation'"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q018",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the line that repeats above each page of the table, where does the document direct readers to view inspection data including citations?",
+    "category": "source_attribution",
+    "reference_answer": "osha.gov/data. The line 'Inspection data, including citations, can be viewed at osha.gov/data.' is repeated above each page table.",
+    "supporting_source_spans": [
+      "Recurring page header line: 'Inspection data, including citations, can be viewed at osha.gov/data.' (appears five times in the document)"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q019",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to this summary, what investigation outcome did MNOSHA record for fatality inspection 318201829 (Crookston, Executive Offices)?",
+    "category": "source_attribution",
+    "reference_answer": "No citations issued. (MNOSHA recorded this outcome for the 318201829 Crookston Executive Offices entry \u2014 Employee was found collapsed on the floor.)",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318201829, 12/19/23, Crookston, Executive Offices (NAICS 921110)"
+    ],
+    "difficulty": "easy"
+  },
+  {
+    "id": "q020",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "For the 1/4/24 North Mankato roof-fall incident involving fatality inspections 318201902 and 318202009, what does the document state about the differing citation outcomes for the two employers?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "The document states 'Citations issued for 318201902; no citations issued for 318202009.' That is, for the same incident (Employee fell from the roof), MNOSHA cited one of the two listed contractors (Commercial and Institutional Building Construction, NAICS 236220, 30 national employees) but did not cite the other (Other Foundation, Structure, and Building Exterior Contractors, NAICS 238190, 8,000 national employees).",
+    "supporting_source_spans": [
+      "Table row for 1/4/24 North Mankato: 'Citations issued for 318201902; no citations issued for 318202009'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q021",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "How does the citation outcome for the 5/30/24 Duluth dual-employer electrocution (318206794 / 318206802) differ from the citation outcome of the 1/4/24 North Mankato dual-employer roof fall (318201902 / 318202009)?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "The Duluth dual-employer electrocution (5/30/24, 318206794/318206802, both 'Roofing Contractors' NAICS 238160) resulted in 'Citations issued for both employers,' while the North Mankato dual-employer roof fall (1/4/24, 318201902/318202009, two different NAICS contractors) resulted in citations issued for only one of the two employers ('Citations issued for 318201902; no citations issued for 318202009'). Same column, same general structure, different outcome.",
+    "supporting_source_spans": [
+      "Table row for 5/30/24 Duluth: outcome 'Citations issued for both employers'",
+      "Table row for 1/4/24 North Mankato: outcome 'Citations issued for 318201902; no citations issued for 318202009'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q022",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "The 318201712 Fulda Soybean Farming fatality resulted in \"Citations issued,\" while the 318199890 Hallock Sugar Beet Farming fatality \u2014 also an agricultural workplace event \u2014 resulted in no inspection. According to the document, what reason is given for the different outcome in the Hallock case?",
+    "category": "conflict_discrepancy",
+    "reference_answer": "For the 318199890 Hallock Sugar Beet Farming case (10/9/23, NAICS 111991, 12 national employees, 'Employee was run over by a passing vehicle'), the outcome column states: 'No inspection \u2013 farm appropriations rider.' The document attributes the no-inspection outcome to this statutory rider rather than to any finding about the incident itself.",
+    "supporting_source_spans": [
+      "Table row for fatality inspection 318199890, 10/9/23, Hallock, Sugar Beet Farming"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q023",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "According to the document, what fatality inspection number is assigned to the 12/7/23 Mankato roofing fatality (employee contacted powerlines)?",
+    "category": "negative_limitation",
+    "reference_answer": "The document does not assign a fatality inspection number to this entry; the inspection-number cell is blank. The only fields populated for this row are: Date of incident 12/7/23, Worksite Mankato, Type of business 'Roofing Contractors,' NAICS 238160, Total employees (national) 35, description 'Employee contacted powerlines,' and Outcome 'Case open.'",
+    "supporting_source_spans": [
+      "First-page table: 12/7/23 Mankato Roofing Contractors row, inspection-number column blank, Outcome 'Case open'"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q024",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "Does the document name the deceased employee or the specific employer (company name) for any entry?",
+    "category": "negative_limitation",
+    "reference_answer": "No. The document records type of business, NAICS code, worksite city or town, date of incident, total employees (national), description of event, and outcome \u2014 but it does not include the deceased employee's name or the specific employer's company name in any entry.",
+    "supporting_source_spans": [
+      "Column schema (repeated header) \u2014 no 'Employee name' or 'Employer name' column",
+      "All entries across all five page tables \u2014 none contain personal employee names or specific employer names"
+    ],
+    "difficulty": "medium"
+  },
+  {
+    "id": "q025",
+    "source_id": "osha_incident_or_enforcement_001",
+    "question": "Considering the column schema together with the variety of statuses recorded in the \"Outcome of MNOSHA investigation\" column across all rows, what range of possible investigation outcomes does the document show, and what does this combination imply about how the dataset should be interpreted (for example, the relationship between fatality counts, inspection counts, and citation counts)?",
+    "category": "synthesis",
+    "reference_answer": "The document's 'Outcome of MNOSHA investigation' column shows at least five distinct status types across the entries: (1) 'Citations issued' / 'Citation issued' (the singular and plural variants both appear); (2) 'No citations issued'; (3) 'Case open' (always for entries without a fatality inspection number, suggesting these are referrals not yet opened or assigned); (4) 'No inspection \u2013 not work-related' (an explicit determination not to inspect); and (5) 'No inspection \u2013 farm appropriations rider' (a statutory bar to inspection). Combined with the fact that several entries lack inspection numbers entirely and that two distinct contractors at the same incident can receive different citation outcomes (1/4/24 North Mankato), this implies the dataset cannot be flattened into a simple count: number of fatality entries \u2260 number of inspections \u2260 number of inspections-with-citations. A correct read must distinguish fatalities referred, fatalities inspected, fatalities with citations issued, and fatalities excluded from inspection on statutory or jurisdictional grounds.",
+    "supporting_source_spans": [
+      "Column schema 'Outcome of MNOSHA investigation' (header)",
+      "All entries across the five page tables, including the five distinct status phrasings",
+      "Two dual-employer entries (1/4/24 North Mankato and 5/30/24 Duluth) where the same incident yields per-employer outcome distinctions"
+    ],
+    "difficulty": "hard"
+  }
+]

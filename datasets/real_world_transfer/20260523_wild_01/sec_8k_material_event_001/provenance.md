@@ -1,0 +1,23 @@
+# Provenance: sec_8k_material_event_001
+
+- **Source URL:** https://www.sec.gov/Archives/edgar/data/1433642/000143364225000110/hlne-20251001.htm
+- **Document type:** HTML (EDGAR-hosted Form 8-K filing).
+- **CIK:** 1433642
+- **Accession number:** 0001433642-25-000110
+- **Filer:** Hamilton Lane Incorporated
+- **Document date (date of earliest event reported):** 2025-10-01
+- **Filing/signing date:** 2025-10-06
+- **Retrieval date:** 2026-05-23
+- **How obtained:** Retrieved by URL via the web_fetch tool against sec.gov. EDGAR documents are public.
+- **How source.md was converted:** The HTML 8-K was converted to Markdown by:
+  - Preserving heading levels (### / #### markers) as rendered.
+  - Converting the cover-page tables (entity identifiers, address, check boxes, Section 12(b) securities) to Markdown tables. EDGAR 8-K cover tables are intentionally a layout-only construct; the rendered text was retained.
+  - Preserving Item 1.01, Item 2.03, and Item 9.01 headings as bold/heading text.
+  - Preserving the Exhibit 10.1 footnote marker '°' and the explanatory line "Confidential information in this exhibit has been omitted."
+  - Preserving the signature block as a Markdown table with the typed "/s/ Lydia A. Gavalis" notation.
+- **Known extraction issues:**
+  - Whitespace in the original EDGAR-rendered "( 610) 934-2222" was normalized to "(610) 934-2222" in source.md to remove an extra space that was an artifact of the EDGAR table cell. No other text was altered.
+  - The "°" marker on Exhibit 10.1 (used in EDGAR to denote a footnote about confidential redaction) is preserved as the original mark.
+  - The four cover-page check boxes are rendered as "☐" (empty box) characters, which is how they appear on the EDGAR HTML page; no box is filled in the original.
+- **Original source file retained:** `source_original.txt` (text capture of the same fetched content).
+- **License / public status:** Public SEC filing; available on EDGAR without restriction.
