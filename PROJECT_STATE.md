@@ -78,7 +78,7 @@ should remain distinct from externally sourced real-world documents.
 The current full-suite verification is:
 
 ```text
-1627 passed, 2 subtests passed
+1629 passed, 2 subtests passed
 ```
 
 These numbers are the current public measurement anchor, not a permanent

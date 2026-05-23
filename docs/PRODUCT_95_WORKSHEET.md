@@ -577,3 +577,60 @@ Read: this should not be turned into a broad claim that Prethinker is now
 "100%" on messy documents. It is a tiny pilot. The useful claim is narrower and
 stronger: two unlike-document blocker shapes were found, repaired with general
 query-only evidence support, and recovered without compatibility pressure.
+
+## Native Query-Surface Gap Replay
+
+The next native audit read the `29` query-surface gaps from the 2026-05-22
+native stamp and replayed them with current QA code against the frozen native
+compile artifacts.
+
+Initial current-code replay:
+
+```text
+29 prior query-surface rows
+22 exact / 1 partial / 6 miss
+remaining surfaces: 6 compile-surface gaps, 1 hybrid-join gap
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
+Read: the `20 -> 29` query-surface increase is mostly stale as an active
+query-layer blocker. Current query repairs already clear `22 / 29` rows. Six
+remaining rows are now honest compile-surface gaps rather than query-policy
+work. The one live query/hybrid row was `sable_creek_budget` q004: a
+counterfactual vote question where the broad `vote_record/5` scan had the
+granular roll-call rows, but the answerer over-weighted the first bound row.
+
+Repair:
+
+- Added query-only `vote_record_counterfactual_support` rows for "if X had
+  voted yes/no on motion Y" questions. The companion reads existing
+  `vote_record/5` rows, matches nearby motion-id aliases, counts original
+  votes, flips the named actor's vote, and reports whether the hypothetical
+  count meets the threshold.
+- During the transfer guard, sealed vote-matrix q021 exposed a sibling
+  disambiguation issue: "exception motion" should prefer the supermajority
+  motion over a later standard fallback motion for the same application. Added
+  query-only `vote_record_disambiguation_support` rows that mark same-entity
+  `vote_record/5` candidates as `exception_or_supermajority` versus
+  `standard_or_simple_majority`.
+
+Verification:
+
+```text
+sable q004 targeted replay: 1 exact / 0 partial / 0 miss
+sable q003/q004/q030 slice: 3 exact / 0 partial / 0 miss
+sealed vote q021 targeted replay: 1 exact / 0 partial / 0 miss
+sealed vote-matrix guard q017/q019/q021/q023/q024/q032: 6 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+full pytest: 1629 passed, 2 subtests passed
+artifact archive: C:\prethinker_tmp_archive\native_query_surface_vote_lane_20260523
+```
+
+Read: the live native query-surface blocker in this slice is cleared, and the
+transfer vote guard caught a real adjacent product issue before the change was
+declared done. The remaining native query-surface rows should be treated as a
+compile-surface queue unless a future replay shows otherwise.

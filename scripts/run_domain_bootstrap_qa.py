@@ -1895,6 +1895,12 @@ def run_one_question(
     source_numeric_ranges = _source_record_numeric_range_companion(query_results, utterance=utterance)
     if source_numeric_ranges:
         query_results.append(source_numeric_ranges)
+    vote_counterfactual = _vote_record_counterfactual_companion(query_results, utterance=utterance)
+    if vote_counterfactual:
+        query_results.append(vote_counterfactual)
+    vote_disambiguation = _vote_record_disambiguation_companion(query_results, utterance=utterance)
+    if vote_disambiguation:
+        query_results.append(vote_disambiguation)
     query_results = _dedupe_helper_query_results(query_results)
     query_results = _limit_helper_query_results(
         query_results,
@@ -14264,6 +14270,314 @@ def _canonical_numeric_range_unit(unit: str) -> str:
         "minute": "minutes",
         "day": "days",
     }.get(text, text)
+
+
+def _vote_record_counterfactual_companion(
+    results: list[dict[str, Any]],
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    request = _parse_vote_counterfactual_request(utterance)
+    if not request:
+        return None
+    vote_rows = _vote_record_rows_from_query_results(results)
+    if not vote_rows:
+        return None
+    target_motion = request["Motion"]
+    target_actor = request["Actor"]
+    target_vote = request["HypotheticalVote"]
+    threshold = _vote_threshold_from_query_results(results)
+    groups: dict[str, list[dict[str, str]]] = {}
+    for row in vote_rows:
+        motion = row.get("Motion", "")
+        vote = row.get("Vote", "")
+        actor = row.get("Actor", "")
+        if not motion or vote not in {"yes", "no"} or not actor:
+            continue
+        groups.setdefault(motion, []).append(row)
+    if not groups:
+        return None
+    target_key = _compact_identifier_key(target_motion)
+    candidates = [
+        (motion, rows)
+        for motion, rows in groups.items()
+        if len(rows) >= 2 and _compact_identifier_key(motion).endswith(target_key)
+    ]
+    if not candidates:
+        candidates = [
+            (motion, rows)
+            for motion, rows in groups.items()
+            if len(rows) >= 2 and target_key in _compact_identifier_key(motion)
+        ]
+    if not candidates:
+        return None
+    motion, rows = sorted(candidates, key=lambda item: (-len(item[1]), len(item[0]), item[0]))[0]
+    actor_key = _compact_identifier_key(target_actor)
+    actor_row = next(
+        (row for row in rows if actor_key and actor_key in _compact_identifier_key(row.get("Actor", ""))),
+        None,
+    )
+    if actor_row is None:
+        return None
+    yes_actors = [row.get("Actor", "") for row in rows if row.get("Vote") == "yes"]
+    no_actors = [row.get("Actor", "") for row in rows if row.get("Vote") == "no"]
+    original_yes = len(yes_actors)
+    original_no = len(no_actors)
+    original_vote = actor_row.get("Vote", "")
+    hypothetical_yes = original_yes
+    if original_vote != target_vote:
+        hypothetical_yes += 1 if target_vote == "yes" else -1
+    if threshold is None:
+        threshold = _threshold_from_vote_outcome(rows)
+    if threshold is None:
+        return None
+    would_pass = hypothetical_yes >= threshold
+    hypothetical_yes_actors = list(yes_actors)
+    hypothetical_no_actors = list(no_actors)
+    if original_vote != target_vote:
+        hypothetical_yes_actors = [actor for actor in hypothetical_yes_actors if actor != actor_row["Actor"]]
+        hypothetical_no_actors = [actor for actor in hypothetical_no_actors if actor != actor_row["Actor"]]
+        if target_vote == "yes":
+            hypothetical_yes_actors.append(actor_row["Actor"])
+        else:
+            hypothetical_no_actors.append(actor_row["Actor"])
+    support_row = {
+        "SupportKind": "vote_record_counterfactual",
+        "QuestionMotion": target_motion,
+        "MatchedMotion": motion,
+        "Actor": actor_row["Actor"],
+        "OriginalVote": original_vote,
+        "HypotheticalVote": target_vote,
+        "OriginalYesCount": str(original_yes),
+        "OriginalNoCount": str(original_no),
+        "HypotheticalYesCount": str(hypothetical_yes),
+        "Threshold": str(threshold),
+        "WouldPass": "yes" if would_pass else "no",
+        "YesActors": ",".join(sorted(yes_actors)),
+        "NoActors": ",".join(sorted(no_actors)),
+        "HypotheticalYesActors": ",".join(sorted(hypothetical_yes_actors)),
+        "HypotheticalNoActors": ",".join(sorted(hypothetical_no_actors)),
+    }
+    return {
+        "query": (
+            "vote_record_counterfactual_support(QuestionMotion, MatchedMotion, Actor, "
+            "OriginalVote, HypotheticalVote, HypotheticalYesCount, Threshold, WouldPass)."
+        ),
+        "result": {
+            "status": "success",
+            "predicate": "vote_record_counterfactual_support",
+            "prolog_query": (
+                "vote_record_counterfactual_support(QuestionMotion, MatchedMotion, Actor, "
+                "OriginalVote, HypotheticalVote, HypotheticalYesCount, Threshold, WouldPass)."
+            ),
+            "result_type": "table",
+            "num_rows": 1,
+            "variables": list(support_row.keys()),
+            "rows": [support_row],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only vote counterfactual support counted retrieved vote_record rows "
+                    "and matched a nearby motion-id alias; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [str(item.get("query", "")) for item in results if isinstance(item, dict)],
+    }
+
+
+def _vote_record_disambiguation_companion(
+    results: list[dict[str, Any]],
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "")
+    lowered = text.casefold()
+    if "vote" not in lowered and "tally" not in lowered and "motion" not in lowered:
+        return None
+    entity_keys = _vote_question_entity_keys(text)
+    if not entity_keys:
+        return None
+    numeric_rows: list[dict[str, str]] = []
+    for row in _vote_record_rows_from_query_results(results):
+        if not all(str(row.get(key, "")).isdigit() for key in ("Actor", "Vote", "Date", "Outcome")):
+            continue
+        motion_key = _compact_identifier_key(row.get("Motion", ""))
+        if not any(entity_key and entity_key in motion_key for entity_key in entity_keys):
+            continue
+        for_votes = int(row["Actor"])
+        against_votes = int(row["Vote"])
+        denominator = int(row["Date"])
+        threshold = int(row["Outcome"])
+        simple_threshold = denominator // 2 + 1
+        if threshold > simple_threshold:
+            motion_kind = "exception_or_supermajority"
+        elif "alternative" in motion_key or "fallback" in motion_key or "fall_back" in motion_key:
+            motion_kind = "alternative_or_fallback"
+        else:
+            motion_kind = "standard_or_simple_majority"
+        numeric_rows.append(
+            {
+                "SupportKind": "vote_record_disambiguation",
+                "QuestionEntity": ",".join(entity_keys),
+                "MatchedMotion": row["Motion"],
+                "MotionKind": motion_kind,
+                "ForVotes": str(for_votes),
+                "AgainstVotes": str(against_votes),
+                "Denominator": str(denominator),
+                "Threshold": str(threshold),
+                "WouldCarry": "yes" if for_votes >= threshold else "no",
+                "ShortTally": f"{for_votes}-{against_votes}-{max(denominator - for_votes - against_votes, 0)}",
+            }
+        )
+    if not numeric_rows:
+        return None
+    wants_exception = bool(re.search(r"\bexception\b|\bsupermajority\b|§\s*\d+(?:\.\d+)?", lowered))
+    wants_alternative = bool(re.search(r"\balternative\b|fall[- ]?back|fallback", lowered))
+
+    def sort_key(row: dict[str, str]) -> tuple[int, str]:
+        kind = row["MotionKind"]
+        if wants_exception and kind == "exception_or_supermajority":
+            return (0, row["MatchedMotion"])
+        if wants_alternative and kind == "alternative_or_fallback":
+            return (0, row["MatchedMotion"])
+        return (1, row["MatchedMotion"])
+
+    numeric_rows.sort(key=sort_key)
+    return {
+        "query": (
+            "vote_record_disambiguation_support(QuestionEntity, MatchedMotion, MotionKind, "
+            "ForVotes, AgainstVotes, Denominator, Threshold, WouldCarry)."
+        ),
+        "result": {
+            "status": "success",
+            "predicate": "vote_record_disambiguation_support",
+            "prolog_query": (
+                "vote_record_disambiguation_support(QuestionEntity, MatchedMotion, MotionKind, "
+                "ForVotes, AgainstVotes, Denominator, Threshold, WouldCarry)."
+            ),
+            "result_type": "table",
+            "num_rows": len(numeric_rows),
+            "variables": list(numeric_rows[0].keys()),
+            "rows": numeric_rows[:12],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only vote-record disambiguation compared same-entity vote_record rows "
+                    "and marked supermajority/exception versus simple/standard motions; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [str(item.get("query", "")) for item in results if isinstance(item, dict)],
+    }
+
+
+def _vote_question_entity_keys(text: str) -> list[str]:
+    keys: list[str] = []
+    for match in re.finditer(r"\b[A-Z]{2,12}[-_][A-Z0-9]{1,12}[-_][0-9]{1,6}\b", str(text or ""), re.IGNORECASE):
+        key = _compact_identifier_key(match.group(0))
+        if key and key not in keys:
+            keys.append(key)
+    return keys[:4]
+
+
+def _parse_vote_counterfactual_request(utterance: str) -> dict[str, str] | None:
+    text = str(utterance or "")
+    if not re.search(r"\b(?:vote|voted)\b", text, re.IGNORECASE):
+        return None
+    match = re.search(
+        r"\bif\s+(?P<actor>[A-Z][A-Za-z0-9_.-]*)\s+had\s+voted\s+"
+        r"(?P<vote>yes|no)\s+on\s+(?P<motion>[A-Z]{1,12}-\d{2,8}-\d{1,4})\b",
+        text,
+        re.IGNORECASE,
+    )
+    if not match:
+        return None
+    return {
+        "Actor": _simple_query_atom(match.group("actor")),
+        "HypotheticalVote": match.group("vote").casefold(),
+        "Motion": _simple_query_atom(match.group("motion")),
+    }
+
+
+def _vote_record_rows_from_query_results(results: list[dict[str, Any]]) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for item in results:
+        if not isinstance(item, dict) or "vote_record" not in str(item.get("query", "")):
+            continue
+        result = item.get("result") if isinstance(item.get("result"), dict) else {}
+        if result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            motion = str(row.get("Motion", "") or row.get("BoundArg1", "")).strip()
+            actor = str(row.get("ForVotes", "") or row.get("X", "")).strip()
+            vote = str(row.get("AgainstVotes", "") or row.get("Y", "")).strip().casefold()
+            date = str(row.get("Denominator", "") or row.get("Z", "")).strip()
+            outcome = str(row.get("ThresholdRequired", "") or row.get("W", "")).strip()
+            if not motion or (vote not in {"yes", "no"} and not vote.isdigit()):
+                continue
+            key = (motion, actor, vote, date, outcome)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(
+                {
+                    "Motion": motion,
+                    "Actor": actor,
+                    "Vote": vote,
+                    "Date": date,
+                    "Outcome": outcome,
+                }
+            )
+    return out
+
+
+def _vote_threshold_from_query_results(results: list[dict[str, Any]]) -> int | None:
+    for _source_row, text_atom in _source_text_rows_from_query_results(results):
+        match = re.search(r"\b(?:at_least_)?(?P<threshold>\d+)_of_(?P<body>\d+)\b", str(text_atom or ""))
+        if match:
+            return int(match.group("threshold"))
+    for item in results:
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            for value in row.values():
+                match = re.search(r"\b(?:at_least_)?(?P<threshold>\d+)_of_(?P<body>\d+)\b", str(value or ""))
+                if match:
+                    return int(match.group("threshold"))
+    return None
+
+
+def _threshold_from_vote_outcome(rows: list[dict[str, str]]) -> int | None:
+    yes_count = sum(1 for row in rows if row.get("Vote") == "yes")
+    outcome_values = {row.get("Outcome", "").casefold() for row in rows}
+    if "failed" in outcome_values:
+        return yes_count + 1
+    if "passed" in outcome_values and yes_count > 0:
+        return yes_count
+    return None
+
+
+def _compact_identifier_key(value: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", str(value or "").casefold())
+
+
+def _simple_query_atom(value: str) -> str:
+    return re.sub(r"_+", "_", re.sub(r"[^a-z0-9]+", "_", str(value or "").casefold())).strip("_")
 
 
 def _defined_interval_duration_companion(runtime: CorePrologRuntime, *, query: str) -> dict[str, Any] | None:

@@ -7,6 +7,8 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_numeric_range_companion,
     _source_coordinate_hint_queries,
     _source_attribution_hint_queries,
+    _vote_record_counterfactual_companion,
+    _vote_record_disambiguation_companion,
 )
 
 
@@ -234,3 +236,116 @@ def test_source_record_numeric_range_companion_extracts_range_support() -> None:
     assert companion is not None
     ranges = {row["Range"] for row in companion["result"]["rows"]}
     assert {"85-100 mph", "74-87 knots", "48-62 knots", "22-27 miles"} <= ranges
+
+
+def test_vote_record_counterfactual_companion_matches_motion_alias_and_counts_flip() -> None:
+    results = [
+        {
+            "query": "vote_record(Motion, ForVotes, AgainstVotes, Denominator, ThresholdRequired).",
+            "result": {
+                "status": "success",
+                "rows": [
+                    {
+                        "Motion": "vote_mot202607",
+                        "ForVotes": "okafor",
+                        "AgainstVotes": "yes",
+                        "Denominator": "2026_04_01",
+                        "ThresholdRequired": "failed",
+                    },
+                    {
+                        "Motion": "vote_mot202607",
+                        "ForVotes": "medina",
+                        "AgainstVotes": "yes",
+                        "Denominator": "2026_04_01",
+                        "ThresholdRequired": "failed",
+                    },
+                    {
+                        "Motion": "vote_mot202607",
+                        "ForVotes": "chen",
+                        "AgainstVotes": "no",
+                        "Denominator": "2026_04_01",
+                        "ThresholdRequired": "failed",
+                    },
+                    {
+                        "Motion": "vote_mot202607",
+                        "ForVotes": "volkov",
+                        "AgainstVotes": "no",
+                        "Denominator": "2026_04_01",
+                        "ThresholdRequired": "failed",
+                    },
+                    {
+                        "Motion": "vote_mot202607",
+                        "ForVotes": "singh",
+                        "AgainstVotes": "yes",
+                        "Denominator": "2026_04_01",
+                        "ThresholdRequired": "failed",
+                    },
+                ],
+            },
+        },
+        {
+            "query": "source_record_text_atom(SourceRow, TextAtom).",
+            "result": {
+                "status": "success",
+                "rows": [
+                    {
+                        "SourceRow": "src_line_0001",
+                        "TextAtom": "town_council_may_amend_by_vote_of_at_least_4_of_7_members",
+                    }
+                ],
+            },
+        },
+    ]
+
+    companion = _vote_record_counterfactual_companion(
+        results,
+        utterance="If Chen had voted yes on MOT-2026-07, would it have passed?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["MatchedMotion"] == "vote_mot202607"
+    assert row["OriginalVote"] == "no"
+    assert row["HypotheticalYesCount"] == "4"
+    assert row["Threshold"] == "4"
+    assert row["WouldPass"] == "yes"
+    assert row["HypotheticalYesActors"] == "chen,medina,okafor,singh"
+
+
+def test_vote_record_disambiguation_companion_prefers_exception_motion() -> None:
+    results = [
+        {
+            "query": "vote_record(Motion, ForVotes, AgainstVotes, Denominator, ThresholdRequired).",
+            "result": {
+                "status": "success",
+                "rows": [
+                    {
+                        "Motion": "motion_3a_case_r24_003",
+                        "ForVotes": "4",
+                        "AgainstVotes": "3",
+                        "Denominator": "7",
+                        "ThresholdRequired": "5",
+                    },
+                    {
+                        "Motion": "motion_3b_case_r24_003",
+                        "ForVotes": "7",
+                        "AgainstVotes": "0",
+                        "Denominator": "7",
+                        "ThresholdRequired": "4",
+                    },
+                ],
+            },
+        }
+    ]
+
+    companion = _vote_record_disambiguation_companion(
+        results,
+        utterance="What was the vote tally on the exception motion for CASE-R24-003?",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["MatchedMotion"] == "motion_3a_case_r24_003"
+    assert rows[0]["MotionKind"] == "exception_or_supermajority"
+    assert rows[0]["ShortTally"] == "4-3-0"
+    assert rows[0]["WouldCarry"] == "no"
