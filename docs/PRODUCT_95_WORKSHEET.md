@@ -186,13 +186,43 @@ Transfer read:
   direct compile-surface carrier gap, so the next repair lane should not be
   query-filter machinery but durable event/date/time source surfaces.
 
+## Source-Record Field Text Fallback
+
+The remaining rejected-filter native row, `draft_within_draft q015`, exposed a
+field/text split problem. The QA plan asked for:
+
+```text
+source_record_field(Line, staff_note, Text), memberchk(dr_holm, Text), memberchk(traffic, Text), ...
+```
+
+The split `source_record_field/3` rows did not contain the traffic verification
+language, but the same staff-note source surface was preserved in
+`source_record_text_atom/2`.
+
+Repair:
+
+- If a `source_record_field/3` contains-filter query returns zero rows, and the
+  filter is on the field value, QA may fall back to `source_record_text_atom/2`.
+- The fallback is bounded: it requires the source text row to carry the same
+  source label or a matching text prefix, so a `staff_note` query does not
+  broaden into unrelated source text.
+
+Verification:
+
+```text
+tests/test_domain_bootstrap_qa.py: 234 passed
+draft_within_draft q015 row replay: 1 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+artifact archive: C:\prethinker_tmp_archive\product_95_source_text_fallback_20260523
+```
+
 ## Next Moves
 
-1. Investigate the remaining native query-surface row,
-   `draft_within_draft q015`, where source text has the answer but the planner
-   stayed inside `source_record_field/3` instead of reaching
-   `source_record_text_atom/2`.
-2. Start the durable event/date/time compile-surface lane exposed by
+1. Start the durable event/date/time compile-surface lane exposed by
    `ntsb_marine_carol_jean_2023 q021`.
-3. Move to hybrid-join partials only after the source-record text fallback is
-   bounded.
+2. Re-run the small rejected-filter replay set if we want a variance check on
+   the bounded source-text fallback.
+3. Move to hybrid-join partials after the event/date/time source carrier is
+   scoped.

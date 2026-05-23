@@ -15677,14 +15677,31 @@ def _run_source_record_contains_filter(
         and needles
         and all(needle in _normalize_text_filter_atom(str(row.get(text_var, ""))) for needle in needles)
     ]
+    fallback_rows: list[dict[str, Any]] = []
+    fallback_query = ""
+    if predicate == "source_record_field" and not filtered_rows:
+        fallback = _source_record_field_text_atom_contains_filter_fallback(
+            runtime=runtime,
+            args=args,
+            text_var=str(text_var),
+            needles=needles,
+        )
+        fallback_rows = fallback.get("rows", []) if fallback else []
+        fallback_query = str(fallback.get("query", "") if fallback else "")
+        if fallback_rows:
+            filtered_rows = fallback_rows
     return {
         "query": original_query,
         "result": {
             "status": "success",
-            "predicate": predicate,
-            "prolog_query": repaired_query,
+            "predicate": "source_record_text_atom" if fallback_rows else predicate,
+            "prolog_query": fallback_query if fallback_rows else repaired_query,
             "result_type": "table",
-            "variables": result.get("variables", []) if isinstance(result, dict) else [],
+            "variables": (
+                [arg for arg in (args[0], args[2]) if _is_prolog_variable(arg)]
+                if fallback_rows
+                else result.get("variables", []) if isinstance(result, dict) else []
+            ),
             "num_rows": len(filtered_rows),
             "rows": filtered_rows,
             "reasoning_basis": {
@@ -15692,18 +15709,99 @@ def _run_source_record_contains_filter(
                 "bundle_id": bundle_id,
                 "purpose": purpose,
                 "validation": (
+                    "source_record_field_text_atom_contains_fallback"
+                    if fallback_rows
+                    else
                     "source_text_contains_filter_repaired"
                     if predicate == "source_record_text_atom"
                     else "source_record_contains_filter_repaired"
                 ),
                 "original_query": original_query,
-                "repaired_query": repaired_query,
+                "repaired_query": fallback_query if fallback_rows else repaired_query,
                 "contains_needles": needles,
                 "unsupported_predicate": "source_text_contains_filter",
             },
         },
-        "derived_from_queries": [repaired_query],
+        "derived_from_queries": [fallback_query if fallback_rows else repaired_query],
     }
+
+
+def _source_record_field_text_atom_contains_filter_fallback(
+    *,
+    runtime: CorePrologRuntime,
+    args: list[str],
+    text_var: str,
+    needles: list[str],
+) -> dict[str, Any] | None:
+    if len(args) != 3 or text_var != args[2] or not needles:
+        return None
+    row_arg, field_arg, value_arg = [str(arg or "").strip() for arg in args]
+    if not row_arg or not field_arg or not value_arg:
+        return None
+    if _is_prolog_variable(field_arg) or field_arg.lower() in {"field", "key", "label"}:
+        return None
+    expected_label = _normalize_text_filter_atom(field_arg)
+    if not expected_label:
+        return None
+    text_query = format_prolog_query("source_record_text_atom", [row_arg, value_arg])
+    text_result = runtime.query_rows(text_query)
+    if not isinstance(text_result, dict) or text_result.get("status") != "success":
+        return None
+    candidate_rows = text_result.get("rows", [])
+    out_rows: list[dict[str, Any]] = []
+    for row in candidate_rows if isinstance(candidate_rows, list) else []:
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get(row_arg if _is_prolog_variable(row_arg) else "SourceRecordFallbackRow", row_arg)).strip()
+        text_atom = str(row.get(value_arg if _is_prolog_variable(value_arg) else "SourceRecordFallbackText", "")).strip()
+        if not source_row or not text_atom:
+            continue
+        normalized_text = _normalize_text_filter_atom(text_atom)
+        if not all(needle in normalized_text for needle in needles):
+            continue
+        if not _source_record_text_atom_matches_field_label(
+            runtime=runtime,
+            source_row=source_row,
+            expected_label=expected_label,
+            text_atom=text_atom,
+        ):
+            continue
+        projected: dict[str, Any] = {}
+        if _is_prolog_variable(row_arg):
+            projected[row_arg] = source_row
+        if _is_prolog_variable(value_arg):
+            projected[value_arg] = text_atom
+        projected["BoundArg2"] = field_arg
+        projected["BoundArg2Display"] = _display_source_phrase(field_arg)
+        projected["SourcePredicate"] = "source_record_text_atom"
+        out_rows.append(projected)
+    if not out_rows:
+        return None
+    return {"query": text_query, "rows": out_rows}
+
+
+def _source_record_text_atom_matches_field_label(
+    *,
+    runtime: CorePrologRuntime,
+    source_row: str,
+    expected_label: str,
+    text_atom: str,
+) -> bool:
+    if not source_row or not expected_label:
+        return False
+    normalized_text = _normalize_text_filter_atom(text_atom)
+    if normalized_text == expected_label or normalized_text.startswith(f"{expected_label}_"):
+        return True
+    label_query = format_prolog_query("source_record_label", [source_row, "SourceRecordFallbackLabel"])
+    label_result = runtime.query_rows(label_query)
+    if not isinstance(label_result, dict) or label_result.get("status") != "success":
+        return False
+    for row in label_result.get("rows", []) or []:
+        if not isinstance(row, dict):
+            continue
+        if _normalize_text_filter_atom(str(row.get("SourceRecordFallbackLabel", ""))) == expected_label:
+            return True
+    return False
 
 
 def _normalize_text_filter_atom(value: str) -> str:

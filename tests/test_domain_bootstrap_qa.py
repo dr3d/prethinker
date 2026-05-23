@@ -998,6 +998,85 @@ def test_evidence_bundle_plan_repairs_source_record_field_contains_filter() -> N
     ]
 
 
+def test_evidence_bundle_plan_falls_back_from_source_field_filter_to_labeled_source_text() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0038, staff_note, dr_holm_density_calculation_is_correct).",
+        (
+            "source_record_text_atom(src_line_0040, "
+            "dr_holm_s_traffic_estimate_has_not_been_verified_by_public_works)."
+        ),
+        "source_record_label(src_line_0040, staff_note).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_field/3", "source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "staff_note_source_text_fallback",
+                    "purpose": "Find staff-note text containing the verification status.",
+                    "query_templates": [
+                        "source_record_field(Line, staff_note, Text), "
+                        "memberchk(dr_holm, Text), memberchk(traffic, Text), memberchk(verified, Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert (
+        results[0]["result"]["reasoning_basis"]["validation"]
+        == "source_record_field_text_atom_contains_fallback"
+    )
+    assert results[0]["result"]["rows"] == [
+        {
+            "BoundArg2": "staff_note",
+            "BoundArg2Display": "staff note",
+            "Line": "src_line_0040",
+            "SourcePredicate": "source_record_text_atom",
+            "Text": "dr_holm_s_traffic_estimate_has_not_been_verified_by_public_works",
+        }
+    ]
+
+
+def test_source_field_text_fallback_requires_matching_label_or_prefix() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0038, staff_note, dr_holm_density_calculation_is_correct).",
+        (
+            "source_record_text_atom(src_line_0040, "
+            "dr_holm_s_traffic_estimate_has_not_been_verified_by_public_works)."
+        ),
+        "source_record_label(src_line_0040, neighbor_letter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_field/3", "source_record_text_atom/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "staff_note_source_text_fallback",
+                    "purpose": "Do not broaden a field query to unrelated source text.",
+                    "query_templates": [
+                        "source_record_field(Line, staff_note, Text), "
+                        "memberchk(dr_holm, Text), memberchk(traffic, Text), memberchk(verified, Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_record_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == []
+
+
 def test_evidence_bundle_plan_repairs_source_record_label_memberchk_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
