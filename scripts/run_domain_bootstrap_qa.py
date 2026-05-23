@@ -2170,7 +2170,21 @@ def _source_text_question_token_hint_queries(
         return []
     needles = _source_text_question_needles(text)
     needle_limit = 10 if _is_quantity_source_text_question(text) else 6
-    return [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:needle_limit]]
+    out = [f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom).' for needle in needles[:needle_limit]]
+    if _is_temporal_source_text_question(text) and "source_record_numeric_token/2" in signatures:
+        for needle in needles[: min(needle_limit, 6)]:
+            out.append(
+                f'source_record_text_atom(SourceRow, TextAtom), memberchk("{needle}", TextAtom), '
+                "source_record_numeric_token(SourceRow, NumericToken)."
+            )
+    return out
+
+
+def _is_temporal_source_text_question(text: str) -> bool:
+    normalized = str(text or "")
+    if re.search(r"\btime\s+zone\b", normalized, re.IGNORECASE):
+        return False
+    return bool(re.search(r"\b(?:when|time|date|timestamp|hour|minute|day)\b", normalized, re.IGNORECASE))
 
 
 def _is_quantity_source_text_question(text: str) -> bool:
@@ -2217,6 +2231,8 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     lowered_raw = raw.casefold()
     if "filing" in tokens:
         derived_needles.append("filed")
+    if _is_temporal_source_text_question(raw):
+        derived_needles.extend(_generic_question_token_inflection_needles(tokens))
     state_phrase_aliases = {
         "kentucky": "ky",
         "new york": "ny",
@@ -2359,6 +2375,38 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     priority_unigram_needles = [token for token in tokens if token in priority_unigram_markers]
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
     return _ordered_atom_unique([*identifier_needles, *derived_needles, *priority_unigram_needles, *phrase_needles, *unigram_needles])
+
+
+def _generic_question_token_inflection_needles(tokens: list[str]) -> list[str]:
+    out: list[str] = []
+    skip = {
+        "what",
+        "when",
+        "where",
+        "which",
+        "time",
+        "date",
+        "does",
+        "with",
+        "from",
+        "that",
+        "this",
+        "than",
+        "then",
+        "they",
+        "them",
+        "were",
+    }
+    for token in tokens:
+        if len(token) < 4 or token in skip or token.isdigit():
+            continue
+        if token.endswith("e"):
+            out.append(f"{token}d")
+        elif token.endswith("y") and len(token) > 4:
+            out.append(f"{token[:-1]}ied")
+        else:
+            out.append(f"{token}ed")
+    return out
 
 
 def _source_field_question_key_hint_queries(
@@ -6740,6 +6788,7 @@ def _scope_source_record_packet_metadata_rows(
         for arg in args
         if str(arg).strip() and not _is_prolog_variable(str(arg).strip())
     }
+    arg_tokens.update(_source_record_metadata_query_filter_tokens(query))
     no_packet_metadata_predicates = {
         "policy_requirement",
     }
@@ -6889,6 +6938,26 @@ def _scope_source_record_packet_metadata_rows(
         ][:8]
         return [*relevant, *context]
     return rows
+
+
+def _source_record_metadata_query_filter_tokens(query: str) -> set[str]:
+    text = str(query or "")
+    if not text:
+        return set()
+    tokens: set[str] = set()
+    for match in re.finditer(r"\bmemberchk\(\s*['\"](?P<token>[^'\"]+)['\"]\s*,", text, flags=re.IGNORECASE):
+        token = match.group("token").strip().casefold()
+        if token:
+            tokens.add(token)
+    for match in re.finditer(
+        r"\b(?:contains|atom_contains|sub_atom)\([^,]+,\s*['\"](?P<token>[^'\"]+)['\"]",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        token = match.group("token").strip().casefold()
+        if token:
+            tokens.add(token)
+    return tokens
 
 
 def _next_source_text_atom(
@@ -7593,6 +7662,8 @@ def _source_record_event_action_after_time(text: str, time_end: int) -> str:
     }
     for token in tokens[:28]:
         if token in action_tokens:
+            return token
+        if re.fullmatch(r"[a-z][a-z0-9]{2,}ed", token) and token not in {"asked", "based", "named", "needed", "stored"}:
             return token
     return ""
 

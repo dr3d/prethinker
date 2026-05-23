@@ -4492,6 +4492,40 @@ def test_source_record_packet_metadata_surfaces_generic_event_time_notes() -> No
     )
 
 
+def test_temporal_source_text_hint_joins_filtered_text_to_numeric_tokens() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0010, labeled_line, 10, event_sequence, calendar_context).",
+        "source_record_section(src_line_0010, event_sequence).",
+        "source_record_line(src_line_0010, 10).",
+        "source_record_text_atom(src_line_0010, on_april_4_the_team_started_the_trial).",
+        "source_record_row(src_line_0012, labeled_line, 12, event_sequence, timed_event).",
+        "source_record_section(src_line_0012, event_sequence).",
+        "source_record_line(src_line_0012, 12).",
+        "source_record_text_atom(src_line_0012, about_1415_when_the_device_was_in_room_7_the_guard_arm_released_and_the_status_changed_to_open).",
+        "source_record_numeric_token(src_line_0012, v_1415).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        [
+            'source_record_text_atom(SourceRow, TextAtom), memberchk("released", TextAtom), '
+            "source_record_numeric_token(SourceRow, NumericToken)."
+        ],
+    )
+
+    result = rows[0]["result"]
+    assert result["predicate"] == "source_record_text_atom"
+    assert result["rows"] == [
+        {
+            "SourceRow": "src_line_0012",
+            "TextAtom": "about_1415_when_the_device_was_in_room_7_the_guard_arm_released_and_the_status_changed_to_open",
+            "NumericToken": "v_1415",
+        }
+    ]
+
+
 def test_source_record_packet_metadata_surfaces_sample_result_notes_without_fixture_terms() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -5421,7 +5455,7 @@ def test_award_cap_quantity_hint_routes_total_exceedance_questions() -> None:
 
 
 def test_source_text_question_hints_prioritize_source_stated_unigrams() -> None:
-    inventory = {"signatures": ["source_record_text_atom/2"]}
+    inventory = {"signatures": ["source_record_text_atom/2", "source_record_numeric_token/2"]}
 
     flag_hints = _source_text_question_token_hint_queries(
         utterance="Which applicant was initially flagged as ineligible by the Grants Administrator?",
@@ -5483,6 +5517,16 @@ def test_source_text_question_hints_prioritize_source_stated_unigrams() -> None:
         kb_inventory=inventory,
     )
     assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("final", TextAtom).' in final_rule_hints
+
+    timed_event_hints = _source_text_question_token_hint_queries(
+        utterance="At what time did the guard arm release?",
+        kb_inventory=inventory,
+    )
+    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("released", TextAtom).' in timed_event_hints
+    assert (
+        'source_record_text_atom(SourceRow, TextAtom), memberchk("released", TextAtom), '
+        "source_record_numeric_token(SourceRow, NumericToken)."
+    ) in timed_event_hints
 
 
 def test_source_section_question_key_hint_routes_sold_at_section_text() -> None:

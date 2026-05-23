@@ -248,15 +248,32 @@ runtime load errors: 0
 QA write proposal rows: 0
 ```
 
+Follow-up transfer probe:
+
+```text
+single approximate-time row replay: 1 exact / 0 partial / 0 miss
+four-fixture real-world guard before query-surface tightening: 159 exact / 0 partial / 1 miss
+affected 40-row fixture replay after query-surface tightening: 40 exact / 0 partial / 0 miss
+composite retained real-world read: 160 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+artifact archive: C:\prethinker_tmp_archive\product_95_event_time_query_surface_20260523
+```
+
+The first full guard showed the same approximate-time row could still miss
+under planner variance: source text contained the answer, but the plan did not
+bind the filtered source row to its numeric tokens. The follow-up repair added a
+generic temporal source-text hint that, for real time/date questions, joins a
+filtered `source_record_text_atom/2` row to `source_record_numeric_token/2`.
+This is query routing over admitted source-record rows, not a new fact or
+compatibility adapter.
+
 ## Next Moves
 
-1. Run a focused real-world row replay for the approximate-time miss against the
-   current selected compile to see whether the new QA companion is enough, or
-   whether a recompile is needed to produce a direct event-time carrier.
-2. If the row still misses, run a compile-only probe on the same real-world
-   document and check whether profile delivery now admits a direct event-time
-   row.
-3. Re-run the small rejected-filter replay set if we want a variance check on
-   the bounded source-text fallback.
-4. Move to hybrid-join partials after the event/date/time source carrier is
+1. Re-run the small rejected-filter replay set if we want a variance check on
+   the bounded source-text fallback and temporal source-token routing.
+2. Move to hybrid-join partials after the event/date/time source carrier is
    scoped.
+3. Hold compile-only event-time probing unless a later row shows the query
+   surface still cannot use admitted source-record text/numeric rows.
