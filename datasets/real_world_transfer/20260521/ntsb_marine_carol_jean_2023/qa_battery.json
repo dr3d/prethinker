@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "What is the NTSB report identifier for this investigation?",
+    "reference_answer": "MIR-23-24",
+    "source_id": "ntsb_marine_carol_jean_2023:q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "On what date did the Carol Jean flood and sink?",
+    "reference_answer": "March 21, 2023",
+    "source_id": "ntsb_marine_carol_jean_2023:q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q003",
+    "question": "At what time (eastern daylight time) did the Carol Jean's EPIRB signal activate?",
+    "reference_answer": "1903 eastern daylight time",
+    "source_id": "ntsb_marine_carol_jean_2023:q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q004",
+    "question": "How far east of Tybee Island was the Carol Jean's last reported location at the time of the EPIRB signal?",
+    "reference_answer": "About 13 miles east of Tybee Island, Georgia",
+    "source_id": "ntsb_marine_carol_jean_2023:q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q005",
+    "question": "What was the estimated property damage from the loss of the Carol Jean?",
+    "reference_answer": "$250,000 (estimated)",
+    "source_id": "ntsb_marine_carol_jean_2023:q005"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q006",
+    "question": "How many persons were on board when the vessel sank?",
+    "reference_answer": "None",
+    "source_id": "ntsb_marine_carol_jean_2023:q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q007",
+    "question": "What is the case number assigned by the NTSB to this investigation?",
+    "reference_answer": "DCA23FM021",
+    "source_id": "ntsb_marine_carol_jean_2023:q007"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q008",
+    "question": "How long was the Carol Jean, in feet?",
+    "reference_answer": "71.9 feet",
+    "source_id": "ntsb_marine_carol_jean_2023:q008"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q009",
+    "question": "In what year was the Carol Jean built?",
+    "reference_answer": "1981",
+    "source_id": "ntsb_marine_carol_jean_2023:q009"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q010",
+    "question": "What was the hull material of the Carol Jean?",
+    "reference_answer": "Wooden (wooden-hulled)",
+    "source_id": "ntsb_marine_carol_jean_2023:q010"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q011",
+    "question": "What was the rated horsepower of the Carol Jean's engine?",
+    "reference_answer": "600 hp",
+    "source_id": "ntsb_marine_carol_jean_2023:q011"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q012",
+    "question": "What manufacturer made the Carol Jean's diesel engine?",
+    "reference_answer": "Cummins",
+    "source_id": "ntsb_marine_carol_jean_2023:q012"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q013",
+    "question": "Where was the Carol Jean normally docked?",
+    "reference_answer": "Valona, Georgia",
+    "source_id": "ntsb_marine_carol_jean_2023:q013"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q014",
+    "question": "What was the name of the second vessel the captain purchased and intended to tow?",
+    "reference_answer": "Having Faith",
+    "source_id": "ntsb_marine_carol_jean_2023:q014"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q015",
+    "question": "From what city did the captain purchase the Having Faith?",
+    "reference_answer": "Port Royal, South Carolina",
+    "source_id": "ntsb_marine_carol_jean_2023:q015"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q016",
+    "question": "On what date did the captain purchase the Having Faith?",
+    "reference_answer": "March 15, 2023",
+    "source_id": "ntsb_marine_carol_jean_2023:q016"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q017",
+    "question": "How long was the rope used as the tow line, approximately?",
+    "reference_answer": "100 to 150 feet long",
+    "source_id": "ntsb_marine_carol_jean_2023:q017"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q018",
+    "question": "Where on the Having Faith did the captain find the rope used as the tow line?",
+    "reference_answer": "In a forward compartment of the Having Faith",
+    "source_id": "ntsb_marine_carol_jean_2023:q018"
+  },
+  {
+    "behavior": "",
+    "category": "attributed_statement",
+    "id": "q019",
+    "question": "According to the captain's stated reasoning, how long had the tow line been in use before he believed it had chafed and parted?",
+    "reference_answer": "5.5 hours",
+    "source_id": "ntsb_marine_carol_jean_2023:q019"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q020",
+    "question": "At what time did the Carol Jean depart with the Having Faith in tow?",
+    "reference_answer": "About 1130 on March 16",
+    "source_id": "ntsb_marine_carol_jean_2023:q020"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q021",
+    "question": "At what time did the tow line part?",
+    "reference_answer": "About 1800 on March 16",
+    "source_id": "ntsb_marine_carol_jean_2023:q021"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q022",
+    "question": "After the tow line fouled the propeller, in approximately how many feet of water did the captain drop the Carol Jean's anchor?",
+    "reference_answer": "About 17 feet",
+    "source_id": "ntsb_marine_carol_jean_2023:q022"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q023",
+    "question": "At what time did the captain's daughter contact Coast Guard Sector Charleston?",
+    "reference_answer": "2127",
+    "source_id": "ntsb_marine_carol_jean_2023:q023"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q024",
+    "question": "At what time did the Coast Guard small boat arrive on scene the night of March 16?",
+    "reference_answer": "2245",
+    "source_id": "ntsb_marine_carol_jean_2023:q024"
+  },
+  {
+    "behavior": "",
+    "category": "compositional",
+    "id": "q025",
+    "question": "Between the original anchoring and 0713 on March 17, in what direction did the Carol Jean drag?",
+    "reference_answer": "Northwest — by 0713 the Carol Jean was about 7.5 miles northwest of where it had originally anchored",
+    "source_id": "ntsb_marine_carol_jean_2023:q025"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q026",
+    "question": "At what time on March 17 did the Coast Guard helicopter arrive to rescue the captain and his friend?",
+    "reference_answer": "About 1733",
+    "source_id": "ntsb_marine_carol_jean_2023:q026"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q027",
+    "question": "From which city did the rescue helicopter launch?",
+    "reference_answer": "Savannah, Georgia",
+    "source_id": "ntsb_marine_carol_jean_2023:q027"
+  },
+  {
+    "behavior": "",
+    "category": "interpretive_supported",
+    "id": "q028",
+    "question": "How did the captain and his friend leave the Carol Jean during the helicopter rescue?",
+    "reference_answer": "They donned lifejackets, jumped into the water, and swam away from the vessel to avoid the helicopter's rescue basket tangling in the vessel's gear",
+    "source_id": "ntsb_marine_carol_jean_2023:q028"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q029",
+    "question": "On what date did the Having Faith break apart on the shoreline?",
+    "reference_answer": "March 19, 2023 (the day after the Having Faith was located aground on March 18)",
+    "source_id": "ntsb_marine_carol_jean_2023:q029"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q030",
+    "question": "At which jetty location was the Having Faith found aground?",
+    "reference_answer": "A jetty at St. Phillips Island, Georgia",
+    "source_id": "ntsb_marine_carol_jean_2023:q030"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q031",
+    "question": "What component on the Carol Jean did the captain discover had been damaged after the diver removed the tow line on March 19?",
+    "reference_answer": "The engine clutch",
+    "source_id": "ntsb_marine_carol_jean_2023:q031"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q032",
+    "question": "What did the captain take to a local repair shop on March 19?",
+    "reference_answer": "The removed engine clutch",
+    "source_id": "ntsb_marine_carol_jean_2023:q032"
+  },
+  {
+    "behavior": "",
+    "category": "interpretive_supported",
+    "id": "q033",
+    "question": "According to the report, what was the probable cause of the sinking?",
+    "reference_answer": "Likely flooding from an unknown source while the vessel was anchored offshore and unattended",
+    "source_id": "ntsb_marine_carol_jean_2023:q033"
+  },
+  {
+    "behavior": "",
+    "category": "interpretive_supported",
+    "id": "q034",
+    "question": "According to the report, what contributing factor was identified?",
+    "reference_answer": "The captain's inadequate planning for a tow, leading to the Carol Jean being anchored after the tow line failed and fouled its propeller",
+    "source_id": "ntsb_marine_carol_jean_2023:q034"
+  },
+  {
+    "behavior": "",
+    "category": "state_lifecycle",
+    "id": "q035",
+    "question": "When was the Carol Jean's last Coast Guard dockside safety examination conducted?",
+    "reference_answer": "February 2023",
+    "source_id": "ntsb_marine_carol_jean_2023:q035"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q036",
+    "question": "How many deficiencies did the Coast Guard issue for the Carol Jean at that examination?",
+    "reference_answer": "Ten",
+    "source_id": "ntsb_marine_carol_jean_2023:q036"
+  },
+  {
+    "behavior": "",
+    "category": "compositional",
+    "id": "q037",
+    "question": "According to the report, what three deficiencies did the captain still plan to correct after towing the Having Faith back?",
+    "reference_answer": "Obtaining a Federal Communications Commission license; installing guards on the generator's exposed belts; and repainting the homeport name",
+    "source_id": "ntsb_marine_carol_jean_2023:q037"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q038",
+    "question": "Under what statute are commercial fishing vessel dockside safety examinations required, according to the report?",
+    "reference_answer": "The Coast Guard Authorization Act of 2010",
+    "source_id": "ntsb_marine_carol_jean_2023:q038"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q039",
+    "question": "How frequently are dockside safety examinations required under that authority for the kind of operation the Carol Jean performed?",
+    "reference_answer": "Once every 5 years (for fishing vessels that operate 3 nautical miles beyond the baseline)",
+    "source_id": "ntsb_marine_carol_jean_2023:q039"
+  },
+  {
+    "behavior": "",
+    "category": "negative_fact",
+    "id": "q040",
+    "question": "According to the report, did the captain or his friend hold a Coast Guard-issued credential?",
+    "reference_answer": "No; neither held a Coast Guard-issued credential, and neither was required to do so",
+    "source_id": "ntsb_marine_carol_jean_2023:q040"
+  }
+]

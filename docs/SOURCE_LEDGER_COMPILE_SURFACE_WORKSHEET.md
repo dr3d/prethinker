@@ -9,6 +9,7 @@ query-only source-ledger bridges into deterministic compile-surface carriers.
 
 The anchor run is:
 
+- Fixture inputs: `datasets/real_world_transfer/20260521`
 - Compile root: `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\real_world_transfer_stamp_20260521_compile_current`
 - QA root: `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\real_world_transfer_stamp_20260521_qa_or8_after_source_bridge_v4`
 - QA result: `160 / 0 / 0`

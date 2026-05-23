@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "reference_answer": "24-056", "source_id": "cpsc_recall_polaris_rzr200_2023:q001"}
+{"category": "direct_fact", "id": "q002", "reference_answer": "December 14, 2023", "source_id": "cpsc_recall_polaris_rzr200_2023:q002"}
+{"category": "direct_fact", "id": "q003", "reference_answer": "About 19,000", "source_id": "cpsc_recall_polaris_rzr200_2023:q003"}
+{"category": "direct_fact", "id": "q004", "reference_answer": "About 950", "source_id": "cpsc_recall_polaris_rzr200_2023:q004"}
+{"category": "direct_fact", "id": "q005", "reference_answer": "The steering system can lock up while in use, posing a crash hazard and risk of serious injury to children", "source_id": "cpsc_recall_polaris_rzr200_2023:q005"}
+{"category": "direct_fact", "id": "q006", "reference_answer": "Model Year 2021-2024", "source_id": "cpsc_recall_polaris_rzr200_2023:q006"}
+{"category": "direct_fact", "id": "q007", "reference_answer": "Repair", "source_id": "cpsc_recall_polaris_rzr200_2023:q007"}
+{"category": "direct_fact", "id": "q008", "reference_answer": "The steering rack assembly", "source_id": "cpsc_recall_polaris_rzr200_2023:q008"}
+{"category": "attributed_statement", "id": "q009", "reference_answer": "32 reports", "source_id": "cpsc_recall_polaris_rzr200_2023:q009"}
+{"category": "direct_fact", "id": "q010", "reference_answer": "Two", "source_id": "cpsc_recall_polaris_rzr200_2023:q010"}
+{"category": "direct_fact", "id": "q011", "reference_answer": "Two", "source_id": "cpsc_recall_polaris_rzr200_2023:q011"}
+{"category": "direct_fact", "id": "q012", "reference_answer": "Two", "source_id": "cpsc_recall_polaris_rzr200_2023:q012"}
+{"category": "direct_fact", "id": "q013", "reference_answer": "Abrasions", "source_id": "cpsc_recall_polaris_rzr200_2023:q013"}
+{"category": "compositional", "id": "q014", "reference_answer": "Blue, gray, and white", "source_id": "cpsc_recall_polaris_rzr200_2023:q014"}
+{"category": "direct_fact", "id": "q015", "reference_answer": "On the side of the chassis", "source_id": "cpsc_recall_polaris_rzr200_2023:q015"}
+{"category": "direct_fact", "id": "q016", "reference_answer": "On a plate riveted to the upper frame rail, visible from the right rear wheel well", "source_id": "cpsc_recall_polaris_rzr200_2023:q016"}
+{"category": "direct_fact", "id": "q017", "reference_answer": "At Polaris dealers nationwide", "source_id": "cpsc_recall_polaris_rzr200_2023:q017"}
+{"category": "direct_fact", "id": "q018", "reference_answer": "Between $6,300 and $7,500", "source_id": "cpsc_recall_polaris_rzr200_2023:q018"}
+{"category": "direct_fact", "id": "q019", "reference_answer": "May 2021 through September 2023", "source_id": "cpsc_recall_polaris_rzr200_2023:q019"}
+{"category": "direct_fact", "id": "q020", "reference_answer": "Polaris Industries Inc.", "source_id": "cpsc_recall_polaris_rzr200_2023:q020"}
+{"category": "direct_fact", "id": "q021", "reference_answer": "Medina, Minnesota", "source_id": "cpsc_recall_polaris_rzr200_2023:q021"}
+{"category": "direct_fact", "id": "q022", "reference_answer": "China", "source_id": "cpsc_recall_polaris_rzr200_2023:q022"}
+{"category": "direct_fact", "id": "q023", "reference_answer": "800-765-2747", "source_id": "cpsc_recall_polaris_rzr200_2023:q023"}
+{"category": "direct_fact", "id": "q024", "reference_answer": "7 a.m. to 7 p.m. Monday through Friday", "source_id": "cpsc_recall_polaris_rzr200_2023:q024"}
+{"category": "direct_fact", "id": "q025", "reference_answer": "Central Time (CT)", "source_id": "cpsc_recall_polaris_rzr200_2023:q025"}
+{"category": "direct_fact", "id": "q026", "reference_answer": "Owner.Connections@polaris.com", "source_id": "cpsc_recall_polaris_rzr200_2023:q026"}
+{"category": "interpretive_supported", "id": "q027", "reference_answer": "The vehicle identification number (VIN) — to check if their VIN is included in any recalls", "source_id": "cpsc_recall_polaris_rzr200_2023:q027"}
+{"category": "state_lifecycle", "id": "q028", "reference_answer": "Yes; Polaris is contacting registered owners directly", "source_id": "cpsc_recall_polaris_rzr200_2023:q028"}
+{"category": "interpretive_supported", "id": "q029", "reference_answer": "Immediately stop using the recalled vehicles and contact an authorized Polaris dealer to schedule a free repair", "source_id": "cpsc_recall_polaris_rzr200_2023:q029"}
+{"category": "direct_fact", "id": "q030", "reference_answer": "POLARIS", "source_id": "cpsc_recall_polaris_rzr200_2023:q030"}
+{"category": "direct_fact", "id": "q031", "reference_answer": "POLARIS and RZR", "source_id": "cpsc_recall_polaris_rzr200_2023:q031"}
+{"category": "direct_fact", "id": "q032", "reference_answer": "The notice states the model name is 'printed on the side of the chassis'; it does not specify left or right side", "source_id": "cpsc_recall_polaris_rzr200_2023:q032"}
+{"category": "direct_fact", "id": "q033", "reference_answer": "The right rear wheel well", "source_id": "cpsc_recall_polaris_rzr200_2023:q033"}
+{"category": "direct_fact", "id": "q034", "reference_answer": "Free of charge", "source_id": "cpsc_recall_polaris_rzr200_2023:q034"}
+{"category": "direct_fact", "id": "q035", "reference_answer": "Fast Track Recall", "source_id": "cpsc_recall_polaris_rzr200_2023:q035"}
+{"category": "negative_fact", "id": "q036", "reference_answer": "No; federal law prohibits any person from selling products subject to a Commission-ordered recall or a voluntary recall undertaken in consultation with the CPSC", "source_id": "cpsc_recall_polaris_rzr200_2023:q036"}
+{"category": "direct_fact", "id": "q037", "reference_answer": "800-638-2772", "source_id": "cpsc_recall_polaris_rzr200_2023:q037"}
+{"category": "direct_fact", "id": "q038", "reference_answer": "800-638-8270", "source_id": "cpsc_recall_polaris_rzr200_2023:q038"}
+{"category": "negative_fact", "id": "q039", "reference_answer": "No; the notice says individual Commissioners 'may have' statements related to the topic and directs readers elsewhere to find them", "source_id": "cpsc_recall_polaris_rzr200_2023:q039"}
+{"category": "source_reference", "id": "q040", "reference_answer": "www.cpsc.gov/commissioners", "source_id": "cpsc_recall_polaris_rzr200_2023:q040"}

@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "reference_answer": "MIR-23-24", "source_id": "ntsb_marine_carol_jean_2023:q001"}
+{"category": "direct_fact", "id": "q002", "reference_answer": "March 21, 2023", "source_id": "ntsb_marine_carol_jean_2023:q002"}
+{"category": "direct_fact", "id": "q003", "reference_answer": "1903 eastern daylight time", "source_id": "ntsb_marine_carol_jean_2023:q003"}
+{"category": "direct_fact", "id": "q004", "reference_answer": "About 13 miles east of Tybee Island, Georgia", "source_id": "ntsb_marine_carol_jean_2023:q004"}
+{"category": "direct_fact", "id": "q005", "reference_answer": "$250,000 (estimated)", "source_id": "ntsb_marine_carol_jean_2023:q005"}
+{"category": "direct_fact", "id": "q006", "reference_answer": "None", "source_id": "ntsb_marine_carol_jean_2023:q006"}
+{"category": "direct_fact", "id": "q007", "reference_answer": "DCA23FM021", "source_id": "ntsb_marine_carol_jean_2023:q007"}
+{"category": "direct_fact", "id": "q008", "reference_answer": "71.9 feet", "source_id": "ntsb_marine_carol_jean_2023:q008"}
+{"category": "direct_fact", "id": "q009", "reference_answer": "1981", "source_id": "ntsb_marine_carol_jean_2023:q009"}
+{"category": "direct_fact", "id": "q010", "reference_answer": "Wooden (wooden-hulled)", "source_id": "ntsb_marine_carol_jean_2023:q010"}
+{"category": "direct_fact", "id": "q011", "reference_answer": "600 hp", "source_id": "ntsb_marine_carol_jean_2023:q011"}
+{"category": "direct_fact", "id": "q012", "reference_answer": "Cummins", "source_id": "ntsb_marine_carol_jean_2023:q012"}
+{"category": "direct_fact", "id": "q013", "reference_answer": "Valona, Georgia", "source_id": "ntsb_marine_carol_jean_2023:q013"}
+{"category": "direct_fact", "id": "q014", "reference_answer": "Having Faith", "source_id": "ntsb_marine_carol_jean_2023:q014"}
+{"category": "direct_fact", "id": "q015", "reference_answer": "Port Royal, South Carolina", "source_id": "ntsb_marine_carol_jean_2023:q015"}
+{"category": "direct_fact", "id": "q016", "reference_answer": "March 15, 2023", "source_id": "ntsb_marine_carol_jean_2023:q016"}
+{"category": "direct_fact", "id": "q017", "reference_answer": "100 to 150 feet long", "source_id": "ntsb_marine_carol_jean_2023:q017"}
+{"category": "direct_fact", "id": "q018", "reference_answer": "In a forward compartment of the Having Faith", "source_id": "ntsb_marine_carol_jean_2023:q018"}
+{"category": "attributed_statement", "id": "q019", "reference_answer": "5.5 hours", "source_id": "ntsb_marine_carol_jean_2023:q019"}
+{"category": "direct_fact", "id": "q020", "reference_answer": "About 1130 on March 16", "source_id": "ntsb_marine_carol_jean_2023:q020"}
+{"category": "direct_fact", "id": "q021", "reference_answer": "About 1800 on March 16", "source_id": "ntsb_marine_carol_jean_2023:q021"}
+{"category": "direct_fact", "id": "q022", "reference_answer": "About 17 feet", "source_id": "ntsb_marine_carol_jean_2023:q022"}
+{"category": "direct_fact", "id": "q023", "reference_answer": "2127", "source_id": "ntsb_marine_carol_jean_2023:q023"}
+{"category": "direct_fact", "id": "q024", "reference_answer": "2245", "source_id": "ntsb_marine_carol_jean_2023:q024"}
+{"category": "compositional", "id": "q025", "reference_answer": "Northwest — by 0713 the Carol Jean was about 7.5 miles northwest of where it had originally anchored", "source_id": "ntsb_marine_carol_jean_2023:q025"}
+{"category": "direct_fact", "id": "q026", "reference_answer": "About 1733", "source_id": "ntsb_marine_carol_jean_2023:q026"}
+{"category": "direct_fact", "id": "q027", "reference_answer": "Savannah, Georgia", "source_id": "ntsb_marine_carol_jean_2023:q027"}
+{"category": "interpretive_supported", "id": "q028", "reference_answer": "They donned lifejackets, jumped into the water, and swam away from the vessel to avoid the helicopter's rescue basket tangling in the vessel's gear", "source_id": "ntsb_marine_carol_jean_2023:q028"}
+{"category": "direct_fact", "id": "q029", "reference_answer": "March 19, 2023 (the day after the Having Faith was located aground on March 18)", "source_id": "ntsb_marine_carol_jean_2023:q029"}
+{"category": "direct_fact", "id": "q030", "reference_answer": "A jetty at St. Phillips Island, Georgia", "source_id": "ntsb_marine_carol_jean_2023:q030"}
+{"category": "direct_fact", "id": "q031", "reference_answer": "The engine clutch", "source_id": "ntsb_marine_carol_jean_2023:q031"}
+{"category": "direct_fact", "id": "q032", "reference_answer": "The removed engine clutch", "source_id": "ntsb_marine_carol_jean_2023:q032"}
+{"category": "interpretive_supported", "id": "q033", "reference_answer": "Likely flooding from an unknown source while the vessel was anchored offshore and unattended", "source_id": "ntsb_marine_carol_jean_2023:q033"}
+{"category": "interpretive_supported", "id": "q034", "reference_answer": "The captain's inadequate planning for a tow, leading to the Carol Jean being anchored after the tow line failed and fouled its propeller", "source_id": "ntsb_marine_carol_jean_2023:q034"}
+{"category": "state_lifecycle", "id": "q035", "reference_answer": "February 2023", "source_id": "ntsb_marine_carol_jean_2023:q035"}
+{"category": "direct_fact", "id": "q036", "reference_answer": "Ten", "source_id": "ntsb_marine_carol_jean_2023:q036"}
+{"category": "compositional", "id": "q037", "reference_answer": "Obtaining a Federal Communications Commission license; installing guards on the generator's exposed belts; and repainting the homeport name", "source_id": "ntsb_marine_carol_jean_2023:q037"}
+{"category": "source_reference", "id": "q038", "reference_answer": "The Coast Guard Authorization Act of 2010", "source_id": "ntsb_marine_carol_jean_2023:q038"}
+{"category": "direct_fact", "id": "q039", "reference_answer": "Once every 5 years (for fishing vessels that operate 3 nautical miles beyond the baseline)", "source_id": "ntsb_marine_carol_jean_2023:q039"}
+{"category": "negative_fact", "id": "q040", "reference_answer": "No; neither held a Coast Guard-issued credential, and neither was required to do so", "source_id": "ntsb_marine_carol_jean_2023:q040"}

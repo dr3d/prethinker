@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "On what date did Wiers Farm Inc. announce the expansion of its cucumber recall?", "source_id": "fda_recall_wiers_farm_2024:q001"}
+{"category": "direct_fact", "id": "q002", "question": "What city and state is Wiers Farm Inc. located in?", "source_id": "fda_recall_wiers_farm_2024:q002"}
+{"category": "direct_fact", "id": "q003", "question": "What pathogen is the recall a precaution against?", "source_id": "fda_recall_wiers_farm_2024:q003"}
+{"category": "direct_fact", "id": "q004", "question": "On what date did the FDA publish the expansion announcement?", "source_id": "fda_recall_wiers_farm_2024:q004"}
+{"category": "direct_fact", "id": "q005", "question": "What was the date of the original recall that this announcement is expanding?", "source_id": "fda_recall_wiers_farm_2024:q005"}
+{"category": "attributed_statement", "id": "q006", "question": "Which state agency made the original findings that prompted the investigation?", "source_id": "fda_recall_wiers_farm_2024:q006"}
+{"category": "attributed_statement", "id": "q007", "question": "Which state agency did Wiers Farm Inc. cooperate with after the initial findings were reported?", "source_id": "fda_recall_wiers_farm_2024:q007"}
+{"category": "direct_fact", "id": "q008", "question": "What range of packing dates do the products in this expanded recall cover?", "source_id": "fda_recall_wiers_farm_2024:q008"}
+{"category": "negative_fact", "id": "q009", "question": "According to the announcement, how many illnesses or consumer complaints had been reported as of the announcement date?", "source_id": "fda_recall_wiers_farm_2024:q009"}
+{"category": "direct_fact", "id": "q010", "question": "What two brand names are associated with the recalled products?", "source_id": "fda_recall_wiers_farm_2024:q010"}
+{"category": "direct_fact", "id": "q011", "question": "What is the UPC for the Wiers Farm Bagged Salad Cucumber?", "source_id": "fda_recall_wiers_farm_2024:q011"}
+{"category": "direct_fact", "id": "q012", "question": "What size is the Wiers Farm Bagged Salad Cucumber package?", "source_id": "fda_recall_wiers_farm_2024:q012"}
+{"category": "direct_fact", "id": "q013", "question": "What is the UPC for the Wiers Farm Bagged Poblano product?", "source_id": "fda_recall_wiers_farm_2024:q013"}
+{"category": "direct_fact", "id": "q014", "question": "Which retail chain in Kentucky, New York, Ohio, Pennsylvania, and West Virginia carried the Freshire Farms branded items?", "source_id": "fda_recall_wiers_farm_2024:q014"}
+{"category": "direct_fact", "id": "q015", "question": "What size bag are the Freshire Farms Bagged Jalapenos sold in?", "source_id": "fda_recall_wiers_farm_2024:q015"}
+{"category": "direct_fact", "id": "q016", "question": "Which two Ohio foodbanks received the Mixed Vegetable Box?", "source_id": "fda_recall_wiers_farm_2024:q016"}
+{"category": "compositional", "id": "q017", "question": "In which states were the retail packaged Walmart items distributed?", "source_id": "fda_recall_wiers_farm_2024:q017"}
+{"category": "compositional", "id": "q018", "question": "Name three retailers in Pennsylvania that carried bulk items.", "source_id": "fda_recall_wiers_farm_2024:q018"}
+{"category": "comparison", "id": "q019", "question": "Which states' bulk-item distribution included only Kroger?", "source_id": "fda_recall_wiers_farm_2024:q019"}
+{"category": "interpretive_supported", "id": "q020", "question": "According to the announcement, what kinds of symptoms should consumers experiencing them seek medical attention for?", "source_id": "fda_recall_wiers_farm_2024:q020"}
+{"category": "source_reference", "id": "q021", "question": "For more information about Listeria monocytogenes, which agency's website does the announcement direct consumers to?", "source_id": "fda_recall_wiers_farm_2024:q021"}
+{"category": "direct_fact", "id": "q022", "question": "What is the UPC for the Wiers Farm Organic Cucumber?", "source_id": "fda_recall_wiers_farm_2024:q022"}
+{"category": "direct_fact", "id": "q023", "question": "How is the Wiers Farm Organic Cucumber packaged (count/format)?", "source_id": "fda_recall_wiers_farm_2024:q023"}
+{"category": "compositional", "id": "q024", "question": "In Maryland, what three retailers sold the bulk items?", "source_id": "fda_recall_wiers_farm_2024:q024"}
+{"category": "comparison", "id": "q025", "question": "At Shop N Save locations, which three bulk items were sold?", "source_id": "fda_recall_wiers_farm_2024:q025"}
+{"category": "comparison", "id": "q026", "question": "Which Pennsylvania retailers sold only cucumber as a bulk item, according to the distribution table?", "source_id": "fda_recall_wiers_farm_2024:q026"}
+{"category": "direct_fact", "id": "q027", "question": "What product types are listed under Product Type in the Summary section?", "source_id": "fda_recall_wiers_farm_2024:q027"}
+{"category": "direct_fact", "id": "q028", "question": "What was the original publish date / current-as-of date listed at the bottom of the announcement?", "source_id": "fda_recall_wiers_farm_2024:q028"}
+{"category": "direct_fact", "id": "q029", "question": "According to the announcement, how long can Listeria infection symptoms last?", "source_id": "fda_recall_wiers_farm_2024:q029"}
+{"category": "negative_fact", "id": "q030", "question": "Was the recall initiated for whole cucumbers only, or did it also cover other vegetables?", "source_id": "fda_recall_wiers_farm_2024:q030"}
+{"category": "interpretive_supported", "id": "q031", "question": "What was the FDA's stated reason for posting the company's announcement?", "source_id": "fda_recall_wiers_farm_2024:q031"}
+{"category": "negative_fact", "id": "q032", "question": "According to the announcement, does the FDA endorse the product or the company?", "source_id": "fda_recall_wiers_farm_2024:q032"}
+{"category": "direct_fact", "id": "q033", "question": "Was the recall described as voluntary or mandatory?", "source_id": "fda_recall_wiers_farm_2024:q033"}
+{"category": "direct_fact", "id": "q034", "question": "How is the announcement labeled at the top — is it \"FOR IMMEDIATE RELEASE\" or \"EMBARGOED\"?", "source_id": "fda_recall_wiers_farm_2024:q034"}
+{"category": "compositional", "id": "q035", "question": "List two bulk pepper varieties included in the recall other than poblano.", "source_id": "fda_recall_wiers_farm_2024:q035"}
+{"category": "comparison", "id": "q036", "question": "Which sole bulk-item retailer is listed for Maine, Rhode Island, and North Carolina?", "source_id": "fda_recall_wiers_farm_2024:q036"}
+{"category": "direct_fact", "id": "q037", "question": "In West Virginia, the Foodland distribution covered which specific products?", "source_id": "fda_recall_wiers_farm_2024:q037"}
+{"category": "compositional", "id": "q038", "question": "How many distinct retail-packaged items sold at Walmart are listed in the announcement?", "source_id": "fda_recall_wiers_farm_2024:q038"}
+{"category": "direct_fact", "id": "q039", "question": "What organization is identified by the acronym MDARD?", "source_id": "fda_recall_wiers_farm_2024:q039"}
+{"category": "direct_fact", "id": "q040", "question": "What organization is identified by the acronym ODA?", "source_id": "fda_recall_wiers_farm_2024:q040"}

@@ -1,0 +1,40 @@
+{"category": "direct_fact", "id": "q001", "question": "What is the document number assigned by the Federal Register for this rule?", "source_id": "federal_register_flra_fsip_2024:q001"}
+{"category": "direct_fact", "id": "q002", "question": "What is the Federal Register citation (FR page reference) for this rule?", "source_id": "federal_register_flra_fsip_2024:q002"}
+{"category": "direct_fact", "id": "q003", "question": "What is the document type — proposed rule, final rule, or notice?", "source_id": "federal_register_flra_fsip_2024:q003"}
+{"category": "direct_fact", "id": "q004", "question": "On what date was this rule published in the Federal Register?", "source_id": "federal_register_flra_fsip_2024:q004"}
+{"category": "state_lifecycle", "id": "q005", "question": "On what date does the final rule become effective?", "source_id": "federal_register_flra_fsip_2024:q005"}
+{"category": "direct_fact", "id": "q006", "question": "Which sub-body of the FLRA issued this rule?", "source_id": "federal_register_flra_fsip_2024:q006"}
+{"category": "direct_fact", "id": "q007", "question": "What does the acronym FSIP stand for in this document?", "source_id": "federal_register_flra_fsip_2024:q007"}
+{"category": "direct_fact", "id": "q008", "question": "What two Code of Federal Regulations parts does the rule amend?", "source_id": "federal_register_flra_fsip_2024:q008"}
+{"category": "direct_fact", "id": "q009", "question": "How many pages does the published rule span?", "source_id": "federal_register_flra_fsip_2024:q009"}
+{"category": "direct_fact", "id": "q010", "question": "Who is named as the point of contact for further information?", "source_id": "federal_register_flra_fsip_2024:q010"}
+{"category": "direct_fact", "id": "q011", "question": "What is the contact phone number listed for the Executive Director?", "source_id": "federal_register_flra_fsip_2024:q011"}
+{"category": "direct_fact", "id": "q012", "question": "What is the contact e-mail address listed in the \"For Further Information Contact\" section?", "source_id": "federal_register_flra_fsip_2024:q012"}
+{"category": "direct_fact", "id": "q013", "question": "On what date was the proposed rule originally published in the Federal Register?", "source_id": "federal_register_flra_fsip_2024:q013"}
+{"category": "direct_fact", "id": "q014", "question": "At what Federal Register citation was the proposed rule originally published?", "source_id": "federal_register_flra_fsip_2024:q014"}
+{"category": "negative_fact", "id": "q015", "question": "How many written comments did the FLRA and FSIP receive on the proposed rule?", "source_id": "federal_register_flra_fsip_2024:q015"}
+{"category": "direct_fact", "id": "q016", "question": "What was the deadline for written comments on the proposed rule?", "source_id": "federal_register_flra_fsip_2024:q016"}
+{"category": "direct_fact", "id": "q017", "question": "How many staff did the FSIP have at the time the office-consolidation move was noted?", "source_id": "federal_register_flra_fsip_2024:q017"}
+{"category": "comparison", "id": "q018", "question": "From which floor to which floor was FSIP's office relocated within 1400 K Street NW?", "source_id": "federal_register_flra_fsip_2024:q018"}
+{"category": "interpretive_supported", "id": "q019", "question": "According to the rule, what method does FSIP wish to strongly encourage parties to use for filing permissible documents?", "source_id": "federal_register_flra_fsip_2024:q019"}
+{"category": "direct_fact", "id": "q020", "question": "How far in advance must a party schedule an appointment for in-person delivery to the FSIP?", "source_id": "federal_register_flra_fsip_2024:q020"}
+{"category": "direct_fact", "id": "q021", "question": "On what days is in-person delivery accepted, by appointment only?", "source_id": "federal_register_flra_fsip_2024:q021"}
+{"category": "direct_fact", "id": "q022", "question": "What facsimile number is listed for the FSIP office?", "source_id": "federal_register_flra_fsip_2024:q022"}
+{"category": "compositional", "id": "q023", "question": "List two methods, other than electronic filing, by which requests may be submitted to the Panel.", "source_id": "federal_register_flra_fsip_2024:q023"}
+{"category": "direct_fact", "id": "q024", "question": "What is the street address of the Office of the Executive Director, Federal Service Impasses Panel?", "source_id": "federal_register_flra_fsip_2024:q024"}
+{"category": "compositional", "id": "q025", "question": "Which five sections of the CFR did the FSIP propose to amend?", "source_id": "federal_register_flra_fsip_2024:q025"}
+{"category": "direct_fact", "id": "q026", "question": "According to the rule, when service is made by electronic or facsimile transmission, what is the date of service?", "source_id": "federal_register_flra_fsip_2024:q026"}
+{"category": "source_reference", "id": "q027", "question": "What is the statutory authority citation for Part 2471?", "source_id": "federal_register_flra_fsip_2024:q027"}
+{"category": "source_reference", "id": "q028", "question": "What is the statutory authority citation for Part 2472?", "source_id": "federal_register_flra_fsip_2024:q028"}
+{"category": "interpretive_supported", "id": "q029", "question": "According to the Regulatory Flexibility Act Certification, why does the rule not have a significant impact on a substantial number of small entities?", "source_id": "federal_register_flra_fsip_2024:q029"}
+{"category": "interpretive_supported", "id": "q030", "question": "Why is the FLRA not subject to the requirements of Executive Order 12866, according to this rule?", "source_id": "federal_register_flra_fsip_2024:q030"}
+{"category": "interpretive_supported", "id": "q031", "question": "Why is the FLRA not subject to the requirements of Executive Order 13132, according to this rule?", "source_id": "federal_register_flra_fsip_2024:q031"}
+{"category": "negative_fact", "id": "q032", "question": "According to the rule, does this final rule contain any additional information collection or recordkeeping requirements under the Paperwork Reduction Act of 1995?", "source_id": "federal_register_flra_fsip_2024:q032"}
+{"category": "compositional", "id": "q033", "question": "What three \"Subjects\" are listed for 5 CFR Parts 2471 and 2472?", "source_id": "federal_register_flra_fsip_2024:q033"}
+{"category": "direct_fact", "id": "q034", "question": "Who signed the rule as Solicitor, Federal Register Liaison?", "source_id": "federal_register_flra_fsip_2024:q034"}
+{"category": "direct_fact", "id": "q035", "question": "On what date was the rule approved (per the signature block)?", "source_id": "federal_register_flra_fsip_2024:q035"}
+{"category": "direct_fact", "id": "q036", "question": "What was the filing date stamped on the Federal Register document, as indicated in the FR Doc filing line?", "source_id": "federal_register_flra_fsip_2024:q036"}
+{"category": "negative_fact", "id": "q037", "question": "According to § 2471.2, what alternative does the rule provide if a party does not use the official form?", "source_id": "federal_register_flra_fsip_2024:q037"}
+{"category": "compositional", "id": "q038", "question": "According to § 2472.5, what two methods may be used to file requests to the Panel under that part?", "source_id": "federal_register_flra_fsip_2024:q038"}
+{"category": "direct_fact", "id": "q039", "question": "What does the rule cite as the billing code at the bottom?", "source_id": "federal_register_flra_fsip_2024:q039"}
+{"category": "source_reference", "id": "q040", "question": "According to the rule, what kinds of impasses does Part 2472 specifically address?", "source_id": "federal_register_flra_fsip_2024:q040"}

@@ -1,0 +1,89 @@
+{
+  "fixtures": [
+    {
+      "categories": {
+        "attributed_statement": 1,
+        "compositional": 1,
+        "direct_fact": 32,
+        "interpretive_supported": 2,
+        "negative_fact": 2,
+        "source_reference": 1,
+        "state_lifecycle": 1
+      },
+      "fixture": "cpsc_recall_polaris_rzr200_2023",
+      "oracle_jsonl": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\cpsc_recall_polaris_rzr200_2023\\oracle.jsonl",
+      "path": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\cpsc_recall_polaris_rzr200_2023",
+      "qa_file": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\cpsc_recall_polaris_rzr200_2023\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\cpsc_recall_polaris_rzr200_2023\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "attributed_statement": 2,
+        "comparison": 4,
+        "compositional": 5,
+        "direct_fact": 23,
+        "interpretive_supported": 2,
+        "negative_fact": 3,
+        "source_reference": 1
+      },
+      "fixture": "fda_recall_wiers_farm_2024",
+      "oracle_jsonl": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\fda_recall_wiers_farm_2024\\oracle.jsonl",
+      "path": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\fda_recall_wiers_farm_2024",
+      "qa_file": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\fda_recall_wiers_farm_2024\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\fda_recall_wiers_farm_2024\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "comparison": 1,
+        "compositional": 4,
+        "direct_fact": 24,
+        "interpretive_supported": 4,
+        "negative_fact": 3,
+        "source_reference": 3,
+        "state_lifecycle": 1
+      },
+      "fixture": "federal_register_flra_fsip_2024",
+      "oracle_jsonl": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\federal_register_flra_fsip_2024\\oracle.jsonl",
+      "path": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\federal_register_flra_fsip_2024",
+      "qa_file": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\federal_register_flra_fsip_2024\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\federal_register_flra_fsip_2024\\source.md",
+      "status": "staged"
+    },
+    {
+      "categories": {
+        "attributed_statement": 1,
+        "compositional": 2,
+        "direct_fact": 31,
+        "interpretive_supported": 3,
+        "negative_fact": 1,
+        "source_reference": 1,
+        "state_lifecycle": 1
+      },
+      "fixture": "ntsb_marine_carol_jean_2023",
+      "oracle_jsonl": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\ntsb_marine_carol_jean_2023\\oracle.jsonl",
+      "path": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\ntsb_marine_carol_jean_2023",
+      "qa_file": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\ntsb_marine_carol_jean_2023\\qa.md",
+      "qa_rows": 40,
+      "source": "tmp\\unseen_real_document_fixture_batch_20260521_cleaned_staged\\ntsb_marine_carol_jean_2023\\source.md",
+      "status": "staged"
+    }
+  ],
+  "generated_at": "2026-05-21T15:14:20+00:00",
+  "policy": [
+    "Copies source and notes as authored.",
+    "Writes qa.md with questions only.",
+    "Writes oracle.jsonl with reference answers for after-the-fact scoring.",
+    "Does not interpret source prose or answers."
+  ],
+  "schema_version": "incoming_fixture_stage_manifest_v1",
+  "summary": {
+    "failed_fixture_count": 0,
+    "fixture_count": 4,
+    "staged_fixture_count": 4
+  }
+}

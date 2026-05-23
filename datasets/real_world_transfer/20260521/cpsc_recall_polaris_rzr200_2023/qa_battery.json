@@ -1,0 +1,322 @@
+[
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q001",
+    "question": "What is the CPSC recall number assigned to this action?",
+    "reference_answer": "24-056",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q001"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q002",
+    "question": "On what date was the recall announced?",
+    "reference_answer": "December 14, 2023",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q002"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q003",
+    "question": "What is the approximate number of units affected in the United States?",
+    "reference_answer": "About 19,000",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q003"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q004",
+    "question": "In addition to the U.S. units, approximately how many units were sold in Canada?",
+    "reference_answer": "About 950",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q004"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q005",
+    "question": "What is the hazard described in the recall?",
+    "reference_answer": "The steering system can lock up while in use, posing a crash hazard and risk of serious injury to children",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q005"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q006",
+    "question": "What model years of the RZR 200 are included in the recall?",
+    "reference_answer": "Model Year 2021-2024",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q006"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q007",
+    "question": "What is the listed remedy for affected vehicles?",
+    "reference_answer": "Repair",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q007"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q008",
+    "question": "What component of the vehicle is to be replaced under the repair remedy?",
+    "reference_answer": "The steering rack assembly",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q008"
+  },
+  {
+    "behavior": "",
+    "category": "attributed_statement",
+    "id": "q009",
+    "question": "How many reports of the steering system locking has Polaris received, according to the notice?",
+    "reference_answer": "32 reports",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q009"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q010",
+    "question": "How many reports of crashes were among the reported incidents?",
+    "reference_answer": "Two",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q010"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q011",
+    "question": "How many reports of rollover or tip-over were among the reported incidents?",
+    "reference_answer": "Two",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q011"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q012",
+    "question": "How many injuries resulted from the reported incidents?",
+    "reference_answer": "Two",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q012"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q013",
+    "question": "What type of injury was reported?",
+    "reference_answer": "Abrasions",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q013"
+  },
+  {
+    "behavior": "",
+    "category": "compositional",
+    "id": "q014",
+    "question": "In what color options were the recalled vehicles sold?",
+    "reference_answer": "Blue, gray, and white",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q014"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q015",
+    "question": "Where on the recalled vehicle is the model name printed (excluding the grille)?",
+    "reference_answer": "On the side of the chassis",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q015"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q016",
+    "question": "Where is the VIN stamped on the recalled vehicle?",
+    "reference_answer": "On a plate riveted to the upper frame rail, visible from the right rear wheel well",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q016"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q017",
+    "question": "Where (broadly) were the recalled vehicles sold?",
+    "reference_answer": "At Polaris dealers nationwide",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q017"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q018",
+    "question": "What price range did the vehicles sell for?",
+    "reference_answer": "Between $6,300 and $7,500",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q018"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q019",
+    "question": "Over what period were the vehicles sold?",
+    "reference_answer": "May 2021 through September 2023",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q019"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q020",
+    "question": "Who is identified as the importer?",
+    "reference_answer": "Polaris Industries Inc.",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q020"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q021",
+    "question": "In what city and state is Polaris Industries Inc. located?",
+    "reference_answer": "Medina, Minnesota",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q021"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q022",
+    "question": "Where were the recalled vehicles manufactured?",
+    "reference_answer": "China",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q022"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q023",
+    "question": "What phone number is provided for the consumer to contact Polaris?",
+    "reference_answer": "800-765-2747",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q023"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q024",
+    "question": "During what hours and on which days is Polaris' phone line available?",
+    "reference_answer": "7 a.m. to 7 p.m. Monday through Friday",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q024"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q025",
+    "question": "In which time zone are Polaris' phone hours given?",
+    "reference_answer": "Central Time (CT)",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q025"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q026",
+    "question": "What is the e-mail address for Polaris' owner connections team?",
+    "reference_answer": "Owner.Connections@polaris.com",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q026"
+  },
+  {
+    "behavior": "",
+    "category": "interpretive_supported",
+    "id": "q027",
+    "question": "To verify if a vehicle is part of the recall, what specifically should the consumer check?",
+    "reference_answer": "The vehicle identification number (VIN) — to check if their VIN is included in any recalls",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q027"
+  },
+  {
+    "behavior": "",
+    "category": "state_lifecycle",
+    "id": "q028",
+    "question": "Has Polaris contacted registered owners directly, according to the notice?",
+    "reference_answer": "Yes; Polaris is contacting registered owners directly",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q028"
+  },
+  {
+    "behavior": "",
+    "category": "interpretive_supported",
+    "id": "q029",
+    "question": "According to the consumer remedy text, what should consumers do immediately?",
+    "reference_answer": "Immediately stop using the recalled vehicles and contact an authorized Polaris dealer to schedule a free repair",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q029"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q030",
+    "question": "What is the front grille of the vehicle stamped with?",
+    "reference_answer": "POLARIS",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q030"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q031",
+    "question": "What two markings are printed on the sides of the recalled vehicles?",
+    "reference_answer": "POLARIS and RZR",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q031"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q032",
+    "question": "On which side of the chassis is the model name printed?",
+    "reference_answer": "The notice states the model name is 'printed on the side of the chassis'; it does not specify left or right side",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q032"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q033",
+    "question": "Which side of the vehicle's wheel well shows the VIN plate?",
+    "reference_answer": "The right rear wheel well",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q033"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q034",
+    "question": "Was the repair offered free of charge or for a fee?",
+    "reference_answer": "Free of charge",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q034"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q035",
+    "question": "What kind of recall is this (e.g., Class I, Fast Track, etc.) per the notice?",
+    "reference_answer": "Fast Track Recall",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q035"
+  },
+  {
+    "behavior": "",
+    "category": "negative_fact",
+    "id": "q036",
+    "question": "According to the notice, does federal law allow continued sale of products subject to a recall?",
+    "reference_answer": "No; federal law prohibits any person from selling products subject to a Commission-ordered recall or a voluntary recall undertaken in consultation with the CPSC",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q036"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q037",
+    "question": "What CPSC hotline phone number is listed for lifesaving information?",
+    "reference_answer": "800-638-2772",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q037"
+  },
+  {
+    "behavior": "",
+    "category": "direct_fact",
+    "id": "q038",
+    "question": "What is the CPSC TTY phone number?",
+    "reference_answer": "800-638-8270",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q038"
+  },
+  {
+    "behavior": "",
+    "category": "negative_fact",
+    "id": "q039",
+    "question": "According to the notice, do individual Commissioners' statements appear within this recall document itself?",
+    "reference_answer": "No; the notice says individual Commissioners 'may have' statements related to the topic and directs readers elsewhere to find them",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q039"
+  },
+  {
+    "behavior": "",
+    "category": "source_reference",
+    "id": "q040",
+    "question": "Where does the notice direct consumers to find statements from individual Commissioners?",
+    "reference_answer": "www.cpsc.gov/commissioners",
+    "source_id": "cpsc_recall_polaris_rzr200_2023:q040"
+  }
+]

@@ -66,6 +66,10 @@ sealed unseen authored transfer: 152 / 1 / 6 over 160 rows, 95.0% exact
 earlier cold transfer baseline: 177 / 10 / 53 over 240 rows, 73.75% exact
 ```
 
+The durable real-world fixture inputs live at
+`datasets/real_world_transfer/20260521`. They are transfer evidence, not part
+of the native `datasets/story_worlds` baseline.
+
 The current full-suite verification is:
 
 ```text
