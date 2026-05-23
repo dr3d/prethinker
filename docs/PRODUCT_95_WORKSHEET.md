@@ -269,11 +269,26 @@ filtered `source_record_text_atom/2` row to `source_record_numeric_token/2`.
 This is query routing over admitted source-record rows, not a new fact or
 compatibility adapter.
 
+Rejected-filter variance replay:
+
+```text
+target rows: 9
+result: 9 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+artifact archive: C:\prethinker_tmp_archive\product_95_rejected_filter_replay_after_event_time_20260523
+```
+
+Read: the earlier rejected-filter gains held under current QA, and the
+remaining row from that slice now resolves exactly through the bounded
+source-field/source-text fallback. The two rows that had previously moved only
+to partial also resolved exactly in this replay. This remains a targeted
+variance check over frozen native compiles, not a native stamp.
+
 ## Next Moves
 
-1. Re-run the small rejected-filter replay set if we want a variance check on
-   the bounded source-text fallback and temporal source-token routing.
-2. Move to hybrid-join partials after the event/date/time source carrier is
+1. Move to hybrid-join partials after the event/date/time source carrier is
    scoped.
-3. Hold compile-only event-time probing unless a later row shows the query
+2. Hold compile-only event-time probing unless a later row shows the query
    surface still cannot use admitted source-record text/numeric rows.
