@@ -1,0 +1,40 @@
+{
+  "fixtures": [
+    {
+      "categories": {
+        "actor_attribution": 4,
+        "causal_chain": 4,
+        "contradiction": 1,
+        "direct_lookup": 8,
+        "environmental": 1,
+        "rule_application": 1,
+        "source_credibility": 1,
+        "timeline": 5
+      },
+      "fixture": "ntsb_aviation_001",
+      "oracle_jsonl": "datasets\\real_world_transfer\\20260523\\ntsb_aviation_001\\oracle.jsonl",
+      "path": "datasets\\real_world_transfer\\20260523\\ntsb_aviation_001",
+      "qa_file": "datasets\\real_world_transfer\\20260523\\ntsb_aviation_001\\qa.md",
+      "qa_rows": 25,
+      "source": "datasets\\real_world_transfer\\20260523\\ntsb_aviation_001\\source.md",
+      "status": "staged_rough_pilot"
+    }
+  ],
+  "generated_at": "2026-05-23T00:00:00-04:00",
+  "intake_caveats": [
+    "Incoming manifest referenced a second template-only document that was not present as a usable fixture.",
+    "Source extraction contains encoding artifacts preserved as received."
+  ],
+  "policy": [
+    "Copies source and notes as authored where possible.",
+    "Writes qa.md with questions only.",
+    "Writes oracle.jsonl with reference answers for after-the-fact scoring.",
+    "Does not interpret source prose or answers."
+  ],
+  "schema_version": "incoming_fixture_stage_manifest_v1",
+  "summary": {
+    "failed_fixture_count": 0,
+    "fixture_count": 1,
+    "staged_fixture_count": 1
+  }
+}

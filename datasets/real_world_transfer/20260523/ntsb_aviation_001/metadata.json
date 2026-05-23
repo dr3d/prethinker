@@ -1,0 +1,44 @@
+{
+  "id": "ntsb_aviation_001",
+  "domain": "ntsb",
+  "report_type": "Aviation Investigation Final Report",
+  "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/195085/pdf",
+  "retrieved_at": "2026-05-23T14:32:00Z",
+  "document_date": "2024-08-30",
+  "published_date": "2025-04-22",
+  "title": "Aviation Investigation Final Report - WPR24LA299 Colusa, California",
+  "accident_number": "WPR24LA299",
+  "location": "Colusa, California",
+  "aircraft_type": "Williams Helicopter Corp UH-1H",
+  "registration": "N710WD",
+  "defining_event": "Loss of control in flight (collective bounce)",
+  "injuries": "1 Serious",
+  "flight_operation": "Part 137 (Agricultural)",
+  "source_format": "pdf",
+  "pages_original": 5,
+  "word_count": 2100,
+  "known_caveats": [
+    "Tables reformatted to markdown for readability",
+    "Original PDF hyperlinks converted to markdown format",
+    "Some spacing and formatting approximated from PDF extraction",
+    "Acronyms used without full expansion per original document (AAIP, VMC, KOVE, etc.)",
+    "Technical references to CFR sections and FAA regulations preserved verbatim"
+  ],
+  "accessibility_notes": "Fully extracted and converted to markdown. All structured tables, lists, and factual data accessible. No OCR artifacts.",
+  "qa_difficulty_mix": {
+    "easy": 8,
+    "medium": 12,
+    "hard": 5,
+    "total": 25
+  },
+  "pressure_points": [
+    "Dense structured data (tables with pilot/aircraft specs) mixed with narrative prose",
+    "Causal reasoning chain (pilot error → collective bounce → loss of control → crash)",
+    "Source credibility and limitations (NTSB did not travel to scene, operator's report vs NTSB findings)",
+    "Multiple timeline references and date inference (departure time, medical exam date, last inspection, accident time)",
+    "Regulatory knowledge (Part 137 operations, FAA certification, airworthiness requirements)",
+    "Contradiction: operator claim ('no preaccident malfunctions') vs NTSB finding (pilot failure to set friction)"
+  ],
+  "investigation_docket": "https://data.ntsb.gov/Docket?ProjectID=195085",
+  "investigation_class": "Class 4 (the NTSB did not travel to the scene)"
+}

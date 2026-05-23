@@ -13,6 +13,9 @@ baseline.
 - `20260521`: four externally sourced real-world fixtures promoted from the
   archived tmp package
   `C:\prethinker_tmp_archive\tmp_lean_markdown_docs_cleanup_20260522\unseen_real_document_fixture_batch_20260521_cleaned_staged`.
+- `20260523`: one rough NTSB aviation pilot fixture promoted from an incoming
+  tmp package. This is useful for harness shakedown, but it is not a polished
+  transfer thermometer batch.
 
 ## Harness Use
 

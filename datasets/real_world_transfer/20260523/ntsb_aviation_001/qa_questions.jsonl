@@ -1,0 +1,25 @@
+{"category": "direct_lookup", "id": "q001", "question": "What is the NTSB accident number for this investigation?", "source_id": "ntsb_aviation_001:q001"}
+{"category": "direct_lookup", "id": "q002", "question": "In what city and state did this accident occur?", "source_id": "ntsb_aviation_001:q002"}
+{"category": "direct_lookup", "id": "q003", "question": "What is the aircraft registration (tail number)?", "source_id": "ntsb_aviation_001:q003"}
+{"category": "direct_lookup", "id": "q004", "question": "Who was the Investigator In Charge?", "source_id": "ntsb_aviation_001:q004"}
+{"category": "direct_lookup", "id": "q005", "question": "What type of flight operation was this aircraft conducting?", "source_id": "ntsb_aviation_001:q005"}
+{"category": "direct_lookup", "id": "q006", "question": "How many people were injured, and what was the severity?", "source_id": "ntsb_aviation_001:q006"}
+{"category": "direct_lookup", "id": "q007", "question": "What is the aircraft serial number?", "source_id": "ntsb_aviation_001:q007"}
+{"category": "direct_lookup", "id": "q008", "question": "What was the aircraft's maximum gross weight?", "source_id": "ntsb_aviation_001:q008"}
+{"category": "timeline", "id": "q009", "question": "On what date and at what local time did the accident occur?", "source_id": "ntsb_aviation_001:q009"}
+{"category": "timeline", "id": "q010", "question": "How much total flight time did the pilot have in this specific aircraft type before the accident?", "source_id": "ntsb_aviation_001:q010"}
+{"category": "timeline", "id": "q011", "question": "What was the date of the pilot's most recent medical certificate examination?", "source_id": "ntsb_aviation_001:q011"}
+{"category": "timeline", "id": "q012", "question": "How long had it been since the pilot's last flight review?", "source_id": "ntsb_aviation_001:q012"}
+{"category": "timeline", "id": "q013", "question": "What was the departure time of the accident flight, and what was its destination?", "source_id": "ntsb_aviation_001:q013"}
+{"category": "actor_attribution", "id": "q014", "question": "What was the pilot's age and commercial rating level?", "source_id": "ntsb_aviation_001:q014"}
+{"category": "actor_attribution", "id": "q015", "question": "Who was the registered owner and operator of the aircraft?", "source_id": "ntsb_aviation_001:q015"}
+{"category": "actor_attribution", "id": "q016", "question": "What was the pilot's seating position, and was a second pilot present?", "source_id": "ntsb_aviation_001:q016"}
+{"category": "actor_attribution", "id": "q017", "question": "Name the FAA participating person listed in the investigation.", "source_id": "ntsb_aviation_001:q017"}
+{"category": "causal_chain", "id": "q018", "question": "According to the NTSB, what was the probable cause of the accident?", "source_id": "ntsb_aviation_001:q018"}
+{"category": "causal_chain", "id": "q019", "question": "What specific phenomenon does the aircraft's operator's manual describe regarding the collective control system?", "source_id": "ntsb_aviation_001:q019"}
+{"category": "causal_chain", "id": "q020", "question": "What is the threshold (in pounds) for absolute friction that prevents collective bounce according to the operator's manual?", "source_id": "ntsb_aviation_001:q020"}
+{"category": "causal_chain", "id": "q021", "question": "What two personnel issues were identified as findings in the accident investigation?", "source_id": "ntsb_aviation_001:q021"}
+{"category": "contradiction", "id": "q022", "question": "The operator reported one finding about preaccident conditions. What did the operator claim, and how did the NTSB's probable cause finding differ?", "source_id": "ntsb_aviation_001:q022"}
+{"category": "source_credibility", "id": "q023", "question": "The investigation summary includes a note about the NTSB's presence at the scene. What does this note say, and what is the investigation class?", "source_id": "ntsb_aviation_001:q023"}
+{"category": "environmental", "id": "q024", "question": "What were the meteorological conditions at the time of the accident (cloud, visibility, wind, temperature)?", "source_id": "ntsb_aviation_001:q024"}
+{"category": "rule_application", "id": "q025", "question": "According to the operator's manual quoted in the report, what action should a pilot take to prevent collective bounce in all flight conditions?", "source_id": "ntsb_aviation_001:q025"}

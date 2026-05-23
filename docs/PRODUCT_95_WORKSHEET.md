@@ -405,3 +405,46 @@ clean QA support layer and keep compatibility rows at zero.
    targeted replay as a corpus score.
 3. Hold compile-only event-time probing unless a later row shows the query
    surface still cannot use admitted source-record text/numeric rows.
+
+## Rough NTSB Pilot Shakedown
+
+The rough incoming NTSB pilot was normalized into
+`datasets/real_world_transfer/20260523/ntsb_aviation_001` and the original
+public PDF was fetched from the source URL. The package only contained one
+usable document despite describing a two-document pilot, so this is a shakedown
+fixture, not a clean transfer thermometer batch.
+
+Compile:
+
+```text
+OpenRouter qwen/qwen3.6-35b-a3b, 1 lane
+1 / 1 fixtures parsed
+36 candidate predicates
+81 compile admitted / 0 skipped
+quality gate: hold
+gate reason: source-claim/source-authority delivery
+```
+
+QA initially exposed source-record routing misses: answer-bearing rows were
+present in the compiled KB as later `source_record_section` and
+`source_record_label` surfaces, but the query hints only saw capped examples.
+The repair now carries full source-record section and label header inventories
+from `compiled_kb_inventory()` and uses those inventories for question-driven
+source-coordinate hints.
+
+Verification:
+
+```text
+source-record inventory hint tests: 18 passed
+final rough NTSB pilot QA: 25 exact / 0 partial / 0 miss
+compatibility rows: 0
+runtime load errors: 0
+QA write proposal rows: 0
+full pytest: 1620 passed, 2 subtests passed
+artifact archive: C:\prethinker_tmp_archive\ntsb_pilot_shakedown_20260523
+```
+
+Read: the pilot was messy enough to find a real product-facing weakness without
+requiring a new compile policy. The compile gate hold remains a separate signal;
+the QA path is operationally clean on this one rough document after the
+source-record routing repair.

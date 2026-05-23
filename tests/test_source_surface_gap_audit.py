@@ -5,6 +5,8 @@ from scripts.audit_source_surface_gaps import audit_scorecard
 from scripts.run_domain_bootstrap_qa import (
     compiled_kb_inventory,
     _source_field_question_key_hint_queries,
+    _source_label_question_key_hint_queries,
+    _source_section_question_key_hint_queries,
     _source_text_question_token_hint_queries,
     run_query_plan,
 )
@@ -73,6 +75,62 @@ def test_source_field_question_key_hints_use_all_inventory_headers_beyond_exampl
     )
 
     assert "source_record_field(SourceRow, vendor, Value)." in queries
+
+
+def test_source_section_question_key_hints_use_all_inventory_headers_beyond_examples() -> None:
+    facts = [
+        f"source_record_section(src_line_{index:04d}, filler_{index})."
+        for index in range(12)
+    ]
+    facts.append("source_record_section(src_line_9999, flight_time).")
+    facts.append("source_record_text_atom(src_line_9999, total_this_make_and_model_22_hours).")
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+
+    queries = _source_section_question_key_hint_queries(
+        utterance="How much total flight time did the pilot have in this specific aircraft type?",
+        kb_inventory=inventory,
+    )
+
+    assert "source_record_section(SourceRow, flight_time), source_record_text_atom(SourceRow, TextAtom)." in queries
+
+
+def test_source_label_question_key_hints_use_all_inventory_headers_beyond_examples() -> None:
+    facts = [
+        f"source_record_label(src_line_{index:04d}, filler_{index})."
+        for index in range(12)
+    ]
+    facts.append("source_record_label(src_line_9999, additional_participating_persons).")
+    facts.append(
+        "source_record_text_atom(src_line_9999, additional_participating_persons_brook_stewart_federal_aviation_administration_sacramento_ca)."
+    )
+    inventory = compiled_kb_inventory(facts=facts, rules=[])
+
+    queries = _source_label_question_key_hint_queries(
+        utterance="Name the FAA participating person listed in the investigation.",
+        kb_inventory=inventory,
+    )
+
+    assert (
+        "source_record_label(SourceRow, additional_participating_persons), "
+        "source_record_text_atom(SourceRow, TextAtom)."
+    ) in queries
+
+
+def test_source_label_question_key_hints_keep_date_time_label_tokens() -> None:
+    inventory = compiled_kb_inventory(
+        facts=[
+            "source_record_label(src_line_0007, date_time).",
+            "source_record_text_atom(src_line_0007, date_time_august_30_2024_07_05_local).",
+        ],
+        rules=[],
+    )
+
+    queries = _source_label_question_key_hint_queries(
+        utterance="On what date and at what local time did the accident occur?",
+        kb_inventory=inventory,
+    )
+
+    assert "source_record_label(SourceRow, date_time), source_record_text_atom(SourceRow, TextAtom)." in queries
 
 
 def test_run_query_plan_filters_source_text_memberchk_queries() -> None:

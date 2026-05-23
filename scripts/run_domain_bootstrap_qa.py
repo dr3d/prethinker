@@ -960,6 +960,8 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
     counts: dict[str, int] = {}
     examples: dict[str, list[str]] = {}
     source_record_field_headers: list[str] = []
+    source_record_label_headers: list[str] = []
+    source_record_section_headers: list[str] = []
     for clause in [*facts, *rules]:
         signature = clause_signature(clause)
         if not signature:
@@ -974,12 +976,26 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
                 predicate, args = parsed
                 if predicate == "source_record_field" and len(args) >= 3 and not _is_prolog_variable(args[1]):
                     source_record_field_headers.append(args[1])
+        if signature == "source_record_label/2":
+            parsed = parse_prolog_query(str(clause))
+            if parsed is not None:
+                predicate, args = parsed
+                if predicate == "source_record_label" and len(args) >= 2 and not _is_prolog_variable(args[1]):
+                    source_record_label_headers.append(args[1])
+        if signature == "source_record_section/2":
+            parsed = parse_prolog_query(str(clause))
+            if parsed is not None:
+                predicate, args = parsed
+                if predicate == "source_record_section" and len(args) >= 2 and not _is_prolog_variable(args[1]):
+                    source_record_section_headers.append(args[1])
     signatures = sorted(counts, key=lambda item: (-counts[item], item))
     return {
         "signatures": signatures,
         "counts": counts,
         "examples": {signature: examples.get(signature, []) for signature in signatures[:80]},
         "source_record_field_headers": _ordered_atom_unique(source_record_field_headers),
+        "source_record_label_headers": _ordered_atom_unique(source_record_label_headers),
+        "source_record_section_headers": _ordered_atom_unique(source_record_section_headers),
         "query_templates": [query_template_for_signature(signature) for signature in signatures],
         "surface_alias_inventory": compiled_surface_alias_inventory(signatures),
     }
@@ -1825,6 +1841,7 @@ def run_one_question(
             *_source_column_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_text_question_token_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_section_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
+            *_source_label_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_record_compile_surface_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_current_state_source_text_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
             *_source_field_question_key_hint_queries(utterance=utterance, kb_inventory=kb_inventory),
@@ -2521,7 +2538,62 @@ def _source_section_question_key_hint_queries(
     return _ordered_query_unique([query for _score, query in scored])[:6]
 
 
+def _source_label_question_key_hint_queries(
+    *,
+    utterance: str,
+    kb_inventory: dict[str, Any],
+) -> list[str]:
+    """Join source-record labels to row text when a question names the label surface."""
+
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "source_record_label/2" not in signatures or "source_record_text_atom/2" not in signatures:
+        return []
+    question_tokens = {
+        _singular_hint_token(token)
+        for token in _source_record_hint_tokens(utterance)
+        if len(token) >= 3 and token not in {"the", "and", "for", "which", "what", "where", "when", "how"}
+    }
+    if not question_tokens:
+        return []
+    scored: list[tuple[int, str]] = []
+    for label in _source_record_label_headers(kb_inventory):
+        label_tokens = {
+            _singular_hint_token(token)
+            for token in _source_record_hint_tokens(label)
+            if len(token) >= 3 and token not in {"the", "and", "for"}
+        }
+        if not label_tokens or not (label_tokens & question_tokens):
+            continue
+        overlap = label_tokens & question_tokens
+        score = len(overlap)
+        if label_tokens <= question_tokens or question_tokens <= label_tokens:
+            score += 3
+        if any(token in overlap for token in {"date", "time", "destination", "person", "participant", "participating"}):
+            score += 4
+        scored.append((score, f"source_record_label(SourceRow, {label}), source_record_text_atom(SourceRow, TextAtom)."))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+    return _ordered_query_unique([query for _score, query in scored])[:8]
+
+
+def _singular_hint_token(token: str) -> str:
+    text = str(token or "").strip().casefold()
+    if len(text) > 4 and text.endswith("ies"):
+        return f"{text[:-3]}y"
+    if len(text) > 3 and text.endswith("s"):
+        return text[:-1]
+    return text
+
+
+def _source_record_hint_tokens(value: str) -> list[str]:
+    return [token for token in re.split(r"[^a-z0-9]+", str(value or "").casefold()) if token]
+
+
 def _source_record_section_headers(kb_inventory: dict[str, Any]) -> list[str]:
+    inventory_headers = kb_inventory.get("source_record_section_headers", [])
+    if isinstance(inventory_headers, list):
+        headers = [str(item).strip() for item in inventory_headers if str(item).strip()]
+        if headers:
+            return _ordered_atom_unique(headers)
     examples = kb_inventory.get("examples", {})
     if not isinstance(examples, dict):
         return []
@@ -2537,6 +2609,29 @@ def _source_record_section_headers(kb_inventory: dict[str, Any]) -> list[str]:
             if predicate == "source_record_section" and len(args) >= 2 and not _is_prolog_variable(args[1]):
                 sections.append(args[1])
     return _ordered_atom_unique(sections)
+
+
+def _source_record_label_headers(kb_inventory: dict[str, Any]) -> list[str]:
+    inventory_headers = kb_inventory.get("source_record_label_headers", [])
+    if isinstance(inventory_headers, list):
+        headers = [str(item).strip() for item in inventory_headers if str(item).strip()]
+        if headers:
+            return _ordered_atom_unique(headers)
+    examples = kb_inventory.get("examples", {})
+    if not isinstance(examples, dict):
+        return []
+    labels: list[str] = []
+    for signature, clauses in examples.items():
+        if str(signature).split("/", 1)[0] != "source_record_label" or not isinstance(clauses, list):
+            continue
+        for clause in clauses[:80]:
+            parsed = parse_prolog_query(str(clause))
+            if parsed is None:
+                continue
+            predicate, args = parsed
+            if predicate == "source_record_label" and len(args) >= 2 and not _is_prolog_variable(args[1]):
+                labels.append(args[1])
+    return _ordered_atom_unique(labels)
 
 
 def _source_record_compile_surface_hint_queries(
