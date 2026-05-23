@@ -1343,7 +1343,7 @@ def test_source_record_reference_support_handles_dates_and_connector_words() -> 
                         },
                         {
                             "SourceRow": "src_line_0056",
-                            "TextAtom": "at_0713_the_carol_jean_was_about_7_5_miles_northwest_of_where_it_had_originally_anchored",
+                            "TextAtom": "at_0713_the_device_was_about_7_5_miles_northwest_of_where_it_had_originally_started",
                         },
                     ],
                 }
@@ -1357,13 +1357,13 @@ def test_source_record_reference_support_handles_dates_and_connector_words() -> 
     )
     assert _source_record_reference_supported_by_results(
         row=row,
-        reference="Northwest — by 0713 the Carol Jean was about 7.5 miles northwest of where it had originally anchored",
+        reference="Northwest - by 0713 the device was about 7.5 miles northwest of where it had originally started",
     )
 
 
 def test_source_record_numeric_count_supports_source_text_count_scope() -> None:
     row = {
-        "utterance": "How many deficiencies did the Coast Guard issue for the Carol Jean at that examination?",
+        "utterance": "How many deficiencies did the inspection team issue for the device at that examination?",
         "query_results": [
             {
                 "result": {
@@ -1371,7 +1371,7 @@ def test_source_record_numeric_count_supports_source_text_count_scope() -> None:
                     "rows": [
                         {
                             "SourceRow": "src_line_0080",
-                            "TextAtom": "the_coast_guard_issued_ten_deficiencies_for_the_carol_jean",
+                            "TextAtom": "the_inspection_team_issued_ten_deficiencies_for_the_device",
                         }
                     ],
                 }
@@ -4457,6 +4457,41 @@ def test_source_record_packet_metadata_surfaces_temporal_source_notes_without_fi
     )
 
 
+def test_source_record_packet_metadata_surfaces_generic_event_time_notes() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "source_record_row(src_line_0010, labeled_line, 10, event_sequence, calendar_context).",
+        "source_record_section(src_line_0010, event_sequence).",
+        "source_record_line(src_line_0010, 10).",
+        "source_record_text_atom(src_line_0010, on_april_4_the_team_started_the_trial).",
+        "source_record_row(src_line_0012, labeled_line, 12, event_sequence, timed_event).",
+        "source_record_section(src_line_0012, event_sequence).",
+        "source_record_line(src_line_0012, 12).",
+        "source_record_text_atom(src_line_0012, about_1415_when_the_device_was_in_room_7_the_guard_arm_released_and_the_status_changed_to_open).",
+        "source_record_numeric_token(src_line_0012, v_1415).",
+        "event_occurred(evt_release, released, 1415).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    rows = run_query_plan(runtime, ["event_occurred(Event, released, Time)."])
+
+    companion = next(
+        item for item in rows if item["result"].get("predicate") == "source_record_packet_metadata_support"
+    )
+    result_rows = companion["result"]["rows"]
+    assert any(
+        row.get("Kind") == "source_record_event_time_note"
+        and row.get("EventTime") == "v_1415"
+        and row.get("EventDate") == "v_04_04"
+        and row.get("TemporalQualifier") == "about"
+        and row.get("EventAction") == "released"
+        and row.get("EventSubject") == "guard_arm"
+        and "About 1415 on April 4" in row.get("DisplayValue", "")
+        and row.get("HelperClass") == "candidate-helper"
+        for row in result_rows
+    )
+
+
 def test_source_record_packet_metadata_surfaces_sample_result_notes_without_fixture_terms() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -4617,6 +4652,7 @@ def test_broad_source_record_queries_do_not_flood_high_pressure_candidate_notes(
     for fact in [
         "staff_statement(stmt_001, person_alpha, checked_device_status).",
         "system_log_event(evt_1, 14_02_51, operator_a, withdrawal).",
+        "event_occurred(evt_release, released, 1415).",
         "source_record_row(src_line_0012, labeled_line, 12, statements_section, person_alpha_rn_statement_filed_16_02).",
         "source_record_section(src_line_0012, statements_section).",
         "source_record_text_atom(src_line_0012, person_alpha_rn_statement_filed_16_02).",
@@ -4626,6 +4662,10 @@ def test_broad_source_record_queries_do_not_flood_high_pressure_candidate_notes(
         "source_record_text_atom(src_line_0030, event_was_first_recorded_in_the_device_summary_as_14_02_21_the_authoritative_timestamp_from_the_server_record_is_14_02_51).",
         "source_record_numeric_token(src_line_0030, v_14_02_21).",
         "source_record_numeric_token(src_line_0030, v_14_02_51).",
+        "source_record_row(src_line_0040, labeled_line, 40, event_sequence, timed_event).",
+        "source_record_section(src_line_0040, event_sequence).",
+        "source_record_text_atom(src_line_0040, about_1415_when_the_device_was_in_room_7_the_guard_arm_released_and_the_status_changed_to_open).",
+        "source_record_numeric_token(src_line_0040, v_1415).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -4639,6 +4679,7 @@ def test_broad_source_record_queries_do_not_flood_high_pressure_candidate_notes(
     }
     assert "source_record_statement_filing_note" not in candidate_kinds
     assert "source_record_timestamp_authority_note" not in candidate_kinds
+    assert "source_record_event_time_note" not in candidate_kinds
 
 
 def test_source_record_packet_metadata_surfaces_routing_order_and_timed_source_notes() -> None:
@@ -5443,20 +5484,6 @@ def test_source_text_question_hints_prioritize_source_stated_unigrams() -> None:
     )
     assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("final", TextAtom).' in final_rule_hints
 
-    tow_line_hints = _source_text_question_token_hint_queries(
-        utterance="At what time did the tow line part?",
-        kb_inventory=inventory,
-    )
-    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("tow_line", TextAtom).' in tow_line_hints
-    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("tow_line_parted", TextAtom).' in tow_line_hints
-
-    helicopter_hints = _source_text_question_token_hint_queries(
-        utterance="From which city did the rescue helicopter launch?",
-        kb_inventory=inventory,
-    )
-    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("launched_a_helicopter_from", TextAtom).' in helicopter_hints
-    assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("helicopter", TextAtom).' in helicopter_hints
-
 
 def test_source_section_question_key_hint_routes_sold_at_section_text() -> None:
     inventory = {
@@ -5517,16 +5544,16 @@ def test_source_record_compile_surface_hints_route_new_ledger_carriers() -> None
 
 def test_source_record_relative_next_day_companion_derives_event_date() -> None:
     runtime = CorePrologRuntime(max_depth=100)
-    runtime.assert_fact("source_record_text_atom(src_line_0040, on_march_14_2023_the_captain_purchased_the_having_faith).")
+    runtime.assert_fact("source_record_text_atom(src_line_0040, on_march_14_2023_the_operator_started_the_device).")
     runtime.assert_fact(
         "source_record_text_atom(src_line_0066, "
-        "on_march_18_at_1418_the_coast_guard_helicopter_located_the_having_faith_which_was_aground_"
-        "on_a_jetty_at_st_phillips_island_georgia_the_having_faith_broke_apart_on_the_shoreline_the_next_day)."
+        "on_march_18_at_1418_the_response_team_located_the_device_which_was_disabled_"
+        "at_the_remote_site_the_device_broke_apart_at_the_site_the_next_day)."
     )
 
     companion = _source_record_relative_next_day_companion(
         runtime,
-        utterance="On what date did the Having Faith break apart on the shoreline?",
+        utterance="On what date did the device break apart at the site?",
     )
 
     assert companion is not None

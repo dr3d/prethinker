@@ -154,10 +154,11 @@ runtime load errors: 0
 QA write proposal rows: 0
 ```
 
-The single miss was `ntsb_marine_carol_jean_2023 q021`, asking when the tow
-line parted. The source text contains "about 1800," but the compiled artifact
-lacks a direct time/date fact for the tow-line-part event. This is a
-compile-surface gap, not evidence that the query-filter repair damaged transfer.
+The single miss was an externally sourced incident-report row asking for an
+approximate clock time anchored by nearby date context. The source text contains
+the time, but the compiled artifact lacks a direct event time/date fact for the
+event. This is a compile-surface gap, not evidence that the query-filter repair
+damaged transfer.
 
 Sealed unseen authored four-fixture guard:
 
@@ -172,9 +173,8 @@ runtime load errors: 0
 QA write proposal rows: 0
 ```
 
-The single miss was `civic_hearing_correction_packet q017`, asking which public
-objector resides at the property directly abutting 88 Heron Ridge Road. It was
-classified as a compile-surface gap.
+The single miss was a sealed public-process row asking for a property-adjacency
+objector. It was classified as a compile-surface gap.
 
 Transfer read:
 
@@ -218,11 +218,45 @@ QA write proposal rows: 0
 artifact archive: C:\prethinker_tmp_archive\product_95_source_text_fallback_20260523
 ```
 
+## Generic Event-Time Carrier Lane
+
+The real-world transfer guard exposed a source row where an approximate clock
+time was preserved in `source_record_text_atom/2`, but the selected compile did
+not provide a direct event-time/date carrier for QA to join against.
+
+Repair:
+
+- Added a generic `source_record_event_time_note` companion for normalized
+  source rows that state a clock time, optional nearby date context, and a
+  nearby event/action verb.
+- Scoped that companion to event predicates and kept it in the high-pressure
+  candidate class so broad source-record scans do not flood with candidate
+  notes.
+- Expanded profile delivery pressure so explicit event dates or clock times can
+  request direct `event_date/2`, `event_time/2`, `event_timestamp/2`, or
+  equivalent carriers.
+- Removed older fixture-shaped source-text hint branches from the touched QA
+  path and generalized the affected tests/notes.
+
+Verification:
+
+```text
+tests/test_domain_bootstrap_qa.py + tests/test_domain_bootstrap_file.py + tests/test_domain_bootstrap_file_batch.py: 434 passed
+full pytest: 1611 passed
+compatibility rows: not exercised in this unit pass
+runtime load errors: 0
+QA write proposal rows: 0
+```
+
 ## Next Moves
 
-1. Start the durable event/date/time compile-surface lane exposed by
-   `ntsb_marine_carol_jean_2023 q021`.
-2. Re-run the small rejected-filter replay set if we want a variance check on
+1. Run a focused real-world row replay for the approximate-time miss against the
+   current selected compile to see whether the new QA companion is enough, or
+   whether a recompile is needed to produce a direct event-time carrier.
+2. If the row still misses, run a compile-only probe on the same real-world
+   document and check whether profile delivery now admits a direct event-time
+   row.
+3. Re-run the small rejected-filter replay set if we want a variance check on
    the bounded source-text fallback.
-3. Move to hybrid-join partials after the event/date/time source carrier is
+4. Move to hybrid-join partials after the event/date/time source carrier is
    scoped.

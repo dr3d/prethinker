@@ -378,19 +378,18 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For questions asking how many corrections/addenda were filed, query correction_filing/3 and count distinct record_kind values. If a run has individual correction_1/correction_2/correction_3/addendum rows, prefer those over a compressed correction_addendum row.",
         "For confirmation questions such as who confirmed a facility was back online or running again, query reported_event(Reporter, facility_restoration, Time, Source) and witness_statement/4 before boil_water_notice_lifted/2. The person lifting a notice is not necessarily the person confirming restoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans. If one violation is an omission, include the paired set-difference query pattern from this strategy: scope predicate with shared variable, then absent-side event predicate with polarity='negative'.",
-        "For marine-insurance or coverage-dispute financial questions, query numeric rows before legal-position rows. Use claim_amount/5 for gross or adjusted amounts, calculation_step/5 for net/share/difference values, cost_claim/5 for surveyor estimates, cost_agreement/4 for accepted items, cost_disagreement/5 for disputed deltas, deductible/3 for deductible values, underwriter_line/4 for share percentages, and attachment_comparison/5 for treaty threshold comparisons when those predicates exist.",
-        "For marine-insurance net-difference questions, retrieve both claimant and insurer net rows from calculation_step/5 or claim_amount/5 before asking legal_position/5. A legal position row usually explains the dispute, but it does not carry the arithmetic answer unless the numeric value appears in its returned atom.",
-        "For marine-insurance questions asking whether an insurer accepted the full claimed amount, query both sides of the amount surface: claim_amount/5 for claimant and insurer/adjusted positions, calculation_step/5 for net positions, and cost_disagreement/5 for disputed items. Do not query only one amount type such as gross_claim against the insurer if the compiled KB uses adjusted_claim or adjusted_total.",
-        "For marine-insurance hypothetical attachment questions such as 'even if the full claimant figure were accepted', retrieve the claimant net calculation_step/5, the lead underwriter share from underwriter_line/4, and attachment_comparison/5 or reinsurance_layer/5. Do not rely only on the actual adjusted-claim attachment row when the question asks about a different stated scenario.",
-        "For marine-insurance H&M cover-suspension or condition-of-class questions, do not query P&I predicates. Prefer cover_suspension/4, class_survey_scope/4, contract_clause/4, defense_status/4, temporal_relation/3, and correction_record/5 when those exist. P&I cover answers liability-club questions, not Hull and Machinery cover-state questions.",
-        "For marine-insurance P&I exposure questions, retrieve itemized exposure surfaces before role metadata: p_i_cover/4 for scope/year, p_i_notification_requirement/3 for notice duties, security_posted/4 for salvage security, cost_claim/5 or claim_amount/5 for cargo/pollution amounts, deductible/3 for P&I deductibles, and calculation_step/5 for total or derived exposure if present. Role rows such as dual_role/3 alone do not answer exposure totals.",
-        "For marine-insurance legal citation or clause questions, query legal_citation/4 and citation_support/4 before broad legal_position/5 rows. Citations support positions; they are not findings.",
-        "For marine-insurance reinsurance late-notice questions, query reinsurance_notice_effect/4 whenever it exists, alongside defense_status/4 and reinsurance_layer/5. defense_status/4 usually answers whether the issue affects the assured; reinsurance_notice_effect/4 answers what late notice does inside the treaty relationship.",
-        "For marine-insurance trading-warranty, sanctions, port-call, or defense-status questions, query the whole chain when available: contract_clause/4 for the warranty, sanctions_event/5 or port_call/5 for voyage/cancellation facts, trading_warranty_status/4 for breach/remedy/intent status, defense_status/4 for whether a party raised or declined a defense, and citation_support/4 or legal_citation/4 for statutory support. Do not invent a label such as trading_warranty_defense unless that exact atom appears in relevant_clauses. Do not stop after the first trading_warranty_status row if another row contains a party's intent or non-intent. For trading_warranty_status/4 intent/non-intent questions, query trading_warranty_status(Policy, Subject, Status, Detail) with all slots as variables unless exact constants appear in relevant_clauses; the intent may be embedded in the Detail slot rather than a party atom.",
-        "For marine-insurance surveyor agreement/disagreement questions, gather source-attributed report and technical rows: survey_report/4, survey_finding/5, measurement_claim/6, cost_claim/5, cost_agreement/4, cost_disagreement/5, class_survey_scope/4, survey_scope_exclusion/3, and correction_record/5 when present. Agreement questions often require both positive agreement rows and absence/outside-scope rows.",
-        "For marine-insurance loss-of-hire calculation questions, retrieve the amount or disagreement row plus the time/rate support: cost_disagreement/5 or claim_amount/5 for the claimed LOH amount, loss_of_hire_period/4 for interval support, charter_rate/3 for the daily rate, and loss_of_hire_position/4 or contract_clause/4 for coverage status. Do not drop charter_rate/3 when the question asks how an amount was calculated.",
-        "For maritime witness questions, the word 'Master' usually means the vessel's master/captain, not a harbour master. Query witness_statement(Speaker, Language, Subject, Content, Source) with Speaker as a variable unless the exact canonical speaker atom appears in relevant_clauses.",
-        "For marine-insurance witness or expert statement count questions, do not bind the second witness_statement/5 slot to the literal constant language. Query witness_statement(Speaker, Language, Subject, Content, Source), then add survey_report/4, legal_position/5, source_detail/4, and citation_support/4 only if the question asks for expert/legal statements beyond witness rows.",
+        "For insurance or coverage-dispute financial questions, query numeric rows before legal-position rows. Use claim_amount/5 for gross or adjusted amounts, calculation_step/5 for net/share/difference values, cost_claim/5 for surveyor estimates, cost_agreement/4 for accepted items, cost_disagreement/5 for disputed deltas, deductible/3 for deductible values, underwriter_line/4 for share percentages, and attachment_comparison/5 for threshold comparisons when those predicates exist.",
+        "For insurance or coverage-dispute net-difference questions, retrieve both claimant and insurer net rows from calculation_step/5 or claim_amount/5 before asking legal_position/5. A legal position row usually explains the dispute, but it does not carry the arithmetic answer unless the numeric value appears in its returned atom.",
+        "For insurance or coverage-dispute questions asking whether an insurer accepted the full claimed amount, query both sides of the amount surface: claim_amount/5 for claimant and insurer/adjusted positions, calculation_step/5 for net positions, and cost_disagreement/5 for disputed items. Do not query only one amount type such as gross_claim against the insurer if the compiled KB uses adjusted_claim or adjusted_total.",
+        "For insurance or coverage-dispute hypothetical attachment questions such as 'even if the full claimant figure were accepted', retrieve the claimant net calculation_step/5, the lead underwriter share from underwriter_line/4, and attachment_comparison/5 or reinsurance_layer/5. Do not rely only on the actual adjusted-claim attachment row when the question asks about a different stated scenario.",
+        "For coverage-suspension or condition-of-class questions, prefer cover_suspension/4, class_survey_scope/4, contract_clause/4, defense_status/4, temporal_relation/3, and correction_record/5 when those exist. Do not answer one coverage class from rows that describe a different coverage class.",
+        "For insurance exposure questions, retrieve itemized exposure surfaces before role metadata: coverage_scope/4 or p_i_cover/4 for scope/year, notification_requirement/3 or p_i_notification_requirement/3 for notice duties, security_posted/4, cost_claim/5 or claim_amount/5 for itemized amounts, deductible/3, and calculation_step/5 for total or derived exposure if present. Role rows such as dual_role/3 alone do not answer exposure totals.",
+        "For legal citation or clause questions, query legal_citation/4 and citation_support/4 before broad legal_position/5 rows. Citations support positions; they are not findings.",
+        "For reinsurance late-notice questions, query reinsurance_notice_effect/4 whenever it exists, alongside defense_status/4 and reinsurance_layer/5. defense_status/4 usually answers whether the issue affects the insured party; reinsurance_notice_effect/4 answers what late notice does inside the treaty relationship.",
+        "For warranty, sanctions, operating-limit, or defense-status questions, query the whole chain when available: contract_clause/4 for the warranty, sanctions_event/5 or scoped_event/5 for event facts, warranty_status/4 or trading_warranty_status/4 for breach/remedy/intent status, defense_status/4 for whether a party raised or declined a defense, and citation_support/4 or legal_citation/4 for statutory support. Do not invent a label unless that exact atom appears in relevant_clauses. Do not stop after the first status row if another row contains a party's intent or non-intent.",
+        "For surveyor agreement/disagreement questions, gather source-attributed report and technical rows: survey_report/4, survey_finding/5, measurement_claim/6, cost_claim/5, cost_agreement/4, cost_disagreement/5, class_survey_scope/4, survey_scope_exclusion/3, and correction_record/5 when present. Agreement questions often require both positive agreement rows and absence/outside-scope rows.",
+        "For loss-of-use or loss-of-service calculation questions, retrieve the amount or disagreement row plus the time/rate support: cost_disagreement/5 or claim_amount/5 for the claimed amount, loss_period/4 or loss_of_hire_period/4 for interval support, rate/3 or charter_rate/3 for the daily rate, and loss_position/4 or contract_clause/4 for coverage status. Do not drop the rate row when the question asks how an amount was calculated.",
+        "For witness or expert statement count questions, do not bind the second witness_statement/5 slot to the literal constant language. Query witness_statement(Speaker, Language, Subject, Content, Source), then add survey_report/4, legal_position/5, source_detail/4, and citation_support/4 only if the question asks for expert/legal statements beyond witness rows.",
         "For threshold-elapsed questions, retrieve the starting state/event time, the threshold-hours policy row, and the later target event time. Use add_hours(StartTime, ThresholdHours, ThresholdTime), then elapsed_minutes(ThresholdTime, LaterTime, Minutes). Do not measure from the raw start event when the question asks from the threshold moment.",
         "For temporal virtual-predicate chains, emit prerequisite virtual-predicate queries before dependent virtual-predicate queries: add_hours(StartTime, Hours, ThresholdTime) must appear before elapsed_minutes(ThresholdTime, LaterTime, Minutes). Prefer elapsed_minutes/3 for answers that may be less than one whole hour, then convert to hours/minutes in the concise answer.",
         "For duration or deadline questions that name a state threshold, first retrieve the state-change predicate that carries the start timestamp, then retrieve the policy threshold, then call add_hours/3 or elapsed_minutes/3. Do not call temporal virtual predicates with unbound invented lowercase constants.",
@@ -2218,14 +2217,6 @@ def _source_text_question_needles(utterance: str) -> list[str]:
     lowered_raw = raw.casefold()
     if "filing" in tokens:
         derived_needles.append("filed")
-    if {"tow", "line"} <= set(tokens) or re.search(r"\btow\s+line\b", lowered_raw):
-        derived_needles.append("tow_line")
-        if any(token in tokens for token in {"part", "parted", "parts"}) or re.search(r"\bpart(?:ed|s)?\b", lowered_raw):
-            derived_needles.append("tow_line_parted")
-            derived_needles.append("parted")
-    if {"rescue", "helicopter"} <= set(tokens) or re.search(r"\bhelicopter\s+launch", lowered_raw):
-        derived_needles.append("launched_a_helicopter_from")
-        derived_needles.append("helicopter")
     state_phrase_aliases = {
         "kentucky": "ky",
         "new york": "ny",
@@ -2310,7 +2301,6 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "freshire",
         "ground",
         "held",
-        "helicopter",
         "hours",
         "identifier",
         "immediate",
@@ -2361,7 +2351,6 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "supplemental",
         "time",
         "timezone",
-        "tow",
         "unit",
         "units",
         "vegetable",
@@ -6188,6 +6177,7 @@ def _source_record_packet_metadata_companion(
             },
         )
 
+    ordered_source_rows = sorted(line_by_row, key=lambda item: line_by_row[item])
     for row in text_rows:
         source_row = str(row.get("SourceRow", "")).strip()
         text_atom = str(row.get("TextAtom", "")).strip()
@@ -6228,6 +6218,23 @@ def _source_record_packet_metadata_companion(
                 display_value=temporal_note["display"],
                 helper_class="candidate-helper",
                 extra_fields=temporal_note.get("fields", {}),
+            )
+        window = _source_text_window(
+            source_row,
+            ordered_source_rows,
+            text_by_row,
+            line_by_row,
+            radius=3,
+        )
+        for event_time_note in _source_record_event_time_notes(text_atom, context_text=window):
+            add(
+                source_row,
+                "source_record_event_time_note",
+                event_time_note["value"],
+                detail=window or text_atom,
+                display_value=event_time_note["display"],
+                helper_class="candidate-helper",
+                extra_fields=event_time_note.get("fields", {}),
             )
         for sample_note in _source_record_sample_result_notes(text_atom):
             add(
@@ -6313,7 +6320,6 @@ def _source_record_packet_metadata_companion(
                 extra_fields=item_event_note.get("fields", {}),
             )
 
-    ordered_source_rows = sorted(line_by_row, key=lambda source_row: line_by_row[source_row])
     for source_row in ordered_source_rows:
         text_atom = text_by_row.get(source_row, "")
         next_text = _next_source_text_atom(source_row, ordered_source_rows, text_by_row, line_by_row)
@@ -6693,9 +6699,21 @@ def _scope_source_record_packet_metadata_rows(
         "court_order": {"motion_status", "source_record_order_section"},
         "caused_by": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
         "current_status": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
-        "event_actor": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
-        "event_occurred": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
-        "event_target": {"source_record_temporal_event_note", "source_record_temporal_relation_note"},
+        "event_actor": {
+            "source_record_event_time_note",
+            "source_record_temporal_event_note",
+            "source_record_temporal_relation_note",
+        },
+        "event_occurred": {
+            "source_record_event_time_note",
+            "source_record_temporal_event_note",
+            "source_record_temporal_relation_note",
+        },
+        "event_target": {
+            "source_record_event_time_note",
+            "source_record_temporal_event_note",
+            "source_record_temporal_relation_note",
+        },
         "lab_result": {
             "source_record_matching_token_source",
             "source_record_sample_result_note",
@@ -6727,6 +6745,7 @@ def _scope_source_record_packet_metadata_rows(
     }
     high_pressure_candidate_kinds = {
         "source_record_discovery_note",
+        "source_record_event_time_note",
         "source_record_sample_result_note",
         "source_record_temporal_event_note",
         "source_record_temporal_relation_note",
@@ -7339,6 +7358,19 @@ def _month_day_value(month: str, day: str) -> str:
     return f"v_{month_num}_{int(day_text):02d}"
 
 
+def _display_source_time_atom(value: str) -> str:
+    text = str(value or "").strip().lower().removeprefix("v_")
+    if re.fullmatch(r"\d{3,4}", text):
+        return text
+    match = re.fullmatch(r"(\d{1,2})_(\d{2})(?:_(\d{2}))?", text)
+    if match:
+        parts = [f"{int(match.group(1)):02d}", match.group(2)]
+        if match.group(3):
+            parts.append(match.group(3))
+        return ":".join(parts)
+    return _display_source_date_atom(value)
+
+
 def _source_record_temporal_notes(text_atom: str) -> list[dict[str, Any]]:
     """Extract reusable temporal source notes from normalized source rows.
 
@@ -7445,6 +7477,204 @@ def _source_record_temporal_notes(text_atom: str) -> list[dict[str, Any]]:
         )
 
     return out
+
+
+def _source_record_event_time_notes(text_atom: str, *, context_text: str = "") -> list[dict[str, Any]]:
+    """Extract source-stated clock-time event notes from normalized source rows.
+
+    The shape is intentionally generic: a clock-time cue, an optional nearby
+    date, and a nearby event/action verb. This keeps approximate time answers
+    addressable without adding project- or fixture-specific vocabulary.
+    """
+
+    text = str(text_atom or "").strip().lower()
+    if not text:
+        return []
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    patterns = [
+        re.compile(
+            r"(?:^|_)(?P<qualifier>about|around|approximately|approx|near)_(?P<time>\d{3,4}|\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)"
+        ),
+        re.compile(
+            r"(?:^|_)(?:at|by)_(?P<time>\d{3,4}|\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)"
+        ),
+        re.compile(r"(?:^|_)(?P<time>\d{1,2}_\d{2}(?:_\d{2})?)(?:_|$)"),
+    ]
+    for pattern in patterns:
+        for match in pattern.finditer(text):
+            time_start = match.start("time")
+            if re.search(r"(?:19|20)\d{2}_$", text[max(0, time_start - 6) : time_start]):
+                continue
+            event_time = _source_record_clock_time_value(match.group("time"))
+            if not event_time:
+                continue
+            action = _source_record_event_action_after_time(text, match.end())
+            if not action:
+                continue
+            qualifier = (match.groupdict().get("qualifier") or "").strip("_")
+            subject = _source_record_event_subject_before_action(text[match.end() :], action=action)
+            date_note = _source_record_nearest_event_date(
+                text=text,
+                context_text=context_text,
+                text_time_start=match.start(),
+            )
+            key = (event_time, action, date_note.get("value", ""))
+            if key in seen:
+                continue
+            seen.add(key)
+            event_phrase = _display_source_phrase(f"{subject}_{action}".strip("_") if subject else action)
+            prefix = _display_source_phrase(qualifier).capitalize() if qualifier else "At"
+            date_display = date_note.get("display", "")
+            display = f"{prefix} {_display_source_time_atom(event_time)}"
+            if date_display:
+                display += f" on {date_display}"
+            display += f": {event_phrase}."
+            fields = {
+                "EventTime": event_time,
+                "EventAction": action,
+                "TemporalQualifier": qualifier,
+            }
+            if subject:
+                fields["EventSubject"] = subject
+            if date_note.get("value"):
+                fields["EventDate"] = date_note["value"]
+            out.append({"value": event_time, "display": display, "fields": fields})
+    return out
+
+
+def _source_record_clock_time_value(raw_value: str) -> str:
+    raw = str(raw_value or "").strip("_").lower()
+    if not raw:
+        return ""
+    if re.fullmatch(r"\d{3,4}", raw):
+        hour = int(raw[:-2])
+        minute = int(raw[-2:])
+        if hour > 23 or minute > 59:
+            return ""
+        return f"v_{raw}"
+    match = re.fullmatch(r"(\d{1,2})_(\d{2})(?:_(\d{2}))?", raw)
+    if not match:
+        return ""
+    hour = int(match.group(1))
+    minute = int(match.group(2))
+    second = int(match.group(3)) if match.group(3) else 0
+    if hour > 23 or minute > 59 or second > 59:
+        return ""
+    return f"v_{raw}"
+
+
+def _source_record_event_action_after_time(text: str, time_end: int) -> str:
+    tokens = [token for token in str(text or "")[time_end:].strip("_").split("_") if token]
+    action_tokens = {
+        "activated",
+        "arrived",
+        "changed",
+        "closed",
+        "completed",
+        "departed",
+        "detected",
+        "ended",
+        "entered",
+        "failed",
+        "issued",
+        "left",
+        "noted",
+        "observed",
+        "occurred",
+        "opened",
+        "received",
+        "recorded",
+        "released",
+        "reported",
+        "started",
+        "stopped",
+        "triggered",
+    }
+    for token in tokens[:28]:
+        if token in action_tokens:
+            return token
+    return ""
+
+
+def _source_record_event_subject_before_action(text_after_time: str, *, action: str) -> str:
+    tokens = [token for token in str(text_after_time or "").strip("_").split("_") if token]
+    try:
+        action_index = tokens.index(action)
+    except ValueError:
+        return ""
+    stop_tokens = {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "been",
+        "being",
+        "by",
+        "for",
+        "had",
+        "has",
+        "in",
+        "is",
+        "of",
+        "on",
+        "the",
+        "then",
+        "to",
+        "was",
+        "were",
+        "when",
+        "while",
+        "with",
+    }
+    subject_parts: list[str] = []
+    for token in reversed(tokens[:action_index]):
+        if token in stop_tokens or token.isdigit():
+            if subject_parts:
+                break
+            continue
+        subject_parts.append(token)
+        if len(subject_parts) >= 3:
+            break
+    return "_".join(reversed(subject_parts))
+
+
+def _source_record_nearest_event_date(*, text: str, context_text: str, text_time_start: int) -> dict[str, str]:
+    context = str(context_text or text or "").strip().lower()
+    if not context:
+        return {}
+    anchor = text_time_start
+    text_start = context.find(str(text or "").strip().lower())
+    if text_start >= 0:
+        anchor = text_start + text_time_start
+    candidates: list[dict[str, Any]] = []
+    for match in re.finditer(r"(?<!\d)((?:19|20)\d{2})_(\d{1,2})_(\d{1,2})(?!\d)", context):
+        year, month, day = match.group(1), match.group(2), match.group(3)
+        candidates.append(
+            {
+                "start": match.start(),
+                "value": f"v_{year}_{int(month):02d}_{int(day):02d}",
+                "display": f"{year}-{int(month):02d}-{int(day):02d}",
+            }
+        )
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    for match in re.finditer(rf"(?:^|_)(?:on_)?(?P<month>{month_pattern})_(?P<day>\d{{1,2}})(?:_|$)", context):
+        month = match.group("month")
+        day = match.group("day")
+        candidates.append(
+            {
+                "start": match.start(),
+                "value": _month_day_value(month, day),
+                "display": _display_month_day(month, day),
+            }
+        )
+    if not candidates:
+        return {}
+    before = [item for item in candidates if int(item["start"]) <= anchor]
+    chosen = max(before, key=lambda item: int(item["start"])) if before else min(candidates, key=lambda item: abs(int(item["start"]) - anchor))
+    return {"value": str(chosen["value"]), "display": str(chosen["display"])}
 
 
 def _source_record_sample_result_notes(text_atom: str) -> list[dict[str, Any]]:
@@ -16498,7 +16728,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identity policy: candidate_identity or ambiguous_identity rows are possible identities, not proof of identity. Multiple candidates support answers such as 'unknown', 'ambiguous', 'not definitively identified', or 'do not assign automatically'.",
             "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
-            "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as departed_dock_c_before_yeast_inspection supporting 'Dock C', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as entered_zone_a_before_inspection supporting 'Zone A', that can be exact support even when the value appears inside a method or explanation predicate.",
             "Predicate-relation policy: a returned row's predicate name is part of the answer-bearing surface. For example, has_knowledge_of(Entity, mislabeled_folders) can support 'knowledge of mislabeled folders' even when the returned value atom is only mislabeled_folders; do not require the relation words to be duplicated inside the value atom.",
             "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
             "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",

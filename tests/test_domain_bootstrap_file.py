@@ -165,6 +165,32 @@ def test_event_date_profile_extension_adds_direct_carrier_for_dated_events() -> 
     assert "event_date/2" in profile["provenance_sensitive_predicates"]
 
 
+def test_event_date_profile_extension_adds_direct_carrier_for_timed_events() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "event_status/2",
+                "args": ["event_id", "status"],
+                "description": "Event status.",
+                "why": "Keeps event status.",
+                "admission_notes": [],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_event_date_predicate(
+        profile,
+        source_text="About 1415 the guard arm released and the status changed to open.",
+    )
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "event_time/2"
+    assert any(item["signature"] == "event_time/2" for item in profile["candidate_predicates"])
+    assert "event_time/2" in profile["provenance_sensitive_predicates"]
+
+
 def test_event_date_profile_extension_respects_existing_temporal_carrier() -> None:
     profile = {
         "candidate_predicates": [
@@ -1883,8 +1909,8 @@ def test_source_authority_extension_recognizes_authorization_act_rules() -> None
     metadata = _ensure_source_authority_predicate(
         profile,
         source_text=(
-            "Under the Coast Guard Authorization Act of 2010, commercial fishing vessel "
-            "dockside safety examinations are required once every 5 years."
+            "Under the Field Safety Authorization Act of 2010, regulated equipment "
+            "safety examinations are required once every 5 years."
         ),
     )
 
@@ -1892,11 +1918,11 @@ def test_source_authority_extension_recognizes_authorization_act_rules() -> None
     assert any(item["signature"] == "source_authority/3" for item in profile["candidate_predicates"])
 
 
-def test_profile_delivery_accepts_vessel_state_as_status_state_carrier() -> None:
+def test_profile_delivery_accepts_status_state_carrier() -> None:
     source_compile = {
         "unique_fact_count": 1,
         "facts": [
-            "vessel_state(carol_jean, unattended, 2023_03_19_to_2023_03_21).",
+            "asset_state(asset_alpha, unattended, 2023_03_19_to_2023_03_21).",
         ],
         "compile_health": {
             "schema_version": "compile_lens_health_v1",
@@ -1915,12 +1941,12 @@ def test_profile_delivery_accepts_vessel_state_as_status_state_carrier() -> None
     parsed_profile = {
         "candidate_predicates": [
             {
-                "signature": "vessel_state/3",
-                "args": ["vessel_id", "state", "time_or_context"],
+                "signature": "asset_state/3",
+                "args": ["asset_id", "state", "time_or_context"],
             }
         ]
     }
-    source_text = "The vessel remained unattended offshore until March 21, 2023."
+    source_text = "The asset remained unattended at the remote site until March 21, 2023."
     admission_report = _profile_admission_report(
         parsed_profile=parsed_profile,
         source_text=source_text,
@@ -1933,7 +1959,7 @@ def test_profile_delivery_accepts_vessel_state_as_status_state_carrier() -> None
     )
 
     assert delivery["findings"] == []
-    assert delivery["delivered_carriers"]["status_state"] == ["vessel_state"]
+    assert delivery["delivered_carriers"]["status_state"] == ["asset_state"]
 
 
 def test_profile_admission_keeps_real_stated_status_claim_pressure() -> None:
@@ -1947,12 +1973,11 @@ def test_profile_admission_keeps_real_stated_status_claim_pressure() -> None:
             ]
         },
         source_text=(
-            "As the captain and crewmember attempted to reestablish the tow on March 16, "
-            "the tow line fouled the propeller of the Carol Jean, preventing the vessel "
-            "from moving. The vessel remained anchored with no one remaining on board to "
-            "monitor its status. The captain returned to the vessel on March 19. He stated "
-            "that the vessel was in good condition at the time, with no flooding noted "
-            "before he departed again."
+            "As the operator and assistant attempted to restart the equipment on March 16, "
+            "a control fault prevented the equipment from moving. The equipment remained "
+            "offline with no one remaining on site to monitor its status. The operator "
+            "returned to the equipment on March 19. He stated that the equipment was in "
+            "good condition at the time, with no damage noted before he departed again."
         ),
     )
 
@@ -3224,17 +3249,19 @@ def test_source_pass_profile_delivery_target_names_objection_and_concern() -> No
 
 def test_source_pass_profile_delivery_target_names_event_date_carrier() -> None:
     lines = domain_bootstrap_file._source_pass_profile_delivery_target_context(
-        source_text="Hearing date April 24, 2026. Appeal filed 2026-05-08.",
+        source_text="Hearing date April 24, 2026. Appeal filed 2026-05-08. About 1415 the status changed to open.",
         parsed_profile={
             "candidate_predicates": [
                 {"signature": "event_date/2", "args": ["event_id", "date"]},
+                {"signature": "event_time/2", "args": ["event_id", "time"]},
             ]
         },
     )
 
     joined = "\n".join(lines)
-    assert "explicit event/hearing/filing dates" in joined
+    assert "explicit event/hearing/filing dates or clock times" in joined
     assert "event_date/2" in joined
+    assert "event_time/2" in joined
     assert "not a substitute for a joinable temporal row" in joined
 
 

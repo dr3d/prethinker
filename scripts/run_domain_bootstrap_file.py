@@ -2409,11 +2409,14 @@ def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_pro
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_signature(item).split("/", 1)[0] in {"event_date", "event_time", "event_timestamp", "event_wall_time", "hearing_date", "meeting_date"}
     ]
-    if event_date_carriers and EVENT_DATE_TEXT_RE.search(str(source_text or "")):
+    if event_date_carriers and (
+        EVENT_DATE_TEXT_RE.search(str(source_text or ""))
+        or EVENT_TIME_TEXT_RE.search(str(source_text or ""))
+    ):
         lines.append(
-            "PROFILE DELIVERY TARGET: this source has explicit event/hearing/filing dates. If a pass creates "
+            "PROFILE DELIVERY TARGET: this source has explicit event/hearing/filing dates or clock times. If a pass creates "
             "an event id that embeds a date, also emit an event_date/2, event_time/2, event_timestamp/2, or "
-            "equivalent temporal row using that same event id and the explicit date. The dated id is an anchor, "
+            "equivalent temporal row using that same event id and the explicit date, time, or timestamp. The id is an anchor, "
             "not a substitute for a joinable temporal row."
         )
     quorum_carriers = [
@@ -3087,6 +3090,28 @@ EVENT_DATE_TEXT_RE = re.compile(
     re.IGNORECASE,
 )
 
+EVENT_TIME_TEXT_RE = re.compile(
+    r"\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review|"
+    r"record|signal|status|entry|action|notice|occurred|received|released|opened|closed|started|ended|arrived|"
+    r"departed|activated|detected|observed|reported|recorded)\b"
+    r".{0,100}\b(?:about|around|approximately|approx|near|at|by)\s+"
+    r"(?:(?:[01]?\d|2[0-3])(?::?[0-5]\d)(?::?[0-5]\d)?)\b|"
+    r"\b(?:about|around|approximately|approx|near|at|by)\s+"
+    r"(?:(?:[01]?\d|2[0-3])(?::?[0-5]\d)(?::?[0-5]\d)?)\b"
+    r".{0,100}\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review|"
+    r"record|signal|status|entry|action|notice|occurred|received|released|opened|closed|started|ended|arrived|"
+    r"departed|activated|detected|observed|reported|recorded)\b|"
+    r"\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review|"
+    r"record|signal|status|entry|action|notice|occurred|received|released|opened|closed|started|ended|arrived|"
+    r"departed|activated|detected|observed|reported|recorded)\b"
+    r".{0,100}\b(?:(?:[01]?\d|2[0-3])[:_][0-5]\d(?:[:_][0-5]\d)?)\b|"
+    r"\b(?:(?:[01]?\d|2[0-3])[:_][0-5]\d(?:[:_][0-5]\d)?)\b"
+    r".{0,100}\b(?:event|hearing|meeting|filing|filed|appeal|application|vote|correction|declaration|ratification|review|"
+    r"record|signal|status|entry|action|notice|occurred|received|released|opened|closed|started|ended|arrived|"
+    r"departed|activated|detected|observed|reported|recorded)\b",
+    re.IGNORECASE,
+)
+
 PUBLIC_RECALL_PRIOR_DATE_TEXT_RE = re.compile(
     r"\b(?:expand(?:ing|s|ed)?|expansion|amend(?:ing|s|ed)?|updat(?:ing|es|ed)?|supersed(?:ing|es|ed)?|revis(?:ing|es|ed)?)\b"
     r".{0,80}\b(?P<date1>(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|aug|august|sep|sept|september|oct|october|nov|november|dec|december)\s+\d{1,2},?\s+(?:19|20)\d{2})\b"
@@ -3274,13 +3299,15 @@ def _has_specific_vote_tally_carrier(signatures: set[str]) -> bool:
 
 
 def _ensure_event_date_predicate(parsed_profile: dict[str, Any], *, source_text: str) -> dict[str, Any]:
-    """Ensure a direct event-date carrier for explicit dated events."""
+    """Ensure a direct event temporal carrier for explicit dated or timed events."""
 
-    if not EVENT_DATE_TEXT_RE.search(str(source_text or "")):
+    has_date_signal = bool(EVENT_DATE_TEXT_RE.search(str(source_text or "")))
+    has_time_signal = bool(EVENT_TIME_TEXT_RE.search(str(source_text or "")))
+    if not has_date_signal and not has_time_signal:
         return {
             "schema_version": "profile_event_date_extension_v1",
             "added": False,
-            "reason": "no_explicit_event_date_signal",
+            "reason": "no_explicit_event_temporal_signal",
         }
     candidates = parsed_profile.get("candidate_predicates")
     if not isinstance(candidates, list):
@@ -3297,30 +3324,32 @@ def _ensure_event_date_predicate(parsed_profile: dict[str, Any], *, source_text:
             "reason": "event_date_carrier_present",
         }
 
+    signature = "event_date/2" if has_date_signal else "event_time/2"
+    value_arg = "date" if has_date_signal else "time_or_timestamp"
     candidates.append(
         {
-            "signature": "event_date/2",
-            "args": ["event_id", "date"],
-            "description": "Direct temporal surface for source-stated event, hearing, meeting, filing, appeal, vote, or correction dates.",
-            "why": "Prevents date-bearing event identifiers from being the only place where an event date is represented.",
+            "signature": signature,
+            "args": ["event_id", value_arg],
+            "description": "Direct temporal surface for source-stated event, hearing, meeting, filing, appeal, vote, or correction dates/times.",
+            "why": "Prevents date- or time-bearing event identifiers from being the only place where event time is represented.",
             "admission_notes": [
-                "Vocabulary extension only; use only for explicit source-stated event dates.",
-                "Keep stable event id and date value joinable in separate arguments.",
+                "Vocabulary extension only; use only for explicit source-stated event dates, times, or timestamps.",
+                "Keep stable event id and temporal value joinable in separate arguments.",
             ],
         }
     )
     provenance = parsed_profile.get("provenance_sensitive_predicates")
-    if isinstance(provenance, list) and "event_date/2" not in provenance:
-        provenance.append("event_date/2")
+    if isinstance(provenance, list) and signature not in provenance:
+        provenance.append(signature)
     self_check = parsed_profile.get("self_check")
     if isinstance(self_check, dict):
         notes = self_check.get("notes")
         if isinstance(notes, list):
-            notes.append("Deterministic profile extension added event_date/2 after explicit event-date signal.")
+            notes.append(f"Deterministic profile extension added {signature} after explicit event temporal signal.")
     return {
         "schema_version": "profile_event_date_extension_v1",
         "added": True,
-        "signature": "event_date/2",
+        "signature": signature,
         "authority": "vocabulary_extension_only",
         "fact_extraction": False,
     }
@@ -4607,6 +4636,7 @@ SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES = {
 
 STATUS_STATE_DELIVERY_PREDICATE_NAMES = {
     "authorization_status",
+    "asset_state",
     "document_status",
     "hearing_scheduled",
     "knowledge_assertion",
@@ -4845,7 +4875,7 @@ def _source_attributed_claim_fact_key(
 
 def _fact_row_can_deliver_status_state(predicate: str, args: list[str]) -> bool:
     name = str(predicate or "").casefold()
-    if name == "vessel_state":
+    if name in {"asset_state", "vessel_state"}:
         return len(args) >= 3
     if name == "lease_term":
         return len(args) >= 4 and bool(_profile_admission_tokens(str(args[3])) & PROFILE_ADMISSION_STATUS_STATE_TERMS)
