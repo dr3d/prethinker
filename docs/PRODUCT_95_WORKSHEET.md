@@ -929,3 +929,67 @@ C:\prethinker_tmp_archive\work_20260523_record_narrative_ach
 Read: the wild batch exposed a product-grade mechanism, not just six isolated
 answers. Messy real documents need a record-layer query surface that can safely
 aggregate admitted rows when compile predicates are too narrow or malformed.
+
+## 2026-05-23 Known-Wild Record-Layer Hardening
+
+Goal: keep pushing toward the next native stamp by using the known
+`datasets/real_world_transfer/20260523_wild_01` corpus as a hardening set,
+without treating targeted row recovery as a fresh transfer claim.
+
+Added current deterministic source-record summaries for:
+
+- parse-failure fallback delivery of source-record companions
+- latest/earliest source-record date selection with sibling row values
+- AIS speed-change sequence extraction from admitted source text
+- missing-field row counts for table rows with blank/absent values
+- assessment/response contrast source text for regulator-vs-firm reasoning
+- agreement counterparty joins over `entered_agreement/3`, `entity_role/3`,
+  and source-record text
+- event date ranges with document/runtime year context
+- named-source measurement discrepancies
+- threshold-vs-current-value comparisons
+
+Known-wild same-corpus reruns:
+
+```text
+initial rerun: 123 / 0 / 2  (98.4%), lanes 5, compatibility 0
+r2:            123 / 1 / 1  (98.4%), lanes 5, compatibility 0
+r3:            124 / 0 / 1  (99.2%), lanes 5, compatibility 0
+r4:            124 / 0 / 1  (99.2%), lanes 5, compatibility 0
+r5:            122 / 0 / 2  (97.6%), lanes 6, compatibility 0
+```
+
+Targeted mechanism replays now exact:
+
+- NTSB marine q010: AIS speed change after parse failure
+- OSHA q012: latest incident date from source-record date aliases
+- OSHA q015: rows missing fatality inspection number
+- FDA q020: MACO low-risk argument vs FDA assessment contrast
+- SEC q002: Second Amendment counterparty from agreement/role/source text
+- NTSB marine q012: salvage operation date range with inferred 2024 context
+- NTSB aviation q020: FDR vs FAA ADS-B altitude discrepancy
+- NTSB aviation q021: SDI cycle thresholds vs 21,043 current cycles
+
+Validation:
+
+```text
+tests/test_domain_bootstrap_qa.py: 255 passed
+py_compile scripts/run_domain_bootstrap_qa.py: pass
+```
+
+Artifact archive:
+
+```text
+C:\prethinker_tmp_archive\wild_known_rerun_hardening_20260523
+```
+
+Read:
+
+- The useful blocker is record-layer semantics, not model swapping: messy
+  documents carry answer-bearing evidence in tables, source lines, and
+  paragraph atoms that need deterministic query-time summaries.
+- The latest full 6-lane rerun is not a clean new corpus claim; it exposed two
+  new aviation hardening rows and those rows now have targeted recovery.
+- The next honest confirmation is either another full known-wild rerun after
+  this commit or, better, a fresh ugly transfer batch from new external
+  documents.

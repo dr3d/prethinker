@@ -1517,6 +1517,218 @@ def test_source_record_messy_summary_counts_distinct_field_items() -> None:
     )
 
 
+def test_source_record_messy_summary_links_agreement_counterparty() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "entered_agreement(agmt_second_amendment_20251001, 2025_10_01, hla_and_jpm).",
+        "entity_role(jpm, lender, agmt_second_amendment_20251001).",
+        (
+            "source_record_text_atom(src_line_0067, "
+            "on_october_1_2025_hamilton_lane_advisors_l_l_c_entered_into_a_second_amendment_"
+            "with_jpmorgan_chase_bank_n_a_jpm_amending_the_multi_draw_term_loan_and_security_agreement)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Who is the counterparty to the Second Amendment?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_agreement_counterparty_support")
+    row = companion["result"]["rows"][0]
+    assert row["Agreement"] == "agmt_second_amendment_20251001"
+    assert row["CounterpartyEntity"] == "jpm"
+    assert row["CounterpartyRole"] == "lender"
+    assert "jpmorgan chase bank n a" in row["CounterpartyDisplay"]
+    assert qa_module._agreement_counterparty_reference_supported_by_results(
+        row={
+            "utterance": "Who is the counterparty to the Second Amendment?",
+            "query_results": [companion],
+        },
+        reference="JPMorgan Chase Bank, N.A. (defined in the filing as 'JPM').",
+    )
+
+
+def test_source_record_messy_summary_extracts_event_date_range_with_context_year() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "vessel_state_at(vessel_baylor_j_tregre, 2024_05_13t21_57_00z, salvage_status, conducted).",
+        (
+            "source_record_text_atom(src_line_0098, "
+            "salvage_operations_were_conducted_from_may_18_to_june_15_the_salvor_found_the_baylor_j_tregre_"
+            "in_an_inverted_position_on_the_ocean_floor_the_vessel_was_successfully_raised_from_the_seafloor_"
+            "and_transported_to_a_salvage_dock_in_galveston_texas_on_june_12)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="According to the report, when did salvage operations begin, when did they end, and on what date was the vessel transported to the salvage dock in Galveston?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_event_date_range_support")
+    row = companion["result"]["rows"][0]
+    assert row["StartDate"] == "v_2024_05_18"
+    assert row["EndDate"] == "v_2024_06_15"
+    assert row["SecondaryDate"] == "v_2024_06_12"
+    assert "galveston texas" in row["SourceTextDisplay"]
+    assert qa_module._event_date_range_reference_supported_by_results(
+        row={
+            "utterance": (
+                "According to the report, when did salvage operations begin, when did they end, "
+                "and on what date was the vessel transported to the salvage dock in Galveston?"
+            ),
+            "query_results": [companion],
+        },
+        reference=(
+            "Salvage operations were conducted from May 18 to June 15, 2024. "
+            "The vessel was transported to a salvage dock in Galveston, Texas, on June 12, 2024."
+        ),
+    )
+
+
+def test_source_record_messy_summary_extracts_measurement_discrepancy() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    fact = (
+        "source_record_text_atom(src_line_0044, "
+        "the_airplane_initially_climbed_but_did_not_get_higher_than_about_30_ft_above_ground_level_agl_"
+        "according_to_radio_altitude_data_from_the_fdr_based_on_faa_provided_ads_b_data_the_last_data_point_"
+        "showed_481_ft_mean_sea_level_msl_and_100_ft_agl)."
+    )
+    assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="The report cites two different sources for the airplane's altitude after takeoff that do not match. What altitude does each source report?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_measurement_discrepancy_support")
+    row = companion["result"]["rows"][0]
+    assert row["FirstValueDisplay"] == "30 ft agl"
+    assert row["SecondValueMslDisplay"] == "481 ft msl"
+    assert row["SecondValueAglDisplay"] == "100 ft agl"
+    assert qa_module._source_record_summary_reference_supported_by_results(
+        row={
+            "utterance": "The report cites two different sources for the airplane's altitude after takeoff that do not match. What altitude does each source report?",
+            "query_results": [companion],
+        },
+        reference=(
+            "FDR radio altitude data indicates the airplane did not get higher than about 30 ft agl. "
+            "FAA-provided ADS-B data, however, shows the last data point at 481 ft mean sea level (msl) and 100 ft agl. "
+            "The report does not reconcile the two values."
+        ),
+        predicates={"source_record_measurement_discrepancy_support"},
+    )
+
+
+def test_source_record_messy_summary_compares_threshold_cycles() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    fact = (
+        "source_record_text_atom(src_line_0142, "
+        "at_the_time_of_the_accident_n259up_had_accumulated_a_total_time_of_about_92_992_hours_and_21_043_cycles_"
+        "a_special_detailed_inspection_sdi_of_the_left_pylon_aft_mount_lugs_would_have_been_due_at_29_200_cycles_"
+        "and_of_the_left_wing_clevis_support_would_have_been_due_at_28_000_cycles_the_accident_airplane_records_"
+        "showed_these_two_sdi_tasks_had_not_been_accomplished_the_airplane_had_21_043_cycles)."
+    )
+    assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="The report describes special detailed inspection cycle thresholds that the airplane had not yet reached. What were the thresholds and how many cycles did the accident airplane have?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_threshold_comparison_support")
+    rows = companion["result"]["rows"]
+    summary = rows[0]
+    assert summary["ActualCyclesDisplay"] == "21,043 cycles"
+    assert summary["AllBelowThreshold"] == "yes"
+    assert "29,200 cycles" in summary["Thresholds"]
+    assert "28,000 cycles" in summary["Thresholds"]
+    assert qa_module._source_record_summary_reference_supported_by_results(
+        row={
+            "utterance": (
+                "The report describes special detailed inspection cycle thresholds that the airplane had not yet reached. "
+                "What were the thresholds and how many cycles did the accident airplane have?"
+            ),
+            "query_results": [companion],
+        },
+        reference=(
+            "SDI of the left pylon aft mount lugs would have been due at 29,200 cycles; "
+            "SDI of the left wing clevis support would have been due at 28,000 cycles. "
+            "The accident airplane had accumulated 21,043 cycles. The report notes both SDI tasks had not been accomplished, "
+            "but the airplane had not yet reached either threshold."
+        ),
+        predicates={"source_record_threshold_comparison_support"},
+    )
+
+
+def test_source_record_messy_summary_counts_rows_missing_requested_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, fatality_inspection_number, v_318199429).",
+        "source_record_field(src_line_0020, date_of_incident, v_10_05_23).",
+        "source_record_field(src_line_0023, date_of_incident, v_12_7_23).",
+        "source_record_date_alias(src_line_0023, v_12_7_23, v_2023_12_07).",
+        "source_record_field(src_line_0023, worksite_city_or_town, mankato).",
+        "source_record_field(src_line_0023, outcome_of_mnosha_investigation, case_open).",
+        "source_record_field(src_line_0079, date_of_incident, v_9_21_24).",
+        "source_record_date_alias(src_line_0079, v_9_21_24, v_2024_09_21).",
+        "source_record_field(src_line_0079, worksite_city_or_town, red_wing).",
+        "source_record_field(src_line_0079, outcome_of_mnosha_investigation, case_open).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="How many fatality entries are listed without any fatality inspection number?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_missing_field_count_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["MissingField"] == "fatality_inspection_number"
+    assert summary["MissingCount"] == "2"
+    assert "src_line_0079" in summary["MissingRows"]
+    assert _source_record_numeric_count_supported_by_results(
+        row={
+            "utterance": "How many fatality entries are listed without any fatality inspection number?",
+            "query_results": [companion],
+        },
+        reference="2 entries have no fatality inspection number",
+    )
+
+
+def test_source_record_messy_summary_returns_assessment_contrast_source_text() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0070, "
+            "in_your_response_you_provide_limited_reserve_sample_testing_results_and_assurance_of_low_microbiological_"
+            "contamination_risk_based_on_retrospective_maco_calculations)."
+        ),
+        (
+            "source_record_text_atom(src_line_0072, "
+            "your_response_is_inadequate_cross_contamination_is_not_uniform_and_testing_of_limited_reserve_samples_"
+            "alone_cannot_ensure_products_are_contaminant_free_while_maco_is_helpful_in_validated_cleaning_scenarios_"
+            "it_cannot_apply_where_cleaning_has_not_been_performed_denominators_utilized_for_batch_size_are_inconsistent_with_bowl_size)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='How does FDA assessment of the firm MACO-based "low risk" argument differ from the firm assessment?',
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_assessment_contrast_support")
+    rows = companion["result"]["rows"]
+    assert rows[0]["FirmRows"] == "src_line_0070"
+    assert rows[0]["RegulatorRows"] == "src_line_0072"
+    assert any(row.get("Side") == "firm_response" for row in rows)
+    assert any(row.get("Side") == "regulator_assessment" and "contaminant_free" in row.get("SourceTextAtom", "") for row in rows)
+
+
 def test_source_record_messy_summary_pairs_earliest_date_with_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -1540,6 +1752,36 @@ def test_source_record_messy_summary_pairs_earliest_date_with_field() -> None:
     assert summary["PairedValues"] == "318201712"
 
 
+def test_source_record_messy_summary_selects_latest_date_with_sibling_values() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, date_of_incident, v_8_21_24).",
+        "source_record_date_alias(src_line_0020, v_8_21_24, v_2024_08_21).",
+        "source_record_field(src_line_0020, worksite_city_or_town, red_wing).",
+        "source_record_field(src_line_0020, type_of_business, golf_courses).",
+        "source_record_field(src_line_0079, date_of_incident, v_9_21_24).",
+        "source_record_date_alias(src_line_0079, v_9_21_24, v_2024_09_21).",
+        "source_record_field(src_line_0079, worksite_city_or_town, red_wing).",
+        "source_record_field(src_line_0079, type_of_business, golf_courses).",
+        "source_record_field_item(src_line_0079, type_of_business, country_clubs).",
+        "source_record_field(src_line_0079, outcome_of_mnosha_investigation, case_open).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='What is the latest "Date of incident" appearing in the document?',
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_extreme_date_field_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["Extreme"] == "latest"
+    assert summary["CanonicalDate"] == "2024_09_21"
+    assert summary["WorksiteCityOrTown"] == "red_wing"
+    assert "country_clubs" in summary["TypeOfBusiness"]
+    assert summary["OutcomeOfMnoshaInvestigation"] == "case_open"
+
+
 def test_source_record_messy_summary_normalizes_max_numeric_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -1561,6 +1803,49 @@ def test_source_record_messy_summary_normalizes_max_numeric_field() -> None:
     assert summary["MaxValue"] == "8000"
     assert summary["MaxDisplayValue"] == "8,000"
     assert "other_foundation_structure" in summary["TypeOfBusiness"]
+
+
+def test_source_record_messy_summary_does_not_select_unmentioned_numeric_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0020, total_employees_national, v_8_000).",
+        "source_record_field(src_line_0020, type_of_business, construction).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the largest penalty amount listed in the document?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_max_numeric_field_support" for item in companions)
+
+
+def test_source_record_messy_summary_extracts_ais_speed_change_from_source_text() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0068, "
+            "according_to_ais_data_the_vessel_s_speed_dropped_from_4_0_knots_at_1647_04_to_1_8_knots_at_1650_09)."
+        ),
+        (
+            "source_record_text_atom(src_line_0074, "
+            "about_1654_20_the_vessel_s_speed_had_dropped_to_0_6_knots_according_to_ais)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="According to AIS data, how did the vessel's speed change between 1647:04 and 1654:20?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_speed_change_support")
+    summary = companion["result"]["rows"][0]
+    assert summary["ObservationCount"] == "3"
+    assert "16:47:04: 4.0 knots" in summary["Sequence"]
+    assert "16:50:09: 1.8 knots" in summary["Sequence"]
+    assert "16:54:20: 0.6 knots" in summary["Sequence"]
 
 
 def test_source_record_messy_summary_extracts_weather_and_product_chronology() -> None:
@@ -1635,6 +1920,23 @@ def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
     assert row["MetadataConflict"] == "yes"
     assert "director_office_of_manufacturing_quality" in row["Roles"]
     assert len(companion["result"]["rows"]) == 1
+
+
+def test_source_record_messy_summary_ignores_unrelated_person_mentions_for_signatory() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_metadata(fda_wl, warning_letter, fda_office, 2025_02_26, francis_godwin).",
+        "entity_role(joseph_lambert, pharm_d).",
+        "source_record_row_context(src_line_0060, joseph_lambert, joseph_lambert, response_instructions).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Who signed the warning letter, and what role within FDA do they hold?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_body_signatory_support" for item in companions)
 
 
 def test_evidence_bundle_plan_preserves_source_record_repairs_for_temporal_joins() -> None:
