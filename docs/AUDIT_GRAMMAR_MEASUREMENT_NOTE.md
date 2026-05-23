@@ -7,6 +7,9 @@ not a benchmark leaderboard. It is a disciplined snapshot of the instrument as
 measured across native, sealed unseen, real-world, and older cold-transfer
 evidence.
 
+For the fuller methodology, read
+[Audit Grammar Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md).
+
 ## Claim
 
 Prethinker has crossed the line from "interesting harness" to a governed
