@@ -26,7 +26,7 @@ proposals across several distinct measurement classes.
 | Measurement class | Corpus | Result | Discipline metrics |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained story-world fixtures, 2163 rows | `1997 / 46 / 120`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
-| Real-world external spotcheck | 4 externally sourced real-world fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA | `4 / 4` compile gates pass, `0` compatibility rows, `0` runtime load errors, `0` write proposals |
+| Real-world external spotcheck | 4 externally sourced real-world fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates pass, `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Earlier cold transfer baseline | 6 fresh transfer fixtures, 240 rows | `177 / 10 / 53`, `73.75%` exact | cold source-only transfer before the current direct-surface work |
 
@@ -66,6 +66,8 @@ runtime writes rescue weak compiles.
   `lantern_school_field_trip`.
 - The sealed unseen fixtures were authored for this project, so they are useful
   transfer evidence but not a substitute for messy external documents.
+- The earlier cold-transfer baseline and the current real-world spotcheck are
+  different corpora, not the same documents measured before and after.
 
 ## Artifact Pointers
 
@@ -85,10 +87,11 @@ runtime writes rescue weak compiles.
 
 ## Public Summary Draft
 
-Prethinker moved from a 73.75% cold-transfer baseline six weeks ago to a
-92.33% native restamp, a 95.0% sealed-unseen transfer result, and a clean
-160/0/0 four-fixture real-world spotcheck, all with zero compatibility rows,
-zero runtime load errors, and zero QA write proposals. The caveat is open:
-native compile-gate noise increased and a few fixtures regressed, so the next
-cycle investigates gate calibration, query-surface gaps, and those regressions
-without hiding the current result.
+Prethinker now has a 92.33% native restamp, a 95.0% sealed-unseen transfer
+result, and a clean 160/0/0 four-fixture real-world spotcheck, all with zero
+compatibility rows, zero runtime load errors, and zero QA write proposals. The
+earlier 73.75% cold-transfer baseline remains useful architectural context, but
+it was a different six-fixture corpus. The caveat is open: native compile-gate
+noise increased and a few fixtures regressed, so the next cycle investigates
+gate calibration, query-surface gaps, and those regressions without hiding the
+current result.

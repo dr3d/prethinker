@@ -18,7 +18,7 @@ On May 22, 2026, Prethinker measured as follows:
 | Evidence class | Corpus | Result | Cleanliness counters |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained fixtures, 2163 judged rows | `1997 exact / 46 partial / 120 miss`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
-| Real-world external spotcheck | 4 externally sourced fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA | `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
+| Real-world external spotcheck | 4 externally sourced fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Earlier cold transfer baseline | 6 fresh transfer fixtures, 240 rows | `177 / 10 / 53`, `73.75%` exact | measured before the current direct-surface work |
 
@@ -26,6 +26,12 @@ The core claim is not "Prethinker solves documents." The claim is narrower and
 more useful: a model-proposed, deterministically admitted symbolic write layer
 can answer row-level questions over compiled document artifacts with high
 accuracy while preserving an auditable account of how the answer was reached.
+
+That discipline matters most in domains where plausible answers are not enough:
+legal, clinical, financial, safety, and regulatory workflows. In those settings
+the difference between a useful system and a liability is often whether the
+system can show what state was admitted, what policy answered from it, and which
+failure surface is responsible when an answer is wrong or incomplete.
 
 The externally sourced four-fixture real-world transfer inputs are retained at
 `datasets/real_world_transfer/20260521`; they remain separate from the native
@@ -182,6 +188,11 @@ The May 22 public claim therefore names four evidence classes:
 - Earlier cold transfer baseline: preserves the before-state from a less
   mature instrument.
 
+The earlier cold transfer baseline and the current real-world spotcheck are not
+the same documents measured before and after. They are different corpora, with
+different row counts and fixture shapes. The comparison is architectural
+context, not a controlled paired-document delta.
+
 The real-world and sealed-unseen results do not erase the native caveats. They
 answer a different question: whether the architecture transfers beyond the
 development corpus.
@@ -209,6 +220,8 @@ These measurements do not claim:
 - model-free QA;
 - proof that LLM-authored fixtures represent messy real-world documents;
 - proof that the compile gate is calibrated correctly;
+- proof that `91.12%` and `92.33%` are strictly comparable under identical gate
+  behavior;
 - proof that `92.33%` is a stable ceiling or floor.
 
 They do claim that the current instrument can be measured honestly, that it can
@@ -238,7 +251,7 @@ The best reading is balanced:
 - The architecture is stronger than the earlier cold-transfer baseline.
 - The real-world four-fixture spotcheck is clean and unusually encouraging.
 - The native restamp improved from `91.12%` to `92.33%` exact under the current
-  measurement.
+  measurement, but the two runs carried different gate calibration behavior.
 - The sealed unseen authored transfer at `95.0%` is useful, but it is not a
   substitute for messy external documents.
 - The compile gate is noisy and must be investigated.
