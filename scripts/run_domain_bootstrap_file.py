@@ -2451,6 +2451,11 @@ def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_pro
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_can_carry_quantity_event_delivery_unit(item)
     ]
+    scope_discrepancy_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_scope_discrepancy_delivery_unit(item)
+    ]
     if not quantity_carriers:
         return lines
     quantity_mentions = _quantity_event_source_mentions(source_text)
@@ -4250,11 +4255,17 @@ def _profile_delivery_report(
         for item in candidate_rows
         if _candidate_signature(item) and _candidate_can_carry_quantity_event_delivery_unit(item)
     ]
+    scope_discrepancy_carriers = [
+        _candidate_signature(item)
+        for item in candidate_rows
+        if _candidate_signature(item) and _candidate_can_carry_scope_discrepancy_delivery_unit(item)
+    ]
     source_authority_predicates = {signature.split("/", 1)[0] for signature in source_authority_carriers}
     source_claim_predicates = {signature.split("/", 1)[0] for signature in source_claim_carriers}
     status_state_predicates = {signature.split("/", 1)[0] for signature in status_state_carriers}
     vote_tally_predicates = {signature.split("/", 1)[0] for signature in vote_tally_carriers}
     quantity_predicates = {signature.split("/", 1)[0] for signature in quantity_carriers}
+    scope_discrepancy_predicates = {signature.split("/", 1)[0] for signature in scope_discrepancy_carriers}
     parsed_fact_rows = [
         (predicate, args, fact)
         for fact in _clause_list(source_compile.get("facts", []))
@@ -4295,11 +4306,17 @@ def _profile_delivery_report(
         parsed_fact_rows,
         key_fn=_quantity_event_fact_key,
     )
+    scope_discrepancy_delivery = _carrier_delivery_summary(
+        scope_discrepancy_predicates,
+        parsed_fact_rows,
+        key_fn=_scope_discrepancy_fact_key,
+    )
     delivered_source_authority = source_authority_delivery["predicates"]
     delivered_source_claim = source_claim_delivery["predicates"]
     delivered_status_state = status_state_delivery["predicates"]
     delivered_vote_tally = vote_tally_delivery["predicates"]
     delivered_quantity = quantity_delivery["predicates"]
+    delivered_scope_discrepancy = scope_discrepancy_delivery["predicates"]
     source_signal_counts = admission_report.get("source_signal_counts") if isinstance(admission_report, dict) else {}
     source_authority_signal_count = (
         int(source_signal_counts.get("source_authority") or 0)
@@ -4344,6 +4361,8 @@ def _profile_delivery_report(
         if isinstance(admission_report, dict) and isinstance(admission_report.get("quantity_event_required_key_counts"), dict)
         else {}
     )
+    scope_discrepancy_required_keys = _scope_discrepancy_required_keys(_scope_discrepancy_source_mentions(source_text))
+    scope_discrepancy_signal_count = len(scope_discrepancy_required_keys)
     findings: list[dict[str, Any]] = []
     _append_profile_delivery_finding(
         findings,
@@ -4392,6 +4411,16 @@ def _profile_delivery_report(
         required_signal_key_counts=quantity_required_key_counts,
         key_match_fn=_quantity_event_key_is_delivered,
     )
+    _append_profile_delivery_finding(
+        findings,
+        class_prefix="scope_discrepancy_carrier",
+        source_signal_count=scope_discrepancy_signal_count,
+        offered_carriers=scope_discrepancy_carriers,
+        delivery=scope_discrepancy_delivery,
+        emitted_predicates=emitted_predicates,
+        required_signal_keys=scope_discrepancy_required_keys,
+        key_match_fn=_scope_discrepancy_key_is_delivered,
+    )
     temporal_backbone = _event_identifier_temporal_backbone_report(source_compile)
     if temporal_backbone["missing_event_ids"]:
         findings.append(
@@ -4421,11 +4450,13 @@ def _profile_delivery_report(
             "status_state": status_state_signal_count,
             "vote_tally": vote_tally_signal_count,
             "quantity_event": quantity_signal_count,
+            "scope_discrepancy": scope_discrepancy_signal_count,
         },
         "carrier_row_requirements": {
             "quantity_event": quantity_required_row_count,
             "source_attributed_claim": len(source_claim_required_keys),
             "vote_tally": len(vote_tally_required_keys),
+            "scope_discrepancy": len(scope_discrepancy_required_keys),
         },
         "offered_carriers": {
             "source_authority": source_authority_carriers[:12],
@@ -4433,6 +4464,7 @@ def _profile_delivery_report(
             "status_state": status_state_carriers[:12],
             "vote_tally": vote_tally_carriers[:12],
             "quantity_event": quantity_carriers[:12],
+            "scope_discrepancy": scope_discrepancy_carriers[:12],
         },
         "delivered_carriers": {
             "source_authority": delivered_source_authority[:12],
@@ -4440,6 +4472,7 @@ def _profile_delivery_report(
             "status_state": delivered_status_state[:12],
             "vote_tally": delivered_vote_tally[:12],
             "quantity_event": delivered_quantity[:12],
+            "scope_discrepancy": delivered_scope_discrepancy[:12],
         },
         "delivered_carrier_row_counts": {
             "source_authority": source_authority_delivery["row_count"],
@@ -4447,6 +4480,7 @@ def _profile_delivery_report(
             "status_state": status_state_delivery["row_count"],
             "vote_tally": vote_tally_delivery["row_count"],
             "quantity_event": quantity_delivery["row_count"],
+            "scope_discrepancy": scope_discrepancy_delivery["row_count"],
         },
         "temporal_backbone": temporal_backbone,
         "findings": findings,
@@ -4591,6 +4625,8 @@ def _source_claim_key_is_delivered(required_key: str, delivered_key: str) -> boo
     if required_claim != delivered_claim:
         return False
     source_matches = required_source == delivered_source or "source" in {required_source, delivered_source}
+    if required_claim == "no_documentation":
+        return source_matches and required_subject == delivered_subject
     subject_matches = required_subject == delivered_subject or "claim" in {required_subject, delivered_subject}
     return source_matches and subject_matches
 
@@ -4660,6 +4696,15 @@ VOTE_TALLY_DELIVERY_PREDICATE_NAMES = {
     "vote_record",
     "vote_tally",
     "voting_record",
+}
+
+SCOPE_DISCREPANCY_DELIVERY_PREDICATE_NAMES = {
+    "conflict_between",
+    "discrepancy_between",
+    "discrepancy_in",
+    "record_discrepancy",
+    "scope_discrepancy",
+    "source_discrepancy",
 }
 
 SOURCE_CLAIM_BACKBONE_WRAPPER_PREDICATES = {
@@ -4773,6 +4818,16 @@ def _candidate_can_carry_vote_tally_delivery_unit(candidate: dict[str, Any]) -> 
     has_result = any(tokens & {"decision", "outcome", "result", "status", "vote"} for tokens in arg_tokens)
     has_tally = any(tokens & {"count", "member", "members", "roll", "tally", "votes"} for tokens in arg_tokens)
     return len(args) >= 4 or bool(has_result and has_tally)
+
+
+def _candidate_can_carry_scope_discrepancy_delivery_unit(candidate: dict[str, Any]) -> bool:
+    signature = _candidate_signature(candidate).lower()
+    name = signature.split("/", 1)[0]
+    if name not in SCOPE_DISCREPANCY_DELIVERY_PREDICATE_NAMES and not (
+        "discrepanc" in signature or "conflict" in signature
+    ):
+        return False
+    return len(_candidate_args(candidate)) >= 4
 
 
 def _fact_row_tokens(predicate: str, args: list[str]) -> set[str]:
@@ -4941,6 +4996,19 @@ def _vote_tally_key_is_delivered(required_key: str, delivered_key: str) -> bool:
     if len(required_parts) == 1:
         return True
     return any(part in delivered_parts for part in required_parts[:-1])
+
+
+def _scope_discrepancy_fact_key(predicate: str, args: list[str]) -> str:
+    name = str(predicate or "").casefold()
+    if name == "scope_discrepancy" and args:
+        return _scope_discrepancy_signal_key(str(args[0]))
+    return _scope_discrepancy_signal_key(" ".join([str(predicate), *(str(arg) for arg in args)]))
+
+
+def _scope_discrepancy_key_is_delivered(required_key: str, delivered_key: str) -> bool:
+    required = _scope_discrepancy_signal_key(required_key)
+    delivered = _scope_discrepancy_signal_key(delivered_key)
+    return bool(required and delivered and required == delivered)
 
 
 def _source_claim_backbone_coexistence_finding(
@@ -5234,6 +5302,17 @@ def _profile_bootstrap_admission_context(
             "value",
         )
     )
+    has_scope_discrepancy_pressure = any(
+        token in label
+        for token in (
+            "conflict",
+            "discrepancy",
+            "inconsistent",
+            "inconsistency",
+            "mismatch",
+            "scope discrepancy",
+        )
+    )
     context: list[str] = []
     if has_operational_pressure:
         context.extend(
@@ -5311,6 +5390,21 @@ def _profile_bootstrap_admission_context(
                     "Do not offer only event_description/2, note/2, summary/2, or other prose-wrapper surfaces for numeric "
                     "event details. A prose description is shallow when the source states query-bearing quantities, rates, "
                     "thresholds, offsets, durations, scores, or before/after values."
+                ),
+            ]
+        )
+    if has_scope_discrepancy_pressure:
+        context.extend(
+            [
+                (
+                    "Profile delivery rule: when two records, policies, contracts, orders, rules, or source surfaces "
+                    "state conflicting values, requirements, omissions, or scope details, a direct discrepancy carrier "
+                    "should be offered and populated when compatible."
+                ),
+                (
+                    "Do not leave source-stated conflicts only in source_record/source_detail prose. Keep issue, "
+                    "left value/source, right value/source, and basis joinable in scope_discrepancy/6, "
+                    "discrepancy_between/4, conflict_between/4, or an equivalent direct row."
                 ),
             ]
         )
@@ -5701,6 +5795,64 @@ def _vote_tally_required_keys(mentions: list[str]) -> list[str]:
     return keys
 
 
+def _scope_discrepancy_source_mentions(source_text: str) -> list[str]:
+    mentions: list[str] = []
+    for raw_line in str(source_text or "").splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        lowered = line.casefold()
+        tokens = _profile_admission_tokens(lowered)
+        record_pair = bool(re.search(r"\brecord\s+[a-z0-9]+\b.*\brecord\s+[a-z0-9]+\b", lowered))
+        compares_records = (
+            len(tokens & {"agreement", "contract", "order", "policy", "record", "resolution", "rule"}) >= 2
+            or record_pair
+        )
+        states_comparison = bool(tokens & {"differs", "discrepancy", "conflict", "states", "specifies", "requires"})
+        omission_comparison = bool(re.search(r"\b(?:does\s+not\s+mention|not\s+addressed|omits?|missing)\b", lowered))
+        if compares_records and (states_comparison or omission_comparison):
+            mentions.append(line[:500])
+    return mentions
+
+
+def _scope_discrepancy_required_keys(mentions: list[str]) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for mention in mentions:
+        key = _scope_discrepancy_signal_key(mention)
+        if key and key not in seen:
+            seen.add(key)
+            keys.append(key)
+    return keys
+
+
+def _scope_discrepancy_signal_key(text: str) -> str:
+    lowered = str(text or "").casefold().replace("-", "_")
+    compact = _normalize_profile_atom(lowered)
+    label = compact
+    label_match = re.match(r"(?:v_\d+|[0-9]{1,3})?_?([a-z0-9_]{3,80}?)(?:_the_|_resolution_|_agreement_|:|$)", compact)
+    if label_match:
+        label = label_match.group(1)
+    aliases = {
+        "progress_reports": "reporting_frequency",
+        "progress_reporting": "reporting_frequency",
+        "reports": "reporting_frequency",
+        "project_timeline": "timeline",
+        "completion_timeline": "timeline",
+        "timeline": "timeline",
+        "fire_hydrants": "fire_hydrants",
+        "hydrants": "fire_hydrants",
+        "pipe_length": "pipe_length",
+        "length": "pipe_length",
+        "pipe_diameter": "pipe_diameter",
+        "diameter": "pipe_diameter",
+    }
+    for needle, value in aliases.items():
+        if needle in compact:
+            return value
+    return re.sub(r"^v_\d+_", "", label).strip("_")
+
+
 def _vote_tally_signal_key(text: str) -> str:
     lowered = str(text or "").casefold().replace("-", "_")
     tokens = _profile_admission_tokens(lowered)
@@ -5751,6 +5903,8 @@ def _source_attributed_claim_signal_key(text: str) -> str:
         source_kind = "statement"
     subject_kind = "claim"
     for candidate, markers in (
+        ("architect_documentation", {"architect", "documentation"}),
+        ("documentation", {"documentation"}),
         ("letter_of_intent", {"letter", "intent"}),
         ("draft", {"draft"}),
         ("amendment", {"amendment"}),

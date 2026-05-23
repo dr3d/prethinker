@@ -1081,6 +1081,23 @@ def test_quality_retry_context_names_numeric_event_details() -> None:
     assert "do not replace the direct numeric value row" in joined
 
 
+def test_quality_retry_context_names_scope_discrepancy_missing_issues() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "profile_delivery:scope_discrepancy_carrier_partially_delivered:"
+                "source=5:offered=scope_discrepancy/6:missing=reporting_frequency,fire_hydrants"
+            ]
+        }
+    )
+
+    joined = "\n".join(lines)
+    assert "not the full source-stated discrepancy set" in joined
+    assert "reporting_frequency" in joined
+    assert "fire_hydrants" in joined
+    assert "both sides and the source/basis joinable" in joined
+
+
 def test_quality_retry_context_names_duration_total_for_partial_quantity_delivery() -> None:
     lines = _quality_retry_context_lines(
         {
@@ -1439,6 +1456,45 @@ def test_compile_quality_gate_holds_profile_delivery_flag() -> None:
     assert gate["reasons"] == [
         "profile_delivery:status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
     ]
+
+
+def test_compile_quality_gate_holds_zero_yield_compile_health() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {"candidate_predicates": [{"signature": "source_claim/3"}]},
+            "source_compile": {
+                "admitted_count": 30,
+                "skipped_count": 0,
+                "compile_health": {
+                    "verdict": "poor",
+                    "flag_counts": {"zero_yield": 1},
+                },
+                "surface_contribution": [
+                    {
+                        "pass_id": "pass_4",
+                        "purpose": "Extract testimony and decision records.",
+                        "health_flags": ["zero_yield"],
+                    }
+                ],
+            },
+            "score": {"rough_score": 1.0, "risk_count": 2},
+        }
+    )
+
+    gate = _quality_gate_result(
+        {"fixture": "fixture_zero_yield", "returncode": 0, "compile_json": "compile.json", "summary": summary},
+        min_rough_score=0.775,
+        max_risk_count=5,
+    )
+    lines = _quality_retry_context_lines(gate)
+
+    assert gate["passed"] is False
+    assert "compile_health:verdict=poor" in gate["reasons"]
+    assert "compile_health:zero_yield=1" in gate["reasons"]
+    assert any(reason.startswith("compile_health:zero_yield_pass:pass_4:") for reason in gate["reasons"])
+    assert any("planned focused pass that emitted zero facts" in line for line in lines)
+    assert any("testimony and decision records" in line for line in lines)
 
 
 def test_quality_retry_context_lines_are_generic_for_wrapper_and_lifecycle_holds() -> None:

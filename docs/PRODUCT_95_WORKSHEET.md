@@ -703,3 +703,59 @@ Thornfield is a cleaner compile gap:
 Next blocker before another native stamp: improve compile emission for
 condition-scoped speaker objections and multi-document discrepancy lists, then
 replay these two rows before deciding whether a full native restamp is earned.
+
+## 2026-05-23 Compile-Emission Recovery Work
+
+Goal: clear the last native compile-surface blockers without spending a full
+native stamp.
+
+Implemented instrument changes:
+
+- Source-claim delivery now distinguishes `architect_documentation:no_documentation`
+  from unrelated permit/no-record rows. This prevents a permit-status row from
+  satisfying a condition-b architect-documentation objection.
+- Added scope-discrepancy profile delivery checks and retry guidance for
+  multi-record conflict lists: issue, left value/source, right value/source, and
+  basis must be joinable in a direct discrepancy carrier.
+- Added compile-health quality-gate holds for `zero_yield` focused passes. A
+  planned pass that emits zero rows now generates retry context naming the dead
+  pass instead of letting a broad source-record ledger hide the skipped section.
+
+Focused validation:
+
+```text
+tests/test_domain_bootstrap_file.py + tests/test_domain_bootstrap_file_batch.py
++ tests/test_compile_surface_stability.py + tests/test_query_hint_surfaces.py:
+260 passed
+```
+
+Targeted replay results:
+
+```text
+northbridge_authority_packet compile retry:
+  QA: 40 / 0 / 0
+  compatibility rows: 0
+  write proposal rows: 0
+  remaining gate flag: conservative scope_discrepancy partial-delivery flag
+
+thornfield_variance first retry:
+  QA: 27 / 2 / 11
+  read: board-deliberation/testimony pass zero-yielded; this was a real
+  struggle-detection miss in the gate.
+
+thornfield_variance after zero-yield gate retry:
+  QA: 37 / 1 / 2
+  compatibility rows: 0
+  write proposal rows: 0
+  remaining non-exact rows:
+    q014 drainage-easement rationale for condition (a)
+    q032 Marchetti testimony that Koss initially had no objection
+    q040 partial unresolved-survey-dispute linkage
+```
+
+Read: Northbridge is answer-clean. Thornfield moved from broad compile collapse
+to three specific residual evidence-link gaps. The zero-yield gate is worth
+keeping because it caught exactly the product-relevant failure mode: a planned
+answer-bearing source section silently produced no ordinary facts.
+
+Artifact archive: `C:\prethinker_tmp_archive\native_compile_recovery_20260523`

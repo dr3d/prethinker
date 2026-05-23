@@ -629,6 +629,7 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "table_list_surface_coverage_flags": _table_list_surface_coverage_flags(payload),
         "table_list_surface_flags": _table_list_surface_flags(payload),
         "identity_canonicality_flags": _identity_canonicality_flags(payload),
+        "compile_health_flags": _compile_health_flags(payload),
     }
 
 
@@ -651,6 +652,53 @@ def _refresh_profile_delivery_reports(payload: dict[str, Any]) -> None:
         source_text=source_text,
         parsed_profile=parsed_profile,
     )
+
+
+def _compile_health_flags(payload: dict[str, Any]) -> list[str]:
+    source_compile = payload.get("source_compile")
+    if not isinstance(source_compile, dict):
+        return []
+    health = source_compile.get("compile_health")
+    if not isinstance(health, dict):
+        return []
+    flags: list[str] = []
+    verdict = str(health.get("verdict", "")).strip()
+    if verdict == "poor":
+        flags.append("verdict=poor")
+    flag_counts = health.get("flag_counts")
+    if isinstance(flag_counts, dict):
+        for flag, count in sorted(flag_counts.items()):
+            text = str(flag).strip()
+            if text in {"pass_not_ok", "zero_yield"} and int(count or 0) > 0:
+                flags.append(f"{text}={int(count or 0)}")
+    for row in source_compile.get("surface_contribution", []):
+        if not isinstance(row, dict):
+            continue
+        health_flags = [str(item).strip() for item in row.get("health_flags", []) if str(item).strip()] if isinstance(row.get("health_flags"), list) else []
+        if "zero_yield" not in health_flags:
+            continue
+        pass_id = _normalize_reason_fragment(str(row.get("pass_id", "") or "unknown_pass"))[:60]
+        purpose = _normalize_reason_fragment(str(row.get("purpose", "") or "unspecified_purpose"))[:160]
+        flags.append(f"zero_yield_pass:{pass_id}:{purpose}")
+    return _dedupe_preserve_order(flags)
+
+
+def _normalize_reason_fragment(text: str) -> str:
+    lowered = str(text or "").strip().casefold().replace("`", "")
+    lowered = re.sub(r"[^a-z0-9_.:/ -]+", " ", lowered)
+    lowered = re.sub(r"\s+", "_", lowered)
+    return lowered.strip("_")
+
+
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value).strip()
+        if text and text not in seen:
+            seen.add(text)
+            out.append(text)
+    return out
 
 
 def _run_job_with_optional_quality_retry(
@@ -854,6 +902,18 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
             lines.append(line)
 
     for reason in reasons:
+        if reason.startswith("compile_health:zero_yield_pass:"):
+            body = reason.split("compile_health:zero_yield_pass:", 1)[1]
+            parts = body.split(":", 1)
+            pass_id = parts[0] if parts else "a planned pass"
+            purpose = parts[1].replace("_", " ") if len(parts) > 1 else "the planned source section"
+            add(
+                "QUALITY GATE RETRY: the prior compile had a planned focused pass that emitted zero facts "
+                f"({pass_id}: {purpose}). In this retry, revisit that source section and emit direct queryable rows "
+                "for each stated testimony, finding, decision, vote, correction, appeal, unresolved issue, or "
+                "source-attributed claim covered by the pass. Do not treat source_record/source_detail rows as a "
+                "replacement for the pass's ordinary facts."
+            )
         if reason.startswith("detail_wrapper_drift:") and "_backbone_missing_with_wrapper:" in reason:
             body = reason.split("detail_wrapper_drift:", 1)[1]
             group = body.split("_backbone_missing_with_wrapper:", 1)[0].strip()
@@ -1186,6 +1246,35 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                         "a joinable argument in event_measurement/4, event_duration/3, line_stop_duration/2, "
                         "interval_duration/3, duration_between/3, or an equivalent allowed carrier."
                     )
+        if "profile_delivery:scope_discrepancy_carrier_offered_but_undelivered:" in reason:
+            missing_discrepancy_keys = _profile_delivery_missing_keys_from_reason(reason)
+            add(
+                "QUALITY GATE RETRY: the prior compile offered a direct discrepancy/conflict carrier but emitted no "
+                "matching rows. In this retry, populate scope_discrepancy/6, discrepancy_between/4, conflict_between/4, "
+                "or an equivalent allowed carrier for every source-stated difference between two governing records, "
+                "including value mismatches, timeline mismatches, reporting-frequency mismatches, and one-record-omits "
+                "while another-record-requires cases. Keep issue, left value/source, right value/source, and basis joinable."
+            )
+            if missing_discrepancy_keys:
+                add(
+                    "QUALITY GATE RETRY: missing discrepancy issues from the prior compile were "
+                    f"{', '.join(missing_discrepancy_keys[:6])}. Emit direct discrepancy rows for these issues; "
+                    "source_record_text/source_detail rows are provenance only and do not replace the direct carrier."
+                )
+        if "profile_delivery:scope_discrepancy_carrier_partially_delivered:" in reason:
+            missing_discrepancy_keys = _profile_delivery_missing_keys_from_reason(reason)
+            add(
+                "QUALITY GATE RETRY: the prior compile populated some discrepancy/conflict rows but not the full "
+                "source-stated discrepancy set. In this retry, emit one direct discrepancy carrier for each listed "
+                "or explicitly compared issue, including omissions and reporting/timeline differences, not only the "
+                "first or most numeric examples."
+            )
+            if missing_discrepancy_keys:
+                add(
+                    "QUALITY GATE RETRY: missing discrepancy issues from the prior compile were "
+                    f"{', '.join(missing_discrepancy_keys[:6])}. Preserve those issues as direct rows with both "
+                    "sides and the source/basis joinable."
+                )
     return lines
 
 
@@ -2015,6 +2104,13 @@ def _quality_gate_result(
     ] if isinstance(item.get("identity_canonicality_flags"), list) else []
     if identity_flags:
         reasons.extend(f"identity_canonicality:{flag}" for flag in identity_flags)
+    compile_health_flags = [
+        str(flag)
+        for flag in item.get("compile_health_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("compile_health_flags"), list) else []
+    if compile_health_flags:
+        reasons.extend(f"compile_health:{flag}" for flag in compile_health_flags)
     admitted = _optional_int(item.get("compile_admitted")) or 0
     skipped = _optional_int(item.get("compile_skipped")) or 0
     effective_admitted = _optional_int(item.get("compile_effective_admitted"))
@@ -2049,6 +2145,7 @@ def _quality_gate_result(
         "table_list_surface_coverage_flags": table_list_coverage_flags,
         "table_list_surface_flags": table_list_flags,
         "identity_canonicality_flags": identity_flags,
+        "compile_health_flags": compile_health_flags,
     }
 
 

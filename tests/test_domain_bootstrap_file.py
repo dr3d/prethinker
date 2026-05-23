@@ -1770,6 +1770,50 @@ def test_profile_admission_keys_speaker_framed_source_claims() -> None:
     ]
 
 
+def test_profile_admission_distinguishes_architect_documentation_claims_from_permit_records() -> None:
+    source_text = (
+        'Panel Member says: "I disagree. No documentation from the architect has been submitted."\n'
+        "Staff note says no record of the separate permit has been issued."
+    )
+    report = _profile_admission_report(
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_or_speaker", "content_or_status", "source_row_or_scope"],
+                }
+            ]
+        },
+        source_text=source_text,
+    )
+
+    assert "statement:architect_documentation:no_documentation" in report["source_attributed_claim_required_keys"]
+
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "source_attributed_claim(staff_note, staff, no_record_of_the_separate_permit_has_been_issued, section_a).",
+        ],
+    }
+    delivery = domain_bootstrap_file._profile_delivery_report(
+        source_compile=source_compile,
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_claim/4",
+                    "args": ["claim_id", "source_or_speaker", "content_or_status", "source_row_or_scope"],
+                }
+            ]
+        },
+        admission_report=report,
+        source_text=source_text,
+    )
+
+    finding = delivery["findings"][0]
+    assert finding["class"] == "source_claim_carrier_partially_delivered"
+    assert "statement:architect_documentation:no_documentation" in finding["missing_signal_keys"]
+
+
 def test_profile_admission_speaker_frames_do_not_promote_admin_headings() -> None:
     report = _profile_admission_report(
         parsed_profile={
@@ -2102,6 +2146,52 @@ def test_profile_delivery_flags_offered_status_state_carrier_without_emitted_row
     health = source_compile["compile_health"]
     assert health["flag_counts"]["status_state_carrier_offered_but_undelivered"] == 1
     assert "profile_delivery" in health["unhealthy_passes"]
+
+
+def test_profile_delivery_flags_partial_scope_discrepancy_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "scope_discrepancy(pipe_length, 3200_feet, record_a, 3400_feet, record_b, revised_survey).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="policy contract discrepancy conflict agreement resolution",
+        source_text=(
+            "1. Pipe length: Record A states 3,200 feet. Record B states 3,400 feet.\n"
+            "2. Progress reports: Record A requires monthly reports. Record B requires quarterly reports.\n"
+            "3. Fire hydrants: Record A does not mention hydrants. Record B requires twelve hydrants."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "scope_discrepancy/6",
+                    "args": ["issue", "left_value", "left_record", "right_value", "right_record", "basis"],
+                },
+            ]
+        },
+    )
+
+    delivery = source_compile["profile_delivery"]
+    finding = delivery["findings"][0]
+    assert finding["class"] == "scope_discrepancy_carrier_partially_delivered"
+    assert finding["missing_signal_keys"] == ["reporting_frequency", "fire_hydrants"]
+    assert delivery["delivered_carrier_row_counts"]["scope_discrepancy"] == 1
+    assert source_compile["compile_health"]["flag_counts"]["scope_discrepancy_carrier_partially_delivered"] == 1
 
 
 def test_profile_delivery_flags_offered_source_claim_carrier_without_emitted_rows() -> None:
