@@ -189,3 +189,85 @@ part of the R4 instrument being tested. But treat Batch 02 as the thermometer:
 if the same surfaces transfer cleanly, they are product learning; if they mostly
 serve Batch 01 shapes, they are research-corpus memory and should be retired or
 converted into stricter direct compile surfaces.
+
+## Same-Day Adjudication
+
+Follow-up work added three adjudication instruments:
+
+- source-record-summary ablation switches in the QA runner:
+  `--disable-current-source-record-summaries` and
+  `--disable-support-predicate`;
+- an active-code leakage audit:
+  `scripts/audit_active_instrument_leakage.py`;
+- metamorphic unit tests for two previously over-literal summaries.
+
+Static audit result:
+
+```text
+artifact archive:
+  C:\prethinker_tmp_archive\support_surface_ablation_20260524
+
+status:
+  pass
+active files scanned:
+  23
+forbidden hits:
+  0
+warnings:
+  10
+```
+
+The warnings are document-class terms in active code: `MARCS`, `CMS`, `FEI`,
+`CFR`, and the `SEC` profile/router label. They are not fixture names or answer
+phrases, but they should stay visible as document-class priors.
+
+Metamorphic fixes:
+
+- Weather observation support no longer keys on `KGLS`; a test with synthetic
+  station code `KABC` now exercises the same structure.
+- Group-formation exception support no longer hardcodes the NTSB ATC group; a
+  test with a synthetic `hazmat_group` and `hazardous_materials_specialist` now
+  exercises the same structure.
+
+Batch 01 ablation over fixed R3 compiles:
+
+```text
+baseline R4 with current source-record summaries:
+  193 / 3 / 4 = 96.5%
+
+R4 with --disable-current-source-record-summaries:
+  187 / 4 / 9 = 93.5%
+
+delta:
+  -6 exact, +1 partial, +5 miss
+
+hygiene:
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Row movement versus R4:
+
+```text
+changed rows: 15
+improved rows under ablation: 4
+regressed rows under ablation: 11
+baseline exact -> non-exact under ablation: 10
+baseline exact -> miss under ablation: 7
+```
+
+Read:
+
+The source-record summary layer is materially load-bearing on Batch 01. It is
+worth roughly six exact rows on this corpus, and several of those rows become
+compile-surface gaps when the layer is removed. That means the layer is not
+cosmetic and should not be described as absent. It is a clean query-only support
+layer with zero compatibility pressure, but it is also carrying product answers
+that direct compile surfaces do not yet carry.
+
+This sharpens the Batch 02 question. If Batch 02 holds near the R4 level, the
+source-record summaries are likely product learning over messy documents. If it
+falls back toward the ablated level or shows class-specific failures, those
+summaries should be treated as Batch 01 shape memory and promoted into stricter
+compile surfaces or retired.

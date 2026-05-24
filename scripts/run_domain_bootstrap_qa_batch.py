@@ -75,6 +75,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Opt in to older native-corpus compatibility adapters for forensic replay.",
     )
+    parser.add_argument(
+        "--disable-current-source-record-summaries",
+        action="store_true",
+        help="Pass through to QA runner for source-record summary ablation.",
+    )
+    parser.add_argument(
+        "--disable-support-predicate",
+        action="append",
+        default=[],
+        help="Pass through to QA runner. Repeat to disable multiple support predicates.",
+    )
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -105,6 +116,8 @@ def main() -> int:
             cache=not bool(args.no_cache),
             compatibility_adapter_row_limit=args.compatibility_adapter_row_limit,
             include_retired_native_compatibility_adapters=bool(args.include_retired_native_compatibility_adapters),
+            disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
+            disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
         )
         for job in jobs
     ]
@@ -187,6 +200,8 @@ def _build_command(
     cache: bool = True,
     compatibility_adapter_row_limit: int | None = 0,
     include_retired_native_compatibility_adapters: bool = False,
+    disable_current_source_record_summaries: bool = False,
+    disabled_support_predicates: tuple[str, ...] = (),
 ) -> list[str]:
     command = [
         sys.executable,
@@ -218,6 +233,10 @@ def _build_command(
         command.extend(["--compatibility-adapter-row-limit", str(int(compatibility_adapter_row_limit))])
     if include_retired_native_compatibility_adapters:
         command.append("--include-retired-native-compatibility-adapters")
+    if disable_current_source_record_summaries:
+        command.append("--disable-current-source-record-summaries")
+    for predicate in disabled_support_predicates:
+        command.extend(["--disable-support-predicate", predicate])
     if evidence_bundle:
         command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
     return command

@@ -879,3 +879,88 @@ Discipline note:
 R4 is a full QA rerun over fixed R3 compiles. It is valid evidence for query-side
 repair behavior on this corpus, not a new compile stamp and not a fresh-document
 generalization result.
+
+## 2026-05-24 Source-Record Summary Ablation
+
+Purpose:
+
+Adjudicate whether current source-record summaries are cosmetic query support or
+materially load-bearing on Batch 01. This was run because the R3 -> R4
+comparison showed one regression with an added support surface, and because the
+project has already retired compatibility helpers once.
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_01
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_r3_20260524\fresh_ugly_public_20260524_01_compile_r3
+QA model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6
+cache:
+  disabled
+ablation:
+  --disable-current-source-record-summaries
+```
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\support_surface_ablation_20260524`
+
+Result:
+
+```text
+R4 current source-record summaries:
+  193 / 3 / 4 = 96.5%
+
+R4 with current source-record summaries disabled:
+  187 / 4 / 9 = 93.5%
+
+delta:
+  -6 exact, +1 partial, +5 miss
+
+hygiene:
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Per-fixture ablation:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `fda_warning_ugly_001` | 23 | 0 | 2 |
+| `fda_warning_ugly_002` | 23 | 1 | 1 |
+| `ntsb_aviation_ugly_001` | 25 | 0 | 0 |
+| `ntsb_marine_ugly_001` | 23 | 0 | 2 |
+| `osha_incident_ugly_001` | 25 | 0 | 0 |
+| `osha_incident_ugly_002` | 23 | 1 | 1 |
+| `sec_material_event_ugly_001` | 22 | 1 | 2 |
+| `sec_material_event_ugly_002` | 23 | 1 | 1 |
+
+Row movement versus R4:
+
+```text
+changed rows: 15
+improved rows under ablation: 4
+regressed rows under ablation: 11
+baseline exact -> non-exact under ablation: 10
+baseline exact -> miss under ablation: 7
+```
+
+Read:
+
+The source-record summary layer is materially load-bearing on Batch 01. It
+contributes about six exact rows on this corpus while keeping runtime,
+write-proposal, and compatibility pressure at zero. It is not answer-key
+leakage, but it is not absent and should not be hidden behind "no helper"
+language.
+
+The ablation also improved four rows, which means the layer can perturb answers
+as well as recover them. The right discipline is not to rip it out before Batch
+02, but to measure it openly: if the same source-record summaries transfer to
+new documents, they are product learning; if they mostly serve Batch 01 shapes,
+they should be promoted into stricter compile surfaces or retired.

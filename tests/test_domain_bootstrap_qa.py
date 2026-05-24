@@ -20,6 +20,7 @@ from scripts.run_domain_bootstrap_qa import (
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
     _event_elapsed_duration_companion,
+    _filter_disabled_support_surfaces,
     _limit_helper_query_results,
     _location_floor_hint_queries,
     _negative_join_with_previous,
@@ -1904,6 +1905,31 @@ def test_source_record_messy_summary_extracts_weather_and_product_chronology() -
     assert "15:44: special_marine_warning_update" in sequence
 
 
+def test_source_record_weather_observation_generalizes_station_code() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_9001, "
+        "the_nearest_weather_reporting_location_was_test_field_kabc_thunderstorms_were_reported_at_kabc_"
+        "beginning_at_1015_with_winds_gusting_up_to_32_knots_at_1044_thunderstorms_ended_at_1112_"
+        "with_about_1_25_inches_of_rainfall)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What weather conditions were reported at KABC, including start, gust, end, and rainfall?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_weather_observation_support"
+    )
+    row = companion["result"]["rows"][0]
+    assert row["Location"] == "kabc"
+    assert row["ThunderstormStart"] == "10:15"
+    assert row["MaxWindGust"] == "32 knots"
+    assert row["ThunderstormEnd"] == "11:12"
+    assert row["Rainfall"] == "1.25 inches"
+
+
 def test_source_record_messy_summary_orders_document_events() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -1977,6 +2003,66 @@ def test_source_record_messy_summary_extracts_not_formed_group_exception() -> No
     assert row["Group"] == "air_traffic_controller_atc_group"
     assert row["FormationStatus"] == "not_formed"
     assert row["Specialist"] == "ntsb_air_traffic_controller_atc_specialist"
+
+
+def test_source_record_group_formation_exception_generalizes_group_name() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_9002, "
+        "the_parties_were_formed_into_specialized_investigative_groups_led_by_group_chairmen_"
+        "a_hazardous_materials_specialist_was_on_site_to_collect_hazmat_information_"
+        "but_a_hazmat_group_was_not_formed)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Which specialist group was not formed despite a specialist being on site?",
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_group_formation_exception_support"
+    )
+    row = companion["result"]["rows"][0]
+    assert row["Group"] == "hazmat_group"
+    assert row["FormationStatus"] == "not_formed"
+    assert row["Specialist"] == "hazardous_materials_specialist"
+
+
+def test_filter_disabled_support_surfaces_removes_current_source_record_summaries_only() -> None:
+    rows = [
+        {
+            "result": {
+                "predicate": "source_record_weather_observation_support",
+                "rows": [{"SupportClass": "deterministic-source-record-summary"}],
+            }
+        },
+        {
+            "result": {
+                "predicate": "status_timeline_summary_support",
+                "rows": [{"SupportClass": "deterministic-query-summary"}],
+            }
+        },
+        {
+            "result": {
+                "predicate": "roster_state_support",
+                "rows": [{"SupportClass": "deterministic-query-summary"}],
+                "reasoning_basis": {"adapter_status": "legacy_native_compatibility_adapter"},
+            }
+        },
+    ]
+
+    filtered = _filter_disabled_support_surfaces(
+        rows,
+        disable_current_source_record_summaries=True,
+        disabled_support_predicates=set(),
+    )
+
+    assert [item["result"]["predicate"] for item in filtered] == [
+        "status_timeline_summary_support",
+        "roster_state_support",
+    ]
 
 
 def test_event_elapsed_duration_companion_computes_departure_to_casualty() -> None:

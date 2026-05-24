@@ -391,8 +391,8 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 "",
                 "## Row Verdict Changes",
                 "",
-                "| Row | Movement | Verdict | Failure Surface | Added Support Surfaces |",
-                "| --- | --- | --- | --- | --- |",
+                "| Row | Movement | Verdict | Failure Surface | Added Support Surfaces | Removed Support Surfaces |",
+                "| --- | --- | --- | --- | --- | --- |",
             ]
         )
         for row in changes:
@@ -405,8 +405,12 @@ def render_markdown(payload: dict[str, Any]) -> str:
                     label = f"{label} ({cls})"
                 added_parts.append(label)
             added = ", ".join(added_parts) or "-"
+            removed = ", ".join(
+                f"`{item}`"
+                for item in row.get("removed_support_predicates", row.get("removed_helper_predicates", []))
+            ) or "-"
             lines.append(
-                "| `{fixture}` `{qid}` | `{movement}` | `{before}` -> `{after}` | `{base_surface}` -> `{cand_surface}` | {added} |".format(
+                "| `{fixture}` `{qid}` | `{movement}` | `{before}` -> `{after}` | `{base_surface}` -> `{cand_surface}` | {added} | {removed} |".format(
                     fixture=row.get("fixture", ""),
                     qid=row.get("id", ""),
                     movement=row.get("movement", ""),
@@ -415,6 +419,7 @@ def render_markdown(payload: dict[str, Any]) -> str:
                     base_surface=row.get("baseline_failure_surface", ""),
                     cand_surface=row.get("candidate_failure_surface", ""),
                     added=added,
+                    removed=removed,
                 )
             )
     return "\n".join(lines).rstrip() + "\n"

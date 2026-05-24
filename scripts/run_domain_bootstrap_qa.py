@@ -545,6 +545,23 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--disable-current-source-record-summaries",
+        action="store_true",
+        help=(
+            "Ablation mode: remove current deterministic source-record summary support surfaces "
+            "from QA evidence. Retired compatibility adapters remain governed by their own flags."
+        ),
+    )
+    parser.add_argument(
+        "--disable-support-predicate",
+        action="append",
+        default=[],
+        help=(
+            "Ablation mode: remove a named query support predicate from QA evidence. "
+            "Repeat to disable multiple predicates."
+        ),
+    )
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
@@ -686,6 +703,8 @@ def main() -> int:
         evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
         helper_companion_row_limit=args.helper_companion_row_limit,
         include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
+        disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
+        disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
         classify_failure_surfaces=bool(args.classify_failure_surfaces),
     )
     for item in questions:
@@ -718,6 +737,8 @@ def main() -> int:
                 evidence_bundle_context_broad_floor=int(args.evidence_bundle_context_broad_floor or 0),
                 helper_companion_row_limit=args.helper_companion_row_limit,
                 include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
+                disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
+                disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
@@ -795,6 +816,8 @@ def build_cache_context(
     evidence_bundle_context_broad_floor: int,
     helper_companion_row_limit: int | None,
     include_legacy_native_helper_adapters: bool,
+    disable_current_source_record_summaries: bool,
+    disabled_support_predicates: tuple[str, ...],
     classify_failure_surfaces: bool,
 ) -> dict[str, Any]:
     return {
@@ -846,6 +869,8 @@ def build_cache_context(
         "compatibility_adapter_row_limit": helper_companion_row_limit,
         "compatibility_adapter_budget_ranker": "lexical_query_overlap_v1",
         "include_retired_native_compatibility_adapters": bool(include_legacy_native_helper_adapters),
+        "disable_current_source_record_summaries": bool(disable_current_source_record_summaries),
+        "disabled_support_predicates": list(disabled_support_predicates),
         "classify_failure_surfaces": bool(classify_failure_surfaces),
     }
 
@@ -1752,6 +1777,8 @@ def run_one_question(
     evidence_bundle_context_broad_floor: int,
     helper_companion_row_limit: int | None,
     include_legacy_native_helper_adapters: bool,
+    disable_current_source_record_summaries: bool = False,
+    disabled_support_predicates: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
     kb_context_pack = {
@@ -1948,6 +1975,11 @@ def run_one_question(
     vote_disambiguation = _vote_record_disambiguation_companion(query_results, utterance=utterance)
     if vote_disambiguation:
         query_results.append(vote_disambiguation)
+    query_results = _filter_disabled_support_surfaces(
+        query_results,
+        disable_current_source_record_summaries=disable_current_source_record_summaries,
+        disabled_support_predicates=set(disabled_support_predicates),
+    )
     query_results = _dedupe_helper_query_results(query_results)
     query_results = _limit_helper_query_results(
         query_results,
@@ -6935,6 +6967,41 @@ def _mark_legacy_native_helper_adapter(companion: dict[str, Any]) -> dict[str, A
             },
         },
     }
+
+
+def _filter_disabled_support_surfaces(
+    query_results: list[dict[str, Any]],
+    *,
+    disable_current_source_record_summaries: bool,
+    disabled_support_predicates: set[str],
+) -> list[dict[str, Any]]:
+    if not disable_current_source_record_summaries and not disabled_support_predicates:
+        return query_results
+    out: list[dict[str, Any]] = []
+    for item in query_results:
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict):
+            out.append(item)
+            continue
+        predicate = str(result.get("predicate") or "").strip()
+        if predicate and predicate in disabled_support_predicates:
+            continue
+        if disable_current_source_record_summaries and _is_current_source_record_summary_result(predicate, result):
+            continue
+        out.append(item)
+    return out
+
+
+def _is_current_source_record_summary_result(predicate: str, result: dict[str, Any]) -> bool:
+    basis = result.get("reasoning_basis", {}) if isinstance(result, dict) else {}
+    if isinstance(basis, dict) and basis.get("adapter_status") == "legacy_native_compatibility_adapter":
+        return False
+    rows = result.get("rows") if isinstance(result, dict) else None
+    if isinstance(rows, list):
+        for row in rows:
+            if isinstance(row, dict) and row.get("SupportClass") == "deterministic-source-record-summary":
+                return True
+    return str(predicate or "").startswith("source_record_") and str(predicate or "").endswith("_support")
 
 
 def _source_record_packet_metadata_companion(
@@ -16987,12 +17054,15 @@ def _source_record_weather_observation_companion(
     utterance: str,
 ) -> dict[str, Any] | None:
     text = str(utterance or "").casefold()
-    if "kgls" not in text and not ("weather" in text and "rainfall" in text):
+    if not re.search(r"\b(?:weather|rainfall|thunderstorm|gust|wind|conditions?)\b", text):
         return None
     support_rows: list[dict[str, str]] = []
     for source_row, text_atom in _source_record_text_atoms(runtime):
         tokens = set(_query_atom_tokens(text_atom))
-        if "kgls" not in tokens or "thunderstorms" not in tokens:
+        if "thunderstorms" not in tokens and "thunderstorm" not in tokens:
+            continue
+        station = _source_record_weather_station_atom(text_atom)
+        if not station:
             continue
         start = _first_regex_group(text_atom, r"(?:^|_)beginning_at_(\d{3,4})(?:_|$)")
         gust_match = re.search(r"(?:^|_)gusting_up_to_(\d+)_knots_at_(\d{3,4})(?:_|$)", text_atom)
@@ -17004,7 +17074,7 @@ def _source_record_weather_observation_companion(
             {
                 "SupportKind": "source_record_weather_observation",
                 "SourceRow": source_row,
-                "Location": "kgls",
+                "Location": station,
                 "ThunderstormStart": _display_clock_atom(start),
                 "MaxWindGust": f"{gust_match.group(1)} knots" if gust_match else "",
                 "MaxWindGustTime": _display_clock_atom(gust_match.group(2)) if gust_match else "",
@@ -17032,7 +17102,7 @@ def _source_record_weather_observation_companion(
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only weather observation companion extracted stated KGLS time/value slots "
+                    "query-only weather observation companion extracted stated station time/value slots "
                     "from admitted source_record_text_atom rows"
                 ),
                 "utterance": utterance,
@@ -17040,6 +17110,31 @@ def _source_record_weather_observation_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_weather_station_atom(text_atom: str) -> str:
+    text = _normalize_text_filter_atom(text_atom)
+    patterns = [
+        r"(?:^|_)reported_at_([a-z0-9]{3,5})_beginning_at_",
+        r"(?:^|_)at_([a-z0-9]{3,5})_beginning_at_",
+        r"(?:^|_)airport_at_[a-z0-9_]*?_([a-z0-9]{3,5})_thunderstorms_",
+        r"(?:^|_)location_to_[a-z0-9_]*?_([a-z0-9]{3,5})_thunderstorms_",
+        r"(?:^|_)weather_reporting_location_to_[a-z0-9_]*?_([a-z0-9]{3,5})_thunderstorms_",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if not match:
+            continue
+        station = match.group(1).strip("_")
+        if station and station not in {"the", "was", "were"}:
+            return station
+    tokens = _query_atom_tokens(text)
+    for index, token in enumerate(tokens):
+        if token in {"thunderstorm", "thunderstorms"} and index > 0:
+            previous = tokens[index - 1]
+            if re.fullmatch(r"[a-z0-9]{3,5}", previous):
+                return previous
+    return ""
 
 
 def _source_record_issued_product_chronology_companion(
@@ -17360,14 +17455,17 @@ def _source_record_group_formation_exception_companion(
             continue
         if "not" not in row_tokens:
             continue
-        if "atc" not in row_tokens and not {"air", "traffic", "controller"} <= row_tokens:
+        group = _source_record_not_formed_group_atom(text_atom)
+        if not group:
             continue
-        specialist = "ntsb_air_traffic_controller_atc_specialist" if "specialist" in row_tokens else ""
+        specialist = _source_record_specialist_atom(text_atom)
+        if group in {"atc_group", "air_traffic_controller_group"} and "atc" in set(_query_atom_tokens(specialist)):
+            group = "air_traffic_controller_atc_group"
         support_rows.append(
             {
                 "SupportKind": "source_record_group_formation_exception",
-                "Group": "air_traffic_controller_atc_group",
-                "GroupDisplay": "Air Traffic Controller (ATC) group",
+                "Group": group,
+                "GroupDisplay": _display_source_phrase(group),
                 "FormationStatus": "not_formed",
                 "Specialist": specialist,
                 "SpecialistDisplay": _display_source_phrase(specialist),
@@ -17401,6 +17499,47 @@ def _source_record_group_formation_exception_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_not_formed_group_atom(text_atom: str) -> str:
+    text = _normalize_text_filter_atom(text_atom)
+    patterns = [
+        r"(?:^|_)but_(?:an?_)?([a-z0-9_]{1,80}?)_group_was_not_formed(?:_|$)",
+        r"(?:^|_)([a-z0-9_]{1,80}?)_group_was_not_formed(?:_|$)",
+        r"(?:^|_)([a-z0-9_]{1,80}?)_group_did_not_form(?:_|$)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if not match:
+            continue
+        group = match.group(1).strip("_")
+        group_tokens = [
+            token
+            for token in group.split("_")
+            if token and token not in {"a", "an", "the", "but", "group", "was", "were", "not", "formed"}
+        ]
+        if group_tokens:
+            return "_".join(group_tokens + ["group"])
+    return ""
+
+
+def _source_record_specialist_atom(text_atom: str) -> str:
+    text = _normalize_text_filter_atom(text_atom)
+    match = re.search(r"(?:^|_)a[n]?_([a-z0-9]+(?:_[a-z0-9]+){0,6}_specialist)_was_on_site(?:_|$)", text)
+    if match:
+        return match.group(1).strip("_")
+    tokens = _query_atom_tokens(text)
+    stop = {"a", "an", "the", "by", "led", "group", "groups", "chairmen", "chairman", "site"}
+    for index, token in enumerate(tokens):
+        if token != "specialist":
+            continue
+        start = index
+        while start > 0 and tokens[start - 1] not in stop and index - start < 6:
+            start -= 1
+        candidate = "_".join(tokens[start : index + 1]).strip("_")
+        if candidate and candidate != "specialist":
+            return candidate
+    return ""
 
 
 def _source_record_destination_companion(

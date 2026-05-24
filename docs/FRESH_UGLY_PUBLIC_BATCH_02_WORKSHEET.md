@@ -129,6 +129,9 @@ gate behavior and QA behavior disagree without a clear explanation
 7. Inspect non-exact rows and classify surfaces before making repairs.
 8. If repairs are made, require a full rerun plus churn comparison before
    treating them as promoted.
+9. Run or schedule a source-record-summary ablation on the first stable QA pass
+   so Batch 02 can distinguish transferable product learning from Batch 01
+   document-shape memory.
 
 ## Open Notes
 
