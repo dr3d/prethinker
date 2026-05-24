@@ -18,6 +18,11 @@ kb_runs_published/
 kb_store/
 docs/drafts/
 
+# Local product-direction notes. Keep these out of the public repo until the
+# product language is intentionally ready to publish.
+docs/PRODUCT_OFFERING_EVIDENCE_WORKSTATION.md
+docs/PRETHINKER_CONSULTANT_HANDOFF.md
+
 # Local runtime cache/index (do not publish by accident)
 docs/reports/*-stress-latest.html
 docs/reports/mid_pack-stress.html

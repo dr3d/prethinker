@@ -38,7 +38,6 @@ dated run reports, and retired product lanes.
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
 - [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
 - [Prethinker Design Overview](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md)
-- [Product Offering: Evidence Workstation](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_OFFERING_EVIDENCE_WORKSTATION.md)
 
 ## Domain Context
 
