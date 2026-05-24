@@ -363,3 +363,128 @@ domain, and the direct-source baseline uses the same model as the pipeline. The
 useful claim is narrower and stronger: on this 200-row fresh ugly batch,
 Prethinker's governed path adds +11.0pp exact over direct source prompting with
 the same model.
+
+## 2026-05-24 Full R3 Rerun After Mechanism Repairs
+
+Purpose:
+
+The duration/source-state work produced a targeted forecast of roughly
+`192 / 5 / 3` (96.0%) if unchanged rows held. This run recompiled and reran
+all eight fixtures to replace that forecast with an actual corpus measurement.
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_r3_20260524`
+
+Compile R3 conditions:
+
+- Provider/model: OpenRouter `qwen/qwen3.6-35b-a3b`
+- Lanes: 6
+- Compile source: enabled
+- Plan passes: enabled, max 2
+- Source/entity, archival identifier, and source-record ledgers: enabled
+- Quality gate and one bounded quality retry on hold: enabled
+
+Compile R3 result:
+
+```text
+fixtures: 8
+parsed OK: 8
+compile admitted / skipped: 273 / 49
+quality gate: 3 pass / 5 hold
+diagnostic rejected flat-pass skips: 0
+```
+
+Gate movement from the original fresh ugly compile:
+
+```text
+original: 2 pass / 6 hold
+R3:       3 pass / 5 hold
+```
+
+`sec_material_event_ugly_002` moved to gate pass after the status-state retry.
+Remaining holds are still source-authority/source-claim carrier delivery and
+the NTSB aviation vote-tally carrier signal.
+
+QA R3 conditions:
+
+- Provider/model: OpenRouter `qwen/qwen3.6-35b-a3b`
+- Lanes: 6
+- Cache: disabled
+- Compatibility adapter row limit: default 0
+
+QA R3 result:
+
+```text
+questions: 200
+exact / partial / miss: 189 / 4 / 7
+exact rate: 94.5%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Comparison:
+
+```text
+QA R2 before mechanism repairs: 187 / 6 / 7 = 93.5%
+QA R3 full rerun:              189 / 4 / 7 = 94.5%
+Direct-source control:         165 / 30 / 5 = 82.5%
+```
+
+Per-fixture R3:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `fda_warning_ugly_001` | 23 | 0 | 2 |
+| `fda_warning_ugly_002` | 23 | 0 | 2 |
+| `ntsb_aviation_ugly_001` | 24 | 1 | 0 |
+| `ntsb_marine_ugly_001` | 24 | 0 | 1 |
+| `osha_incident_ugly_001` | 25 | 0 | 0 |
+| `osha_incident_ugly_002` | 23 | 2 | 0 |
+| `sec_material_event_ugly_001` | 22 | 1 | 2 |
+| `sec_material_event_ugly_002` | 25 | 0 | 0 |
+
+Row movement versus R2:
+
+- 21 rows changed verdict.
+- 11 rows improved.
+- 10 rows regressed.
+- Net result: +2 exact, -2 partial, no miss-count change.
+
+Recovered mechanisms that held in the full rerun:
+
+- FDA warning-letter identifier set support recovered reference-number rows.
+- FDA subsection support recovered the three sub-sections under the 21 CFR
+  211.192 violation.
+- OSHA blank field preservation recovered the blank `nature_of_injury` row.
+- OSHA identifier aggregation recovered the distinct inspection-related
+  identifier row.
+- OSHA date-pair duration recovered the citation-to-abatement 13-day row.
+- OSHA blank contest/latest-event support recovered the contested-status row.
+- SEC checkbox preservation recovered the emerging-growth-company row.
+- SEC role-start support recovered the new-CEO approximately-four-month row.
+
+Regressed or still unstable surfaces:
+
+- FDA CFR citation lists can be present in source-record text but unavailable
+  as an ordered, queryable citation list.
+- FDA signer/contact lines can be present in source-record context but missed
+  by primary structural queries.
+- NTSB marine departure date/time can be confused with casualty summary
+  date/time when the query plan locks onto the summary table.
+- OSHA source-value discrepancy rows can miss one table location for a repeated
+  numeric value.
+- SEC closing-date extension facts are not stable enough: the Agreement
+  effective date and amendment filing/report dates can crowd out original/new
+  closing-date surfaces and the derived 37-day duration.
+
+Read:
+
+The mechanisms transferred into a full rerun, but not as cleanly as the
+targeted forecast. This is the right warning sign: the instrument is improving,
+yet some residue moved between adjacent rows. The current measured fresh ugly
+score is therefore `94.5%`, not the `96.0%` forecast. The next blocker is not
+more row polishing on this batch; it is stabilizing reusable citation-list,
+source-contact/signatory, and date-range/extension surfaces, then checking them
+on fresh ugly documents.
