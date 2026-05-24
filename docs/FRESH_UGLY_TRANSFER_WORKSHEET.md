@@ -566,3 +566,58 @@ Discipline note:
 This is mechanism evidence only. It repairs two R3 regressed FDA citation-list
 rows on targeted replay, but the corpus score remains `189 / 4 / 7` until the
 next full fresh-ugly rerun.
+
+## 2026-05-24 Contact/Signatory Mechanism Probe
+
+Mechanism:
+
+- Added `source_record_contact_signatory_support`, a query-only companion that
+  collects signer/title blocks from admitted `source_record_row_context` rows
+  and reply/contact rows from admitted `source_record_text_atom` rows.
+- Signatory support groups person-like source-record labels with adjacent title
+  and office/program continuation rows, while filtering office/program/header
+  labels that look like people only because of source normalization.
+- Reply/ATTN support prefers source rows that actually contain reply/ATTN
+  language when the question asks for reply instructions, so incidental emails
+  and identifiers elsewhere in the document do not crowd the result.
+- It writes no durable facts.
+
+Validation:
+
+```text
+tests/test_source_surface_gap_audit.py
+tests/test_domain_bootstrap_qa.py
+
+282 passed
+```
+
+Targeted replay:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_contact_signatory_probe_20260524`
+
+```text
+fixtures/rows:
+  fda_warning_ugly_001 q016
+  fda_warning_ugly_002 q004
+exact / partial / miss: 2 / 0 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Recovered surfaces:
+
+- `fda_warning_ugly_001 q016`: electronic reply destination
+  `CDER-OC-OMQ-Communications@fda.hhs.gov`, ATTN `Andrew Haack`, and
+  `FEI 2513595` from the response-instruction line.
+- `fda_warning_ugly_002 q004`: `Maria S Knirk JD MBA` with `Director Office Of
+  Enforcement; Office Of Compliance And Enforcement; Human Foods Program` from
+  the signature block.
+
+Discipline note:
+
+This is mechanism evidence only. It repairs two FDA contact/signatory rows on
+targeted replay, but the corpus score remains `189 / 4 / 7` until the next full
+fresh-ugly rerun.

@@ -25,6 +25,7 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_join_with_previous,
     _negative_reference_supported_by_results,
     _source_record_citation_text_companion,
+    _source_record_contact_signatory_companion,
     _source_record_compile_surface_hint_queries,
     _source_record_date_pair_duration_companion,
     _source_record_field_state_companion,
@@ -2126,6 +2127,54 @@ def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
     assert row["MetadataConflict"] == "yes"
     assert row["AcronymHints"] == "cder"
     assert "director_office_of_manufacturing_quality" in row["Roles"]
+    assert len(companion["result"]["rows"]) == 1
+
+
+def test_source_record_contact_signatory_supports_source_record_signature_block() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row_context(src_line_0114, maria_s_knirk_jd_mba, maria_s_knirk_jd_mba, conclusion).",
+        "source_record_row_context(src_line_0115, maria_s_knirk_jd_mba, director_office_of_enforcement, conclusion).",
+        "source_record_row_context(src_line_0116, maria_s_knirk_jd_mba, office_of_compliance_and_enforcement, conclusion).",
+        "source_record_row_context(src_line_0117, maria_s_knirk_jd_mba, human_foods_program, conclusion).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_contact_signatory_companion(
+        runtime,
+        utterance="Who signed the warning letter, and what is their title?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["PersonDisplay"] == "Maria S Knirk JD MBA"
+    assert "Director Office Of Enforcement" in row["RoleDisplay"]
+    assert "Office Of Compliance And Enforcement" in row["RoleDisplay"]
+    assert "Human Foods Program" in row["RoleDisplay"]
+
+
+def test_source_record_contact_signatory_supports_reply_email_attn_and_identifier() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0228, "
+        "send_your_electronic_reply_to_cder_oc_omq_communications_fda_hhs_gov_"
+        "identify_your_response_with_fei_2513595_and_attn_andrew_haack)."
+    )
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0030, "
+        "facility_registration_fei_9999999_cms_888888_and_shortage_email_drugshortages_fda_hhs_gov)."
+    )
+
+    companion = _source_record_contact_signatory_companion(
+        runtime,
+        utterance="Identify the email address for the firm's electronic reply and the investigator named in the ATTN line.",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["EmailDisplay"] == "CDER-OC-OMQ-Communications@fda.hhs.gov"
+    assert row["AttentionPersonDisplay"] == "Andrew Haack"
+    assert row["IdentifierDisplay"] == "FEI 2513595"
     assert len(companion["result"]["rows"]) == 1
 
 

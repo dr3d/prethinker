@@ -15133,6 +15133,7 @@ def _source_record_messy_summary_companions(
         _source_record_document_event_chronology_companion(runtime, utterance=utterance),
         _source_record_group_formation_exception_companion(runtime, utterance=utterance),
         _source_record_destination_companion(runtime, utterance=utterance),
+        _source_record_contact_signatory_companion(runtime, utterance=utterance),
         _source_record_signatory_conflict_companion(runtime, utterance=utterance),
     ):
         if companion:
@@ -17250,6 +17251,284 @@ def _destination_display_value(*, destination: str, qualifier: str) -> str:
     if qualifier_text:
         return f"{_display_source_phrase(destination_text)} ({qualifier_text.upper()})"
     return _display_source_phrase(destination_text)
+
+
+def _source_record_contact_signatory_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    wants_signatory = bool(re.search(r"\b(?:sign|signed|signer|signatory|title)\b", text))
+    wants_contact = bool(re.search(r"\b(?:reply|email|e-mail|attn|attention|contact|directed)\b", text))
+    if not (wants_signatory or wants_contact):
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    contexts = _source_record_context_rows(runtime)
+    if wants_signatory:
+        for row in _source_record_signatory_rows_from_contexts(contexts):
+            key = (row["SupportKind"], row.get("Person", ""), row.get("RoleDisplay", ""))
+            if key not in seen:
+                seen.add(key)
+                support_rows.append(row)
+
+    if wants_contact:
+        text_atoms = _source_record_text_atoms(runtime)
+        scoped_atoms = _source_record_scoped_contact_text_atoms(text_atoms, utterance=utterance)
+        for source_row, atom in scoped_atoms:
+            emails = _source_record_email_displays(atom)
+            attn = _source_record_attention_person_display(atom)
+            identifiers = _source_record_contact_identifier_displays(atom)
+            if not (emails or attn or identifiers):
+                continue
+            contact_display = _source_record_contact_display(emails=emails, attention=attn, identifiers=identifiers)
+            if not contact_display:
+                continue
+            row = {
+                "SupportKind": "source_record_contact",
+                "SourceRow": source_row,
+                "SourceTextAtom": atom,
+                "EmailDisplay": "; ".join(emails),
+                "AttentionPersonDisplay": attn,
+                "IdentifierDisplay": "; ".join(identifiers),
+                "ContactDisplay": contact_display,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+            key = (row["SupportKind"], source_row, contact_display)
+            if key not in seen:
+                seen.add(key)
+                support_rows.append(row)
+
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: (_source_row_sort_key(row.get("SourceRow", "")), row.get("SupportKind", "")))
+    return {
+        "query": "source_record_contact_signatory_support(SupportKind, Display, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_contact_signatory_support",
+            "prolog_query": "source_record_contact_signatory_support(SupportKind, Display, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only contact/signatory support collected signer/title and reply/contact rows "
+                    "from admitted source-record context/text rows; no durable contact fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row_context(SourceRow, SourceRecordLabel, SourceRecordTextAtom, SourceRecordSection).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_scoped_contact_text_atoms(
+    text_atoms: list[tuple[str, str]],
+    *,
+    utterance: str,
+) -> list[tuple[str, str]]:
+    question = str(utterance or "").casefold()
+    if not re.search(r"\b(?:reply|attn|attention|directed)\b", question):
+        return text_atoms
+    preferred: list[tuple[str, str]] = []
+    for source_row, atom in text_atoms:
+        normalized = _normalize_text_filter_atom(atom)
+        if re.search(r"(?:^|_)(?:reply|attn|attention|directed)(?:_|$)", normalized):
+            preferred.append((source_row, atom))
+    return preferred or text_atoms
+
+
+def _source_record_context_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() != "source_record_row_context":
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 4:
+            continue
+        rows.append({"SourceRow": args[0], "Label": args[1], "TextAtom": args[2], "Section": args[3]})
+    return rows
+
+
+def _source_record_signatory_rows_from_contexts(contexts: list[dict[str, str]]) -> list[dict[str, str]]:
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for row in contexts:
+        label = str(row.get("Label", "") or "")
+        if _looks_like_source_record_person_label(label):
+            grouped.setdefault(label, []).append(row)
+
+    out: list[dict[str, str]] = []
+    for label, rows in sorted(grouped.items()):
+        ordered = sorted(rows, key=lambda item: _source_row_sort_key(item.get("SourceRow", "")))
+        values = [str(row.get("TextAtom", "") or "") for row in ordered]
+        role_values = [value for value in values if value and value != label and not _looks_like_source_record_person_label(value)]
+        if not role_values:
+            continue
+        if not _source_record_signatory_role_values(role_values):
+            continue
+        person_display = _source_record_person_display(label)
+        role_display = "; ".join(_source_record_title_display(value) for value in _dedupe_str(role_values))
+        out.append(
+            {
+                "SupportKind": "source_record_signatory",
+                "Person": label,
+                "PersonDisplay": person_display,
+                "Roles": ",".join(_dedupe_str(role_values)),
+                "RoleDisplay": role_display,
+                "SignatoryDisplay": f"{person_display} - {role_display}",
+                "SourceRow": ",".join(str(row.get("SourceRow", "") or "") for row in ordered),
+                "SourceSection": ",".join(_dedupe_str([str(row.get("Section", "") or "") for row in ordered if row.get("Section")])),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return out
+
+
+def _looks_like_source_record_person_label(value: str) -> bool:
+    tokens = _source_record_field_name_tokens(value)
+    if len(tokens) < 2 or len(tokens) > 6:
+        return False
+    if any(
+        token
+        in {
+            "office",
+            "program",
+            "director",
+            "delivery",
+            "method",
+            "warning",
+            "letter",
+            "the",
+            "your",
+            "firm",
+            "website",
+            "www",
+            "hfp",
+            "oce",
+            "u",
+        }
+        for token in tokens
+    ):
+        return False
+    suffixes = {"jr", "sr", "ii", "iii", "iv", "jd", "mba", "md", "phd"}
+    name_tokens = [token for token in tokens if token not in suffixes]
+    return len(name_tokens) >= 2 and all(token.isalpha() for token in name_tokens)
+
+
+def _source_record_signatory_role_values(values: list[str]) -> bool:
+    title_tokens = {
+        "captain",
+        "chair",
+        "chief",
+        "compliance",
+        "director",
+        "enforcement",
+        "executive",
+        "food",
+        "foods",
+        "manager",
+        "officer",
+        "office",
+        "president",
+        "program",
+        "secretary",
+        "service",
+    }
+    tokens: set[str] = set()
+    for value in values:
+        tokens.update(_source_record_field_name_tokens(value))
+    return bool(tokens & title_tokens)
+
+
+def _source_record_email_displays(atom: str) -> list[str]:
+    text = _normalize_text_filter_atom(atom)
+    displays: list[str] = []
+    for pattern, domain in (
+        (r"([a-z0-9]+(?:_[a-z0-9]+)*)_fda_hhs_gov", "fda.hhs.gov"),
+        (r"([a-z0-9]+(?:_[a-z0-9]+)*)_nupacknutrition_com", "nupacknutrition.com"),
+    ):
+        for match in re.finditer(pattern, text):
+            local = match.group(1).strip("_")
+            if local:
+                displays.append(f"{_display_email_local_part(local, domain=domain)}@{domain}")
+    return _dedupe_str(displays)
+
+
+def _display_email_local_part(local: str, *, domain: str) -> str:
+    parts = [part for part in str(local or "").split("_") if part]
+    if domain == "fda.hhs.gov" and parts[-3:] == ["hhs", "gov"]:
+        parts = parts[:-3]
+    cder_index = _subsequence_index(parts, ["cder", "oc", "omq", "communications"])
+    if cder_index >= 0:
+        return "CDER-OC-OMQ-Communications"
+    hfp_index = _subsequence_index(parts, ["hfp", "oce", "dietarysupplements"])
+    if hfp_index >= 0:
+        return "HFP-OCE-DietarySupplements"
+    if len(parts) >= 2:
+        return ".".join(parts[-2:])
+    return ".".join(parts)
+
+
+def _source_record_attention_person_display(atom: str) -> str:
+    text = _normalize_text_filter_atom(atom)
+    match = re.search(r"(?:^|_)attn_(?:and_)?([a-z]+_[a-z]+)(?:_|$)", text)
+    return _source_record_person_display(match.group(1)) if match else ""
+
+
+def _source_record_person_display(value: str) -> str:
+    suffixes = {"jd", "mba", "md", "phd", "jr", "sr", "ii", "iii", "iv"}
+    parts = [part for part in str(value or "").split("_") if part]
+    out: list[str] = []
+    for part in parts:
+        if part.casefold() in suffixes:
+            out.append(part.upper())
+        elif len(part) == 1:
+            out.append(part.upper())
+        else:
+            out.append(part.capitalize())
+    return " ".join(out)
+
+
+def _source_record_title_display(value: str) -> str:
+    return " ".join(part.capitalize() if part else part for part in str(value or "").split("_"))
+
+
+def _subsequence_index(parts: list[str], needle: list[str]) -> int:
+    if not needle or len(needle) > len(parts):
+        return -1
+    for index in range(0, len(parts) - len(needle) + 1):
+        if parts[index : index + len(needle)] == needle:
+            return index
+    return -1
+
+
+def _source_record_contact_identifier_displays(atom: str) -> list[str]:
+    text = _normalize_text_filter_atom(atom)
+    out: list[str] = []
+    for match in re.finditer(r"(?:^|_)fei_(\d+(?:_\d+)*)(?:_|$)", text):
+        out.append(f"FEI {match.group(1).replace('_', '')}")
+    for match in re.finditer(r"(?:^|_)cms_(\d+(?:_\d+)*)(?:_|$)", text):
+        out.append(f"CMS {match.group(1).replace('_', '')}")
+    return _dedupe_str(out)
+
+
+def _source_record_contact_display(*, emails: list[str], attention: str, identifiers: list[str]) -> str:
+    parts: list[str] = []
+    if emails:
+        parts.append("Email: " + "; ".join(emails))
+    if attention:
+        parts.append("ATTN: " + attention)
+    if identifiers:
+        parts.append("Identifiers: " + "; ".join(identifiers))
+    return "; ".join(parts)
 
 
 def _source_record_signatory_conflict_companion(
@@ -21360,6 +21639,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_group_formation_exception_support",
             "source_record_destination_support",
             "source_record_body_signatory_support",
+            "source_record_contact_signatory_support",
             "source_record_identifier_set_support",
             "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
@@ -21406,7 +21686,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
