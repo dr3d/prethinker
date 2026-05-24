@@ -452,6 +452,26 @@ Row movement versus R2:
 - 10 rows regressed.
 - Net result: +2 exact, -2 partial, no miss-count change.
 
+Row-level comparison artifact:
+
+`C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_r2_r3_comparison_20260524`
+
+Additional guard read:
+
+- Baseline-exact regressions: 9 rows.
+- Baseline exact-to-miss regressions: 6 rows.
+- Regressions with newly added helper/support predicates: 0 rows.
+- Partial movement was mixed: four partial rows became exact, one partial row
+  became miss, and two baseline exact rows became partial.
+
+That means the R3 regressions are not well explained by the new query
+companions over-firing onto previously correct rows. The actual pattern is more
+likely compile/query-path variance plus missing structured carriers: the
+regressed rows generally lacked a newly added helper predicate and instead
+failed to recover an ordered list, a signer/contact field, a departure
+date/time distinct from a casualty summary, a repeated numeric field location,
+or a closing-date extension surface.
+
 Recovered mechanisms that held in the full rerun:
 
 - FDA warning-letter identifier set support recovered reference-number rows.
@@ -488,3 +508,10 @@ score is therefore `94.5%`, not the `96.0%` forecast. The next blocker is not
 more row polishing on this batch; it is stabilizing reusable citation-list,
 source-contact/signatory, and date-range/extension surfaces, then checking them
 on fresh ugly documents.
+
+Process change:
+
+`scripts/compare_qa_runs.py` now reports row-level verdict churn in addition to
+fixture totals. Future mechanism work should run this comparison against the
+previous full batch before promotion; aggregate score gains are not sufficient
+when baseline-exact rows regress.

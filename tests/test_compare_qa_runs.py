@@ -32,6 +32,31 @@ def _multi_batch(rows: list[tuple[str, int, int, int]]) -> dict:
     }
 
 
+def _run_rows(fixture: str, rows: list[tuple[str, str, str, list[str]]]) -> dict:
+    return {
+        "fixture": fixture,
+        "summary": {
+            "judge_exact": sum(1 for _, verdict, _, _ in rows if verdict == "exact"),
+            "judge_partial": sum(1 for _, verdict, _, _ in rows if verdict == "partial"),
+            "judge_miss": sum(1 for _, verdict, _, _ in rows if verdict == "miss"),
+        },
+        "rows": [
+            {
+                "id": row_id,
+                "utterance": f"Question {row_id}?",
+                "reference_answer": "Reference",
+                "reference_judge": {"verdict": verdict, "concise_answer": "note"},
+                "failure_surface": {"surface": surface},
+                "query_results": [
+                    {"result": {"predicate": predicate, "rows": [{"x": "y"}]}}
+                    for predicate in predicates
+                ],
+            }
+            for row_id, verdict, surface, predicates in rows
+        ],
+    }
+
+
 def test_compare_qa_runs_marks_promotable_when_exact_holds_and_miss_drops() -> None:
     payload = compare_qa_runs(_batch("fixture_a", 24, 4, 12), _batch("fixture_a", 27, 5, 8))
 
@@ -72,3 +97,38 @@ def test_compare_qa_runs_reports_aggregate_delta() -> None:
     }
     assert payload["summary"]["aggregate_promotion_status"] == "promotable"
     assert payload["summary"]["aggregate_delta"] == {"exact": 1, "partial": 1, "miss": -2}
+
+
+def test_compare_qa_runs_reports_row_level_churn_and_added_helpers() -> None:
+    baseline = _run_rows(
+        "fixture_a",
+        [
+            ("q001", "exact", "not_applicable", ["direct_fact"]),
+            ("q002", "miss", "compile_surface_gap", ["direct_fact"]),
+            ("q003", "partial", "query_surface_gap", ["source_record_old_support"]),
+        ],
+    )
+    candidate = _run_rows(
+        "fixture_a",
+        [
+            ("q001", "miss", "query_surface_gap", ["direct_fact", "source_record_new_support"]),
+            ("q002", "exact", "not_applicable", ["direct_fact", "source_record_new_support"]),
+            ("q003", "partial", "query_surface_gap", ["source_record_old_support"]),
+        ],
+    )
+
+    payload = compare_qa_runs(baseline, candidate)
+
+    assert payload["summary"]["row_change_count"] == 2
+    assert payload["summary"]["row_improvement_count"] == 1
+    assert payload["summary"]["row_regression_count"] == 1
+    assert payload["summary"]["baseline_exact_regression_count"] == 1
+    assert payload["summary"]["baseline_exact_to_miss_count"] == 1
+    assert payload["row_changes"]["summary"]["regression_with_added_helper_count"] == 1
+    regression = [
+        row
+        for row in payload["row_changes"]["changes"]
+        if row["id"] == "q001"
+    ][0]
+    assert regression["movement"] == "regressed"
+    assert regression["added_helper_predicates"] == ["source_record_new_support"]
