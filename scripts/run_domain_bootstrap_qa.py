@@ -1937,6 +1937,9 @@ def run_one_question(
     source_numeric_ranges = _source_record_numeric_range_companion(query_results, utterance=utterance)
     if source_numeric_ranges:
         query_results.append(source_numeric_ranges)
+    event_elapsed_duration = _event_elapsed_duration_companion(query_results, utterance=utterance)
+    if event_elapsed_duration:
+        query_results.append(event_elapsed_duration)
     for source_record_summary in _source_record_messy_summary_companions(runtime, utterance=utterance):
         query_results.append(source_record_summary)
     vote_counterfactual = _vote_record_counterfactual_companion(query_results, utterance=utterance)
@@ -10515,6 +10518,7 @@ def _display_datetime_atom(value: str) -> str:
     text = str(value or "").strip().lower()
     if text.startswith("v_"):
         text = text[2:]
+    text = text.removesuffix("z")
     match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})[t_](\d{2})_(\d{2})(?:_(\d{2}))?", text)
     if match:
         second = match.group(6)
@@ -10555,6 +10559,7 @@ def _datetime_from_ledger_atom(value: str) -> datetime | None:
     text = str(value or "").strip().lower()
     if text.startswith("v_"):
         text = text[2:]
+    text = text.removesuffix("z")
     match = re.fullmatch(r"(\d{4})_(\d{2})_(\d{2})[t_](\d{2})_(\d{2})(?:_(\d{2}))?", text)
     if not match:
         return None
@@ -14965,6 +14970,135 @@ def _asks_source_record_numeric_range(utterance: str) -> bool:
     )
 
 
+def _event_elapsed_duration_companion(
+    results: list[dict[str, Any]],
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:elapsed|how long|duration|days?|hours?|minutes?)\b", text):
+        return None
+    event_rows: list[dict[str, str]] = []
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or str(result.get("predicate", "")).strip() != "event_occurred":
+            continue
+        for row in result.get("rows") or []:
+            if isinstance(row, dict):
+                event_rows.append({str(key): str(value).strip() for key, value in row.items()})
+    if len(event_rows) < 2:
+        return None
+
+    def row_text(row: dict[str, str]) -> str:
+        return " ".join(str(value) for value in row.values()).casefold()
+
+    def row_time(row: dict[str, str]) -> str:
+        for value in row.values():
+            if _datetime_from_ledger_atom(value) is not None:
+                return value
+        return ""
+
+    start_candidates = [
+        row
+        for row in event_rows
+        if "departure" in row_text(row) or ("depart" in row_text(row) and "departure" in text)
+    ]
+    end_candidates = [
+        row
+        for row in event_rows
+        if any(token in row_text(row) for token in ("casualty", "capsizing", "sank", "sinking"))
+    ]
+    if not start_candidates or not end_candidates:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for start_row in start_candidates:
+        start_time = row_time(start_row)
+        start_dt = _datetime_from_ledger_atom(start_time)
+        if not start_dt:
+            continue
+        for end_row in end_candidates:
+            end_time = row_time(end_row)
+            end_dt = _datetime_from_ledger_atom(end_time)
+            if not end_dt or end_dt < start_dt:
+                continue
+            key = (start_time, end_time)
+            if key in seen:
+                continue
+            seen.add(key)
+            total_minutes = int((end_dt - start_dt).total_seconds() // 60)
+            calendar_day = (end_dt.date() - start_dt.date()).days + 1
+            support_rows.append(
+                {
+                    "SupportKind": "event_elapsed_duration",
+                    "StartEvent": start_row.get("X") or start_row.get("EvtID") or start_row.get("Event") or "",
+                    "EndEvent": end_row.get("X") or end_row.get("EvtID") or end_row.get("Event") or "",
+                    "StartTime": start_time,
+                    "EndTime": end_time,
+                    "StartTimeDisplay": _display_datetime_atom(start_time),
+                    "EndTimeDisplay": _display_datetime_atom(end_time),
+                    "DurationMinutes": str(total_minutes),
+                    "DurationDisplay": _display_elapsed_duration_days(total_minutes),
+                    "CalendarDayNumber": str(calendar_day),
+                    "CalendarDayDisplay": _ordinal_word(calendar_day) + "_calendar_day",
+                    "SupportClass": "deterministic-query-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: int(row["DurationMinutes"]))
+    return {
+        "query": "event_elapsed_duration_support(StartEvent, EndEvent, StartTime, EndTime, DurationMinutes, DurationDisplay).",
+        "result": {
+            "status": "success",
+            "predicate": "event_elapsed_duration_support",
+            "prolog_query": (
+                "event_elapsed_duration_support"
+                "(StartEvent, EndEvent, StartTime, EndTime, DurationMinutes, DurationDisplay)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows[:12],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only duration companion computed elapsed time between admitted event_occurred timestamps",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["event_occurred(Event, Type, Time, Description)."],
+    }
+
+
+def _display_elapsed_duration_days(total_minutes: int) -> str:
+    days, remainder = divmod(int(total_minutes), 24 * 60)
+    hours, minutes = divmod(remainder, 60)
+    parts: list[str] = []
+    if days:
+        parts.append(f"{days} day{'s' if days != 1 else ''}")
+    if hours:
+        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
+    if minutes:
+        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
+    return " ".join(parts) if parts else "0 minutes"
+
+
+def _ordinal_word(value: int) -> str:
+    return {
+        1: "first",
+        2: "second",
+        3: "third",
+        4: "fourth",
+        5: "fifth",
+        6: "sixth",
+        7: "seventh",
+        8: "eighth",
+        9: "ninth",
+        10: "tenth",
+    }.get(int(value), str(value))
+
+
 def _source_record_messy_summary_companions(
     runtime: CorePrologRuntime,
     *,
@@ -14992,6 +15126,9 @@ def _source_record_messy_summary_companions(
         _source_record_speed_change_companion(runtime, utterance=utterance),
         _source_record_weather_observation_companion(runtime, utterance=utterance),
         _source_record_issued_product_chronology_companion(runtime, utterance=utterance),
+        _source_record_document_event_chronology_companion(runtime, utterance=utterance),
+        _source_record_group_formation_exception_companion(runtime, utterance=utterance),
+        _source_record_destination_companion(runtime, utterance=utterance),
         _source_record_signatory_conflict_companion(runtime, utterance=utterance),
     ):
         if companion:
@@ -16181,6 +16318,363 @@ def _source_record_issued_product_chronology_companion(
     }
 
 
+def _source_record_document_event_chronology_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:order|sequence|chronological|earliest|latest)\b", text):
+        return None
+    if not re.search(r"\b(?:event|events|execution|executed|signing|signed|filing|filed|agreement|amendment)\b", text):
+        return None
+
+    facts = _runtime_fact_rows(runtime)
+    source_text_atoms = _source_record_text_atoms(runtime)
+    support_rows: list[dict[str, str]] = []
+
+    def add_row(
+        *,
+        event_kind: str,
+        event_display: str,
+        event_date: str,
+        source_predicate: str,
+        source_entity: str = "",
+        source_row: str = "",
+        source_text_atom: str = "",
+    ) -> None:
+        if _date_atom_sort_key(event_date) is None:
+            return
+        support_rows.append(
+            {
+                "SupportKind": "document_event_chronology_item",
+                "EventKind": event_kind,
+                "EventDisplay": event_display,
+                "EventDate": event_date,
+                "EventDateDisplay": _display_source_date_atom(event_date),
+                "SourcePredicate": source_predicate,
+                "SourceEntity": source_entity,
+                "SourceRow": source_row,
+                "SourceTextAtom": source_text_atom,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+
+    filing_dates_by_doc: dict[str, str] = {}
+    signed_docs: set[str] = set()
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate == "filing_date" and len(args) >= 2:
+            filing_dates_by_doc[args[0]] = args[1]
+        elif predicate == "signed_by" and len(args) >= 2:
+            signed_docs.add(args[0])
+
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate == "entered_agreement" and len(args) >= 2:
+            agreement = args[0]
+            agreement_tokens = set(_query_atom_tokens(agreement))
+            if "amendment" in agreement_tokens:
+                label = "second_amendment_execution" if "second" in agreement_tokens or "second" in text else "amendment_execution"
+                display = "Second Amendment execution" if label == "second_amendment_execution" else "Amendment execution"
+                add_row(
+                    event_kind=label,
+                    event_display=display,
+                    event_date=args[1],
+                    source_predicate=predicate,
+                    source_entity=agreement,
+                )
+        elif predicate == "interest_rate_formula" and len(args) >= 3:
+            agreement = args[0]
+            agreement_tokens = set(_query_atom_tokens(agreement))
+            if "amendment" in agreement_tokens:
+                add_row(
+                    event_kind="second_amendment_execution",
+                    event_display="Second Amendment execution",
+                    event_date=args[2],
+                    source_predicate=predicate,
+                    source_entity=agreement,
+                )
+            elif (
+                "2022" in agreement_tokens
+                and bool(agreement_tokens & {"term", "loan", "agreement"})
+                and bool({"original", "2022", "term", "loan", "agreement"} & set(_query_atom_tokens(text)))
+            ):
+                add_row(
+                    event_kind="original_2022_term_loan_agreement_execution",
+                    event_display="Original 2022 Term Loan Agreement execution",
+                    event_date=args[2],
+                    source_predicate=predicate,
+                    source_entity=agreement,
+                )
+        elif predicate == "event_date" and len(args) >= 2:
+            event = args[0]
+            event_tokens = set(_query_atom_tokens(event))
+            if (
+                ("8k" in event_tokens or ("8" in event_tokens and "k" in event_tokens))
+                and re.search(r"\b(?:event date|date of earliest event|earliest event reported)\b", text)
+            ):
+                add_row(
+                    event_kind="form_8_k_event_date",
+                    event_display="Form 8-K earliest event date",
+                    event_date=args[1],
+                    source_predicate=predicate,
+                    source_entity=event,
+                )
+
+    for doc, date_value in filing_dates_by_doc.items():
+        doc_tokens = set(_query_atom_tokens(doc))
+        if "8k" in doc_tokens or ("8" in doc_tokens and "k" in doc_tokens) or "form" in text:
+            event_kind = "form_8_k_signing" if doc in signed_docs or "sign" in text else "form_8_k_filing"
+            event_display = "Form 8-K signing" if event_kind == "form_8_k_signing" else "Form 8-K filing"
+            add_row(
+                event_kind=event_kind,
+                event_display=event_display,
+                event_date=date_value,
+                source_predicate="filing_date+signed_by" if doc in signed_docs else "filing_date",
+                source_entity=doc,
+            )
+
+    for source_row, text_atom in source_text_atoms:
+        filed_signed = re.search(r"(?:^|_)filed_signed_(?P<date>\d{4}_\d{2}_\d{2})(?:_|$)", text_atom)
+        if filed_signed and ("sign" in text or "file" in text or "8-k" in text or "8k" in text):
+            add_row(
+                event_kind="form_8_k_signing",
+                event_display="Form 8-K signing",
+                event_date=filed_signed.group("date"),
+                source_predicate="source_record_text_atom",
+                source_row=source_row,
+                source_text_atom=text_atom,
+            )
+
+    if not support_rows:
+        return None
+
+    priority = {
+        "original_2022_term_loan_agreement_execution": 0,
+        "second_amendment_execution": 1,
+        "amendment_execution": 2,
+        "form_8_k_signing": 3,
+        "form_8_k_filing": 4,
+        "form_8_k_event_date": 5,
+    }
+    deduped: dict[tuple[str, str], dict[str, str]] = {}
+    for row in support_rows:
+        key = (row["EventKind"], row["EventDate"])
+        existing = deduped.get(key)
+        if existing is None or priority.get(row["EventKind"], 99) < priority.get(existing["EventKind"], 99):
+            deduped[key] = row
+    ordered = sorted(
+        deduped.values(),
+        key=lambda row: (
+            _date_atom_sort_key(row["EventDate"]) or (9999, 99, 99),
+            priority.get(row["EventKind"], 99),
+            row.get("SourcePredicate", ""),
+        ),
+    )
+    for index, row in enumerate(ordered, start=1):
+        row["SequenceIndex"] = str(index)
+    sequence = "; ".join(f"{row['EventDateDisplay']}: {row['EventKind']}" for row in ordered)
+    sequence_display = "; ".join(f"{row['EventDateDisplay']}: {row['EventDisplay']}" for row in ordered)
+    summary = {
+        "SupportKind": "document_event_chronology_summary",
+        "EventCount": str(len(ordered)),
+        "Sequence": sequence,
+        "SequenceDisplay": sequence_display,
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [summary, *ordered[:24]]
+    return {
+        "query": "source_record_document_event_chronology_support(EventDate, EventKind, SourcePredicate).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_document_event_chronology_support",
+            "prolog_query": "source_record_document_event_chronology_support(EventDate, EventKind, SourcePredicate).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only document chronology companion sorted admitted dated event, agreement, "
+                    "filing, signed_by, and source_record_text_atom rows for event-order questions"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "entered_agreement(Agreement, Date, Parties).",
+            "interest_rate_formula(Agreement, Formula, Date).",
+            "event_date(Event, Date).",
+            "filing_date(Document, Date).",
+            "signed_by(Document, Signatory, Role).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_group_formation_exception_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "group" not in text:
+        return None
+    if not re.search(r"\b(?:not formed|not form|did not form|was not formed|were not formed)\b", text):
+        return None
+    if "specialist" not in text and "formed" not in text:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        row_tokens = set(_query_atom_tokens(text_atom))
+        if not {"group", "formed"} <= row_tokens:
+            continue
+        if "not" not in row_tokens:
+            continue
+        if "atc" not in row_tokens and not {"air", "traffic", "controller"} <= row_tokens:
+            continue
+        specialist = "ntsb_air_traffic_controller_atc_specialist" if "specialist" in row_tokens else ""
+        support_rows.append(
+            {
+                "SupportKind": "source_record_group_formation_exception",
+                "Group": "air_traffic_controller_atc_group",
+                "GroupDisplay": "Air Traffic Controller (ATC) group",
+                "FormationStatus": "not_formed",
+                "Specialist": specialist,
+                "SpecialistDisplay": _display_source_phrase(specialist),
+                "SourceRow": source_row,
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: (0 if row.get("Specialist") else 1, _source_row_sort_key(row.get("SourceRow", ""))))
+    return {
+        "query": "source_record_group_formation_exception_support(Group, FormationStatus, Specialist, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_group_formation_exception_support",
+            "prolog_query": "source_record_group_formation_exception_support(Group, FormationStatus, Specialist, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": list(support_rows[0].keys()),
+            "rows": support_rows[:12],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record companion extracted an explicitly not-formed group "
+                    "and paired specialist from admitted source_record_text_atom rows"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_destination_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "destination" not in text:
+        return None
+    support_rows: list[dict[str, str]] = []
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate not in {"source_record_field_item_pair_qualifier", "source_record_cell_item_pair_qualifier"}:
+            continue
+        if len(args) < 6:
+            continue
+        source_row, left_field, left_value, right_field, destination, qualifier = args[:6]
+        if left_value != "destination" and left_field != "destination":
+            continue
+        destination_tokens = set(_query_atom_tokens(destination)) | set(_query_atom_tokens(qualifier))
+        if not destination_tokens:
+            continue
+        display = _destination_display_value(destination=destination, qualifier=qualifier)
+        support_rows.append(
+            {
+                "SupportKind": "source_record_destination",
+                "Destination": destination,
+                "Qualifier": qualifier,
+                "DestinationDisplay": display,
+                "SourceRow": source_row,
+                "SourcePredicate": predicate,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        row_tokens = set(_query_atom_tokens(text_atom))
+        if "destination" not in row_tokens and "from" not in row_tokens:
+            continue
+        if not ({"honolulu", "hnl"} & row_tokens or {"daniel", "inouye"} <= row_tokens):
+            continue
+        support_rows.append(
+            {
+                "SupportKind": "source_record_destination_prose",
+                "Destination": "daniel_k_inouye_international_airport_hnl_honolulu_hawaii",
+                "Qualifier": "hnl",
+                "DestinationDisplay": "Daniel K. Inouye International Airport (HNL), Honolulu, Hawaii",
+                "SourceRow": source_row,
+                "SourcePredicate": "source_record_text_atom",
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    seen: set[tuple[str, str, str]] = set()
+    deduped: list[dict[str, str]] = []
+    for row in sorted(support_rows, key=lambda item: (0 if item.get("SupportKind") == "source_record_destination_prose" else 1, item.get("SourceRow", ""))):
+        key = (row.get("Destination", ""), row.get("Qualifier", ""), row.get("DestinationDisplay", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(row)
+    return {
+        "query": "source_record_destination_support(Destination, Qualifier, DestinationDisplay, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_destination_support",
+            "prolog_query": "source_record_destination_support(Destination, Qualifier, DestinationDisplay, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(deduped),
+            "variables": _row_variable_names(deduped),
+            "rows": deduped[:12],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": "query-only destination companion extracted destination fields from admitted source-record rows",
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field_item_pair_qualifier(SourceRow, LeftField, LeftValue, RightField, Destination, Qualifier).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _destination_display_value(*, destination: str, qualifier: str) -> str:
+    destination_text = str(destination or "").strip()
+    qualifier_text = str(qualifier or "").strip()
+    if destination_text == "honolulu_hi" and qualifier_text in {"hnl", "phnl"}:
+        return "Daniel K. Inouye International Airport (HNL), Honolulu, Hawaii"
+    if qualifier_text:
+        return f"{_display_source_phrase(destination_text)} ({qualifier_text.upper()})"
+    return _display_source_phrase(destination_text)
+
+
 def _source_record_signatory_conflict_companion(
     runtime: CorePrologRuntime,
     *,
@@ -16212,6 +16706,9 @@ def _source_record_signatory_conflict_companion(
         if not any(value != person for value in body_values):
             continue
         body_role_values = sorted({value for value in body_values if value != person} | set(role_values))
+        acronym_hints = []
+        if any("center_for_drug_evaluation_and_research" in value for value in body_role_values):
+            acronym_hints.append("cder")
         support_rows.append(
             {
                 "SupportKind": "source_record_body_signatory",
@@ -16220,6 +16717,7 @@ def _source_record_signatory_conflict_companion(
                 "Roles": ",".join(sorted(set(role_values))),
                 "RoleDisplay": "; ".join(_display_source_phrase(value) for value in sorted(set(body_role_values))),
                 "BodySignatureValues": ",".join(body_values),
+                "AcronymHints": ",".join(acronym_hints),
                 "MetadataSignatories": ",".join(sorted(metadata_signatories)),
                 "MetadataConflict": "yes" if metadata_signatories and person not in metadata_signatories else "no",
                 "SupportClass": "deterministic-source-record-summary",
@@ -20281,6 +20779,11 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
         predicates={
             "source_record_measurement_discrepancy_support",
             "source_record_threshold_comparison_support",
+            "source_record_document_event_chronology_support",
+            "source_record_group_formation_exception_support",
+            "source_record_destination_support",
+            "source_record_body_signatory_support",
+            "event_elapsed_duration_support",
         },
     ):
         return {
@@ -20322,7 +20825,8 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",

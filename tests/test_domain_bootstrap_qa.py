@@ -19,6 +19,7 @@ from scripts.run_domain_bootstrap_qa import (
     _dedupe_helper_query_results,
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
+    _event_elapsed_duration_companion,
     _limit_helper_query_results,
     _location_floor_hint_queries,
     _negative_join_with_previous,
@@ -1898,6 +1899,147 @@ def test_source_record_messy_summary_extracts_weather_and_product_chronology() -
     assert "15:44: special_marine_warning_update" in sequence
 
 
+def test_source_record_messy_summary_orders_document_events() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "interest_rate_formula(multi_draw_term_loan_and_security_agreement_2022, "
+            "greater_of_prime_rate_minus_1_50_percent_or_3_00_percent, 2022_10_20)."
+        ),
+        (
+            "entered_agreement(second_amendment_to_multi_draw_term_loan_and_security_agreement, "
+            "2025_10_01, hamilton_lane_advisors_l_l_c_jpmorgan_chase_bank_n_a)."
+        ),
+        "filing_date(hlne_8k_20251001_20251006, 2025_10_06).",
+        "signed_by(hlne_8k_20251001_20251006, lydia_a_gavalis, general_counsel_and_secretary).",
+        (
+            "source_record_text_atom(src_line_0004, "
+            "document_date_2025_10_01_date_of_earliest_event_reported_filed_signed_2025_10_06)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "In what order do the following events appear on the document, from earliest to latest: "
+            "(a) execution of the original 2022 Term Loan Agreement, (b) execution of the Second Amendment, "
+            "(c) signing of the Form 8-K?"
+        ),
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_document_event_chronology_support"
+    )
+    summary = companion["result"]["rows"][0]
+    assert summary["EventCount"] == "3"
+    assert (
+        summary["Sequence"]
+        == "2022-10-20: original_2022_term_loan_agreement_execution; "
+        "2025-10-01: second_amendment_execution; 2025-10-06: form_8_k_signing"
+    )
+    rows = companion["result"]["rows"][1:]
+    assert [row["EventKind"] for row in rows] == [
+        "original_2022_term_loan_agreement_execution",
+        "second_amendment_execution",
+        "form_8_k_signing",
+    ]
+
+
+def test_source_record_messy_summary_extracts_not_formed_group_exception() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0030, "
+        "the_parties_were_formed_into_specialized_investigative_groups_led_by_ntsb_group_chairmen_"
+        "a_ntsb_air_traffic_controller_atc_specialist_was_on_site_to_collect_atc_information_"
+        "but_an_atc_group_was_not_formed)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "The NTSB formed multiple specialized investigative groups but explicitly did not form one group "
+            "despite having a specialist on site. Which group was not formed?"
+        ),
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_group_formation_exception_support"
+    )
+    row = companion["result"]["rows"][0]
+    assert row["Group"] == "air_traffic_controller_atc_group"
+    assert row["FormationStatus"] == "not_formed"
+    assert row["Specialist"] == "ntsb_air_traffic_controller_atc_specialist"
+
+
+def test_event_elapsed_duration_companion_computes_departure_to_casualty() -> None:
+    results = [
+        {
+            "query": "event_occurred(X, departure, Departtime, Y).",
+            "result": {
+                "status": "success",
+                "predicate": "event_occurred",
+                "rows": [
+                    {
+                        "X": "event_departure_houma",
+                        "Departtime": "2024_05_11t08_40_00z",
+                        "Y": "baylor_j_tregre_departed_houma_louisiana_en_route_to_block_538a",
+                    }
+                ],
+            },
+        },
+        {
+            "query": "event_occurred(X, capsizing, Casualtytime, Y).",
+            "result": {
+                "status": "success",
+                "predicate": "event_occurred",
+                "rows": [
+                    {
+                        "X": "event_casualty_capsizing",
+                        "Casualtytime": "2024_05_13t21_57_00z",
+                        "Y": "towing_vessel_baylor_j_tregre_capsized_and_sank",
+                    }
+                ],
+            },
+        },
+    ]
+
+    companion = _event_elapsed_duration_companion(
+        results,
+        utterance="When did the Baylor J. Tregre depart Houma, Louisiana, and how many days elapsed before the casualty?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["DurationMinutes"] == "3677"
+    assert row["DurationDisplay"] == "2 days 13 hours 17 minutes"
+    assert row["CalendarDayDisplay"] == "third_calendar_day"
+
+
+def test_source_record_messy_summary_extracts_destination_field() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field_item_pair_qualifier(src_line_0196, field, destination, value, honolulu_hi, phnl).",
+        (
+            "source_record_text_atom(src_line_0026, "
+            "flight_2976_was_a_domestic_cargo_flight_from_sdf_to_daniel_k_inouye_international_airport_hnl_honolulu_hawaii)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What was the intended destination of UPS flight 2976?",
+    )
+
+    companion = next(item for item in companions if item["result"]["predicate"] == "source_record_destination_support")
+    rows = companion["result"]["rows"]
+    assert rows[0]["DestinationDisplay"] == "Daniel K. Inouye International Airport (HNL), Honolulu, Hawaii"
+    assert any(row["Qualifier"] == "phnl" for row in rows)
+
+
 def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -1906,6 +2048,7 @@ def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
         "source_record_row_context(src_line_0127, francis_godwin, francis_godwin, warning_letter).",
         "source_record_row_context(src_line_0128, francis_godwin, director, warning_letter).",
         "source_record_row_context(src_line_0129, francis_godwin, office_of_manufacturing_quality, warning_letter).",
+        "source_record_row_context(src_line_0130, francis_godwin, center_for_drug_evaluation_and_research, warning_letter).",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -1918,6 +2061,7 @@ def test_source_record_messy_summary_cross_checks_signatory_metadata() -> None:
     row = companion["result"]["rows"][0]
     assert row["Person"] == "francis_godwin"
     assert row["MetadataConflict"] == "yes"
+    assert row["AcronymHints"] == "cder"
     assert "director_office_of_manufacturing_quality" in row["Roles"]
     assert len(companion["result"]["rows"]) == 1
 

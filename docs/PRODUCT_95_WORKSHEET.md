@@ -993,3 +993,58 @@ Read:
 - The next honest confirmation is either another full known-wild rerun after
   this commit or, better, a fresh ugly transfer batch from new external
   documents.
+
+## 2026-05-23/24 Known-Wild Chronology And Volatility Hardening
+
+Goal: take the known-wild `datasets/real_world_transfer/20260523_wild_01`
+corpus as far as is useful before spending another full native or fresh wild
+stamp. This remains same-corpus hardening evidence, not a new transfer claim.
+
+Full reruns, OpenRouter Qwen3.6 A3B, 6 lanes, no cache:
+
+```text
+r6: 124 / 0 / 1  (99.2%), compatibility 0
+r7: 123 / 1 / 1  (98.4%), compatibility 0
+r8: 124 / 1 / 0  (99.2%), compatibility 0
+r9: 124 / 0 / 1  (99.2%), compatibility 0
+```
+
+The residue moved between rows, which is useful signal: these are mostly
+query/judge volatility around admitted source-record evidence, not compile
+runtime failures. Runtime load errors and QA write proposals stayed at 0.
+
+Added deterministic current-query support for:
+
+- SEC document event chronology: original 2022 Term Loan Agreement execution,
+  Second Amendment execution, Form 8-K signing/filing sequence
+- NTSB investigative group exception: ATC group not formed despite an ATC
+  specialist being on site
+- FDA body-signatory conflict: body signature block support carries CDER
+  acronym hint and remains exact despite conflicting metadata signer
+- event elapsed duration from admitted `event_occurred/4` timestamps, including
+  multi-day duration and calendar-day ordinal
+- source-record destination extraction from destination table rows and HNL prose
+
+Targeted live replays now exact:
+
+- SEC q012 document-event chronology
+- FDA q017 body signatory/role
+- NTSB aviation q022 ATC group not formed
+- NTSB marine q009 departure-to-casualty elapsed duration
+- NTSB aviation q002 intended destination
+
+Validation:
+
+```text
+tests/test_domain_bootstrap_qa.py: 259 passed
+py_compile scripts/run_domain_bootstrap_qa.py: pass
+```
+
+Read:
+
+- The known-wild set is now good at finding deterministic query-surface
+  omissions, but repeated full reruns are showing diminishing returns because
+  the remaining misses can move with model/judge volatility.
+- The next product-useful evidence should be either a fresh ugly wild batch or
+  a native restamp. More loops on the same five known-wild fixtures risk
+  polishing the thermometer instead of measuring the room.
