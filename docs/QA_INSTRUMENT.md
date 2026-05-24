@@ -45,6 +45,31 @@ what gets counted.
 The discipline is not "the LLM did well." The discipline is that the audit
 summary can say what path was used and whether the run stayed clean.
 
+## Response Envelope
+
+The QA row can also carry a product-facing `qa_response_envelope_v1`.
+
+This envelope is deliberately downstream of scoring. It does not change
+exact/partial/miss counts, compatibility accounting, failure-surface labels, or
+compile gates. It renders the current row as a support reading:
+
+```text
+reference answer supplied by the evaluation set
+  + admitted query evidence
+  + reference judge verdict
+  + clarification and missing-slot signals
+  + failure-surface label when present
+  -> established / partially_established / not_established
+     / clarification_required / coverage_gap / ambiguous
+```
+
+The key boundary is that this is `reference_answer_support`, not an autonomous
+final-answer renderer. It can say that the admitted evidence establishes the
+supplied reference answer, or that the row needs clarification or has a coverage
+gap. It should not be described as "Prethinker answered the user's question" in
+a product demo unless a separate final-answer renderer has actually composed
+that answer from the envelope.
+
 ## What Is LLM-Mediated
 
 The QA stage can involve model calls for:

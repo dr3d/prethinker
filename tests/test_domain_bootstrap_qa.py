@@ -39,6 +39,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_reference_supported_by_results,
     _source_record_relative_next_day_companion,
     _source_record_section_list_count_companion,
+    build_qa_response_envelope,
     _default_openrouter_title,
     _chat_headers,
     _method_frame_purpose_companion,
@@ -218,6 +219,76 @@ def test_qa_cache_row_round_trips(tmp_path) -> None:
     write_cached_row(cache_dir=tmp_path, cache_key="abc", row=row)
 
     assert read_cached_row(cache_dir=tmp_path, cache_key="abc") == row
+
+
+def test_qa_response_envelope_marks_exact_reference_support_established() -> None:
+    row = {
+        "reference_answer": "The report was signed by Dana Lee.",
+        "reference_judge": {
+            "verdict": "exact",
+            "concise_answer": "The admitted source row names Dana Lee as signer.",
+        },
+        "failure_surface": {"surface": "not_applicable"},
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_field",
+                    "rows": [{"SourceRow": "src_line_7", "Field": "signer", "Value": "dana_lee"}],
+                }
+            }
+        ],
+    }
+
+    envelope = build_qa_response_envelope(row)
+
+    assert envelope["schema_version"] == "qa_response_envelope_v1"
+    assert envelope["reading_type"] == "reference_answer_support"
+    assert envelope["status"] == "established"
+    assert envelope["reference_support"] == "exact"
+    assert envelope["evidence_rows"] == [
+        {"query_index": 0, "predicate": "source_record_field", "source_row": "src_line_7"}
+    ]
+
+
+def test_qa_response_envelope_marks_clarification_pressure_before_verdict() -> None:
+    row = {
+        "projected_decision": "clarify",
+        "clarification_questions": ["Which notice are you asking about?"],
+        "self_check": {"missing_slots": ["notice_id"]},
+        "reference_judge": {"verdict": "exact"},
+    }
+
+    envelope = build_qa_response_envelope(row)
+
+    assert envelope["status"] == "clarification_required"
+    assert envelope["clarification_questions"] == ["Which notice are you asking about?"]
+    assert envelope["missing_slots"] == ["notice_id"]
+
+
+def test_qa_response_envelope_marks_compile_gap_as_coverage_gap() -> None:
+    row = {
+        "reference_answer": "The notice listed three corrective actions.",
+        "reference_judge": {"verdict": "miss"},
+        "failure_surface": {"surface": "compile_surface_gap"},
+    }
+
+    envelope = build_qa_response_envelope(row)
+
+    assert envelope["status"] == "coverage_gap"
+    assert envelope["failure_surface"] == "compile_surface_gap"
+
+
+def test_qa_response_envelope_marks_partial_and_miss_without_claiming_final_answer() -> None:
+    partial = build_qa_response_envelope(
+        {"reference_answer": "A and B.", "reference_judge": {"verdict": "partial"}}
+    )
+    miss = build_qa_response_envelope(
+        {"reference_answer": "C.", "reference_judge": {"verdict": "miss"}}
+    )
+
+    assert partial["status"] == "partially_established"
+    assert miss["status"] == "not_established"
+    assert "not an autonomous final-answer renderer" in partial["policy_note"]
 
 
 def test_compiled_kb_inventory_uses_clause_surfaces_not_english() -> None:
@@ -3020,9 +3091,27 @@ def test_run_query_plan_derives_causal_end_state_support() -> None:
 
 def test_summarize_counts_reference_judge_verdicts() -> None:
     rows = [
-        {"ok": True, "queries": ["p(X)."], "reference_answer": "A", "reference_judge": {"verdict": "exact"}},
-        {"ok": True, "queries": ["q(X)."], "reference_answer": "B", "reference_judge": {"verdict": "partial"}},
-        {"ok": True, "queries": [], "reference_answer": "C", "reference_judge": {"verdict": "miss"}},
+        {
+            "ok": True,
+            "queries": ["p(X)."],
+            "reference_answer": "A",
+            "reference_judge": {"verdict": "exact"},
+            "response_envelope": {"status": "established"},
+        },
+        {
+            "ok": True,
+            "queries": ["q(X)."],
+            "reference_answer": "B",
+            "reference_judge": {"verdict": "partial"},
+            "response_envelope": {"status": "partially_established"},
+        },
+        {
+            "ok": True,
+            "queries": [],
+            "reference_answer": "C",
+            "reference_judge": {"verdict": "miss"},
+            "response_envelope": {"status": "coverage_gap"},
+        },
     ]
 
     summary = summarize(rows=rows, load_errors=[], elapsed_ms=12)
@@ -3031,6 +3120,11 @@ def test_summarize_counts_reference_judge_verdicts() -> None:
     assert summary["judge_exact"] == 1
     assert summary["judge_partial"] == 1
     assert summary["judge_miss"] == 1
+    assert summary["response_envelope_counts"] == {
+        "coverage_gap": 1,
+        "established": 1,
+        "partially_established": 1,
+    }
 
 
 def test_summarize_counts_compatibility_rows_by_companion() -> None:

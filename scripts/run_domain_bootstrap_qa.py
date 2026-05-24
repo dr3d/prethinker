@@ -753,10 +753,13 @@ def main() -> int:
                     rules=rules,
                     config=config,
                 )
+            row["response_envelope"] = build_qa_response_envelope(row)
             row["cache_hit"] = False
             row["cache_key"] = cache_key
             if cache_enabled and is_cacheable_row(row):
                 write_cached_row(cache_dir=cache_dir, cache_key=cache_key, row=row)
+        if "response_envelope" not in row:
+            row["response_envelope"] = build_qa_response_envelope(row)
         rows.append(row)
 
     summary = summarize(rows=rows, load_errors=load_errors, elapsed_ms=int((time.perf_counter() - started) * 1000))
@@ -2000,6 +2003,7 @@ def run_one_question(
             "query_results": query_results,
             "oracle": oracle,
             "reference_answer": str(oracle.get("reference_answer", "")),
+            "clarification_questions": ir.get("clarification_questions", []),
             "self_check": ir.get("self_check", {}),
         }
     )
@@ -2012,6 +2016,146 @@ def run_one_question(
         row["mapper_diagnostics"] = diagnostics
     row["oracle_match"] = score_oracle(row=row, oracle=oracle)
     return row
+
+
+def build_qa_response_envelope(row: dict[str, Any]) -> dict[str, Any]:
+    """Render a product-facing support reading without changing QA scoring."""
+
+    judge = row.get("reference_judge") if isinstance(row.get("reference_judge"), dict) else {}
+    failure = row.get("failure_surface") if isinstance(row.get("failure_surface"), dict) else {}
+    verdict = str(judge.get("verdict", "")).strip()
+    projected = str(row.get("projected_decision", "") or row.get("model_decision", "")).strip()
+    clarification_questions = _qa_row_clarification_questions(row)
+    missing_slots = _qa_row_missing_slots(row)
+    failure_surface = str(failure.get("surface", "")).strip()
+
+    if projected == "clarify" or clarification_questions or missing_slots:
+        status = "clarification_required"
+        basis = "The parsed question or self-check retained unresolved clarification pressure."
+    elif failure_surface == "compile_surface_gap":
+        status = "coverage_gap"
+        basis = "The admitted compile artifact did not preserve enough support for the reference answer."
+    elif verdict == "exact":
+        status = "established"
+        basis = "The governed QA judge marked the admitted evidence as an exact match for the reference answer."
+    elif verdict == "partial":
+        status = "partially_established"
+        basis = "The admitted evidence supports part of the reference answer or supports it with material qualification."
+    elif verdict == "miss":
+        status = "not_established"
+        basis = "The admitted evidence did not support the supplied reference answer."
+    else:
+        status = "ambiguous"
+        basis = "No decisive reference-support verdict was available for this row."
+
+    support_summary = ""
+    for key in ("concise_answer", "rationale", "notes"):
+        value = judge.get(key)
+        if isinstance(value, str) and value.strip():
+            support_summary = value.strip()
+            break
+
+    return {
+        "schema_version": "qa_response_envelope_v1",
+        "reading_type": "reference_answer_support",
+        "status": status,
+        "basis": basis,
+        "reference_support": verdict or "unjudged",
+        "reference_answer": str(row.get("reference_answer", "")).strip(),
+        "support_summary": support_summary,
+        "clarification_questions": clarification_questions,
+        "missing_slots": missing_slots,
+        "failure_surface": failure_surface,
+        "evidence_rows": _qa_response_evidence_rows(row),
+        "policy_note": (
+            "This envelope reports whether admitted evidence supports the supplied reference answer; "
+            "it is not an autonomous final-answer renderer."
+        ),
+    }
+
+
+def _qa_row_clarification_questions(row: dict[str, Any]) -> list[str]:
+    values: list[str] = []
+    candidates = [row.get("clarification_questions")]
+    semantic_ir = row.get("semantic_ir")
+    if isinstance(semantic_ir, dict):
+        candidates.append(semantic_ir.get("clarification_questions"))
+    for candidate in candidates:
+        if not isinstance(candidate, list):
+            continue
+        for value in candidate:
+            text = str(value).strip()
+            if text and text not in values:
+                values.append(text)
+    return values
+
+
+def _qa_row_missing_slots(row: dict[str, Any]) -> list[str]:
+    values: list[str] = []
+    candidates: list[Any] = []
+    self_check = row.get("self_check")
+    if isinstance(self_check, dict):
+        candidates.append(self_check.get("missing_slots"))
+    semantic_ir = row.get("semantic_ir")
+    if isinstance(semantic_ir, dict) and isinstance(semantic_ir.get("self_check"), dict):
+        candidates.append(semantic_ir["self_check"].get("missing_slots"))
+    for candidate in candidates:
+        if not isinstance(candidate, list):
+            continue
+        for value in candidate:
+            text = str(value).strip()
+            if text and text not in values:
+                values.append(text)
+    return values
+
+
+def _qa_response_evidence_rows(row: dict[str, Any]) -> list[dict[str, Any]]:
+    evidence_rows: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for query_index, query_result in enumerate(row.get("query_results", []) or []):
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict):
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for result_row in rows:
+            if not isinstance(result_row, dict):
+                continue
+            for source_row in _source_row_values_from_result_row(result_row):
+                key = (predicate, source_row, str(query_index))
+                if key in seen:
+                    continue
+                seen.add(key)
+                evidence_rows.append(
+                    {
+                        "query_index": query_index,
+                        "predicate": predicate,
+                        "source_row": source_row,
+                    }
+                )
+                if len(evidence_rows) >= 16:
+                    return evidence_rows
+    return evidence_rows
+
+
+def _source_row_values_from_result_row(result_row: dict[str, Any]) -> list[str]:
+    source_rows: list[str] = []
+    for key, value in result_row.items():
+        if key == "SourceRows" and isinstance(value, list):
+            for item in value:
+                text = str(item).strip()
+                if text and text not in source_rows:
+                    source_rows.append(text)
+            continue
+        if key == "SourceRow" or key.endswith("SourceRow"):
+            text = str(value).strip()
+            if text and text not in source_rows:
+                source_rows.append(text)
+    return source_rows
 
 
 def _fallback_queries_from_semantic_ir(
@@ -23547,12 +23691,19 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         if isinstance(row.get("reference_judge"), dict)
     ]
     failure_surface_counts: dict[str, int] = {}
+    response_envelope_counts: dict[str, int] = {}
     for row in rows:
         failure = row.get("failure_surface")
         if not isinstance(failure, dict):
-            continue
-        surface = str(failure.get("surface", "")).strip() or "unknown"
-        failure_surface_counts[surface] = failure_surface_counts.get(surface, 0) + 1
+            surface = ""
+        else:
+            surface = str(failure.get("surface", "")).strip() or "unknown"
+        if surface:
+            failure_surface_counts[surface] = failure_surface_counts.get(surface, 0) + 1
+        envelope = row.get("response_envelope")
+        if isinstance(envelope, dict):
+            status = str(envelope.get("status", "")).strip() or "unknown"
+            response_envelope_counts[status] = response_envelope_counts.get(status, 0) + 1
     compatibility_row_summary = summarize_compatibility_rows(rows)
     return {
         "question_count": len(rows),
@@ -23567,6 +23718,7 @@ def summarize(*, rows: list[dict[str, Any]], load_errors: list[str], elapsed_ms:
         "judge_partial": sum(1 for judge in judge_rows if judge.get("verdict") == "partial"),
         "judge_miss": sum(1 for judge in judge_rows if judge.get("verdict") == "miss"),
         "failure_surface_counts": failure_surface_counts,
+        "response_envelope_counts": response_envelope_counts,
         "compatibility_row_summary": compatibility_row_summary,
         "runtime_load_error_count": len(load_errors),
         "elapsed_ms": elapsed_ms,
@@ -23636,6 +23788,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Oracle rows/matches: `{summary.get('oracle_rows', 0)}` / `{summary.get('oracle_match', 0)}`",
         f"- Reference judge: exact=`{summary.get('judge_exact', 0)}` partial=`{summary.get('judge_partial', 0)}` miss=`{summary.get('judge_miss', 0)}`",
         f"- Failure surfaces: `{summary.get('failure_surface_counts', {})}`",
+        f"- Response envelope statuses: `{summary.get('response_envelope_counts', {})}`",
         f"- Compatibility rows: `{compatibility_summary.get('row_class_counts', {})}` rows=`{compatibility_summary.get('row_count', 0)}`",
         f"- Cache: enabled=`{summary.get('cache_enabled', False)}` hits=`{summary.get('cache_hits', 0)}` misses=`{summary.get('cache_misses', 0)}`",
         "",
@@ -23673,6 +23826,7 @@ def write_summary(record: dict[str, Any], path: Path) -> None:
                 "",
                 f"- Phase: `{row.get('phase', '')}`",
                 f"- Decision: model=`{row.get('model_decision', '')}` projected=`{row.get('projected_decision', '')}`",
+                f"- Response envelope: `{(row.get('response_envelope') or {}).get('status', None)}`",
                 f"- Queries: `{row.get('queries', [])}`",
                 f"- Proposed writes: facts=`{len(row.get('proposed_facts', []) or [])}` rules=`{len(row.get('proposed_rules', []) or [])}`",
                 f"- Oracle match: `{row.get('oracle_match', None)}`",
