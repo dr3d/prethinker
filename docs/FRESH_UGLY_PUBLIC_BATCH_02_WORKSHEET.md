@@ -585,3 +585,231 @@ duration rows across FDA, OSHA, SEC, and NTSB shapes, and the guard showed why
 the threshold matters. The unresolved duration misses are mostly cases where
 the needed date is not strongly enough represented as an admitted date
 coordinate, or where the QA planner fails before query support can help.
+
+## 2026-05-24 Residual After Elapsed-Date Support
+
+Purpose:
+
+Re-run the prior Batch 02 fresh-only non-exact rows after the elapsed-date
+support landed, without treating targeted replay as a corpus score.
+
+Artifacts:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_residual_after_duration_20260524
+```
+
+Evidence-bundle residual replay:
+
+```text
+rows replayed: 29
+exact / partial / miss: 14 / 2 / 12
+not judged: 1
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+The remaining `not_judged` row was the same large OSHA violation-items table
+shape seen earlier. A narrow no-evidence-bundle replay over
+`osha_incident_ugly_004 q019,q022,q025` resolved the context pressure:
+
+```text
+q019: exact
+q022: miss
+q025: exact
+```
+
+Normalized residual-slice read:
+
+```text
+prior non-exact rows replayed: 29
+exact / partial / miss: 16 / 2 / 11
+projected full fresh-only slice, holding previously exact rows fixed:
+  237 / 2 / 11 over 250 = 94.8%
+```
+
+This is only a residual-slice projection. It is useful mechanism evidence, not
+a fresh Batch 02 benchmark claim.
+
+Clear recoveries:
+
+- FDA elapsed-duration rows on `fda_warning_ugly_003` and
+  `fda_warning_ugly_004`;
+- NTSB aviation maintenance elapsed duration;
+- OSHA correction-method and date-duration rows;
+- SEC event-date chronology and duration rows;
+- oversized OSHA table rows `q019` and `q025` once judge context pressure was
+  removed.
+
+Remaining blocker taxonomy:
+
+```text
+source-ordered report lists and rosters:
+  ntsb_aviation_ugly_002 q004,q012,q013,q018,q022
+  ntsb_surface_ugly_001 q012,q013,q023
+
+source-record table aggregation:
+  osha_incident_ugly_004 q022
+
+person/addressee role disambiguation:
+  fda_warning_ugly_003 q001
+
+duration planner variance or missing date admission:
+  osha_incident_ugly_003 q007
+  osha_incident_ugly_005 q009
+
+section comparison:
+  ntsb_aviation_ugly_002 q024
+```
+
+Read:
+
+The elapsed-date support did what it was supposed to do. The next real
+engineering blocker is no longer generic elapsed duration; it is preserving and
+querying source-order structures from long public reports, plus one generic
+table aggregation shape where a repeated maximum value must be counted and
+checked against a column total.
+
+Do not tune directly to NTSB section names. First audit whether the needed
+source-record rows are admitted for each remaining report-list row. If the rows
+are present, the proper mechanism is a generic source-section list/roster
+support surface over admitted `source_record_*` rows. If the rows are absent,
+the fix belongs in compile admission rather than QA query support.
+
+## 2026-05-24 Scoped Numeric Frequency Support
+
+Purpose:
+
+Address the generic table-aggregation residual represented by
+`osha_incident_ugly_004 q022`: a repeated maximum value must be counted inside a
+row scope and verified against a summary total.
+
+Change:
+
+Added a query-only deterministic support surface:
+
+```text
+source_record_scoped_numeric_frequency_support(ScopeValue, NumericField, MaxValue, MaxValueCount)
+```
+
+Behavior:
+
+- fires only on maximum/highest/largest questions that also ask for count,
+  repeated rows/items, arithmetic, or totals;
+- scopes candidate rows by admitted nonnumeric `source_record_field` values
+  mentioned in the question;
+- selects the repeated maximum numeric value inside that scope;
+- computes count times value locally;
+- checks the product against admitted total fields whose field names are also
+  question-relevant;
+- writes no durable fact and reads no raw source file.
+
+Unit coverage:
+
+```text
+tests/test_domain_bootstrap_qa.py:
+  repeated scoped maximum beats a larger out-of-scope numeric value
+  count-times-value product matches an admitted total column value
+```
+
+Targeted replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_scoped_numeric_frequency_20260524
+
+osha_incident_ugly_004 q022:
+  exact
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Read:
+
+This repairs the table aggregation residual without encoding OSHA, citation, or
+fixture-specific names. The live replay found the repeated `165,514` maximum
+inside the `willful` scoped rows, counted six rows, and matched
+`6 * 165,514 = 993,084` to the admitted summary total field.
+
+Residual-slice projection after substituting the validated `q022` replay:
+
+```text
+238 / 2 / 10 over 250 = 95.2%
+```
+
+Again, this is targeted residual-slice evidence. The honest benchmark remains
+the next full fresh rerun.
+
+## 2026-05-24 Source-Section List Detail Support
+
+Audit:
+
+The residual report-list rows split into two different causes:
+
+- `ntsb_surface_ugly_001 q012,q013` had the needed casualty list rows admitted
+  as same-section `source_record_row(..., list_row, ...)` plus
+  `source_record_text_atom` rows. The earlier miss was empty query evidence,
+  not missing source admission.
+- several `ntsb_aviation_ugly_002` residuals had the relevant text in
+  `source.md`, but no admitted source-record rows for the exact CAE
+  configuration list, administrative roster, toxicology substances, or previous
+  accident section. Those remain compile-admission issues, not query-support
+  issues.
+
+Change:
+
+Added a query-only deterministic support surface:
+
+```text
+source_record_section_list_detail_support(Position, SourceRow, TextAtom)
+```
+
+Behavior:
+
+- fires for questions asking to list/enumerate people, occupants, items,
+  entries, configurations, violations, events, or dates;
+- finds an admitted source-record header whose text/label/section overlaps the
+  question;
+- follows same-section `list_row` entries in source order;
+- returns the list row text and display text with source-row coordinates;
+- also runs in parse-failure fallback, so a malformed Semantic IR response does
+  not erase already-admitted list evidence;
+- writes no durable fact and reads no raw source file.
+
+Unit coverage:
+
+```text
+tests/test_domain_bootstrap_qa.py:
+  question-matched source header follows same-section list rows in source order
+```
+
+Targeted replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_source_section_list_detail_20260524
+
+ntsb_surface_ugly_001 q012,q013:
+  2 / 0 / 0
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Read:
+
+This is the cleanest kind of repair: the source rows were already admitted, but
+the QA path returned empty evidence when the query planner failed. The new
+support surface makes admitted source-order list rows visible without adding
+domain-specific names.
+
+Residual-slice projection after substituting the validated list-detail replay:
+
+```text
+240 / 2 / 8 over 250 = 96.0%
+```
+
+This is still targeted residual-slice evidence, not a fresh full Batch 02
+benchmark. The next full fresh rerun is the claim-making run.

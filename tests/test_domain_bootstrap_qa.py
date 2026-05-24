@@ -33,6 +33,8 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_date_range_duration_companion,
     _source_record_field_state_companion,
     _source_record_same_day_event_time_companion,
+    _source_record_scoped_numeric_frequency_companion,
+    _source_record_section_list_detail_companion,
     _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
     _source_record_relative_next_day_companion,
@@ -1827,6 +1829,103 @@ def test_source_record_messy_summary_does_not_select_unmentioned_numeric_field()
     )
 
     assert not any(item["result"]["predicate"] == "source_record_max_numeric_field_support" for item in companions)
+
+
+def test_source_record_scoped_numeric_frequency_counts_repeated_maximum() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0084, violations_penalties, initial_penalty).",
+        "source_record_field(src_line_0084, willful, v_993_084).",
+        "source_record_field(src_line_0085, violations_penalties, current_penalty).",
+        "source_record_field(src_line_0085, willful, v_993_084).",
+        "source_record_field(src_line_0094, citation_type, serious).",
+        "source_record_field(src_line_0094, citation_id, v_01001a).",
+        "source_record_field(src_line_0094, current_penalty, v_200_000).",
+        "source_record_field(src_line_0095, citation_type, willful).",
+        "source_record_field(src_line_0095, citation_id, v_02001a).",
+        "source_record_field(src_line_0095, current_penalty, v_165_514).",
+        "source_record_field(src_line_0095, initial_penalty, v_165_514).",
+        "source_record_field(src_line_0096, citation_type, willful).",
+        "source_record_field(src_line_0096, citation_id, v_02001b).",
+        "source_record_field(src_line_0096, current_penalty, v_0).",
+        "source_record_field(src_line_0097, citation_type, willful).",
+        "source_record_field(src_line_0097, citation_id, v_02002a).",
+        "source_record_field(src_line_0097, current_penalty, v_165_514).",
+        "source_record_field(src_line_0098, citation_type, willful).",
+        "source_record_field(src_line_0098, citation_id, v_02003a).",
+        "source_record_field(src_line_0098, current_penalty, v_165_514).",
+        "source_record_field(src_line_0099, citation_type, willful).",
+        "source_record_field(src_line_0099, citation_id, v_02004a).",
+        "source_record_field(src_line_0099, current_penalty, v_165_514).",
+        "source_record_field(src_line_0100, citation_type, willful).",
+        "source_record_field(src_line_0100, citation_id, v_02005a).",
+        "source_record_field(src_line_0100, current_penalty, v_165_514).",
+        "source_record_field(src_line_0101, citation_type, willful).",
+        "source_record_field(src_line_0101, citation_id, v_02006a).",
+        "source_record_field(src_line_0101, current_penalty, v_165_514).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_scoped_numeric_frequency_companion(
+        runtime,
+        utterance=(
+            "The maximum willful penalty appears verbatim in multiple rows of "
+            "the violation-items table. State that exact penalty amount, how "
+            "many violation items are at that exact amount, and verify with "
+            "arithmetic that those items account for the Willful column total."
+        ),
+    )
+
+    assert companion is not None
+    assert companion["result"]["predicate"] == "source_record_scoped_numeric_frequency_support"
+    summary = companion["result"]["rows"][0]
+    assert summary["ScopeField"] == "citation_type"
+    assert summary["ScopeValue"] == "willful"
+    assert summary["NumericField"] == "current_penalty"
+    assert summary["MaxValue"] == "165514"
+    assert summary["MaxValueCount"] == "6"
+    assert summary["ArithmeticProduct"] == "993084"
+    assert summary["ArithmeticTotalMatched"] == "true"
+    assert summary["ArithmeticTotalField"] == "willful,willful"
+    assert summary["MaxValueSourceRows"] == (
+        "src_line_0095,src_line_0097,src_line_0098,src_line_0099,src_line_0100,src_line_0101"
+    )
+
+
+def test_source_record_section_list_detail_follows_question_matched_header() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0084, paragraph_line, 84, injuries_section, the_fatally_injured_people_included).",
+        "source_record_text_atom(src_line_0084, the_fatally_injured_people_included).",
+        (
+            "source_record_row(src_line_0086, list_row, 86, injuries_section, "
+            "three_residents_of_the_house_in_the_driveway)."
+        ),
+        (
+            "source_record_text_atom(src_line_0086, "
+            "three_residents_of_the_house_in_the_driveway_an_adult_male_and_his_two_young_children)."
+        ),
+        "source_record_row(src_line_0087, list_row, 87, injuries_section, driver_of_a_2015_kenworth).",
+        "source_record_text_atom(src_line_0087, driver_of_a_2015_kenworth_truck_tractor_combination_vehicle).",
+        "source_record_row(src_line_0088, list_row, 88, injuries_section, driver_of_a_2023_hyundai).",
+        "source_record_text_atom(src_line_0088, driver_of_a_2023_hyundai).",
+        "source_record_row(src_line_0100, list_row, 100, other_section, unrelated_list_item).",
+        "source_record_text_atom(src_line_0100, unrelated_list_item).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_section_list_detail_companion(
+        runtime,
+        utterance="List the five fatally injured people in source order, including vehicle details.",
+    )
+
+    assert companion is not None
+    assert companion["result"]["predicate"] == "source_record_section_list_detail_support"
+    rows = companion["result"]["rows"]
+    assert [row["SourceRow"] for row in rows] == ["src_line_0086", "src_line_0087", "src_line_0088"]
+    assert rows[0]["Position"] == "1"
+    assert "adult_male" in rows[0]["TextAtom"]
+    assert all(row["HeaderSourceRow"] == "src_line_0084" for row in rows)
 
 
 def test_source_record_messy_summary_extracts_ais_speed_change_from_source_text() -> None:

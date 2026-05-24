@@ -1863,7 +1863,7 @@ def run_one_question(
     if not isinstance(ir, dict):
         row["raw_content"] = str(result.get("content", ""))[:4000] if isinstance(result, dict) else ""
         row["reference_answer"] = str(oracle.get("reference_answer", ""))
-        fallback_results = _source_record_messy_summary_companions(runtime, utterance=utterance)
+        fallback_results = _query_independent_source_record_support(runtime, utterance=utterance)
         if fallback_results:
             row.update(
                 {
@@ -1949,6 +1949,9 @@ def run_one_question(
     source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
     if source_list_window:
         query_results.append(source_list_window)
+    source_section_list_detail = _source_record_section_list_detail_companion(runtime, utterance=utterance)
+    if source_section_list_detail:
+        query_results.append(source_section_list_detail)
     source_speaker_window = _source_record_speaker_window_companion(runtime, utterance=utterance)
     if source_speaker_window:
         query_results.append(source_speaker_window)
@@ -6248,6 +6251,144 @@ def _source_record_list_window_companion(
         "derived_from_queries": [
             "source_record_text_atom(SourceRow, TextAtom).",
             "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _source_record_section_list_detail_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:list|enumerat(?:e|es|ed|ion)|source order|in order|which|what)\b", text):
+        return None
+    if not re.search(r"\b(?:people|persons|occupants?|items?|entries|rows?|configuration|violations?|events?|dates?)\b", text):
+        return None
+
+    question_tokens = _source_record_overlap_question_tokens(utterance)
+    if not question_tokens:
+        return None
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    row_meta = _source_record_row_metadata(runtime)
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    ordered: list[dict[str, Any]] = []
+    for source_row, meta in row_meta.items():
+        line = _safe_int(meta.get("Line"))
+        if line is None:
+            continue
+        text_atom = text_by_row.get(source_row, _normalize_text_filter_atom(str(meta.get("Label", ""))))
+        tokens = set(_query_atom_tokens("_".join([text_atom, str(meta.get("Label", "")), str(meta.get("SectionAtom", ""))])))
+        ordered.append(
+            {
+                "SourceRow": source_row,
+                "Line": line,
+                "Kind": str(meta.get("Kind", "")),
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": str(meta.get("Label", "")),
+                "TextAtom": text_atom,
+                "Tokens": tokens,
+            }
+        )
+    if not ordered:
+        return None
+    ordered.sort(key=lambda row: int(row["Line"]))
+
+    groups: list[dict[str, Any]] = []
+    for index, row in enumerate(ordered):
+        if row["Kind"] == "list_row":
+            continue
+        overlap = question_tokens & set(row["Tokens"])
+        if len(overlap) < 2:
+            continue
+        list_cue_tokens = {
+            "configuration",
+            "fatally",
+            "include",
+            "included",
+            "injured",
+            "occupants",
+            "people",
+            "persons",
+            "seriously",
+            "violation",
+            "violations",
+        }
+        if not (overlap & list_cue_tokens or {"section", "source"} & question_tokens):
+            continue
+        section = str(row["Section"])
+        followers: list[dict[str, Any]] = []
+        last_line = int(row["Line"])
+        for follower in ordered[index + 1 : index + 20]:
+            if str(follower["Section"]) != section:
+                break
+            gap = int(follower["Line"]) - last_line
+            if gap > 8 and followers:
+                break
+            if int(follower["Line"]) - int(row["Line"]) > 35:
+                break
+            if str(follower["Kind"]) == "list_row":
+                followers.append(follower)
+                last_line = int(follower["Line"])
+                continue
+            if followers and str(follower["Kind"]) not in {"list_row", "continuation_line"}:
+                break
+        if not followers:
+            continue
+        score = len(overlap) * 10 + len(followers)
+        groups.append({"score": score, "header": row, "followers": followers, "overlap": sorted(overlap)})
+    if not groups:
+        return None
+    groups.sort(
+        key=lambda item: (
+            -int(item["score"]),
+            _source_row_sort_key(str(item["header"]["SourceRow"])),
+        )
+    )
+    best = groups[0]
+    out_rows: list[dict[str, str]] = []
+    for position, row in enumerate(best["followers"], start=1):
+        out_rows.append(
+            {
+                "SupportKind": "source_record_section_list_detail",
+                "Position": str(position),
+                "SourceRow": str(row["SourceRow"]),
+                "HeaderSourceRow": str(best["header"]["SourceRow"]),
+                "Line": str(row["Line"]),
+                "Section": str(row["Section"]),
+                "HeaderTextAtom": str(best["header"]["TextAtom"]),
+                "TextAtom": str(row["TextAtom"]),
+                "DisplayText": _display_source_phrase(str(row["TextAtom"])),
+                "MatchedQuestionTokens": ",".join(str(token) for token in best["overlap"]),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return {
+        "query": "source_record_section_list_detail_support(Position, SourceRow, TextAtom).",
+        "result": {
+            "predicate": "source_record_section_list_detail_support",
+            "prolog_query": "source_record_section_list_detail_support(Position, SourceRow, TextAtom).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows[:24]),
+            "variables": list(out_rows[0].keys()),
+            "rows": out_rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-section list detail support followed an admitted "
+                    "question-matched source-record header to same-section list rows; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
         ],
     }
 
@@ -15196,6 +15337,7 @@ def _source_record_messy_summary_companions(
         _source_record_field_state_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
         _source_record_extreme_date_field_companion(runtime, utterance=utterance),
+        _source_record_scoped_numeric_frequency_companion(runtime, utterance=utterance),
         _source_record_max_numeric_field_companion(runtime, utterance=utterance),
         _source_record_speed_change_companion(runtime, utterance=utterance),
         _source_record_weather_observation_companion(runtime, utterance=utterance),
@@ -15205,6 +15347,28 @@ def _source_record_messy_summary_companions(
         _source_record_destination_companion(runtime, utterance=utterance),
         _source_record_contact_signatory_companion(runtime, utterance=utterance),
         _source_record_signatory_conflict_companion(runtime, utterance=utterance),
+    ):
+        if companion:
+            out.append(companion)
+    return out
+
+
+def _query_independent_source_record_support(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for companion in (
+        _source_record_citation_text_companion(runtime, utterance=utterance),
+        _source_record_section_list_count_companion(runtime, utterance=utterance),
+        _source_record_relative_next_day_companion(runtime, utterance=utterance),
+        _source_record_question_overlap_companion(runtime, utterance=utterance),
+        _source_record_list_window_companion(runtime, utterance=utterance),
+        _source_record_section_list_detail_companion(runtime, utterance=utterance),
+        _source_record_speaker_window_companion(runtime, utterance=utterance),
+        _source_record_discrepancy_list_companion(runtime, utterance=utterance),
+        *_source_record_messy_summary_companions(runtime, utterance=utterance),
     ):
         if companion:
             out.append(companion)
@@ -17348,6 +17512,220 @@ def _source_record_max_numeric_field_companion(
             "source_record_field(SourceRow, naics_code, NaicsCode).",
         ],
     }
+
+
+def _source_record_scoped_numeric_frequency_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:largest|max(?:imum)?|highest|greatest)\b", text):
+        return None
+    if not re.search(r"\b(?:count|how many|multiple|appears?|times|rows?|items?|arithmetic|total)\b", text):
+        return None
+
+    fields_by_row = _source_record_all_field_values_by_row(runtime, include_items=False)
+    if not fields_by_row:
+        return None
+
+    query_tokens = set(_source_record_field_name_tokens(text))
+    numeric_field_tokens = {
+        "amount",
+        "assessment",
+        "fee",
+        "fine",
+        "penalty",
+        "price",
+        "total",
+        "value",
+    }
+    scoped_candidates: list[tuple[str, str, str, dict[str, list[str]]]] = []
+    for source_row, fields in fields_by_row.items():
+        matched_scope = ""
+        matched_scope_field = ""
+        for field, values in fields.items():
+            if _source_record_field_has_numeric_values(values):
+                continue
+            for value in values:
+                value_tokens = set(_source_record_field_name_tokens(value))
+                if not value_tokens or len(value_tokens) > 4:
+                    continue
+                if value_tokens <= query_tokens:
+                    matched_scope = value
+                    matched_scope_field = field
+                    break
+            if matched_scope:
+                break
+        if matched_scope:
+            scoped_candidates.append((source_row, matched_scope_field, matched_scope, fields))
+    if len(scoped_candidates) < 2:
+        return None
+
+    numeric_fields: set[str] = set()
+    for _, _, _, fields in scoped_candidates:
+        for field, values in fields.items():
+            field_tokens = set(_source_record_field_name_tokens(field))
+            if not field_tokens or not _source_record_field_has_numeric_values(values):
+                continue
+            if field_tokens & query_tokens or (field_tokens & numeric_field_tokens and query_tokens & numeric_field_tokens):
+                numeric_fields.add(field)
+    if not numeric_fields:
+        return None
+
+    candidate_summaries: list[dict[str, Any]] = []
+    for field in sorted(numeric_fields):
+        numeric_rows: list[dict[str, str]] = []
+        for source_row, scope_field, scope_value, fields in scoped_candidates:
+            for raw_value in fields.get(field, []):
+                number = _source_record_numeric_field_value(raw_value, field=field)
+                if number is None:
+                    continue
+                sibling_values = _source_record_sibling_display(fields, exclude_fields={field})
+                numeric_rows.append(
+                    {
+                        "SupportKind": "scoped_numeric_frequency_candidate",
+                        "ScopeField": scope_field,
+                        "ScopeValue": scope_value,
+                        "ScopeDisplay": _normalize_source_record_display_value(scope_value),
+                        "NumericField": field,
+                        "SourceRow": source_row,
+                        "RawValue": raw_value,
+                        "NumericValue": str(number),
+                        "DisplayValue": f"{number:,}",
+                        "SiblingValues": sibling_values,
+                        "SupportClass": "deterministic-source-record-summary",
+                    }
+                )
+        if not numeric_rows:
+            continue
+        max_value = max(int(row["NumericValue"]) for row in numeric_rows)
+        if max_value == 0 and any(int(row["NumericValue"]) > 0 for row in numeric_rows):
+            continue
+        max_rows = [row for row in numeric_rows if int(row["NumericValue"]) == max_value]
+        if len(max_rows) < 2 and "multiple" in text:
+            continue
+        product = max_value * len(max_rows)
+        total_matches = _source_record_total_matches_for_value(
+            fields_by_row,
+            value=product,
+            query_tokens=query_tokens,
+        )
+        field_tokens = set(_source_record_field_name_tokens(field))
+        score = (
+            len(field_tokens & query_tokens) * 10
+            + len(max_rows) * 2
+            + (5 if max_value > 0 else 0)
+            + (8 if total_matches else 0)
+            - (4 if field.casefold().startswith("fta") and "fta" not in query_tokens else 0)
+        )
+        candidate_summaries.append(
+            {
+                "score": score,
+                "field": field,
+                "max_value": max_value,
+                "max_rows": max_rows,
+                "numeric_rows": numeric_rows,
+                "product": product,
+                "total_matches": total_matches,
+            }
+        )
+    if not candidate_summaries:
+        return None
+
+    candidate_summaries.sort(
+        key=lambda item: (
+            -int(item["score"]),
+            -int(item["max_value"]),
+            str(item["field"]),
+        )
+    )
+    best = candidate_summaries[0]
+    max_rows = list(best["max_rows"])
+    total_matches = list(best["total_matches"])
+    summary = {
+        **max_rows[0],
+        "SupportKind": "scoped_max_numeric_frequency",
+        "MaxValue": str(best["max_value"]),
+        "MaxDisplayValue": f"{int(best['max_value']):,}",
+        "MaxValueCount": str(len(max_rows)),
+        "MaxValueSourceRows": ",".join(row["SourceRow"] for row in max_rows),
+        "ScopedRowCount": str(len(best["numeric_rows"])),
+        "ArithmeticProduct": str(best["product"]),
+        "ArithmeticProductDisplay": f"{int(best['product']):,}",
+        "ArithmeticTotalMatched": "true" if total_matches else "false",
+        "ArithmeticTotalField": ",".join(match["Field"] for match in total_matches[:4]),
+        "ArithmeticTotalSourceRows": ",".join(match["SourceRow"] for match in total_matches[:4]),
+    }
+    support_rows = [summary, *max_rows[:24], *total_matches[:8]]
+    return {
+        "query": "source_record_scoped_numeric_frequency_support(ScopeValue, NumericField, MaxValue, MaxValueCount).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_scoped_numeric_frequency_support",
+            "prolog_query": "source_record_scoped_numeric_frequency_support(ScopeValue, NumericField, MaxValue, MaxValueCount).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only source-record aggregate scoped numeric rows by an admitted "
+                    "row value, selected the repeated maximum, and checked count-times-value "
+                    "against admitted total fields; no durable aggregate fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, ScopeField, ScopeValue).",
+            "source_record_field(SourceRow, NumericField, NumericValue).",
+            "source_record_field(SourceRow, TotalField, TotalValue).",
+        ],
+    }
+
+
+def _source_record_field_has_numeric_values(values: list[str]) -> bool:
+    return any(_source_record_numeric_field_value(value, field="") is not None for value in values)
+
+
+def _source_record_total_matches_for_value(
+    fields_by_row: dict[str, dict[str, list[str]]],
+    *,
+    value: int,
+    query_tokens: set[str],
+) -> list[dict[str, str]]:
+    if value <= 0:
+        return []
+    out: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, fields in fields_by_row.items():
+        for field, values in fields.items():
+            field_tokens = set(_source_record_field_name_tokens(field))
+            if field_tokens and query_tokens and not (field_tokens & query_tokens):
+                continue
+            for raw_value in values:
+                number = _source_record_numeric_field_value(raw_value, field=field)
+                if number != value:
+                    continue
+                key = (source_row, field, raw_value)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(
+                    {
+                        "SupportKind": "scoped_numeric_frequency_total_match",
+                        "SourceRow": source_row,
+                        "Field": field,
+                        "RawValue": raw_value,
+                        "NumericValue": str(number),
+                        "DisplayValue": f"{number:,}",
+                        "SupportClass": "deterministic-source-record-summary",
+                    }
+                )
+    out.sort(key=lambda row: (_source_row_sort_key(row["SourceRow"]), row["Field"]))
+    return out
 
 
 def _source_record_speed_change_companion(
@@ -22417,6 +22795,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
+            "source_record_section_list_detail_support",
             "source_record_date_range_duration_support",
             "source_record_same_day_event_time_support",
             "source_record_field_state_support",
@@ -22462,7 +22841,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
