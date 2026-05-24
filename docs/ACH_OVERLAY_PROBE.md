@@ -169,6 +169,32 @@ surviving_hypotheses
 5. Keep the planner separate from the scorer: model proposes, deterministic ACH
    code audits the matrix.
 
+## Product Discipline
+
+ACH should be treated as a sibling product surface, not a scoring shortcut. Its
+job is to make Prethinker's source-grounded substrate legible to domains that
+already think in evidence matrices, competing hypotheses, disconfirmation, and
+reviewable reasoning. That is useful for market reception in legal, regulatory,
+clinical, financial, insurance, safety, and investigation workflows.
+
+ACH must not be allowed to inflate QA exact-rate claims, write durable KB facts,
+or introduce fixture-shaped language into the core instrument. A useful ACH
+result means the matrix is complete, the judgments are auditable, the evidence
+rows trace to admitted source/claim surfaces, and the ranking says something
+clearer than a direct QA answer would have said.
+
+Optimization target:
+
+```text
+make competing-explanation analysis understandable and reviewable
+without weakening audit-grammar discipline
+```
+
+Near-term calibration should prefer documents with genuine disagreement or
+alternative explanations. Overdetermined NTSB probable-cause reports are good
+sanity checks, but contested enforcement, claims, incident, and litigation-like
+records are better tests of whether ACH is product-ready.
+
 ## 2026-05-23 Real-Document Probe
 
 Payload:
