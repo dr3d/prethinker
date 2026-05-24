@@ -515,3 +515,54 @@ Process change:
 fixture totals. Future mechanism work should run this comparison against the
 previous full batch before promotion; aggregate score gains are not sufficient
 when baseline-exact rows regress.
+
+## 2026-05-24 Citation-List Mechanism Probe
+
+Mechanism:
+
+- Added `source_record_citation_list_support`, a query-only companion that
+  collects ordered CFR citations from admitted `source_record_text_atom` rows.
+- For CGMP/violation questions, the companion prefers numbered violation rows
+  when those exist, so it does not answer a "four violations" question with
+  unrelated CFR citations elsewhere in the letter.
+- It emits individual ordered citation rows plus a summary row with count and
+  display list. It writes no durable facts.
+
+Validation:
+
+```text
+tests/test_source_surface_gap_audit.py
+tests/test_domain_bootstrap_qa.py
+
+280 passed
+```
+
+Targeted replay:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_citation_list_probe_20260524`
+
+```text
+fixtures/rows:
+  fda_warning_ugly_001 q012
+  fda_warning_ugly_002 q014
+exact / partial / miss: 2 / 0 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Recovered surfaces:
+
+- `fda_warning_ugly_001 q012`: `21 CFR 211.113(a)`,
+  `21 CFR 211.100(a)`, `21 CFR 211.192`, `21 CFR 211.166(a)`.
+- `fda_warning_ugly_002 q014`: `21 CFR 111.70(e)`,
+  `21 CFR 111.205(a)`, `21 CFR 111.255(a)`,
+  `21 CFR Part 111, Subpart N`.
+
+Discipline note:
+
+This is mechanism evidence only. It repairs two R3 regressed FDA citation-list
+rows on targeted replay, but the corpus score remains `189 / 4 / 7` until the
+next full fresh-ugly rerun.

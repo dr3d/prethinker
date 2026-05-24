@@ -4,6 +4,7 @@ from kb_pipeline import CorePrologRuntime
 from scripts.audit_source_surface_gaps import audit_scorecard
 from scripts.run_domain_bootstrap_qa import (
     compiled_kb_inventory,
+    _source_record_citation_list_companion,
     _source_record_identifier_set_companion,
     _source_field_question_key_hint_queries,
     _source_label_question_key_hint_queries,
@@ -190,6 +191,58 @@ def test_source_record_identifier_set_collects_inspection_related_identifiers() 
     assert "Report ID 0112600" in displays
     assert "Activity Nr 2277281" in displays
     assert "Investigation Nr 180500.015" in displays
+
+
+def test_source_record_citation_list_collects_ordered_cfr_sections() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0046, "
+        "v_1_your_firm_failed_to_establish_procedures_under_21_cfr_211_113_a)."
+    )
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0078, "
+        "v_2_production_control_violation_under_21_cfr_211_100_a)."
+    )
+    runtime.assert_fact("source_record_text_atom(src_line_0098, v_3_batch_failure_investigation_21_cfr_211_192).")
+    runtime.assert_fact("source_record_text_atom(src_line_0133, v_4_stability_testing_program_21_cfr_211_166_a).")
+
+    companion = _source_record_citation_list_companion(
+        runtime,
+        utterance="Which four CFR sections are cited as the four CGMP violations?",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    displays = [row["CitationDisplay"] for row in rows if row["CitationOrder"] != "summary"]
+    assert displays == [
+        "21 CFR 211.113(a)",
+        "21 CFR 211.100(a)",
+        "21 CFR 211.192",
+        "21 CFR 211.166(a)",
+    ]
+    assert rows[-1]["CitationCount"] == "4"
+
+
+def test_source_record_citation_list_collects_cfr_part_subpart() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact("source_record_text_atom(src_line_0010, violation_under_21_cfr_111_70_e).")
+    runtime.assert_fact("source_record_text_atom(src_line_0011, violation_under_21_cfr_111_205_a).")
+    runtime.assert_fact("source_record_text_atom(src_line_0012, violation_under_21_cfr_111_255_a).")
+    runtime.assert_fact("source_record_text_atom(src_line_0013, label_review_under_21_cfr_part_111_subpart_n).")
+
+    companion = _source_record_citation_list_companion(
+        runtime,
+        utterance="What are the four CFR citations listed under the CGMP violations?",
+    )
+
+    assert companion is not None
+    displays = [row["CitationDisplay"] for row in companion["result"]["rows"] if row["CitationOrder"] != "summary"]
+    assert displays == [
+        "21 CFR 111.70(e)",
+        "21 CFR 111.205(a)",
+        "21 CFR 111.255(a)",
+        "21 CFR Part 111, Subpart N",
+    ]
 
 
 def test_source_surface_gap_audit_separates_stranded_source_from_direct_rows(tmp_path) -> None:

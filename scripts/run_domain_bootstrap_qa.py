@@ -15121,6 +15121,7 @@ def _source_record_messy_summary_companions(
         _source_record_assessment_contrast_companion(runtime, utterance=utterance),
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
         _source_record_identifier_set_companion(runtime, utterance=utterance),
+        _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
@@ -15518,6 +15519,119 @@ def _source_record_identifier_display(*, label: str, value: str, text_atom: str 
         number = _first_identifier_number(normalized)
         return f"FEI {number}" if number else _display_source_phrase(raw_value)
     return _display_source_phrase(raw_value)
+
+
+def _source_record_citation_list_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:cfr|citation|citations|section|sections|subpart|violations?)\b", text):
+        return None
+    if "cfr" not in text and "code of federal regulations" not in text:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    text_atoms = _source_record_text_atoms(runtime)
+    if re.search(r"\b(?:cgmp|violation|violations)\b", text):
+        violation_atoms = [
+            (source_row, text_atom)
+            for source_row, text_atom in text_atoms
+            if re.search(r"(?:^|_)v_\d+_", _normalize_text_filter_atom(text_atom))
+        ]
+        if violation_atoms:
+            text_atoms = violation_atoms
+    for source_row, text_atom in text_atoms:
+        citations = _source_record_cfr_citations_from_atom(text_atom)
+        for citation in citations:
+            key = citation["CitationDisplay"]
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_citation_list",
+                    "CitationKind": "cfr",
+                    "CitationValue": citation["CitationValue"],
+                    "CitationDisplay": citation["CitationDisplay"],
+                    "CitationOrder": str(len(support_rows) + 1),
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    list_display = "; ".join(row["CitationDisplay"] for row in support_rows)
+    support_rows.append(
+        {
+            "SupportKind": "source_record_citation_list_summary",
+            "CitationKind": "cfr",
+            "CitationValue": ",".join(row["CitationValue"] for row in support_rows if row.get("CitationValue")),
+            "CitationDisplay": list_display,
+            "CitationOrder": "summary",
+            "CitationCount": str(len(support_rows)),
+            "SourceRow": "source_record_citation_list",
+            "SupportClass": "deterministic-source-record-summary",
+        }
+    )
+    return {
+        "query": "source_record_citation_list_support(CitationKind, CitationValue, CitationDisplay, CitationOrder, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_citation_list_support",
+            "prolog_query": "source_record_citation_list_support(CitationKind, CitationValue, CitationDisplay, CitationOrder, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only citation-list support collected ordered CFR citations from admitted "
+                    "source_record_text_atom rows; no durable citation fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_cfr_citations_from_atom(text_atom: str) -> list[dict[str, str]]:
+    text = _normalize_text_filter_atom(text_atom)
+    out: list[dict[str, str]] = []
+    seen: set[str] = set()
+    pattern = re.compile(
+        r"(?:^|_)(?P<title>\d+)_cfr_(?:(?P<section>\d+_\d+)(?:_(?P<letter>[a-z]))?|"
+        r"(?:part_)?(?P<part>\d+)(?:_subpart_(?P<subpart>[a-z]))?)(?=$|_)"
+    )
+    for match in pattern.finditer(text):
+        title = match.group("title")
+        part = match.group("part")
+        subpart = match.group("subpart")
+        section = match.group("section")
+        letter = match.group("letter")
+        if part and subpart:
+            value = f"{title}_cfr_part_{part}_subpart_{subpart}"
+            display = f"{title} CFR Part {part}, Subpart {subpart.upper()}"
+        elif section:
+            section_display = section.replace("_", ".")
+            suffix = f"({letter})" if letter else ""
+            value = f"{title}_cfr_{section}{'_' + letter if letter else ''}"
+            display = f"{title} CFR {section_display}{suffix}"
+        elif part:
+            value = f"{title}_cfr_part_{part}"
+            display = f"{title} CFR Part {part}"
+        else:
+            continue
+        if value in seen:
+            continue
+        seen.add(value)
+        out.append({"CitationValue": value, "CitationDisplay": display})
+    return out
 
 
 def _first_identifier_number(value: str) -> str:
@@ -21247,6 +21361,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_destination_support",
             "source_record_body_signatory_support",
             "source_record_identifier_set_support",
+            "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
             "source_record_field_state_support",
             "event_elapsed_duration_support",
