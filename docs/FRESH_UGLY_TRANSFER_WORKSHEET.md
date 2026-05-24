@@ -289,3 +289,77 @@ fresh ugly score. If replayed across all eight fixtures with these mechanisms,
 the arithmetic forecast from unchanged rows is approximately `192 / 5 / 3`
 on 200 rows, or 96.0% exact, but that is a forecast until a full rerun is
 actually performed.
+
+## 2026-05-24 Direct Source Baseline Control
+
+Purpose:
+
+Claude raised the right calibration question: how much of the 93.5% fresh ugly
+score comes from Prethinker's governed compile/query substrate, and how much is
+just the base model reading `source.md` directly? I added a no-Prethinker
+baseline runner to make that delta measurable.
+
+Instrument:
+
+- Script: `scripts/run_direct_source_qa_baseline.py`
+- Dataset: `datasets/real_world_transfer/fresh_ugly_public_20260524_01`
+- Model/provider: OpenRouter `qwen/qwen3.6-35b-a3b`
+- Lanes: 6
+- Input per row: the fixture `source.md` plus one `qa.md` question
+- Excluded from answer prompt: compiled KB artifacts, query surfaces,
+  `oracle.jsonl`, fixture notes, and answer-bearing authored QA
+- Scoring: after-the-fact structured judge against `oracle.jsonl`
+
+Result:
+
+```text
+questions: 200
+direct-source exact / partial / miss: 165 / 30 / 5
+direct-source exact rate: 82.5%
+runtime/API error rows: 0
+cache hits / misses: 2 / 198
+```
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\direct_source_qa_baseline_fresh_ugly_20260524_01`
+
+Comparison to the current fresh ugly Prethinker run:
+
+```text
+Prethinker QA R2:       187 / 6  / 7  = 93.5%
+Direct-source control:  165 / 30 / 5  = 82.5%
+Exact-rate delta: +11.0 percentage points for the governed pipeline
+```
+
+Per-fixture comparison:
+
+| Fixture | Prethinker QA R2 | Direct source | Exact delta |
+| --- | ---: | ---: | ---: |
+| `fda_warning_ugly_001` | 22 / 1 / 2 | 18 / 6 / 1 | +4 |
+| `fda_warning_ugly_002` | 24 / 1 / 0 | 18 / 6 / 1 | +6 |
+| `ntsb_aviation_ugly_001` | 24 / 1 / 0 | 17 / 6 / 2 | +7 |
+| `ntsb_marine_ugly_001` | 24 / 0 / 1 | 22 / 3 / 0 | +2 |
+| `osha_incident_ugly_001` | 23 / 1 / 1 | 23 / 1 / 1 | 0 |
+| `osha_incident_ugly_002` | 23 / 0 / 2 | 22 / 3 / 0 | +1 |
+| `sec_material_event_ugly_001` | 25 / 0 / 0 | 23 / 2 / 0 | +2 |
+| `sec_material_event_ugly_002` | 22 / 2 / 1 | 22 / 3 / 0 | 0 |
+
+Read:
+
+The control confirms that the 93.5% run is not just the base model's document
+reading ability. The direct model is strong on these structurally regular public
+documents, but it leaves many more rows in partial. Prethinker's gain is mostly
+conversion of partial answers into exact answers through source-record
+stability, deterministic surfaces, and governed query joins. The pipeline does
+not dominate every miss cell, so this is a delta measurement rather than a claim
+that every individual row is improved.
+
+Discipline note:
+
+This remains a project signal, not a leaderboard benchmark. The oracle was
+authored in the same batch as the documents, the corpus is only two fixtures per
+domain, and the direct-source baseline uses the same model as the pipeline. The
+useful claim is narrower and stronger: on this 200-row fresh ugly batch,
+Prethinker's governed path adds +11.0pp exact over direct source prompting with
+the same model.
