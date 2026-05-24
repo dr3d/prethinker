@@ -217,3 +217,75 @@ Discipline note:
 This is mechanism evidence only. It is not a new corpus score. The next corpus
 score requires a full rerun of all eight fresh ugly fixtures after any further
 general repairs land.
+
+## 2026-05-24 Duration And Source-State Repair
+
+Mechanisms:
+
+- Added `source_record_date_pair_duration_support`, a query-only companion that
+  computes elapsed days between same-row `source_record_field` date values using
+  admitted `source_record_date_alias` rows.
+- Updated the source-record ledger to preserve empty table cells as explicit
+  `blank` values when a header exists.
+- Updated the source-record ledger to preserve checkbox glyphs as
+  `source_record_checkbox_state` and queryable source-record fields.
+- Added `source_record_field_state_support`, a query-only companion that
+  surfaces explicit `blank`, `checked`, and `unchecked` states from admitted
+  source-record rows.
+
+Validation:
+
+```text
+tests/test_domain_bootstrap_qa.py
+tests/test_source_record_ledger.py
+tests/test_source_surface_gap_audit.py
+tests/test_real_world_transfer_dataset.py
+
+312 passed
+```
+
+Targeted recompile:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_mechanism_r2_20260524`
+
+```text
+fixtures: osha_incident_ugly_001, osha_incident_ugly_002, sec_material_event_ugly_002
+parsed OK: 3 / 3
+quality gate: 0 pass / 3 hold
+compile admitted / skipped: 60 / 1
+```
+
+Gate read:
+
+The targeted compiles still hold for broader source-claim/status-state carrier
+reasons. The new source-record facts did land: OSHA blank `nature_of_injury`
+cells are now preserved, and SEC unchecked checkbox rows are now explicit.
+
+Targeted QA replay:
+
+```text
+fixtures: osha_incident_ugly_001, osha_incident_ugly_002, sec_material_event_ugly_002
+questions: 75
+exact / partial / miss: 73 / 2 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Comparison to batch QA R2 for these three fixtures:
+
+| Fixture | Before | After | Read |
+| --- | --- | --- | --- |
+| `osha_incident_ugly_001` | 23 / 1 / 1 | 25 / 0 / 0 | Blank `nature_of_injury` preservation recovered the table-column row. |
+| `osha_incident_ugly_002` | 23 / 0 / 2 | 24 / 1 / 0 | Date-pair duration and contest/latest-event evidence moved misses out of miss; citation count remains partial. |
+| `sec_material_event_ugly_002` | 22 / 2 / 1 | 24 / 1 / 0 | Checkbox preservation recovered the emerging-growth-company row; one section-scope filing-date row remains judge-uncertain/partial. |
+
+Discipline note:
+
+This is still targeted mechanism evidence, not a replacement for the 200-row
+fresh ugly score. If replayed across all eight fixtures with these mechanisms,
+the arithmetic forecast from unchanged rows is approximately `192 / 5 / 3`
+on 200 rows, or 96.0% exact, but that is a forecast until a full rerun is
+actually performed.

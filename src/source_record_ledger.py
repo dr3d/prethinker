@@ -267,6 +267,7 @@ def source_record_ledger_facts(
         if exact:
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
             facts.append(f"source_record_row_context({row_id}, {label_atom}, {exact}, {section}).")
+            facts.extend(_checkbox_state_facts(str(raw.get("exact", "")), row_id=row_id, label_atom=label_atom))
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
         facts.extend(_citation_facts(str(raw.get("exact", "")), row_id=row_id))
@@ -285,10 +286,12 @@ def source_record_ledger_facts(
             cell_qualifiers_by_index_item: dict[tuple[int, str], list[str]] = {}
             for index, cell_raw in enumerate(cells, start=1):
                 cell = _atom(str(cell_raw))
+                header_atom = header_atoms[index - 1] if index <= len(header_atoms) else ""
+                if not cell and header_atom:
+                    cell = "blank"
                 if not cell:
                     continue
                 facts.append(f"source_record_cell({row_id}, {index}, {cell}).")
-                header_atom = header_atoms[index - 1] if index <= len(header_atoms) else ""
                 if header_atom:
                     facts.append(f"source_record_cell_header({row_id}, {index}, {header_atom}).")
                     facts.append(f"source_record_field({row_id}, {header_atom}, {cell}).")
@@ -510,8 +513,41 @@ def _strip_blockquote_marker(line: str) -> str:
 
 
 def _clean_text(value: str, *, max_chars: int) -> str:
-    cleaned = re.sub(r"\s+", " ", str(value).strip())
+    cleaned = re.sub(r"\s+", " ", _replace_source_state_glyphs(str(value)).strip())
     return cleaned[:max_chars]
+
+
+def _replace_source_state_glyphs(value: str) -> str:
+    text = str(value or "")
+    replacements = {
+        "☐": " unchecked_box ",
+        "☑": " checked_box ",
+        "☒": " checked_box ",
+        "✓": " checked_mark ",
+        "✔": " checked_mark ",
+    }
+    for source, replacement in replacements.items():
+        text = text.replace(source, replacement)
+    return text
+
+
+def _checkbox_state_facts(text: str, *, row_id: str, label_atom: str) -> list[str]:
+    raw = str(text or "")
+    state = ""
+    if "☐" in raw or "unchecked_box" in raw:
+        state = "unchecked"
+    elif "☑" in raw or "☒" in raw or "checked_box" in raw or re.search(r"\[[xX]\]", raw):
+        state = "checked"
+    if not state:
+        return []
+    label_source = re.sub(r"☐|☑|☒|unchecked_box|checked_box|\[[xX]\]", " ", raw)
+    label = label_atom if label_atom and label_atom != "no_label" else _atom(label_source)
+    if not label:
+        return []
+    return [
+        f"source_record_checkbox_state({row_id}, {label}, {state}).",
+        f"source_record_field({row_id}, {label}, {state}).",
+    ]
 
 
 def _is_table_separator(cells: list[str]) -> bool:

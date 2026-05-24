@@ -132,6 +132,34 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
 
 
+def test_source_record_ledger_preserves_blank_table_cells() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "| Employee | Degree of Injury | Nature of Injury |",
+                "| --- | --- | --- |",
+                "| 1 | Fatality | |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_cell(src_line_0003, 3, blank)." in facts
+    assert "source_record_cell_header(src_line_0003, 3, nature_of_injury)." in facts
+    assert "source_record_field(src_line_0003, nature_of_injury, blank)." in facts
+
+
+def test_source_record_ledger_preserves_checkbox_state() -> None:
+    ledger = extract_source_record_ledger("**Emerging growth company ☐**")
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_text_atom(src_line_0001, emerging_growth_company_unchecked_box)." in facts
+    assert "source_record_checkbox_state(src_line_0001, emerging_growth_company_unchecked_box, unchecked)." in facts
+    assert "source_record_field(src_line_0001, emerging_growth_company_unchecked_box, unchecked)." in facts
+
+
 def test_source_record_ledger_emits_row_context_citations_dates_and_count_words() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

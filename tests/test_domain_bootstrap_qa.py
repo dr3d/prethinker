@@ -26,6 +26,8 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_reference_supported_by_results,
     _source_record_citation_text_companion,
     _source_record_compile_surface_hint_queries,
+    _source_record_date_pair_duration_companion,
+    _source_record_field_state_companion,
     _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
     _source_record_relative_next_day_companion,
@@ -2016,6 +2018,67 @@ def test_event_elapsed_duration_companion_computes_departure_to_casualty() -> No
     assert row["DurationMinutes"] == "3677"
     assert row["DurationDisplay"] == "2 days 13 hours 17 minutes"
     assert row["CalendarDayDisplay"] == "third_calendar_day"
+
+
+def test_source_record_date_pair_duration_companion_computes_same_row_dates() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0089, issuance_date, v_06_25_2020).",
+        "source_record_field(src_line_0089, abatement_due_date, v_07_08_2020).",
+        "source_record_date_alias(src_line_0089, v_06_25_2020, v_2020_06_25).",
+        "source_record_date_alias(src_line_0089, v_07_08_2020, v_2020_07_08).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_date_pair_duration_companion(
+        runtime,
+        utterance="How many days elapsed between the citation issuance date and the abatement due date?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0089"
+    assert row["StartField"] == "issuance_date"
+    assert row["EndField"] == "abatement_due_date"
+    assert row["ElapsedDays"] == "13"
+    assert row["Duration"] == "13 days"
+
+
+def test_source_record_field_state_companion_surfaces_blank_column_values() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0027, degree_of_injury, fatality).",
+        "source_record_field(src_line_0027, nature_of_injury, blank).",
+        "source_record_field(src_line_0028, nature_of_injury, blank).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_field_state_companion(
+        runtime,
+        utterance='What value is shown in the "Nature of Injury" column for the three employees?',
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["Field"] == "nature_of_injury"
+    assert {row["Value"] for row in rows if row["Field"] == "nature_of_injury"} == {"blank"}
+
+
+def test_source_record_field_state_companion_surfaces_checkbox_state() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_checkbox_state(src_line_0027, emerging_growth_company_unchecked_box, unchecked)."
+    ).get("status") == "success"
+
+    companion = _source_record_field_state_companion(
+        runtime,
+        utterance="Does the 8-K state that the registrant is an emerging growth company?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["Field"] == "emerging_growth_company_unchecked_box"
+    assert row["Value"] == "unchecked"
 
 
 def test_source_record_messy_summary_extracts_destination_field() -> None:

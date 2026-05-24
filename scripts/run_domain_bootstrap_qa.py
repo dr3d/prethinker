@@ -15121,6 +15121,8 @@ def _source_record_messy_summary_companions(
         _source_record_assessment_contrast_companion(runtime, utterance=utterance),
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
         _source_record_identifier_set_companion(runtime, utterance=utterance),
+        _source_record_date_pair_duration_companion(runtime, utterance=utterance),
+        _source_record_field_state_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
         _source_record_extreme_date_field_companion(runtime, utterance=utterance),
         _source_record_max_numeric_field_companion(runtime, utterance=utterance),
@@ -15531,6 +15533,275 @@ def _dotted_identifier_number(value: str) -> str:
 def _joined_identifier_number(value: str) -> str:
     match = re.search(r"\d+(?:[_\-.]\d+)+", str(value or ""))
     return match.group(0).replace("_", "-").replace(".", "-") if match else _first_identifier_number(value)
+
+
+def _source_record_date_pair_duration_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:elapsed|how many days|how long|duration|between)\b", text):
+        return None
+    if not re.search(r"\b(?:date|day|days|due|deadline|issuance|issued|opened|closed)\b", text):
+        return None
+    query_tokens = set(_query_atom_tokens(utterance))
+    date_aliases = _source_record_date_aliases(runtime)
+    values_by_row: dict[str, dict[str, set[str]]] = {}
+    predicates = {"source_record_field", "source_record_field_item"}
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        if predicate not in predicates:
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 3:
+            continue
+        source_row, field, value = args[:3]
+        canonical = date_aliases.get((source_row, value)) or _canonical_date_from_source_atom(value)
+        if not canonical:
+            continue
+        values_by_row.setdefault(source_row, {}).setdefault(field, set()).add(canonical)
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+    for source_row, field_values in sorted(values_by_row.items(), key=lambda item: _source_row_sort_key(item[0])):
+        fields = sorted(field_values)
+        if len(fields) < 2:
+            continue
+        for start_field, end_field in combinations(fields, 2):
+            start_tokens = set(_source_record_field_name_tokens(start_field))
+            end_tokens = set(_source_record_field_name_tokens(end_field))
+            overlap = len((start_tokens | end_tokens) & query_tokens)
+            if overlap < 2:
+                continue
+            start_dates = sorted(field_values[start_field])
+            end_dates = sorted(field_values[end_field])
+            for start_date in start_dates:
+                for end_date in end_dates:
+                    ordered = _order_date_pair_from_question(
+                        utterance=utterance,
+                        left_field=start_field,
+                        left_date=start_date,
+                        right_field=end_field,
+                        right_date=end_date,
+                    )
+                    if ordered is None:
+                        continue
+                    first_field, first_date, second_field, second_date = ordered
+                    elapsed_days = _elapsed_days_between_date_atoms(first_date, second_date)
+                    if elapsed_days is None or elapsed_days < 0:
+                        continue
+                    key = (source_row, first_field, first_date, second_field, second_date)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    support_rows.append(
+                        {
+                            "SupportKind": "source_record_date_pair_duration",
+                            "SourceRow": source_row,
+                            "StartField": first_field,
+                            "StartFieldDisplay": _display_source_phrase(first_field),
+                            "StartDate": first_date,
+                            "StartDateDisplay": _display_date_atom(first_date),
+                            "EndField": second_field,
+                            "EndFieldDisplay": _display_source_phrase(second_field),
+                            "EndDate": second_date,
+                            "EndDateDisplay": _display_date_atom(second_date),
+                            "ElapsedDays": str(elapsed_days),
+                            "Duration": f"{elapsed_days} day{'s' if elapsed_days != 1 else ''}",
+                            "SupportClass": "deterministic-source-record-summary",
+                        }
+                    )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            -_date_pair_field_overlap_score(row.get("StartField", ""), row.get("EndField", ""), query_tokens),
+            int(row.get("ElapsedDays", "0")),
+            _source_row_sort_key(row.get("SourceRow", "")),
+        )
+    )
+    return {
+        "query": "source_record_date_pair_duration_support(SourceRow, StartField, EndField, ElapsedDays, Duration).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_date_pair_duration_support",
+            "prolog_query": "source_record_date_pair_duration_support(SourceRow, StartField, EndField, ElapsedDays, Duration).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only duration support computed elapsed days between same-row admitted "
+                    "source-record date fields; no durable duration fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, DateValue).",
+            "source_record_field_item(SourceRow, Field, DateValue).",
+            "source_record_date_alias(SourceRow, DateValue, CanonicalDate).",
+        ],
+    }
+
+
+def _order_date_pair_from_question(
+    *,
+    utterance: str,
+    left_field: str,
+    left_date: str,
+    right_field: str,
+    right_date: str,
+) -> tuple[str, str, str, str] | None:
+    left_pos = _field_position_in_utterance(utterance, left_field)
+    right_pos = _field_position_in_utterance(utterance, right_field)
+    if left_pos >= 0 and right_pos >= 0 and right_pos < left_pos:
+        return right_field, right_date, left_field, left_date
+    if left_pos < 0 and right_pos >= 0:
+        return right_field, right_date, left_field, left_date
+    return left_field, left_date, right_field, right_date
+
+
+def _field_position_in_utterance(utterance: str, field: str) -> int:
+    text = str(utterance or "").casefold()
+    tokens = _source_record_field_name_tokens(field)
+    if not tokens:
+        return -1
+    phrases = [" ".join(tokens), "-".join(tokens), "_".join(tokens)]
+    if len(tokens) > 1:
+        phrases.extend(" ".join(tokens[index:]) for index in range(1, len(tokens)))
+    positions = [text.find(phrase) for phrase in phrases if phrase and text.find(phrase) >= 0]
+    if positions:
+        return min(positions)
+    token_positions = [text.find(token) for token in tokens if len(token) > 2 and text.find(token) >= 0]
+    return min(token_positions) if token_positions else -1
+
+
+def _elapsed_days_between_date_atoms(start: str, end: str) -> int | None:
+    try:
+        start_dt = datetime.strptime(str(start or ""), "%Y_%m_%d")
+        end_dt = datetime.strptime(str(end or ""), "%Y_%m_%d")
+    except ValueError:
+        return None
+    return (end_dt - start_dt).days
+
+
+def _display_date_atom(value: str) -> str:
+    text = str(value or "")
+    try:
+        parsed = datetime.strptime(text, "%Y_%m_%d")
+    except ValueError:
+        return _display_source_phrase(text)
+    return parsed.strftime("%Y-%m-%d")
+
+
+def _date_pair_field_overlap_score(start_field: str, end_field: str, query_tokens: set[str]) -> int:
+    return len((set(_source_record_field_name_tokens(start_field)) | set(_source_record_field_name_tokens(end_field))) & query_tokens)
+
+
+def _source_record_field_state_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:value|shown|column|field|blank|empty|checked|unchecked|check mark|checkbox|state)\b", text):
+        return None
+    query_tokens = set(_query_atom_tokens(utterance))
+    target_field = _best_source_record_field_for_tokens(runtime, text)
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate in {"source_record_field", "source_record_field_item"} and len(args) >= 3:
+            source_row, field, value = args[:3]
+            if target_field and field != target_field:
+                continue
+            field_tokens = set(_source_record_field_name_tokens(field))
+            value_tokens = set(_query_atom_tokens(value))
+            if not target_field and not ((field_tokens | value_tokens) & query_tokens):
+                continue
+            if value not in {"blank", "checked", "unchecked"} and not (
+                {"blank", "empty", "checked", "unchecked"} & query_tokens
+            ):
+                continue
+            key = (source_row, field, value, predicate)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "SupportKind": "source_record_field_state",
+                    "SourceRow": source_row,
+                    "Field": field,
+                    "FieldDisplay": _display_source_phrase(field),
+                    "Value": value,
+                    "ValueDisplay": _display_source_phrase(value),
+                    "SourcePredicate": predicate,
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+        elif predicate == "source_record_checkbox_state" and len(args) >= 3:
+            source_row, label, state = args[:3]
+            label_tokens = set(_source_record_field_name_tokens(label))
+            if label_tokens and not (label_tokens & query_tokens):
+                continue
+            key = (source_row, label, state, predicate)
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "SupportKind": "source_record_checkbox_state",
+                    "SourceRow": source_row,
+                    "Field": label,
+                    "FieldDisplay": _display_source_phrase(label),
+                    "Value": state,
+                    "ValueDisplay": _display_source_phrase(state),
+                    "SourcePredicate": predicate,
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            0 if row.get("Value") in {"blank", "unchecked", "checked"} else 1,
+            -len(set(_source_record_field_name_tokens(row.get("Field", ""))) & query_tokens),
+            _source_row_sort_key(row.get("SourceRow", "")),
+        )
+    )
+    return {
+        "query": "source_record_field_state_support(SourceRow, Field, Value).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_field_state_support",
+            "prolog_query": "source_record_field_state_support(SourceRow, Field, Value).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only field-state support surfaced explicit blank/checked/unchecked states "
+                    "from admitted source-record rows"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, Value).",
+            "source_record_field_item(SourceRow, Field, Value).",
+            "source_record_checkbox_state(SourceRow, Field, Value).",
+        ],
+    }
 
 
 def _source_record_event_date_range_companion(
@@ -20976,6 +21247,8 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_destination_support",
             "source_record_body_signatory_support",
             "source_record_identifier_set_support",
+            "source_record_date_pair_duration_support",
+            "source_record_field_state_support",
             "event_elapsed_duration_support",
         },
     ):
