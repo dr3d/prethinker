@@ -1,4 +1,4 @@
-from scripts.compare_qa_runs import compare_qa_runs, render_markdown
+from scripts.compare_qa_runs import compare_qa_runs, normalize_comparison_payload, render_markdown
 
 
 def _batch(fixture: str, exact: int, partial: int, miss: int) -> dict:
@@ -179,3 +179,41 @@ def test_compare_qa_runs_markdown_uses_support_surface_language() -> None:
 
     assert "Added Support Surfaces" in markdown
     assert "helper" not in markdown.casefold()
+
+
+def test_normalize_comparison_payload_adds_regression_guard_to_archived_payload() -> None:
+    payload = {
+        "schema_version": "qa_run_comparison_v1",
+        "summary": {"aggregate_promotion_status": "promotable"},
+        "row_changes": {
+            "summary": {
+                "baseline_exact_regression_count": 5,
+                "baseline_exact_to_miss_count": 2,
+                "regression_with_added_support_count": 1,
+            }
+        },
+    }
+
+    normalized = normalize_comparison_payload(payload)
+
+    assert normalized["summary"]["baseline_exact_regression_count"] == 5
+    assert normalized["summary"]["baseline_exact_to_miss_count"] == 2
+    assert normalized["regression_guard"]["status"] == "fail"
+    assert normalized["regression_guard"]["baseline_exact_to_miss_count"] == 2
+
+
+def test_normalize_comparison_payload_maps_legacy_added_support_count() -> None:
+    payload = {
+        "schema_version": "qa_run_comparison_v1",
+        "summary": {},
+        "row_changes": {
+            "summary": {
+                "baseline_exact_regression_count": 0,
+                "regression_with_added_helper_count": 3,
+            }
+        },
+    }
+
+    normalized = normalize_comparison_payload(payload)
+
+    assert normalized["summary"]["regression_with_added_support_count"] == 3

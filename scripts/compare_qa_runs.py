@@ -10,8 +10,14 @@ from typing import Any
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--baseline-qa", type=Path, required=True)
-    parser.add_argument("--candidate-qa", type=Path, required=True)
+    parser.add_argument("--baseline-qa", type=Path, default=None)
+    parser.add_argument("--candidate-qa", type=Path, default=None)
+    parser.add_argument(
+        "--comparison-json",
+        type=Path,
+        default=None,
+        help="Existing qa_run_comparison_v1 JSON to upgrade/render/enforce without recomputing.",
+    )
     parser.add_argument(
         "--baseline-artifact-root",
         type=Path,
@@ -36,12 +42,17 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    payload = compare_qa_runs(
-        _load(args.baseline_qa),
-        _load(args.candidate_qa),
-        baseline_artifact_root=args.baseline_artifact_root,
-        candidate_artifact_root=args.candidate_artifact_root,
-    )
+    if args.comparison_json is not None:
+        payload = normalize_comparison_payload(_load(args.comparison_json))
+    else:
+        if args.baseline_qa is None or args.candidate_qa is None:
+            raise SystemExit("--baseline-qa and --candidate-qa are required unless --comparison-json is provided")
+        payload = compare_qa_runs(
+            _load(args.baseline_qa),
+            _load(args.candidate_qa),
+            baseline_artifact_root=args.baseline_artifact_root,
+            candidate_artifact_root=args.candidate_artifact_root,
+        )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
         args.out_json.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
@@ -99,6 +110,29 @@ def compare_qa_runs(
         "row_changes": row_changes,
         "regression_guard": regression_guard,
     }
+
+
+def normalize_comparison_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    if payload.get("schema_version") != "qa_run_comparison_v1":
+        raise ValueError("expected qa_run_comparison_v1 payload")
+    row_summary = payload.get("row_changes", {}).get("summary", {})
+    if not isinstance(row_summary, dict):
+        row_summary = {}
+    payload = dict(payload)
+    summary = dict(payload.get("summary") if isinstance(payload.get("summary"), dict) else {})
+    summary.setdefault("baseline_exact_regression_count", int(row_summary.get("baseline_exact_regression_count") or 0))
+    summary.setdefault("baseline_exact_to_miss_count", int(row_summary.get("baseline_exact_to_miss_count") or 0))
+    added_support_count = row_summary.get("regression_with_added_support_count")
+    if added_support_count is None:
+        added_support_count = row_summary.get("regression_with_added_helper_count")
+    summary.setdefault("regression_with_added_support_count", int(added_support_count or 0))
+    summary.setdefault(
+        "regression_with_added_helper_count",
+        int(summary.get("regression_with_added_support_count") or 0),
+    )
+    payload["summary"] = summary
+    payload["regression_guard"] = _build_regression_guard(summary)
+    return payload
 
 
 def _fixture_summaries(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:

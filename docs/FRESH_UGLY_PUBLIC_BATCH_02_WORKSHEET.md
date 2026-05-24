@@ -1028,3 +1028,96 @@ Next thermometer:
 `docs/FRESH_UGLY_PUBLIC_BATCH_03_SPEC.md` now defines the next 12-document public
 batch. It asks for FDA, OSHA, SEC, and a fourth outside regulatory/investigation
 source family, with 25 QA rows per document and explicit messy-source pressure.
+
+## 2026-05-24 Waiting-For-Batch Prep
+
+Regression-guard exercise over archived comparisons:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\regression_guard_exercises_20260524
+
+R2 -> R3 comparison:
+  guard exit: 2
+  baseline exact -> non-exact: 9
+  baseline exact -> miss: 6
+
+R3 -> R4 comparison:
+  guard exit: 2
+  baseline exact -> non-exact: 5
+  baseline exact -> miss: 2
+  regressions with added support surfaces: 1
+
+Batch 02 source-record-summary ablation comparison:
+  guard exit: 0
+  baseline exact -> non-exact: 0
+  baseline exact -> miss: 0
+```
+
+Read: the guard now blocks the two older "aggregate-promotable but row-churny"
+comparisons. That is the intended behavior. The aggregate can improve while the
+promotion guard still says "do not promote this as stable" if exact rows moved
+backward.
+
+Batch 02 readiness validator:
+
+```text
+command:
+  python scripts\validate_fresh_ugly_batch.py datasets\real_world_transfer\fresh_ugly_public_20260524_02 --expected-documents 12 --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_validation_20260524.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_validation_20260524.md
+
+result:
+  status: pass
+  fixtures: 12 / 12
+  issues: 0
+  warnings: 12
+```
+
+Warnings were `metadata_pressure_tags_missing`, which is expected because Batch
+02 predates the stricter Batch 03 metadata shape. Required files and 25/25 QA
+counts are intact.
+
+Renderer smoke:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_envelope_smoke_20260524\batch02_rendered_response_samples.json
+```
+
+Read: `established`, `coverage_gap`, `not_established`, and
+`clarification_required` render cleanly as product states. `partially_established`
+can inherit a long scorer note; later UI polish should summarize partials more
+tightly rather than requiring the scorer to write product copy.
+
+Batch 02 regression triage:
+
+```text
+date/order/elapsed chronology:
+  ntsb_surface_ugly_001 q007 exact -> miss
+  ntsb_surface_ugly_001 q025 exact -> miss
+  osha_incident_ugly_003 q006 exact -> miss
+  osha_incident_ugly_005 q006 exact -> partial
+  sec_material_event_ugly_004 q008 exact -> miss
+
+source-order/source-coordinate inventory:
+  osha_incident_ugly_003 q024 exact -> partial
+  osha_incident_ugly_005 q014 exact -> partial
+  sec_material_event_ugly_004 q015 exact -> miss
+  sec_material_event_ugly_005 q003 exact -> partial
+
+cross-context duplicate or grouped-count reconciliation:
+  osha_incident_ugly_004 q021 exact -> miss
+  osha_incident_ugly_004 q023 exact -> miss
+
+benefit/comparison matrix shape:
+  sec_material_event_ugly_003 q021 exact -> partial
+
+simple addressee metadata:
+  fda_warning_ugly_003 q001 partial -> miss
+```
+
+Read: the regressions cluster around chronology arithmetic, source-order
+inventory, grouped counts/duplicate values, and comparison-matrix rows. That
+points away from adding broad new support surfaces while waiting for Batch 03.
+The useful next compile-side attention is preserving long-report source sections
+and ordered list/table rows more consistently, then letting Batch 03 tell us
+whether the stability work transfers.

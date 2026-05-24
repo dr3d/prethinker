@@ -145,3 +145,13 @@ Before handing off, verify:
 - every `metadata.json` parses as JSON;
 - source URLs are public and reachable;
 - no source text was generated or rewritten by an LLM.
+
+Codex-side validation command after unpacking:
+
+```text
+python scripts\validate_fresh_ugly_batch.py datasets\real_world_transfer\fresh_ugly_public_20260524_03 --out-json tmp\fresh_ugly_public_20260524_03_validation.json --out-md tmp\fresh_ugly_public_20260524_03_validation.md
+```
+
+The validator checks required files, question and answer counts, metadata JSON,
+public source URL shape, and explicit `llm_authored_source` /
+`llm_rewritten_source` flags before any compile or QA run spends model time.
