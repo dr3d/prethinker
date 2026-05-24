@@ -80,6 +80,11 @@ def compare_qa_runs(
             "row_regression_count": row_changes["summary"]["row_regression_count"],
             "baseline_exact_regression_count": row_changes["summary"]["baseline_exact_regression_count"],
             "baseline_exact_to_miss_count": row_changes["summary"]["baseline_exact_to_miss_count"],
+            "regression_with_added_support_count": row_changes["summary"]["regression_with_added_support_count"],
+            # Backward-compatible legacy label. Historically this meant
+            # "*_support/_companion/_helper predicate", not necessarily a
+            # retired compatibility helper.
+            "regression_with_added_helper_count": row_changes["summary"]["regression_with_added_support_count"],
         },
         "aggregate": aggregate,
         "comparisons": comparisons,
@@ -163,7 +168,8 @@ def _row_summary(row: dict[str, Any], *, fixture: str, qid: str) -> dict[str, An
     judge = row.get("reference_judge") if isinstance(row.get("reference_judge"), dict) else {}
     failure = row.get("failure_surface") if isinstance(row.get("failure_surface"), dict) else {}
     query_predicates: set[str] = set()
-    helper_predicates: set[str] = set()
+    support_predicates: set[str] = set()
+    support_surface_classes: dict[str, str] = {}
     nonempty_predicates: set[str] = set()
     for query_result in row.get("query_results", []) or []:
         if not isinstance(query_result, dict):
@@ -178,8 +184,9 @@ def _row_summary(row: dict[str, Any], *, fixture: str, qid: str) -> dict[str, An
         result_rows = result.get("rows")
         if isinstance(result_rows, list) and result_rows:
             nonempty_predicates.add(predicate)
-        if _is_helper_predicate(predicate):
-            helper_predicates.add(predicate)
+        if _is_support_surface_predicate(predicate):
+            support_predicates.add(predicate)
+            support_surface_classes[predicate] = _support_surface_class(predicate, result)
     return {
         "fixture": fixture,
         "id": qid,
@@ -190,11 +197,15 @@ def _row_summary(row: dict[str, Any], *, fixture: str, qid: str) -> dict[str, An
         "judge_note": str(judge.get("concise_answer") or ""),
         "query_predicates": sorted(query_predicates),
         "nonempty_predicates": sorted(nonempty_predicates),
-        "helper_predicates": sorted(helper_predicates),
+        "support_predicates": sorted(support_predicates),
+        "support_surface_classes": dict(sorted(support_surface_classes.items())),
+        # Backward-compatible legacy key used by older comparison artifacts and
+        # tests. Prefer support_predicates/support_surface_classes in new reads.
+        "helper_predicates": sorted(support_predicates),
     }
 
 
-def _is_helper_predicate(predicate: str) -> bool:
+def _is_support_surface_predicate(predicate: str) -> bool:
     name = str(predicate or "")
     return (
         name.endswith("_support")
@@ -202,6 +213,25 @@ def _is_helper_predicate(predicate: str) -> bool:
         or name.endswith("_helper")
         or "_helper_" in name
     )
+
+
+def _support_surface_class(predicate: str, result: dict[str, Any]) -> str:
+    basis = result.get("reasoning_basis", {}) if isinstance(result, dict) else {}
+    if isinstance(basis, dict) and basis.get("adapter_status") == "legacy_native_compatibility_adapter":
+        return "retired_compatibility_adapter"
+    rows = result.get("rows") if isinstance(result, dict) else None
+    if isinstance(rows, list):
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            support_class = str(row.get("SupportClass") or "").strip()
+            if support_class == "deterministic-source-record-summary":
+                return "current_source_record_summary"
+            if support_class.startswith("deterministic-"):
+                return "current_deterministic_summary"
+    if str(predicate or "").startswith("source_record_"):
+        return "current_source_record_summary"
+    return "current_query_summary"
 
 
 VERDICT_RANK = {"exact": 3, "partial": 2, "miss": 1, "not_judged": 0, "unknown": 0, "": 0}
@@ -219,8 +249,10 @@ def _compare_detail_rows(
         after = str(candidate.get("verdict") or "unknown")
         if before == after:
             continue
-        baseline_helpers = set(baseline.get("helper_predicates", []) or [])
-        candidate_helpers = set(candidate.get("helper_predicates", []) or [])
+        baseline_support = set(baseline.get("support_predicates", baseline.get("helper_predicates", [])) or [])
+        candidate_support = set(candidate.get("support_predicates", candidate.get("helper_predicates", [])) or [])
+        candidate_classes = candidate.get("support_surface_classes", {})
+        added_support = sorted(candidate_support - baseline_support)
         changes.append(
             {
                 "fixture": key[0],
@@ -233,10 +265,19 @@ def _compare_detail_rows(
                 "movement": _movement(before, after),
                 "baseline_failure_surface": baseline.get("failure_surface", ""),
                 "candidate_failure_surface": candidate.get("failure_surface", ""),
-                "baseline_helper_predicates": sorted(baseline_helpers),
-                "candidate_helper_predicates": sorted(candidate_helpers),
-                "added_helper_predicates": sorted(candidate_helpers - baseline_helpers),
-                "removed_helper_predicates": sorted(baseline_helpers - candidate_helpers),
+                "baseline_support_predicates": sorted(baseline_support),
+                "candidate_support_predicates": sorted(candidate_support),
+                "added_support_predicates": added_support,
+                "removed_support_predicates": sorted(baseline_support - candidate_support),
+                "added_support_surface_classes": {
+                    predicate: str(candidate_classes.get(predicate) or "unknown")
+                    for predicate in added_support
+                },
+                # Backward-compatible legacy keys. Prefer support_* in new reads.
+                "baseline_helper_predicates": sorted(baseline_support),
+                "candidate_helper_predicates": sorted(candidate_support),
+                "added_helper_predicates": added_support,
+                "removed_helper_predicates": sorted(baseline_support - candidate_support),
                 "candidate_nonempty_predicates": candidate.get("nonempty_predicates", []),
                 "candidate_judge_note": candidate.get("judge_note", ""),
             }
@@ -252,10 +293,12 @@ def _compare_detail_rows(
         "baseline_exact_to_miss_count": sum(
             1 for row in changes if row["baseline_verdict"] == "exact" and row["candidate_verdict"] == "miss"
         ),
-        "regression_with_added_helper_count": sum(
-            1 for row in changes if int(row["verdict_delta"]) < 0 and row["added_helper_predicates"]
+        "regression_with_added_support_count": sum(
+            1 for row in changes if int(row["verdict_delta"]) < 0 and row["added_support_predicates"]
         ),
     }
+    # Backward-compatible legacy label.
+    summary["regression_with_added_helper_count"] = summary["regression_with_added_support_count"]
     return {"summary": summary, "changes": changes}
 
 
@@ -348,12 +391,20 @@ def render_markdown(payload: dict[str, Any]) -> str:
                 "",
                 "## Row Verdict Changes",
                 "",
-                "| Row | Movement | Verdict | Failure Surface | Added Helpers |",
+                "| Row | Movement | Verdict | Failure Surface | Added Support Surfaces |",
                 "| --- | --- | --- | --- | --- |",
             ]
         )
         for row in changes:
-            added = ", ".join(f"`{item}`" for item in row.get("added_helper_predicates", [])) or "-"
+            classes = row.get("added_support_surface_classes", {})
+            added_parts = []
+            for item in row.get("added_support_predicates", row.get("added_helper_predicates", [])):
+                cls = str(classes.get(item) or "")
+                label = f"`{item}`"
+                if cls:
+                    label = f"{label} ({cls})"
+                added_parts.append(label)
+            added = ", ".join(added_parts) or "-"
             lines.append(
                 "| `{fixture}` `{qid}` | `{movement}` | `{before}` -> `{after}` | `{base_surface}` -> `{cand_surface}` | {added} |".format(
                     fixture=row.get("fixture", ""),

@@ -824,7 +824,7 @@ row churn:
   regressed rows: 7
   baseline exact -> non-exact: 5
   baseline exact -> miss: 2
-  regressions with an added helper predicate: 1
+  regressions with an added support surface: 1
 ```
 
 Promoted rows:
@@ -857,8 +857,10 @@ Read:
 
 The mechanism set is promotable in aggregate and crosses the 95% line on this
 fresh-ugly batch, but the row churn is still too noisy to treat this as a final
-benchmark claim. Most regressions did not show added helper predicates, which
-points less to direct helper pollution and more to no-cache route/judge
+benchmark claim. Most regressions did not show added support surfaces, and the
+one added-surface regression involved a current source-record summary
+(`source_record_citation_list_support`), not a retired compatibility adapter.
+This points less to retired-helper pollution and more to no-cache route/judge
 variance plus remaining weak surfaces in chronology, elapsed duration, and
 nested source-record structure.
 

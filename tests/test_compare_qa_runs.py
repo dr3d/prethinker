@@ -99,7 +99,7 @@ def test_compare_qa_runs_reports_aggregate_delta() -> None:
     assert payload["summary"]["aggregate_delta"] == {"exact": 1, "partial": 1, "miss": -2}
 
 
-def test_compare_qa_runs_reports_row_level_churn_and_added_helpers() -> None:
+def test_compare_qa_runs_reports_row_level_churn_and_added_support_surfaces() -> None:
     baseline = _run_rows(
         "fixture_a",
         [
@@ -124,6 +124,7 @@ def test_compare_qa_runs_reports_row_level_churn_and_added_helpers() -> None:
     assert payload["summary"]["row_regression_count"] == 1
     assert payload["summary"]["baseline_exact_regression_count"] == 1
     assert payload["summary"]["baseline_exact_to_miss_count"] == 1
+    assert payload["row_changes"]["summary"]["regression_with_added_support_count"] == 1
     assert payload["row_changes"]["summary"]["regression_with_added_helper_count"] == 1
     regression = [
         row
@@ -131,4 +132,8 @@ def test_compare_qa_runs_reports_row_level_churn_and_added_helpers() -> None:
         if row["id"] == "q001"
     ][0]
     assert regression["movement"] == "regressed"
+    assert regression["added_support_predicates"] == ["source_record_new_support"]
+    assert regression["added_support_surface_classes"] == {
+        "source_record_new_support": "current_source_record_summary"
+    }
     assert regression["added_helper_predicates"] == ["source_record_new_support"]
