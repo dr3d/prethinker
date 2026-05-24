@@ -270,3 +270,37 @@ ranked the unsafe-passing/evasive-action hypothesis as the single least
 disconfirmed explanation, matching the report's probable-cause theory, while
 keeping hazmat-response, PPE, decontamination, and classification evidence in a
 severity lane rather than confusing it with initiating crash cause.
+
+## 2026-05-24 FDA Warning Letter Probe
+
+Payload:
+
+```text
+experiments/ach_overlay/fda_warning_data_integrity_v1/ach_payload.json
+```
+
+Run artifact:
+
+```text
+C:\prethinker_tmp_archive\ach_overlay_runs_20260524\fda-warning-data-integrity-v1_ach_report.md
+```
+
+Result:
+
+```text
+hypotheses: 4
+evidence rows: 6
+judgments: 24
+matrix complete: true
+warnings: 0
+top hypothesis: h_data_integrity_systemic_primary
+surviving hypotheses: 1
+sensitivity rows: 0
+```
+
+Read: ACH also works as a compliance evidence matrix, not only as an incident
+root-cause lens. On a fresh FDA warning letter, the deterministic scorer ranked
+systemic data-integrity failure as the least-disconfirmed explanation. The
+quality-unit hypothesis remained plausible but lower-ranked, while narrower
+computer-control and import-alert-status explanations were disconfirmed by the
+broader inspection findings and remediation demands.

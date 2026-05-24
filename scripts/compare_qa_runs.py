@@ -26,6 +26,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
+    parser.add_argument(
+        "--enforce-regression-guard",
+        action="store_true",
+        help="Return a non-zero exit code when any previously exact row becomes non-exact.",
+    )
     return parser.parse_args()
 
 
@@ -45,6 +50,8 @@ def main() -> int:
         args.out_md.write_text(render_markdown(payload), encoding="utf-8")
     if not args.out_json and not args.out_md:
         print(json.dumps(payload, indent=2, sort_keys=True))
+    if bool(args.enforce_regression_guard) and payload.get("regression_guard", {}).get("status") != "pass":
+        return 2
     return 0
 
 
@@ -66,6 +73,7 @@ def compare_qa_runs(
     baseline_detail_rows = _fixture_detail_rows(baseline, artifact_root=baseline_artifact_root)
     candidate_detail_rows = _fixture_detail_rows(candidate, artifact_root=candidate_artifact_root)
     row_changes = _compare_detail_rows(baseline_detail_rows, candidate_detail_rows)
+    regression_guard = _build_regression_guard(row_changes["summary"])
     aggregate = _aggregate_comparison(comparisons)
     return {
         "schema_version": "qa_run_comparison_v1",
@@ -89,6 +97,7 @@ def compare_qa_runs(
         "aggregate": aggregate,
         "comparisons": comparisons,
         "row_changes": row_changes,
+        "regression_guard": regression_guard,
     }
 
 
@@ -302,6 +311,19 @@ def _compare_detail_rows(
     return {"summary": summary, "changes": changes}
 
 
+def _build_regression_guard(row_change_summary: dict[str, Any]) -> dict[str, Any]:
+    baseline_exact_regressions = int(row_change_summary.get("baseline_exact_regression_count") or 0)
+    baseline_exact_to_miss = int(row_change_summary.get("baseline_exact_to_miss_count") or 0)
+    status = "pass" if baseline_exact_regressions == 0 else "fail"
+    return {
+        "schema_version": "qa_regression_guard_v1",
+        "status": status,
+        "rule": "Previously exact rows must remain exact before a candidate run is promoted.",
+        "baseline_exact_regression_count": baseline_exact_regressions,
+        "baseline_exact_to_miss_count": baseline_exact_to_miss,
+    }
+
+
 def _rank(verdict: str) -> int:
     return VERDICT_RANK.get(str(verdict or ""), 0)
 
@@ -362,13 +384,20 @@ def _aggregate_comparison(comparisons: list[dict[str, Any]]) -> dict[str, Any]:
 
 def render_markdown(payload: dict[str, Any]) -> str:
     row_summary = payload.get("row_changes", {}).get("summary", {})
+    summary = payload.get("summary", {})
+    guard = payload.get("regression_guard", {})
     lines = [
         "# QA Run Comparison",
         "",
         f"- Schema: `{payload['schema_version']}`",
-        f"- Summary: `{payload['summary']}`",
+        f"- Aggregate status: `{summary.get('aggregate_promotion_status', '')}`",
+        f"- Aggregate delta: `{summary.get('aggregate_delta', {})}`",
+        f"- Row changes: changed=`{summary.get('row_change_count', 0)}` improved=`{summary.get('row_improvement_count', 0)}` regressed=`{summary.get('row_regression_count', 0)}`",
+        f"- Baseline-exact regressions: `{summary.get('baseline_exact_regression_count', 0)}` exact-to-miss=`{summary.get('baseline_exact_to_miss_count', 0)}`",
+        f"- Regressions with added support surfaces: `{summary.get('regression_with_added_support_count', 0)}`",
+        f"- Regression guard: `{guard.get('status', 'unknown')}`",
         f"- Aggregate: `{payload['aggregate']}`",
-        f"- Row churn: `{row_summary}`",
+        f"- Detailed row coverage: `{row_summary.get('row_count_with_details', 0)}` rows",
         "",
         "| Fixture | Status | Exact | Partial | Miss | Delta |",
         "| --- | --- | ---: | ---: | ---: | --- |",

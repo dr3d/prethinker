@@ -70,6 +70,11 @@ gap. It should not be described as "Prethinker answered the user's question" in
 a product demo unless a separate final-answer renderer has actually composed
 that answer from the envelope.
 
+The separate `qa_rendered_response_v1` layer consumes the envelope and produces
+user-facing text for demos or workstation surfaces. That renderer is not part of
+QA scoring. It does not query, judge, mutate, or repair the KB; it only presents
+the current support reading.
+
 ## What Is LLM-Mediated
 
 The QA stage can involve model calls for:
@@ -107,6 +112,12 @@ to be rescued by a retired or non-clean compatibility path. That does not mean
 the LLM was absent. It means the deterministic summary found no compatibility
 rescue pressure.
 
+Older internal JSON keys may still contain the word `helper` for backward
+compatibility with archived comparison artifacts. New reports and product prose
+should prefer `support surface`, `query-only support`, or `compatibility row`
+depending on the actual path. A support surface is allowed to be current and
+clean; a compatibility row is the cleanliness pressure being counted.
+
 ## The Audit Grammar
 
 The deterministic summary is the audit grammar for a QA run. It records:
@@ -117,6 +128,11 @@ The deterministic summary is the audit grammar for a QA run. It records:
 - QA-time write proposals;
 - failure-surface labels;
 - cache/provider/run metadata where available.
+
+Comparison reports also carry `qa_regression_guard_v1`. The guard fails when a
+row that was previously exact becomes non-exact in the candidate run. That
+turns row churn into a promotion blocker instead of leaving it as a narrative
+note after the fact.
 
 This is what makes a run comparable and replayable. LLM proposals, evidence
 bundles, answer comparisons, and failure classifications are governed by this

@@ -1,0 +1,233 @@
+{
+  "schema_version": "ach_overlay_v1",
+  "id": "fda_warning_data_integrity_v1",
+  "name": "FDA Warning Letter Data Integrity And Enforcement ACH Probe",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_02/fda_warning_ugly_003",
+  "source_compile": "C:/prethinker_tmp_archive/fresh_ugly_public_20260524_02_r1_20260524/fresh_ugly_public_20260524_02_compile_r1/fda_warning_ugly_003/domain_bootstrap_file_20260524T140440647991Z_source_qwen-qwen3-6-35b-a3b.json",
+  "hypotheses": [
+    {
+      "id": "h_data_integrity_systemic_primary",
+      "label": "Systemic data integrity failure is the primary compliance problem driving the warning letter"
+    },
+    {
+      "id": "h_computer_controls_primary",
+      "label": "Computer-system access and deletion controls are the primary compliance problem"
+    },
+    {
+      "id": "h_quality_unit_oversight_primary",
+      "label": "Quality-unit oversight weakness is the primary compliance problem"
+    },
+    {
+      "id": "h_import_alert_status_primary",
+      "label": "Existing import-alert status is the primary reason for the letter's regulatory posture"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e_fabricated_lab_investigations",
+      "label": "FDA says laboratory records lacked complete and reliable original data; the laboratory manager stated several investigations were fabricated, and a senior QA manager confirmed fabrication before inspection",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Violation 1"
+      }
+    },
+    {
+      "id": "e_deleted_raw_data_admin_rights",
+      "label": "FDA says laboratory systems lacked controls preventing deletion or manipulation of electronic raw data, and analysts had administrative rights to alter or delete files and folders",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Violation 2"
+      }
+    },
+    {
+      "id": "e_broad_di_remediation_requested",
+      "label": "FDA requested a comprehensive investigation into data inaccuracies, a risk assessment for patient effects, and a global CAPA strategy for data reliability and completeness",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Data integrity remediation request"
+      }
+    },
+    {
+      "id": "e_qu_records_and_oversight_gap",
+      "label": "FDA says the quality unit lacked adequate oversight and the firm could not provide records for release testing, stability testing, sample preparation, QC data review, and batch production/control",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Violation 3"
+      }
+    },
+    {
+      "id": "e_repeat_failures_management_oversight",
+      "label": "FDA cites a previous warning letter with similar CGMP violations and says repeated failures demonstrate inadequate executive management oversight and control",
+      "diagnosticity": "medium",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Violation 3"
+      }
+    },
+    {
+      "id": "e_import_alert_and_enforcement_consequences",
+      "label": "FDA states the firm remains on Import Alert 66-40 and warns that FDA may withhold approvals, reinspect, and continue refusing admission of manufactured articles",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "Conclusion"
+      }
+    }
+  ],
+  "judgments": [
+    {
+      "evidence_id": "e_fabricated_lab_investigations",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "consistent",
+      "rationale": "Fabricated investigations and missing original data directly support systemic data integrity failure."
+    },
+    {
+      "evidence_id": "e_fabricated_lab_investigations",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "inconsistent",
+      "rationale": "Fabricated investigations are broader than computer access controls alone."
+    },
+    {
+      "evidence_id": "e_fabricated_lab_investigations",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "neutral",
+      "rationale": "QA involvement matters, but this evidence is framed primarily as data integrity fabrication."
+    },
+    {
+      "evidence_id": "e_fabricated_lab_investigations",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "inconsistent",
+      "rationale": "This evidence describes current inspection findings, not import-alert status as the primary cause."
+    },
+    {
+      "evidence_id": "e_deleted_raw_data_admin_rights",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "consistent",
+      "rationale": "Deletion and manipulation risk is a data integrity mechanism."
+    },
+    {
+      "evidence_id": "e_deleted_raw_data_admin_rights",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "consistent",
+      "rationale": "The evidence directly concerns electronic raw data controls and administrative access."
+    },
+    {
+      "evidence_id": "e_deleted_raw_data_admin_rights",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "neutral",
+      "rationale": "Weak oversight may permit the control gap, but the evidence is about systems access."
+    },
+    {
+      "evidence_id": "e_deleted_raw_data_admin_rights",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "inconsistent",
+      "rationale": "The evidence concerns current laboratory-system controls, not import-alert status."
+    },
+    {
+      "evidence_id": "e_broad_di_remediation_requested",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "consistent",
+      "rationale": "FDA's requested investigation, risk assessment, and CAPA are broad data integrity remedies."
+    },
+    {
+      "evidence_id": "e_broad_di_remediation_requested",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "inconsistent",
+      "rationale": "The requested remediation extends beyond computer controls to all laboratories, operations, systems, and reporting."
+    },
+    {
+      "evidence_id": "e_broad_di_remediation_requested",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "neutral",
+      "rationale": "Quality oversight is implicated but the requested remedy is framed around data integrity."
+    },
+    {
+      "evidence_id": "e_broad_di_remediation_requested",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "inconsistent",
+      "rationale": "The remediation request addresses current deficiencies rather than import-alert status."
+    },
+    {
+      "evidence_id": "e_qu_records_and_oversight_gap",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "consistent",
+      "rationale": "Missing release, stability, and batch records reinforce a broad data reliability problem."
+    },
+    {
+      "evidence_id": "e_qu_records_and_oversight_gap",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "inconsistent",
+      "rationale": "The quality-unit record gaps include manufacturing and batch records, not just computer systems."
+    },
+    {
+      "evidence_id": "e_qu_records_and_oversight_gap",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "consistent",
+      "rationale": "The evidence directly names inadequate quality-unit oversight and missing QU-controlled records."
+    },
+    {
+      "evidence_id": "e_qu_records_and_oversight_gap",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "inconsistent",
+      "rationale": "The evidence identifies current quality-system failures, not import alert status."
+    },
+    {
+      "evidence_id": "e_repeat_failures_management_oversight",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "consistent",
+      "rationale": "Similar repeated CGMP failures strengthen the systemic character of the data integrity problem."
+    },
+    {
+      "evidence_id": "e_repeat_failures_management_oversight",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "neutral",
+      "rationale": "Repeat failure does not specifically decide whether computer controls are primary."
+    },
+    {
+      "evidence_id": "e_repeat_failures_management_oversight",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "consistent",
+      "rationale": "Management oversight and control failures are compatible with a quality oversight theory."
+    },
+    {
+      "evidence_id": "e_repeat_failures_management_oversight",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "neutral",
+      "rationale": "The prior warning and repeated failures are related history, but not the same as import-alert status."
+    },
+    {
+      "evidence_id": "e_import_alert_and_enforcement_consequences",
+      "hypothesis_id": "h_data_integrity_systemic_primary",
+      "assessment": "neutral",
+      "rationale": "The enforcement consequences flow from deficiencies but do not by themselves identify the primary deficiency."
+    },
+    {
+      "evidence_id": "e_import_alert_and_enforcement_consequences",
+      "hypothesis_id": "h_computer_controls_primary",
+      "assessment": "neutral",
+      "rationale": "Enforcement consequences do not isolate computer controls as the primary issue."
+    },
+    {
+      "evidence_id": "e_import_alert_and_enforcement_consequences",
+      "hypothesis_id": "h_quality_unit_oversight_primary",
+      "assessment": "neutral",
+      "rationale": "Enforcement consequences do not isolate quality-unit oversight as the primary issue."
+    },
+    {
+      "evidence_id": "e_import_alert_and_enforcement_consequences",
+      "hypothesis_id": "h_import_alert_status_primary",
+      "assessment": "consistent",
+      "rationale": "This evidence directly supports the regulatory posture and continuing refusal/admission consequences."
+    }
+  ]
+}

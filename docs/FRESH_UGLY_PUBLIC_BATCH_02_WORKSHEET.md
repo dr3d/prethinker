@@ -972,3 +972,59 @@ Next energy:
    rows.
 4. Treat the next fresh ugly batch as the product thermometer; do not polish
    Batch 02 toward a number.
+
+## 2026-05-24 QA Envelope And Guard Follow-Up
+
+Response-envelope smoke:
+
+```text
+source: archived Batch 02 fresh-only after-supports QA JSON rows
+rows: 250
+old exact/partial/miss: 222 / 8 / 16
+new exact/partial/miss: 222 / 8 / 16
+response envelope statuses:
+  established: 217
+  partially_established: 4
+  not_established: 6
+  clarification_required: 7
+  coverage_gap: 12
+  ambiguous: 4
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_envelope_smoke_20260524
+```
+
+Read: the new envelope is presentation/product telemetry only. It did not move
+any exact/partial/miss counters on the archived 250-row smoke. The status split
+is useful because it separates missing coverage, clarification pressure, and
+ambiguous rows that would otherwise all sit behind ordinary non-exact counts.
+
+Regression guard:
+
+`scripts/compare_qa_runs.py` now emits `qa_regression_guard_v1`. The guard fails
+when any previously exact row becomes non-exact in the candidate run, and the CLI
+can enforce that with `--enforce-regression-guard`. This turns row churn into a
+promotion blocker rather than a post-hoc worksheet observation.
+
+ACH compliance probe:
+
+```text
+payload:
+  experiments/ach_overlay/fda_warning_data_integrity_v1/ach_payload.json
+artifact:
+  C:\prethinker_tmp_archive\ach_overlay_runs_20260524\fda-warning-data-integrity-v1_ach_report.md
+result:
+  4 hypotheses / 6 evidence rows / 24 judgments
+  matrix complete: true
+  warnings: 0
+  top hypothesis: h_data_integrity_systemic_primary
+```
+
+Read: ACH transferred from NTSB incident causation into FDA compliance review.
+The evidence matrix ranked systemic data-integrity failure above narrower
+computer-control, quality-unit, and import-alert explanations.
+
+Next thermometer:
+
+`docs/FRESH_UGLY_PUBLIC_BATCH_03_SPEC.md` now defines the next 12-document public
+batch. It asks for FDA, OSHA, SEC, and a fourth outside regulatory/investigation
+source family, with 25 QA rows per document and explicit messy-source pressure.

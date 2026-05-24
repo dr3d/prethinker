@@ -1,4 +1,4 @@
-from scripts.compare_qa_runs import compare_qa_runs
+from scripts.compare_qa_runs import compare_qa_runs, render_markdown
 
 
 def _batch(fixture: str, exact: int, partial: int, miss: int) -> dict:
@@ -124,6 +124,13 @@ def test_compare_qa_runs_reports_row_level_churn_and_added_support_surfaces() ->
     assert payload["summary"]["row_regression_count"] == 1
     assert payload["summary"]["baseline_exact_regression_count"] == 1
     assert payload["summary"]["baseline_exact_to_miss_count"] == 1
+    assert payload["regression_guard"] == {
+        "schema_version": "qa_regression_guard_v1",
+        "status": "fail",
+        "rule": "Previously exact rows must remain exact before a candidate run is promoted.",
+        "baseline_exact_regression_count": 1,
+        "baseline_exact_to_miss_count": 1,
+    }
     assert payload["row_changes"]["summary"]["regression_with_added_support_count"] == 1
     assert payload["row_changes"]["summary"]["regression_with_added_helper_count"] == 1
     regression = [
@@ -137,3 +144,38 @@ def test_compare_qa_runs_reports_row_level_churn_and_added_support_surfaces() ->
         "source_record_new_support": "current_source_record_summary"
     }
     assert regression["added_helper_predicates"] == ["source_record_new_support"]
+
+
+def test_compare_qa_runs_regression_guard_passes_when_exact_rows_hold() -> None:
+    baseline = _run_rows(
+        "fixture_a",
+        [
+            ("q001", "exact", "not_applicable", ["direct_fact"]),
+            ("q002", "miss", "compile_surface_gap", ["direct_fact"]),
+        ],
+    )
+    candidate = _run_rows(
+        "fixture_a",
+        [
+            ("q001", "exact", "not_applicable", ["direct_fact"]),
+            ("q002", "exact", "not_applicable", ["direct_fact", "source_record_new_support"]),
+        ],
+    )
+
+    payload = compare_qa_runs(baseline, candidate)
+
+    assert payload["regression_guard"]["status"] == "pass"
+    assert payload["regression_guard"]["baseline_exact_regression_count"] == 0
+
+
+def test_compare_qa_runs_markdown_uses_support_surface_language() -> None:
+    baseline = _run_rows("fixture_a", [("q001", "exact", "not_applicable", ["direct_fact"])])
+    candidate = _run_rows(
+        "fixture_a",
+        [("q001", "miss", "query_surface_gap", ["direct_fact", "source_record_new_support"])],
+    )
+
+    markdown = render_markdown(compare_qa_runs(baseline, candidate))
+
+    assert "Added Support Surfaces" in markdown
+    assert "helper" not in markdown.casefold()
