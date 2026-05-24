@@ -30,6 +30,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_date_pair_duration_companion,
     _source_record_date_range_duration_companion,
     _source_record_field_state_companion,
+    _source_record_same_day_event_time_companion,
     _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
     _source_record_relative_next_day_companion,
@@ -2068,6 +2069,32 @@ def test_source_record_date_range_duration_companion_computes_closing_extension(
     assert row["EndDate"] == "2026_05_22"
     assert row["ElapsedDays"] == "37"
     assert row["Duration"] == "37 days"
+
+
+def test_source_record_same_day_event_time_companion_anchors_departure_to_previous_date() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0041, "
+        "on_may_11_2024_trinity_tugs_entered_into_an_agreement_for_the_baylor_j_tregre_"
+        "to_tow_the_barge_marmac_27_from_houma_louisiana_to_brazos_area_block_538a).",
+        "source_record_text_atom(src_line_0043, "
+        "the_same_day_about_0340_the_baylor_j_tregre_departed_houma_en_route_to_block_538a).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_same_day_event_time_companion(
+        runtime,
+        utterance="When did the Baylor J. Tregre depart Houma, and approximately at what time?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["AnchorSourceRow"] == "src_line_0041"
+    assert row["SourceRow"] == "src_line_0043"
+    assert row["EventAction"] == "departed"
+    assert row["EventDate"] == "2024_05_11"
+    assert row["EventTime"] == "0340"
+    assert row["EventLocation"] == "houma"
 
 
 def test_source_record_field_state_companion_surfaces_blank_column_values() -> None:

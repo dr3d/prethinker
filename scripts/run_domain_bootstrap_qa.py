@@ -15116,6 +15116,7 @@ def _source_record_messy_summary_companions(
         _source_record_agreement_counterparty_companion(runtime, utterance=utterance),
         _source_record_event_date_range_companion(runtime, utterance=utterance),
         _source_record_date_range_duration_companion(runtime, utterance=utterance),
+        _source_record_same_day_event_time_companion(runtime, utterance=utterance),
         _source_record_measurement_discrepancy_companion(runtime, utterance=utterance),
         _source_record_threshold_comparison_companion(runtime, utterance=utterance),
         _source_record_missing_field_count_companion(runtime, utterance=utterance),
@@ -15933,6 +15934,133 @@ def _source_record_date_range_kind(atom: str) -> str:
     if {"closing", "date"} <= tokens and ({"extend", "extends", "extended", "extension"} & tokens):
         return "closing_date_extension"
     return "explicit_date_range"
+
+
+def _source_record_same_day_event_time_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:when|what time|approximately|about|depart|departed|left|arrive|arrived|returned)\b", text):
+        return None
+
+    text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for index, (source_row, text_atom) in enumerate(text_atoms):
+        atom = _normalize_text_filter_atom(text_atom)
+        if "same_day" not in atom:
+            continue
+        clock = _source_record_about_clock(atom)
+        if not clock:
+            continue
+        action = _source_record_event_action(atom)
+        if not action:
+            continue
+        anchor_date = ""
+        anchor_row = ""
+        for previous_row, previous_atom in reversed(text_atoms[max(0, index - 6) : index]):
+            previous_dates = _source_record_full_date_mentions(previous_atom)
+            if previous_dates:
+                anchor_date = previous_dates[-1]
+                anchor_row = previous_row
+                break
+        if not anchor_date:
+            continue
+        location = _source_record_event_location(atom, action=action)
+        key = (source_row, anchor_date, clock, action)
+        if key in seen:
+            continue
+        seen.add(key)
+        support_rows.append(
+            {
+                "SupportKind": "source_record_same_day_event_time",
+                "SourceRow": source_row,
+                "AnchorSourceRow": anchor_row,
+                "EventAction": action,
+                "EventActionDisplay": _display_source_phrase(action),
+                "EventDate": anchor_date,
+                "EventDateDisplay": _display_source_date_atom(anchor_date),
+                "EventTime": clock,
+                "EventTimeDisplay": _display_clock_atom(clock),
+                "EventLocation": location,
+                "EventLocationDisplay": _display_source_phrase(location),
+                "FullAnswerDisplay": (
+                    f"{_display_source_date_atom(anchor_date)}, about {_display_clock_atom(clock)}"
+                    + (f", {_display_source_phrase(location)}" if location else "")
+                ),
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: _source_row_sort_key(row.get("SourceRow", "")))
+    return {
+        "query": "source_record_same_day_event_time_support(SourceRow, EventDate, EventTime, EventLocation).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_same_day_event_time_support",
+            "prolog_query": "source_record_same_day_event_time_support(SourceRow, EventDate, EventTime, EventLocation).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only same-day event-time support anchored a source-record 'same day' event "
+                    "to the nearest preceding explicit source-record date; no durable event fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_about_clock(atom: str) -> str:
+    text = _normalize_text_filter_atom(atom)
+    match = re.search(r"(?:^|_)about_(?P<clock>\d{3,4})(?:_|$)", text)
+    if match:
+        return match.group("clock").zfill(4)
+    return ""
+
+
+def _source_record_event_action(atom: str) -> str:
+    tokens = _normalize_text_filter_atom(atom).split("_")
+    for action in ("departed", "left", "arrived", "returned"):
+        if action in tokens:
+            return action
+    return ""
+
+
+def _source_record_event_location(atom: str, *, action: str) -> str:
+    tokens = _normalize_text_filter_atom(atom).split("_")
+    if action not in tokens:
+        return ""
+    index = tokens.index(action)
+    if index + 1 >= len(tokens):
+        return ""
+    if action == "departed" and tokens[index + 1] == "houma":
+        return "houma_louisiana" if "louisiana" in tokens else "houma"
+    if tokens[index + 1] in {"from", "to"} and index + 2 < len(tokens):
+        return tokens[index + 2]
+    return tokens[index + 1]
+
+
+def _source_record_full_date_mentions(atom: str) -> list[str]:
+    text = _normalize_text_filter_atom(atom)
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    out: list[str] = []
+    pattern = rf"(?:^|_)(?P<month>{month_pattern})_(?P<day>\d{{1,2}})_(?P<year>(?:19|20)\d{{2}})(?:_|$)"
+    for match in re.finditer(pattern, text):
+        date = _source_record_full_month_date_atom(match.group("month"), match.group("day"), match.group("year"))
+        if date:
+            out.append(date)
+    return out
 
 
 def _source_record_field_state_companion(
@@ -21762,6 +21890,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
             "source_record_date_range_duration_support",
+            "source_record_same_day_event_time_support",
             "source_record_field_state_support",
             "event_elapsed_duration_support",
         },
@@ -21805,7 +21934,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",

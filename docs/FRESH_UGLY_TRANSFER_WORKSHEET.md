@@ -674,3 +674,51 @@ Discipline note:
 This is mechanism evidence only. It repairs the SEC closing-date extension
 cluster on targeted replay, but the corpus score remains `189 / 4 / 7` until
 the next full fresh-ugly rerun.
+
+## 2026-05-24 Same-Day Event-Time Mechanism Probe
+
+Mechanism:
+
+- Added `source_record_same_day_event_time_support`, a query-only companion
+  that anchors source-record phrases like `the same day about 0340 ... departed`
+  to the nearest preceding explicit source-record date.
+- The mechanism is intended for narrative incident reports where a dated setup
+  sentence is followed by a same-day event sentence.
+- It writes no durable event fact; it only exposes the anchored date, clock
+  time, action, and location from admitted source-record text.
+
+Validation:
+
+```text
+tests/test_source_surface_gap_audit.py
+tests/test_domain_bootstrap_qa.py
+
+284 passed
+```
+
+Targeted replay:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_same_day_event_time_probe_20260524`
+
+```text
+fixtures/rows:
+  ntsb_marine_ugly_001 q006
+exact / partial / miss: 1 / 0 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Recovered surface:
+
+- `ntsb_marine_ugly_001 q006`: departure date/time anchored from the May 11,
+  2024 setup sentence to the same-day `about 0340` departure-from-Houma
+  sentence.
+
+Discipline note:
+
+This is mechanism evidence only. It repairs the NTSB marine departure row on
+targeted replay, but the corpus score remains `189 / 4 / 7` until the next full
+fresh-ugly rerun.
