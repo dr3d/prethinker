@@ -813,3 +813,162 @@ Residual-slice projection after substituting the validated list-detail replay:
 
 This is still targeted residual-slice evidence, not a fresh full Batch 02
 benchmark. The next full fresh rerun is the claim-making run.
+
+## 2026-05-24 Fresh-Only QA Rerun After Generic Supports
+
+Purpose:
+
+Test whether the targeted residual repairs transfer inside a full fresh-only
+Batch 02 QA pass, including churn on previously exact rows.
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_02
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_compile_r1
+QA out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_fresh10_after_supports_20260524
+fixtures:
+  fresh-only 10-fixture slice
+excluded duplicate-source fixtures:
+  fda_warning_ugly_005
+  ntsb_marine_ugly_002
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6 requested
+cache:
+  disabled
+compatibility adapter row limit:
+  0
+evidence-bundle path:
+  enabled for the main run
+```
+
+Raw full rerun:
+
+```text
+questions: 250
+exact / partial / miss: 222 / 8 / 16
+not judged: 4
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+The four `not_judged` rows were normalized with a narrow no-evidence-bundle
+replay, plus one parse-failure row that also normalized under no-bundle replay:
+
+```text
+ntsb_surface_ugly_001 q025:
+  miss
+
+osha_incident_ugly_004 q015,q019,q025:
+  exact: 3
+
+osha_incident_ugly_005 q002:
+  exact
+```
+
+Normalized full rerun:
+
+```text
+fresh-only 10-fixture slice:
+  226 / 8 / 16 over 250 = 90.4%
+
+baseline adjusted fresh-only slice:
+  225 / 5 / 20 over 250 = 90.0%
+
+delta:
+  +1 exact
+  +3 partial
+  -4 miss
+```
+
+Churn:
+
+```text
+changed rows: 28
+improved rows: 15
+regressed rows: 13
+baseline exact -> non-exact: 12
+baseline non-exact -> exact: 13
+```
+
+Improved rows:
+
+```text
+fda_warning_ugly_003 q021: miss -> exact
+fda_warning_ugly_003 q022: miss -> exact
+fda_warning_ugly_004 q021: miss -> exact
+fda_warning_ugly_004 q022: miss -> exact
+ntsb_aviation_ugly_002 q008: miss -> exact
+ntsb_aviation_ugly_002 q024: partial -> exact
+ntsb_surface_ugly_001 q006: miss -> partial
+ntsb_surface_ugly_001 q012: partial -> exact
+ntsb_surface_ugly_001 q013: miss -> exact
+ntsb_surface_ugly_001 q023: miss -> partial
+osha_incident_ugly_003 q008: miss -> exact
+osha_incident_ugly_003 q009: miss -> exact
+osha_incident_ugly_004 q019: not_judged -> exact
+sec_material_event_ugly_004 q006: partial -> exact
+sec_material_event_ugly_004 q007: miss -> exact
+```
+
+Regressed rows:
+
+```text
+fda_warning_ugly_003 q001: partial -> miss
+ntsb_surface_ugly_001 q007: exact -> miss
+ntsb_surface_ugly_001 q025: exact -> miss
+osha_incident_ugly_003 q006: exact -> miss
+osha_incident_ugly_003 q024: exact -> partial
+osha_incident_ugly_004 q021: exact -> miss
+osha_incident_ugly_004 q023: exact -> miss
+osha_incident_ugly_005 q006: exact -> partial
+osha_incident_ugly_005 q014: exact -> partial
+sec_material_event_ugly_003 q021: exact -> partial
+sec_material_event_ugly_004 q008: exact -> miss
+sec_material_event_ugly_004 q015: exact -> miss
+sec_material_event_ugly_005 q003: exact -> partial
+```
+
+Support-surface interference check:
+
+The newly added support predicates appeared only on exact rows in this rerun:
+
+```text
+source_record_elapsed_date_duration_support
+source_record_scoped_numeric_frequency_support
+source_record_section_list_detail_support
+```
+
+No non-exact row contained the new scoped numeric or source-section list support
+surface. The regressions therefore do not look like direct trigger overreach
+from the two latest generic supports. They look more like QA/evidence-plan
+variance and remaining compile/query fragility.
+
+Read:
+
+The targeted residual projection was too optimistic. It measured mechanism
+recoveries, not full-run stability. The full fresh-only rerun is nearly neutral
+against the adjusted R1 baseline: `90.0% -> 90.4%`, with clean hygiene but
+substantial churn.
+
+This is still good product evidence in one sense: the pipeline stayed clean
+under a harder full run. But it is not a 95% transfer claim. The next blocker is
+stability and compile preservation, not adding broad new query support.
+
+Next energy:
+
+1. Inspect the 13 regressions for evidence-plan variance versus real support
+   loss.
+2. Add regression guards for previously exact Batch 02 rows before promoting
+   more support surfaces.
+3. Work the true compile-admission gaps, especially long-report source sections
+   present in `source.md` but absent from admitted `source_record_text_atom`
+   rows.
+4. Treat the next fresh ugly batch as the product thermometer; do not polish
+   Batch 02 toward a number.
