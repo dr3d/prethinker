@@ -722,3 +722,39 @@ Discipline note:
 This is mechanism evidence only. It repairs the NTSB marine departure row on
 targeted replay, but the corpus score remains `189 / 4 / 7` until the next full
 fresh-ugly rerun.
+
+## 2026-05-24 Remaining Partial-Row Checkpoint
+
+Targeted replay:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_remaining_partial_probe_20260524`
+
+```text
+fixtures/rows:
+  ntsb_aviation_ugly_001 q020
+  osha_incident_ugly_002 q007
+  osha_incident_ugly_002 q019
+exact / partial / miss: 3 / 0 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Read:
+
+- These rows did not require another mechanism in this pass.
+- `ntsb_aviation_ugly_001 q020` replayed exact with the existing numeric
+  fatality evidence and comparison support.
+- `osha_incident_ugly_002 q007` replayed exact with the close-conference date,
+  citation-issued date, and one-day relationship visible in query results.
+- `osha_incident_ugly_002 q019` replayed exact with the current repeated-value
+  location support.
+
+Discipline note:
+
+This checkpoint closes the known R3 partial residue on targeted replay only.
+The corpus score remains `189 / 4 / 7` until the next full fresh-ugly rerun,
+and row-level churn still has to be checked before treating the repair set as a
+corpus recovery.
