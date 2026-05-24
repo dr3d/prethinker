@@ -1,0 +1,273 @@
+{
+  "schema_version": "ach_overlay_v1",
+  "id": "ntsb_surface_teutopolis_v1",
+  "name": "NTSB Surface Teutopolis Root Cause And Severity ACH Probe",
+  "source_fixture": "datasets/real_world_transfer/fresh_ugly_public_20260524_02/ntsb_surface_ugly_001",
+  "source_compile": "C:/prethinker_tmp_archive/fresh_ugly_public_20260524_02_r1_20260524/fresh_ugly_public_20260524_02_compile_r1/ntsb_surface_ugly_001/domain_bootstrap_file_20260524T141654170010Z_source_qwen-qwen3-6-35b-a3b.json",
+  "hypotheses": [
+    {
+      "id": "h_teen_unsafe_passing_evasive_loss_control",
+      "label": "Teen driver's unsafe passing maneuver caused evasive action, loss of control, and rollover"
+    },
+    {
+      "id": "h_vehicle_or_cargo_tank_defect",
+      "label": "A truck-tractor or cargo-tank mechanical/design defect caused the crash or release"
+    },
+    {
+      "id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "label": "Combination vehicle driver impairment, fatigue, or distraction caused the crash"
+    },
+    {
+      "id": "h_hos_exemption_or_carrier_safety_primary",
+      "label": "Agricultural HOS exemption or carrier safety-management weakness was the primary cause"
+    },
+    {
+      "id": "h_hazmat_response_or_classification_severity",
+      "label": "Hazmat classification, PPE, decontamination, or emergency response primarily explains injury severity"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e_probable_cause_statement",
+      "label": "NTSB probable cause names the teen driver's unsafe passing maneuver causing evasive action, loss of control, and rollover; it separately names the cargo-tank impact and ammonia release as contributing to severity",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "3.1 Probable Cause"
+      }
+    },
+    {
+      "id": "e_video_no_passing_sequence",
+      "label": "Forward-facing video shows the no passing zone, oncoming vehicle, minivan passing, combination vehicle steering right, shoulder departure, and rollover sequence",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "1.2 Event Sequence"
+      }
+    },
+    {
+      "id": "e_no_impairment_fatigue_distraction",
+      "label": "The analysis found no evidence of impairment, fatigue, or phone distraction for the combination vehicle driver, and no phone distraction for the minivan driver",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "2 Analysis"
+      }
+    },
+    {
+      "id": "e_mechanical_condition_not_factor",
+      "label": "The investigation determined the truck-tractor mechanical condition and cargo tank construction were not factors; the puncture involved an extremely unusual hardened-steel trailer impact at a weld seam",
+      "diagnosticity": "critical",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_section": "2 Analysis"
+      }
+    },
+    {
+      "id": "e_hazmat_release_and_response_deficiencies",
+      "label": "Five deaths and most injuries resulted from anhydrous ammonia exposure; Level A PPE was recommended but not used, east-side decontamination was deficient, and classification did not match toxic effects",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_sections": ["1.3 Injuries", "1.4 Hazmat Emergency Response", "2.2 Safety Issue"]
+      }
+    },
+    {
+      "id": "e_hos_exemption_not_crash_factor",
+      "label": "The report notes about 14.5 on-duty hours and agricultural HOS exemption concerns, but says the investigation found no evidence that the driver was fatigued",
+      "diagnosticity": "high",
+      "source": {
+        "kind": "admitted_source_record",
+        "predicate": "source_record_text_atom",
+        "source_sections": ["1.5.4.1 Cargo Tank Driver", "2.2 Safety Issue"]
+      }
+    }
+  ],
+  "judgments": [
+    {
+      "evidence_id": "e_probable_cause_statement",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "consistent",
+      "rationale": "This is the report's direct probable-cause conclusion."
+    },
+    {
+      "evidence_id": "e_probable_cause_statement",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "inconsistent",
+      "rationale": "The probable-cause sentence names unsafe passing and evasive loss of control, not a vehicle or cargo-tank defect."
+    },
+    {
+      "evidence_id": "e_probable_cause_statement",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "inconsistent",
+      "rationale": "The conclusion does not attribute the crash to impairment, fatigue, or distraction by the combination vehicle driver."
+    },
+    {
+      "evidence_id": "e_probable_cause_statement",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "inconsistent",
+      "rationale": "The conclusion does not identify HOS exemption or carrier management as the primary crash cause."
+    },
+    {
+      "evidence_id": "e_probable_cause_statement",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "consistent",
+      "rationale": "The conclusion separately says the cargo-tank impact and ammonia release contributed to severity, which is compatible with a severity hypothesis."
+    },
+    {
+      "evidence_id": "e_video_no_passing_sequence",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "consistent",
+      "rationale": "The observed sequence directly supports unsafe passing leading to evasive steering and roadway departure."
+    },
+    {
+      "evidence_id": "e_video_no_passing_sequence",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "inconsistent",
+      "rationale": "The sequence shows a traffic conflict and evasive maneuver before rollover rather than a spontaneous equipment failure."
+    },
+    {
+      "evidence_id": "e_video_no_passing_sequence",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "neutral",
+      "rationale": "The video sequence alone does not determine the driver's cognitive state."
+    },
+    {
+      "evidence_id": "e_video_no_passing_sequence",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "neutral",
+      "rationale": "The video does not directly test carrier policy or HOS exemption."
+    },
+    {
+      "evidence_id": "e_video_no_passing_sequence",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "neutral",
+      "rationale": "The video explains crash sequence, not response or classification effects after release."
+    },
+    {
+      "evidence_id": "e_no_impairment_fatigue_distraction",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "consistent",
+      "rationale": "Ruling out impairment/fatigue/distraction for the combination driver leaves the unsafe passing mechanism intact."
+    },
+    {
+      "evidence_id": "e_no_impairment_fatigue_distraction",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "neutral",
+      "rationale": "Driver-state evidence does not directly decide vehicle or cargo-tank condition."
+    },
+    {
+      "evidence_id": "e_no_impairment_fatigue_distraction",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "inconsistent",
+      "rationale": "The report explicitly found no evidence for this driver-state theory."
+    },
+    {
+      "evidence_id": "e_no_impairment_fatigue_distraction",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "neutral",
+      "rationale": "No fatigue weakens an HOS-as-primary theory but does not by itself decide broader carrier safety management."
+    },
+    {
+      "evidence_id": "e_no_impairment_fatigue_distraction",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "neutral",
+      "rationale": "Driver-state findings do not determine response or classification severity issues."
+    },
+    {
+      "evidence_id": "e_mechanical_condition_not_factor",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "consistent",
+      "rationale": "Ruling out mechanical condition is compatible with a traffic-conflict/evasive-action cause."
+    },
+    {
+      "evidence_id": "e_mechanical_condition_not_factor",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "inconsistent",
+      "rationale": "The report directly says mechanical condition and cargo tank construction were not factors."
+    },
+    {
+      "evidence_id": "e_mechanical_condition_not_factor",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "neutral",
+      "rationale": "Mechanical findings do not directly test driver impairment or fatigue."
+    },
+    {
+      "evidence_id": "e_mechanical_condition_not_factor",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "neutral",
+      "rationale": "Mechanical findings do not decide the carrier-management theory."
+    },
+    {
+      "evidence_id": "e_mechanical_condition_not_factor",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "neutral",
+      "rationale": "The unusual puncture explains release mechanics but not whether response/classification primarily explains severity."
+    },
+    {
+      "evidence_id": "e_hazmat_release_and_response_deficiencies",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "neutral",
+      "rationale": "Exposure and response evidence speaks mainly to severity after the crash, not the initiating traffic conflict."
+    },
+    {
+      "evidence_id": "e_hazmat_release_and_response_deficiencies",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "neutral",
+      "rationale": "Release severity does not by itself show a cargo-tank defect."
+    },
+    {
+      "evidence_id": "e_hazmat_release_and_response_deficiencies",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "neutral",
+      "rationale": "Response and exposure evidence does not test driver impairment or fatigue."
+    },
+    {
+      "evidence_id": "e_hazmat_release_and_response_deficiencies",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "neutral",
+      "rationale": "Response and classification findings are separate from carrier HOS or safety-management causation."
+    },
+    {
+      "evidence_id": "e_hazmat_release_and_response_deficiencies",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "consistent",
+      "rationale": "The evidence directly supports a severity-focused issue involving ammonia exposure, PPE, decontamination, and classification."
+    },
+    {
+      "evidence_id": "e_hos_exemption_not_crash_factor",
+      "hypothesis_id": "h_teen_unsafe_passing_evasive_loss_control",
+      "assessment": "consistent",
+      "rationale": "The HOS concern is framed as broader safety issue rather than crash-causal fatigue, leaving the passing/evasive-action cause intact."
+    },
+    {
+      "evidence_id": "e_hos_exemption_not_crash_factor",
+      "hypothesis_id": "h_vehicle_or_cargo_tank_defect",
+      "assessment": "neutral",
+      "rationale": "HOS findings do not decide mechanical or cargo-tank condition."
+    },
+    {
+      "evidence_id": "e_hos_exemption_not_crash_factor",
+      "hypothesis_id": "h_combination_driver_impairment_fatigue_or_distraction",
+      "assessment": "inconsistent",
+      "rationale": "The report says there was no evidence that the driver was fatigued."
+    },
+    {
+      "evidence_id": "e_hos_exemption_not_crash_factor",
+      "hypothesis_id": "h_hos_exemption_or_carrier_safety_primary",
+      "assessment": "inconsistent",
+      "rationale": "The report treats agricultural HOS exemptions as a broader concern but not the primary crash cause."
+    },
+    {
+      "evidence_id": "e_hos_exemption_not_crash_factor",
+      "hypothesis_id": "h_hazmat_response_or_classification_severity",
+      "assessment": "neutral",
+      "rationale": "HOS exemption evidence does not directly test hazmat response or classification severity."
+    }
+  ]
+}

@@ -211,3 +211,36 @@ review/audit.
   accidental empty query?
 - What makes an ACH result product-ready: matrix completeness, transfer probe
   behavior, or domain-specific reviewer approval?
+
+## 2026-05-24 Fresh Ugly Batch 02 Probe
+
+Payload:
+
+```text
+experiments/ach_overlay/ntsb_surface_teutopolis_v1/ach_payload.json
+```
+
+Run artifact:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\ntsb_surface_teutopolis_v1
+```
+
+Result:
+
+```text
+hypotheses: 5
+evidence rows: 6
+judgments: 30
+matrix complete: true
+warnings: 0
+top hypothesis: h_teen_unsafe_passing_evasive_loss_control
+surviving hypotheses: 1
+sensitivity rows: 0
+```
+
+Read: ACH remained useful on a fresh public NTSB surface report. The overlay
+ranked the unsafe-passing/evasive-action hypothesis as the single least
+disconfirmed explanation, matching the report's probable-cause theory, while
+keeping hazmat-response, PPE, decontamination, and classification evidence in a
+severity lane rather than confusing it with initiating crash cause.

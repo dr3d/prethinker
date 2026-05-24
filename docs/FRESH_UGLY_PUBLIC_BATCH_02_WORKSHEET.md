@@ -341,3 +341,145 @@ Next actions:
 3. Inspect non-exact clusters before implementing repairs.
 4. Do not polish individual Batch 02 rows until the ablation tells us whether
    source-record summaries are transferring or carrying too much of the score.
+
+## 2026-05-24 Source-Record Summary Ablation
+
+Purpose:
+
+Measure whether the current source-record summary layer transfers to Batch 02
+or mainly carries Batch 01 document-shape memory.
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_02
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_compile_r1
+QA out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_qa_r1_no_source_record_summaries_fresh10
+fixtures:
+  fresh-only 10-fixture slice
+ablation:
+  --disable-current-source-record-summaries
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6 requested
+cache:
+  disabled
+compatibility adapter row limit:
+  0
+```
+
+Raw ablation summary:
+
+```text
+questions: 250
+exact / partial / miss: 212 / 6 / 27
+not judged: 5
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+The five `not_judged` rows were the same large OSHA table/judge-context shape
+seen in the baseline. A narrow replay without the evidence-bundle path resolved
+them:
+
+```text
+osha_incident_ugly_004 q017,q019,q021,q024,q025:
+  exact: 4
+  miss: 1
+```
+
+Adjusted ablation:
+
+```text
+fresh-only 10-fixture slice:
+  216 / 6 / 28 = 86.4%
+
+baseline adjusted fresh-only slice:
+  225 / 5 / 19 plus 1 not_judged
+  conservative, counting remaining not_judged as miss:
+    225 / 5 / 20 = 90.0%
+
+delta versus conservative baseline:
+  -9 exact, +1 partial, +8 miss
+```
+
+Row movement after replay normalization:
+
+```text
+changed rows: 25
+improved rows under ablation: 8
+regressed rows under ablation: 17
+baseline exact -> non-exact: 16
+baseline exact -> miss: 12
+regressions with removed source-record support: 16
+```
+
+Read:
+
+The source-record summary layer is materially load-bearing on Batch 02 as well
+as Batch 01. That is important evidence that the layer is not merely a Batch 01
+artifact. Removing it costs roughly nine exact rows on the fresh-only slice,
+and nearly every regression lost a source-record support surface.
+
+The layer is still not free. It improves some rows when removed, which means it
+can perturb route/judge behavior. But the dominant signal is that it transfers:
+source-record summaries recover real answer-bearing structure in unseen public
+documents, especially CFR/citation lists, elapsed-time joins, blank/former-name
+fields, repeated numeric table values, and source-overlap rows.
+
+Engineering implication:
+
+Do not remove the layer. Promote recurring transferable summaries into direct
+compile surfaces where possible, and keep the ablation as a required control
+for future fresh batches.
+
+## 2026-05-24 ACH Overlay Probe
+
+Question:
+
+Is there any use in running ACH on the recent fresh ugly documents?
+
+Answer:
+
+Yes, but only as a sibling product-surface probe, not as part of QA scoring. The
+best use is on reports with competing causal theories, severity contributors,
+negative findings, and source-attributed explanations.
+
+Probe:
+
+```text
+payload:
+  experiments/ach_overlay/ntsb_surface_teutopolis_v1/ach_payload.json
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\ntsb_surface_teutopolis_v1
+source fixture:
+  ntsb_surface_ugly_001
+```
+
+Result:
+
+```text
+hypotheses: 5
+evidence rows: 6
+judgments: 30
+matrix complete: true
+warnings: 0
+top hypothesis: h_teen_unsafe_passing_evasive_loss_control
+surviving hypotheses: 1
+sensitivity rows: 0
+```
+
+Read:
+
+The overlay separated initiating crash cause from injury-severity contributors.
+The surviving top hypothesis matches the NTSB probable-cause theory: unsafe
+passing by the teen driver caused evasive action, loss of control, and rollover.
+The hazmat-response/classification evidence stayed useful, but as severity
+evidence rather than as the initiating crash cause. That is exactly the product
+role ACH should play: disciplined competing-hypothesis ranking over the same
+source-grounded substrate, without contaminating the KB or QA score.
