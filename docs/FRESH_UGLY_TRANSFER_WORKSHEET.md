@@ -758,3 +758,122 @@ This checkpoint closes the known R3 partial residue on targeted replay only.
 The corpus score remains `189 / 4 / 7` until the next full fresh-ugly rerun,
 and row-level churn still has to be checked before treating the repair set as a
 corpus recovery.
+
+## 2026-05-24 Full R4 QA Rerun Over R3 Compiles
+
+Purpose:
+
+Measure the query-side repair set on the full 8-fixture fresh-ugly batch without
+recompiling. The recent repairs are all QA/query/judge-side mechanisms, so this
+run uses the archived R3 compile artifacts as the fixed compile substrate.
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_01
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_r3_20260524\fresh_ugly_public_20260524_01_compile_r3
+QA model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6
+cache:
+  disabled
+questions:
+  200
+```
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_public_20260524_01_qa_r4_current_20260524`
+
+Result:
+
+```text
+exact / partial / miss: 193 / 3 / 4 = 96.5%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Per-fixture R4:
+
+| Fixture | Exact | Partial | Miss | Failure surfaces |
+| --- | ---: | ---: | ---: | --- |
+| `fda_warning_ugly_001` | 24 | 0 | 1 | `compile_surface_gap:1` |
+| `fda_warning_ugly_002` | 23 | 2 | 0 | `hybrid_join_gap:1`, `query_surface_gap:1` |
+| `ntsb_aviation_ugly_001` | 24 | 0 | 1 | `query_surface_gap:1` |
+| `ntsb_marine_ugly_001` | 24 | 0 | 1 | `hybrid_join_gap:1` |
+| `osha_incident_ugly_001` | 25 | 0 | 0 | none |
+| `osha_incident_ugly_002` | 24 | 0 | 1 | `compile_surface_gap:1` |
+| `sec_material_event_ugly_001` | 25 | 0 | 0 | none |
+| `sec_material_event_ugly_002` | 24 | 1 | 0 | `hybrid_join_gap:1` |
+
+R3 -> R4 comparison:
+
+```text
+aggregate:
+  R3: 189 / 4 / 7 = 94.5%
+  R4: 193 / 3 / 4 = 96.5%
+  delta: +4 exact, -1 partial, -3 miss
+
+row churn:
+  changed rows: 16
+  improved rows: 9
+  regressed rows: 7
+  baseline exact -> non-exact: 5
+  baseline exact -> miss: 2
+  regressions with an added helper predicate: 1
+```
+
+Promoted rows:
+
+| Row | R3 -> R4 | Mechanism |
+| --- | --- | --- |
+| `fda_warning_ugly_001 q012` | miss -> exact | `source_record_citation_list_support` |
+| `fda_warning_ugly_001 q016` | miss -> exact | `source_record_contact_signatory_support` |
+| `fda_warning_ugly_002 q004` | miss -> exact | `source_record_contact_signatory_support` |
+| `fda_warning_ugly_002 q014` | miss -> exact | `source_record_citation_list_support` |
+| `ntsb_marine_ugly_001 q006` | miss -> exact | `source_record_same_day_event_time_support` |
+| `osha_incident_ugly_002 q019` | partial -> exact | existing repeated-value support |
+| `sec_material_event_ugly_001 q008` | miss -> exact | `source_record_date_range_duration_support` |
+| `sec_material_event_ugly_001 q009` | partial -> exact | `source_record_date_range_duration_support` |
+| `sec_material_event_ugly_001 q020` | miss -> exact | `source_record_date_range_duration_support` |
+
+Remaining non-exact R4 rows:
+
+| Row | Verdict | Surface | Shape |
+| --- | --- | --- | --- |
+| `fda_warning_ugly_001 q013` | miss | compile | nested sub-section headings under one CFR violation |
+| `fda_warning_ugly_002 q010` | partial | query | chronology across inspection start/end, extension request, letter date |
+| `fda_warning_ugly_002 q021` | partial | hybrid | semantic distinction between extension request and substantive response |
+| `ntsb_aviation_ugly_001 q020` | miss | query | similar-event fatality arithmetic and comparison |
+| `ntsb_marine_ugly_001 q017` | miss | hybrid | elapsed time between two narrative clock events |
+| `osha_incident_ugly_002 q007` | miss | compile | close conference date vs citation issue date |
+| `sec_material_event_ugly_002 q018` | partial | hybrid | approximate month duration from role-start to appointment date |
+
+Read:
+
+The mechanism set is promotable in aggregate and crosses the 95% line on this
+fresh-ugly batch, but the row churn is still too noisy to treat this as a final
+benchmark claim. Most regressions did not show added helper predicates, which
+points less to direct helper pollution and more to no-cache route/judge
+variance plus remaining weak surfaces in chronology, elapsed duration, and
+nested source-record structure.
+
+Next engineering focus:
+
+- Add regression guards for the 5 rows that were exact in R3 and non-exact in
+  R4 before broadening the mechanism set again.
+- Prefer route-discrimination and stability checks over more one-off corpus
+  polish.
+- Use the next fresh-ugly batch to test whether the R4 mechanisms generalize
+  and whether FDA/OSHA/NTSB temporal and nested-section residues recur on truly
+  unseen documents.
+
+Discipline note:
+
+R4 is a full QA rerun over fixed R3 compiles. It is valid evidence for query-side
+repair behavior on this corpus, not a new compile stamp and not a fresh-document
+generalization result.
