@@ -483,3 +483,105 @@ The hazmat-response/classification evidence stayed useful, but as severity
 evidence rather than as the initiating crash cause. That is exactly the product
 role ACH should play: disciplined competing-hypothesis ranking over the same
 source-grounded substrate, without contaminating the KB or QA score.
+
+## 2026-05-24 Elapsed-Date Duration Support
+
+Purpose:
+
+Address the largest transferable residual pattern in Batch 02: elapsed calendar
+day questions where the relevant dates are present in admitted source-record or
+date facts, but query planning fails to bind the right pair or execute
+`elapsed_days/3`.
+
+Change:
+
+Added a query-only deterministic support surface:
+
+```text
+source_record_elapsed_date_duration_support(StartDate, EndDate, ElapsedDays, Duration)
+```
+
+The support is current source-record summary work, not a durable KB fact and
+not a retired compatibility adapter. It fires only for elapsed/duration/date
+questions, requires admitted date evidence, computes calendar days locally, and
+uses a minimum role-overlap threshold so weak same-document date matches do not
+pollute the judge.
+
+Unit coverage:
+
+```text
+tests/test_domain_bootstrap_qa.py:
+  explicit source-backed dates in the question
+  role-matched source-record fields
+  section/context role stems such as publication/published and abated/abatement
+  admitted date predicates such as inspection_period/3 and letter_date/2
+```
+
+Targeted replay artifacts:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_duration_support_20260524
+```
+
+Targeted duration probe:
+
+```text
+Initial duration-heavy slice:
+  fda_warning_ugly_003 q021,q022
+  fda_warning_ugly_004 q021,q022
+  ntsb_aviation_ugly_002 q008
+  osha_incident_ugly_003 q007,q008,q009
+  osha_incident_ugly_005 q009
+  sec_material_event_ugly_004 q007
+
+After first pass:
+  6 exact / 0 partial / 4 miss
+
+Clear recoveries:
+  fda_warning_ugly_003 q021: 143 days
+  fda_warning_ugly_004 q021: 42 days
+  fda_warning_ugly_004 q022: 124 days
+  ntsb_aviation_ugly_002 q008: 48 days
+  osha_incident_ugly_003 q007: exact under replay
+  sec_material_event_ugly_004 q007: 23 days
+```
+
+Refinement:
+
+The first pass was too literal for OSHA rows where the question said
+`abatement deadline` but the source row said `date by which violation must be
+abated`, and where the publication date was carried by the row's section
+context rather than the date field itself. Added context from
+`source_record_label`, `source_record_section`, and `source_record_row_context`,
+plus small morphology normalization for public-document date roles.
+
+Post-refinement spot replay:
+
+```text
+osha_incident_ugly_003 q008: exact, 27 days
+osha_incident_ugly_003 q009: exact, 9 days
+sec_material_event_ugly_004 q007: exact, 23 days
+```
+
+Guard finding:
+
+The guard replay exposed a real overreach risk on
+`fda_warning_ugly_003 q024`: low-score context matching produced weak zero-day
+or wrong-date support. The support surface now:
+
+```text
+filters zero-day rows unless the question asks for same-date/same-day pressure
+requires context-match score >= 4 for inferred context-duration rows
+```
+
+After the threshold, `fda_warning_ugly_003 q024` receives no weak elapsed-date
+support; the row remains a compile/query issue rather than being hidden by a
+bad support surface.
+
+Read:
+
+This is a transfer-shaped mechanism, not a fixture polish. It recovers elapsed
+duration rows across FDA, OSHA, SEC, and NTSB shapes, and the guard showed why
+the threshold matters. The unresolved duration misses are mostly cases where
+the needed date is not strongly enough represented as an admitted date
+coordinate, or where the QA planner fails before query support can help.

@@ -29,6 +29,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_contact_signatory_companion,
     _source_record_compile_surface_hint_queries,
     _source_record_date_pair_duration_companion,
+    _source_record_elapsed_date_duration_companion,
     _source_record_date_range_duration_companion,
     _source_record_field_state_companion,
     _source_record_same_day_event_time_companion,
@@ -2131,6 +2132,111 @@ def test_source_record_date_pair_duration_companion_computes_same_row_dates() ->
     assert row["EndField"] == "abatement_due_date"
     assert row["ElapsedDays"] == "13"
     assert row["Duration"] == "13 days"
+
+
+def test_source_record_elapsed_date_duration_companion_uses_explicit_dates_from_source_records() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0010, case_closed_07_16_2025).",
+        "source_record_text_atom(src_line_0020, trench_collapse_incident_november_18_2025).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance=(
+            "How many calendar days elapsed between the Case Closed date "
+            "(07/16/2025) and the November 18, 2025 trench-collapse incident?"
+        ),
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SupportKind"] == "source_record_explicit_date_duration"
+    assert row["StartDate"] == "2025_07_16"
+    assert row["EndDate"] == "2025_11_18"
+    assert row["ElapsedDays"] == "125"
+
+
+def test_source_record_elapsed_date_duration_companion_matches_question_roles_to_fields() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0030, inspection_opening_date, v_07_09_2024).",
+        "source_record_field(src_line_0030, citation_issuance_date, v_01_07_2025).",
+        "source_record_date_alias(src_line_0030, v_07_09_2024, v_2024_07_09).",
+        "source_record_date_alias(src_line_0030, v_01_07_2025, v_2025_01_07).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance=(
+            "How many calendar days elapsed between the inspection opening date "
+            "and the citation issuance date?"
+        ),
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SupportKind"] == "source_record_context_date_duration"
+    assert row["StartDate"] == "2024_07_09"
+    assert row["EndDate"] == "2025_01_07"
+    assert row["ElapsedDays"] == "182"
+
+
+def test_source_record_elapsed_date_duration_companion_uses_section_context_and_role_stems() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_field(src_line_0008, citation_issuance_date, january_07_2025).",
+        "source_record_date_alias(src_line_0008, january_07_2025, v_2025_01_07).",
+        "source_record_section(src_line_0007, agency_news_release).",
+        "source_record_text_atom(src_line_0007, date_january_16_2025).",
+        "source_record_row_context(src_line_0165, date_by_which_violation_must_be_abated, date_by_which_violation_must_be_abated_february_03_2025, citation_1_item_1).",
+        "source_record_field(src_line_0165, date_by_which_violation_must_be_abated, february_03_2025).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    release = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance=(
+            "How many calendar days elapsed between the citation issuance date "
+            "and the agency news release publication date?"
+        ),
+    )
+    assert release is not None
+    release_rows = release["result"]["rows"]
+    assert any(row["EndDate"] == "2025_01_16" for row in release_rows)
+
+    abatement = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance=(
+            "How many calendar days elapsed between the citation issuance date "
+            "and the abatement deadline for Citation 1 Item 1?"
+        ),
+    )
+    assert abatement is not None
+    abatement_rows = abatement["result"]["rows"]
+    assert any(row["EndDate"] == "2025_02_03" for row in abatement_rows)
+
+
+def test_source_record_elapsed_date_duration_companion_uses_admitted_date_predicates() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "inspection_period(warning_letter_1, 2024_09_16, 2024_09_20).",
+        "letter_date(warning_letter_1, 2025_03_10).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance="How many calendar days elapsed between the end of the inspection and the date of the warning letter?",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["StartDate"] == "2024_09_20"
+    assert rows[0]["EndDate"] == "2025_03_10"
+    assert rows[0]["ElapsedDays"] == "171"
 
 
 def test_source_record_date_range_duration_companion_computes_closing_extension() -> None:

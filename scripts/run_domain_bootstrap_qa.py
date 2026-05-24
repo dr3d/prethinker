@@ -15191,6 +15191,7 @@ def _source_record_messy_summary_companions(
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
         _source_record_identifier_set_companion(runtime, utterance=utterance),
         _source_record_citation_list_companion(runtime, utterance=utterance),
+        _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
@@ -15207,6 +15208,393 @@ def _source_record_messy_summary_companions(
     ):
         if companion:
             out.append(companion)
+    return out
+
+
+_DATE_DURATION_STOP_TOKENS = {
+    "a",
+    "an",
+    "and",
+    "answer",
+    "arithmetic",
+    "between",
+    "calendar",
+    "date",
+    "dates",
+    "day",
+    "days",
+    "elapsed",
+    "from",
+    "how",
+    "in",
+    "is",
+    "many",
+    "of",
+    "on",
+    "show",
+    "the",
+    "to",
+    "what",
+    "which",
+}
+
+
+def _source_record_elapsed_date_duration_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:elapsed|how many days|duration|between)\b", text):
+        return None
+    if not re.search(r"\b(?:date|day|days|deadline|issuance|issued|opened|closed|published|report)\b", text):
+        return None
+
+    spans = _date_duration_question_spans(utterance)
+    candidates = _source_record_date_duration_candidates(runtime)
+    if len(candidates) < 2:
+        return None
+
+    utterance_dates = _date_atoms_from_free_text(utterance)
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+
+    def add_row(
+        *,
+        start: dict[str, str],
+        end: dict[str, str],
+        start_role: str,
+        end_role: str,
+        score: int,
+        support_kind: str,
+    ) -> None:
+        elapsed_days = _elapsed_days_between_date_atoms(start["Date"], end["Date"])
+        if elapsed_days is None or elapsed_days < 0:
+            return
+        if elapsed_days == 0 and not re.search(r"\b(?:same date|same day|also)\b", text):
+            return
+        if support_kind == "source_record_context_date_duration" and score < 4:
+            return
+        key = (start["Date"], end["Date"], start.get("SourceRow", ""), end.get("SourceRow", ""))
+        if key in seen:
+            return
+        seen.add(key)
+        support_rows.append(
+            {
+                "SupportKind": support_kind,
+                "StartRole": start_role,
+                "StartRoleDisplay": _display_source_phrase(start_role),
+                "StartDate": start["Date"],
+                "StartDateDisplay": _display_source_date_atom(start["Date"]),
+                "StartSourceRow": start.get("SourceRow", ""),
+                "StartSourceField": start.get("Field", ""),
+                "StartSourceDisplay": start.get("Display", ""),
+                "EndRole": end_role,
+                "EndRoleDisplay": _display_source_phrase(end_role),
+                "EndDate": end["Date"],
+                "EndDateDisplay": _display_source_date_atom(end["Date"]),
+                "EndSourceRow": end.get("SourceRow", ""),
+                "EndSourceField": end.get("Field", ""),
+                "EndSourceDisplay": end.get("Display", ""),
+                "ElapsedDays": str(elapsed_days),
+                "Duration": f"{elapsed_days} day{'s' if elapsed_days != 1 else ''}",
+                "MatchScore": str(score),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+
+    if len(utterance_dates) >= 2:
+        start_date, end_date = utterance_dates[0], utterance_dates[-1]
+        start_matches = [candidate for candidate in candidates if candidate["Date"] == start_date]
+        end_matches = [candidate for candidate in candidates if candidate["Date"] == end_date]
+        if start_matches and end_matches:
+            start = sorted(start_matches, key=lambda row: _source_row_sort_key(row.get("SourceRow", "")))[0]
+            end = sorted(end_matches, key=lambda row: _source_row_sort_key(row.get("SourceRow", "")))[0]
+            add_row(
+                start=start,
+                end=end,
+                start_role="utterance_start_date",
+                end_role="utterance_end_date",
+                score=100,
+                support_kind="source_record_explicit_date_duration",
+            )
+
+    start_span, end_span = spans
+    start_tokens = _date_duration_span_tokens(start_span)
+    end_tokens = _date_duration_span_tokens(end_span)
+    if start_tokens and end_tokens:
+        for start in candidates:
+            start_score = _date_duration_candidate_score(start, start_tokens)
+            if start_score <= 0:
+                continue
+            for end in candidates:
+                if start is end:
+                    continue
+                end_score = _date_duration_candidate_score(end, end_tokens)
+                if end_score <= 0:
+                    continue
+                add_row(
+                    start=start,
+                    end=end,
+                    start_role=_compact_role_from_span(start_span) or "start_date",
+                    end_role=_compact_role_from_span(end_span) or "end_date",
+                    score=start_score + end_score,
+                    support_kind="source_record_context_date_duration",
+                )
+
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            -int(row.get("MatchScore", "0")),
+            int(row.get("ElapsedDays", "0")),
+            _source_row_sort_key(row.get("StartSourceRow", "")),
+            _source_row_sort_key(row.get("EndSourceRow", "")),
+        )
+    )
+    return {
+        "query": "source_record_elapsed_date_duration_support(StartDate, EndDate, ElapsedDays, Duration).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_elapsed_date_duration_support",
+            "prolog_query": "source_record_elapsed_date_duration_support(StartDate, EndDate, ElapsedDays, Duration).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only elapsed-date support matched question date roles to admitted "
+                    "source-record or direct date facts and computed calendar-day differences; no durable "
+                    "duration fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, DateValue).",
+            "source_record_field_item(SourceRow, Field, DateValue).",
+            "source_record_date_alias(SourceRow, DateValue, CanonicalDate).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "direct admitted predicates with date-valued arguments",
+        ],
+    }
+
+
+def _date_duration_question_spans(utterance: str) -> tuple[str, str]:
+    text = str(utterance or "").strip()
+    match = re.search(
+        r"\bbetween\b(?P<start>.+?)\band\b(?P<end>.+?)(?:[?.]|$)",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if match:
+        return match.group("start"), match.group("end")
+    match = re.search(
+        r"\bfrom\b(?P<start>.+?)\bto\b(?P<end>.+?)(?:[?.]|$)",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if match:
+        return match.group("start"), match.group("end")
+    return "", ""
+
+
+def _date_duration_span_tokens(value: str) -> set[str]:
+    return {
+        normalized
+        for token in _query_atom_tokens(value)
+        for normalized in [_date_duration_normalize_token(token)]
+        if normalized
+        if token not in _DATE_DURATION_STOP_TOKENS
+        and token not in _SOURCE_MONTHS
+        and not re.fullmatch(r"\d{1,4}", token)
+    }
+
+
+def _compact_role_from_span(value: str) -> str:
+    tokens = [token for token in _date_duration_span_tokens(value) if len(token) > 1]
+    return "_".join(tokens[:8])
+
+
+def _source_record_date_duration_candidates(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    date_aliases = _source_record_date_aliases(runtime)
+    context_by_row: dict[str, list[str]] = {}
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        context_by_row.setdefault(source_row, []).append(text_atom)
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        if predicate not in {"source_record_label", "source_record_section", "source_record_row_context"}:
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 2:
+            continue
+        context_by_row.setdefault(args[0], []).extend(args[1:])
+    text_by_row = {source_row: " ".join(parts) for source_row, parts in context_by_row.items()}
+    candidates: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def add(*, source_row: str, date_value: str, field: str = "", text_atom: str = "") -> None:
+        date = str(date_value or "").strip().removeprefix("v_")
+        if _date_atom_sort_key(date) is None:
+            return
+        context_atom = text_atom or text_by_row.get(source_row, "")
+        context = " ".join(item for item in [field, context_atom] if item)
+        key = (source_row, field, date)
+        if key in seen:
+            return
+        seen.add(key)
+        display_parts = []
+        if field:
+            display_parts.append(_display_source_phrase(field))
+        display_parts.append(_display_source_date_atom(date))
+        candidates.append(
+            {
+                "SourceRow": source_row,
+                "Field": field,
+                "Date": date,
+                "TextAtom": context_atom,
+                "Context": context,
+                "Display": " / ".join(part for part in display_parts if part),
+            }
+        )
+
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate in {"source_record_field", "source_record_field_item"} and len(args) >= 3:
+            source_row, field, value = args[:3]
+            canonical = date_aliases.get((source_row, value)) or _canonical_date_from_source_atom(value)
+            if canonical:
+                add(source_row=source_row, field=field, date_value=canonical)
+        elif predicate == "source_record_date_alias" and len(args) >= 3:
+            add(source_row=args[0], field="source_record_date_alias", date_value=args[2])
+        elif not predicate.startswith("source_record_"):
+            for index, value in enumerate(args):
+                canonical = _canonical_admitted_date_atom(value)
+                if not canonical:
+                    continue
+                field = _admitted_date_argument_role(predicate, index)
+                context = " ".join([predicate, field, *args])
+                key = (f"admitted:{predicate}:{index}", field, canonical)
+                if key in seen:
+                    continue
+                seen.add(key)
+                candidates.append(
+                    {
+                        "SourceRow": "",
+                        "Field": field,
+                        "Date": canonical,
+                        "TextAtom": "",
+                        "Context": context,
+                        "Display": f"{_display_source_phrase(field)} / {_display_source_date_atom(canonical)}",
+                    }
+                )
+
+    for source_row, text_atom in text_by_row.items():
+        for date_value in _date_atoms_from_free_text(text_atom):
+            add(source_row=source_row, date_value=date_value, text_atom=text_atom)
+    return candidates
+
+
+def _canonical_admitted_date_atom(value: str) -> str:
+    text = str(value or "").strip().removeprefix("v_")
+    return text if _date_atom_sort_key(text) is not None else ""
+
+
+def _admitted_date_argument_role(predicate: str, index: int) -> str:
+    name = str(predicate or "").strip()
+    if name == "inspection_period":
+        if index == 1:
+            return "inspection_period_start_date"
+        if index == 2:
+            return "inspection_period_end_date"
+    if name in {"letter_date", "document_date", "filing_date"}:
+        return name
+    if name.endswith("_date"):
+        return name
+    if name.endswith("_event"):
+        return f"{name}_date"
+    return f"{name}_date_arg_{index}"
+
+
+def _date_duration_candidate_score(candidate: dict[str, str], span_tokens: set[str]) -> int:
+    if not span_tokens:
+        return 0
+    context_tokens = _date_duration_relevance_tokens(candidate.get("Context", ""))
+    field_tokens = _date_duration_relevance_tokens(candidate.get("Field", ""))
+    overlap = span_tokens & context_tokens
+    field_overlap = span_tokens & field_tokens
+    return len(overlap) + len(field_overlap)
+
+
+def _date_duration_relevance_tokens(value: str) -> set[str]:
+    out: set[str] = set()
+    for token in _query_atom_tokens(value):
+        if token in _DATE_DURATION_STOP_TOKENS or token in _SOURCE_MONTHS or re.fullmatch(r"\d{1,4}", token):
+            continue
+        normalized = _date_duration_normalize_token(token)
+        if normalized:
+            out.add(normalized)
+    return out
+
+
+def _date_duration_normalize_token(token: str) -> str:
+    text = str(token or "").strip().casefold()
+    if not text:
+        return ""
+    if text in {"abate", "abated", "abatement", "abating"}:
+        return "abat"
+    if text in {"close", "closed", "closing", "closure"}:
+        return "clos"
+    if text in {"issue", "issued", "issuance", "issuing"}:
+        return "issu"
+    if text in {"publish", "published", "publication", "public"}:
+        return "publish"
+    if text in {"release", "released"}:
+        return "release"
+    if text in {"inspect", "inspected", "inspection"}:
+        return "inspect"
+    if text in {"respond", "response", "reviewed", "review"}:
+        return text.removesuffix("ed")
+    return text
+
+
+def _date_atoms_from_free_text(value: str) -> list[str]:
+    text = str(value or "").casefold()
+    matches: list[tuple[int, str]] = []
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    patterns = [
+        re.compile(
+            rf"(?:^|[^a-z0-9])(?P<month>{month_pattern})[\s_]+(?P<day>\d{{1,2}})(?:st|nd|rd|th)?(?:,)?[\s_]+(?P<year>(?:19|20)\d{{2}})(?:[^a-z0-9]|$)"
+        ),
+        re.compile(
+            r"(?:^|[^a-z0-9])(?P<month>\d{1,2})[/_-](?P<day>\d{1,2})[/_-](?P<year>(?:19|20)?\d{2})(?:[^a-z0-9]|$)"
+        ),
+        re.compile(r"(?:^|_)(?:v_)?(?P<year>(?:19|20)\d{2})_(?P<month>\d{2})_(?P<day>\d{2})(?:_|$)"),
+    ]
+    for pattern in patterns:
+        for match in pattern.finditer(text):
+            if "year" not in match.groupdict():
+                continue
+            year = int(match.group("year"))
+            if year < 100:
+                year += 2000 if year < 70 else 1900
+            month_text = match.group("month")
+            month = _SOURCE_MONTHS.get(month_text, month_text)
+            day = match.group("day")
+            if not str(month).isdigit() or not str(day).isdigit():
+                continue
+            date_atom = f"{year:04d}_{int(month):02d}_{int(day):02d}"
+            if _date_atom_sort_key(date_atom) is None:
+                continue
+            matches.append((match.start(), date_atom))
+    out: list[str] = []
+    for _, date_atom in sorted(matches, key=lambda item: item[0]):
+        if date_atom in out:
+            continue
+        out.append(date_atom)
     return out
 
 
@@ -22028,6 +22416,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_identifier_set_support",
             "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
+            "source_record_elapsed_date_duration_support",
             "source_record_date_range_duration_support",
             "source_record_same_day_event_time_support",
             "source_record_field_state_support",
@@ -22073,7 +22462,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only helper rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
