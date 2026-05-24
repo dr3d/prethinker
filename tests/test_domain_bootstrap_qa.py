@@ -28,6 +28,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_contact_signatory_companion,
     _source_record_compile_surface_hint_queries,
     _source_record_date_pair_duration_companion,
+    _source_record_date_range_duration_companion,
     _source_record_field_state_companion,
     _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
@@ -2043,6 +2044,30 @@ def test_source_record_date_pair_duration_companion_computes_same_row_dates() ->
     assert row["EndField"] == "abatement_due_date"
     assert row["ElapsedDays"] == "13"
     assert row["Duration"] == "13 days"
+
+
+def test_source_record_date_range_duration_companion_computes_closing_extension() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0049, "
+        "the_first_amendment_extends_the_closing_date_under_the_agreement_from_april_15_2026_"
+        "to_may_22_2026_the_total_purchase_price_of_11_168_864_remains_unchanged)."
+    ).get("status") == "success"
+
+    companion = _source_record_date_range_duration_companion(
+        runtime,
+        utterance="By how many days does the First Amendment extend the closing date?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["RangeKind"] == "closing_date_extension"
+    assert row["StartRole"] == "original_closing_date"
+    assert row["StartDate"] == "2026_04_15"
+    assert row["EndRole"] == "new_closing_date"
+    assert row["EndDate"] == "2026_05_22"
+    assert row["ElapsedDays"] == "37"
+    assert row["Duration"] == "37 days"
 
 
 def test_source_record_field_state_companion_surfaces_blank_column_values() -> None:

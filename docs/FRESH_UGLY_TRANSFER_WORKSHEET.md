@@ -621,3 +621,56 @@ Discipline note:
 This is mechanism evidence only. It repairs two FDA contact/signatory rows on
 targeted replay, but the corpus score remains `189 / 4 / 7` until the next full
 fresh-ugly rerun.
+
+## 2026-05-24 Date-Range Extension Mechanism Probe
+
+Mechanism:
+
+- Added `source_record_date_range_duration_support`, a query-only companion
+  that extracts explicit `from <full date> to <full date>` ranges from admitted
+  `source_record_text_atom` rows and computes elapsed calendar days.
+- For source rows whose text says a closing date was extended, the companion
+  labels the endpoints as `original_closing_date` and `new_closing_date`.
+- It writes no durable `closing_date/2` or `elapsed_days/3` facts; it only
+  exposes answer-bearing support from the source-record row.
+
+Validation:
+
+```text
+tests/test_source_surface_gap_audit.py
+tests/test_domain_bootstrap_qa.py
+
+283 passed
+```
+
+Targeted replay:
+
+Artifact archive:
+
+`C:\prethinker_tmp_archive\fresh_ugly_date_range_extension_probe_20260524`
+
+```text
+fixtures/rows:
+  sec_material_event_ugly_001 q008
+  sec_material_event_ugly_001 q009
+  sec_material_event_ugly_001 q020
+exact / partial / miss: 3 / 0 / 0
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Recovered surfaces:
+
+- `sec_material_event_ugly_001 q008`: original closing date `2026-04-15`
+  and new closing date `2026-05-22`.
+- `sec_material_event_ugly_001 q009`: the two closing-date endpoints are now
+  available as structured support for the full chronology.
+- `sec_material_event_ugly_001 q020`: `37 days` from `2026-04-15` to
+  `2026-05-22`.
+
+Discipline note:
+
+This is mechanism evidence only. It repairs the SEC closing-date extension
+cluster on targeted replay, but the corpus score remains `189 / 4 / 7` until
+the next full fresh-ugly rerun.
