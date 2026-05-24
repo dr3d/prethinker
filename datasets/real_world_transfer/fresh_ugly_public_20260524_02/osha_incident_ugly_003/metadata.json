@@ -1,0 +1,25 @@
+{
+  "fixture_id": "osha_incident_ugly_003",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "osha.gov",
+  "document_title": "Citation and Notification of Penalty — Southeast Services of the Treasure Coast, Inc.",
+  "document_identifier": "Inspection 1760606 / News Release 24-2619-ATL",
+  "case_number": "1760606",
+  "document_date": "2025-01-07",
+  "news_release_date": "2025-01-16",
+  "incident_date": "2024-07-08",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.dol.gov/sites/dolgov/files/OPA/newsreleases/2025/OSHA20242619.pdf",
+  "news_release_url": "https://www.dol.gov/newsroom/releases/osha/osha20250116",
+  "source_type": "official_public_document",
+  "document_format_original": "PDF (Citation and Notification of Penalty) + HTML (News release)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "Combined source comprising (a) the US Department of Labor / OSHA news release dated January 16, 2025 (release no. 24-2619-ATL) and (b) the underlying OSHA Citation and Notification of Penalty issued January 7, 2025, for Inspection Number 1760606 against Southeast Services of the Treasure Coast, Inc. (Vero Beach, FL) for the July 8, 2024 fatal pneumatic pipe-plug explosion at the SW Becker Road/SW Village Parkway worksite in Port Saint Lucie, Florida. Citation 1 Item 1 is a Serious violation under Section 5(a)(1) of the OSH Act, with a $16,131.00 proposed penalty and a February 3, 2025 abatement deadline. The Citation packet includes the cover letter, Citation header pages, Notice to Employees of Informal Conference, Certification of Corrective Action Worksheet, Citation 1 Item 1 narrative with six enumerated corrective methods, and the Debt Collection / Invoice section. The news release and citation contain a date discrepancy (news release: June 2024 / June 8, 2024; citation: July 8, 2024) that the fixture explicitly probes. Suitable for OSHA-style chronology, identifier-recurrence, and inconsistency-detection QA pressure."
+}

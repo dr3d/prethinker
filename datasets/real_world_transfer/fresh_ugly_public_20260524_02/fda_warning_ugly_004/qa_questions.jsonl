@@ -1,0 +1,25 @@
+{"id": "q001", "category": "metadata_identifier", "question": "To whom is the warning letter's greeting addressed? Name both addressees as they appear in the salutation."}
+{"id": "q002", "category": "metadata_identifier", "question": "What is the street address of the inspected facility?"}
+{"id": "q003", "category": "metadata_identifier", "question": "What is the FEI number?"}
+{"id": "q004", "category": "metadata_identifier", "question": "According to the metadata block at the top of the letter, what is the issuing office?"}
+{"id": "q005", "category": "metadata_identifier", "question": "To whom must the firm direct its electronic reply (ATTN name), and at what email address?"}
+{"id": "q006", "category": "date_chronology", "question": "On what dates did FDA conduct the inspection?"}
+{"id": "q007", "category": "date_chronology", "question": "What is the date of the firm's Form FDA 483 response that FDA reviewed in detail?"}
+{"id": "q008", "category": "date_chronology", "question": "What is the date of the warning letter itself?"}
+{"id": "q009", "category": "date_chronology", "question": "The letter references a previous warning letter pertaining to Kingston Pharma, LLC at the same facility. What is the date of that previous warning letter, and what CMS number is given for it?"}
+{"id": "q010", "category": "date_chronology", "question": "The letter says the firm was notified of persistent CGMP violations during two subsequent regulatory meetings. On what dates were those meetings held?"}
+{"id": "q011", "category": "table_list_citation", "question": "List, in source order, the three primary CFR citations associated with the three numbered violations in this letter."}
+{"id": "q012", "category": "table_list_citation", "question": "Under violation 1, after the main 211.22(d) citation, the letter lists two additional CFR-citation bullets describing what the QU also failed to ensure. List both CFR citations in source order, with a short description of each."}
+{"id": "q013", "category": "table_list_citation", "question": "The \"Change of Ownership at Facility\" section lists three subsequent inspections that demonstrated repeated failures. List those three inspection periods in source order."}
+{"id": "q014", "category": "table_list_citation", "question": "Under violation 1, the letter names a specific SOP that the QU failed to follow. What is the SOP number, the revision, and the title?"}
+{"id": "q015", "category": "table_list_citation", "question": "Under violation 2, the letter names specific high-risk components used in the firm's OTC oral drug products that were used before identity testing. What components does the letter name?"}
+{"id": "q016", "category": "source_state_response_status", "question": "How does FDA characterize the firm's response with respect to violation 1, and why?"}
+{"id": "q017", "category": "source_state_response_status", "question": "Under violation 2, the firm made a specific assertion about U.S. Code and CFR provisions. What did the firm assert, and how did FDA respond to that assertion?"}
+{"id": "q018", "category": "source_state_response_status", "question": "How does FDA characterize the firm's response with respect to violation 3, and why?"}
+{"id": "q019", "category": "source_state_response_status", "question": "Under violation 1, the firm's response makes a specific numerical claim about how many batches left the facility without passing microbial results. What did the firm say?"}
+{"id": "q020", "category": "source_state_response_status", "question": "The letter recommends the firm engage a CGMP consultant. What CFR section is cited as setting forth the qualifications for that consultant, and what specific type of audit should the consultant perform?"}
+{"id": "q021", "category": "hard_join_comparison", "question": "How many calendar days elapsed between the end of the FDA inspection and the date of the firm's Form FDA 483 response that FDA reviewed?"}
+{"id": "q022", "category": "hard_join_comparison", "question": "How many calendar days elapsed between the date of the firm's Form FDA 483 response and the date of the warning letter?"}
+{"id": "q023", "category": "hard_join_comparison", "question": "How many calendar days elapsed between the end of the FDA inspection and the date of the warning letter?"}
+{"id": "q024", "category": "hard_join_comparison", "question": "According to violation 1, over what time period did the QU release numerous batches of drug products for distribution prior to reviewing all test results to ensure they met specifications?"}
+{"id": "q025", "category": "hard_join_comparison", "question": "From the date of the previous warning letter to Kingston Pharma, LLC (May 14, 2019) to the date of this warning letter (December 1, 2025), approximately how many years, months, and days elapsed, and what does the letter say about the manufacturing facility and responsible officials across that ownership change?"}

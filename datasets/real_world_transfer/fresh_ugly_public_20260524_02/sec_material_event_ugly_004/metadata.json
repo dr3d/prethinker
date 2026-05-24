@@ -1,0 +1,31 @@
+{
+  "fixture_id": "sec_material_event_ugly_004",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "sec.gov (EDGAR)",
+  "document_title": "Blackstone Inc. — Form 8-K/A (Amendment No. 1) — Item 2.02 corrective amendment to Original 8-K filed October 23, 2025",
+  "document_identifier": "EDGAR Accession 0001193125-25-248907 / d51239d8ka.htm",
+  "registrant_name": "Blackstone Inc.",
+  "registrant_cik": "1393818",
+  "trading_symbol": "BX",
+  "commission_file_number": "001-33551",
+  "irs_ein": "20-8875684",
+  "document_date": "2025-10-23",
+  "signature_date": "2025-10-23",
+  "original_8k_filing_date": "2025-10-23",
+  "quarter_end": "2025-09-30",
+  "form_type": "8-K/A",
+  "amendment_number": 1,
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1393818/000119312525248907/d51239d8ka.htm",
+  "source_type": "official_public_document",
+  "document_format_original": "HTML (EDGAR Form 8-K/A)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "Source is Blackstone Inc.'s Form 8-K/A (Amendment No. 1) corrective amendment to its Original 8-K filed on October 23, 2025 reporting third-quarter results for the fiscal quarter ended September 30, 2025. The Amendment is dated and signed October 23, 2025 (same calendar date as the Original 8-K's Date of Report) and is filed solely to correct a 'financial printer edgarization error' in the EDGAR Copy of Exhibit 99.1 (the earnings presentation), in which the Net Realizations of the Private Equity segment for Q3 2025 was shown on page 11 as $280.1 million rather than the actual $380.1 million (a leading-digit error producing a $100 million understatement). The actual Earnings Presentation as posted on October 23, 2025 in the 'Overview' and 'Events' sections of the Shareholders page on Blackstone's website contains the correct $380.1 million figure. The Amendment is signed by Chief Financial Officer Michael S. Chae and explicitly disclaims any other changes to the Original 8-K. The fixture pressures (i) form-type and amendment-number identifier recognition (8-K/A, Amendment No. 1); (ii) recurrence of October 23, 2025 across six distinct event-anchors; (iii) the EDGAR Copy vs Earnings Presentation copy-authority distinction; (iv) the $280.1M vs $380.1M discrepancy with explicit attribution to page 11 and the Private Equity segment Net Realizations line for Q3 2025; (v) the 'furnished but not filed' Exchange Act classification; (vi) negative-finding probes confirming no other changes between original and amendment; (vii) CFO-as-signatory (in contrast to GC-as-signatory common in Item 5.02-driven 8-Ks)."
+}

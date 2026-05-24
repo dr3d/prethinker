@@ -1,0 +1,23 @@
+{
+  "fixture_id": "ntsb_marine_ugly_002",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "ntsb.gov",
+  "document_title": "Capsizing and Sinking of Towing Vessel Baylor J. Tregre",
+  "document_identifier": "MIR-25-21",
+  "case_number": "DCA24FM038",
+  "document_date": "2025-05-15",
+  "accident_date": "2024-05-13",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/MIR2521.pdf",
+  "source_type": "official_public_document",
+  "document_format_original": "PDF (Marine Investigation Report)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "NTSB Marine Investigation Report MIR-25-21, published May 15, 2025, on the May 13, 2024 capsizing and sinking of the US towing vessel Baylor J. Tregre about 23 nautical miles south of Galveston, Texas, while towing the ocean barge MARMAC 27. Source preserves the full report body: opening narrative, Casualty Summary table, Vessel Particulars table, factual-information sections (1.1 Background, 1.2 Event Sequence, 1.3 Additional Information with damage / inspections / environmental subsections including weather forecasts), Analysis (section 2), Conclusions (section 3.1 Probable Cause only — note the report has no separately labeled contributing factor section), footnotes 1–8, and figure captions. AIS clock times preserved to seconds where given. Suitable for join, chronology, and absence-style QA pressure."
+}

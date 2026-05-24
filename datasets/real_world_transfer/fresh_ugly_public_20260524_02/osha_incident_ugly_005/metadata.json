@@ -1,0 +1,28 @@
+{
+  "fixture_id": "osha_incident_ugly_005",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "osha.gov / dol.gov",
+  "document_title": "News Release 26-574-NAT (Revoli Construction / Yarmouth cave-in) + Prior OSHA Inspection 1794687.015",
+  "document_identifier": "News Release 26-574-NAT / Inspection 1794687.015",
+  "case_numbers": ["1794687.015"],
+  "report_id": "0111400",
+  "document_date": "2026-04-01",
+  "news_release_date": "2026-04-01",
+  "prior_inspection_opened": "2024-12-20",
+  "prior_inspection_closed": "2025-07-16",
+  "incident_date": "2025-11-18",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.dol.gov/newsroom/releases/osha/osha20260401",
+  "secondary_source_url": "https://www.osha.gov/ords/imis/establishment.inspection_detail?id=1794687.015",
+  "source_type": "official_public_document",
+  "document_format_original": "HTML (DOL news release) + HTML (OSHA inspection-detail page)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "Combined source comprising (a) the DOL/OSHA national news release dated April 1, 2026 (release no. 26-574-NAT, BOSTON dateline) announcing $4,699,362 in proposed penalties against Revoli Construction Co. Inc. for the November 18, 2025 fatal trench-collapse cave-in at a Yarmouth, Massachusetts worksite (7 willful + 33 repeat + 17 serious = 57 violations), and (b) the prior OSHA inspection-detail record for Inspection 1794687.015 (Report ID 0111400, Boston South Area Office), a Referral-type inspection opened 12/20/2024 at 174 South Shore Drive, South Yarmouth, MA 02664, that settled formally and closed on 07/16/2025 with two of three citations deleted. The combination probes (i) calendar arithmetic across multi-year timelines including a 125-day gap between the prior inspection closing and the fatal incident, (ii) headline-vs-body violation-count reconciliation (40 vs 57), (iii) $4.6M sub-headline rounding vs $4,699,362 body figure, (iv) post-settlement column accounting in the OSHA Violation Summary (Initial 2 → Current 1, Initial $13,240 → Current $6,950), (v) implicit cross-document link between the two Yarmouth worksites (both at the same company, same general locale, both water/sewer line construction). Fixture also probes the rarely-seen 'F - Formal Settlement' Latest Event code, the 'Citation has been deleted.' note convention, and the three-media-contact news release format with two distinct phone numbers."
+}

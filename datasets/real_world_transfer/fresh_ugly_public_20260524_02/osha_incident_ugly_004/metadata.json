@@ -1,0 +1,26 @@
+{
+  "fixture_id": "osha_incident_ugly_004",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "osha.gov / dol.gov",
+  "document_title": "Inspection 1826893.015 — Taylor Farms New Jersey, Inc. (with companion DOL/OSHA news release 25-1520-NAT)",
+  "document_identifier": "Inspection 1826893.015 / News Release 25-1520-NAT",
+  "case_number": "1826893.015",
+  "report_id": "0213900",
+  "document_date": "2025-11-21",
+  "news_release_date": "2025-11-24",
+  "inspection_opened": "2025-05-27",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.osha.gov/ords/imis/establishment.inspection_detail?id=1826893.015",
+  "news_release_url": "https://www.dol.gov/newsroom/releases/osha/osha20251124",
+  "source_type": "official_public_document",
+  "document_format_original": "HTML (OSHA inspection-detail page) + HTML (DOL news release)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "Combined source comprising (a) the US Department of Labor / OSHA national news release dated November 24, 2025 (release no. 25-1520-NAT) announcing more than $1M in proposed penalties against Taylor Farms New Jersey, Inc. and (b) the official OSHA inspection-detail page for Inspection 1826893.015 (Report ID 0213900) from the Marlton, NJ Area Office, covering an inspection opened May 27, 2025 after an employee fatality during machine sanitation at 406 Heron Drive, Swedesboro, NJ 08085. The OSHA inspection table records 9 distinct violations across 16 grouped sub-items (2 Serious, 6 Willful, 1 Repeat) all citing variants of 29 CFR 1910.147 (Control of Hazardous Energy / lockout-tagout); the news release reports the count as \"16 safety violations.\" Total proposed penalties: $1,125,484 against Taylor Farms; $33,100 against PL Solutions Group LLC (operating as People Logistics), the on-site temporary employment agency. All 16 items were contested by Taylor Farms on 12/08/2025. Source preserves both the news-release narrative and the structured OSHA inspection-detail page (header, related-activity table, Violation Summary table, Violation Items table). Fixture is especially suited to violation-counting reconciliation, grouped-subpart probes, repeated-numeric-value joins, and inspection-vs-news-release cross-document QA."
+}

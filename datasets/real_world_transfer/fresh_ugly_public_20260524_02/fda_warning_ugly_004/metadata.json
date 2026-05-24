@@ -1,0 +1,12 @@
+{
+  "fixture_id": "fda_warning_ugly_004",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "FDA",
+  "document_title": "Seaway Pharma Inc. MARCS-CMS 717355 — December 01, 2025",
+  "document_date": "2025-12-01",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/seaway-pharma-inc-717355-12012025",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "A US-facility CGMP warning letter pressuring three numbered violations with five distinct CFR citations across them (three primary plus two sub-citations under violation 1), an SOP identifier with revision, a multi-year facility history that spans a change of ownership from Kingston Pharma LLC, three prior inspection periods, two regulatory meeting dates, an embedded prior warning letter date and CMS number, three separate response-adequacy findings each with a different reason, a (b)(4) redacted product, and a salutation that names a person not in the recipient block. Useful for testing nested headings, multi-citation lists, multi-decade chronology, response-status differentiation, and contractor-context qualifications."
+}

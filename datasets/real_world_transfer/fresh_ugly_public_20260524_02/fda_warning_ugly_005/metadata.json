@@ -1,0 +1,12 @@
+{
+  "fixture_id": "fda_warning_ugly_005",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "FDA",
+  "document_title": "Warning Letter to Medical Products Laboratories, Inc., MARCS-CMS 721916",
+  "document_date": "2026-04-09",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "FDA CGMP warning letter to a U.S. contract manufacturer in Philadelphia, citing four numbered CGMP violations (with three italicized sub-sections under Violation 3) plus a separate Unapproved New Drug Violations section enumerating 13 products. Pressures ordered CFR citation lists, nested sub-headings, two distinct stability findings in different parts of the letter, multiple-signatory blocks (Francis Godwin and Tina Smith), redacted (b)(4) lot tables, response-adequacy distinctions per violation, GDUFA III footnote, and a multi-leg inspection-to-response-to-letter chronology."
+}

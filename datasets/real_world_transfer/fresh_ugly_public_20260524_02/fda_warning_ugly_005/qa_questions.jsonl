@@ -1,0 +1,25 @@
+{"id": "q001", "category": "metadata_identifier", "question": "To whom is the warning letter addressed (full name and title)?"}
+{"id": "q002", "category": "metadata_identifier", "question": "What is the full street address of the inspected facility, including state and ZIP code?"}
+{"id": "q003", "category": "metadata_identifier", "question": "What is the FEI number of the inspected facility?"}
+{"id": "q004", "category": "metadata_identifier", "question": "What email address must the firm send its electronic reply to, and what is the ATTN line and FEI number the reply must be identified with?"}
+{"id": "q005", "category": "metadata_identifier", "question": "List the two signatories of this warning letter, including each signatory's full title and organizational unit as printed in the signature block, in the order they appear."}
+{"id": "q006", "category": "date_chronology", "question": "What were the inspection dates (start and end)?"}
+{"id": "q007", "category": "date_chronology", "question": "On what date did the firm submit its response to the Form FDA 483?"}
+{"id": "q008", "category": "date_chronology", "question": "What is the date the warning letter was issued?"}
+{"id": "q009", "category": "date_chronology", "question": "Within how many working days must the firm respond to this warning letter?"}
+{"id": "q010", "category": "date_chronology", "question": "What is the \"Content current as of\" date shown at the bottom of the letter?"}
+{"id": "q011", "category": "table_list_citation", "question": "List, in the order they appear in the letter, the four 21 CFR citations associated with the four numbered CGMP violations."}
+{"id": "q012", "category": "table_list_citation", "question": "How many distinct unapproved new drug products are listed in the introductory paragraph that introduces the section 301(d) / 505(a) violations? You do not need to name them, just provide the count."}
+{"id": "q013", "category": "table_list_citation", "question": "Under Violation 1, the letter lists three finished drug product lots with TAMC and TYMC results. Reproduce the three lots' TAMC and TYMC pattern as the letter presents them (you may use (b)(4) for redacted values)."}
+{"id": "q014", "category": "table_list_citation", "question": "Under Violation 3, three italicized sub-headings introduce categories of investigation failure. List those three sub-headings in the order they appear."}
+{"id": "q015", "category": "table_list_citation", "question": "The \"Unapproved New Drug Violations\" section cites which two FD&C Act sections and which two corresponding 21 U.S.C. sections as violated?"}
+{"id": "q016", "category": "source_state_response_status", "question": "Was the firm's response to Violation 1 (objectionable microorganisms / 21 CFR 211.113(a)) found adequate, and what is the principal reason the letter gives for its finding?"}
+{"id": "q017", "category": "source_state_response_status", "question": "Was the firm's response to Violation 2 (process validation / 21 CFR 211.100(a)) found adequate, and what is the principal reason the letter gives for its finding?"}
+{"id": "q018", "category": "source_state_response_status", "question": "Was the firm's response to Violation 3 (failure investigations / 21 CFR 211.192) found adequate, and what is the principal reason the letter gives for its finding?"}
+{"id": "q019", "category": "source_state_response_status", "question": "Was the firm's response to Violation 4 (stability program / 21 CFR 211.166(a)) found adequate, and what is the principal reason the letter gives for its finding?"}
+{"id": "q020", "category": "source_state_response_status", "question": "Under \"Consultant Recommended,\" what specific 21 CFR section is cited for consultant qualification, and what additional comprehensive audit does the letter say the consultant should perform?"}
+{"id": "q021", "category": "hard_join_comparison", "question": "How many days elapsed from the end of the inspection to the firm's Form FDA 483 response date?"}
+{"id": "q022", "category": "hard_join_comparison", "question": "How many days elapsed from the firm's Form FDA 483 response date to the warning letter date?"}
+{"id": "q023", "category": "hard_join_comparison", "question": "How many days elapsed from the end of the inspection to the warning letter date?"}
+{"id": "q024", "category": "hard_join_comparison", "question": "What does footnote 1 in the letter describe — specifically, which user fee program, which fiscal years, and what additional meeting opportunity it references?"}
+{"id": "q025", "category": "hard_join_comparison", "question": "Compare the stability-related findings in two different parts of the letter: the Stability Assay sub-section under Violation 3, and Violation 4 itself. State in one or two sentences what failure each part describes, in a way that makes clear they are two distinct stability problems and not the same finding."}

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "fda_warning_ugly_003",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "FDA",
+  "document_title": "International Laboratories Corp MARCS-CMS 698522 — March 10, 2025",
+  "document_date": "2025-03-10",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/international-laboratories-corp-698522-03102025",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "A foreign-facility CGMP warning letter pressuring three CFR-cited violations in nested form, a five-item sub-list of missing CGMP records under violation 3, an FEI number, ATTN/contact email, signatory and title, two pre-letter event dates (704(a)(4) request and Import Alert 66-40 placement), inspection dates, a Form FDA 483 response date with inadequacy findings on each of the three violations, and (b)(4) redaction markers. Useful for testing nested headings, ordered citation lists, response-status distinctions, redacted-detail handling, and multi-leg chronology arithmetic spanning two calendar years."
+}

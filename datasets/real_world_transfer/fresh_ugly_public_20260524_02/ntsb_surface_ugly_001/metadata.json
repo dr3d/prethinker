@@ -1,0 +1,23 @@
+{
+  "fixture_id": "ntsb_surface_ugly_001",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "ntsb.gov",
+  "document_title": "Cargo Tank Combination Vehicle Roadway Departure, Rollover, and Release of Anhydrous Ammonia — Teutopolis, Illinois",
+  "document_identifier": "HIR-25-06",
+  "case_number": "HWY23MH017",
+  "document_date": "2025-09-16",
+  "accident_date": "2023-09-29",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/HIR2506.pdf",
+  "source_type": "official_public_document",
+  "document_format_original": "PDF (Highway Investigation Report)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "NTSB Highway Investigation Report HIR-25-06, published September 16, 2025, on the September 29, 2023 fatal crash near Teutopolis, Effingham County, Illinois, in which a teen-driven Toyota Sienna minivan executed an unsafe passing maneuver in a no passing zone, causing the driver of a Prairieland Transport truck-tractor/cargo-tank combination vehicle carrying anhydrous ammonia (UN1005) to take evasive action that resulted in roadway departure, rollover, cargo tank puncture, and release. Five fatalities, nine serious injuries (including the combination vehicle driver), four minor injuries (including one first responder). Source preserves the full body: Casualty Summary table, sections 1.1–1.6 (Background, Event Sequence with 50-second forward-facing camera footage, Injuries and Exposure, Hazmat Emergency Response, Additional Information including 1.5.1 effects and classification, 1.5.2 vehicle, 1.5.3 carrier, 1.5.4 driver subsections, and 1.6 Postcrash Actions), section 2 Analysis (with 2.1 Risky Behaviors Among Teen Drivers and 2.2 Safety Issue in Transportation of Anhydrous Ammonia), section 3 Conclusions (3.1 Probable Cause and 3.2 Lessons Learned), References, and footnotes 1–41. Suitable for hazmat/HOS, multi-party injury attribution, agricultural-exemption arithmetic, and dual-track domestic/international regulatory classification QA."
+}

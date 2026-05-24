@@ -1,0 +1,29 @@
+{
+  "fixture_id": "sec_material_event_ugly_003",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "sec.gov (EDGAR)",
+  "document_title": "ServiceNow, Inc. — Form 8-K — Item 5.02 employment-agreement amendment (William R. McDermott)",
+  "document_identifier": "EDGAR Accession 0001373715-25-000335 / now-20251223.htm",
+  "registrant_name": "ServiceNow, Inc.",
+  "registrant_cik": "1373715",
+  "trading_symbol": "NOW",
+  "commission_file_number": "001-35580",
+  "irs_ein": "20-2056195",
+  "document_date": "2025-12-23",
+  "signature_date": "2025-12-23",
+  "amendment_effective_date": "2026-01-01",
+  "end_of_service_date": "2030-12-31",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1373715/000137371525000335/now-20251223.htm",
+  "source_type": "official_public_document",
+  "document_format_original": "HTML (EDGAR Form 8-K)",
+  "qa_count": 25,
+  "qa_category_mix": {
+    "metadata_identifier": 5,
+    "date_chronology": 5,
+    "table_list_citation": 5,
+    "source_state_response_status": 5,
+    "hard_join_comparison": 5
+  },
+  "notes": "Source is ServiceNow's Form 8-K filed December 23, 2025 disclosing under Item 5.02 the entry into Amendment No. 3 to the previously filed employment agreement with Chairman and CEO William R. McDermott, plus amendment of the Executive Severance Policy, both effective January 1, 2026. Under the amendment, Mr. McDermott agrees to remain in service through at least December 31, 2030 in one of four titled roles: CEO, co-CEO, Executive Chairman, or Non-Executive Chairman. The Item 5.02 disclosure includes detailed enumerations of severance benefits under two scenarios — Qualifying Termination within three months before or 12 months following a Change in Control (four benefits) vs Qualifying Termination not in connection with a Change in Control (five benefits) — plus retirement, death, and disability provisions. The 8-K is signed by General Counsel Russell S. Elmer on December 23, 2025 (same calendar date as the Date of report). Three exhibits filed: 10.1 (Amendment No. 3), 10.2 (Executive Severance Policy, as amended), and 104 (cover page XBRL). Fixture probes: registrant identifier set (state, CIK, EIN, ticker, par value); date-of-report vs effective-date vs end-of-service-date arithmetic (with explicit attention to the 2028 leap day); enumerated severance benefit lists (4 vs 5 items); CIC vs non-CIC structural comparison; role-specific compensation language with one role (Non-Executive Chairman) intentionally silent; the 'Amendment No. 3' designation implying prior amendments not disclosed in this filing; and signatory-vs-subject distinction (General Counsel vs CEO)."
+}

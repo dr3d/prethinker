@@ -8,12 +8,28 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATASET_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260521"
 PILOT_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260523"
 NTSB_TWO_DOC_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "20260523_ntsb_pilot_2doc"
+FRESH_UGLY_BATCH_02_ROOT = REPO_ROOT / "datasets" / "real_world_transfer" / "fresh_ugly_public_20260524_02"
 
 EXPECTED_FIXTURES = {
     "cpsc_recall_polaris_rzr200_2023",
     "fda_recall_wiers_farm_2024",
     "federal_register_flra_fsip_2024",
     "ntsb_marine_carol_jean_2023",
+}
+
+EXPECTED_FRESH_UGLY_BATCH_02_FIXTURES = {
+    "fda_warning_ugly_003",
+    "fda_warning_ugly_004",
+    "fda_warning_ugly_005",
+    "ntsb_aviation_ugly_002",
+    "ntsb_marine_ugly_002",
+    "ntsb_surface_ugly_001",
+    "osha_incident_ugly_003",
+    "osha_incident_ugly_004",
+    "osha_incident_ugly_005",
+    "sec_material_event_ugly_003",
+    "sec_material_event_ugly_004",
+    "sec_material_event_ugly_005",
 }
 
 
@@ -135,3 +151,48 @@ def test_real_world_transfer_ntsb_two_doc_pilot_keeps_twenty_five_row_shape() ->
         assert [row["id"] for row in question_rows] == [f"q{i:03d}" for i in range(1, 26)]
         assert all("reference_answer" not in row for row in question_rows)
         assert all("reference_answer" in row for row in qa_battery)
+
+
+def test_fresh_ugly_batch_02_is_retained() -> None:
+    fixture_dirs = {path.name for path in FRESH_UGLY_BATCH_02_ROOT.iterdir() if path.is_dir()}
+
+    assert fixture_dirs == EXPECTED_FRESH_UGLY_BATCH_02_FIXTURES
+
+    for fixture in EXPECTED_FRESH_UGLY_BATCH_02_FIXTURES:
+        fixture_root = FRESH_UGLY_BATCH_02_ROOT / fixture
+        for name in (
+            "source.md",
+            "source_original.txt",
+            "qa.md",
+            "qa_questions.jsonl",
+            "oracle.jsonl",
+            "metadata.json",
+            "provenance.md",
+            "fixture_notes.md",
+            "anti_leakage_manifest.md",
+            "qa_authored_with_answers.md",
+        ):
+            assert (fixture_root / name).is_file(), f"{fixture} missing {name}"
+
+
+def test_fresh_ugly_batch_02_keeps_twenty_five_row_shape() -> None:
+    for fixture in EXPECTED_FRESH_UGLY_BATCH_02_FIXTURES:
+        fixture_root = FRESH_UGLY_BATCH_02_ROOT / fixture
+        oracle_rows = [
+            json.loads(line)
+            for line in (fixture_root / "oracle.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+        question_rows = [
+            json.loads(line)
+            for line in (fixture_root / "qa_questions.jsonl").read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        ]
+
+        expected_ids = [f"q{i:03d}" for i in range(1, 26)]
+        assert len(oracle_rows) == 25
+        assert len(question_rows) == 25
+        assert [row["id"] for row in oracle_rows] == expected_ids
+        assert [row["id"] for row in question_rows] == expected_ids
+        assert all("reference_answer" not in row for row in question_rows)
+        assert all("reference_answer" in row for row in oracle_rows)

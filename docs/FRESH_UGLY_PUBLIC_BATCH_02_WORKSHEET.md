@@ -135,6 +135,209 @@ gate behavior and QA behavior disagree without a clear explanation
 
 ## Open Notes
 
-The next useful action is waiting for the incoming zip, then running the intake
-check before any compile. Do not start repair work from Batch 02 until the first
-full run gives a baseline.
+The incoming dataset has landed under
+`datasets/real_world_transfer/fresh_ugly_public_20260524_02/`.
+
+## 2026-05-24 Intake
+
+Dataset shape:
+
+```text
+fixtures: 12
+questions per fixture: 25
+total questions: 300
+required fixture files: present
+qa_questions.jsonl: questions only
+oracle.jsonl: answer-bearing key isolated
+source.md: no QA/oracle markers found
+runtime fixture tests: added
+```
+
+Local intake repair:
+
+- `sec_material_event_ugly_005/oracle.jsonl` had `q004` and `q005` swapped in
+  file order. The rows were sorted by ID; the answer text was not changed.
+
+Freshness caveat:
+
+Two fixtures reuse source documents already present in earlier transfer
+datasets:
+
+| Fixture | Prior fixture/source |
+| --- | --- |
+| `fda_warning_ugly_005` | same FDA Medical Products Laboratories warning letter as Batch 01 `fda_warning_ugly_001` |
+| `ntsb_marine_ugly_002` | same NTSB Baylor J. Tregre report as earlier NTSB pilots and Batch 01 `ntsb_marine_ugly_001` |
+
+Therefore, Batch 02 should be reported two ways:
+
+- all-12 operational score: `300` rows;
+- fresh-only transfer slice: `10` fixtures / `250` rows, excluding
+  `fda_warning_ugly_005` and `ntsb_marine_ugly_002`.
+
+## 2026-05-24 Compile R1
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_02
+compile out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_compile_r1
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6 requested
+compile source:
+  enabled
+plan passes:
+  enabled, max 2
+source/entity, archival identifier, and source-record ledgers:
+  enabled
+quality gate and one retry on hold:
+  enabled
+```
+
+Summary:
+
+```text
+fixtures: 12
+parsed OK: 12
+candidate predicates: 246
+compile admitted / skipped: 351 / 67
+diagnostic rejected flat-pass skips: 0
+```
+
+Per-fixture rough/admission read:
+
+| Fixture | Admitted | Skipped | Rough | Read |
+| --- | ---: | ---: | ---: | --- |
+| `fda_warning_ugly_003` | 14 | 0 | 0.889 | source-authority/source-claim/status-state gaps |
+| `fda_warning_ugly_004` | 34 | 0 | 0.833 | source-claim/status-state gaps |
+| `fda_warning_ugly_005` | 44 | 0 | 0.889 | duplicate source; one poor/zero-yield pass |
+| `ntsb_aviation_ugly_002` | 76 | 5 | 1.000 | cleanest compile by rough score |
+| `ntsb_marine_ugly_002` | 41 | 32 | 0.889 | duplicate source; many skipped rows |
+| `ntsb_surface_ugly_001` | 48 | 4 | 0.778 | source-authority/source-claim/status-state gaps |
+| `osha_incident_ugly_003` | 0 | 11 | 0.694 | poor compile; zero admitted direct facts |
+| `osha_incident_ugly_004` | 14 | 15 | 0.833 | source-claim/status-state gaps |
+| `osha_incident_ugly_005` | 31 | 0 | 0.944 | source-claim/status-state gaps |
+| `sec_material_event_ugly_003` | 23 | 0 | 0.944 | mostly clean |
+| `sec_material_event_ugly_004` | 10 | 0 | 0.750 | thin direct compile surface |
+| `sec_material_event_ugly_005` | 16 | 0 | 0.704 | thin direct compile surface |
+
+Read:
+
+This is a much harder compile batch than Batch 01. The SEC QA surface later
+looks strong despite thin direct compile, but the compile gate is correctly
+surfacing weak direct carriers. The most important blocker is
+`osha_incident_ugly_003`, where the compiler parsed the document but admitted
+zero direct facts, leaving QA to ride source-record rows and query support.
+
+## 2026-05-24 QA R1 Baseline
+
+Conditions:
+
+```text
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_compile_r1
+QA out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_02_r1_20260524\fresh_ugly_public_20260524_02_qa_r1
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6 requested
+cache:
+  disabled
+compatibility adapter row limit:
+  0
+evidence-bundle path:
+  enabled for the main run
+```
+
+Initial main-run summary:
+
+```text
+questions: 300
+exact / partial / miss: 264 / 6 / 24
+not judged: 6
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Six rows were `not_judged` because the judge/failure-classifier prompt exceeded
+OpenRouter context limits on very large source-record/table evidence. A narrow
+replay without the evidence-bundle path resolved five of those rows:
+
+```text
+ntsb_aviation_ugly_002 q018:
+  miss
+
+osha_incident_ugly_004 q011,q018,q019,q022,q025:
+  q011 exact
+  q018 exact
+  q019 still not_judged due context overflow
+  q022 exact
+  q025 exact
+```
+
+Adjusted baseline:
+
+```text
+all 12 fixtures:
+  confirmed: 268 / 6 / 25 plus 1 not_judged
+  conservative, counting remaining not_judged as miss:
+    268 / 6 / 26 = 89.3%
+
+fresh-only 10-fixture slice:
+  confirmed: 225 / 5 / 19 plus 1 not_judged
+  conservative, counting remaining not_judged as miss:
+    225 / 5 / 20 = 90.0%
+
+hygiene:
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Per-fixture main-run scores before the narrow replay:
+
+| Fixture | Exact | Partial | Miss | Other |
+| --- | ---: | ---: | ---: | ---: |
+| `fda_warning_ugly_003` | 22 | 1 | 2 | 0 |
+| `fda_warning_ugly_004` | 23 | 0 | 2 | 0 |
+| `fda_warning_ugly_005` | 20 | 0 | 5 | 0 |
+| `ntsb_aviation_ugly_002` | 18 | 1 | 5 | 1 |
+| `ntsb_marine_ugly_002` | 23 | 1 | 1 | 0 |
+| `ntsb_surface_ugly_001` | 21 | 1 | 3 | 0 |
+| `osha_incident_ugly_003` | 21 | 0 | 4 | 0 |
+| `osha_incident_ugly_004` | 20 | 0 | 0 | 5 |
+| `osha_incident_ugly_005` | 23 | 1 | 1 | 0 |
+| `sec_material_event_ugly_003` | 25 | 0 | 0 | 0 |
+| `sec_material_event_ugly_004` | 23 | 1 | 1 | 0 |
+| `sec_material_event_ugly_005` | 25 | 0 | 0 | 0 |
+
+Read:
+
+Batch 02 is the first strong counter-pressure after the Batch 01 R4 result. It
+does not support a broad "95% on fresh ugly documents" claim. The clean
+fresh-only slice is about `90%` under conservative scoring. That is still
+strong for a harder, less-curated public-document batch, but it tells us the
+Batch 01 `96.5%` was not fully transferable.
+
+The misses are not random. The largest pressure points are:
+
+- OSHA/FDA direct compile carriers for warning/citation tables;
+- NTSB aviation toxicology, similar-event, and role/equipment detail joins;
+- NTSB surface source-claim/status-state carriers;
+- oversized OSHA table evidence producing context-overflow judge pressure;
+- thin direct compile surfaces for some SEC filings, partly masked by strong
+  source-record query behavior.
+
+Next actions:
+
+1. Archive these R1 compile/QA artifacts out of `tmp`.
+2. Run the planned source-record-summary ablation on Batch 02, at least on the
+   fresh-only 10-fixture slice.
+3. Inspect non-exact clusters before implementing repairs.
+4. Do not polish individual Batch 02 rows until the ablation tells us whether
+   source-record summaries are transferring or carrying too much of the score.

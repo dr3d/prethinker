@@ -1,0 +1,12 @@
+{
+  "fixture_id": "ntsb_aviation_ugly_002",
+  "batch": "fresh_ugly_public_20260524_02",
+  "source_domain": "NTSB",
+  "document_title": "Aviation Investigation Final Report — Westwater, Utah — Accident Number WPR24FA083",
+  "document_date": "2025-12-23",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/193761/pdf",
+  "source_type": "official_public_document",
+  "document_format_original": "pdf",
+  "notes": "NTSB final report for the February 7, 2024 loss-of-control accident of a Hawker 900XP (N900VA) near Westwater, Utah during a post-maintenance stall test, both pilots fatally injured. Pressures clock-anchored event sequence (1037, 1044:00, 1046:33, 1046:37, 1046:47, 1047:44), elapsed-time computation between FDR clock events, probable cause vs contributing factor distinction, comparison to a prior similar event (CHI06IA127 on the same type certificate), pilot-table joins (medical exam, flight review, total hours), and joins between narrative text and the Findings table and the CAE Simulator Flight test results."
+}
