@@ -15120,6 +15120,7 @@ def _source_record_messy_summary_companions(
         _source_record_missing_field_count_companion(runtime, utterance=utterance),
         _source_record_assessment_contrast_companion(runtime, utterance=utterance),
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
+        _source_record_identifier_set_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
         _source_record_extreme_date_field_companion(runtime, utterance=utterance),
         _source_record_max_numeric_field_companion(runtime, utterance=utterance),
@@ -15339,6 +15340,197 @@ def _source_record_distinct_field_count_companion(
             "source_record_field_item(SourceRow, Field, Value).",
         ],
     }
+
+
+def _source_record_identifier_set_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:identifier|identifiers|reference number|reference numbers|report id|inspection-related|nr)\b", text):
+        return None
+    if not re.search(r"\b(?:what|which|how many|list|identify|reference|identifier|id|nr|number)\b", text):
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    def append_row(*, source_row: str, label: str, value: str, source_predicate: str, text_atom: str = "") -> None:
+        display = _source_record_identifier_display(label=label, value=value, text_atom=text_atom)
+        if not display:
+            return
+        key = (source_row, label, display)
+        if key in seen:
+            return
+        seen.add(key)
+        support_rows.append(
+            {
+                "SupportKind": "source_record_identifier",
+                "IdentifierKind": label,
+                "IdentifierValue": value,
+                "IdentifierDisplay": display,
+                "SourceRow": source_row,
+                "SourcePredicate": source_predicate,
+                **({"SourceTextAtom": text_atom} if text_atom else {}),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+
+    text_atoms_by_row = {source_row: atom for source_row, atom in _source_record_text_atoms(runtime)}
+    numeric_by_row: dict[str, list[str]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate == "source_record_numeric_token" and len(args) >= 2:
+            numeric_by_row.setdefault(args[0], []).append(args[1])
+
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate in {"source_record_field", "source_record_field_item", "source_record_inline_field"} and len(args) >= 3:
+            source_row, field, value = args[:3]
+            if _source_record_identifier_label(field) or _source_record_identifier_label(value):
+                append_row(
+                    source_row=source_row,
+                    label=field,
+                    value=value,
+                    source_predicate=predicate,
+                    text_atom=text_atoms_by_row.get(source_row, ""),
+                )
+        elif predicate in {"source_record_field_item_pair", "source_record_cell_item_pair"} and len(args) >= 5:
+            source_row, left_field, left_value, right_field, right_value = args[:5]
+            for label, value in ((left_field, left_value), (right_field, right_value)):
+                if _source_record_identifier_label(label) or _source_record_identifier_label(value):
+                    append_row(
+                        source_row=source_row,
+                        label=label,
+                        value=value,
+                        source_predicate=predicate,
+                        text_atom=text_atoms_by_row.get(source_row, ""),
+                    )
+
+    for source_row, text_atom in text_atoms_by_row.items():
+        label = _source_record_identifier_label(text_atom)
+        if not label:
+            continue
+        values = numeric_by_row.get(source_row, [])
+        if not values and re.search(r"\d", text_atom):
+            values = [text_atom]
+        for value in values:
+            append_row(
+                source_row=source_row,
+                label=label,
+                value=value,
+                source_predicate="source_record_text_atom",
+                text_atom=text_atom,
+            )
+
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: (_source_row_sort_key(row.get("SourceRow", "")), row.get("IdentifierKind", "")))
+    return {
+        "query": "source_record_identifier_set_support(IdentifierKind, IdentifierValue, IdentifierDisplay, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_identifier_set_support",
+            "prolog_query": "source_record_identifier_set_support(IdentifierKind, IdentifierValue, IdentifierDisplay, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only identifier support collected identifier/reference-number rows from admitted "
+                    "source_record_* surfaces; no durable identifier fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_field(SourceRow, Field, Value).",
+            "source_record_field_item(SourceRow, Field, Value).",
+            "source_record_field_item_pair(SourceRow, LeftField, LeftValue, RightField, RightValue).",
+            "source_record_numeric_token(SourceRow, Value).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_identifier_label(value: str) -> str:
+    tokens = set(_source_record_field_name_tokens(value))
+    if not tokens:
+        return ""
+    if {"marcs", "cms"} <= tokens:
+        return "marcs_cms"
+    if {"warning", "letter"} <= tokens:
+        return "warning_letter"
+    if {"report", "id"} <= tokens:
+        return "report_id"
+    if {"inspection", "nr"} <= tokens or {"inspection", "number"} <= tokens:
+        return "inspection_nr"
+    if {"investigation", "nr"} <= tokens or {"investigation", "number"} <= tokens:
+        return "investigation_nr"
+    if {"accident", "summary", "nr"} <= tokens:
+        return "accident_summary_nr"
+    if {"activity", "nr"} <= tokens:
+        return "activity_nr"
+    if {"case", "id"} <= tokens:
+        return "case_id"
+    if {"fei"} & tokens:
+        return "fei"
+    if {"identifier", "identifiers", "id", "nr"} & tokens:
+        return "_".join(sorted(tokens & {"identifier", "identifiers", "id", "nr"}))
+    return ""
+
+
+def _source_record_identifier_display(*, label: str, value: str, text_atom: str = "") -> str:
+    label = _source_record_identifier_label(label) or str(label or "").strip()
+    raw_value = str(value or "").strip()
+    raw_text = str(text_atom or "").strip()
+    normalized = _normalize_source_record_display_value(raw_value)
+    if not normalized:
+        return ""
+    if label == "marcs_cms":
+        number = _first_identifier_number(normalized) or _first_identifier_number(raw_text)
+        return f"MARCS-CMS {number}" if number else _display_source_phrase(raw_text or raw_value)
+    if label == "warning_letter":
+        number = _joined_identifier_number(normalized) or _joined_identifier_number(raw_text)
+        return f"Warning Letter {number}" if number else _display_source_phrase(raw_text or raw_value)
+    if label in {"inspection_nr", "investigation_nr", "accident_summary_nr"}:
+        number = _dotted_identifier_number(normalized)
+        title = {
+            "inspection_nr": "Inspection Nr",
+            "investigation_nr": "Investigation Nr",
+            "accident_summary_nr": "Accident Summary Nr",
+        }[label]
+        return f"{title} {number}" if number else _display_source_phrase(raw_value)
+    if label == "report_id":
+        number = _first_identifier_number(normalized)
+        return f"Report ID {number}" if number else _display_source_phrase(raw_value)
+    if label == "activity_nr":
+        number = _first_identifier_number(normalized)
+        return f"Activity Nr {number}" if number else _display_source_phrase(raw_value)
+    if label == "fei":
+        number = _first_identifier_number(normalized)
+        return f"FEI {number}" if number else _display_source_phrase(raw_value)
+    return _display_source_phrase(raw_value)
+
+
+def _first_identifier_number(value: str) -> str:
+    match = re.search(r"\d+(?:[_\-.]\d+)*", str(value or ""))
+    return match.group(0).replace("_", ".") if match else ""
+
+
+def _dotted_identifier_number(value: str) -> str:
+    number = _first_identifier_number(value)
+    return number.replace("-", ".") if number else ""
+
+
+def _joined_identifier_number(value: str) -> str:
+    match = re.search(r"\d+(?:[_\-.]\d+)+", str(value or ""))
+    return match.group(0).replace("_", "-").replace(".", "-") if match else _first_identifier_number(value)
 
 
 def _source_record_event_date_range_companion(
@@ -20783,6 +20975,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_group_formation_exception_support",
             "source_record_destination_support",
             "source_record_body_signatory_support",
+            "source_record_identifier_set_support",
             "event_elapsed_duration_support",
         },
     ):

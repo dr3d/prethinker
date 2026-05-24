@@ -1,0 +1,21 @@
+# Provenance — sec_material_event_ugly_001
+
+- **Source URL:** https://www.sec.gov/Archives/edgar/data/1877461/000147793226002325/cbdw_8k.htm
+- **Issuer CIK:** 1877461
+- **Filer:** 1606 Corp.
+- **Form type:** 8-K (Current Report)
+- **Date of Report:** April 13, 2026
+- **Signature / Filing Date:** April 16, 2026
+- **Retrieval date:** 2026-05-24
+- **Document format (original):** HTML on SEC EDGAR.
+- **Transformation performed:**
+    - The EDGAR HTML page was fetched and the substantive narrative, cover-page tables, item heading, and signature block were extracted.
+    - `source_original.txt` is a plain-text capture of the filing with the cover-page table values preserved.
+    - `source.md` is a Markdown rendering of the filing's substantive content in the order in which it appears in the document, including the cover page (state of incorporation / commission file number / IRS EIN table, address, phone, the four box-checked simultaneous-filing options, the Section 12(b) securities table, the emerging-growth-company indicator), Item 1.01 in full, and the signature block.
+    - EDGAR header navigation, footer chrome, and the boilerplate "*(untagged table — column alignment not verified)*" annotations that appeared in the extracted HTML were removed; the table contents themselves are preserved.
+- **Excerpt boundaries:** `source.md` contains the **full text** of the four-numbered-page 8-K filing (cover page, Item 1.01 body, and signatures). No exhibits to the 8-K are included; the document body did not reference any 9.01 exhibits.
+- **Caveats:**
+    - The Section 12(b) cover-page table records Title of each class as "N/A", Trading Symbol(s) as "N/A", and Name of each exchange as "N/A". The CIK-1877461 entity is associated externally with ticker symbol CBDW (visible in the EDGAR URL slug), but the filing itself reports N/A; the filing value is preserved verbatim.
+    - The phrase "*relating to the Company's purchase of certain real property and related assets located in Angelina County, Texas*" is the only description of the underlying transaction provided in the 8-K; no further description of the property is given.
+    - The 8-K does not disclose what payment instrument or wire route the $250,000 earnest money was originally deposited via; that information is not in the 8-K.
+    - The Date of Report is April 13, 2026; the signature is dated April 16, 2026. Both dates appear in the source verbatim; neither was altered.

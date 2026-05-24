@@ -1,0 +1,72 @@
+{
+  "batch": "fresh_ugly_public_20260524_01",
+  "fixture_count": 8,
+  "questions_per_fixture": 25,
+  "total_questions": 200,
+  "retrieval_date": "2026-05-24",
+  "qa_composition_per_fixture": {
+    "direct_lookup": 5,
+    "timeline_date_order": 5,
+    "table_source_record": 5,
+    "reasoning_join": 5,
+    "negative_exception_contrast": 5
+  },
+  "fixtures": [
+    {
+      "fixture_id": "ntsb_aviation_ugly_001",
+      "domain": "transportation_safety_aviation",
+      "source_url": "https://www.ntsb.gov/investigations/Documents/Preliminary%20Report%20DCA26MA024.pdf",
+      "document_title": "NTSB Preliminary Report DCA26MA024 — UPS Flight 2976 MD-11F crash at Louisville (SDF), November 4, 2025",
+      "pressure_tags": ["multi_engine_pylon_fatigue", "two_airworthiness_directives", "maintenance_program_SDI_vs_cycles", "1979_AA191_comparator_reference", "three_crewmembers", "ongoing_investigation"]
+    },
+    {
+      "fixture_id": "ntsb_marine_ugly_001",
+      "domain": "transportation_safety_marine",
+      "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/MIR2521.pdf",
+      "document_title": "NTSB Marine Investigation Report MIR-25-21 — Towing vessel Baylor J. Tregre capsizing, Gulf of America, May 13, 2024",
+      "pressure_tags": ["weather_sequence_timeline", "tow_wire_length_800ft_vs_1800ft", "four_USCG_entities", "vessel_rename_history", "case_number_DCA24FM038"]
+    },
+    {
+      "fixture_id": "fda_warning_ugly_001",
+      "domain": "fda_enforcement",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026",
+      "document_title": "FDA Warning Letter MARCS-CMS 721916 / 320-26-61 to Medical Products Laboratories Inc, April 9, 2026",
+      "pressure_tags": ["four_CGMP_violations", "unapproved_new_drug_13_products", "two_signatories", "heavy_b4_redactions", "inspection_window"]
+    },
+    {
+      "fixture_id": "fda_warning_ugly_002",
+      "domain": "fda_enforcement",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nupack-inc-722113-03202026",
+      "document_title": "FDA Warning Letter MARCS-CMS 722113 to Nupack Inc, March 20, 2026",
+      "pressure_tags": ["three_legal_theories", "six_products_overlapping_subsets", "set_difference_reasoning", "human_foods_program"]
+    },
+    {
+      "fixture_id": "osha_incident_ugly_001",
+      "domain": "occupational_safety_health",
+      "source_url": "https://osha.prod.pace.dol.gov/ords/imis/accidentsearch.accident_detail?id=180500.015",
+      "document_title": "OSHA Accident Report Detail 180500.015 + Inspection Detail 1814187.015 — Premier Fence LLC, three fatalities struck by vehicle on I-91, West Springfield MA, March 28, 2025",
+      "pressure_tags": ["three_fatalities", "three_identifiers", "site_vs_mailing_address", "five_dates_in_case_lifecycle", "two_citations_same_standard_family", "case_open_contested"]
+    },
+    {
+      "fixture_id": "osha_incident_ugly_002",
+      "domain": "occupational_safety_health",
+      "source_url": "https://www.osha.gov/pls/imis/accidentsearch.accident_detail?id=123160.015",
+      "document_title": "OSHA Accident Report Detail 123160.015 + Inspection Detail 1455758.015 — Centimark Corporation, fall through deteriorated roof, Plant City FL, January 13, 2020 (CLOSED, informal settlement)",
+      "pressure_tags": ["single_fatality", "fall_through_deteriorated_roof", "post_settlement_penalty_reduction", "minor_height_discrepancy_in_record", "multiple_identifiers", "closed_case_lifecycle", "site_vs_mailing_address", "specific_time_of_day"]
+    },
+    {
+      "fixture_id": "sec_material_event_ugly_001",
+      "domain": "sec_corporate_disclosure",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1877461/000147793226002325/cbdw_8k.htm",
+      "document_title": "1606 Corp. — Form 8-K Item 1.01, First Amendment to Purchase and Sale Agreement with Jefferson Enterprise Energy LLC, April 13, 2026",
+      "pressure_tags": ["amendment_to_prior_agreement", "two_distinct_dollar_amounts_with_different_roles", "earnest_money_redefinition_as_non_refundable_fee", "multiple_dates_with_extension", "multi_state_parties", "trading_symbol_listed_as_NA", "date_of_report_vs_filing_date_gap", "asymmetric_one_way_obligation"]
+    },
+    {
+      "fixture_id": "sec_material_event_ugly_002",
+      "domain": "sec_corporate_disclosure",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/945841/000119312526204112/pool-20260504.htm",
+      "document_title": "Pool Corporation — Form 8-K Item 5.02 + 7.01, CEO transition (Arvan → Watwood), Executive Chair appointment (Stokely), May 4, 2026",
+      "pressure_tags": ["officer_director_transition", "multiple_named_individuals_overlapping_first_names", "three_compensation_amounts_at_different_scales", "equity_grant_50_50_split", "bonus_as_target_not_guaranteed", "stokely_three_role_history_dates", "item_5_02_e_deferred_amendment", "item_7_01_furnished_not_filed", "signatory_is_CFO_not_CEO"]
+    }
+  ]
+}

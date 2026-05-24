@@ -1,0 +1,25 @@
+{"id":"q001","question":"What is the NTSB accident number for this investigation?"}
+{"id":"q002","question":"What is the aircraft registration?"}
+{"id":"q003","question":"What was the flight number?"}
+{"id":"q004","question":"What aircraft make and model was involved?"}
+{"id":"q005","question":"Who is the Investigator In Charge (IIC)?"}
+{"id":"q006","question":"At what local time did the flight data on the FDR end?"}
+{"id":"q007","question":"On what date did the NTSB travel to SDF in response to the accident?"}
+{"id":"q008","question":"When did UPS ground its MD-11 fleet?"}
+{"id":"q009","question":"When did the FAA issue Emergency AD 2025-23-53?"}
+{"id":"q010","question":"Which Emergency Airworthiness Directive superseded which?"}
+{"id":"q011","question":"Per the Meteorological Information and Flight Plan table, what visibility was reported?"}
+{"id":"q012","question":"Per the table, what is the observation facility and its elevation?"}
+{"id":"q013","question":"Per the table, what are the accident-site latitude and longitude in decimal form?"}
+{"id":"q014","question":"Per the table, what type of flight plan was filed?"}
+{"id":"q015","question":"Per the Aircraft and Owner/Operator Information block, what is the operator name exactly as listed?"}
+{"id":"q016","question":"How many people in total were fatally injured in this accident, combining airplane crew and ground fatalities?"}
+{"id":"q017","question":"Of the three crewmembers, which had the most total reported flight hours, and how many?"}
+{"id":"q018","question":"Of the three crewmembers, which had the fewest hours in the MD-11 make/model?"}
+{"id":"q019","question":"Was the special detailed inspection (SDI) of the left pylon aft mount lugs overdue at the time of the accident? Explain briefly."}
+{"id":"q020","question":"Comparing total fatalities in the 1979 American Airlines flight 191 accident described in the \"Similar Events\" section to the UPS flight 2976 accident, which had more total fatalities and by how many?"}
+{"id":"q021","question":"Was an ATC group formed for this investigation?"}
+{"id":"q022","question":"Did the forward lug's outboard fracture surface show evidence of fatigue cracking?"}
+{"id":"q023","question":"Did the right engine separate from the right wing?"}
+{"id":"q024","question":"Does this preliminary report state a probable cause for the accident?"}
+{"id":"q025","question":"Was the accident airplane equipped with GE CF-6 engines or Pratt & Whitney PW4000 engines?"}

@@ -1,0 +1,12 @@
+{
+  "fixture_id": "ntsb_aviation_ugly_001",
+  "batch": "fresh_ugly_public_20260524_01",
+  "source_domain": "NTSB",
+  "document_title": "Aviation Investigation Preliminary Report DCA26MA024 - UPS Flight 2976",
+  "document_date": "2025-11-04",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.ntsb.gov/investigations/Documents/Preliminary%20Report%20DCA26MA024.pdf",
+  "source_type": "official_public_document",
+  "document_format_original": "pdf",
+  "notes": "12-page NTSB preliminary report. Event Nov 4 2025; report describes accident, recorders, materials lab findings, maintenance gaps, and safety actions. Investigation is ongoing; document explicitly marked subject to change."
+}

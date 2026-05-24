@@ -1,0 +1,25 @@
+{"id":"q001","question":"What is the name of the employer in this OSHA inspection?"}
+{"id":"q002","question":"Where was the accident located (site address)?"}
+{"id":"q003","question":"Which OSHA Area Office handled this inspection?"}
+{"id":"q004","question":"What was the event date of the accident?"}
+{"id":"q005","question":"What is the NAICS code listed for the employer, and what description is given for it?"}
+{"id":"q006","question":"On what date was the inspection opened?"}
+{"id":"q007","question":"On what date was the close conference held?"}
+{"id":"q008","question":"What was the issuance date of the citations?"}
+{"id":"q009","question":"What is the abatement due date set in the citations?"}
+{"id":"q010","question":"On what date did the employer contest the citations?"}
+{"id":"q011","question":"How many employees are listed in the Employee Details table, and what is each one's age?"}
+{"id":"q012","question":"What \"Degree of Injury\" is listed for every employee on this case?"}
+{"id":"q013","question":"What value is shown in the \"Nature of Injury\" column for the three employees?"}
+{"id":"q014","question":"What are the two Citation IDs listed in the Violation Items table, and what citation type does each one carry?"}
+{"id":"q015","question":"What does the Violation Summary show for the Current Penalty under \"Serious\" and the FTA Penalty under \"Serious\"?"}
+{"id":"q016","question":"What was the total initial penalty issued in this case, and how does it relate to the per-citation penalty?"}
+{"id":"q017","question":"Both Serious citations cite a \"Standard Cited\" beginning with `19260200`. What distinguishes the two citations from each other in that column?"}
+{"id":"q018","question":"The Site Address and the Mailing Address are different. Where did the accident actually take place — the site address or the mailing address — and what makes that clear from the document?"}
+{"id":"q019","question":"What was the occupation of every fatally injured worker, and how does that occupation relate to the work being performed at the time of the accident?"}
+{"id":"q020","question":"How many distinct inspection-related identifiers does this record contain, and what are they?"}
+{"id":"q021","question":"Has this case been closed? What in the document tells you so?"}
+{"id":"q022","question":"Does the record list a SIC code for the employer?"}
+{"id":"q023","question":"Was advance notice given to the employer for this inspection?"}
+{"id":"q024","question":"Did any of the citations result in a Failure-to-Abate (FTA) penalty?"}
+{"id":"q025","question":"Was the employer's union status union or nonunion in this record?"}

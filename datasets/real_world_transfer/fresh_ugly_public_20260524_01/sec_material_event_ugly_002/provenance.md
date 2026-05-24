@@ -1,0 +1,22 @@
+# Provenance — sec_material_event_ugly_002
+
+- **Source URL:** https://www.sec.gov/Archives/edgar/data/945841/000119312526204112/pool-20260504.htm
+- **Issuer CIK:** 945841
+- **Filer:** Pool Corporation
+- **Form type:** 8-K (Current Report)
+- **Date of Report:** May 4, 2026
+- **Signature / Filing Date:** May 4, 2026
+- **Retrieval date:** 2026-05-24
+- **Document format (original):** HTML on SEC EDGAR.
+- **Transformation performed:**
+    - The EDGAR HTML page was fetched and the substantive narrative (cover-page declarations, item bodies, exhibit list, signature block) was extracted.
+    - `source_original.txt` is a plain-text capture of the filing with table values preserved where the extractor returned them.
+    - `source.md` is a Markdown rendering of the filing's substantive content in the order in which it appears in the document, including the cover page (Date of Report, the four box-checked simultaneous-filing options, the emerging-growth-company indicator), Item 5.02 in full, Item 7.01 in full, the Item 9.01 exhibit table, and the signature block.
+    - EDGAR header navigation and footer chrome were removed.
+- **Excerpt boundaries:** `source.md` contains the **full substantive text** of the 8-K body (Items 5.02, 7.01, and 9.01) as displayed on the EDGAR HTML page, plus the cover-page indicator boxes, the emerging-growth-company indicator, and the signature block.
+- **Caveats:**
+    - **Cover-page registrant tables not captured:** The EDGAR HTML page renders the registrant's name, state of incorporation, Commission file number, IRS EIN, and address inside cover-page tables that did not survive extraction (this is an artifact of how the page is structured for inline XBRL tagging). The registrant's identity — Pool Corporation, a Delaware corporation — is established unambiguously in the first sentence of Item 5.02 and in the signature block. The CIK (945841) is taken from the EDGAR URL.
+    - **Securities-registered table not captured:** The Section 12(b) "Securities registered" table is similarly not preserved in the extracted output. This is noted explicitly in `source.md`.
+    - **Item 5.02(e) information is deferred:** The 8-K states that "Information required by Item 5.02(e) of Form 8-K has not been determined as of the date of this report" and that the Company "intends to file an amendment to this filing containing the information called for by Item 5.02(e) of Form 8-K within four business days after the information is determined or becomes available." A future 8-K/A may add detail on Mr. Arvan's separation compensation that is not in this filing; this fixture is built only from what is in *this* 8-K.
+    - **Exhibit 99.1 (press release) is referenced but not included** in this fixture's source materials; only the body of the 8-K is captured.
+    - **The signatory is the CFO, not the CEO,** because the CEO position transitioned on the same day. This is a feature of the source, not an editorial choice.

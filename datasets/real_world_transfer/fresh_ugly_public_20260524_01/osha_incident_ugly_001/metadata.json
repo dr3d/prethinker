@@ -1,0 +1,12 @@
+{
+  "fixture_id": "osha_incident_ugly_001",
+  "batch": "fresh_ugly_public_20260524_01",
+  "source_domain": "OSHA",
+  "document_title": "OSHA Accident Report Detail 180500.015 (Premier Fence, LLC) and Inspection Detail 1814187.015 — Three Employees Struck By Vehicle",
+  "document_date": "2025-03-28",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://osha.prod.pace.dol.gov/ords/imis/accidentsearch.accident_detail?id=180500.015",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "OSHA IMIS Accident Report Detail combined with the matched Inspection Detail at https://osha.prod.pace.dol.gov/ords/imis/establishment.inspection_detail?id=1814187.015 . Fatal accident on I-91 in West Springfield, MA, March 28 2025 — three guardrail-repair workers killed when a vehicle struck them. Two Serious citations under 19260200 G01/G02, both contested. Case OPEN as of retrieval."
+}

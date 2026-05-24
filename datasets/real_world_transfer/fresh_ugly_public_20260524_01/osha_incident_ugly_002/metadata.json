@@ -1,0 +1,25 @@
+{
+  "fixture_id": "osha_incident_ugly_002",
+  "domain": "occupational_safety_health",
+  "document_type": "osha_imis_accident_and_inspection_dossier",
+  "source_urls": [
+    "https://www.osha.gov/pls/imis/accidentsearch.accident_detail?id=123160.015",
+    "https://www.osha.gov/ords/imis/establishment.inspection_detail?id=1455758.015"
+  ],
+  "document_title": "OSHA Accident Report Detail 123160.015 (Employee is killed in fall through deteriorated roof) and matched Inspection Detail 1455758.015 (Centimark Corporation)",
+  "issuer": "U.S. Department of Labor — Occupational Safety and Health Administration (OSHA), Tampa Area Office",
+  "establishment": "Centimark Corporation",
+  "event_date": "2020-01-13",
+  "retrieval_date": "2026-05-24",
+  "questions_count": 25,
+  "pressure_tags": [
+    "single_fatality",
+    "fall_through_deteriorated_roof",
+    "post_settlement_penalty_reduction",
+    "minor_height_discrepancy_in_record",
+    "multiple_identifiers",
+    "closed_case_lifecycle",
+    "site_vs_mailing_address",
+    "specific_time_of_day"
+  ]
+}

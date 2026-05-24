@@ -1,0 +1,25 @@
+{"id":"q001","question":"Which company employed the worker who was killed?"}
+{"id":"q002","question":"Where was the accident located (site address)?"}
+{"id":"q003","question":"Which OSHA Area Office handled this inspection?"}
+{"id":"q004","question":"What time of day did the fatal incident occur?"}
+{"id":"q005","question":"What was the worker's occupation?"}
+{"id":"q006","question":"On what date did the accident occur, and when was the inspection opened?"}
+{"id":"q007","question":"On what date was the close conference held, and when was the citation issued?"}
+{"id":"q008","question":"What was the abatement due date for the citation?"}
+{"id":"q009","question":"On what date was the case marked closed?"}
+{"id":"q010","question":"Place these case-life-cycle events in chronological order: case closed, close conference, citation issuance, event date, abatement due date."}
+{"id":"q011","question":"How many citations were issued in this inspection, and what citation type was each?"}
+{"id":"q012","question":"What was the standard cited?"}
+{"id":"q013","question":"What was the Initial Penalty and what is the Current Penalty?"}
+{"id":"q014","question":"What does the \"Latest Event\" column show for the single citation?"}
+{"id":"q015","question":"What value does the document give for the employee's age and sex?"}
+{"id":"q016","question":"By what amount, and what percentage, was the penalty reduced from its initial value to its current value?"}
+{"id":"q017","question":"What is the relationship between the Investigation Nr and the Accident Summary Nr?"}
+{"id":"q018","question":"The Site Address and the Mailing Address are in different states. Which state did the accident occur in, and what makes that clear from the document?"}
+{"id":"q019","question":"The document gives more than one numeric value for the height of the worker's fall. What are those values, and where does each appear?"}
+{"id":"q020","question":"How many days elapsed between the citation issuance date and the abatement due date?"}
+{"id":"q021","question":"Was the citation contested by the employer?"}
+{"id":"q022","question":"Does the record list a SIC code for the establishment?"}
+{"id":"q023","question":"Was advance notice given to the employer for this inspection?"}
+{"id":"q024","question":"Does the record list any willful or repeat citations?"}
+{"id":"q025","question":"Did the case result in a Failure-to-Abate (FTA) penalty?"}

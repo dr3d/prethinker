@@ -1,0 +1,25 @@
+{"id":"q001","reference_answer":"Centimark Corporation, described in the abstract as a roofing company."}
+{"id":"q002","reference_answer":"302 N Frontage Road, Plant City, FL 33563."}
+{"id":"q003","reference_answer":"Tampa Area Office."}
+{"id":"q004","reference_answer":"8:31 a.m. on January 13, 2020."}
+{"id":"q005","reference_answer":"Roofer (the Employee Details and Investigated Inspection rows list the occupation as \"Roofers\")."}
+{"id":"q006","reference_answer":"The accident occurred on 01/13/2020. The inspection was opened on the same day, 01/13/2020."}
+{"id":"q007","reference_answer":"The close conference was held on 06/24/2020. The citation was issued on 06/25/2020 — one day after the close conference."}
+{"id":"q008","reference_answer":"07/08/2020."}
+{"id":"q009","reference_answer":"08/18/2020."}
+{"id":"q010","reference_answer":"In chronological order: event date 01/13/2020, close conference 06/24/2020, citation issuance 06/25/2020, abatement due date 07/08/2020, case closed 08/18/2020."}
+{"id":"q011","reference_answer":"One citation, classified as Serious. (Initial Violations = 1, Current Violations = 1, both under the Serious column.)"}
+{"id":"q012","reference_answer":"Standard 19260760 A01 (OSHA IMIS shorthand for 29 CFR 1926.760(a)(1))."}
+{"id":"q013","reference_answer":"Initial Penalty $13,494; Current Penalty $6,747."}
+{"id":"q014","reference_answer":"\"I — Informal Settlement.\""}
+{"id":"q015","reference_answer":"Age 51, sex M (male)."}
+{"id":"q016","reference_answer":"The penalty was reduced by $6,747, from $13,494 to $6,747 — exactly 50% (the current penalty is half the initial penalty)."}
+{"id":"q017","reference_answer":"They are the same number, 123160.015. The Accident Report Detail labels it \"Accident Summary Nr\" and the embedded Investigation Summary on the Inspection Detail labels the same number \"Investigation Nr.\""}
+{"id":"q018","reference_answer":"The accident occurred in Florida. The Site Address is in Plant City, FL 33563; the Mailing Address is in Franklin, OH 45005. The two are explicitly labeled \"Site Address\" and \"Mailing Address\" on the Inspection Detail, and the abstract describes the worker performing reroofing activity at a commercial building (the work site), not at the corporate mailing address."}
+{"id":"q019","reference_answer":"Two different values are recorded. The abstract / Investigation Summary narrative gives the fall height as 22.8 feet. The Accident Details table shows Non-building Height of 23 (feet); the Employee Details row shows Distance of Fall: 23 feet and Worker Height Above Ground/Floor: 23 feet. So 22.8 ft appears once (in the narrative, repeated identically on both pages) and 23 ft appears in three structured fields."}
+{"id":"q020","reference_answer":"13 days. Citation Issuance Date 06/25/2020 to Abatement Due Date 07/08/2020 = 13 days."}
+{"id":"q021","reference_answer":"No. The \"Contest\" column for the single citation is blank, and the \"Latest Event\" is \"I — Informal Settlement,\" indicating the matter was resolved by settlement rather than contested."}
+{"id":"q022","reference_answer":"No. The SIC field is blank in the source; only the NAICS value (238160) is populated."}
+{"id":"q023","reference_answer":"No. The \"Advanced Notice\" field shows N."}
+{"id":"q024","reference_answer":"No. The Violation Summary shows zero violations and $0 in the Willful, Repeat, Other, and Unclass columns; only the Serious column has a non-zero value."}
+{"id":"q025","reference_answer":"No. Every FTA Penalty entry — in the Violation Summary row and in the single Violation Item — is $0."}

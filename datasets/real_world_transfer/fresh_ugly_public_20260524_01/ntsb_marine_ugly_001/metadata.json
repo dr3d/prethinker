@@ -1,0 +1,12 @@
+{
+  "fixture_id": "ntsb_marine_ugly_001",
+  "batch": "fresh_ugly_public_20260524_01",
+  "source_domain": "NTSB",
+  "document_title": "Capsizing and Sinking of Towing Vessel Baylor J. Tregre (MIR-25-21)",
+  "document_date": "2025-05-15",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/MIR2521.pdf",
+  "source_type": "official_public_document",
+  "document_format_original": "pdf",
+  "notes": "17-page NTSB Marine Investigation Report (MIR-25-21) covering the May 13, 2024 capsizing of a 67-ft towing vessel. Includes event sequence, weather forecasts and reports, probable cause, and vessel particulars table. Investigation case ID DCA24FM038."
+}

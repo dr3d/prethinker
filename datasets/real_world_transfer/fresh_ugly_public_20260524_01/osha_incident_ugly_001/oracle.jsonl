@@ -1,0 +1,25 @@
+{"id":"q001","reference_answer":"Premier Fence, Llc."}
+{"id":"q002","reference_answer":"I91 North Exit 10a West Springfield, West Springfield, MA 01089."}
+{"id":"q003","reference_answer":"Springfield Area Office."}
+{"id":"q004","reference_answer":"03/28/2025."}
+{"id":"q005","reference_answer":"NAICS 238990, described as \"All Other Specialty Trade Contractors.\""}
+{"id":"q006","reference_answer":"03/28/2025 — the same day as the event."}
+{"id":"q007","reference_answer":"09/10/2025."}
+{"id":"q008","reference_answer":"09/17/2025 (the same issuance date for both citations)."}
+{"id":"q009","reference_answer":"11/04/2025 (the same abatement due date for both citations)."}
+{"id":"q010","reference_answer":"10/06/2025 (the same contest date for both citations)."}
+{"id":"q011","reference_answer":"Three employees are listed; their ages are 26, 48, and 57."}
+{"id":"q012","reference_answer":"Fatality — listed for all three employees."}
+{"id":"q013","reference_answer":"The \"Nature of Injury\" cell is blank for all three employees; no value is recorded."}
+{"id":"q014","reference_answer":"Citation IDs 01001 and 01002; both are classified as Serious."}
+{"id":"q015","reference_answer":"Current Penalty under Serious is $23,170; FTA Penalty under Serious is $0."}
+{"id":"q016","reference_answer":"Total initial penalty $23,170, which is two Serious citations at $11,585 each ($11,585 × 2 = $23,170)."}
+{"id":"q017","reference_answer":"The subpart suffix: citation 01001 cites \"19260200 G01\" while citation 01002 cites \"19260200 G02\". The base standard is the same; only the trailing subpart differs."}
+{"id":"q018","reference_answer":"The accident took place at the site address (I91 North Exit 10a West Springfield, West Springfield, MA 01089), not the mailing address (1010 Turnpike Street, Canton, MA 02021). The abstract describes the workers performing guardrail repairs on the interstate, and the document explicitly labels one address \"Site Address\" and the other \"Mailing Address.\""}
+{"id":"q019","reference_answer":"All three fatally injured workers are listed with the occupation \"Construction laborers.\" That is consistent with the described activity — performing guardrail repairs on the interstate — at the time they were struck."}
+{"id":"q020","reference_answer":"Five distinct inspection-related identifiers appear: Inspection Nr 1814187.015, Accident/Investigation Summary Nr 180500.015 (which also appears as the Investigation Nr in the Investigation Summary), Report ID 0112600, and in the Related Activity section an Accident Activity Nr 2277281 and a related Inspection 1814197."}
+{"id":"q021","reference_answer":"No. The Case Status is shown as OPEN (twice on the inspection detail page), and the document explicitly notes the inspection has not been indicated as closed; the \"Case Closed\" field is also blank."}
+{"id":"q022","reference_answer":"No. The SIC field is blank in the source; only the NAICS value (238990) is populated."}
+{"id":"q023","reference_answer":"No. The \"Advanced Notice\" field shows N."}
+{"id":"q024","reference_answer":"No. Every FTA Penalty value in the Violation Summary and in both Violation Items rows is $0."}
+{"id":"q025","reference_answer":"NonUnion."}

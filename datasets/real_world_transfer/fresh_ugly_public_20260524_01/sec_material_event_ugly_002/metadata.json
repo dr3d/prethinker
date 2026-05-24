@@ -1,0 +1,25 @@
+{
+  "fixture_id": "sec_material_event_ugly_002",
+  "domain": "sec_corporate_disclosure",
+  "document_type": "form_8k_item_5_02_officer_director_change_with_compensation",
+  "source_urls": [
+    "https://www.sec.gov/Archives/edgar/data/945841/000119312526204112/pool-20260504.htm"
+  ],
+  "document_title": "Pool Corporation — Form 8-K — Departure of CEO Peter D. Arvan and appointment of John B. Watwood as President and CEO; appointment of John E. Stokely as Executive Chair",
+  "issuer": "Pool Corporation (Delaware corporation), CIK 945841",
+  "event_date": "2026-05-04",
+  "filing_date": "2026-05-04",
+  "retrieval_date": "2026-05-24",
+  "questions_count": 25,
+  "pressure_tags": [
+    "officer_director_transition",
+    "multiple_named_individuals_overlapping_first_names",
+    "three_compensation_amounts_at_different_scales",
+    "equity_grant_50_50_split",
+    "bonus_as_target_not_guaranteed",
+    "stokely_three_role_history_dates",
+    "item_5_02_e_deferred_amendment",
+    "item_7_01_furnished_not_filed",
+    "signatory_is_CFO_not_CEO"
+  ]
+}

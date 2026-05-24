@@ -1,0 +1,122 @@
+# WARNING LETTER
+
+## Nupack Inc. — MARCS-CMS 722113 — March 20, 2026
+
+| Field | Value |
+|---|---|
+| Delivery Method | Via Email |
+| Product | Dietary Supplements |
+
+### Recipient
+
+Khaleeq Ahmed  
+Owner  
+Nupack Inc.  
+1390 Gateway Dr.  
+Elgin, IL 60124  
+United States  
+amd@nupacknutrition.com
+
+### Issuing Office
+
+Human Foods Program  
+United States
+
+---
+
+**March 20, 2026**
+
+**WARNING LETTER**
+
+**CMS #722113**
+
+Dear Mr. Ahmed:
+
+The U.S. Food and Drug Administration (FDA) conducted an inspection of your facility located at 1390 Gateway Dr., Elgin, IL 60124 on August 20, 2025, through September 24, 2025. Based on inspectional findings and review of the product labels and labeling collected during the inspection, as well as review of your website, www.unitechusk.com, we have identified significant violations of the Federal Food, Drug, and Cosmetic Act (the Act) and applicable regulations. You can find the Act and FDA regulations through links on FDA's home page at www.fda.gov.
+
+At the conclusion of the inspection on September 24, 2025, our investigator provided you with a Form FDA 483, Inspectional Observations (FDA 483). We acknowledge receipt of your response dated January 12, 2026, requesting an additional four weeks to respond. To date, we have not received further correspondence from your firm.
+
+## Unapproved New Drugs
+
+FDA reviewed your website at the Internet address www.unitechusk.com in August and September of 2025 and has determined that you take orders there for the products, Cardiag, Diabetech, Cleanse-CAMP, MACA, Kidney Cleanse, and Pure Pysyllium Husk. FDA also reviewed product labels for your Cardiag, Diabetech, Cleanse-CAMP, MACA, Kidney Cleanse, and Pure Pysyllium Husk following the inspection of your facility between August 20, 2025, through September 24, 2025. The claims on your website and product labels establish that these products are drugs under section 201(g)(1)(B) of the Act [21 U.S.C. 321(g)(1)(B)] because they are intended for use in the cure, mitigation, treatment, or prevention of disease. As explained further below, introducing or delivering these products for introduction into interstate commerce for such uses violates the Act.
+
+Examples of some of the claims that provide evidence that your products are intended for use as drugs include:
+
+**Your firm's website, www.unitechusk.com, states the following under your Diabetech labeling:**
+
+- Product name: "Diabetech" [diabetes]
+- "Diabetech powder for Diabetics" [diabetes]
+- "Helping in daily regulation of blood glucose levels"
+- "[N]atural diabetic supplement powder mix for daily diabetes support"
+- "Diabetech (a) supports blood sugar control, (b) reduces inflammation, and (c) helps enhance insulin sensitivity"
+
+**Your firm's Cardiag labels and website, www.unitechusk.com, state the following:**
+
+- "It may help…..Lowering Cholesterol, and protecting against clots which can cause heart attacks and stroke"
+- "It … may prevent high blood pressure"
+- "Can help….with the prevention of …..stroke and heart attack"
+- "It helps to reduce risk for repeat heart attacks and improving outcomes in patients with heart failure [heart disease] to lowering blood pressure and combat side effects of cholesterol lowering statins"
+
+**Your firm's Cleanse-CAMP label states the following:**
+
+- "Relieves Constipation"
+- "[H]ealthy alternative to over-the-counter laxatives…"
+
+**Your firm's label for your Kidney Cleanse states the following:**
+
+- "This supplement helps…reduce inflammation"
+
+**Your firm's label for your Pure Psyllium Husk states the following:**
+
+- "Support to lower LDL Cholesterol"
+
+**Your firm's website, www.unitechusk.com, states the following under your MACA labeling:**
+
+- "MACA may helps [sic] to reduce erectile dysfunction."
+- "MACA may reduce blood pressure"
+
+Your products are not generally recognized as safe and effective for the above referenced uses and, therefore, the products are "new drugs" under section 201(p) of the Act [21 U.S.C. 321(p)]. With certain exceptions not applicable here, new drugs may not be legally introduced or delivered for introduction into interstate commerce without prior approval from FDA, as described in sections 301(d) and 505(a) of the Act [21 U.S.C. 331(d), 355(a)]. FDA approves a new drug on the basis of scientific data and information demonstrating that the drug is safe and effective.
+
+## Misbranded Drugs
+
+A drug is misbranded under section 502(f)(1) of the Act [21 U.S.C. 352(f)(1)] if the drug fails to bear adequate directions for its intended use(s). "Adequate directions for use" means directions under which a layperson can use a drug safely and for the purposes for which it is intended (21 CFR 201.5). Prescription drugs, as defined in section 503(b)(1)(A) of the Act [21 U.S.C. 353(b)(1)(A)], can only be used safely at the direction, and under the supervision, of a licensed practitioner.
+
+Your products Cardiag, Diabetech, and MACA are intended for treatment or prevention of one or more diseases that are not amenable to self-diagnosis, treatment, or prevention without the supervision of a licensed practitioner. Therefore, it is impossible to write adequate directions for a layperson to use your products safely for their intended purposes. Accordingly, Cardiag, Diabetech, and MACA fail to bear adequate directions for their intended use and, therefore, the products are misbranded under section 502(f)(1) of the Act [21 U.S.C. 352(f)(1)]. The introduction or delivery for introduction into interstate commerce of these misbranded drugs violates section 301(a) of the Act [21 U.S.C. 331(a)].
+
+## Adulterated Dietary Supplements
+
+The inspection of your facility on August 20, 2025, through September 24, 2025, identified serious violations of the FDA's regulations for Current Good Manufacturing Practice (CGMP) in Manufacturing, Packaging, Labeling, or Holding Operations for Dietary Supplements, under Title 21, Code of Federal Regulations (CFR), Part 111 (21 CFR Part 111). These violations cause all of your dietary supplements, including the Cardiag, Cleanse-camp, and MACA 1000 mg products manufactured at your facility, to be adulterated within the meaning of section 402(g)(1) of the Act [21 U.S.C. 342(g)(1)] because they have been prepared, packed, or held under conditions that do not meet CGMP requirements for dietary supplements. Thus, in addition to being unapproved new drugs and misbranded drugs, your Cardiag, Cleanse-camp, and MACA 1000 mg products are also adulterated dietary supplements under section 402(g)(1) of the Act [21 U.S.C. 342(g)(1)].
+
+Your significant violations of the CGMP requirements are as follows:
+
+**1.** For each dietary supplement that you manufacture, you did not establish product specifications for the identity, purity, strength, and composition of the finished batch of the dietary supplement and for limits on those types of contamination that may adulterate your supplements, to comply with 21 CFR 111.70(e). For example, you were unable to produce finished product specifications for identity, purity, strength, composition and limits on contamination for your products, Cardiag, Cleanse-camp, and MACA 1000 mg.
+
+In addition to establishing these specifications, you must determine whether such specifications are met, in accordance with 21 CFR 111.73 and 21 CFR 111.75.
+
+**2.** You did not prepare and follow a written master manufacturing record for each unique formulation of dietary supplement that you manufacture, and for each batch size of a dietary supplement that you manufacture, to comply with 21 CFR 111.205(a). For example, you did not prepare a written master manufacturing record for each unique formulation and each batch size of your finished products Cardiag, Cleanse-camp, and MACA 1000 mg.
+
+**3.** You did not prepare a batch production record every time you manufactured a batch of a dietary supplement to comply with 21 CFR 111.255(a). For example, you do not have a batch production record for the manufacturing of your Cardiag, Cleanse-camp, and MACA 1000 mg dietary supplements.
+
+**4.** You did not establish written procedures for when a returned dietary supplement is received, when a returned dietary supplement must be destroyed, or otherwise suitably disposed, when a returned dietary supplement may be salvaged, for ensuring any returned dietary supplements that are reprocessed meet all product specifications, accepting or rejecting the release for distribution of any returned dietary supplement that is reprocessed, and, if the reason for a dietary supplement being returned implicates other batches, conducting an investigation of your manufacturing processes and other batches to determine compliance with specifications, to comply with 21 CFR Part 111, Subpart N. For example, you did not establish written procedures for your returned Cardiag, Cleanse-camp, and MACA 1000 mg dietary supplement products.
+
+This letter is not intended to be an all-inclusive statement of violations that may exist in connection with your products. You are responsible for investigating and determining the causes of any violations and for preventing their recurrence or the occurrence of other violations. It is your responsibility to ensure that your firm complies with all requirements of federal law, including FDA regulations.
+
+This letter notifies you of our concerns and provides you an opportunity to address them. Failure to adequately address this matter may result in legal action including, without limitation, seizure and injunction.
+
+Please notify FDA in writing, within 15 working days of receipt of this letter, of the specific steps you have taken to address any violations. Include an explanation of each step being taken to prevent the recurrence of violations, as well as copies of related documentation. If you cannot complete corrective actions within 15 working days, state the reason for the delay and the time within which you will do so. If you believe that your products are not in violation of the Act, include your reasoning and any supporting information for our consideration.
+
+Your written reply should be directed to Lauren.Crivellone@fda.hhs.gov United States Food and Drug Administration, Human Foods Program, Office of Enforcement, 5001 Campus Drive, College Park, Maryland 20740-3835 or via email at HFP-OCE-DietarySupplements@fda.hhs.gov. Please reference CMS #722113 on any submissions and within the subject line of any emails to us. If you have any questions, you may email at HFP-OCE-DietarySupplements@fda.hhs.gov.
+
+Sincerely,
+
+/S/
+
+**Maria S. Knirk, JD, MBA**  
+Director, Office of Enforcement  
+Office of Compliance and Enforcement  
+Human Foods Program
+
+---
+
+*Content current as of: 04/28/2026*  
+*Regulated Product(s): Dietary Supplements*

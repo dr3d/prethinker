@@ -1,0 +1,12 @@
+{
+  "fixture_id": "fda_warning_ugly_001",
+  "batch": "fresh_ugly_public_20260524_01",
+  "source_domain": "FDA",
+  "document_title": "Warning Letter — Medical Products Laboratories, Inc., MARCS-CMS 721916",
+  "document_date": "2026-04-09",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "CDER warning letter to a Philadelphia drug manufacturer following an inspection Sep 29 – Oct 16, 2025. Four CGMP violations plus an unapproved new drug section. Two co-signatories, heavy (b)(4) redactions, 15-working-day response window."
+}

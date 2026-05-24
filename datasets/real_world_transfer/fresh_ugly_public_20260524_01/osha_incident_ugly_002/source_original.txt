@@ -1,0 +1,102 @@
+========================================================================
+PAGE 1: OSHA Accident Report Detail
+URL: https://www.osha.gov/pls/imis/accidentsearch.accident_detail?id=123160.015
+========================================================================
+
+Accident Report Detail
+
+Accident Summary Nr: 123160.015 - Employee is killed in fall through deteriorated roof
+
+Accident Summary Nr: 123160.015 -- Report ID: 0420600 -- Event Date: 01/13/2020
+
+Inspection Nr | Date Opened | SIC | NAICS  | Establishment Name
+1455758.015   | 01/13/2020  |     | 238160 | Centimark Corporation
+
+Abstract: At 8:31 a.m. on January 13, 2020, Employee #1, employed by a roofing company, was engaged in reroofing activity at a one-story commercial building. He was removing old roofing layers down to the structural metal deck. The metal deck, which was deteriorated and corroded away from the open web steel joist and beams, failed to hold the employee's weight. The employee fell through the metal deck to the concrete surface, a fall height of 22.8 feet. Employee #1 sustained skull fractures and blunt force traumatic brain injury and was killed.
+
+Keywords: Blunt force trauma, Brain, Construction, Dismantling, Fall, Fall Protection, Floor Hole, Fracture, Repair, Roof, Roof Decking, Roofer, Skull, Structural Collapse
+
+Accident Details
+
+End Use             | Project Type                 | Project Cost | Stories | Non-building Height | Fatality
+Commercial building | Alteration or rehabilitation |              | 1       | 23                  | X
+
+Employee Details
+
+Employee # | Inspection Nr | Age | Sex | Degree of Injury | Nature of Injury | Occupation | Construction
+1          | 1455758.015   | 51  | M   | Fatality         |                  | Roofers    | Distance of Fall: 23 feet   Worker Height Above Ground/Floor: 23 feet   Cause: Roofing   Fatality Cause:
+
+========================================================================
+PAGE 2: OSHA Inspection Detail
+URL: https://www.osha.gov/ords/imis/establishment.inspection_detail?id=1455758.015
+========================================================================
+
+Inspection Detail
+
+Case Status: CLOSED
+
+Inspection: 1455758.015 - Centimark Corporation
+
+Inspection Information - Office: Tampa Area Office
+
+Inspection Nr: 1455758.015
+Report ID: 0420600
+Date Opened: 01/13/2020
+
+Site Address:
+Centimark Corporation
+302 N Frontage Road
+Plant City, FL 33563
+
+Mailing Address:
+319 Industrial Drive, Franklin, OH 45005
+
+Union Status: NonUnion
+SIC:
+NAICS: 238160/Roofing Contractors
+
+Inspection Type: Fat/Cat
+Scope: Complete
+Advanced Notice: N
+Ownership: Private
+Safety/Health: Safety
+Close Conference: 06/24/2020
+Emphasis: L:Fall
+Case Closed: 08/18/2020
+
+Related Activity
+
+Type     | Activity Nr | Safety | Health
+Accident | 1533489     |        |
+
+Case Status: CLOSED
+
+Violation Summary
+
+Violations/Penalties | Serious | Willful | Repeat | Other | Unclass | Total
+Initial Violations   | 1       |         |        |       |         | 1
+Current Violations   | 1       |         |        |       |         | 1
+Initial Penalty      | $13,494 | $0      | $0     | $0    | $0      | $13,494
+Current Penalty      | $6,747  | $0      | $0     | $0    | $0      | $6,747
+FTA Penalty          | $0      | $0      | $0     | $0    | $0      | $0
+
+Violation Items
+
+# | Citation ID | Citation Type | Standard Cited | Issuance Date | Abatement Due Date | Current Penalty | Initial Penalty | FTA Penalty | Contest | Latest Event            | Note
+1 | 01001       | Serious       | 19260760 A01   | 06/25/2020    | 07/08/2020         | $6,747          | $13,494         | $0          |         | I - Informal Settlement |
+
+Investigation Summary
+
+Investigation Nr: 123160.015
+Event: 01/13/2020
+
+Employee is killed in fall through deteriorated roof
+
+At 8:31 a.m. on January 13, 2020, Employee #1, employed by a roofing company, was engaged in reroofing activity at a one-story commercial building. He was removing old roofing layers down to the structural metal deck. The metal deck, which was deteriorated and corroded away from the open web steel joist and beams, failed to hold the employee's weight. The employee fell through the metal deck to the concrete surface, a fall height of 22.8 feet. Employee #1 sustained skull fractures and blunt force traumatic brain injury and was killed.
+
+Keywords: Blunt force trauma, Brain, Construction, Dismantling, Fall, Fall Protection, Floor Hole, Fracture, Repair, Roof, Roof Decking, Roofer, Skull, Structural Collapse
+
+Investigated Inspection
+
+# | Inspection   | Age | Sex | Degree of Injury | Nature of Injury | Occupation
+1 | 1455758.015  | 51  | M   | Fatality         |                  | Roofers

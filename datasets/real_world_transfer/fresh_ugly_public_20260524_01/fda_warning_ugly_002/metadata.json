@@ -1,0 +1,12 @@
+{
+  "fixture_id": "fda_warning_ugly_002",
+  "batch": "fresh_ugly_public_20260524_01",
+  "source_domain": "FDA",
+  "document_title": "Warning Letter — Nupack Inc., MARCS-CMS 722113 / CMS #722113",
+  "document_date": "2026-03-20",
+  "retrieved_at": "2026-05-24",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nupack-inc-722113-03202026",
+  "source_type": "official_public_document",
+  "document_format_original": "html",
+  "notes": "FDA Human Foods Program warning letter to dietary supplement manufacturer in Elgin, IL. Three-part violation structure: Unapproved New Drugs (website/label disease claims for six products), Misbranded Drugs (three of those products), and Adulterated Dietary Supplements (four 21 CFR Part 111 CGMP citations across three products). Firm requested an extension and stopped corresponding."
+}

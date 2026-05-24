@@ -1,0 +1,111 @@
+Accident Report Detail
+========================
+
+Accident Summary Nr: 180500.015 - Three employees struck by vehicle
+
+Accident Summary Nr: 180500.015 -- Report ID: 0112600 -- Event Date: 03/28/2025
+
+| Inspection Nr | Date Opened | SIC | NAICS  | Establishment Name |
+| ------------- | ----------- | --- | ------ | ------------------ |
+| 1814187.015   | 03/28/2025  |     | 238990 | Premier Fence, Llc |
+
+Abstract: Three employees were performing guardrail repairs on the interstate when a vehicle traveling at a high rate of speed fatally struck the employees.
+
+Keywords: Guardrail, Maintenance, Struck By, Vehicle
+
+Accident Details
+
+| End Use               | Project Type          | Project Cost | Stories | Non-building Height | Fatality |
+| --------------------- | --------------------- | ------------ | ------- | ------------------- | -------- |
+| Highway, road, street | Maintenance or repair |              |         | 0                   | X        |
+
+Employee Details
+
+| Employee # | Inspection Nr | Age | Sex | Degree of Injury | Nature of Injury | Occupation            |
+| ---------- | ------------- | --- | --- | ---------------- | ---------------- | --------------------- |
+| 1          | 1814187.015   | 26  | M   | Fatality         |                  | Construction laborers |
+| 2          | 1814187.015   | 48  | M   | Fatality         |                  | Construction laborers |
+| 3          | 1814187.015   | 57  | M   | Fatality         |                  | Construction laborers |
+
+
+Inspection Detail
+==================
+
+Case Status: OPEN
+
+Note: The following inspection has not been indicated as closed. OSHA citation items will be posted 30 (thirty) days after the employer receives the citation(s), except in cases of significant public interest. Posted citation items reflect any amendments to citations that are the result of a prompt settlement, which OSHA encourages. Employers and employee representatives will continue to receive copies of the citation(s) upon issuance.
+
+Inspection: 1814187.015 - Premier Fence, Llc
+
+Inspection Information - Office: Springfield Area Office
+
+Inspection Nr: 1814187.015
+Report ID: 0112600
+Date Opened: 03/28/2025
+
+Site Address:
+Premier Fence, Llc
+I91 North Exit 10a West Springfield
+West Springfield, MA 01089
+
+Mailing Address:
+1010 Turnpike Street, Canton, MA 02021
+
+Union Status: NonUnion
+SIC:
+NAICS: 238990/All Other Specialty Trade Contractors
+
+Inspection Type: Fat/Cat
+Scope: Partial
+Advanced Notice: N
+Ownership: Private
+Safety/Health: Safety
+Close Conference: 09/10/2025
+Emphasis:
+Case Closed:
+
+Related Activity
+
+| Type       | Activity Nr | Safety | Health |
+| ---------- | ----------- | ------ | ------ |
+| Accident   | 2277281     |        |        |
+| Inspection | 1814197     | Yes    |        |
+
+Case Status: OPEN
+
+Violation Summary
+
+| Violations/Penalties | Serious | Willful | Repeat | Other | Unclass | Total   |
+| -------------------- | ------- | ------- | ------ | ----- | ------- | ------- |
+| Initial Violations   | 2       |         |        |       |         | 2       |
+| Current Violations   | 2       |         |        |       |         | 2       |
+| Initial Penalty      | $23,170 | $0      | $0     | $0    | $0      | $23,170 |
+| Current Penalty      | $23,170 | $0      | $0     | $0    | $0      | $23,170 |
+| FTA Penalty          | $0      | $0      | $0     | $0    | $0      | $0      |
+
+Violation Items
+
+| # | Citation ID | Citation Type | Standard Cited | Issuance Date | Abatement Due Date | Current Penalty | Initial Penalty | FTA Penalty | Contest    | Latest Event  |
+| - | ----------- | ------------- | -------------- | ------------- | ------------------ | --------------- | --------------- | ----------- | ---------- | ------------- |
+| 1 | 01001       | Serious       | 19260200 G01   | 09/17/2025    | 11/04/2025         | $11,585         | $11,585         | $0          | 10/06/2025 | C - Contested |
+| 2 | 01002       | Serious       | 19260200 G02   | 09/17/2025    | 11/04/2025         | $11,585         | $11,585         | $0          | 10/06/2025 | C - Contested |
+
+Investigation Summary
+
+Investigation Nr: 180500.015
+
+Event: 03/28/2025
+
+Three employees struck by vehicle
+
+Three employees were performing guardrail repairs on the interstate when a vehicle traveling at a high rate of speed fatally struck the employees.
+
+Keywords: Guardrail, Maintenance, Struck By, Vehicle
+
+Investigated Inspection
+
+| # | Inspection   | Age | Sex | Degree of Injury | Nature of Injury | Occupation            |
+| - | ------------ | --- | --- | ---------------- | ---------------- | --------------------- |
+| 1 | 1814187.015  | 26  | M   | Fatality         |                  | Construction laborers |
+| 2 | 1814187.015  | 48  | M   | Fatality         |                  | Construction laborers |
+| 3 | 1814187.015  | 57  | M   | Fatality         |                  | Construction laborers |

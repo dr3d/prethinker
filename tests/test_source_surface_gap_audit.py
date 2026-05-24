@@ -4,6 +4,7 @@ from kb_pipeline import CorePrologRuntime
 from scripts.audit_source_surface_gaps import audit_scorecard
 from scripts.run_domain_bootstrap_qa import (
     compiled_kb_inventory,
+    _source_record_identifier_set_companion,
     _source_field_question_key_hint_queries,
     _source_label_question_key_hint_queries,
     _source_section_question_key_hint_queries,
@@ -148,6 +149,47 @@ def test_run_query_plan_filters_source_text_memberchk_queries() -> None:
     assert rows[0]["result"]["num_rows"] == 1
     assert rows[0]["result"]["rows"][0]["SourceRow"] == "src_line_1"
     assert rows[0]["result"]["reasoning_basis"]["validation"] == "source_text_contains_filter_repaired"
+
+
+def test_source_record_identifier_set_collects_reference_numbers() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0003, "
+        "medical_products_laboratories_inc_marcs_cms_721916_april_09_2026)."
+    )
+    runtime.assert_fact("source_record_numeric_token(src_line_0003, v_721916).")
+    runtime.assert_fact("source_record_text_atom(src_line_0026, warning_letter_320_26_61).")
+    runtime.assert_fact("source_record_numeric_token(src_line_0026, v_320_26_61).")
+
+    companion = _source_record_identifier_set_companion(
+        runtime,
+        utterance="What are the two reference numbers FDA uses for this warning letter?",
+    )
+
+    assert companion is not None
+    displays = {row["IdentifierDisplay"] for row in companion["result"]["rows"]}
+    assert "MARCS-CMS 721916" in displays
+    assert "Warning Letter 320-26-61" in displays
+
+
+def test_source_record_identifier_set_collects_inspection_related_identifiers() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact("source_record_field(src_line_0045, inspection_nr, v_1814187_015).")
+    runtime.assert_fact("source_record_field(src_line_0046, report_id, v_0112600).")
+    runtime.assert_fact("source_record_field(src_line_0075, activity_nr, v_2277281).")
+    runtime.assert_fact("source_record_field(src_line_0099, investigation_nr, v_180500_015).")
+
+    companion = _source_record_identifier_set_companion(
+        runtime,
+        utterance="How many distinct inspection-related identifiers does this record contain?",
+    )
+
+    assert companion is not None
+    displays = {row["IdentifierDisplay"] for row in companion["result"]["rows"]}
+    assert "Inspection Nr 1814187.015" in displays
+    assert "Report ID 0112600" in displays
+    assert "Activity Nr 2277281" in displays
+    assert "Investigation Nr 180500.015" in displays
 
 
 def test_source_surface_gap_audit_separates_stranded_source_from_direct_rows(tmp_path) -> None:
