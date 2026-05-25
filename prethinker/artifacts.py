@@ -30,13 +30,14 @@ def build_compiled_artifact_bundle(
     document_type: str,
     document_bytes: bytes,
     source_records: list[SourceRecord],
+    compile_mode: str = "ledger",
+    semantic_compile: dict[str, Any] | None = None,
 ) -> CompiledArtifactBundle:
     """Build the semantic compiled artifact bundle for a public compile.
 
-    The public API currently admits deterministic source identity and ledger
-    facts. Rich semantic world admission remains behind the research harness, so
-    the bundle records that status explicitly instead of overstating compiled
-    truth.
+    The default public API admits deterministic source identity and ledger facts.
+    Opt-in semantic mode may append narrowly admitted, source-anchored semantic
+    facts while keeping model proposals out of the durable artifact.
     """
 
     source_hash = hashlib.sha256(document_bytes).hexdigest()
@@ -51,19 +52,39 @@ def build_compiled_artifact_bundle(
     for record in source_records:
         world_facts.append(_fact("source_record", kb_id, record.record_id))
 
+    semantic_compile = semantic_compile or {}
+    semantic_status = str(semantic_compile.get("status") or "not_run")
+    semantic_world_status = "document_identity_only"
+    semantic_admission_status = "pending_public_semantic_compiler"
+    query_policy_status = "deterministic_extractive_source_record_policy"
+    if compile_mode == "semantic":
+        query_policy_status = "semantic_bundle_plus_deterministic_extractive_source_record_policy"
+        if semantic_status == "completed":
+            semantic_world_status = "semantic_core_v1"
+            semantic_admission_status = "admitted_semantic_core_v1"
+        elif semantic_status == "error":
+            semantic_world_status = "document_identity_only"
+            semantic_admission_status = "semantic_core_v1_error"
+        elif semantic_status == "skipped":
+            semantic_world_status = "document_identity_only"
+            semantic_admission_status = "semantic_core_v1_skipped"
+
     epistemic_facts = [
         _fact("compile_artifact_status", kb_id, "semantic_bundle_created"),
-        _fact("semantic_world_status", kb_id, "document_identity_only"),
-        _fact("semantic_admission_status", kb_id, "pending_public_semantic_compiler"),
-        _fact("query_policy_status", kb_id, "deterministic_extractive_source_record_policy"),
+        _fact("semantic_world_status", kb_id, semantic_world_status),
+        _fact("semantic_admission_status", kb_id, semantic_admission_status),
+        _fact("query_policy_status", kb_id, query_policy_status),
     ]
     if not source_records:
         epistemic_facts.append(_fact("coverage_status", kb_id, "no_extractable_source_records"))
+    world_facts.extend(str(fact) for fact in semantic_compile.get("world_facts") or [])
+    epistemic_facts.extend(str(fact) for fact in semantic_compile.get("epistemic_facts") or [])
 
     ledger_facts = _source_record_ledger_facts(source_records)
     query_policy = {
         "schema_version": "query_policy_v1",
         "answer_surfaces": ["world", "epistemic", "ledgers", "source_records"],
+        "compile_mode": compile_mode,
         "default_query_mode": "deterministic_extractive_source_record",
         "llm_synthesis": False,
         "qa_writes_allowed": False,
@@ -88,9 +109,10 @@ def build_compiled_artifact_bundle(
         "schema_version": "compile_diagnostics_v1",
         "semantic_compile": {
             "status": "not_run",
+            "compile_mode": compile_mode,
             "reason": (
                 "public Engine writes the semantic artifact bundle contract; "
-                "full LLM semantic admission remains behind the research harness"
+                "use compile_mode='semantic' to run the bounded public semantic compiler"
             ),
         },
         "coverage": {
@@ -103,6 +125,14 @@ def build_compiled_artifact_bundle(
             "write_proposals": 0,
         },
     }
+    if semantic_compile:
+        semantic_diagnostics = dict(semantic_compile.get("diagnostics") or {})
+        diagnostics["semantic_compile"] = {
+            "status": semantic_status,
+            "compile_mode": compile_mode,
+            "schema_version": str(semantic_compile.get("schema_version") or "semantic_core_v1"),
+            **semantic_diagnostics,
+        }
     return CompiledArtifactBundle(
         schema_version=SEMANTIC_ARTIFACT_SCHEMA_VERSION,
         artifact_paths=dict(COMPILED_ARTIFACT_PATHS),
@@ -214,6 +244,10 @@ def _render_prolog_program(*, title: str, schema_version: str, facts: list[str],
 
 
 def _fact(name: str, *args: Any) -> str:
+    return prolog_fact(name, *args)
+
+
+def prolog_fact(name: str, *args: Any) -> str:
     return f"{name}({', '.join(_term(arg) for arg in args)})."
 
 

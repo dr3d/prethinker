@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 import prethinker
+from prethinker.semantic import admit_semantic_proposal
 from prethinker import (
     AuditTrace,
     CleanlinessCounters,
@@ -21,7 +22,7 @@ class ExternalDocumentType(str, Enum):
 
 
 def test_public_package_exports_version_and_engine() -> None:
-    assert prethinker.__version__ == "0.4.0"
+    assert prethinker.__version__ == "0.5.0"
     assert Engine is prethinker.Engine
     assert all(
         item is not None
@@ -60,6 +61,7 @@ def test_engine_compile_query_and_lifecycle(tmp_path) -> None:
     assert [record.kb_id for record in compiled.source_records] == [compiled.kb_id] * 3
     assert compiled.artifact_bundle is not None
     assert compiled.artifact_bundle.schema_version == "semantic_artifact_bundle_v1"
+    assert compiled.artifact_bundle.query_policy["compile_mode"] == "ledger"
     assert compiled.artifact_bundle.query_policy["qa_writes_allowed"] is False
     assert compiled.artifact_bundle.diagnostics["semantic_compile"]["status"] == "not_run"
     assert any(fact.startswith("source_document(") for fact in compiled.artifact_bundle.world_facts)
@@ -101,6 +103,106 @@ def test_engine_accepts_enum_like_document_type(tmp_path) -> None:
     )
 
     assert compiled.metadata.document_type == "md"
+
+
+def test_semantic_compile_mode_admits_only_source_anchored_facts(tmp_path) -> None:
+    class FakeSemanticCompiler:
+        def compile(self, *, kb_id, document_name, source_records):
+            assert document_name == "semantic.md"
+            return admit_semantic_proposal(
+                kb_id=kb_id,
+                source_records=source_records,
+                proposal={
+                    "entities": [
+                        {
+                            "id": "maria",
+                            "kind": "person",
+                            "name": "Maria Chen",
+                            "source_record_id": "src_line_0002",
+                            "source_quote": "Maria Chen",
+                        }
+                    ],
+                    "claims": [
+                        {
+                            "id": "signed_notice",
+                            "subject": "inspection notice",
+                            "predicate": "signed_by",
+                            "object": "Maria Chen",
+                            "source_record_id": "src_line_0002",
+                            "source_quote": "Maria Chen signed the inspection notice",
+                        },
+                        {
+                            "id": "unsupported",
+                            "subject": "notice",
+                            "predicate": "approved_by",
+                            "object": "Hidden Reviewer",
+                            "source_record_id": "src_line_0002",
+                            "source_quote": "Hidden Reviewer",
+                        },
+                    ],
+                },
+            )
+
+    engine = Engine(storage_dir=tmp_path / "kbs", semantic_compiler=FakeSemanticCompiler())
+    compiled = engine.compile_document(
+        document_name="semantic.md",
+        document_bytes=b"# Source\nMaria Chen signed the inspection notice.\n",
+        document_type="md",
+        compile_mode="semantic",
+    )
+
+    assert compiled.cleanliness_counters.is_clean is True
+    assert compiled.artifact_bundle is not None
+    assert compiled.artifact_bundle.query_policy["compile_mode"] == "semantic"
+    assert compiled.artifact_bundle.diagnostics["semantic_compile"]["status"] == "completed"
+    assert compiled.artifact_bundle.diagnostics["semantic_compile"]["skipped_candidate_count"] == 1
+    assert compiled.metadata.metadata["semantic_compile_status"] == "completed"
+    world_text = (tmp_path / "kbs" / compiled.kb_id / "compiled_source" / "world.pl").read_text(encoding="utf-8")
+    epistemic_text = (tmp_path / "kbs" / compiled.kb_id / "compiled_source" / "epistemic.pl").read_text(encoding="utf-8")
+    assert 'semantic_entity("entity_maria", "person", "Maria Chen", "src_line_0002").' in world_text
+    assert (
+        'source_claim("claim_signed_notice", "inspection notice", "signed_by", "Maria Chen", "src_line_0002").'
+        in epistemic_text
+    )
+    assert "Hidden Reviewer" not in world_text
+    assert "Hidden Reviewer" not in epistemic_text
+
+
+def test_semantic_compile_failure_persists_error_diagnostics(tmp_path) -> None:
+    class BrokenSemanticCompiler:
+        def compile(self, *, kb_id, document_name, source_records):
+            raise RuntimeError("LM Studio unavailable")
+
+    engine = Engine(storage_dir=tmp_path / "kbs", semantic_compiler=BrokenSemanticCompiler())
+    compiled = engine.compile_document(
+        document_name="semantic.md",
+        document_bytes=b"# Source\nMaria Chen signed the inspection notice.\n",
+        document_type="md",
+        compile_mode="semantic",
+    )
+
+    assert compiled.cleanliness_counters.runtime_load_errors == 1
+    assert compiled.artifact_bundle is not None
+    assert compiled.artifact_bundle.diagnostics["semantic_compile"]["status"] == "error"
+    diagnostics_text = (
+        tmp_path / "kbs" / compiled.kb_id / "compiled_source" / "diagnostics.json"
+    ).read_text(encoding="utf-8")
+    assert "LM Studio unavailable" in diagnostics_text
+
+
+def test_compile_rejects_unknown_compile_mode(tmp_path) -> None:
+    engine = Engine(storage_dir=tmp_path / "kbs")
+    try:
+        engine.compile_document(
+            document_name="sample.md",
+            document_bytes=b"Plain source line.",
+            document_type="md",
+            compile_mode="magic",
+        )
+    except ValueError as exc:
+        assert "compile_mode" in str(exc)
+    else:
+        raise AssertionError("unknown compile mode should raise ValueError")
 
 
 def test_markdown_table_rows_compile_into_deterministic_ledger_fields(tmp_path) -> None:

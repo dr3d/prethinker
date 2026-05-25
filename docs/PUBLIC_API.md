@@ -55,6 +55,7 @@ engine.compile_document(
     document_name: str,
     document_bytes: bytes,
     document_type: str | DocumentType,
+    compile_mode: str = "ledger",
 ) -> CompileResult
 
 engine.query(*, kb_id: str, question: str) -> QueryResult
@@ -108,7 +109,7 @@ All models are dataclasses and provide `to_dict()` for JSON-facing adapters.
 
 ## Alpha Behavior
 
-The `0.4.0` Engine facade compiles Markdown, plain-text documents, and PDFs
+The `0.5.0` Engine facade compiles Markdown, plain-text documents, and PDFs
 with extractable text into a semantic compiled artifact bundle. The bundle is
 returned on `CompileResult.artifact_bundle` and persisted under the KB
 directory:
@@ -124,11 +125,53 @@ compiled_source/
   artifact_bundle.json
 ```
 
-The public package now has the product-shaped artifact contract. Its admitted
-semantic layer is intentionally narrow: deterministic source identity and
-source-record ledgers are durable, while rich LLM semantic admission is recorded
-as `not_run` in `diagnostics.json` until that research compiler is promoted into
-a stable SDK surface.
+The default `compile_mode="ledger"` is fast and local. It admits deterministic
+source identity and source-record ledgers, while semantic admission is recorded
+as `not_run` in `diagnostics.json`.
+
+Opt-in `compile_mode="semantic"` calls an OpenAI-compatible local endpoint,
+intended for LM Studio by default:
+
+```powershell
+$env:PRETHINKER_BASE_URL='http://127.0.0.1:1234'
+$env:PRETHINKER_MODEL='qwen/qwen3.6-35b-a3b'
+```
+
+```python
+compiled = engine.compile_document(
+    document_name="source.pdf",
+    document_bytes=pdf_bytes,
+    document_type="pdf",
+    compile_mode="semantic",
+)
+```
+
+Semantic mode is deliberately bounded. The LLM returns JSON candidates only;
+it never writes Prolog. Every candidate must cite a `source_record_id` and an
+exact `source_quote`. Deterministic admission writes only source-anchored facts
+into `world.pl` and `epistemic.pl`; unsupported candidates are skipped into
+`diagnostics.json`.
+
+The first public semantic slice admits sparse rows such as:
+
+```text
+semantic_entity(...)
+document_event(...)
+document_status(...)
+document_action(...)
+document_obligation(...)
+document_quantity(...)
+document_date(...)
+document_identifier(...)
+source_claim(...)
+source_finding(...)
+uncertainty_note(...)
+semantic_source_support(...)
+```
+
+If the semantic endpoint is unavailable, compile still persists the deterministic
+bundle and records `semantic_compile.status = "error"` in `diagnostics.json`.
+The returned `CleanlinessCounters.runtime_load_errors` is incremented.
 
 The alpha query path returns source-record evidence and an audit trace. When a
 source-record match is strong enough, `QueryResult.answer` contains a
@@ -148,6 +191,7 @@ query-time writes.
 ```json
 {
   "default_query_mode": "deterministic_extractive_source_record",
+  "compile_mode": "ledger",
   "llm_synthesis": false,
   "qa_writes_allowed": false,
   "compatibility_adapters": "disabled"

@@ -13,9 +13,11 @@ what can become durable truth.
 - Runtime entrypoint: `src/mcp_server.py`, especially `process_utterance()`.
 - Daily harness entrypoint: `scripts/run_kb_pipeline_clean_harness.py`, backed
   by `src/kb_pipeline_clean`.
-- Public package facade: `prethinker.Engine` `0.4.0`, whose
+- Public package facade: `prethinker.Engine` `0.5.0`, whose
   `compile_document()` returns and persists the semantic compiled artifact
-  bundle contract while marking full LLM semantic admission as not run.
+  bundle contract. Default `compile_mode="ledger"` stays fast and local; opt-in
+  `compile_mode="semantic"` calls an OpenAI-compatible endpoint and admits only
+  source-record-anchored semantic candidates into `world.pl` / `epistemic.pl`.
 - Current instrument brief: `docs/SEMANTIC_INSTRUMENT.md`.
 - Public research headline: `docs/CURRENT_RESEARCH_HEADLINE.md`.
 - Operating doctrine for high-context agents: `docs/CTO_ARCHITECTURE_BRIEF.md`.

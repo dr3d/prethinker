@@ -24,15 +24,22 @@ from prethinker.models import (
     QueryResult,
     SourceRecord,
 )
+from prethinker.semantic import (
+    OpenAICompatibleSemanticCompiler,
+    SemanticCompileAdmission,
+    semantic_compile_error_payload,
+    semantic_compile_skipped_payload,
+)
 from prethinker.storage import LocalKBStore
 
 
 class Engine:
     """Small public API for document compile, query, and KB lifecycle."""
 
-    def __init__(self, storage_dir: str | os.PathLike[str] | None = None) -> None:
+    def __init__(self, storage_dir: str | os.PathLike[str] | None = None, semantic_compiler: Any | None = None) -> None:
         self.storage_dir = Path(storage_dir or os.getenv("PRETHINKER_STORAGE_DIR", ".prethinker/kbs"))
         self._store = LocalKBStore(self.storage_dir)
+        self._semantic_compiler = semantic_compiler
 
     @classmethod
     def from_env(cls) -> "Engine":
@@ -52,12 +59,13 @@ class Engine:
         document_name: str,
         document_bytes: bytes,
         document_type: DocumentType | str | Any,
+        compile_mode: str = "ledger",
     ) -> CompileResult:
         """Compile a document into a local KB artifact.
 
-        The alpha compile path preserves deterministic source records for text
-        documents and extractable PDFs. It does not yet run the full semantic
-        compile harness.
+        The default compile path preserves deterministic source records and the
+        compiled artifact bundle. compile_mode="semantic" additionally runs a
+        bounded LLM proposal pass and admits only source-anchored semantic rows.
         """
 
         if not isinstance(document_name, str) or not document_name.strip():
@@ -66,17 +74,28 @@ class Engine:
             raise TypeError("document_bytes must be bytes")
 
         doc_type = _normalize_document_type(document_type)
+        mode = _normalize_compile_mode(compile_mode)
         source_records = _source_records_from_document(document_bytes, doc_type)
         kb_id = self._store.kb_id_for_document(document_name.strip(), document_bytes)
         compiled_records = [
             SourceRecord(record_id=record.record_id, kb_id=kb_id, payload=dict(record.payload)) for record in source_records
         ]
+        semantic_payload: dict[str, Any] | None = None
+        cleanliness = CleanlinessCounters()
+        if mode == "semantic":
+            semantic_payload, cleanliness = self._run_semantic_compile(
+                kb_id=kb_id,
+                document_name=document_name.strip(),
+                source_records=compiled_records,
+            )
         artifact_bundle = build_compiled_artifact_bundle(
             kb_id=kb_id,
             document_name=document_name.strip(),
             document_type=doc_type,
             document_bytes=document_bytes,
             source_records=compiled_records,
+            compile_mode=mode,
+            semantic_compile=semantic_payload,
         )
         metadata = self._store.create_kb(
             document_name=document_name.strip(),
@@ -86,7 +105,6 @@ class Engine:
             artifact_bundle=artifact_bundle,
             kb_id=kb_id,
         )
-        cleanliness = CleanlinessCounters()
         return CompileResult(
             kb_id=metadata.kb_id,
             metadata=metadata,
@@ -180,6 +198,22 @@ class Engine:
 
         return self._store.delete_kb(kb_id)
 
+    def _run_semantic_compile(
+        self,
+        *,
+        kb_id: str,
+        document_name: str,
+        source_records: list[SourceRecord],
+    ) -> tuple[dict[str, Any], CleanlinessCounters]:
+        if not source_records:
+            return semantic_compile_skipped_payload("no_extractable_source_records", 0), CleanlinessCounters()
+        compiler = self._semantic_compiler or OpenAICompatibleSemanticCompiler.from_env()
+        try:
+            result = compiler.compile(kb_id=kb_id, document_name=document_name, source_records=source_records)
+        except Exception as exc:
+            return semantic_compile_error_payload(exc), CleanlinessCounters(runtime_load_errors=1)
+        return _semantic_payload(result), CleanlinessCounters()
+
 
 def _normalize_document_type(document_type: DocumentType | str | Any) -> str:
     value = getattr(document_type, "value", document_type)
@@ -189,6 +223,31 @@ def _normalize_document_type(document_type: DocumentType | str | Any) -> str:
         "text": "txt",
     }
     return aliases.get(value, value)
+
+
+def _normalize_compile_mode(compile_mode: str) -> str:
+    value = str(compile_mode or "").strip().lower()
+    aliases = {
+        "deterministic": "ledger",
+        "source": "ledger",
+        "source_records": "ledger",
+    }
+    value = aliases.get(value, value)
+    if value not in {"ledger", "semantic"}:
+        raise ValueError("compile_mode must be 'ledger' or 'semantic'")
+    return value
+
+
+def _semantic_payload(result: Any) -> dict[str, Any]:
+    if isinstance(result, SemanticCompileAdmission):
+        return result.to_bundle_payload()
+    if hasattr(result, "to_bundle_payload"):
+        payload = result.to_bundle_payload()
+        if isinstance(payload, dict):
+            return payload
+    if isinstance(result, dict):
+        return result
+    raise TypeError("semantic_compiler.compile() must return a SemanticCompileAdmission or dict")
 
 
 def _source_records_from_document(document_bytes: bytes, document_type: str) -> list[SourceRecord]:

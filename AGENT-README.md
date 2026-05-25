@@ -42,9 +42,11 @@ not use them as day-one guidance unless the user names a specific artifact.
 - The current document product is a compiled KB artifact package:
   `world.pl`, `epistemic.pl`, deterministic ledgers, query policy, manifest,
   and diagnostics.
-- The public Python package facade is `prethinker` `0.4.0`; its
-  `Engine.compile_document()` writes and returns that bundle shape, with rich
-  LLM semantic admission explicitly marked as not yet run.
+- The public Python package facade is `prethinker` `0.5.0`; its
+  `Engine.compile_document()` writes and returns that bundle shape. Default
+  `compile_mode="ledger"` is deterministic and local; opt-in
+  `compile_mode="semantic"` calls an OpenAI-compatible endpoint and only admits
+  exact-source-anchored semantic candidates.
 - The live document QA path is governed QA over admitted state: the model may
   propose query plans or judge rows, while deterministic code controls admitted
   evidence, query execution, adapter policy, write blocking, and row accounting.
