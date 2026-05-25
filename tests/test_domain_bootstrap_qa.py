@@ -2769,6 +2769,92 @@ def test_source_record_messy_summary_biography_does_not_fire_for_amount_question
     assert not any(item["result"]["predicate"] == "source_record_employment_history_support" for item in companions)
 
 
+def test_source_record_messy_summary_extracts_amount_inventory() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0010, common_stock_par_value_0_01_per_share).",
+        (
+            "source_record_text_atom(src_line_0011, "
+            "security_12_b_title_2026_05_20_to_2026_05_20_common_stock_par_value_0_01_per_share)."
+        ),
+        (
+            "source_record_text_atom(src_line_0012, "
+            "the_officer_will_receive_a_cash_bonus_of_500_000_to_be_paid_on_december_31_2026_"
+            "and_a_time_vesting_restricted_stock_unit_award_valued_at_500_000)."
+        ),
+        (
+            "source_record_text_atom(src_line_0014, "
+            "cash_severance_equal_to_200_of_the_sum_of_base_salary_and_target_annual_bonus_"
+            "based_on_a_100_achievement_of_the_individual_objectives)."
+        ),
+        (
+            "source_record_text_atom(src_line_0016, "
+            "continued_lodging_benefits_for_the_remainder_of_2026_of_up_to_40_000_"
+            "and_thereafter_through_2037_an_annual_benefit_of_25_000)."
+        ),
+        (
+            "source_record_text_atom(src_line_0018, "
+            "reimbursement_of_up_to_50_000_in_fees_for_legal_counsel_and_public_relations_advisors)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every dollar amount and percentage appearing in the document, with what each refers to.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_amount_inventory_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "$0.01" in joined
+    assert sum(1 for display in displays if display.startswith("$500,000 - ")) == 2
+    assert "$500,000 - cash bonus of 500 000" in joined
+    assert "$500,000 - time vesting restricted stock unit award valued at 500 000" in joined
+    assert "200%" in joined
+    assert "100%" in joined
+    assert "$40,000" in joined
+    assert "$25,000" in joined
+    assert "$50,000" in joined
+    assert "$12" not in joined
+    assert "$20,260,520" not in joined
+    assert "$2,026" not in joined
+    assert "$2,037" not in joined
+
+
+def test_source_record_messy_summary_amount_inventory_requires_inventory_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0012, officer_will_receive_a_cash_bonus_of_500_000)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What cash bonus amount will the officer receive?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
+
+
+def test_source_record_messy_summary_amount_inventory_ignores_bullet_list_comparison() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0012, officer_will_receive_a_cash_bonus_of_500_000)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "Combining the narrative with the bullet-list on compensation: which executive receives "
+            "the larger total dollar-value award package over the next 12 months?"
+        ),
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

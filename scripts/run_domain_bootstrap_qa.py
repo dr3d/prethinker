@@ -15987,6 +15987,7 @@ def _source_record_messy_summary_companions(
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance),
+        _source_record_amount_inventory_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -17577,6 +17578,253 @@ def _source_record_biography_date_sort_key(value: str) -> tuple[int, int, int]:
     if match:
         return (int(match.group("year")), int(_SOURCE_MONTHS.get(match.group("month"), "0")), 0)
     return (9999, 99, 99)
+
+
+def _source_record_amount_inventory_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    list_intent = bool(re.search(r"\b(?:list|enumerate|inventory)\b", text)) and not bool(
+        re.search(r"\b(?:bullet|numbered|ordered)[-\s]+list\b", text)
+    )
+    exhaustive_amount_intent = bool(
+        re.search(r"\b(?:every|all)\b.{0,80}\b(?:dollar|amount|amounts|percentage|percent|value|values)\b", text)
+        or re.search(r"\b(?:dollar|amount|amounts|percentage|percent|value|values)\b.{0,80}\b(?:every|all)\b", text)
+    )
+    if not (list_intent or exhaustive_amount_intent):
+        return None
+    if not re.search(r"\b(?:dollar|amount|amounts|percentage|percent|value|values)\b|%", text):
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        atom = _normalize_text_filter_atom(text_atom)
+        if not _source_record_amount_context_signal(atom):
+            continue
+        for amount in _source_record_amount_mentions(atom):
+            key = (source_row, amount["AmountKind"], amount["AmountValue"], amount["ReferentAtom"])
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_amount_inventory_item",
+                    "AmountKind": amount["AmountKind"],
+                    "AmountValue": amount["AmountValue"],
+                    "AmountDisplay": amount["AmountDisplay"],
+                    "ReferentAtom": amount["ReferentAtom"],
+                    "ReferentDisplay": _display_source_phrase(amount["ReferentAtom"]),
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "FullAnswerDisplay": (
+                        f"{amount['AmountDisplay']} - {_display_source_phrase(amount['ReferentAtom'])}"
+                    ),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRow", "")),
+            0 if row.get("AmountKind") == "money" else 1,
+            row.get("AmountValue", ""),
+            row.get("ReferentAtom", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_amount_inventory_summary",
+        "SourceRow": "source_record_amount_inventory",
+        "AmountCount": str(len(support_rows)),
+        "AmountsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_amount_inventory_support(AmountKind, AmountValue, Referent, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_amount_inventory_support",
+            "prolog_query": "source_record_amount_inventory_support(AmountKind, AmountValue, Referent, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:100],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only amount-inventory support paired amount-like numeric tokens with nearby "
+                    "admitted source-record context; no durable amount fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_amount_context_signal(atom: str) -> bool:
+    tokens = set(_query_atom_tokens(atom))
+    return bool(
+        tokens
+        & {
+            "amount",
+            "annual",
+            "award",
+            "benefit",
+            "bonus",
+            "cash",
+            "fee",
+            "fees",
+            "gross",
+            "par",
+            "payment",
+            "payments",
+            "premium",
+            "premiums",
+            "reimbursement",
+            "salary",
+            "severance",
+            "share",
+            "value",
+            "valued",
+        }
+    )
+
+
+def _source_record_amount_mentions(atom: str) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    text = _normalize_text_filter_atom(atom)
+    for match in re.finditer(r"(?<!\d)(?P<value>\d+(?:_\d{2,3})*)(?!\d)", text):
+        value = match.group("value")
+        if _source_record_amount_is_plain_year(value):
+            continue
+        if _source_record_amount_is_date_fragment(text=text, start=match.start(), end=match.end(), value=value):
+            continue
+        window = _source_record_amount_window(text, match.start(), match.end())
+        amount_kind = _source_record_amount_kind(value=value, window=window)
+        if not amount_kind:
+            continue
+        referent = _source_record_amount_referent(
+            text=text,
+            start=match.start(),
+            end=match.end(),
+            window=window,
+            amount_value=value,
+            amount_kind=amount_kind,
+        )
+        if not referent:
+            continue
+        out.append(
+            {
+                "AmountKind": amount_kind,
+                "AmountValue": value,
+                "AmountDisplay": _source_record_amount_display(value=value, amount_kind=amount_kind),
+                "ReferentAtom": referent,
+            }
+        )
+    return out
+
+
+def _source_record_amount_is_plain_year(value: str) -> bool:
+    return bool(re.fullmatch(r"(?:19|20)\d{2}", value))
+
+
+def _source_record_amount_is_date_fragment(*, text: str, start: int, end: int, value: str) -> bool:
+    if re.fullmatch(r"(?:19|20)\d{2}_\d{2}_\d{2}", value):
+        return True
+    if re.fullmatch(r"\d{1,2}", value) and re.match(r"_(?:19|20)\d{2}(?:_|$)", text[end:]):
+        return True
+    if re.fullmatch(r"\d{1,2}", value) and re.match(r"_[a-z](?:_|$)", text[end:]):
+        prefix = text[max(0, start - 48) : start]
+        if re.search(r"(?:^|_)(?:item|rule|section|security|subsection|title)(?:_|$)", prefix):
+            return True
+    if re.fullmatch(r"\d{1,2}", value):
+        prefix = text[max(0, start - 16) : start]
+        if re.search(
+            r"(?:^|_)(?:jan|january|feb|february|mar|march|apr|april|may|jun|june|jul|july|"
+            r"aug|august|sep|sept|september|oct|october|nov|november|dec|december)_$",
+            prefix,
+        ):
+            return True
+    return False
+
+
+def _source_record_amount_window(text: str, start: int, end: int, *, radius: int = 120) -> str:
+    left = max(0, int(start) - radius)
+    right = min(len(text), int(end) + radius)
+    return text[left:right].strip("_")
+
+
+def _source_record_amount_kind(*, value: str, window: str) -> str:
+    if re.search(r"(?:^|_)(?:achievement|attainment|multiplier)(?:_|$)", window):
+        return "percentage"
+    if re.search(rf"(?:^|_)equal_to_{re.escape(value)}_of_the_sum(?:_|$)", window):
+        return "percentage"
+    if re.search(
+        r"(?:^|_)(?:amount|annual|award|benefit|bonus|cash|fee|fees|par_value|payment|payments|premium|"
+        r"premiums|reimbursement|salary|severance|share|value|valued)(?:_|$)",
+        window,
+    ):
+        return "money"
+    return ""
+
+
+def _source_record_amount_referent(
+    *,
+    text: str,
+    start: int,
+    end: int,
+    window: str,
+    amount_value: str,
+    amount_kind: str,
+) -> str:
+    local_text = _source_record_amount_window(text, start, end, radius=56)
+    window_text = _normalize_text_filter_atom(window)
+    value = re.escape(amount_value)
+    patterns = [
+        rf"(?:^|_)(?P<referent>common_stock_par_value_{value}_per_share)(?:_|$)",
+        rf"(?:^|_)(?P<referent>cash_bonus_of_{value}(?:_[a-z0-9]+){{0,18}}?)(?:_|$)",
+        rf"(?:^|_)(?P<referent>time_vesting_restricted_stock_unit_award_valued_at_{value}(?:_[a-z0-9]+){{0,18}}?)(?:_|$)",
+        rf"(?:^|_)(?P<referent>cash_severance_equal_to_{value}_of_the_sum(?:_[a-z0-9]+){{0,18}}?)(?:_|$)",
+        rf"(?:^|_)(?P<referent>{value}_achievement_of_the_individual_objectives)(?:_|$)",
+        rf"(?:^|_)(?P<referent>continued_[a-z0-9_]*benefits(?:_[a-z0-9]+){{0,16}}?_up_to_{value})(?:_|$)",
+        rf"(?:^|_)(?P<referent>annual_benefit_of_{value}(?:_[a-z0-9]+){{0,12}}?)(?:_|$)",
+        rf"(?:^|_)(?P<referent>reimbursement_of_up_to_{value}(?:_[a-z0-9]+){{0,18}}?)(?:_|$)",
+    ]
+    for candidate_text in (local_text, window_text):
+        for pattern in patterns:
+            match = re.search(pattern, candidate_text)
+            if match:
+                return match.group("referent").strip("_")
+    tokens = window_text.split("_")
+    value_tokens = amount_value.split("_")
+    for index in range(0, max(0, len(tokens) - len(value_tokens) + 1)):
+        if tokens[index : index + len(value_tokens)] != value_tokens:
+            continue
+        left = max(0, index - 8)
+        right = min(len(tokens), index + len(value_tokens) + 10)
+        referent_tokens = tokens[left:right]
+        referent = "_".join(token for token in referent_tokens if token)
+        if amount_kind == "percentage" and not re.search(r"(achievement|attainment|severance|sum)", referent):
+            return ""
+        return referent
+    return ""
+
+
+def _source_record_amount_display(*, value: str, amount_kind: str) -> str:
+    text = _normalize_text_filter_atom(value)
+    if amount_kind == "percentage":
+        return f"{text.replace('_', '.')}%"
+    if re.fullmatch(r"\d+_\d{2}", text) and not text.endswith("_000"):
+        whole, cents = text.split("_", 1)
+        return f"${int(whole):,}.{cents}"
+    number = int(text.replace("_", ""))
+    return f"${number:,}"
 
 
 def _first_identifier_number(value: str) -> str:
@@ -24125,6 +24373,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_citation_list_support",
             "source_record_exhibit_index_support",
             "source_record_employment_history_support",
+            "source_record_amount_inventory_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -24176,8 +24425,9 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
+            "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",

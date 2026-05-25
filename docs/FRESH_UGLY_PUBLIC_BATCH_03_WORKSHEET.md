@@ -818,3 +818,110 @@ Next blocker:
 The remaining SEC-dense residue is likely not biography. Next inspect dollar /
 percentage inventory (`sec_ugly_003 q015`) and restrictive-covenant / condition
 rows (`sec_ugly_003 q020/q021/q023`) before another Batch 03 sweep.
+
+## 2026-05-25 Amount-Inventory Source-Record Cage
+
+Question:
+
+Can an amount-list question recover from source-record text without adding a
+fixture-specific money parser or waking up on ordinary single-amount questions?
+
+Finding:
+
+`sec_ugly_003 q015` was not missing the numeric tokens. It was missing the
+amount-to-referent pairing needed for an inventory question: par value, cash
+bonus, RSU value, severance multiplier, individual-objective percentage,
+lodging benefit caps, and legal/PR reimbursement cap. Primitive numeric rows
+were too context-free to support the reference answer.
+
+Edit:
+
+```text
+source_record_amount_inventory_support:
+  query-only amount/percentage inventory support over admitted
+  source_record_text_atom rows.
+
+  trigger:
+    inventory/list wording AND amount/value/dollar/percentage wording
+
+  non-trigger guard:
+    ordinary single-amount questions such as "What cash bonus amount..."
+    bullet-list comparison questions that mention dollar value but do not ask
+    for an amount inventory
+
+  filters:
+    plain years
+    year-month-day date atoms
+    day-year date fragments
+    month-name day fragments
+    official section fragments such as 12(b)
+```
+
+The support reads only admitted source-record text. It writes no durable facts
+and does not branch on fixture names, company names, person names, SEC form
+names, or answer strings.
+
+Focused tests:
+
+```text
+python -m pytest \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_extracts_amount_inventory \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_amount_inventory_requires_inventory_question \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_amount_inventory_ignores_bullet_list_comparison -q
+
+3 passed
+```
+
+Mechanism details:
+
+The first focused test intentionally reproduced two false-positive classes
+seen in SEC source-record rows: `security_12_b` and `2026_05_20`. Those now
+stay out of the amount inventory. The same test also verifies that two distinct
+`$500,000` referents on one source row remain distinct rather than collapsing
+into one amount.
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_amount_inventory_20260525
+
+sec_ugly_003 q015:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  artifact:
+    targeted_sec_ugly_003_q015_clean
+
+guards:
+  q005 cash bonus amount: exact, source_record_amount_inventory_support absent
+  q017 bonus payable condition: exact, source_record_amount_inventory_support absent
+  artifact:
+    guard_sec_ugly_003_q005_q017_clean
+
+trigger-tightening guard:
+  q015 amount inventory: exact, source_record_amount_inventory_support present
+  q023 bullet-list dollar-value comparison: exact, source_record_amount_inventory_support absent
+  artifact:
+    targeted_sec_ugly_003_q015_q023_tight
+```
+
+Read:
+
+This is mechanism evidence, not a new Batch 03 score. The useful part is the
+scope: the carrier only enters when the user asks for an inventory/list of
+amounts or percentages, and the guard replay shows it stayed absent from
+single-amount questions. A whole-fixture `sec_ugly_003` guard run before the
+final trigger tightening produced `23 / 1 / 1` and exposed one over-broad
+activation on a bullet-list comparison row (`q023`); the trigger was tightened
+and `q023` was replayed exact with the amount-inventory support absent.
+
+The remaining risk is ordinary row churn in a full Batch 03 sweep; do that
+before treating this as corpus-level gain.
+
+Residual:
+
+`q017` remained judge-exact but reported `response_envelope.status =
+clarification_required` in the guard replay. That matches the prior envelope
+noise seen on biography rows and should be inspected as a separate status
+assembly issue rather than folded into the amount-inventory mechanism.
