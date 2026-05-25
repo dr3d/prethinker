@@ -2899,6 +2899,53 @@ def test_source_record_messy_summary_restrictive_covenants_requires_covenant_que
     )
 
 
+def test_source_record_messy_summary_extracts_defined_term_contrast() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0030, "
+            "on_january_1_2026_the_officer_will_serve_as_an_advisor_through_march_31_2026_"
+            "the_transition_period)."
+        ),
+        (
+            "source_record_text_atom(src_line_0032, "
+            "continued_vesting_commences_on_march_31_2026_or_such_earlier_date_that_"
+            "the_officer_s_employment_actually_terminates_the_separation_date)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='What is the difference between the "Transition Period" and the "Separation Date"?',
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_defined_term_contrast_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "Transition Period: fixed period from january 1 2026 through march 31 2026" in joined
+    assert "Separation Date: march 31 2026 or an earlier date if the officer s employment actually terminates" in joined
+    assert "conditional date can move earlier" in joined
+
+
+def test_source_record_messy_summary_defined_term_contrast_requires_comparison() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0030, advisor_through_march_31_2026_the_transition_period)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance='What is the start and end date of the "Transition Period"?',
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_defined_term_contrast_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

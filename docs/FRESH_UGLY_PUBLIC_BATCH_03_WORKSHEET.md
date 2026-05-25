@@ -1024,3 +1024,100 @@ Next blocker:
 conditional-date distinction between a fixed transition period and a variable
 separation date. That is probably a separate source-record term-definition
 surface, not a covenant issue.
+
+## 2026-05-25 Defined-Term Contrast Source-Record Cage
+
+Question:
+
+Can the transition-period / separation-date distinction recover as a generic
+defined-term contrast, without hard-coding the terms or the fixture document?
+
+Finding:
+
+`sec_ugly_003 q021` already had the dates. The missing support was the
+relationship between two quoted defined terms:
+
+- one term is a fixed period with a stated end date;
+- the other term is a conditional date: the same stated date, or an earlier
+  date if the named triggering event occurs.
+
+Edit:
+
+```text
+source_record_defined_term_contrast_support:
+  query-only defined-term contrast support over admitted source_record_text_atom rows.
+
+  trigger:
+    comparison wording such as difference / distinguish / contrast /
+    relationship / versus
+    AND at least two quoted terms in the question
+
+  extracted shapes:
+    fixed period through a stated date
+    conditional date: stated date or earlier date if a stated event occurs
+    relation: coincides at the fixed period end unless the earlier event occurs
+```
+
+The support reads only admitted source-record text. It writes no durable facts
+and does not branch on fixture names, term names, party names, filing names, or
+answer strings.
+
+Focused tests:
+
+```text
+python -m pytest \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_extracts_defined_term_contrast \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_defined_term_contrast_requires_comparison -q
+
+2 passed
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_defined_term_contrast_20260525
+
+sec_ugly_003 q021:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  returned:
+    Transition Period: fixed period from May 20, 2026 through August 31, 2026
+    Separation Date: August 31, 2026 or an earlier date if employment actually terminates
+    terms coincide at the fixed period end if no earlier triggering event occurs;
+    the conditional date can move earlier if the stated event occurs
+  artifact:
+    targeted_sec_ugly_003_q021
+
+guards:
+  q008 definition-location row: exact, defined-term contrast support absent
+  q016 single-term transition-period date row: exact, defined-term contrast support absent
+  q024 cross-section relationship row: exact, defined-term contrast support present
+  artifact:
+    guard_sec_ugly_003_q008_q016_q024
+
+combined fixture guard:
+  sec_ugly_003 full QA replay after amount-inventory, covenant, and defined-term cages:
+    25 / 0 / 0
+    compatibility/runtime/write rows: 0/0/0
+    source_record_amount_inventory_support fired only on q015
+    source_record_restrictive_covenant_support fired only on q020
+    source_record_defined_term_contrast_support fired only on q021 and q024
+  artifact:
+    full_sec_ugly_003_guard_after_defined_terms
+```
+
+Read:
+
+This is a small deterministic inference over source-record definitions, not a
+new compile fact. It is still caged enough to keep: it needs comparison
+wording, two quoted terms, and source text containing the fixed-period /
+conditional-date shapes. It also improves the full local fixture guard from
+`24 / 1 / 0` to `25 / 0 / 0`.
+
+Residual:
+
+The full fixture guard still has three exact rows (`q022/q023/q025`) whose
+response envelope reports `clarification_required`. That remains envelope
+status assembly noise rather than answer evidence failure.

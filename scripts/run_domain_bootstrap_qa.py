@@ -15989,6 +15989,7 @@ def _source_record_messy_summary_companions(
         _source_record_biography_history_companion(runtime, utterance=utterance),
         _source_record_amount_inventory_companion(runtime, utterance=utterance),
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
+        _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -17956,6 +17957,207 @@ def _source_record_restrictive_covenant_sort_key(kind: str) -> int:
         "release_of_claims": 5,
     }
     return order.get(str(kind), 99)
+
+
+def _source_record_defined_term_contrast_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "")
+    folded = text.casefold()
+    if not re.search(r"\b(?:difference|different|distinguish|contrast|relationship|relate|versus|vs)\b", folded):
+        return None
+    terms = _source_record_quoted_terms(text)
+    if len(terms) < 2:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        atom = _normalize_text_filter_atom(text_atom)
+        for term_atom, term_display in terms:
+            if not re.search(rf"(?:^|_)the_{re.escape(term_atom)}(?:_|$)", atom):
+                continue
+            for entry in _source_record_defined_term_entries(
+                source_row=source_row,
+                text_atom=text_atom,
+                atom=atom,
+                term_atom=term_atom,
+                term_display=term_display,
+            ):
+                key = (entry["DefinitionKind"], entry["TermAtom"], entry["SourceRow"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(entry)
+    relation = _source_record_defined_term_relation_row(support_rows)
+    if relation:
+        support_rows.append(relation)
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            1 if row.get("DefinitionKind") == "term_relationship" else 0,
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("TermAtom", ""),
+            row.get("DefinitionKind", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_defined_term_contrast_summary",
+        "SourceRow": "source_record_defined_term_contrast",
+        "TermCount": str(len({row.get("TermAtom") for row in support_rows if row.get("TermAtom")})),
+        "DefinitionsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_defined_term_contrast_support(Term, DefinitionKind, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_defined_term_contrast_support",
+            "prolog_query": "source_record_defined_term_contrast_support(Term, DefinitionKind, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:100],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only defined-term contrast support extracted fixed-period and conditional-date "
+                    "term definitions from admitted source-record text; no durable term fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_quoted_terms(utterance: str) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"[\"'“”‘’]([^\"'“”‘’]{2,80})[\"'“”‘’]", str(utterance or "")):
+        display = re.sub(r"\s+", " ", match.group(1)).strip()
+        atom = _normalize_text_filter_atom(display)
+        if not atom or atom in seen:
+            continue
+        seen.add(atom)
+        out.append((atom, display))
+    return out
+
+
+def _source_record_defined_term_entries(
+    *,
+    source_row: str,
+    text_atom: str,
+    atom: str,
+    term_atom: str,
+    term_display: str,
+) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    fixed_period = re.search(
+        rf"(?:^|_)(?P<context>[a-z0-9_]{{0,220}}?through_(?P<end>[a-z]+_\d{{1,2}}_\d{{4}})_the_{re.escape(term_atom)})(?:_|$)",
+        atom,
+    )
+    if fixed_period:
+        context = fixed_period.group("context").strip("_")
+        dates = _source_record_defined_term_month_date_atoms(context)
+        start_date = dates[0] if dates else ""
+        end_date = fixed_period.group("end")
+        display = f"{term_display}: fixed period"
+        if start_date and end_date:
+            display = f"{term_display}: fixed period from {_display_source_phrase(start_date)} through {_display_source_phrase(end_date)}"
+        elif end_date:
+            display = f"{term_display}: fixed period through {_display_source_phrase(end_date)}"
+        out.append(
+            {
+                "SupportKind": "source_record_defined_term_contrast_item",
+                "TermAtom": term_atom,
+                "TermDisplay": term_display,
+                "DefinitionKind": "fixed_period",
+                "StartDate": start_date,
+                "EndDate": end_date,
+                "ConditionAtom": "",
+                "DefinitionAtom": context,
+                "DefinitionDisplay": _display_source_phrase(context),
+                "SourceRow": source_row,
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "FullAnswerDisplay": display,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    conditional_date = re.search(
+        rf"(?:^|_)(?P<context>[a-z0-9_]{{0,220}}?(?P<base>[a-z]+_\d{{1,2}}_\d{{4}})_or_such_earlier_date_that_(?P<condition>[a-z0-9_]{{3,180}}?)_the_{re.escape(term_atom)})(?:_|$)",
+        atom,
+    )
+    if conditional_date:
+        context = conditional_date.group("context").strip("_")
+        base_date = conditional_date.group("base")
+        condition = conditional_date.group("condition").strip("_")
+        out.append(
+            {
+                "SupportKind": "source_record_defined_term_contrast_item",
+                "TermAtom": term_atom,
+                "TermDisplay": term_display,
+                "DefinitionKind": "conditional_date",
+                "StartDate": "",
+                "EndDate": base_date,
+                "ConditionAtom": condition,
+                "DefinitionAtom": context,
+                "DefinitionDisplay": _display_source_phrase(context),
+                "SourceRow": source_row,
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "FullAnswerDisplay": (
+                    f"{term_display}: {_display_source_phrase(base_date)} or an earlier date if "
+                    f"{_display_source_phrase(condition)}"
+                ),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return out
+
+
+def _source_record_defined_term_month_date_atoms(text: str) -> list[str]:
+    return re.findall(
+        r"(?:january|february|march|april|may|june|july|august|september|october|november|december)_\d{1,2}_\d{4}",
+        _normalize_text_filter_atom(text),
+    )
+
+
+def _source_record_defined_term_relation_row(rows: list[dict[str, str]]) -> dict[str, str] | None:
+    fixed = next((row for row in rows if row.get("DefinitionKind") == "fixed_period"), None)
+    conditional = next((row for row in rows if row.get("DefinitionKind") == "conditional_date"), None)
+    if not fixed or not conditional:
+        return None
+    fixed_end = fixed.get("EndDate", "")
+    conditional_base = conditional.get("EndDate", "")
+    if fixed_end and conditional_base and fixed_end != conditional_base:
+        relation = "defined terms have different stated dates"
+    else:
+        relation = (
+            "terms coincide at the fixed period end if no earlier triggering event occurs; "
+            "the conditional date can move earlier if the stated event occurs"
+        )
+    return {
+        "SupportKind": "source_record_defined_term_contrast_relation",
+        "TermAtom": f"{fixed.get('TermAtom', '')}_vs_{conditional.get('TermAtom', '')}".strip("_"),
+        "TermDisplay": f"{fixed.get('TermDisplay', '')} vs {conditional.get('TermDisplay', '')}".strip(),
+        "DefinitionKind": "term_relationship",
+        "StartDate": fixed.get("StartDate", ""),
+        "EndDate": fixed_end or conditional_base,
+        "ConditionAtom": conditional.get("ConditionAtom", ""),
+        "DefinitionAtom": relation.replace(" ", "_").replace(";", ""),
+        "DefinitionDisplay": relation,
+        "SourceRow": "source_record_defined_term_contrast",
+        "SourceTextAtom": "",
+        "SourceTextDisplay": "",
+        "FullAnswerDisplay": relation,
+        "SupportClass": "deterministic-source-record-summary",
+    }
 
 
 def _first_identifier_number(value: str) -> str:
@@ -24506,6 +24708,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_employment_history_support",
             "source_record_amount_inventory_support",
             "source_record_restrictive_covenant_support",
+            "source_record_defined_term_contrast_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -24557,10 +24760,11 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
+            "Defined-term contrast policy: source_record_defined_term_contrast_support rows are deterministic structured support rows for questions comparing quoted defined terms. They can fully support fixed-period versus conditional-date distinctions when the definitions are extracted from admitted source-record text; do not downgrade solely because primitive term_definition predicates are absent.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
