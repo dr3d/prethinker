@@ -1311,3 +1311,92 @@ Next blocker:
 SEC subset residue after this targeted repair is mostly ordered dated-event
 inventory (`sec_ugly_001 q015`) and sparse source-claim/negative-fact rows in
 `sec_ugly_002`.
+
+## 2026-05-25 Dated-Event Inventory Source-Record Cage
+
+Question:
+
+Can an ordered dated-event list recover from admitted source-record text without
+turning ordinary date questions into broad source scans?
+
+Finding:
+
+`sec_ugly_001 q015` was not missing all date evidence. It was missing an
+ordered inventory surface. The direct predicates exposed only a few isolated
+dates, while the source-record rows preserved the narrative dates and duration
+phrases needed for the reference list.
+
+Edit:
+
+```text
+source_record_dated_event_inventory_support:
+  query-only dated-event inventory support over admitted source_record_text_atom rows.
+
+  trigger:
+    list/every/all/inventory wording
+    AND dated-event / event-date / date-order wording
+
+  ordering:
+    source row order, then date occurrence order within the source row
+
+  filters:
+    heading rows
+    exhibit-index rows that are dated references rather than narrative events
+```
+
+The support reads only admitted source-record text. It writes no durable facts
+and does not branch on fixture names, person names, company names, filing names,
+or answer strings.
+
+Focused tests:
+
+```text
+python -m pytest \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_extracts_dated_event_inventory \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_dated_event_inventory_requires_inventory_question -q
+
+2 passed
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_dated_event_inventory_20260525
+
+sec_ugly_001 q015 local:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  returned 12 dated-event rows plus summary
+  artifact:
+    targeted_sec_ugly_001_q015_ordered
+
+sec_ugly_001 q015 OpenRouter:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  artifact:
+    targeted_sec_ugly_001_q015_openrouter
+
+guards:
+  q016 revocation-period expiration: exact, dated-event inventory absent
+  q018 resignation notification/effective dates: exact, dated-event inventory absent
+  q025 date reconciliation cross-section: exact, dated-event inventory absent
+  artifact:
+    guard_sec_ugly_001_q016_q018_q025
+```
+
+Mechanism note:
+
+The first targeted run recovered the row but sorted same-date subevents by date
+text, which put duration phrases before the agreement-execution event inside
+one source row. The kept version sorts by source occurrence position, so
+"order mentioned" is represented directly.
+
+Read:
+
+This is mechanism evidence, not a fresh SEC subset score. If the two targeted
+OpenRouter repairs (`q010` and `q015`) hold in the next SEC subset rerun,
+`sec_ugly_001` should move from `23 / 0 / 2` to `25 / 0 / 0`. The remaining SEC
+subset blockers are now concentrated in `sec_ugly_002`.

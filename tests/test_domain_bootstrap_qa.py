@@ -2989,6 +2989,73 @@ def test_source_record_messy_summary_signature_mismatch_requires_inconsistency_q
     )
 
 
+def test_source_record_messy_summary_extracts_dated_event_inventory() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_kind(src_line_0001, heading).",
+        "source_record_text_atom(src_line_0001, filing_title_filed_april_1_2026_report_date_march_26_2026).",
+        "source_record_kind(src_line_0017, paragraph_line).",
+        "source_record_text_atom(src_line_0017, date_of_report_date_of_earliest_event_reported_march_26_2026).",
+        "source_record_kind(src_line_0082, paragraph_line).",
+        (
+            "source_record_text_atom(src_line_0082, "
+            "on_march_26_2026_the_officer_notified_the_board_of_resignation_effective_march_27_2026)."
+        ),
+        "source_record_kind(src_line_0084, paragraph_line).",
+        (
+            "source_record_text_atom(src_line_0084, "
+            "on_march_27_2026_the_company_executed_an_agreement_the_revocation_period_is_"
+            "seven_business_days_from_march_27_2026_and_all_awards_as_of_march_27_2026_"
+            "shall_accelerate_and_remain_exercisable_for_twenty_four_24_months_from_march_27_2026)."
+        ),
+        "source_record_kind(src_line_0088, paragraph_line).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "the_board_appointed_the_successor_effective_march_27_2026_the_successor_was_appointed_"
+            "as_a_director_on_june_16_2025_and_has_served_as_commercial_officer_since_november_2025)."
+        ),
+        "source_record_kind(src_line_0114, table_row).",
+        "source_record_text_atom(src_line_0114, v_10_1_agreement_dated_march_27_2026).",
+        "source_record_kind(src_line_0127, table_row).",
+        "source_record_text_atom(src_line_0127, date_april_1_2026_by_s_alex_moore).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every dated event in the filing in the order it is mentioned.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "march 26 2026" in joined
+    assert "seven business days from march 27 2026" in joined
+    assert "twenty four 24 months from march 27 2026" in joined
+    assert "november 2025" in joined
+    assert "april 1 2026" in joined
+    assert "filing title filed" not in joined
+    assert "v 10 1 agreement dated" not in joined
+
+
+def test_source_record_messy_summary_dated_event_inventory_requires_inventory_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0017, date_of_report_date_of_earliest_event_reported_march_26_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the date of report?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_dated_event_inventory_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

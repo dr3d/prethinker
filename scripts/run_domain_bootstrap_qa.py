@@ -15991,6 +15991,7 @@ def _source_record_messy_summary_companions(
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
+        _source_record_dated_event_inventory_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -18311,6 +18312,179 @@ def _small_edit_distance(left: str, right: str, *, limit: int = 2) -> int:
             return best
         previous = current
     return previous[-1]
+
+
+def _source_record_dated_event_inventory_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:list|every|all|inventory)\b", text):
+        return None
+    if not re.search(r"\b(?:dated event|dated events|event date|event dates|dates? in .*order|order .*dates?)\b", text):
+        return None
+
+    kind_by_row = {
+        str(row.get("SourceRow", "")): str(row.get("Kind", ""))
+        for row in _runtime_rows(runtime, "source_record_kind(SourceRow, Kind).")
+        if isinstance(row, dict)
+    }
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    sequence = 1
+    for source_row, text_atom in sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0])):
+        atom = _normalize_text_filter_atom(text_atom)
+        if _source_record_dated_event_skip_row(source_row=source_row, atom=atom, kind=kind_by_row.get(source_row, "")):
+            continue
+        for mention in _source_record_dated_event_mentions(atom):
+            key = (source_row, mention["DateDisplay"], mention["EventAtom"])
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_dated_event_inventory_item",
+                    "SequenceIndex": str(sequence),
+                    "EventDate": mention["DateAtom"],
+                    "EventDateDisplay": mention["DateDisplay"],
+                    "EventAtom": mention["EventAtom"],
+                    "EventDisplay": mention["EventDisplay"],
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "FullAnswerDisplay": f"{sequence}. {mention['DateDisplay']}: {mention['EventDisplay']}",
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+            sequence += 1
+    if not support_rows:
+        return None
+    summary = {
+        "SupportKind": "source_record_dated_event_inventory_summary",
+        "SourceRow": "source_record_dated_event_inventory",
+        "EventCount": str(len(support_rows)),
+        "SequenceDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_dated_event_inventory_support(SequenceIndex, EventDate, EventAtom, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_dated_event_inventory_support",
+            "prolog_query": "source_record_dated_event_inventory_support(SequenceIndex, EventDate, EventAtom, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:120],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only dated-event inventory support listed date mentions in admitted source-record "
+                    "row order; no durable event fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_dated_event_skip_row(*, source_row: str, atom: str, kind: str) -> bool:
+    if str(kind) == "heading":
+        return True
+    if re.match(r"^v_\d+(?:_\d+)?_", atom):
+        return True
+    if _source_row_sort_key(source_row)[0] <= 1:
+        return True
+    return False
+
+
+def _source_record_dated_event_mentions(atom: str) -> list[dict[str, str]]:
+    text = _normalize_text_filter_atom(atom)
+    mentions: list[dict[str, str]] = []
+    occupied: list[tuple[int, int]] = []
+    duration_pattern = (
+        r"(?P<duration>(?:seven_business_days|twenty_four_24_months|twenty_four_months)_from_"
+        r"(?P<date>(?:january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"\d{1,2}_\d{4}))"
+    )
+    for match in re.finditer(duration_pattern, text):
+        duration = match.group("duration")
+        date_atom = match.group("date")
+        event_atom = _source_record_dated_event_window(text, match.start(), match.end())
+        mentions.append(
+            {
+                "DateAtom": duration,
+                "DateDisplay": _display_source_phrase(duration),
+                "EventAtom": event_atom,
+                "EventDisplay": _display_source_phrase(event_atom),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+        occupied.append((match.start(), match.end()))
+    full_date_pattern = (
+        r"(?P<date>(?:january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"\d{1,2}_\d{4})"
+    )
+    for match in re.finditer(full_date_pattern, text):
+        if any(start <= match.start() < end for start, end in occupied):
+            continue
+        if _source_record_dated_event_date_is_duration_tail(text, match.start()):
+            continue
+        date_atom = match.group("date")
+        event_atom = _source_record_dated_event_window(text, match.start(), match.end())
+        mentions.append(
+            {
+                "DateAtom": date_atom,
+                "DateDisplay": _display_source_phrase(date_atom),
+                "EventAtom": event_atom,
+                "EventDisplay": _display_source_phrase(event_atom),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+    month_year_pattern = r"(?P<date>(?:january|february|march|april|may|june|july|august|september|october|november|december)_\d{4})"
+    for match in re.finditer(month_year_pattern, text):
+        if re.match(r"_\d{1,2}", text[match.end() :]):
+            continue
+        date_atom = match.group("date")
+        event_atom = _source_record_dated_event_window(text, match.start(), match.end())
+        if not re.search(r"(?:^|_)(?:since|served|appointed|effective|issued|executed|notified)(?:_|$)", event_atom):
+            continue
+        mentions.append(
+            {
+                "DateAtom": date_atom,
+                "DateDisplay": _display_source_phrase(date_atom),
+                "EventAtom": event_atom,
+                "EventDisplay": _display_source_phrase(event_atom),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+    mentions.sort(key=lambda item: int(item.get("OccurrenceStart", "0") or "0"))
+    return mentions
+
+
+def _source_record_dated_event_date_is_duration_tail(text: str, start: int) -> bool:
+    prefix = text[max(0, start - 40) : start]
+    return bool(re.search(r"(?:seven_business_days|twenty_four_24_months|twenty_four_months)_from_$", prefix))
+
+
+def _source_record_dated_event_window(text: str, start: int, end: int, *, before: int = 14, after: int = 24) -> str:
+    tokens = [token for token in _normalize_text_filter_atom(text).split("_") if token]
+    prefix = text[:start]
+    token_index = len([token for token in prefix.split("_") if token])
+    value_token_count = len([token for token in text[start:end].split("_") if token])
+    left = max(0, token_index - before)
+    right = min(len(tokens), token_index + value_token_count + after)
+    window = "_".join(tokens[left:right])
+    return _source_record_dated_event_trim_window(window)
+
+
+def _source_record_dated_event_trim_window(value: str) -> str:
+    text = _normalize_text_filter_atom(value).strip("_")
+    text = re.sub(r"^(?:and|or|the|a|an)_", "", text)
+    return text
 
 
 def _first_identifier_number(value: str) -> str:
@@ -24863,6 +25037,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_restrictive_covenant_support",
             "source_record_defined_term_contrast_support",
             "source_record_signature_mismatch_support",
+            "source_record_dated_event_inventory_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -24914,12 +25089,13 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
             "Defined-term contrast policy: source_record_defined_term_contrast_support rows are deterministic structured support rows for questions comparing quoted defined terms. They can fully support fixed-period versus conditional-date distinctions when the definitions are extracted from admitted source-record text; do not downgrade solely because primitive term_definition predicates are absent.",
             "Signature-mismatch support policy: source_record_signature_mismatch_support rows are deterministic structured support rows for signature-block inconsistency questions. They can fully support spelling mismatches between adjacent signed-name and printed-name source-record table cells; do not downgrade solely because normalized signatory predicates collapse the names.",
+            "Dated-event inventory policy: source_record_dated_event_inventory_support rows are deterministic structured support rows for questions asking to list all dated events in source order. They can fully support ordered date/event inventories when derived from admitted source-record text; do not downgrade solely because primitive event predicates are sparse.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
