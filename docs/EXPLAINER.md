@@ -200,10 +200,14 @@ truth can be retrieved, selected, and answered under pressure.
 Current evidence gives that claim some teeth. The native direct-surface
 instrument has been restamped over `2163` judged rows at `1997 / 46 / 120`
 exact/partial/miss (`92.33%` exact), with zero compatibility rows, zero runtime
-load errors, and zero write proposals. External and unlike-probe work now
-includes a clean four-fixture real-world spotcheck (`160 / 0 / 0`) and sealed
-unseen authored transfer at `152 / 1 / 6` over `160` rows (`95.0%` exact).
-Those numbers are claims with caveats, not a declaration of finished work.
+load errors, and zero write proposals. Fresh ugly public Batch 03 latest
+guarded slices now read as `291 / 6 / 3` over `300` rows (`97.0%` exact), again
+with zero compatibility rows, runtime load errors, or write proposals. That
+Batch 03 figure is not one single fresh 300-row rerun and is partly regression
+evidence after mechanism repair. External and unlike-probe work also includes a
+clean four-fixture real-world spotcheck (`160 / 0 / 0`) and sealed unseen
+authored transfer at `152 / 1 / 6` over `160` rows (`95.0%` exact). Those
+numbers are claims with caveats, not a declaration of finished work.
 
 That is not perfection. Compile-surface gaps, source-fidelity preservation,
 hybrid joins, language transfer, and palette stability are still frontier work.
@@ -329,13 +333,12 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 22, 2026:
+As of May 25, 2026:
 
 ### Internal Health
 
 - the full-suite verification headline is maintained in `PROJECT_STATE.md`
-- focused direct-surface/selector verification is green at `428 passed`; rerun the
-  full suite before updating any full-suite headline
+- full-suite verification is green at `1779 passed, 2 subtests passed`
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score
@@ -346,7 +349,8 @@ As of May 22, 2026:
 
 - a historical surgical fixture batch spans `9` fixtures and `303` questions, with `284` exact answers (`94%`), only `3` misses, `7` zero-miss fixtures, and zero unauthorized writes
 - the native direct-surface restamp spans `2163` judged rows and currently sits at `1997 exact / 46 partial / 120 miss` (`92.33%`), with no compatibility rows or write proposals
-- the current residual pressure is compile-surface and source-fidelity coverage: answer-bearing distinctions must become admitted predicates or deterministic ledgers, not hidden query-time archaeology
+- fresh ugly public Batch 03 latest guarded slices sit at `291 exact / 6 partial / 3 miss` over `300` rows (`97.0%`), with the caveat that this is a slice-combined current view and not a single fresh 300-row rerun
+- the current residual pressure is compile-surface and source-fidelity coverage: answer-bearing distinctions must become admitted predicates, deterministic ledgers, or query-only support surfaces with clear authority boundaries, not hidden query-time archaeology
 - enterprise-guidance and clarification probes show that safe-surface accumulation and ask/no-ask governance can be measured separately from ordinary QA
 - rule-ingestion transfer now uses separate rule lenses, admitted-fact support summaries, mapper gates against unsupported raw Prolog constructs, runtime trial, and promotion filtering
 - the next hard problem is row-level activation: accumulated symbolic surfaces can rescue weak answers, but global activation can perturb rows that were already good

@@ -12,7 +12,7 @@ durable Prolog state, and the UI/trace layers show the decision path.
 
 Use this short path if you are new:
 
-1. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the newest gain and why it matters.
+1. [Current Research Headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the newest native and fresh-ugly evidence stack.
 2. [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md) - current public measurement claim and caveats.
 3. [Audit Grammar Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md) - methodology behind the current numbers and cleanliness counters.
 4. [CTO Architecture Brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - current operating doctrine and the next boundary-hunt job.
@@ -65,6 +65,7 @@ Then go deeper:
 ## History
 
 Older parser-lane notes, generated run reports, dated handoffs, retired
-lab-automation plans, publishing plans, public-benchmarking plans, and stale experiment reports
-are intentionally not kept in this front-door docs set. Git history preserves
-the trail; this directory should describe the project as it works now.
+lab-automation plans, publishing plans, public-benchmarking plans, and stale
+experiment reports are intentionally not kept in this front-door docs set. Git
+history preserves the trail; this directory should describe the project as it
+works now.

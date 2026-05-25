@@ -1,6 +1,6 @@
 # CTO Architecture Brief
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This is the fastest orientation for a new high-context collaborator. Read it
 as the current operating doctrine, not as a research diary.
@@ -158,6 +158,10 @@ Current native fixed-compile direct-surface anchor:
 
 Current transfer anchors:
 
+- fresh ugly public Batch 03 latest guarded slices: SEC `75 / 0 / 0`, non-SEC
+  `216 / 6 / 3`, slice-combined current view `291 / 6 / 3` over `300` rows
+  (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
+  `0` write proposal rows; not a single fresh 300-row rerun;
 - four externally sourced real-world fixtures: latest fixture-level
   `160 / 0 / 0`, with `4 / 4` compile gates clean;
 - sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
@@ -176,9 +180,10 @@ Continue only if you find one of these:
 3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
 4. active code paths that would re-enable compatibility adapters by default.
 
-The next-cycle investigation is query-surface growth, native compile-gate noise
-(`26 / 30 -> 9 / 47` pass/hold), and the named regressed fixtures. Do not hide
-those caveats; they are part of the audit discipline that makes the measurement
+The next-cycle investigation is Batch 03 remaining residue, source-record/query
+surface boundaries, native compile-gate noise (`26 / 30 -> 9 / 47` pass/hold),
+and whether the next fresh ugly batch confirms transfer. Do not hide those
+caveats; they are part of the audit discipline that makes the measurement
 credible.
 
 ## Repo Hygiene

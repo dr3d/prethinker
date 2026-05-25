@@ -1,11 +1,11 @@
 # Audit Grammar Measurement Note
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This note captures the current public measurement claim for Prethinker. It is
 not a benchmark leaderboard. It is a disciplined snapshot of the instrument as
-measured across native, sealed unseen, real-world, and older cold-transfer
-evidence.
+measured across native, fresh ugly public, sealed unseen, real-world, and older
+cold-transfer evidence.
 
 For the fuller methodology, read
 [Audit Grammar Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md).
@@ -25,7 +25,8 @@ proposals across several distinct measurement classes.
 
 | Measurement class | Corpus | Result | Discipline metrics |
 | --- | --- | ---: | --- |
-| Native restamp | 56 maintained story-world fixtures, 2163 rows | `1997 / 46 / 120`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
+| Native restamp | 56 maintained native corpus members, 2163 rows | `1997 / 46 / 120`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
+| Fresh ugly public Batch 03 | 12 externally sourced public-document fixtures, latest guarded slices | SEC `75 / 0 / 0`, non-SEC `216 / 6 / 3`; slice-combined current view `291 / 6 / 3` over `300`, `97.0%` exact | not a single fresh 300-row rerun; `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Real-world external spotcheck | 4 externally sourced real-world fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates pass, `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Earlier cold transfer baseline | 6 fresh transfer fixtures, 240 rows | `177 / 10 / 53`, `73.75%` exact | cold source-only transfer before the current direct-surface work |
@@ -50,10 +51,11 @@ runtime writes rescue weak compiles.
 
 ## Caveats
 
-- The 2026-05-22 native restamp used the same 56 fixture names as the
-  2026-05-20 baseline, and the current dataset tree had no git drift, but no
-  prior per-file hash manifest was found. The strict comparability claim is
-  therefore same named corpus, not proven byte-identical corpus.
+- The 2026-05-22 native restamp used the same 56 maintained native corpus
+  members as the 2026-05-20 baseline, and the current dataset tree had no git
+  drift, but no prior per-file hash manifest was found. The strict
+  comparability claim is therefore same named corpus, not proven
+  byte-identical corpus.
 - The compile quality gate became noisier on the native restamp:
   `26 / 30 -> 9 / 47` pass/hold. QA improved despite that, so the gate noise is
   a calibration and diagnostic problem, not a native QA blocker.
@@ -61,19 +63,25 @@ runtime writes rescue weak compiles.
   useful evidence but should be interpreted with the gate-change caveat.
 - Query-surface gaps increased from `20 -> 29` even as compile-surface,
   hybrid-join, answer-surface, and judge-uncertain gaps improved.
-- Three notable fixture regressions need follow-up:
-  `black_lantern_maze`, `identifier_ledger_torture`, and
-  `lantern_school_field_trip`.
+- Three native-corpus regressions remain in the worksheet trail. They should be
+  read for structural causes, not promoted as public vocabulary.
 - The sealed unseen fixtures were authored for this project, so they are useful
   transfer evidence but not a substitute for messy external documents.
 - The earlier cold-transfer baseline and the current real-world spotcheck are
   different corpora, not the same documents measured before and after.
+- Fresh ugly public Batch 03 is now partly tuned evidence: it is valuable as a
+  product thermometer and regression guard, but the next generalization claim
+  requires fresh ugly documents that did not shape the mechanisms.
 
 ## Artifact Pointers
 
 - Native restamp worksheet: `docs/NATIVE_RESTAMP_WORKSHEET.md`
 - Real-world fixture inputs:
   `datasets/real_world_transfer/20260521`
+- Fresh ugly public Batch 03 fixture inputs:
+  `datasets/real_world_transfer/fresh_ugly_public_20260524_03`
+- Fresh ugly public Batch 03 worksheet:
+  `docs/FRESH_UGLY_PUBLIC_BATCH_03_WORKSHEET.md`
 - Sealed unseen fixture inputs:
   `datasets/sealed_unseen/20260521`
 - Native compile summary:
@@ -87,11 +95,10 @@ runtime writes rescue weak compiles.
 
 ## Public Summary Draft
 
-Prethinker now has a 92.33% native restamp, a 95.0% sealed-unseen transfer
-result, and a clean 160/0/0 four-fixture real-world spotcheck, all with zero
+Prethinker now has a 92.33% native restamp and a fresh ugly public Batch 03
+slice-combined guarded view of 291/6/3 over 300 rows, both with zero
 compatibility rows, zero runtime load errors, and zero QA write proposals. The
-earlier 73.75% cold-transfer baseline remains useful architectural context, but
-it was a different six-fixture corpus. The caveat is open: native compile-gate
-noise increased and a few fixtures regressed, so the next cycle investigates
-gate calibration, query-surface gaps, and those regressions without hiding the
-current result.
+sealed-unseen authored result remains 95.0%, and the older four-fixture
+real-world spotcheck remains clean at latest fixture-level 160/0/0. The caveat
+is open: Batch 03 is not a single fresh rerun and has become partly tuned
+evidence, so the next product-useful check is another fresh ugly document set.

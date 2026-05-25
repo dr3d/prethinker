@@ -146,7 +146,7 @@ role.
 
 ## Current Reality
 
-As of May 22, 2026:
+As of May 25, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -157,6 +157,10 @@ As of May 22, 2026:
 - domain profiles are context and validation packages, not domain-product claims
 - post-ingestion document QA is now a first-class research surface: compiled KBs are queried from admitted predicates, deterministic ledgers, selectors, and guards
 - the native direct-surface restamp is `1997 / 46 / 120` over `2163` judged rows (`92.33%` exact), with zero compatibility rows and zero write proposals
+- fresh ugly public Batch 03 latest guarded slices are SEC `75 / 0 / 0` and
+  non-SEC `216 / 6 / 3`, or `291 / 6 / 3` over `300` rows (`97.0%` exact) as
+  a slice-combined current view, with zero compatibility rows, runtime load
+  errors, or write proposals
 - compile-surface stability, source-fidelity preservation, palette governance, and unlike-document transfer are the active research pressures
 - lab automation, public benchmarking, and publishing are retired lanes; git history is the archive for that work
 

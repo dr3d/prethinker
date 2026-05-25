@@ -1,11 +1,11 @@
 # Audit Grammar Technical Note
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This is the public technical note for Prethinker's current measurement method.
 It explains what the audit grammar measures, why the discipline metrics matter,
-and how to read the May 22, 2026 numbers without turning them into a benchmark
-claim they are not.
+and how to read the current numbers without turning them into a benchmark claim
+they are not.
 
 Prethinker is a governed semantic compile and QA system. A model proposes
 semantic structure, but deterministic code decides what becomes durable truth,
@@ -13,11 +13,12 @@ what can be queried, and what gets counted.
 
 ## The Short Claim
 
-On May 22, 2026, Prethinker measured as follows:
+As of May 25, 2026, Prethinker measures as follows:
 
 | Evidence class | Corpus | Result | Cleanliness counters |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained fixtures, 2163 judged rows | `1997 exact / 46 partial / 120 miss`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
+| Fresh ugly public Batch 03 | 12 externally sourced public-document fixtures, latest guarded slices | SEC `75 / 0 / 0`, non-SEC `216 / 6 / 3`; slice-combined current view `291 / 6 / 3` over `300`, `97.0%` exact | not a single fresh 300-row rerun; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Real-world external spotcheck | 4 externally sourced fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Earlier cold transfer baseline | 6 fresh transfer fixtures, 240 rows | `177 / 10 / 53`, `73.75%` exact | measured before the current direct-surface work |
@@ -178,9 +179,13 @@ separate those cases rather than suppress the gate or loosen it blindly.
 The native corpus is the development set. It is important for non-regression,
 but not enough for generalization.
 
-The May 22 public claim therefore names four evidence classes:
+The current public claim therefore names five evidence classes:
 
 - Native restamp: shows current behavior on the maintained 56-fixture corpus.
+- Fresh ugly public Batch 03: tests ugly public documents with tables, official
+  formats, identifiers, attachments, redactions, and regulatory/incident
+  structure. It is now partly tuned evidence and should be read as a product
+  thermometer plus regression guard, not as a sealed benchmark.
 - Real-world external spotcheck: tests documents from external sources and
   domains outside the fixture author's usual patterns.
 - Sealed unseen authored transfer: tests withheld fixtures created for transfer
@@ -199,9 +204,10 @@ development corpus.
 
 ## Comparability Caveat
 
-The May 22 native restamp used the same 56 fixture names as the May 20 baseline,
-and the dataset tree was clean in git. However, no prior per-file hash manifest
-was found for the May 20 run. The strict public statement is therefore:
+The May 22 native restamp used the same 56 maintained native corpus members as
+the May 20 baseline, and the dataset tree was clean in git. However, no prior
+per-file hash manifest was found for the May 20 run. The strict public
+statement is therefore:
 
 ```text
 same named native corpus, not proven byte-identical corpus
@@ -219,6 +225,8 @@ These measurements do not claim:
 - production readiness for legal, clinical, financial, or safety decisions;
 - model-free QA;
 - proof that LLM-authored fixtures represent messy real-world documents;
+- proof that Batch 03 is an untouched benchmark after the May 25 mechanism
+  work;
 - proof that the compile gate is calibrated correctly;
 - proof that `91.12%` and `92.33%` are strictly comparable under identical gate
   behavior;
@@ -249,16 +257,18 @@ policy, runtime execution, and explicit failure accounting.
 The best reading is balanced:
 
 - The architecture is stronger than the earlier cold-transfer baseline.
-- The real-world four-fixture spotcheck is clean and unusually encouraging.
+- The fresh ugly public Batch 03 slice view is the strongest current
+  real-document pressure signal, but it is not a single fresh 300-row rerun and
+  is no longer untouched after mechanism repair.
+- The real-world four-fixture spotcheck is clean and remains useful context.
 - The native restamp improved from `91.12%` to `92.33%` exact under the current
   measurement, but the two runs carried different gate calibration behavior.
 - The sealed unseen authored transfer at `95.0%` is useful, but it is not a
   substitute for messy external documents.
 - The compile gate is noisy and must be investigated.
 - Query-surface regression is the most direct next technical pressure.
-- Three native regressions need fixture-level reading:
-  `black_lantern_maze`, `identifier_ledger_torture`, and
-  `lantern_school_field_trip`.
+- Three native-corpus regressions need structural reading from the worksheet
+  trail, but their local names are not public doctrine.
 
 The public claim is therefore publishable with caveats, not finished without
 caveats.
@@ -271,6 +281,8 @@ caveats.
   [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
 - Real-world source-surface worksheet:
   [Source Ledger Compile Surface Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_LEDGER_COMPILE_SURFACE_WORKSHEET.md)
+- Fresh ugly Batch 03 worksheet:
+  [Fresh Ugly Public Batch 03 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_03_WORKSHEET.md)
 - QA boundary:
   [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
 - Compiled artifact contract:

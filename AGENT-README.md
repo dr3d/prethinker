@@ -47,9 +47,13 @@ not use them as day-one guidance unless the user names a specific artifact.
   evidence, query execution, adapter policy, write blocking, and row accounting.
   Retired compatibility adapters are not day-one architecture.
 - Current public measurement anchor: native restamp `1997 / 46 / 120` over
-  `2163` rows (`92.33%` exact), real-world four-fixture spotcheck `160 / 0 / 0`,
-  and sealed unseen authored transfer `152 / 1 / 6`, all with `0`
-  compatibility rows, runtime load errors, and QA write proposals.
+  `2163` rows (`92.33%` exact), fresh ugly public Batch 03 latest guarded
+  slices `75 / 0 / 0` SEC plus `216 / 6 / 3` non-SEC (`291 / 6 / 3` over
+  `300` rows as a slice-combined current view), real-world four-fixture
+  spotcheck `160 / 0 / 0`, and sealed unseen authored transfer `152 / 1 / 6`.
+  Treat Batch 03 as transfer/regression evidence, not a single fresh 300-row
+  benchmark. All current guarded measurements held `0` compatibility rows,
+  runtime load errors, and QA write proposals.
 
 ## Fresh Context Handoff
 

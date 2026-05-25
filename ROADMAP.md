@@ -1,6 +1,6 @@
 # Prethinker Roadmap
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This is a secondary planning note. Treat
 [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md),
@@ -32,6 +32,11 @@ The current public measurement stack is:
 - Native restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163`
   rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors,
   and `0` QA write proposals.
+- Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0`
+  over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`).
+  Read together, the current slice view is `291 / 6 / 3` over `300` rows
+  (`97.0%`), with `0` compatibility rows, `0` runtime load errors, and `0`
+  QA write proposals. This is not a single fresh 300-row rerun.
 - Real-world external four-fixture spotcheck: latest fixture-level
   `160 / 0 / 0`, with `4 / 4` compile gates clean.
 - Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`
@@ -41,37 +46,39 @@ The current public measurement stack is:
 
 The caveats are part of the roadmap: native compile-gate noise increased from
 `26 / 30` pass/hold to `9 / 47`, query-surface gaps rose from `20` to `29`, and
-the clearest current regressions are `black_lantern_maze`,
-`identifier_ledger_torture`, and `lantern_school_field_trip`.
+Batch 03 is now partly tuned evidence rather than a pristine benchmark. The
+next clean generalization check needs fresh ugly documents that did not shape
+the current mechanism set.
 
 ## Near-Term Priorities
 
-1. **Gate calibration without gate collapse**
-   - Explain why the native quality gate now holds `47` fixtures while QA
-     improved.
+1. **Fresh ugly transfer discipline**
+   - Treat Batch 03 as current product-thermometer and regression evidence, not
+     as a surface to polish indefinitely.
+   - Ask for fresh ugly documents whenever remaining fixes start moving residue
+     between adjacent rows instead of reducing total residue.
+   - Keep external, authored, native, and narrative probes separate.
+
+2. **Remaining source-record and query-surface blockers**
+   - Work the Batch 03 non-exacts as generic mechanisms: first-occurrence source
+     rows, raw spelling/casing preservation, source-section joins,
+     cross-document limits, and authority/acronym normalization.
+   - Prefer structural query planner, ledger, or selector-policy fixes over
+     fixture phrasing patches.
+   - Preserve compatibility adapters as forensic tools only.
+
+3. **Native non-regression stamp**
+   - Re-run the native corpus when mechanism changes are stable enough to make
+     the cost worthwhile.
+   - Compare failure-surface distribution, not only headline exact rate.
+   - Keep the May 22 native anchor visible until a new full native stamp exists.
+
+4. **Gate calibration without gate collapse**
+   - Explain why the native quality gate held `47` fixtures while QA improved.
    - Separate over-sensitive diagnostic flags from true answer-bearing source
      surface failures.
    - Keep source-claim, source-authority, vote-tally, quantity, and coexistence
      checks strict when they correspond to real misses.
-
-2. **Query-surface gap investigation**
-   - Read the rows behind the `20 -> 29` query-surface increase.
-   - Prefer structural query planner or selector-policy fixes over fixture
-     phrasing patches.
-   - Preserve compatibility adapters as forensic tools only.
-
-3. **Regressed fixture reading**
-   - Start with `black_lantern_maze`, `identifier_ledger_torture`, and
-     `lantern_school_field_trip`.
-   - Compare current misses against the 2026-05-20 native baseline and the
-     current compile-gate reasons.
-   - Promote only repairs that survive unlike probes.
-
-4. **Messy-document transfer**
-   - Keep the four externally sourced real-world fixtures as transfer evidence,
-     not native baseline material.
-   - Ask for or stage messier external fixtures only after the current gate and
-     query-surface lessons are understood.
 
 5. **Public docs hygiene**
    - Keep root docs and `docs/` aligned with the current measurement claim.

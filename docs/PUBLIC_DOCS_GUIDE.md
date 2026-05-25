@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This is the public reading map. It should stay short and current. Git history
 and `C:\prethinker_tmp_archive` keep older research diaries, prompt snapshots,

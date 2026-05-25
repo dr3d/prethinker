@@ -1,6 +1,6 @@
 # Compiling Language
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 How Prethinker treats ordinary source language as compilable input and turns it
 into a queryable, auditable knowledge program.
@@ -81,10 +81,14 @@ not get to decide what becomes durable truth. Deterministic code owns schema
 validation, predicate contracts, source ledgers, Prolog execution, write
 blocking, and cleanliness counters.
 
-The 2026-05-22 public measurement anchor is:
+The current public measurement anchor is:
 
 - native restamp: `1997 exact / 46 partial / 120 miss` over `2163` rows
   (`92.33%` exact);
+- fresh ugly public Batch 03: latest guarded SEC and non-SEC slices read as
+  `291 / 6 / 3` over `300` rows (`97.0%` exact), with the caveat that this is
+  not one single fresh 300-row rerun and the batch is now partly a regression
+  guard;
 - real-world external spotcheck: `160 / 0 / 0`, with `4 / 4` compile gates
   clean;
 - sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%`

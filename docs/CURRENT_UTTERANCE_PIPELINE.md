@@ -1,6 +1,6 @@
 # Current Utterance And Document Pipeline
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language
@@ -217,7 +217,7 @@ compile-surface and ledger improvements retiring downstream selector scars.
 Local POWER / LM Studio is the default execution target for current development
 and product-adjacent API calls. OpenRouter remains an explicit hosted research
 lane for broad sweeps and provider-drift measurement, but it should not be the
-implicit default for Aver or ordinary Prethinker runs.
+implicit default for ordinary Prethinker runs.
 
 Secrets live in `.env.local`, which is gitignored. The main compile, QA, batch,
 selector, and Semantic IR call paths now bootstrap local environment values
@@ -245,10 +245,12 @@ Transfer work supports the current direction:
 
 - Earlier cold transfer on OpenRouter scored `177 / 10 / 53` over 240 rows,
   or 73.75% exact, before the current direct-surface work.
-- The 2026-05-22 public measurement anchor is stronger: the native restamp is
-  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), the sealed unseen
-  authored transfer is `152 / 1 / 6` over `160` rows (`95.0%` exact), and the
-  four-fixture real-world spotcheck is `160 / 0 / 0`.
+- The public measurement anchor is stronger: the native restamp is
+  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), fresh ugly public Batch
+  03 latest guarded slices read as `291 / 6 / 3` over `300` rows (`97.0%`) when
+  SEC and non-SEC slices are combined, the sealed unseen authored transfer is
+  `152 / 1 / 6` over `160` rows (`95.0%` exact), and the four-fixture
+  real-world spotcheck is `160 / 0 / 0`.
 - A roster-reconciliation fixture exposed why compatibility evidence had to
   become compile-surface work: the high-water was reachable, but the forward
   repair is direct assignment/table surfaces.

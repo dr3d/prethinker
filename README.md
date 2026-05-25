@@ -61,13 +61,18 @@ scored encounter where a question tests whether that state is present,
 retrievable, and safe to answer from. The selector is the steering wheel; guards
 are the rumble strips that stop tempting but wrong surfaces from winning.
 
-The current public claim is now measurement-backed across several evidence
-classes: a 2026-05-22 native restamp reached `1997 exact / 46 partial / 120
-miss` over `2163` rows (`92.33%` exact), a four-fixture externally sourced
-real-world spotcheck reached latest fixture-level `160 / 0 / 0` with `4 / 4`
-compile gates clean, and a sealed unseen authored batch reached `152 / 1 / 6`
-over `160` rows (`95.0%` exact). All three current measurements held `0`
-compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+The current public claim is measurement-backed across several evidence classes.
+The 2026-05-22 native restamp remains the non-regression anchor at `1997 exact /
+46 partial / 120 miss` over `2163` rows (`92.33%` exact). The newer fresh ugly
+public Batch 03 work now gives the strongest real-document pressure signal:
+latest guarded slices reached `75 / 0 / 0` on the SEC subset and `216 / 6 / 3`
+on the non-SEC subset, or `291 / 6 / 3` over `300` rows (`97.0%`) if read as a
+slice-combined current view. That is not a single fresh 300-row rerun, and the
+batch is now partly a regression guard because some mechanisms were learned
+from it. A four-fixture externally sourced spotcheck remains clean at latest
+fixture-level `160 / 0 / 0`, and a sealed unseen authored batch reached `152 /
+1 / 6` over `160` rows (`95.0%` exact). These runs held `0` compatibility rows,
+`0` runtime load errors, and `0` QA write proposals.
 
 The caveats are part of the claim: the native compile gate grew noisier
 (`26 / 30 -> 9 / 47` pass/hold), the native corpus is same named fixtures rather
@@ -148,17 +153,22 @@ Open `http://127.0.0.1:8765` for the live console.
 The current full-suite verification headline is kept in
 [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md).
 
-Focused local verification for the newest compile-surface and guard work:
+Focused local verification for the newest compile-surface and source-record
+work:
 
 ```powershell
-python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py tests\test_qa_mode_selector.py tests\test_selector_guard_families.py -q
-# 428 passed
+python -m pytest -q
+# 1779 passed, 2 subtests passed
+
+python scripts\audit_active_instrument_leakage.py
+# forbidden hits: 0
 ```
 
 Current high-signal evidence:
 
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+- Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined current view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and should be treated as current transfer/regression evidence, not a leaderboard claim.
 - Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Earlier cold transfer baseline: six fresh transfer fixtures scored `177 / 10 / 53` over `240` rows (`73.75%` exact) before the current direct-surface work.
