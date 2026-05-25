@@ -388,3 +388,19 @@ source-coordinate joins, or answer assessment. On Batch 03, the next experiment
 should inspect the ACH-disagreement rows, especially rows labeled
 `compile_surface_gap` but ranked `h_join_computation`, before assuming a
 compile-side repair is the right first patch.
+
+Follow-up:
+
+The ACH read produced a useful intervention path. A narrow source-coordinate
+pass added query-only support for preceding headings, named section windows,
+quote-to-heading location, elapsed date differences, and public `.gov` contact
+emails. Targeted replay recovered the intended rows without runtime, write, or
+compatibility pressure. The full Batch 03 R2 rerun reached `273 / 11 / 16 =
+91.0%` on 300 rows, up from `270 / 14 / 16 = 90.0%`.
+
+The guard still matters: row-level comparison showed `7` baseline-exact
+regressions, and `0` of those regressions had an added support surface. ACH was
+therefore useful as a patch-location lens, but the next blocker is not just
+more support breadth. It is dense-document stability over SEC-style biography,
+exhibit, dollar/percentage, covenant, signature-block, and conditional-term
+rows.

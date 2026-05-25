@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -1949,6 +1950,15 @@ def run_one_question(
     source_overlap_support = _source_record_question_overlap_companion(runtime, utterance=utterance)
     if source_overlap_support:
         query_results.append(source_overlap_support)
+    source_preceding_heading = _source_record_preceding_heading_companion(runtime, utterance=utterance)
+    if source_preceding_heading:
+        query_results.append(source_preceding_heading)
+    source_named_section_window = _source_record_named_section_window_companion(runtime, utterance=utterance)
+    if source_named_section_window:
+        query_results.append(source_named_section_window)
+    source_quote_heading = _source_record_quote_heading_locator_companion(runtime, utterance=utterance)
+    if source_quote_heading:
+        query_results.append(source_quote_heading)
     source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
     if source_list_window:
         query_results.append(source_list_window)
@@ -6192,6 +6202,505 @@ def _source_record_question_overlap_companion(
             "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
         ],
     }
+
+
+def _source_record_preceding_heading_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:heading|section)\b", text):
+        return None
+    if not re.search(r"\b(?:preced(?:e|es|ed|ing)|immediately before|before)\b", text):
+        return None
+
+    target_tokens = _preceding_heading_target_tokens(utterance)
+    if not target_tokens:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    headings: list[dict[str, Any]] = []
+    for source_row, meta in _source_record_row_metadata(runtime).items():
+        line = _safe_int(meta.get("Line"))
+        if line is None:
+            continue
+        kind = str(meta.get("Kind", "")).strip()
+        label = _normalize_text_filter_atom(str(meta.get("Label", "")))
+        text_atom = text_by_row.get(source_row, label)
+        combined = "_".join(part for part in (kind, label, text_atom, str(meta.get("SectionAtom", ""))) if part)
+        combined_tokens = set(_query_atom_tokens(combined))
+        looks_like_heading = (
+            kind == "heading"
+            or "heading" in combined_tokens
+            or text_atom == str(meta.get("SectionAtom", ""))
+            or (label and label == text_atom)
+        )
+        if not looks_like_heading:
+            continue
+        headings.append(
+            {
+                "SourceRow": source_row,
+                "Line": line,
+                "Kind": kind,
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": label,
+                "TextAtom": text_atom,
+                "Tokens": combined_tokens,
+            }
+        )
+    if len(headings) < 2:
+        return None
+    headings.sort(key=lambda row: int(row["Line"]))
+
+    targets: list[tuple[int, dict[str, Any]]] = []
+    for row in headings:
+        overlap = target_tokens & set(row["Tokens"])
+        if not overlap:
+            continue
+        score = len(overlap) * 10
+        if target_tokens <= set(row["Tokens"]):
+            score += 20
+        targets.append((score, row))
+    if not targets:
+        return None
+    targets.sort(key=lambda item: (-item[0], int(item[1]["Line"])))
+
+    out_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for _, target in targets[:3]:
+        target_index = headings.index(target)
+        if target_index <= 0:
+            continue
+        previous = headings[target_index - 1]
+        key = (str(previous["SourceRow"]), str(target["SourceRow"]))
+        if key in seen:
+            continue
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": "source_record_preceding_heading",
+                "PreviousHeadingRow": str(previous["SourceRow"]),
+                "PreviousHeadingLine": str(previous["Line"]),
+                "PreviousHeadingAtom": str(previous["TextAtom"]),
+                "PreviousHeadingDisplay": _display_source_phrase(str(previous["TextAtom"])),
+                "TargetHeadingRow": str(target["SourceRow"]),
+                "TargetHeadingLine": str(target["Line"]),
+                "TargetHeadingAtom": str(target["TextAtom"]),
+                "TargetHeadingDisplay": _display_source_phrase(str(target["TextAtom"])),
+                "MatchedTargetTokens": ",".join(sorted(target_tokens & set(target["Tokens"]))),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_preceding_heading_support(PreviousHeadingRow, TargetHeadingRow, PreviousHeadingAtom, TargetHeadingAtom).",
+        "result": {
+            "predicate": "source_record_preceding_heading_support",
+            "prolog_query": (
+                "source_record_preceding_heading_support"
+                "(PreviousHeadingRow, TargetHeadingRow, PreviousHeadingAtom, TargetHeadingAtom)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": _row_variable_names(out_rows),
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only preceding-heading support sorted admitted source-record heading rows "
+                    "by source line and selected the heading immediately before the target heading; "
+                    "no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _preceding_heading_target_tokens(utterance: str) -> set[str]:
+    text = str(utterance or "")
+    quoted = re.findall(r'"([^"]+)"|`([^`]+)`|' + r"'([^']+)'", text)
+    for groups in quoted:
+        value = next((item for item in groups if item), "")
+        tokens = {token for token in _query_atom_tokens(value) if len(token) >= 3}
+        if tokens:
+            return tokens
+    match = re.search(
+        r"\b(?:precedes?|preceding|before)\s+(?:the\s+)?(?P<target>[A-Za-z0-9][A-Za-z0-9 _/-]{1,80}?)(?:\?|\.|$)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if match:
+        return {
+            token
+            for token in _query_atom_tokens(match.group("target"))
+            if len(token) >= 3 and token not in {"heading", "section"}
+        }
+    return set()
+
+
+def _source_record_named_section_window_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if "section" not in text:
+        return None
+    if re.search(r"\b(?:preced(?:e|es|ed|ing)|immediately before)\b", text):
+        return None
+    if not re.search(r"\b(?:list|name|cite|cited|mentions?|under|inside|within|located|appears?)\b", text):
+        return None
+
+    section_targets = _named_section_target_candidates(utterance)
+    if not section_targets:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    ordered = _source_record_ordered_rows(runtime, text_by_row=text_by_row)
+    if not ordered:
+        return None
+    heading_indexes = [
+        index
+        for index, row in enumerate(ordered)
+        if _source_record_row_looks_like_heading(row)
+    ]
+    if not heading_indexes:
+        return None
+
+    candidates: list[tuple[int, int, int]] = []
+    for heading_index in heading_indexes:
+        row = ordered[heading_index]
+        row_tokens = set(row["Tokens"])
+        for target_index, target_tokens in enumerate(section_targets):
+            overlap = row_tokens & target_tokens
+            if not overlap:
+                continue
+            score = len(overlap) * 12
+            if target_tokens <= row_tokens:
+                score += 24
+            if str(row["TextAtom"]) == "_".join(sorted(target_tokens)):
+                score += 6
+            candidates.append((score, target_index, heading_index))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (-item[0], item[1], int(ordered[item[2]]["Line"])))
+
+    _score, _target_index, heading_index = candidates[0]
+    heading = ordered[heading_index]
+    next_heading_line = None
+    for later_index in heading_indexes:
+        if later_index > heading_index:
+            next_heading_line = int(ordered[later_index]["Line"])
+            break
+
+    section_rows: list[dict[str, str]] = []
+    for row in ordered[heading_index:]:
+        line = int(row["Line"])
+        if line < int(heading["Line"]):
+            continue
+        if next_heading_line is not None and line >= next_heading_line:
+            break
+        if line - int(heading["Line"]) > 80:
+            break
+        if row["Kind"] in {"blank", "separator"}:
+            continue
+        section_rows.append(
+            {
+                "SupportKind": "source_record_named_section_window",
+                "SectionSourceRow": str(heading["SourceRow"]),
+                "SectionLine": str(heading["Line"]),
+                "SectionAtom": str(heading["TextAtom"]),
+                "SectionDisplay": _display_source_phrase(str(heading["TextAtom"])),
+                "SourceRow": str(row["SourceRow"]),
+                "Line": str(row["Line"]),
+                "Kind": str(row["Kind"]),
+                "Label": str(row["Label"]),
+                "TextAtom": str(row["TextAtom"]),
+                "DisplayText": _display_source_phrase(str(row["TextAtom"])),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+        if len(section_rows) >= 18:
+            break
+    if not section_rows:
+        return None
+    return {
+        "query": "source_record_named_section_window_support(SectionSourceRow, SourceRow, TextAtom).",
+        "result": {
+            "predicate": "source_record_named_section_window_support",
+            "prolog_query": "source_record_named_section_window_support(SectionSourceRow, SourceRow, TextAtom).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(section_rows),
+            "variables": _row_variable_names(section_rows),
+            "rows": section_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only named-section support matched an admitted source-record heading "
+                    "from the question and returned the bounded source rows until the next heading; "
+                    "no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_quote_heading_locator_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:section|heading)\b", text):
+        return None
+    if not re.search(r"\b(?:under|inside|within|located|appears?)\b", text):
+        return None
+    quote_targets = [
+        tokens
+        for tokens in _quoted_target_token_candidates(utterance)
+        if len(tokens) >= 3 and not {"section", "heading"} & tokens
+    ]
+    if not quote_targets:
+        return None
+
+    text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+    text_by_row = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in text_rows
+        if isinstance(row, dict)
+    }
+    ordered = _source_record_ordered_rows(runtime, text_by_row=text_by_row)
+    headings = [row for row in ordered if _source_record_row_looks_like_heading(row)]
+    if not ordered or not headings:
+        return None
+
+    candidates: list[tuple[int, dict[str, Any], set[str]]] = []
+    for row in ordered:
+        row_tokens = set(row["Tokens"])
+        for target_tokens in quote_targets:
+            overlap = row_tokens & target_tokens
+            min_overlap = max(3, math.ceil(len(target_tokens) * 0.6))
+            if len(overlap) < min(min_overlap, len(target_tokens)):
+                continue
+            score = len(overlap) * 12
+            if target_tokens <= row_tokens:
+                score += 24
+            candidates.append((score, row, overlap))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (-item[0], int(item[1]["Line"])))
+
+    out_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for _score, target, overlap in candidates[:4]:
+        target_line = int(target["Line"])
+        previous_heading = None
+        for heading in headings:
+            if int(heading["Line"]) <= target_line:
+                previous_heading = heading
+            else:
+                break
+        if not previous_heading:
+            continue
+        previous_context = _nearest_source_record_context_before(ordered, target_line)
+        key = (str(previous_heading["SourceRow"]), str(target["SourceRow"]))
+        if key in seen:
+            continue
+        seen.add(key)
+        out_rows.append(
+            {
+                "SupportKind": "source_record_quote_heading_locator",
+                "HeadingSourceRow": str(previous_heading["SourceRow"]),
+                "HeadingLine": str(previous_heading["Line"]),
+                "HeadingAtom": str(previous_heading["TextAtom"]),
+                "HeadingDisplay": _display_source_phrase(str(previous_heading["TextAtom"])),
+                "MatchedSourceRow": str(target["SourceRow"]),
+                "MatchedLine": str(target["Line"]),
+                "MatchedTextAtom": str(target["TextAtom"]),
+                "MatchedDisplayText": _display_source_phrase(str(target["TextAtom"])),
+                "PreviousContextTextAtom": str(previous_context.get("TextAtom", "")) if previous_context else "",
+                "PreviousContextDisplay": (
+                    _display_source_phrase(str(previous_context.get("TextAtom", ""))) if previous_context else ""
+                ),
+                "MatchedQuoteTokens": ",".join(sorted(overlap)),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not out_rows:
+        return None
+    return {
+        "query": "source_record_quote_heading_locator_support(HeadingSourceRow, MatchedSourceRow, HeadingAtom, MatchedTextAtom).",
+        "result": {
+            "predicate": "source_record_quote_heading_locator_support",
+            "prolog_query": (
+                "source_record_quote_heading_locator_support"
+                "(HeadingSourceRow, MatchedSourceRow, HeadingAtom, MatchedTextAtom)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(out_rows),
+            "variables": _row_variable_names(out_rows),
+            "rows": out_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only quote-heading support located a quoted phrase in admitted source-record "
+                    "text and returned the nearest preceding admitted heading-like row; no durable fact "
+                    "was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _named_section_target_candidates(utterance: str) -> list[set[str]]:
+    candidates: list[set[str]] = []
+    candidates.extend(_quoted_target_token_candidates(utterance))
+    text = str(utterance or "")
+    for match in re.finditer(
+        r"\b(?:in|under|inside|within|from)\s+(?:the\s+)?(?P<section>[A-Za-z0-9][A-Za-z0-9 _&/().,-]{1,80}?)\s+section\b",
+        text,
+        flags=re.IGNORECASE,
+    ):
+        tokens = _section_target_tokens(match.group("section"))
+        if tokens:
+            candidates.append(tokens)
+    deduped: list[set[str]] = []
+    seen: set[tuple[str, ...]] = set()
+    for tokens in candidates:
+        filtered = {token for token in tokens if token not in {"section", "heading"}}
+        if not filtered:
+            continue
+        key = tuple(sorted(filtered))
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(filtered)
+    return deduped[:6]
+
+
+def _quoted_target_token_candidates(utterance: str) -> list[set[str]]:
+    candidates: list[set[str]] = []
+    for groups in re.findall(r'"([^"]+)"|`([^`]+)`|' + r"'([^']+)'", str(utterance or "")):
+        value = next((item for item in groups if item), "")
+        tokens = _section_target_tokens(value)
+        if tokens:
+            candidates.append(tokens)
+    return candidates
+
+
+def _section_target_tokens(value: str) -> set[str]:
+    return {
+        token
+        for token in _query_atom_tokens(value)
+        if len(token) >= 3
+        and token not in GENERIC_QUERY_PLACEHOLDERS
+        and token
+        not in {
+            "the",
+            "and",
+            "with",
+            "from",
+            "which",
+            "what",
+            "where",
+            "under",
+            "inside",
+            "within",
+            "located",
+            "appears",
+        }
+    }
+
+
+def _source_record_ordered_rows(
+    runtime: CorePrologRuntime,
+    *,
+    text_by_row: dict[str, str] | None = None,
+) -> list[dict[str, Any]]:
+    if text_by_row is None:
+        text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+        text_by_row = {
+            str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+            for row in text_rows
+            if isinstance(row, dict)
+        }
+    ordered: list[dict[str, Any]] = []
+    for source_row, meta in _source_record_row_metadata(runtime).items():
+        line = _safe_int(meta.get("Line"))
+        if line is None:
+            continue
+        label = _normalize_text_filter_atom(str(meta.get("Label", "")))
+        section = _normalize_text_filter_atom(str(meta.get("SectionAtom", "")))
+        text_atom = text_by_row.get(source_row, label)
+        combined = "_".join(part for part in (str(meta.get("Kind", "")), label, text_atom, section) if part)
+        ordered.append(
+            {
+                "SourceRow": source_row,
+                "Line": line,
+                "Kind": str(meta.get("Kind", "")),
+                "Section": str(meta.get("SectionAtom", "")),
+                "Label": label,
+                "TextAtom": text_atom,
+                "Tokens": set(_query_atom_tokens(combined)),
+            }
+        )
+    ordered.sort(key=lambda row: int(row["Line"]))
+    return ordered
+
+
+def _source_record_row_looks_like_heading(row: dict[str, Any]) -> bool:
+    kind = str(row.get("Kind", "")).strip()
+    label = _normalize_text_filter_atom(str(row.get("Label", "")))
+    text_atom = _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+    tokens = set(row.get("Tokens", set()))
+    if kind == "heading" or "heading" in tokens:
+        return True
+    if kind == "labeled_line" and label and label == text_atom:
+        return True
+    return False
+
+
+def _nearest_source_record_context_before(
+    ordered: list[dict[str, Any]],
+    target_line: int,
+) -> dict[str, Any] | None:
+    for row in reversed(ordered):
+        line = int(row["Line"])
+        if line >= target_line:
+            continue
+        if str(row.get("Kind", "")) in {"paragraph_line", "anchored_line", "labeled_line"}:
+            return row
+    return None
 
 
 def _asks_for_source_record_overlap_support(utterance: str) -> bool:
@@ -15508,6 +16017,9 @@ def _query_independent_source_record_support(
         _source_record_section_list_count_companion(runtime, utterance=utterance),
         _source_record_relative_next_day_companion(runtime, utterance=utterance),
         _source_record_question_overlap_companion(runtime, utterance=utterance),
+        _source_record_preceding_heading_companion(runtime, utterance=utterance),
+        _source_record_named_section_window_companion(runtime, utterance=utterance),
+        _source_record_quote_heading_locator_companion(runtime, utterance=utterance),
         _source_record_list_window_companion(runtime, utterance=utterance),
         _source_record_section_list_detail_companion(runtime, utterance=utterance),
         _source_record_speaker_window_companion(runtime, utterance=utterance),
@@ -15701,6 +16213,13 @@ def _date_duration_question_spans(utterance: str) -> tuple[str, str]:
         return match.group("start"), match.group("end")
     match = re.search(
         r"\bfrom\b(?P<start>.+?)\bto\b(?P<end>.+?)(?:[?.]|$)",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if match:
+        return match.group("start"), match.group("end")
+    match = re.search(
+        r"(?P<start>.+?)\band\b(?P<end>.+?)\b(?:differ|differs|difference)\b",
         text,
         flags=re.IGNORECASE | re.DOTALL,
     )
@@ -18748,6 +19267,11 @@ def _source_record_email_displays(atom: str) -> list[str]:
     displays: list[str] = []
     for pattern, domain in (
         (r"([a-z0-9]+(?:_[a-z0-9]+)*)_fda_hhs_gov", "fda.hhs.gov"),
+        (r"([a-z]+(?:_[a-z]+)*)_dol_gov", "dol.gov"),
+        (r"([a-z]+(?:_[a-z]+)*)_sec_gov", "sec.gov"),
+        (r"([a-z]+(?:_[a-z]+)*)_osha_gov", "osha.gov"),
+        (r"([a-z]+(?:_[a-z]+)*)_cpsc_gov", "cpsc.gov"),
+        (r"([a-z]+(?:_[a-z]+)*)_ftc_gov", "ftc.gov"),
         (r"([a-z0-9]+(?:_[a-z0-9]+)*)_nupacknutrition_com", "nupacknutrition.com"),
     ):
         for match in re.finditer(pattern, text):
@@ -18767,6 +19291,8 @@ def _display_email_local_part(local: str, *, domain: str) -> str:
     hfp_index = _subsequence_index(parts, ["hfp", "oce", "dietarysupplements"])
     if hfp_index >= 0:
         return "HFP-OCE-DietarySupplements"
+    if domain in {"dol.gov", "sec.gov", "osha.gov", "cpsc.gov", "ftc.gov"}:
+        return ".".join(parts)
     if len(parts) >= 2:
         return ".".join(parts[-2:])
     return ".".join(parts)
@@ -22939,6 +23465,9 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_citation_list_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
+            "source_record_named_section_window_support",
+            "source_record_preceding_heading_support",
+            "source_record_quote_heading_locator_support",
             "source_record_section_list_detail_support",
             "source_record_date_range_duration_support",
             "source_record_same_day_event_time_support",
@@ -22985,7 +23514,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",

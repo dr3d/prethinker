@@ -402,3 +402,224 @@ carrier. The immediate QA patch location may still be join/query mechanics over
 already-admitted source coordinates. The next useful inspection should focus on
 rows where the classifier says `compile_surface_gap` but ACH ranks
 `h_join_computation`.
+
+## 2026-05-25 ACH-Guided Source-Coordinate Cages
+
+Question:
+
+Can the ACH disagreement signal lead to narrow deterministic support without
+turning Batch 03 into a polish target?
+
+Edits:
+
+```text
+source_record_preceding_heading_support:
+  sorts admitted source-record heading-like rows by source line and returns the
+  heading immediately before a named target heading.
+
+source_record_elapsed_date_duration_support:
+  extended to handle "X and Y differ by how many days" wording when both date
+  roles are present in admitted source-record/direct date surfaces.
+
+source_record_named_section_window_support:
+  matches a named source section from the question and returns the bounded
+  admitted source-record rows until the next heading-like row.
+
+source_record_quote_heading_locator_support:
+  locates a quoted source phrase in admitted source-record text and returns the
+  nearest preceding heading-like source row.
+
+source_record_contact_signatory_support:
+  expanded public `.gov` email parsing so admitted media-contact rows such as
+  DOL contacts can render address displays without a fixture-specific rule.
+```
+
+All of these are query-only support rows. They read admitted
+`source_record_*` rows already present in the runtime, write no durable facts,
+and do not use fixture names or fixture vocabulary.
+
+Focused tests:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q
+
+284 passed
+```
+
+Full test suite after the Batch 03 R2 run and worksheet update:
+
+```text
+python -m pytest -q
+
+1717 passed, 2 subtests passed
+```
+
+Leakage check:
+
+```text
+python scripts\audit_active_instrument_leakage.py
+
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain-token warnings
+scope: active runtime scripts and src only; docs/tests/datasets excluded
+```
+
+Targeted mechanism replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_join_cages_20260525\targeted_rerun_r2
+
+rows:
+  fda_ugly_001 q013: exact via source_record_named_section_window_support
+  fda_ugly_003 q006: exact via source_record_quote_heading_locator_support
+  osha_ugly_002 q015: exact via source_record_contact_signatory_support
+
+targeted total:
+  3 / 0 / 0
+
+hygiene:
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+The earlier focused replay for `fda_ugly_001 q007/q020` also stayed clean:
+
+```text
+fda_ugly_001 q007:
+  miss -> exact via source_record_preceding_heading_support
+
+fda_ugly_001 q020:
+  miss -> exact via source_record_elapsed_date_duration_support
+
+targeted total:
+  2 / 0 / 0
+```
+
+Context-overflow normalization:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_join_cages_20260525\normalize_not_judged\fda_ugly_001_q025_no_bundle
+
+row:
+  fda_ugly_001 q025
+
+result:
+  exact
+```
+
+Read: the prior `not_judged` row was a judge-context overflow from the bulky
+evidence-bundle path, not a factual miss.
+
+Full Batch 03 R2 rerun:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_join_cages_20260525\full_batch03_rerun_r2
+
+summary:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_join_cages_20260525\full_batch03_rerun_r2_summary.md
+
+comparison:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_join_cages_20260525\full_batch03_rerun_r2_comparison.md
+
+conditions:
+  model: qwen/qwen3.6-35b-a3b via OpenRouter
+  lanes: 6
+  cache: disabled
+  evidence-bundle path: enabled
+  compatibility adapter row limit: 0
+```
+
+Result:
+
+```text
+questions: 300
+exact / partial / miss: 273 / 11 / 16
+exact rate: 91.0%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Comparison with QA R1 baseline:
+
+```text
+baseline:
+  270 / 14 / 16 = 90.0%
+
+candidate:
+  273 / 11 / 16 = 91.0%
+
+delta:
+  +3 exact, -3 partial, 0 miss
+
+row changes:
+  changed: 18
+  improved: 10
+  regressed: 8
+  baseline exact -> non-exact: 7
+  baseline exact -> miss: 6
+
+regressions with added support surfaces:
+  0
+
+aggregate status:
+  promotable
+
+regression guard:
+  fail
+```
+
+Per-fixture R2 score:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `fda_ugly_001` | 25 | 0 | 0 |
+| `fda_ugly_002` | 22 | 1 | 2 |
+| `fda_ugly_003` | 24 | 0 | 1 |
+| `osha_ugly_001` | 25 | 0 | 0 |
+| `osha_ugly_002` | 22 | 1 | 2 |
+| `osha_ugly_003` | 23 | 1 | 1 |
+| `other_ugly_001` | 24 | 1 | 0 |
+| `other_ugly_002` | 24 | 0 | 1 |
+| `other_ugly_003` | 24 | 1 | 0 |
+| `sec_ugly_001` | 22 | 1 | 2 |
+| `sec_ugly_002` | 20 | 3 | 2 |
+| `sec_ugly_003` | 18 | 2 | 5 |
+
+Direct support-surface wins in the comparison:
+
+```text
+fda_ugly_001 q007:
+  source_record_preceding_heading_support
+
+fda_ugly_001 q020:
+  source_record_elapsed_date_duration_support
+
+fda_ugly_003 q006:
+  source_record_quote_heading_locator_support
+```
+
+Rows improved without added support surfaces also moved, which is normal
+no-cache route/judge variance. The important guardrail is the inverse: no
+regressed row had an added support surface. That means this batch of support
+surfaces does not look like trigger overreach. The remaining guard failure is
+mostly route/judge/answer-assessment churn over dense SEC-style rows, not a
+new support pollution problem.
+
+Current blocker read:
+
+1. Batch 03 is back in the 90s cleanly at `91.0%`, but this is not a clean
+   promotion because the exact-row regression guard still fails.
+2. The new cages are generic and transfer-shaped, with no fixture names,
+   no fixture-specific vocabulary, and no durable KB writes.
+3. The highest-value next blocker is SEC dense-document stability: biography
+   paragraphs, exhibits, dollar/percentage inventories, restrictive covenants,
+   signature-block inconsistencies, and conditional transition/separation terms.
+4. The next intervention should target one generic SEC-shaped source-record
+   support family at a time, then replay both the named miss rows and the
+   previously exact SEC guard rows before another full Batch 03 sweep.

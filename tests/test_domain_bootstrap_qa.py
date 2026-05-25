@@ -32,6 +32,9 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_elapsed_date_duration_companion,
     _source_record_date_range_duration_companion,
     _source_record_field_state_companion,
+    _source_record_named_section_window_companion,
+    _source_record_preceding_heading_companion,
+    _source_record_quote_heading_locator_companion,
     _source_record_same_day_event_time_companion,
     _source_record_scoped_numeric_frequency_companion,
     _source_record_section_list_detail_companion,
@@ -2409,6 +2412,105 @@ def test_source_record_elapsed_date_duration_companion_uses_admitted_date_predic
     assert rows[0]["ElapsedDays"] == "171"
 
 
+def test_source_record_elapsed_date_duration_companion_handles_named_date_difference() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "document_date(warning_letter, 2026_04_09).",
+        "source_record_text_atom(src_line_0002, content_current_as_of_april_14_2026).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance=(
+            'The warning letter date and the "Content current as of" date differ. '
+            "By how many days do they differ?"
+        ),
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["StartDate"] == "2026_04_09"
+    assert rows[0]["EndDate"] == "2026_04_14"
+    assert rows[0]["ElapsedDays"] == "5"
+
+
+def test_source_record_preceding_heading_companion_finds_heading_before_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0210, heading, 210, review_scope, review_scope).",
+        "source_record_text_atom(src_line_0210, review_scope).",
+        "source_record_row(src_line_0212, heading, 212, recommendation, recommendation).",
+        "source_record_text_atom(src_line_0212, recommendation).",
+        "source_record_row(src_line_0216, heading, 216, closing_section, closing_section).",
+        "source_record_text_atom(src_line_0216, closing_section).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_preceding_heading_companion(
+        runtime,
+        utterance='What is the section heading that immediately precedes "Closing Section"?',
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["PreviousHeadingAtom"] == "recommendation"
+    assert row["TargetHeadingAtom"] == "closing_section"
+
+
+def test_source_record_named_section_window_companion_returns_bounded_section_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0208, labeled_line, 208, public_record, process_controls).",
+        "source_record_text_atom(src_line_0208, process_controls).",
+        "source_record_row(src_line_0210, paragraph_line, 210, public_record, guidance_list).",
+        (
+            "source_record_text_atom(src_line_0210, "
+            "agency_guidances_alpha_one_beta_two_and_gamma_three)."
+        ),
+        "source_record_row(src_line_0212, labeled_line, 212, public_record, next_section).",
+        "source_record_text_atom(src_line_0212, next_section).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_named_section_window_companion(
+        runtime,
+        utterance='Name the three guidance documents cited in the "Process Controls" section.',
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert [row["SourceRow"] for row in rows] == ["src_line_0208", "src_line_0210"]
+    assert rows[0]["SectionAtom"] == "process_controls"
+    assert rows[1]["TextAtom"].endswith("gamma_three")
+
+
+def test_source_record_quote_heading_locator_companion_finds_enclosing_heading() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0040, labeled_line, 40, public_record, first_findings).",
+        "source_record_text_atom(src_line_0040, first_findings).",
+        "source_record_row(src_line_0071, paragraph_line, 71, public_record, quotation_intro).",
+        "source_record_text_atom(src_line_0071, source_states_the_following_under_topic_label).",
+        "source_record_row(src_line_0073, list_row, 73, public_record, alpha_phrase_contains_quoted_terms_for_review).",
+        "source_record_text_atom(src_line_0073, alpha_phrase_contains_quoted_terms_for_review).",
+        "source_record_row(src_line_0078, labeled_line, 78, public_record, second_findings).",
+        "source_record_text_atom(src_line_0078, second_findings).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_quote_heading_locator_companion(
+        runtime,
+        utterance='Under which named section heading is the inline quote "alpha phrase contains quoted terms for review" located?',
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["HeadingAtom"] == "first_findings"
+    assert row["MatchedSourceRow"] == "src_line_0073"
+    assert row["PreviousContextTextAtom"] == "source_states_the_following_under_topic_label"
+
+
 def test_source_record_date_range_duration_companion_computes_closing_extension() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(
@@ -2590,6 +2692,29 @@ def test_source_record_contact_signatory_supports_reply_email_attn_and_identifie
     assert row["AttentionPersonDisplay"] == "Andrew Haack"
     assert row["IdentifierDisplay"] == "FEI 2513595"
     assert len(companion["result"]["rows"]) == 1
+
+
+def test_source_record_contact_signatory_supports_public_gov_contact_emails() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0035, juan_j_rodriguez_972_850_4709_rodriguez_juan_dol_gov).",
+        "source_record_text_atom(src_line_0036, eric_r_lucero_678_237_0630_lucero_eric_r_dol_gov).",
+        "source_record_text_atom(src_line_0037, erika_b_ruthman_678_237_0630_ruthman_erika_b_dol_gov).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_contact_signatory_companion(
+        runtime,
+        utterance="List the email addresses of all named media contacts.",
+    )
+
+    assert companion is not None
+    displays = {row["EmailDisplay"] for row in companion["result"]["rows"]}
+    assert displays == {
+        "rodriguez.juan@dol.gov",
+        "lucero.eric.r@dol.gov",
+        "ruthman.erika.b@dol.gov",
+    }
 
 
 def test_source_record_messy_summary_ignores_unrelated_person_mentions_for_signatory() -> None:
