@@ -1,0 +1,27 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "osha_ugly_002",
+  "source_family": "osha",
+  "source_url": "https://www.osha.gov/news/newsreleases/chicago/20260318",
+  "collected_utc": "2026-05-24T22:45:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "obligations",
+    "source_sections",
+    "headline_vs_body_mismatch",
+    "duplicated_lede",
+    "qualified_answers",
+    "cross_document_validation",
+    "absence_of_evidence",
+    "non_ascii_names",
+    "open_list_grouped_totals",
+    "provisional_facts"
+  ]
+}

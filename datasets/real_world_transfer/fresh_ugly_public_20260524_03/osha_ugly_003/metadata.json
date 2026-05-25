@@ -1,0 +1,28 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "osha_ugly_003",
+  "source_family": "osha",
+  "source_url": "https://www.osha.gov/news/newsreleases/atlanta/20251204",
+  "collected_utc": "2026-05-24T22:55:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "obligations",
+    "source_sections",
+    "cited_vs_operator_entity_separation",
+    "name_canonicalization",
+    "absence_of_evidence",
+    "qualified_answers",
+    "question_premise_pushback",
+    "general_duty_clause_no_specific_standard",
+    "provisional_facts",
+    "unexplained_parenthetical_identifier",
+    "duplicated_lede"
+  ]
+}

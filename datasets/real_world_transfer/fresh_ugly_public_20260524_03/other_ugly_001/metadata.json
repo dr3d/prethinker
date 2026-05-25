@@ -1,0 +1,31 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "other_ugly_001",
+  "source_family": "epa",
+  "source_url": "https://www.epa.gov/enforcement/meyer-distributing-clean-air-act-settlement-summary",
+  "collected_utc": "2026-05-24T23:45:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "obligations",
+    "source_sections",
+    "open_lists_vs_closed_lists",
+    "bulleted_obligation_list_mixed_polarity",
+    "missing_year_in_partial_date",
+    "duration_without_start_date",
+    "annual_vs_lifetime_aggregates",
+    "lower_bound_counts",
+    "metadata_vs_body_date_consistency",
+    "preserved_typo",
+    "proposed_vs_entered_decree",
+    "asymmetric_remedy_scope",
+    "forward_scheduled_review_timestamp",
+    "qualified_answers",
+    "derived_vs_stated_figures"
+  ]
+}

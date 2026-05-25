@@ -50,6 +50,7 @@ Each subfolder must contain:
 source.md
 qa.md
 qa_authored_with_answers.md
+oracle.jsonl
 fixture_notes.md
 metadata.json
 ```
@@ -63,6 +64,12 @@ line/order structure as much as practical. Do not simplify the prose.
 `qa_authored_with_answers.md` should contain the same 25 questions plus reference
 answers. Answers should cite the document section, paragraph, row, table, or
 line where practical.
+
+`oracle.jsonl` should contain exactly 25 JSON Lines rows with stable IDs
+`q001` through `q025` and the reference answer in `reference_answer`. This is
+the machine-readable answer key used by the QA harness. It may be generated
+mechanically from `qa_authored_with_answers.md`, but it must not add or alter
+answer content.
 
 `fixture_notes.md` should explain:
 
@@ -139,9 +146,10 @@ temporary files in the zip.
 
 Before handing off, verify:
 
-- every subfolder has the five required files;
+- every subfolder has the six required files;
 - every `qa.md` has exactly 25 numbered questions;
 - every `qa_authored_with_answers.md` has exactly 25 reference answers;
+- every `oracle.jsonl` has exactly 25 JSON Lines answer rows;
 - every `metadata.json` parses as JSON;
 - source URLs are public and reachable;
 - no source text was generated or rewritten by an LLM.

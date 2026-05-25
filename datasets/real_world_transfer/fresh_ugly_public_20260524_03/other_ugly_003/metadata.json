@@ -1,0 +1,32 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "other_ugly_003",
+  "source_family": "cpsc",
+  "source_url": "https://www.cpsc.gov/Warnings/2026/CPSC-Warns-Consumers-to-Stop-Using-Sperax-Walking-Pads-and-Treadmills-Immediately-Due-to-Risk-of-Serious-Injury-from-Fall-Burn-and-Fire-Hazards",
+  "collected_utc": "2026-05-25T00:05:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "obligations",
+    "source_sections",
+    "warning_vs_recall_disambiguation",
+    "firm_refusal_of_recall",
+    "section_6b_minimum_comment",
+    "two_category_incident_extraction",
+    "asymmetric_labeled_field_coverage",
+    "lower_bound_qualifiers",
+    "importer_dba_brand_canonicalization",
+    "carousel_vs_prose_ordering",
+    "open_list_vs_closed_list_semantics",
+    "missing_typical_recall_fields",
+    "brand_homonym_disambiguation",
+    "repeated_content_deduplication",
+    "structural_absence_detection",
+    "qualified_answers"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "sec_ugly_002",
+  "source_family": "sec",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1013871/000110465926001602/tm261967d1_8k.htm",
+  "collected_utc": "2026-05-24T23:15:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "tables",
+    "obligations",
+    "source_sections",
+    "multi_actor_transition",
+    "forward_dated_effectiveness",
+    "two_event_clusters_same_date",
+    "untagged_tables",
+    "partial_table_rows",
+    "missing_word_sentence",
+    "stale_cross_reference",
+    "forward_looking_obligations",
+    "negative_fact_assertions",
+    "honorific_consistency",
+    "qualified_answers"
+  ]
+}

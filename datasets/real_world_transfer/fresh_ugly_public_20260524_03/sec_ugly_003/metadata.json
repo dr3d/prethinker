@@ -1,0 +1,31 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "sec_ugly_003",
+  "source_family": "sec",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1046311/000119312526232581/d228027d8k.htm",
+  "collected_utc": "2026-05-24T23:30:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "tables",
+    "obligations",
+    "source_sections",
+    "xbrl_bullet_cover_page",
+    "five_bullet_severance_schedule",
+    "conditional_entitlements",
+    "out_of_document_references",
+    "multi_role_history",
+    "possible_role_overlap",
+    "bilateral_release",
+    "missing_item_7_01",
+    "no_employment_agreement_attached",
+    "forward_dated_obligations",
+    "qualified_answers"
+  ]
+}

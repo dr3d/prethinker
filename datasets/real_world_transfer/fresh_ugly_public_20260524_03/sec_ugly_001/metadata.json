@@ -1,0 +1,30 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "sec_ugly_001",
+  "source_family": "sec",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1641631/000149315226014676/form8-k.htm",
+  "collected_utc": "2026-05-24T23:05:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "tables",
+    "obligations",
+    "source_sections",
+    "untagged_tables",
+    "signature_name_mismatch",
+    "multi_item_cross_reference",
+    "filed_vs_furnished",
+    "summary_qualified_by_exhibit",
+    "forward_looking_obligations",
+    "negative_fact_assertions",
+    "date_derivation_exclusion_clause",
+    "biographical_sentence_gap",
+    "same_day_event_clustering"
+  ]
+}

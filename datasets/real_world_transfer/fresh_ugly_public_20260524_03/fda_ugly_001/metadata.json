@@ -1,0 +1,25 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "fda_ugly_001",
+  "source_family": "fda",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026",
+  "collected_utc": "2026-05-24T22:30:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "tables",
+    "obligations",
+    "source_sections",
+    "redactions",
+    "multi_signatory",
+    "qualified_answers",
+    "cross_section_join",
+    "cfr_citations"
+  ]
+}

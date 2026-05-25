@@ -1,0 +1,26 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v1",
+  "batch_id": "fresh_ugly_public_20260524_03",
+  "document_id": "fda_ugly_002",
+  "source_family": "fda",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/vapingcom-710327-06062025",
+  "collected_utc": "2026-05-24T22:45:00Z",
+  "public_domain_or_public_record": true,
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "answer_count": 25,
+  "pressure_tags": [
+    "dates",
+    "roles",
+    "obligations",
+    "source_sections",
+    "redactions",
+    "cc_distribution_list",
+    "multi_entity_disambiguation",
+    "mixed_citation_styles",
+    "relative_deadlines",
+    "qualified_answers",
+    "open_lists"
+  ]
+}

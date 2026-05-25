@@ -14,6 +14,7 @@ REQUIRED_FILES = (
     "source.md",
     "qa.md",
     "qa_authored_with_answers.md",
+    "oracle.jsonl",
     "fixture_notes.md",
     "metadata.json",
 )
@@ -105,6 +106,10 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
     answers = _reference_answer_count(authored_text)
     if answers != expected_questions:
         issues.append(f"reference_answer_count:{answers} expected:{expected_questions}")
+    oracle_count, oracle_issues = _oracle_row_count(fixture_dir / "oracle.jsonl")
+    issues.extend(oracle_issues)
+    if (fixture_dir / "oracle.jsonl").exists() and oracle_count != expected_questions:
+        issues.append(f"oracle_row_count:{oracle_count} expected:{expected_questions}")
     if isinstance(metadata, dict):
         _validate_metadata(
             metadata,
@@ -118,6 +123,7 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
         "status": "pass" if not issues else "fail",
         "question_count": len(questions),
         "reference_answer_count": answers,
+        "oracle_row_count": oracle_count,
         "source_chars": len(source_text),
         "issues": issues,
         "warnings": warnings,
@@ -162,7 +168,10 @@ def _reference_answer_count(text: str) -> int:
     markers = re.findall(r"(?im)^\s*\*\*Reference answer\.\*\*", text)
     if markers:
         return len(markers)
-    numbered_answers = re.findall(r"(?im)^\s*(?:answer\s*)?\d{1,3}\.\s+\S", text)
+    bold_numbered_questions = re.findall(r"(?m)^\s*\*\*\d{1,3}\.\s+.+?\*\*\s*$", text)
+    if bold_numbered_questions:
+        return len(bold_numbered_questions)
+    numbered_answers = re.findall(r"(?im)^(?:answer\s*)?\d{1,3}\.\s+\S", text)
     return len(numbered_answers)
 
 
@@ -176,6 +185,36 @@ def _read_metadata(path: Path) -> tuple[dict[str, Any] | None, str]:
     if not isinstance(value, dict):
         return None, "metadata_not_object"
     return value, ""
+
+
+def _oracle_row_count(path: Path) -> tuple[int, list[str]]:
+    if not path.exists():
+        return 0, []
+    issues: list[str] = []
+    ids: set[str] = set()
+    count = 0
+    for line_number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+        if not line.strip():
+            continue
+        count += 1
+        try:
+            row = json.loads(line)
+        except Exception as exc:
+            issues.append(f"oracle_jsonl_error:line_{line_number}:{exc}")
+            continue
+        if not isinstance(row, dict):
+            issues.append(f"oracle_jsonl_row_not_object:line_{line_number}")
+            continue
+        row_id = str(row.get("id") or "").strip()
+        if not row_id:
+            issues.append(f"oracle_jsonl_missing_id:line_{line_number}")
+        elif row_id in ids:
+            issues.append(f"oracle_jsonl_duplicate_id:{row_id}")
+        else:
+            ids.add(row_id)
+        if not str(row.get("reference_answer") or row.get("answer") or "").strip():
+            issues.append(f"oracle_jsonl_missing_reference_answer:{row_id or 'line_' + str(line_number)}")
+    return count, issues
 
 
 def _read_text(path: Path) -> str:
@@ -195,16 +234,17 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Issues: `{summary.get('issue_count', 0)}`",
         f"- Warnings: `{summary.get('warning_count', 0)}`",
         "",
-        "| Fixture | Status | Questions | Answers | Issues | Warnings |",
-        "| --- | --- | ---: | ---: | --- | --- |",
+        "| Fixture | Status | Questions | Answers | Oracle | Issues | Warnings |",
+        "| --- | --- | ---: | ---: | ---: | --- | --- |",
     ]
     for row in report.get("fixtures", []) or []:
         lines.append(
-            "| `{fixture}` | `{status}` | {questions} | {answers} | {issues} | {warnings} |".format(
+            "| `{fixture}` | `{status}` | {questions} | {answers} | {oracle} | {issues} | {warnings} |".format(
                 fixture=row.get("fixture", ""),
                 status=row.get("status", ""),
                 questions=row.get("question_count", 0),
                 answers=row.get("reference_answer_count", 0),
+                oracle=row.get("oracle_row_count", 0),
                 issues=", ".join(f"`{item}`" for item in row.get("issues", []) or []) or "-",
                 warnings=", ".join(f"`{item}`" for item in row.get("warnings", []) or []) or "-",
             )
