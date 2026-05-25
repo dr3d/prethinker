@@ -16,6 +16,7 @@ __pycache__/
 *.pyd
 codex-state.json
 .playwright-mcp/
+.vscode/
 kb_runs/
 kb_runs_published/
 kb_store/
