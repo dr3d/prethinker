@@ -925,3 +925,102 @@ Residual:
 clarification_required` in the guard replay. That matches the prior envelope
 noise seen on biography rows and should be inspected as a separate status
 assembly issue rather than folded into the amount-inventory mechanism.
+
+## 2026-05-25 Restrictive-Covenant Source-Record Cage
+
+Question:
+
+Can the restrictive-covenant miss recover from admitted legal text without
+teaching the instrument a particular filing, party, or answer string?
+
+Finding:
+
+`sec_ugly_003 q020` was a query-surface gap. The source-record row was admitted
+with the relevant text, but the query path searched for question n-grams such
+as `restrictive_covenants_does` instead of the actual covenant terms present in
+the row.
+
+Edit:
+
+```text
+source_record_restrictive_covenant_support:
+  query-only legal covenant support over admitted source_record_text_atom rows.
+
+  trigger:
+    restrictive/covenant/confidentiality/non-competition/non-solicitation/
+    non-disparagement wording in the question
+
+  extracted terms:
+    confidentiality
+    non-competition
+    non-solicitation
+    non-disparagement
+    other customary terms and conditions
+    release of claims, marked bilateral when the source says each side provides it
+```
+
+The support reads only admitted source-record text. It writes no durable facts
+and does not branch on fixture names, party names, filing names, or answer
+strings.
+
+Focused tests:
+
+```text
+python -m pytest \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_extracts_restrictive_covenants \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_restrictive_covenants_requires_covenant_question -q
+
+2 passed
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_covenant_terms_20260525
+
+sec_ugly_003 q020:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  returned:
+    confidentiality
+    non-competition
+    non-solicitation
+    non-disparagement
+    other customary terms and conditions
+    bilateral release of claims
+  artifact:
+    targeted_sec_ugly_003_q020
+
+guards:
+  q011 payments/benefits list: exact, covenant support absent
+  q021 transition-period vs separation-date distinction: still partial, covenant support absent
+  q024 transition/separation cross-section: exact, covenant support absent
+  artifact:
+    guard_sec_ugly_003_q011_q021_q024
+
+combined fixture guard:
+  sec_ugly_003 full QA replay after amount-inventory and covenant cages:
+    24 / 1 / 0
+    compatibility/runtime/write rows: 0/0/0
+    source_record_amount_inventory_support fired only on q015
+    source_record_restrictive_covenant_support fired only on q020
+    remaining non-exact: q021 transition-period vs separation-date distinction
+  artifact:
+    full_sec_ugly_003_guard_after_covenants
+```
+
+Read:
+
+This is another mechanism repair, not a corpus score. It is narrow enough to be
+worth keeping: the trigger is legal-covenant language, the extraction vocabulary
+is generic contract/separation-agreement vocabulary, and the guard rows show it
+does not wake up on nearby payment or transition-date questions.
+
+Next blocker:
+
+`sec_ugly_003 q021` remains the local unresolved row: a term-definition /
+conditional-date distinction between a fixed transition period and a variable
+separation date. That is probably a separate source-record term-definition
+surface, not a covenant issue.

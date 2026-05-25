@@ -15988,6 +15988,7 @@ def _source_record_messy_summary_companions(
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance),
         _source_record_amount_inventory_companion(runtime, utterance=utterance),
+        _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -17825,6 +17826,136 @@ def _source_record_amount_display(*, value: str, amount_kind: str) -> str:
         return f"${int(whole):,}.{cents}"
     number = int(text.replace("_", ""))
     return f"${number:,}"
+
+
+def _source_record_restrictive_covenant_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(
+        r"\b(?:restrictive|covenant|covenants|confidentiality|non[-\s]?competition|"
+        r"non[-\s]?solicitation|non[-\s]?disparagement)\b",
+        text,
+    ):
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        atom = _normalize_text_filter_atom(text_atom)
+        if not _source_record_restrictive_covenant_signal(atom):
+            continue
+        for term in _source_record_restrictive_covenant_terms(atom):
+            key = (source_row, term["CovenantKind"])
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_restrictive_covenant_item",
+                    "CovenantKind": term["CovenantKind"],
+                    "CovenantAtom": term["CovenantAtom"],
+                    "CovenantDisplay": term["CovenantDisplay"],
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "FullAnswerDisplay": term["CovenantDisplay"],
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRow", "")),
+            _source_record_restrictive_covenant_sort_key(row.get("CovenantKind", "")),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_restrictive_covenant_summary",
+        "SourceRow": "source_record_restrictive_covenants",
+        "CovenantCount": str(len(support_rows)),
+        "CovenantsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_restrictive_covenant_support(CovenantKind, CovenantAtom, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_restrictive_covenant_support",
+            "prolog_query": "source_record_restrictive_covenant_support(CovenantKind, CovenantAtom, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:100],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only restrictive-covenant support extracted generic covenant and release terms "
+                    "from admitted source-record text; no durable covenant fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_restrictive_covenant_signal(atom: str) -> bool:
+    text = _normalize_text_filter_atom(atom)
+    return bool(
+        re.search(
+            r"(?:^|_)(?:confidentiality|non_competition|noncompetition|non_solicitation|"
+            r"nonsolicitation|non_disparagement|nondisparagement|release_of_claims)(?:_|$)",
+            text,
+        )
+    )
+
+
+def _source_record_restrictive_covenant_terms(atom: str) -> list[dict[str, str]]:
+    text = _normalize_text_filter_atom(atom)
+    term_specs = [
+        ("confidentiality", "confidentiality", "confidentiality"),
+        ("non_competition", "non[_-]?competition|noncompetition", "non-competition"),
+        ("non_solicitation", "non[_-]?solicitation|nonsolicitation", "non-solicitation"),
+        ("non_disparagement", "non[_-]?disparagement|nondisparagement", "non-disparagement"),
+        (
+            "customary_terms_and_conditions",
+            "other_customary_terms_and_conditions|customary_terms_and_conditions|customary_terms",
+            "other customary terms and conditions",
+        ),
+    ]
+    out: list[dict[str, str]] = []
+    for kind, pattern, display in term_specs:
+        if re.search(rf"(?:^|_)(?:{pattern})(?:_|$)", text):
+            out.append({"CovenantKind": kind, "CovenantAtom": kind, "CovenantDisplay": display})
+    if re.search(r"(?:^|_)release_of_claims(?:_|$)", text):
+        display = "release of claims"
+        if re.search(r"(?:^|_)each_of_[a-z0-9_]{1,160}_and_[a-z0-9_]{1,160}_is_providing_a_release_of_claims(?:_|$)", text):
+            display = "bilateral release of claims"
+        out.append(
+            {
+                "CovenantKind": "release_of_claims",
+                "CovenantAtom": "release_of_claims",
+                "CovenantDisplay": display,
+            }
+        )
+    return out
+
+
+def _source_record_restrictive_covenant_sort_key(kind: str) -> int:
+    order = {
+        "confidentiality": 0,
+        "non_competition": 1,
+        "non_solicitation": 2,
+        "non_disparagement": 3,
+        "customary_terms_and_conditions": 4,
+        "release_of_claims": 5,
+    }
+    return order.get(str(kind), 99)
 
 
 def _first_identifier_number(value: str) -> str:
@@ -24374,6 +24505,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_exhibit_index_support",
             "source_record_employment_history_support",
             "source_record_amount_inventory_support",
+            "source_record_restrictive_covenant_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -24425,9 +24557,10 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
+            "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",

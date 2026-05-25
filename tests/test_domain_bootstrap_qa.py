@@ -2855,6 +2855,50 @@ def test_source_record_messy_summary_amount_inventory_ignores_bullet_list_compar
     assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
 
 
+def test_source_record_messy_summary_extracts_restrictive_covenants() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0020, "
+        "each_of_the_company_and_the_executive_is_providing_a_release_of_claims_and_"
+        "the_executive_has_agreed_to_comply_with_obligations_to_which_the_executive_is_subject_"
+        "that_are_intended_to_survive_the_termination_of_employment_including_without_limitation_"
+        "confidentiality_non_competition_non_solicitation_non_disparagement_and_other_customary_terms_and_conditions)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What restrictive covenants does the executive agree to as part of the agreement?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_restrictive_covenant_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "confidentiality" in joined
+    assert "non-competition" in joined
+    assert "non-solicitation" in joined
+    assert "non-disparagement" in joined
+    assert "other customary terms and conditions" in joined
+    assert "bilateral release of claims" in joined
+
+
+def test_source_record_messy_summary_restrictive_covenants_requires_covenant_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0020, confidentiality_non_competition_non_solicitation)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What payments and benefits are listed in the agreement?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_restrictive_covenant_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
