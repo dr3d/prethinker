@@ -232,6 +232,8 @@ TEXT_SUFFIXES = {".html", ".json", ".jsonl", ".md", ".py", ".txt", ".yml", ".yam
 
 def area_for(path: Path) -> str:
     rel = path.relative_to(ROOT).as_posix()
+    if rel.startswith("scripts/audit_") or rel.endswith("_audit.py"):
+        return "audit_tool"
     if rel in {
         "scripts/plan_incoming_fixture_runs.py",
         "scripts/plan_story_world_fixture_runs.py",

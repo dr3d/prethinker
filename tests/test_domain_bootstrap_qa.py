@@ -2166,6 +2166,68 @@ def test_source_record_messy_summary_orders_document_events() -> None:
     ]
 
 
+def test_source_record_messy_summary_orders_role_transition_events_from_source_records() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "resignation(alex_rivera, president, 2026_01_06, no_disagreement, form_8k).",
+        "advisor_role(alex_rivera, advisor, 2026_04_30, 2026_12_31, form_8k).",
+        "source_record_text_atom(src_line_0087, on_january_6_2026_the_board_of_directors_the_board).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "of_the_company_appointed_jordan_liao_the_company_s_current_executive_vice_president_operations)."
+        ),
+        (
+            "source_record_text_atom(src_line_0089, "
+            "as_president_of_the_company_effective_immediately_and_as_chief_executive_officer_"
+            "effective_april_30_2026)."
+        ),
+        (
+            "source_record_text_atom(src_line_0094, "
+            "the_board_of_his_intention_to_step_down_from_the_company_on_april_30_2026_"
+            "dr_rivera_will_resign_as_the_company_s_president_effective)."
+        ),
+        (
+            "source_record_text_atom(src_line_0095, "
+            "immediately_and_will_remain_as_chief_executive_officer_and_chair_of_the_board_"
+            "through_april_30_2026_dr_rivera_will_serve_as_an_advisor)."
+        ),
+        (
+            "source_record_text_atom(src_line_0096, "
+            "to_the_company_from_april_30_2026_through_the_end_of_the_2026_fiscal_year)."
+        ),
+        (
+            "source_record_text_atom(src_line_0098, "
+            "in_connection_with_dr_rivera_s_departure_from_the_board_on_april_30_2026_"
+            "the_board_has_appointed_casey_moore)."
+        ),
+        (
+            "source_record_text_atom(src_line_0099, "
+            "who_has_served_on_the_board_since_2019_to_succeed_dr_rivera_as_chair_of_the_board)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "Place these events in chronological order: Jordan becomes President; Alex resigns as President; "
+            "Jordan becomes CEO; Alex ceases to be CEO; Casey becomes Chair; Alex becomes advisor."
+        ),
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_document_event_chronology_support"
+    )
+    sequence_display = companion["result"]["rows"][0]["SequenceDisplay"]
+    assert "2026-01-06: jordan liao becomes president" in sequence_display
+    assert "2026-01-06: alex rivera resigns as president" in sequence_display
+    assert "2026-04-30: jordan liao becomes chief executive officer" in sequence_display
+    assert "2026-04-30: dr rivera ceases to be chief executive officer" in sequence_display
+    assert "2026-04-30: casey moore becomes chair of the board" in sequence_display
+    assert "2026-04-30: alex rivera becomes advisor" in sequence_display
+    assert "dr rivera becomes advisor" not in sequence_display
+
+
 def test_source_record_messy_summary_extracts_not_formed_group_exception() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(
@@ -3056,6 +3118,333 @@ def test_source_record_messy_summary_dated_event_inventory_requires_inventory_qu
     )
 
 
+def test_source_record_messy_summary_extracts_negative_assertions() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0103, "
+            "mr_rivera_does_not_have_any_family_relationships_with_any_director_or_executive_officer_"
+            "of_the_company_and_there_are_no_arrangements)."
+        ),
+        (
+            "source_record_text_atom(src_line_0104, "
+            "or_understandings_with_any_persons_pursuant_to_which_mr_rivera_has_been_appointed_to_"
+            "his_position_in_addition_there_have_been_no)."
+        ),
+        (
+            "source_record_text_atom(src_line_0105, "
+            "transactions_directly_or_indirectly_involving_mr_rivera_that_would_be_required_to_be_"
+            "disclosed_pursuant_to_item_404_a_of_regulation)."
+        ),
+        "source_record_text_atom(src_line_0106, s_k_promulgated_under_the_exchange_act).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List the three negative-fact assertions made about Mr. Rivera under this item.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_negative_assertion_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "mr rivera does not have any family relationships with any director or executive officer of the company" in joined
+    assert "there are no arrangements or understandings with any persons pursuant to which mr rivera has been appointed to his position" in joined
+    assert "there have been no transactions directly or indirectly involving mr rivera" in joined
+    assert "item 404 a of regulation s k" in joined
+    assert any(row.get("AssertionCount") == "3" for row in companion["result"]["rows"])
+
+
+def test_source_record_messy_summary_negative_assertions_require_assertion_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0103, "
+        "mr_rivera_does_not_have_any_family_relationships_with_any_director_or_executive_officer_of_the_company)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Why did the officer depart?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_negative_assertion_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_extracts_role_transition() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0093, concurrently_therewith_alex_rivera_informed).",
+        (
+            "source_record_text_atom(src_line_0094, "
+            "the_board_of_their_intention_to_step_down_from_the_company_on_april_30_2026_"
+            "dr_rivera_will_resign_as_the_company_s_president_effective)."
+        ),
+        (
+            "source_record_text_atom(src_line_0095, "
+            "immediately_and_will_remain_as_chief_executive_officer_and_chair_of_the_board_"
+            "through_april_30_2026_dr_rivera_will_serve_as_an_advisor)."
+        ),
+        (
+            "source_record_text_atom(src_line_0096, "
+            "to_the_company_from_april_30_2026_through_the_end_of_the_2026_fiscal_year_"
+            "in_order_to_facilitate_an_orderly_transition)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="On what date does Dr. Rivera's resignation as President take effect, and what roles continue after that?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_role_transition_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "dr rivera resigns as president effective immediately" in joined
+    assert "dr rivera remains as chief executive officer through april 30 2026" in joined
+    assert "dr rivera remains as chair of the board through april 30 2026" in joined
+    assert "advisor period starts april 30 2026 and ends at the end of the 2026 fiscal year" in joined
+    assert "does not state a calendar end date" in joined
+
+
+def test_source_record_messy_summary_role_transition_requires_transition_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0095, "
+        "immediately_and_will_remain_as_chief_executive_officer_and_chair_of_the_board_through_april_30_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Who signed the report?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_role_transition_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_role_transition_ignores_chronology_lists() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0094, "
+            "dr_rivera_will_resign_as_the_company_s_president_effective)."
+        ),
+        (
+            "source_record_text_atom(src_line_0095, "
+            "immediately_and_will_remain_as_chief_executive_officer_and_chair_of_the_board_"
+            "through_april_30_2026)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Place these events in chronological order: the officer resigns as president and the successor becomes CEO.",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_role_transition_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_extracts_appointment_and_succession_transitions() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0087, on_january_6_2026_the_board_of_directors_the_board).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "of_the_company_appointed_jordan_liao_the_company_s_current_executive_vice_president_operations)."
+        ),
+        (
+            "source_record_text_atom(src_line_0089, "
+            "as_president_of_the_company_effective_immediately_and_as_chief_executive_officer_"
+            "effective_april_30_2026)."
+        ),
+        (
+            "source_record_text_atom(src_line_0098, "
+            "practices_in_connection_with_dr_rivera_s_departure_from_the_board_on_april_30_2026_"
+            "the_board_has_appointed_casey_moore)."
+        ),
+        (
+            "source_record_text_atom(src_line_0099, "
+            "who_has_served_on_the_board_since_2019_to_succeed_dr_rivera_as_chair_of_the_board)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "For each executive, list the date their old role ends and the date their new role begins. "
+            "Note any executive whose old role and new role overlap."
+        ),
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_role_transition_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "jordan liao is described as current executive vice president operations" in joined
+    assert "does not state when that old role ends" in joined
+    assert "jordan liao appointed president effective immediately on 2026-01-06" in joined
+    assert "jordan liao appointed chief executive officer effective 2026-04-30" in joined
+    assert "casey moore has served on the board since 2019" in joined
+    assert "casey moore appointed to succeed dr rivera as chair of the board effective 2026-04-30" in joined
+
+
+def test_source_record_messy_summary_role_transition_supports_direct_assumed_role_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0098, "
+            "in_connection_with_dr_rivera_s_departure_from_the_board_on_april_30_2026_"
+            "the_board_has_appointed_casey_moore)."
+        ),
+        (
+            "source_record_text_atom(src_line_0099, "
+            "who_has_served_on_the_board_since_2019_to_succeed_dr_rivera_as_chair_of_the_board)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What role does Casey Moore assume on April 30, 2026?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_role_transition_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "casey moore appointed to succeed dr rivera as chair of the board effective 2026-04-30" in joined
+
+
+def test_source_record_messy_summary_extracts_board_nominee_path() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0087, on_january_6_2026_the_board_of_directors_the_board).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "of_the_company_appointed_jordan_liao_the_company_s_current_executive_vice_president)."
+        ),
+        (
+            "source_record_text_atom(src_line_0089, "
+            "as_president_of_the_company_effective_immediately_and_as_chief_executive_officer_"
+            "effective_april_30_2026)."
+        ),
+        (
+            "source_record_text_atom(src_line_0090, "
+            "the_date_of_the_company_s_next_annual_meeting_of_stockholders_the_annual_meeting_"
+            "ms_liao_will_also_be_named)."
+        ),
+        "source_record_text_atom(src_line_0091, as_a_director_nominee_seeking_election_at_the_annual_meeting).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What does the document say about Ms. Liao's path to Board membership?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_board_nominee_path_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "ms liao will be named as a director nominee seeking election at the annual meeting" in joined
+    assert "april 30 2026" in joined
+    assert "not automatic board membership" in joined
+
+
+def test_source_record_messy_summary_board_nominee_path_requires_board_path_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0091, "
+        "ms_liao_will_also_be_named_as_a_director_nominee_seeking_election_at_the_annual_meeting)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What compensation has been finalized for the officer?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_board_nominee_path_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_extracts_named_role_roster() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "appoints(company, jordan_liao, president, 2026_01_06).",
+        "appoints(company, jordan_liao, chief_executive_officer, 2026_04_30).",
+        "resigns(alex_rivera, president, 2026_01_06).",
+        "succeeds(casey_moore, alex_rivera, chair_of_the_board, 2026_04_30).",
+        "transition_role(alex_rivera, advisor, 2026_04_30, 2026_12_31).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "of_the_company_appointed_jordan_liao_the_company_s_current_executive_vice_president_operations_as_president)."
+        ),
+        (
+            "source_record_text_atom(src_line_0090, "
+            "the_date_of_the_company_s_next_annual_meeting_of_stockholders_the_annual_meeting_"
+            "ms_liao_will_also_be_named)."
+        ),
+        "source_record_text_atom(src_line_0091, as_a_director_nominee_seeking_election_at_the_annual_meeting).",
+        (
+            "source_record_text_atom(src_line_0098, "
+            "the_board_has_appointed_casey_moore_who_has_served_on_the_board_since_2019_to_succeed_alex)."
+        ),
+        "source_record_cell(src_line_0140, 2, by).",
+        "source_record_cell(src_line_0140, 3, s_taylor_chen).",
+        "source_record_cell(src_line_0141, 3, taylor_chen).",
+        "source_record_cell(src_line_0142, 3, corporate_secretary).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every named individual in this report and their stated role(s).",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_named_role_roster_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "Jordan Liao" in joined
+    assert "appointed president effective 2026 01 06" in joined
+    assert "current executive vice president operations" in joined
+    assert "director nominee seeking election" in joined
+    assert "Alex Rivera" in joined
+    assert "advisor from 2026 04 30 through 2026 12 31" in joined
+    assert "Casey Moore" in joined
+    assert "board member since 2019" in joined
+    assert "Taylor Chen" in joined
+    assert "corporate secretary signatory" in joined
+
+
+def test_source_record_messy_summary_named_role_roster_requires_roster_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("appoints(company, jordan_liao, president, 2026_01_06).").get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="When was the president appointed?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_named_role_roster_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -3125,6 +3514,27 @@ def test_source_record_contact_signatory_supports_source_record_signature_block(
     assert "Director Office Of Enforcement" in row["RoleDisplay"]
     assert "Office Of Compliance And Enforcement" in row["RoleDisplay"]
     assert "Human Foods Program" in row["RoleDisplay"]
+
+
+def test_source_record_contact_signatory_supports_named_individual_role_roster() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_cell(src_line_0114, 2, by).",
+        "source_record_cell(src_line_0114, 3, s_alex_rivera).",
+        "source_record_cell(src_line_0115, 3, alex_rivera).",
+        "source_record_cell(src_line_0116, 3, corporate_secretary).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_contact_signatory_companion(
+        runtime,
+        utterance="List every named individual in this report and their stated role(s).",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert any(row.get("PersonDisplay") == "Alex Rivera" for row in rows)
+    assert any("Corporate Secretary" in row.get("RoleDisplay", "") for row in rows)
 
 
 def test_source_record_contact_signatory_supports_reply_email_attn_and_identifier() -> None:

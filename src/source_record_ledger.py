@@ -520,6 +520,8 @@ def _clean_text(value: str, *, max_chars: int) -> str:
 def _replace_source_state_glyphs(value: str) -> str:
     text = str(value or "")
     replacements = {
+        "\u00c2\u00a8": " unchecked_box ",
+        "\u00a8": " unchecked_box ",
         "☐": " unchecked_box ",
         "☑": " checked_box ",
         "☒": " checked_box ",
@@ -533,15 +535,16 @@ def _replace_source_state_glyphs(value: str) -> str:
 
 def _checkbox_state_facts(text: str, *, row_id: str, label_atom: str) -> list[str]:
     raw = str(text or "")
+    normalized = _replace_source_state_glyphs(raw)
     state = ""
-    if "☐" in raw or "unchecked_box" in raw:
+    if "unchecked_box" in normalized:
         state = "unchecked"
-    elif "☑" in raw or "☒" in raw or "checked_box" in raw or re.search(r"\[[xX]\]", raw):
+    elif "checked_box" in normalized or re.search(r"\[[xX]\]", raw):
         state = "checked"
     if not state:
         return []
-    label_source = re.sub(r"☐|☑|☒|unchecked_box|checked_box|\[[xX]\]", " ", raw)
-    label = label_atom if label_atom and label_atom != "no_label" else _atom(label_source)
+    label_source = re.sub(r"unchecked_box|checked_box|\[[xX]\]", " ", normalized)
+    label = label_atom if label_atom and label_atom not in {"no_label", "unchecked_box", "checked_box"} else _atom(label_source)
     if not label:
         return []
     return [

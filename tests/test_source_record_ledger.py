@@ -176,6 +176,21 @@ def test_source_record_ledger_preserves_checkbox_state() -> None:
     assert "source_record_field(src_line_0001, emerging_growth_company_unchecked_box, unchecked)." in facts
 
 
+def test_source_record_ledger_preserves_mojibake_unchecked_table_cell() -> None:
+    ledger = extract_source_record_ledger(
+        "| \u00c2\u00a8 | Written communications pursuant to Rule 425 under the Securities Act |"
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_cell(src_line_0001, 1, unchecked_box)." in facts
+    assert "source_record_cell(src_line_0001, 2, written_communications_pursuant_to_rule_425_under_the_securities_act)." in facts
+    assert (
+        "source_record_checkbox_state("
+        "src_line_0001, written_communications_pursuant_to_rule_425_under_the_securities_act, unchecked)."
+    ) in facts
+
+
 def test_source_record_ledger_emits_row_context_citations_dates_and_count_words() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

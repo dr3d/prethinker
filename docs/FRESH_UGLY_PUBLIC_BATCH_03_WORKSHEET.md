@@ -1400,3 +1400,137 @@ This is mechanism evidence, not a fresh SEC subset score. If the two targeted
 OpenRouter repairs (`q010` and `q015`) hold in the next SEC subset rerun,
 `sec_ugly_001` should move from `23 / 0 / 2` to `25 / 0 / 0`. The remaining SEC
 subset blockers are now concentrated in `sec_ugly_002`.
+
+## 2026-05-25 SEC Source-Record Transition Cages
+
+Question:
+
+Can the SEC governance-transition residue recover from admitted source-record
+text when the fresh compile palette drifts away from durable appointment and
+succession predicates?
+
+Finding:
+
+The fresh `sec_ugly_002` compile preserved the relevant Item 5.02 text in the
+source-record ledger but admitted only the Coben `resignation/5` and
+`advisor_role/5` facts. It missed durable Gaudette appointment and Carrillo
+succession facts that a previous compile had admitted. This is compile-palette
+variance, not document evidence loss.
+
+Edits:
+
+```text
+source_record_negative_assertion_support:
+  query-only support for source-stated no/does-not assertions.
+
+source_record_role_transition_support:
+  query-only support for appointment/succession/resign/remain/advisor phrases,
+  including current-role end not stated and effective-date appointments.
+
+source_record_board_nominee_path_support:
+  query-only support for nominee/election/annual-meeting board path language.
+
+source_record_named_role_roster_support:
+  query-only roster support combining admitted role predicates, transition
+  phrases, nominee phrases, and signature-block cells.
+
+source_record_document_event_chronology_support:
+  extended to sort role-transition events from source-record transition rows
+  when the question asks for event chronology.
+
+source_record_checkbox_state:
+  source-record ledger now normalizes mojibake unchecked checkbox glyphs.
+```
+
+All supports read admitted `source_record_*` rows or existing admitted facts.
+They write no durable facts and do not branch on fixture names, person names,
+company names, filing names, or answer strings.
+
+Focused tests:
+
+```text
+negative assertion focused tests: 2 passed
+role transition focused tests: 3 passed
+board nominee focused tests: 4 passed
+signatory / named-role roster focused tests: 3 passed
+checkbox state focused tests: 3 passed
+appointment/succession chronology focused tests: 4 passed
+```
+
+Targeted OpenRouter replays:
+
+```text
+negative assertion:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_negative_assertion_20260525
+  sec_ugly_002 q015:
+    1 / 0 / 0, established, 0/0/0 hygiene
+  guards:
+    q010, q021, q023 exact; support absent
+
+role transition:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_role_transition_20260525
+  sec_ugly_002 q016/q017/q019:
+    3 / 0 / 0, 0/0/0 hygiene
+  note:
+    q019 guard forced trigger tightening so chronology lists do not receive the
+    standalone role-transition companion.
+
+board nominee path:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_board_nominee_path_20260525
+  sec_ugly_002 q022:
+    1 / 0 / 0, established, 0/0/0 hygiene
+  guards:
+    q003 and q024 exact; board-nominee support absent where not asked.
+
+named role roster:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_named_role_roster_20260525
+  sec_ugly_002 q012:
+    1 / 0 / 0, established, 0/0/0 hygiene
+
+checkbox state:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_checkbox_state_20260525
+  fresh compile:
+    compile_sec_ugly_002
+  sec_ugly_002 q011:
+    1 / 0 / 0, established, 0/0/0 hygiene
+
+appointment/succession and chronology:
+  artifact root:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_transition_appointment_20260525
+  q003/q024 targeted:
+    1 / 1 / 0 before structured support policy
+  q024 structured-policy replay:
+    1 / 0 / 0
+  q019 chronology replay:
+    1 / 0 / 0
+  q012/q019/q025 guard before chronology repair:
+    2 / 1 / 0, with q019 partial
+```
+
+Fresh full-fixture rerun:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_transition_appointment_20260525\full_sec_ugly_002_fresh_compile_structured_policy_openrouter
+
+sec_ugly_002:
+  25 / 0 / 0
+  parsed_ok: 25 / 25
+  response envelopes: 23 established, 2 clarification_required
+  failure surfaces: 25 not_applicable
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+This is a useful cage against fresh-compile palette variance. The LLM can still
+miss durable appointment/succession predicates, but the deterministic
+source-record support now keeps the answer path exact when the source text was
+admitted. The remaining caution is response-envelope calibration: q019 and q024
+can be judge-exact while still carrying `clarification_required` from the
+model's self-check because the narrower durable predicates are absent.

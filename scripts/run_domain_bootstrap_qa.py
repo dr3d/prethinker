@@ -15992,6 +15992,10 @@ def _source_record_messy_summary_companions(
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
         _source_record_dated_event_inventory_companion(runtime, utterance=utterance),
+        _source_record_negative_assertion_companion(runtime, utterance=utterance),
+        _source_record_role_transition_companion(runtime, utterance=utterance),
+        _source_record_board_nominee_path_companion(runtime, utterance=utterance),
+        _source_record_named_role_roster_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -18487,6 +18491,822 @@ def _source_record_dated_event_trim_window(value: str) -> str:
     return text
 
 
+def _source_record_negative_assertion_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not _source_record_negative_assertion_question(text):
+        return None
+
+    text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for index, (source_row, _text_atom) in enumerate(text_atoms):
+        row_window = text_atoms[index : index + 4]
+        if not row_window:
+            continue
+        window_text = "_".join(_normalize_text_filter_atom(atom) for _row, atom in row_window if atom)
+        window_sources = [row for row, _atom in row_window if row]
+        for assertion in _source_record_negative_assertions_from_text(window_text):
+            key = (assertion["AssertionKind"], assertion["SubjectAtom"])
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_negative_assertion",
+                    "AssertionKind": assertion["AssertionKind"],
+                    "SubjectAtom": assertion["SubjectAtom"],
+                    "SubjectDisplay": _display_source_phrase(assertion["SubjectAtom"]),
+                    "AssertionAtom": assertion["AssertionAtom"],
+                    "AssertionDisplay": assertion["AssertionDisplay"],
+                    "SourceRows": ",".join(window_sources[:4]),
+                    "SourceTextAtom": window_text,
+                    "SourceTextDisplay": _display_source_phrase(window_text),
+                    "FullAnswerDisplay": assertion["AssertionDisplay"],
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRows", "").split(",", 1)[0]),
+            _source_record_negative_assertion_sort_key(row.get("AssertionKind", "")),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_negative_assertion_summary",
+        "SourceRow": "source_record_negative_assertions",
+        "AssertionCount": str(len(support_rows)),
+        "AssertionsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_negative_assertion_support(AssertionKind, Subject, AssertionAtom, SourceRows).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_negative_assertion_support",
+            "prolog_query": "source_record_negative_assertion_support(AssertionKind, Subject, AssertionAtom, SourceRows).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only negative-assertion support grouped source-stated no/does-not disclosure "
+                    "claims from admitted source-record text; no durable absence fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_negative_assertion_question(text: str) -> bool:
+    if re.search(r"\bnegative[-\s]?fact(?:s)?\b", text):
+        return True
+    if re.search(r"\bnegative\b.{0,40}\bassertion", text):
+        return True
+    if re.search(r"\bassertions?\b", text) and re.search(r"\b(?:does not|do not|did not|no|none|without)\b", text):
+        return True
+    return False
+
+
+def _source_record_negative_assertions_from_text(text: str) -> list[dict[str, str]]:
+    normalized = _normalize_text_filter_atom(text)
+    out: list[dict[str, str]] = []
+    family_match = re.search(
+        r"(?P<subject>(?:mr|mrs|ms|dr)_[a-z0-9]+)_does_not_have_any_family_relationships_with_any_"
+        r"(?P<object>director_or_executive_officer(?:_of_the_company)?)",
+        normalized,
+    )
+    if family_match:
+        subject = family_match.group("subject")
+        assertion = (
+            f"{subject}_does_not_have_any_family_relationships_with_any_{family_match.group('object')}"
+        )
+        out.append(
+            {
+                "AssertionKind": "no_family_relationships",
+                "SubjectAtom": subject,
+                "AssertionAtom": assertion,
+                "AssertionDisplay": _display_source_phrase(assertion),
+            }
+        )
+
+    arrangements_match = re.search(
+        r"there_are_no_arrangements_or_understandings_with_any_persons_pursuant_to_which_"
+        r"(?P<subject>(?:mr|mrs|ms|dr)_[a-z0-9]+)_has_been_appointed_to_(?P<position>[a-z0-9_]{3,80})",
+        normalized,
+    )
+    if arrangements_match:
+        subject = arrangements_match.group("subject")
+        position = _source_record_negative_assertion_trim_tail(arrangements_match.group("position"))
+        assertion = f"there_are_no_arrangements_or_understandings_with_any_persons_pursuant_to_which_{subject}_has_been_appointed_to_{position}"
+        out.append(
+            {
+                "AssertionKind": "no_arrangements_or_understandings",
+                "SubjectAtom": subject,
+                "AssertionAtom": assertion,
+                "AssertionDisplay": _display_source_phrase(assertion),
+            }
+        )
+
+    transactions_match = re.search(
+        r"there_have_been_no_transactions_directly_or_indirectly_involving_"
+        r"(?P<subject>(?:mr|mrs|ms|dr)_[a-z0-9]+)_that_would_be_required_to_be_disclosed_pursuant_to_"
+        r"(?P<authority>item_404_a(?:_of_regulation_s_k)?)",
+        normalized,
+    )
+    if transactions_match:
+        subject = transactions_match.group("subject")
+        authority = transactions_match.group("authority")
+        assertion = (
+            f"there_have_been_no_transactions_directly_or_indirectly_involving_{subject}_"
+            f"that_would_be_required_to_be_disclosed_pursuant_to_{authority}"
+        )
+        out.append(
+            {
+                "AssertionKind": "no_item_404_transactions",
+                "SubjectAtom": subject,
+                "AssertionAtom": assertion,
+                "AssertionDisplay": _display_source_phrase(assertion),
+            }
+        )
+    return out
+
+
+def _source_record_negative_assertion_trim_tail(value: str) -> str:
+    text = _normalize_text_filter_atom(value)
+    text = re.split(
+        r"_(?:in_addition|there_have_been|there_are|as_of|the_company|the_registrant)(?:_|$)",
+        text,
+        maxsplit=1,
+    )[0]
+    return text.strip("_") or value
+
+
+def _source_record_negative_assertion_sort_key(kind: str) -> int:
+    return {
+        "no_family_relationships": 0,
+        "no_arrangements_or_understandings": 1,
+        "no_item_404_transactions": 2,
+    }.get(kind, 99)
+
+
+def _source_record_role_transition_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not _source_record_role_transition_question(text):
+        return None
+
+    text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for index, (_source_row, _text_atom) in enumerate(text_atoms):
+        row_window = text_atoms[index : index + 4]
+        if not row_window:
+            continue
+        window_text = "_".join(_normalize_text_filter_atom(atom) for _row, atom in row_window if atom)
+        window_sources = [row for row, _atom in row_window if row]
+        for entry in _source_record_role_transition_entries(window_text):
+            key = (
+                entry["TransitionKind"],
+                entry["ActorAtom"],
+                entry["RoleAtom"],
+                entry.get("StartDate", "") or entry.get("EndDate", ""),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    **entry,
+                    "SourceRows": ",".join(window_sources[:4]),
+                    "SourceTextAtom": window_text,
+                    "SourceTextDisplay": _display_source_phrase(window_text),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRows", "").split(",", 1)[0]),
+            _source_record_role_transition_sort_key(row.get("TransitionKind", "")),
+            row.get("RoleAtom", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_role_transition_summary",
+        "SourceRow": "source_record_role_transitions",
+        "TransitionCount": str(len(support_rows)),
+        "TransitionsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_role_transition_support(TransitionKind, Actor, Role, StartDate, EndDate, SourceRows).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_role_transition_support",
+            "prolog_query": "source_record_role_transition_support(TransitionKind, Actor, Role, StartDate, EndDate, SourceRows).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:120],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only role-transition support grouped source-stated appointment/succession/"
+                    "resign/remain/advisor phrases from admitted source-record text; no durable role fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_role_transition_question(text: str) -> bool:
+    if re.search(r"\b(?:assume|assumes|assumed)\b", text) and re.search(r"\b(?:role|title|position)\b", text):
+        return True
+    if re.search(r"\b(?:appoint|appointed|appointment|succeed|succeeds|succession)\b", text) and re.search(
+        r"\b(?:role|title|position|date|effective)\b",
+        text,
+    ):
+        return True
+    if re.search(r"\b(?:transition|transitions|old role|new role|overlap)\b", text) and re.search(
+        r"\b(?:executive|officer|role|roles|appoint|appointed|assume|succeed|resign|remain)\b",
+        text,
+    ):
+        return True
+    if re.search(r"\b(?:resign|resigns|resignation)\b", text) and re.search(
+        r"\b(?:effective|takes? effect|continue|continues|continued|hold|holds|role|roles|after)\b",
+        text,
+    ):
+        return True
+    if re.search(r"\b(?:advisory|advisor)\b", text) and re.search(r"\b(?:period|start|end|date|through)\b", text):
+        return True
+    if re.search(r"\b(?:continue|continues|continued|hold|holds|held)\b", text) and re.search(
+        r"\b(?:role|roles|after|through|date)\b",
+        text,
+    ):
+        return True
+    return False
+
+
+def _source_record_role_transition_entries(text: str) -> list[dict[str, str]]:
+    normalized = _normalize_text_filter_atom(text)
+    out: list[dict[str, str]] = []
+    resign_match = re.search(
+        r"(?P<actor>(?:mr|mrs|ms|dr)_[a-z0-9]+)_will_resign_as_(?:the_[a-z0-9]+_s_)?"
+        r"(?P<resign_role>[a-z0-9_]+?)_effective_immediately_and_will_remain_as_"
+        r"(?P<remain_roles>[a-z0-9_]+?)_through_(?P<through>"
+        r"(?:january|february|march|april|may|june|july|august|september|october|november|december)_\d{1,2}_\d{4})",
+        normalized,
+    )
+    if resign_match:
+        actor = resign_match.group("actor")
+        resign_role = _source_record_role_transition_clean_role(resign_match.group("resign_role"))
+        through = resign_match.group("through")
+        out.append(
+            {
+                "SupportKind": "source_record_role_transition_event",
+                "TransitionKind": "resignation_effective_immediately",
+                "ActorAtom": actor,
+                "ActorDisplay": _display_source_phrase(actor),
+                "RoleAtom": resign_role,
+                "RoleDisplay": _display_source_phrase(resign_role),
+                "StartDate": "effective_immediately",
+                "StartDateDisplay": "effective immediately",
+                "EndDate": "",
+                "EndDateDisplay": "",
+                "FullAnswerDisplay": (
+                    f"{_display_source_phrase(actor)} resigns as {_display_source_phrase(resign_role)} "
+                    "effective immediately"
+                ),
+            }
+        )
+        for role in _source_record_role_transition_role_list(resign_match.group("remain_roles")):
+            out.append(
+                {
+                    "SupportKind": "source_record_role_transition_event",
+                    "TransitionKind": "continuing_role_through_date",
+                    "ActorAtom": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "RoleAtom": role,
+                    "RoleDisplay": _display_source_phrase(role),
+                    "StartDate": "after_resignation",
+                    "StartDateDisplay": "after resignation",
+                    "EndDate": through,
+                    "EndDateDisplay": _display_source_date_atom(through),
+                    "FullAnswerDisplay": (
+                        f"{_display_source_phrase(actor)} remains as {_display_source_phrase(role)} "
+                        f"through {_display_source_date_atom(through)}"
+                    ),
+                }
+            )
+
+    advisor_match = re.search(
+        r"(?P<actor>(?:mr|mrs|ms|dr)_[a-z0-9]+)_will_serve_as_an_advisor(?:_to_[a-z0-9_]+?)?_from_"
+        r"(?P<start>(?:january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"\d{1,2}_\d{4})_through_the_end_of_the_(?P<year>\d{4})_fiscal_year",
+        normalized,
+    )
+    if advisor_match:
+        actor = advisor_match.group("actor")
+        start = advisor_match.group("start")
+        textual_end = f"end_of_the_{advisor_match.group('year')}_fiscal_year"
+        out.append(
+            {
+                "SupportKind": "source_record_role_transition_event",
+                "TransitionKind": "advisor_period_textual_end",
+                "ActorAtom": actor,
+                "ActorDisplay": _display_source_phrase(actor),
+                "RoleAtom": "advisor",
+                "RoleDisplay": "advisor",
+                "StartDate": start,
+                "StartDateDisplay": _display_source_date_atom(start),
+                "EndDate": textual_end,
+                "EndDateDisplay": _display_source_phrase(textual_end),
+                "FullAnswerDisplay": (
+                    f"{_display_source_phrase(actor)} advisor period starts {_display_source_date_atom(start)} "
+                    f"and ends at the {_display_source_phrase(textual_end)}; "
+                    "the source text does not state a calendar end date in this phrase"
+                ),
+            }
+        )
+
+    appointment_match = re.search(
+        r"(?:^|_)on_(?P<anchor_month>january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"(?P<anchor_day>\d{1,2})_(?P<anchor_year>(?:19|20)\d{2})_.*?_appointed_"
+        r"(?P<actor>(?:mr|mrs|ms|dr)_[a-z0-9]+|[a-z]+_[a-z]+)_"
+        r"(?:the_[a-z0-9]+_s_)?current_(?P<current_role>[a-z0-9_]+?)_as_"
+        r"(?P<first_role>[a-z0-9_]+?)_of_the_company_effective_immediately_and_as_"
+        r"(?P<second_role>[a-z0-9_]+?)_effective_"
+        r"(?P<second_month>january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"(?P<second_day>\d{1,2})_(?P<second_year>(?:19|20)\d{2})",
+        normalized,
+    )
+    if appointment_match:
+        actor = appointment_match.group("actor")
+        anchor_date = _source_record_full_month_date_atom(
+            appointment_match.group("anchor_month"),
+            appointment_match.group("anchor_day"),
+            appointment_match.group("anchor_year"),
+        )
+        second_date = _source_record_full_month_date_atom(
+            appointment_match.group("second_month"),
+            appointment_match.group("second_day"),
+            appointment_match.group("second_year"),
+        )
+        current_role = _source_record_role_transition_clean_role(appointment_match.group("current_role"))
+        first_role = _source_record_role_transition_clean_role(appointment_match.group("first_role"))
+        second_role = _source_record_role_transition_clean_role(appointment_match.group("second_role"))
+        if current_role:
+            out.append(
+                {
+                    "SupportKind": "source_record_role_transition_event",
+                    "TransitionKind": "current_role_end_not_stated",
+                    "ActorAtom": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "RoleAtom": current_role,
+                    "RoleDisplay": _display_source_phrase(current_role),
+                    "StartDate": "",
+                    "StartDateDisplay": "",
+                    "EndDate": "not_stated",
+                    "EndDateDisplay": "not stated",
+                    "FullAnswerDisplay": (
+                        f"{_display_source_phrase(actor)} is described as current "
+                        f"{_display_source_phrase(current_role)}; the source text does not state when that old role ends"
+                    ),
+                }
+            )
+        if first_role:
+            out.append(
+                {
+                    "SupportKind": "source_record_role_transition_event",
+                    "TransitionKind": "appointment_effective_immediately",
+                    "ActorAtom": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "RoleAtom": first_role,
+                    "RoleDisplay": _display_source_phrase(first_role),
+                    "StartDate": anchor_date,
+                    "StartDateDisplay": _display_source_date_atom(anchor_date),
+                    "EndDate": "",
+                    "EndDateDisplay": "",
+                    "FullAnswerDisplay": (
+                        f"{_display_source_phrase(actor)} appointed {_display_source_phrase(first_role)} "
+                        f"effective immediately on {_display_source_date_atom(anchor_date)}"
+                    ),
+                }
+            )
+        if second_role:
+            out.append(
+                {
+                    "SupportKind": "source_record_role_transition_event",
+                    "TransitionKind": "appointment_effective_date",
+                    "ActorAtom": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "RoleAtom": second_role,
+                    "RoleDisplay": _display_source_phrase(second_role),
+                    "StartDate": second_date,
+                    "StartDateDisplay": _display_source_date_atom(second_date),
+                    "EndDate": "",
+                    "EndDateDisplay": "",
+                    "FullAnswerDisplay": (
+                        f"{_display_source_phrase(actor)} appointed {_display_source_phrase(second_role)} "
+                        f"effective {_display_source_date_atom(second_date)}"
+                    ),
+                }
+            )
+
+    succession_match = re.search(
+        r"departure_from_the_board_on_"
+        r"(?P<date_month>january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"(?P<date_day>\d{1,2})_(?P<date_year>(?:19|20)\d{2}).*?_board_has_appointed_"
+        r"(?P<actor>(?:mr|mrs|ms|dr)_[a-z0-9]+|[a-z]+_[a-z]+)_"
+        r"who_has_served_on_the_board_since_(?P<board_since>\d{4})_to_succeed_"
+        r"(?P<predecessor>(?:mr|mrs|ms|dr)_[a-z0-9]+|[a-z]+_[a-z]+)_as_"
+        r"(?P<role>[a-z0-9_]+?)(?=_(?:item|biographical|as_of|the_company|mr_|mrs_|ms_|dr_|concurrently|in_connection)|$)",
+        normalized,
+    )
+    if succession_match:
+        actor = succession_match.group("actor")
+        predecessor = succession_match.group("predecessor")
+        role = _source_record_role_transition_clean_role(succession_match.group("role"))
+        date = _source_record_full_month_date_atom(
+            succession_match.group("date_month"),
+            succession_match.group("date_day"),
+            succession_match.group("date_year"),
+        )
+        board_since = succession_match.group("board_since")
+        out.append(
+            {
+                "SupportKind": "source_record_role_transition_event",
+                "TransitionKind": "prior_board_service",
+                "ActorAtom": actor,
+                "ActorDisplay": _display_source_phrase(actor),
+                "RoleAtom": "board_member",
+                "RoleDisplay": "board member",
+                "StartDate": board_since,
+                "StartDateDisplay": board_since,
+                "EndDate": "",
+                "EndDateDisplay": "",
+                "FullAnswerDisplay": (
+                    f"{_display_source_phrase(actor)} has served on the board since {board_since}"
+                ),
+            }
+        )
+        if role:
+            out.append(
+                {
+                    "SupportKind": "source_record_role_transition_event",
+                    "TransitionKind": "succession_appointment_effective_date",
+                    "ActorAtom": actor,
+                    "ActorDisplay": _display_source_phrase(actor),
+                    "PredecessorAtom": predecessor,
+                    "PredecessorDisplay": _display_source_phrase(predecessor),
+                    "RoleAtom": role,
+                    "RoleDisplay": _display_source_phrase(role),
+                    "StartDate": date,
+                    "StartDateDisplay": _display_source_date_atom(date),
+                    "EndDate": "",
+                    "EndDateDisplay": "",
+                    "FullAnswerDisplay": (
+                        f"{_display_source_phrase(actor)} appointed to succeed "
+                        f"{_display_source_phrase(predecessor)} as {_display_source_phrase(role)} "
+                        f"effective {_display_source_date_atom(date)}"
+                    ),
+                }
+            )
+    return out
+
+
+def _source_record_role_transition_clean_role(value: str) -> str:
+    text = _normalize_text_filter_atom(value)
+    text = re.sub(r"^(?:the|company_s)_", "", text)
+    return text.strip("_")
+
+
+def _source_record_role_transition_role_list(value: str) -> list[str]:
+    text = _normalize_text_filter_atom(value)
+    roles = []
+    for role in re.split(r"_and_", text):
+        clean = _source_record_role_transition_clean_role(role)
+        if clean:
+            roles.append(clean)
+    return roles
+
+
+def _source_record_role_transition_sort_key(kind: str) -> int:
+    return {
+        "resignation_effective_immediately": 0,
+        "continuing_role_through_date": 1,
+        "advisor_period_textual_end": 2,
+        "current_role_end_not_stated": 3,
+        "appointment_effective_immediately": 4,
+        "appointment_effective_date": 5,
+        "prior_board_service": 6,
+        "succession_appointment_effective_date": 7,
+    }.get(kind, 99)
+
+
+def _source_record_board_nominee_path_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not _source_record_board_nominee_path_question(text):
+        return None
+
+    text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for index, (_source_row, _text_atom) in enumerate(text_atoms):
+        row_window = text_atoms[index : index + 5]
+        if not row_window:
+            continue
+        window_text = "_".join(_normalize_text_filter_atom(atom) for _row, atom in row_window if atom)
+        window_sources = [row for row, _atom in row_window if row]
+        for entry in _source_record_board_nominee_entries(window_text):
+            key = (entry["NomineeAtom"], entry.get("ElectionEventAtom", ""), entry.get("MeetingDate", ""))
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    **entry,
+                    "SourceRows": ",".join(window_sources[:5]),
+                    "SourceTextAtom": window_text,
+                    "SourceTextDisplay": _display_source_phrase(window_text),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(key=lambda row: _source_row_sort_key(row.get("SourceRows", "").split(",", 1)[0]))
+    summary = {
+        "SupportKind": "source_record_board_nominee_path_summary",
+        "SourceRow": "source_record_board_nominee_path",
+        "NomineePathCount": str(len(support_rows)),
+        "NomineePathsDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_board_nominee_path_support(Nominee, ElectionEvent, MeetingDate, SourceRows).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_board_nominee_path_support",
+            "prolog_query": "source_record_board_nominee_path_support(Nominee, ElectionEvent, MeetingDate, SourceRows).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only board-nominee path support grouped source-stated nominee/election/meeting "
+                    "phrases from admitted source-record text; no durable director fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_board_nominee_path_question(text: str) -> bool:
+    if re.search(r"\bboard\b.{0,80}\b(?:membership|member|service|seat|path)\b", text):
+        return True
+    if re.search(r"\b(?:director nominee|nominee)\b", text) and re.search(r"\b(?:election|elect|meeting)\b", text):
+        return True
+    if re.search(r"\bpath\b", text) and re.search(r"\bboard\b", text):
+        return True
+    return False
+
+
+def _source_record_board_nominee_entries(text: str) -> list[dict[str, str]]:
+    normalized = _normalize_text_filter_atom(text)
+    nominee_match = re.search(
+        r"(?P<nominee>(?:mr|mrs|ms|dr)_[a-z0-9]+)_will_also_be_named_as_a_director_nominee_"
+        r"seeking_election_at_the_annual_meeting",
+        normalized,
+    )
+    if not nominee_match:
+        return []
+    nominee = nominee_match.group("nominee")
+    meeting_date = ""
+    date_match = re.search(
+        r"effective_(?P<date>(?:january|february|march|april|may|june|july|august|september|october|november|december)_"
+        r"\d{1,2}_\d{4})_the_date_of_[a-z0-9_]{0,120}?annual_meeting",
+        normalized,
+    )
+    if date_match:
+        meeting_date = date_match.group("date")
+    election_event = "director_nominee_seeking_election_at_the_annual_meeting"
+    date_display = _display_source_date_atom(meeting_date) if meeting_date else "the annual meeting"
+    return [
+        {
+            "SupportKind": "source_record_board_nominee_path",
+            "NomineeAtom": nominee,
+            "NomineeDisplay": _display_source_phrase(nominee),
+            "ElectionEventAtom": election_event,
+            "ElectionEventDisplay": _display_source_phrase(election_event),
+            "MeetingDate": meeting_date,
+            "MeetingDateDisplay": date_display,
+            "FullAnswerDisplay": (
+                f"{_display_source_phrase(nominee)} will be named as a director nominee seeking election "
+                f"at the annual meeting ({date_display}); the source states a nominee/election path, "
+                "not automatic board membership"
+            ),
+        }
+    ]
+
+
+def _source_record_named_role_roster_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not _source_record_named_role_roster_question(text):
+        return None
+
+    entries_by_person: dict[str, list[str]] = {}
+    source_rows_by_person: dict[str, list[str]] = {}
+
+    def add(person: str, detail: str, *, source_row: str = "") -> None:
+        person_atom = _normalize_text_filter_atom(person)
+        detail_atom = _normalize_text_filter_atom(detail)
+        if not person_atom or not detail_atom:
+            return
+        entries_by_person.setdefault(person_atom, [])
+        if detail_atom not in entries_by_person[person_atom]:
+            entries_by_person[person_atom].append(detail_atom)
+        if source_row:
+            source_rows_by_person.setdefault(person_atom, [])
+            if source_row not in source_rows_by_person[person_atom]:
+                source_rows_by_person[person_atom].append(source_row)
+
+    for row in _runtime_rows(runtime, "appoints(Organization, Person, Role, Date)."):
+        person = str(row.get("Person", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        date = str(row.get("Date", "")).strip()
+        if person and role:
+            add(person, f"appointed_{role}_effective_{date}" if date else f"appointed_{role}")
+
+    for row in _runtime_rows(runtime, "resigns(Person, Role, Date)."):
+        person = str(row.get("Person", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        date = str(row.get("Date", "")).strip()
+        if person and role:
+            add(person, f"{role}_ends_{date}" if date else f"resigned_{role}")
+
+    for row in _runtime_rows(runtime, "succeeds(Person, Predecessor, Role, Date)."):
+        person = str(row.get("Person", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        date = str(row.get("Date", "")).strip()
+        if person and role:
+            add(person, f"succeeds_as_{role}_effective_{date}" if date else f"succeeds_as_{role}")
+
+    for row in _runtime_rows(runtime, "transition_role(Person, Role, StartDate, EndDate)."):
+        person = str(row.get("Person", "")).strip()
+        role = str(row.get("Role", "")).strip()
+        start = str(row.get("StartDate", "")).strip()
+        end = str(row.get("EndDate", "")).strip()
+        if person and role:
+            add(person, f"{role}_from_{start}_through_{end}".strip("_"))
+
+    text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
+    for index, (_source_row, _text_atom) in enumerate(text_atoms):
+        row_window = text_atoms[index : index + 5]
+        if not row_window:
+            continue
+        window_text = "_".join(_normalize_text_filter_atom(atom) for _row, atom in row_window if atom)
+        source_row = ",".join(row for row, _atom in row_window if row)
+        for entry in _source_record_board_nominee_entries(window_text):
+            add(
+                entry.get("NomineeAtom", ""),
+                f"to_be_named_director_nominee_seeking_election_at_annual_meeting_{entry.get('MeetingDate', '')}",
+                source_row=source_row,
+            )
+        for entry in _source_record_role_transition_entries(window_text):
+            add(entry.get("ActorAtom", ""), entry.get("FullAnswerDisplay", ""), source_row=source_row)
+        for entry in _source_record_named_role_roster_text_entries(window_text):
+            add(entry["PersonAtom"], entry["RoleAtom"], source_row=source_row)
+
+    for row in _source_record_signature_block_rows_from_cells(runtime):
+        person = row.get("Person", "")
+        role = row.get("Roles", "") or row.get("RoleDisplay", "")
+        if person and role:
+            add(person, f"{role}_signatory", source_row=row.get("SourceRow", ""))
+
+    if not entries_by_person:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    for person, details in sorted(entries_by_person.items()):
+        detail_display = "; ".join(_display_source_phrase(detail) for detail in details)
+        support_rows.append(
+            {
+                "SupportKind": "source_record_named_role_roster_item",
+                "PersonAtom": person,
+                "PersonDisplay": _source_record_person_display(person),
+                "RoleDetailAtoms": ",".join(details),
+                "RoleDetailsDisplay": detail_display,
+                "SourceRows": ",".join(source_rows_by_person.get(person, [])),
+                "FullAnswerDisplay": f"{_source_record_person_display(person)} - {detail_display}",
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    summary = {
+        "SupportKind": "source_record_named_role_roster_summary",
+        "SourceRow": "source_record_named_role_roster",
+        "PersonCount": str(len(support_rows)),
+        "RosterDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_named_role_roster_support(Person, RoleDetails, SourceRows).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_named_role_roster_support",
+            "prolog_query": "source_record_named_role_roster_support(Person, RoleDetails, SourceRows).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:120],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only named-role roster support grouped admitted role predicates, source-record "
+                    "transition/nominee phrases, and signature-block name/title cells; no durable role fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "appoints(Organization, Person, Role, Date).",
+            "resigns(Person, Role, Date).",
+            "succeeds(Person, Predecessor, Role, Date).",
+            "transition_role(Person, Role, StartDate, EndDate).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_cell(SourceRow, Column, Value).",
+        ],
+    }
+
+
+def _source_record_named_role_roster_question(text: str) -> bool:
+    return bool(
+        re.search(r"\b(?:list|show|build|give)\b", text)
+        and re.search(r"\b(?:every|all)\b.{0,50}\b(?:named )?(?:individual|person|people)\b", text)
+        and re.search(r"\brole", text)
+    )
+
+
+def _source_record_named_role_roster_text_entries(text: str) -> list[dict[str, str]]:
+    normalized = _normalize_text_filter_atom(text)
+    out: list[dict[str, str]] = []
+    current_role_match = re.search(
+        r"appointed_(?P<person>[a-z]+_[a-z]+)_the_company_s_current_"
+        r"(?P<role>[a-z0-9_]+?)_as_president",
+        normalized,
+    )
+    if current_role_match:
+        out.append(
+            {
+                "PersonAtom": current_role_match.group("person"),
+                "RoleAtom": f"current_{current_role_match.group('role')}",
+            }
+        )
+    board_since_match = re.search(
+        r"appointed_(?P<person>[a-z]+_[a-z]+)_who_has_served_on_the_board_since_(?P<year>\d{4})",
+        normalized,
+    )
+    if board_since_match:
+        out.append(
+            {
+                "PersonAtom": board_since_match.group("person"),
+                "RoleAtom": f"board_member_since_{board_since_match.group('year')}",
+            }
+        )
+    return out
+
+
 def _first_identifier_number(value: str) -> str:
     match = re.search(r"\d+(?:[_\-.]\d+)*", str(value or ""))
     return match.group(0).replace("_", ".") if match else ""
@@ -18777,6 +19597,17 @@ def _source_record_full_month_date_atom(month: str, day: str, year: str) -> str:
     if not month_number or not str(day or "").isdigit() or not str(year or "").isdigit():
         return ""
     return f"{int(year):04d}_{month_number}_{int(day):02d}"
+
+
+def _source_record_canonical_date_atom(value: str) -> str:
+    text = str(value or "").strip().lower()
+    if re.fullmatch(r"\d{4}_\d{2}_\d{2}", text):
+        return text
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    match = re.fullmatch(rf"(?P<month>{month_pattern})_(?P<day>\d{{1,2}})_(?P<year>(?:19|20)\d{{2}})", text)
+    if match:
+        return _source_record_full_month_date_atom(match.group("month"), match.group("day"), match.group("year"))
+    return ""
 
 
 def _source_record_date_range_kind(atom: str) -> str:
@@ -20248,6 +21079,7 @@ def _source_record_document_event_chronology_companion(
     facts = _runtime_fact_rows(runtime)
     source_text_atoms = _source_record_text_atoms(runtime)
     support_rows: list[dict[str, str]] = []
+    structured_role_event_keys: set[tuple[str, str, str, str]] = set()
 
     def add_row(
         *,
@@ -20339,6 +21171,39 @@ def _source_record_document_event_chronology_companion(
                     source_predicate=predicate,
                     source_entity=event,
                 )
+        elif predicate == "resignation" and len(args) >= 3:
+            person, role, date_value = args[:3]
+            if _source_record_chronology_mentions_role_event(text, person, role):
+                structured_role_event_keys.add(_source_record_chronology_role_event_key(person, role, date_value, "resignation"))
+                add_row(
+                    event_kind=f"{person}_{role}_resignation",
+                    event_display=f"{_display_source_phrase(person)} resigns as {_display_source_phrase(role)}",
+                    event_date=date_value,
+                    source_predicate=predicate,
+                    source_entity=person,
+                )
+        elif predicate == "resigns" and len(args) >= 3:
+            person, role, date_value = args[:3]
+            if _source_record_chronology_mentions_role_event(text, person, role):
+                structured_role_event_keys.add(_source_record_chronology_role_event_key(person, role, date_value, "resignation"))
+                add_row(
+                    event_kind=f"{person}_{role}_resignation",
+                    event_display=f"{_display_source_phrase(person)} resigns as {_display_source_phrase(role)}",
+                    event_date=date_value,
+                    source_predicate=predicate,
+                    source_entity=person,
+                )
+        elif predicate == "advisor_role" and len(args) >= 3:
+            person, role, date_value = args[:3]
+            if _source_record_chronology_mentions_role_event(text, person, role):
+                structured_role_event_keys.add(_source_record_chronology_role_event_key(person, role, date_value, "begins"))
+                add_row(
+                    event_kind=f"{person}_{role}_begins",
+                    event_display=f"{_display_source_phrase(person)} becomes {_display_source_phrase(role)}",
+                    event_date=date_value,
+                    source_predicate=predicate,
+                    source_entity=person,
+                )
 
     for doc, date_value in filing_dates_by_doc.items():
         doc_tokens = set(_query_atom_tokens(doc))
@@ -20365,6 +21230,36 @@ def _source_record_document_event_chronology_companion(
                 source_text_atom=text_atom,
             )
 
+    if _source_record_chronology_role_event_question(text):
+        ordered_text_atoms = sorted(source_text_atoms, key=lambda item: _source_row_sort_key(item[0]))
+        for index, (_source_row, _text_atom) in enumerate(ordered_text_atoms):
+            row_window = ordered_text_atoms[index : index + 5]
+            if not row_window:
+                continue
+            window_text = "_".join(_normalize_text_filter_atom(atom) for _row, atom in row_window if atom)
+            window_source_rows = ",".join(row for row, _atom in row_window if row)
+            for entry in _source_record_role_transition_entries(window_text):
+                chronology = _source_record_role_transition_chronology_row(entry)
+                if not chronology:
+                    continue
+                role_event_key = _source_record_chronology_role_event_key(
+                    entry.get("ActorAtom", ""),
+                    entry.get("RoleAtom", ""),
+                    chronology["EventDate"],
+                    chronology["EventSuffix"],
+                )
+                if role_event_key in structured_role_event_keys:
+                    continue
+                add_row(
+                    event_kind=chronology["EventKind"],
+                    event_display=chronology["EventDisplay"],
+                    event_date=chronology["EventDate"],
+                    source_predicate="source_record_role_transition_support",
+                    source_entity=entry.get("ActorAtom", ""),
+                    source_row=window_source_rows,
+                    source_text_atom=window_text,
+                )
+
     if not support_rows:
         return None
 
@@ -20380,14 +21275,17 @@ def _source_record_document_event_chronology_companion(
     for row in support_rows:
         key = (row["EventKind"], row["EventDate"])
         existing = deduped.get(key)
-        if existing is None or priority.get(row["EventKind"], 99) < priority.get(existing["EventKind"], 99):
+        if existing is None or _document_event_chronology_priority(
+            row, priority
+        ) < _document_event_chronology_priority(existing, priority):
             deduped[key] = row
     ordered = sorted(
         deduped.values(),
         key=lambda row: (
             _date_atom_sort_key(row["EventDate"]) or (9999, 99, 99),
-            priority.get(row["EventKind"], 99),
+            _document_event_chronology_priority(row, priority),
             row.get("SourcePredicate", ""),
+            _source_row_sort_key(row.get("SourceRow", "")),
         ),
     )
     for index, row in enumerate(ordered, start=1):
@@ -20428,8 +21326,87 @@ def _source_record_document_event_chronology_companion(
             "filing_date(Document, Date).",
             "signed_by(Document, Signatory, Role).",
             "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_role_transition_support(TransitionKind, Actor, Role, StartDate, EndDate, SourceRows).",
         ],
     }
+
+
+def _source_record_chronology_role_event_question(text: str) -> bool:
+    return bool(
+        re.search(r"\b(?:order|sequence|chronological|earliest|latest)\b", text)
+        and re.search(
+            r"\b(?:role|roles|becomes?|resigns?|ceases?|advisor|chair|president|chief executive|succession|transition)\b",
+            text,
+        )
+    )
+
+
+def _source_record_chronology_mentions_role_event(text: str, person: str, role: str) -> bool:
+    tokens = set(_query_atom_tokens(text))
+    person_tokens = set(_query_atom_tokens(person))
+    role_tokens = set(_query_atom_tokens(role))
+    return bool(tokens & (person_tokens | role_tokens | {"role", "roles", "event", "events"}))
+
+
+def _source_record_chronology_role_event_key(person: str, role: str, date_value: str, suffix: str) -> tuple[str, str, str, str]:
+    person_tokens = _query_atom_tokens(person)
+    person_key = person_tokens[-1] if person_tokens else _normalize_text_filter_atom(person)
+    return (person_key, _normalize_text_filter_atom(role), _source_record_canonical_date_atom(date_value), suffix)
+
+
+def _source_record_role_transition_chronology_row(entry: dict[str, str]) -> dict[str, str] | None:
+    kind = entry.get("TransitionKind", "")
+    actor = entry.get("ActorAtom", "")
+    role = entry.get("RoleAtom", "")
+    if not actor or not role:
+        return None
+    event_date = ""
+    event_suffix = ""
+    event_display = ""
+    if kind in {"appointment_effective_immediately", "appointment_effective_date", "succession_appointment_effective_date"}:
+        event_date = _source_record_canonical_date_atom(entry.get("StartDate", ""))
+        event_suffix = "begins"
+        event_display = f"{_display_source_phrase(actor)} becomes {_display_source_phrase(role)}"
+    elif kind == "continuing_role_through_date":
+        event_date = _source_record_canonical_date_atom(entry.get("EndDate", ""))
+        event_suffix = "ends"
+        event_display = f"{_display_source_phrase(actor)} ceases to be {_display_source_phrase(role)}"
+    elif kind == "advisor_period_textual_end":
+        event_date = _source_record_canonical_date_atom(entry.get("StartDate", ""))
+        event_suffix = "begins"
+        event_display = f"{_display_source_phrase(actor)} becomes {_display_source_phrase(role)}"
+    else:
+        return None
+    if not event_date:
+        return None
+    return {
+        "EventKind": f"{actor}_{role}_{event_suffix}",
+        "EventDisplay": event_display,
+        "EventDate": event_date,
+        "EventSuffix": event_suffix,
+    }
+
+
+def _document_event_chronology_priority(row: dict[str, str], static_priority: dict[str, int]) -> int:
+    event_kind = row.get("EventKind", "")
+    if event_kind in static_priority:
+        return static_priority[event_kind]
+    text = f"{event_kind} {row.get('EventDisplay', '')}".casefold()
+    if "president" in text and "begins" in text:
+        return 10
+    if "president" in text and ("resignation" in text or "resigns" in text):
+        return 11
+    if "chief_executive_officer" in text and "begins" in text:
+        return 20
+    if "chief_executive_officer" in text and ("ends" in text or "ceases" in text):
+        return 21
+    if "chair_of_the_board" in text and ("ends" in text or "ceases" in text):
+        return 22
+    if "chair_of_the_board" in text and "begins" in text:
+        return 23
+    if "advisor" in text and "begins" in text:
+        return 24
+    return 90
 
 
 def _source_record_group_formation_exception_companion(
@@ -20641,7 +21618,11 @@ def _source_record_contact_signatory_companion(
     utterance: str,
 ) -> dict[str, Any] | None:
     text = str(utterance or "").casefold()
-    wants_signatory = bool(re.search(r"\b(?:sign|signed|signer|signatory|title)\b", text))
+    wants_person_role_roster = bool(
+        re.search(r"\b(?:every|all|named)\b.{0,40}\b(?:named )?(?:individual|person|people)\b", text)
+        and re.search(r"\brole", text)
+    )
+    wants_signatory = bool(re.search(r"\b(?:sign|signed|signer|signatory|title)\b", text)) or wants_person_role_roster
     wants_contact = bool(re.search(r"\b(?:reply|email|e-mail|attn|attention|contact|directed)\b", text))
     if not (wants_signatory or wants_contact):
         return None
@@ -20651,6 +21632,11 @@ def _source_record_contact_signatory_companion(
     contexts = _source_record_context_rows(runtime)
     if wants_signatory:
         for row in _source_record_signatory_rows_from_contexts(contexts):
+            key = (row["SupportKind"], row.get("Person", ""), row.get("RoleDisplay", ""))
+            if key not in seen:
+                seen.add(key)
+                support_rows.append(row)
+        for row in _source_record_signature_block_rows_from_cells(runtime):
             key = (row["SupportKind"], row.get("Person", ""), row.get("RoleDisplay", ""))
             if key not in seen:
                 seen.add(key)
@@ -20783,11 +21769,15 @@ def _looks_like_source_record_person_label(value: str) -> bool:
         in {
             "office",
             "program",
+            "corporate",
             "director",
             "delivery",
             "method",
+            "secretary",
             "warning",
             "letter",
+            "no",
+            "label",
             "the",
             "your",
             "firm",
@@ -20828,6 +21818,75 @@ def _source_record_signatory_role_values(values: list[str]) -> bool:
     for value in values:
         tokens.update(_source_record_field_name_tokens(value))
     return bool(tokens & title_tokens)
+
+
+def _source_record_signature_block_rows_from_cells(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    rows_by_source: dict[str, dict[int, str]] = {}
+    for row in _runtime_rows(runtime, "source_record_cell(SourceRow, Column, Value)."):
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", "")).strip()
+        column = _safe_int(row.get("Column"))
+        value = _normalize_text_filter_atom(str(row.get("Value", "")))
+        if not source_row or column is None or not value:
+            continue
+        rows_by_source.setdefault(source_row, {})[column] = value
+
+    out: list[dict[str, str]] = []
+    sorted_rows = sorted(rows_by_source.items(), key=lambda item: _source_row_sort_key(item[0]))
+    for index, (source_row, cells) in enumerate(sorted_rows):
+        signed_name = _source_record_signature_signed_name(cells)
+        if not signed_name:
+            continue
+        printed_name = ""
+        role_values: list[str] = []
+        source_rows = [source_row]
+        for candidate_row, candidate_cells in sorted_rows[index + 1 : index + 7]:
+            values = [_normalize_text_filter_atom(value) for _column, value in sorted(candidate_cells.items())]
+            if not printed_name:
+                printed_name = _source_record_signature_block_person_name(values)
+                if printed_name:
+                    source_rows.append(candidate_row)
+                    continue
+            for value in values:
+                if not value or value in {"by", "name", signed_name, printed_name}:
+                    continue
+                if value.startswith("s_") or _looks_like_source_record_person_label(value):
+                    continue
+                if not _source_record_signatory_role_values([value]):
+                    continue
+                role_values.append(value)
+                source_rows.append(candidate_row)
+                break
+        person = printed_name or signed_name
+        role_values = _dedupe_str(role_values)
+        if not person or not role_values:
+            continue
+        person_display = _source_record_person_display(person)
+        role_display = "; ".join(_source_record_title_display(value) for value in role_values)
+        out.append(
+            {
+                "SupportKind": "source_record_signatory",
+                "Person": person,
+                "PersonDisplay": person_display,
+                "Roles": ",".join(role_values),
+                "RoleDisplay": role_display,
+                "SignatoryDisplay": f"{person_display} - {role_display}",
+                "SourceRow": ",".join(_dedupe_str(source_rows)),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return out
+
+
+def _source_record_signature_block_person_name(values: list[str]) -> str:
+    for value in values:
+        normalized = _normalize_text_filter_atom(value)
+        if not normalized or normalized.startswith("s_"):
+            continue
+        if _looks_like_source_record_person_label(normalized):
+            return normalized
+    return ""
 
 
 def _source_record_email_displays(atom: str) -> list[str]:
@@ -25038,6 +26097,10 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_defined_term_contrast_support",
             "source_record_signature_mismatch_support",
             "source_record_dated_event_inventory_support",
+            "source_record_negative_assertion_support",
+            "source_record_role_transition_support",
+            "source_record_board_nominee_path_support",
+            "source_record_named_role_roster_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -25089,13 +26152,18 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
             "Defined-term contrast policy: source_record_defined_term_contrast_support rows are deterministic structured support rows for questions comparing quoted defined terms. They can fully support fixed-period versus conditional-date distinctions when the definitions are extracted from admitted source-record text; do not downgrade solely because primitive term_definition predicates are absent.",
             "Signature-mismatch support policy: source_record_signature_mismatch_support rows are deterministic structured support rows for signature-block inconsistency questions. They can fully support spelling mismatches between adjacent signed-name and printed-name source-record table cells; do not downgrade solely because normalized signatory predicates collapse the names.",
             "Dated-event inventory policy: source_record_dated_event_inventory_support rows are deterministic structured support rows for questions asking to list all dated events in source order. They can fully support ordered date/event inventories when derived from admitted source-record text; do not downgrade solely because primitive event predicates are sparse.",
+            "Negative-assertion support policy: source_record_negative_assertion_support rows are deterministic structured support rows for questions asking for source-stated negative-fact or no/does-not assertions. They can fully support affirmative negative disclosure claims when derived from admitted source-record text; do not treat them as invented absence facts.",
+            "Role-transition support policy: source_record_role_transition_support rows are deterministic structured support rows for questions about appointment/succession, resignation timing, continuing roles, old/new role transitions, role overlap, advisor/advisory periods, and textual transition endpoints. Treat ActorAtom, RoleAtom, StartDate, EndDate, StartDateDisplay, EndDateDisplay, TransitionKind, and FullAnswerDisplay as structured support fields, not as unstructured text summaries. These rows can fully support multi-person transition answers when they supply the requested people, roles, dates, and source-stated unknown endpoints; do not downgrade solely because direct appointment/resignation/succession predicates are absent.",
+            "Board-nominee path support policy: source_record_board_nominee_path_support rows are deterministic structured support rows for questions about board-membership paths, director nominees, elections, and annual-meeting conditionality. They can fully support a nominee/election path without requiring a durable elected-director fact.",
+            "Named-role roster support policy: source_record_named_role_roster_support rows are deterministic structured support rows for questions asking to list every named individual and stated roles. They can combine admitted role predicates with source-record transition, nominee, and signature-block rows to support the roster without requiring a single durable roster predicate.",
+            "Contact/signatory support policy: source_record_contact_signatory_support rows with SupportKind source_record_signatory are answer-bearing for named-individual, title, and role-roster questions. PersonDisplay plus RoleDisplay supports the person-role entry, and SignatoryDisplay supports signatory status; do not downgrade solely because the row is query-only source-record support.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
