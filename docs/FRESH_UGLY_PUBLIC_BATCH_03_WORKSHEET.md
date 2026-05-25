@@ -1654,3 +1654,237 @@ date/role inventory triggers. The SEC subset is now clean under current code,
 but this should be treated as mechanism evidence and a regression guard, not as
 a product benchmark. The next generalization check still needs fresh ugly
 documents outside the tuned SEC slice.
+
+## 2026-05-25 - Non-SEC source-record surface stabilizers
+
+Question:
+
+Can the non-SEC rows that still fail after R5/R6 be improved with generic
+source-record surfaces, without putting fresh fixture names or values into the
+instrument?
+
+Baseline and guard:
+
+```text
+R5 latest non-SEC aggregate:
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_nonsec_r5_or_20260525
+  result:
+    209 / 7 / 9 on 225 rows = 92.89%
+    compatibility/runtime/write rows: 0/0/0
+
+R6 after initial source-surface stabilizers:
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_nonsec_r6_source_surface_or_20260525
+  result:
+    212 / 5 / 8 on 225 rows = 94.22%
+    compatibility/runtime/write rows: 0/0/0
+
+R5 -> R6 churn:
+  changed rows: 14
+  improved rows: 8
+  regressed rows: 5
+  regressions with newly added support predicates: 0
+```
+
+Mechanisms added:
+
+```text
+source_record_label_value_pair_support:
+  exposes direct and adjacent printed field/value source rows.
+
+source_record_postal_state_code_support:
+  extracts two-letter postal state codes only when source-adjacent to a
+  five-digit postal code.
+
+source_record_address_block_support:
+  assembles adjacent multi-line address blocks inside the same source section.
+
+source_record_link_attachment_support:
+  extracts PDF/link attachment labels and filenames from admitted source text.
+
+source_record_incident_statistic_support:
+  extracts source-stated report/injury category counts.
+
+source_record_duration_quantity_support:
+  now includes within-N-working-days deadline anchors such as "from receipt."
+
+source_record_enforcement_action_inventory_support:
+  extracts possible source-stated regulatory/enforcement actions and notice
+  qualifications.
+
+source_record_generic_designation_support:
+  exposes source-stated generic party/entity designations for name-availability
+  questions, e.g. "third party" / "data recipient" shapes. It does not assert
+  a durable absence fact.
+
+source_record_signatory_responsibility_support:
+  matches source-stated signatory office tokens to separate source-stated
+  issue/section tokens for signatory responsibility questions. Issue candidates
+  are explicitly barred from the signature block itself.
+
+source_record_ratio_calculation_support:
+  divides source-stated money amounts by source-stated counts for per-unit
+  questions, preserving numerator/denominator source rows and denominator
+  qualifiers such as "over."
+```
+
+Targeted OpenRouter replays:
+
+```text
+postal state code:
+  fda_ugly_002 q015 -> 1 / 0 / 0
+  ablation source_record_postal_state_code_support -> miss
+
+PDF/link attachment:
+  other_ugly_002 q008 -> 1 / 0 / 0
+  ablation source_record_link_attachment_support -> miss
+
+field/value pair:
+  other_ugly_003 q007 -> 1 / 0 / 0
+  ablation source_record_label_value_pair_support -> exact
+
+incident statistics:
+  other_ugly_003 q015 -> 1 / 0 / 0
+  ablation source_record_incident_statistic_support -> exact
+
+address block:
+  fda_ugly_002 q008 -> 1 / 0 / 0
+  ablation source_record_address_block_support -> exact
+
+deadline anchor:
+  fda_ugly_003 q020 -> 1 / 0 / 0
+  ablation source_record_duration_quantity_support -> exact
+
+enforcement action inventory:
+  fda_ugly_002 q021 -> 1 / 0 / 0
+  ablation source_record_enforcement_action_inventory_support -> partial
+
+generic designation / no-name answer:
+  other_ugly_002 q015 -> 1 / 0 / 0
+  ablation source_record_generic_designation_support -> exact in this replay
+  read: stabilizing deterministic surface, not uniquely load-bearing here
+
+signatory responsibility:
+  fda_ugly_001 q025 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_signatory_responsibility_20260525\fda_ugly_001_q025_de_domain
+  read:
+    exact after tightening issue candidates so the issue side cannot be drawn
+    from the signature block itself.
+
+ratio calculation:
+  other_ugly_001 q022 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_ratio_calculation_20260525\other_ugly_001_q022_tight
+  read:
+    exact with a query-only calculation row: $7,400,000 / 90,000 =
+    approximately $82 per aftermarket defeat device. The calculation preserves
+    the "over" denominator qualifier as an upper-bound note.
+  ablation source_record_ratio_calculation_support -> exact in this replay
+  read:
+    stabilizing deterministic arithmetic surface, not uniquely load-bearing in
+    that one-row replay because the judge accepted raw-number derivability.
+```
+
+Full non-SEC guard after the source-record stabilizers above, but before the
+later ratio-calculation targeted patch:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_nonsec_r7_current_surfaces_or_20260525
+
+aggregate:
+  216 / 6 / 3 on 225 rows = 96.0%
+  compatibility/runtime/write rows: 0/0/0
+
+per fixture:
+  fda_ugly_001: 25 / 0 / 0
+  fda_ugly_002: 23 / 1 / 1
+  fda_ugly_003: 23 / 1 / 1
+  osha_ugly_001: 25 / 0 / 0
+  osha_ugly_002: 23 / 1 / 1
+  osha_ugly_003: 23 / 2 / 0
+  other_ugly_001: 24 / 1 / 0
+  other_ugly_002: 25 / 0 / 0
+  other_ugly_003: 25 / 0 / 0
+
+movement from R6:
+  R6: 212 / 5 / 8 = 94.22%
+  R7: 216 / 6 / 3 = 96.0%
+  delta: +4 exact, +1 partial, -5 miss
+```
+
+Remaining R7 non-exacts:
+
+```text
+fda_ugly_002 q007:
+  query-surface gap; first occurrence / source-row label projection for a date.
+
+fda_ugly_002 q012:
+  compile-surface gap; cc-list address rows lack granular d/b/a or email
+  association per address.
+
+fda_ugly_003 q015:
+  compile-surface gap; raw spelling/casing variations are not preserved as
+  extractable values.
+
+fda_ugly_003 q024:
+  hybrid-join gap; product-by-section classification matrix needs a
+  source-section cross-reference join.
+
+osha_ugly_002 q007:
+  external-convention gap; the source does not define release-prefix-to-office
+  mapping.
+
+osha_ugly_002 q025:
+  external-document gap; cross-document media-contact comparison needs the
+  other release.
+
+osha_ugly_003 q014:
+  compile-surface / authority-normalization gap; source has agency/body text,
+  but expansion from acronym or investigator subgroup to parent administrative
+  body should not be hard-coded casually.
+
+osha_ugly_003 q019:
+  hybrid temporal gap; source supports broad order and deadline duration but
+  not exact receipt-date expiration.
+
+other_ugly_001 q022:
+  ratio calculation partial in R7; targeted replay is exact with
+  source_record_ratio_calculation_support.
+```
+
+Verification:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q
+  335 passed
+
+python -m pytest -q
+  1779 passed, 2 subtests passed
+
+python scripts\audit_active_instrument_leakage.py
+  forbidden hits: 0
+  warning hits: 10 existing agency/domain-token warnings
+
+python -m py_compile scripts\run_domain_bootstrap_qa.py src\source_record_ledger.py scripts\audit_fixture_vocabulary_leaks.py
+  passed
+```
+
+Read:
+
+The useful part is the surface taxonomy and the full-guard movement, not any
+one targeted score. Three repairs were load-bearing under ablation in targeted
+replay: postal state codes, PDF/link attachments, and enforcement-action
+inventory. Generic designation, signatory-responsibility support, and ratio
+calculation support are stabilizers: they make the evidence path deterministic
+and inspectable, but their ablations did not prove unique load-bearing value in
+the replays run today.
+
+The remaining non-SEC residue still points at broader problems: source boundary
+and first-occurrence questions, raw spelling/casing preservation, home-vs-incident
+location distinctions, external convention questions, cross-document questions,
+and legal/administrative body inventories. Those should be handled as new
+mechanism work or declared oracle/external-evidence limits, not patched with
+fixture-specific strings.

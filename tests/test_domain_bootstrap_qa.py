@@ -3051,6 +3051,371 @@ def test_source_record_messy_summary_duration_quantity_requires_duration_questio
     assert not any(item["result"]["predicate"] == "source_record_duration_quantity_support" for item in companions)
 
 
+def test_source_record_messy_summary_duration_quantity_extracts_deadline_anchor() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0060, "
+        "please_submit_a_written_response_within_15_working_days_from_the_date_of_receipt_describing_actions_taken)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the response deadline and from what event is it measured?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_duration_quantity_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "15 working days" in joined
+    assert "from receipt" in joined
+
+
+def test_source_record_messy_summary_extracts_adjacent_label_value_pair() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row_context(src_line_0010, manufactured_in, manufactured_in, product_page).",
+        "source_record_row_context(src_line_0011, france, france, product_page).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Which page field is populated with France?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_label_value_pair_support"
+    )
+    joined = " ".join(row.get("FieldDisplay", "") + " " + row.get("ValueDisplay", "") for row in companion["result"]["rows"])
+    assert "manufactured in france" in joined
+
+
+def test_source_record_messy_summary_extracts_postal_state_codes() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0010, office_line_boise_id_83702).",
+        "source_record_text_atom(src_line_0011, response_address_denver_co_80202).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List all two-letter U.S. state postal codes that appear anywhere in the letter.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_postal_state_code_support"
+    )
+    summary = companion["result"]["rows"][0]
+    assert summary["StateCodesDisplay"] == "ID, CO"
+
+
+def test_source_record_messy_summary_extracts_address_block() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row_context(src_line_0020, reply_address, reply_address_office_of_compliance, letter).",
+        "source_record_row_context(src_line_0021, reply_address, document_control_center, letter).",
+        "source_record_row_context(src_line_0022, reply_address, building_12_room_204, letter).",
+        "source_record_row_context(src_line_0023, reply_address, v_400_market_street, letter).",
+        "source_record_row_context(src_line_0024, reply_address, boise_id_83702, letter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What postal address is given for the document control center?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_address_block_support"
+    )
+    address = companion["result"]["rows"][0]["AddressDisplay"]
+    assert "document control center" in address
+    assert "building 12 room 204" in address
+    assert "400 market street" in address
+    assert "boise id 83702" in address
+
+
+def test_source_record_messy_summary_extracts_pdf_link_attachments() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_row_context(src_line_0020, body, "
+            "federal_complaint_https_www_example_org_files_pdf_case_complaint_pdf, release)."
+        ),
+        (
+            "source_record_row_context(src_line_0021, body, "
+            "proposed_settlement_https_www_example_org_files_pdf_settlement_order_pdf, release)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="The release links two PDF attachments. What are they?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_link_attachment_support"
+    )
+    joined = " ".join(row.get("LinkLabelDisplay", "") + " " + row.get("FileDisplay", "") for row in companion["result"]["rows"])
+    assert "federal complaint" in joined
+    assert "case_complaint.pdf" in joined
+    assert "proposed settlement" in joined
+    assert "settlement_order.pdf" in joined
+
+
+def test_source_record_messy_summary_extracts_incident_statistics() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0030, "
+            "the_product_has_12_reports_of_uncontrolled_motion_and_abrupt_stops_"
+            "resulting_in_at_least_8_falls_or_injuries_including_at_least_one_concussion)."
+        ),
+        (
+            "source_record_text_atom(src_line_0032, "
+            "the_product_has_34_reports_of_overheating_smoke_and_other_thermal_incidents_"
+            "including_two_reports_of_minor_burns)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List the two distinct incident categories with report counts and injury counts.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_incident_statistic_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "12 reports of uncontrolled motion and abrupt stops" in joined
+    assert "at least 8 falls or injuries" in joined
+    assert "34 reports of overheating smoke and other thermal incidents" in joined
+    assert "2 reports of minor burns" in joined
+
+
+def test_source_record_messy_summary_extracts_enforcement_action_inventory() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0040, "
+        "failure_to_address_violations_may_lead_to_regulatory_action_including_but_not_limited_to_"
+        "civil_money_penalties_seizure_and_or_injunction_however_this_notice_does_not_constitute_written_notice_"
+        "products_offered_for_import_may_be_detained_or_refused_admission)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every possible enforcement action mentioned in the letter.",
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_enforcement_action_inventory_support"
+    )
+    summary = companion["result"]["rows"][0]
+    assert "civil money penalties" in summary["ActionsDisplay"]
+    assert "seizure" in summary["ActionsDisplay"]
+    assert "injunction" in summary["ActionsDisplay"]
+    assert "detention or refusal of admission" in summary["ActionsDisplay"]
+    assert "does not constitute written notice" in summary["NoticeQualificationsDisplay"]
+
+
+def test_source_record_messy_summary_extracts_generic_designations_for_name_questions() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0040, "
+        "the_service_shared_records_with_an_unrelated_third_party_and_later_referred_to_the_third_party_data_recipient)."
+    ).get("status") == "success"
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0041, "
+        "the_data_recipient_requested_the_records_but_the_release_did_not_supply_a_proper_name)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Identify by name the unrelated third party that received the records.",
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_generic_designation_support"
+    )
+    summary = companion["result"]["rows"][0]
+    assert "unrelated third party" in summary["DesignationsDisplay"]
+    assert "third party data recipient" in summary["DesignationsDisplay"]
+    assert summary["NamedStatus"] == "generic_designation_not_proper_name"
+
+
+def test_generic_designation_reference_supports_no_name_answers() -> None:
+    row = {
+        "utterance": "Identify by name the unrelated third party that received the records.",
+        "query_results": [
+            {
+                "query": "source_record_generic_designation_support(SourceRow, DesignationAtom, NamedStatus).",
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_generic_designation_support",
+                    "rows": [
+                        {
+                            "DesignationDisplay": "unrelated third party",
+                            "NamedStatus": "generic_designation_not_proper_name",
+                            "NameAvailabilityDisplay": "source uses generic designations, not proper names",
+                        },
+                        {
+                            "DesignationDisplay": "third party data recipient",
+                            "NamedStatus": "generic_designation_not_proper_name",
+                        },
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert qa_module._source_record_generic_designation_reference_supported_by_results(
+        row=row,
+        reference=(
+            "The release does not name the third party. It refers to it as an unrelated "
+            "third party and the third-party data recipient; a definitive answer is not available."
+        ),
+    )
+
+
+def test_source_record_messy_summary_maps_signatory_offices_to_issue_sections() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row_context(src_line_0030, current_good_manufacturing_practice_violations, current_good_manufacturing_practice_violations, letter).",
+        "source_record_text_atom(src_line_0030, current_good_manufacturing_practice_violations).",
+        "source_record_row_context(src_line_0040, unapproved_new_product_violations, unapproved_new_product_violations, letter).",
+        "source_record_text_atom(src_line_0040, unapproved_new_product_violations).",
+        "source_record_row_context(src_line_0100, jordan_lee, jordan_lee, letter).",
+        "source_record_row_context(src_line_0101, jordan_lee, director, letter).",
+        "source_record_row_context(src_line_0102, jordan_lee, office_of_manufacturing_quality, letter).",
+        "source_record_row_context(src_line_0110, riley_chen, riley_chen, letter).",
+        "source_record_row_context(src_line_0111, riley_chen, director, letter).",
+        "source_record_row_context(src_line_0112, riley_chen, office_of_unapproved_product_labeling, letter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance=(
+            "The letter is signed by two officials. Based on the offices they each direct, "
+            "which signatory is responsible for the manufacturing-practice portion and which "
+            "is responsible for the unapproved-product portion?"
+        ),
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_signatory_responsibility_support"
+    )
+    mappings = companion["result"]["rows"][0]["MappingsDisplay"]
+    assert "Jordan Lee: current good manufacturing practice violations" in mappings
+    assert "Riley Chen: unapproved new product violations" in mappings
+
+
+def test_signatory_responsibility_reference_supports_office_section_mapping() -> None:
+    row = {
+        "utterance": (
+            "The letter is signed by two officials. Based on the offices they each direct, "
+            "which signatory is responsible for the manufacturing-practice portion and which "
+            "is responsible for the unapproved-product portion?"
+        ),
+        "query_results": [
+            {
+                "query": "source_record_signatory_responsibility_support(Person, IssueAtom, SourceRow).",
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_signatory_responsibility_support",
+                    "rows": [
+                        {
+                            "SupportKind": "source_record_signatory_responsibility",
+                            "PersonDisplay": "Jordan Lee",
+                            "RoleDisplay": "Director; Office Of Manufacturing Quality",
+                            "IssueDisplay": "current good manufacturing practice violations",
+                        },
+                        {
+                            "SupportKind": "source_record_signatory_responsibility",
+                            "PersonDisplay": "Riley Chen",
+                            "RoleDisplay": "Director; Office Of Unapproved Product Labeling",
+                            "IssueDisplay": "unapproved new product violations",
+                        },
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert qa_module._source_record_signatory_responsibility_reference_supported_by_results(
+        row=row,
+        reference=(
+            "Jordan Lee, Director, Office of Manufacturing Quality, corresponds to the "
+            "current good manufacturing practice violations. Riley Chen, Director, Office of "
+            "Unapproved Product Labeling, corresponds to the unapproved new product violations."
+        ),
+    )
+
+
+def test_source_record_messy_summary_calculates_per_unit_ratio() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0020, settlement_requires_a_3_6_million_civil_penalty).",
+        "source_record_text_atom(src_line_0030, the_company_sold_over_45_000_recalled_units_during_the_period).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the per-unit civil penalty if one divides the penalty by the recalled-unit count?",
+    )
+
+    companion = next(
+        item
+        for item in companions
+        if item["result"]["predicate"] == "source_record_ratio_calculation_support"
+    )
+    row = companion["result"]["rows"][1]
+    assert row["NumeratorDisplay"] == "$3,600,000"
+    assert row["DenominatorDisplay"] == "over 45,000 recalled units"
+    assert row["RoundedQuotient"] == "80"
+    assert row["QuotientDisplay"] == "approximately $80 per recalled unit"
+
+
+def test_ratio_calculation_reference_supports_per_unit_answers() -> None:
+    row = {
+        "utterance": "What is the per-unit civil penalty if one divides the penalty by the recalled-unit count?",
+        "query_results": [
+            {
+                "query": "source_record_ratio_calculation_support(NumeratorSourceRow, DenominatorSourceRow, QuotientValue).",
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_ratio_calculation_support",
+                    "rows": [
+                        {
+                            "SupportKind": "source_record_ratio_calculation",
+                            "NumeratorValue": "3600000",
+                            "DenominatorValue": "45000",
+                            "RoundedQuotient": "80",
+                            "QuotientDisplay": "approximately $80 per recalled unit",
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert qa_module._source_record_ratio_calculation_reference_supported_by_results(
+        row=row,
+        reference="$3,600,000 divided by 45,000 recalled units is approximately $80 per unit.",
+    )
+
+
 def test_source_record_messy_summary_extracts_restrictive_covenants() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(
