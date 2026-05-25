@@ -28,6 +28,7 @@ surface while keeping scripts, datasets, worksheets, and run artifacts private.
 from prethinker import (
     AuditTrace,
     CleanlinessCounters,
+    CompiledArtifactBundle,
     CompileResult,
     DocumentType,
     Engine,
@@ -81,6 +82,7 @@ kb_id
 metadata
 cleanliness_counters
 source_records
+artifact_bundle
 ```
 
 `QueryResult` contains:
@@ -106,9 +108,27 @@ All models are dataclasses and provide `to_dict()` for JSON-facing adapters.
 
 ## Alpha Behavior
 
-The `0.3.0` Engine facade preserves deterministic source records for Markdown,
-plain-text documents, and PDFs with extractable text. It stores KB artifacts in
-a local filesystem registry.
+The `0.4.0` Engine facade compiles Markdown, plain-text documents, and PDFs
+with extractable text into a semantic compiled artifact bundle. The bundle is
+returned on `CompileResult.artifact_bundle` and persisted under the KB
+directory:
+
+```text
+compiled_source/
+  world.pl
+  epistemic.pl
+  ledgers.pl
+  query_policy.json
+  manifest.json
+  diagnostics.json
+  artifact_bundle.json
+```
+
+The public package now has the product-shaped artifact contract. Its admitted
+semantic layer is intentionally narrow: deterministic source identity and
+source-record ledgers are durable, while rich LLM semantic admission is recorded
+as `not_run` in `diagnostics.json` until that research compiler is promoted into
+a stable SDK surface.
 
 The alpha query path returns source-record evidence and an audit trace. When a
 source-record match is strong enough, `QueryResult.answer` contains a
@@ -122,6 +142,17 @@ should report evidence without overclaiming.
 
 The public query path does not use LLM synthesis, reference answers, or durable
 query-time writes.
+
+`query_policy.json` records that boundary:
+
+```json
+{
+  "default_query_mode": "deterministic_extractive_source_record",
+  "llm_synthesis": false,
+  "qa_writes_allowed": false,
+  "compatibility_adapters": "disabled"
+}
+```
 
 PDF input is parsed with `pypdf`. Extractable page text becomes source records
 with `page` and `page_line` payload fields. Scanned/image-only or malformed PDFs

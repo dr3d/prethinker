@@ -1,6 +1,6 @@
 # Compiled KB Artifact Package
 
-Last updated: 2026-05-22
+Last updated: 2026-05-25
 
 ## The Core Doctrine
 
@@ -31,6 +31,13 @@ compiled_source/
 
 This may physically be one Prolog program at first, but the conceptual
 separation matters.
+
+The public `prethinker` package now writes this bundle shape during
+`Engine.compile_document()`. In the current alpha API, `world.pl` admits source
+identity and source-record coordinates, `ledgers.pl` admits deterministic source
+addressability, and `diagnostics.json` explicitly marks rich semantic admission
+as not yet run. That is a contract step, not a claim that the full research
+compiler has been promoted into the package.
 
 ## World KB
 

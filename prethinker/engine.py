@@ -14,6 +14,7 @@ from typing import Any
 
 from pypdf import PdfReader
 
+from prethinker.artifacts import build_compiled_artifact_bundle
 from prethinker.models import (
     AuditTrace,
     CleanlinessCounters,
@@ -66,22 +67,32 @@ class Engine:
 
         doc_type = _normalize_document_type(document_type)
         source_records = _source_records_from_document(document_bytes, doc_type)
+        kb_id = self._store.kb_id_for_document(document_name.strip(), document_bytes)
+        compiled_records = [
+            SourceRecord(record_id=record.record_id, kb_id=kb_id, payload=dict(record.payload)) for record in source_records
+        ]
+        artifact_bundle = build_compiled_artifact_bundle(
+            kb_id=kb_id,
+            document_name=document_name.strip(),
+            document_type=doc_type,
+            document_bytes=document_bytes,
+            source_records=compiled_records,
+        )
         metadata = self._store.create_kb(
             document_name=document_name.strip(),
             document_type=doc_type,
             document_bytes=document_bytes,
-            source_records=source_records,
+            source_records=compiled_records,
+            artifact_bundle=artifact_bundle,
+            kb_id=kb_id,
         )
-        compiled_records = [
-            SourceRecord(record_id=record.record_id, kb_id=metadata.kb_id, payload=dict(record.payload))
-            for record in source_records
-        ]
         cleanliness = CleanlinessCounters()
         return CompileResult(
             kb_id=metadata.kb_id,
             metadata=metadata,
             cleanliness_counters=cleanliness,
             source_records=compiled_records,
+            artifact_bundle=artifact_bundle,
         )
 
     def query(self, *, kb_id: str, question: str) -> QueryResult:
@@ -124,7 +135,10 @@ class Engine:
             failure_surface = "not_applicable"
             status = "answered"
             notes = [
-                "Deterministic extractive answer rendered from source-record evidence; no LLM synthesis or durable writes."
+                (
+                    "Deterministic extractive answer rendered from the compiled source-record ledger; "
+                    "no LLM synthesis or durable writes."
+                )
             ]
         elif matches:
             failure_surface = "answer_surface_gap"
@@ -188,21 +202,47 @@ def _source_records_from_document(document_bytes: bytes, document_type: str) -> 
 
 def _source_records_from_text(text: str) -> list[SourceRecord]:
     records: list[SourceRecord] = []
+    current_section = ""
+    active_headers: list[str] | None = None
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
         line = raw_line.strip()
         if not line:
             continue
         kind = _source_line_kind(line)
+        payload: dict[str, Any] = {
+            "line": line_number,
+            "kind": kind,
+            "text": line,
+            "text_atom": _text_atom(line),
+        }
+        if kind == "heading":
+            current_section = _clean_source_text(line)
+            active_headers = None
+            payload["section"] = current_section
+            payload["label"] = current_section
+        elif current_section:
+            payload["section"] = current_section
+        if kind == "table_row":
+            cells = _markdown_table_cells(line)
+            if _is_markdown_separator_row(cells):
+                continue
+            payload["cells"] = cells
+            if active_headers is None and cells:
+                active_headers = cells
+                payload["headers"] = cells
+                payload["label"] = "table_header"
+            elif active_headers:
+                payload["headers"] = active_headers
+                payload["label"] = cells[0] if cells else _source_label(line)
+        elif kind == "list_row":
+            payload["label"] = _source_label(_clean_source_text(line))
+        elif "label" not in payload:
+            payload["label"] = _source_label(line)
         records.append(
             SourceRecord(
                 record_id=f"src_line_{line_number:04d}",
                 kb_id="",
-                payload={
-                    "line": line_number,
-                    "kind": kind,
-                    "text": line,
-                    "text_atom": _text_atom(line),
-                },
+                payload=payload,
             )
         )
     return records
@@ -237,6 +277,8 @@ def _source_records_from_pdf(document_bytes: bytes) -> list[SourceRecord]:
                         "kind": _source_line_kind(line),
                         "text": line,
                         "text_atom": _text_atom(line),
+                        "section": f"page {page_number}",
+                        "label": _source_label(line),
                     },
                 )
             )
@@ -253,6 +295,22 @@ def _source_line_kind(line: str) -> str:
     return "paragraph"
 
 
+def _markdown_table_cells(line: str) -> list[str]:
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def _is_markdown_separator_row(cells: list[str]) -> bool:
+    return bool(cells) and all(re.fullmatch(r":?-{3,}:?", cell.strip()) for cell in cells)
+
+
+def _source_label(line: str) -> str:
+    cleaned = _clean_source_text(line)
+    if ":" in cleaned:
+        return cleaned.split(":", 1)[0].strip()[:120]
+    sentence = re.split(r"[.;]", cleaned, maxsplit=1)[0].strip()
+    return sentence[:120]
+
+
 def _rank_source_records(records: list[SourceRecord], question: str) -> list[SourceRecord]:
     return [record for _score, _index, record in _score_source_records(records, question)[:8]]
 
@@ -263,8 +321,7 @@ def _score_source_records(records: list[SourceRecord], question: str) -> list[tu
         return []
     scored: list[tuple[int, int, SourceRecord]] = []
     for index, record in enumerate(records):
-        payload_text = " ".join(str(value) for value in record.payload.values())
-        record_tokens = _token_set(payload_text)
+        record_tokens = _token_set(_record_search_text(record))
         overlap = question_tokens & record_tokens
         if not overlap:
             continue
@@ -274,6 +331,19 @@ def _score_source_records(records: list[SourceRecord], question: str) -> list[tu
         scored.append((score, index, record))
     scored.sort(key=lambda item: (-item[0], item[1]))
     return scored
+
+
+def _record_search_text(record: SourceRecord) -> str:
+    payload = record.payload
+    parts = [
+        str(payload.get("text", "")),
+        str(payload.get("label", "")),
+    ]
+    for key in ("cells", "headers"):
+        value = payload.get(key)
+        if isinstance(value, list):
+            parts.extend(str(item) for item in value)
+    return " ".join(part for part in parts if part)
 
 
 def _render_extractive_answer(scored_matches: list[tuple[int, int, SourceRecord]]) -> str | None:

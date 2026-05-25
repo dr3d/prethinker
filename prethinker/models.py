@@ -44,6 +44,34 @@ class SourceRecord:
 
 
 @dataclass(slots=True)
+class CompiledArtifactBundle:
+    """Frozen files and structured metadata for a compiled document artifact."""
+
+    schema_version: str
+    artifact_paths: dict[str, str]
+    world_facts: list[str] = field(default_factory=list)
+    world_rules: list[str] = field(default_factory=list)
+    epistemic_facts: list[str] = field(default_factory=list)
+    ledger_facts: list[str] = field(default_factory=list)
+    query_policy: dict[str, Any] = field(default_factory=dict)
+    manifest: dict[str, Any] = field(default_factory=dict)
+    diagnostics: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "artifact_paths": dict(self.artifact_paths),
+            "world_facts": list(self.world_facts),
+            "world_rules": list(self.world_rules),
+            "epistemic_facts": list(self.epistemic_facts),
+            "ledger_facts": list(self.ledger_facts),
+            "query_policy": dict(self.query_policy),
+            "manifest": dict(self.manifest),
+            "diagnostics": dict(self.diagnostics),
+        }
+
+
+@dataclass(slots=True)
 class AuditTrace:
     """Query audit trace: failure surface, hygiene counters, and evidence."""
 
@@ -85,6 +113,7 @@ class CompileResult:
     metadata: KBMetadata
     cleanliness_counters: CleanlinessCounters
     source_records: list[SourceRecord] = field(default_factory=list)
+    artifact_bundle: CompiledArtifactBundle | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -92,6 +121,7 @@ class CompileResult:
             "metadata": self.metadata.to_dict(),
             "cleanliness_counters": self.cleanliness_counters.to_dict(),
             "source_records": [record.to_dict() for record in self.source_records],
+            "artifact_bundle": self.artifact_bundle.to_dict() if self.artifact_bundle is not None else None,
         }
 
 

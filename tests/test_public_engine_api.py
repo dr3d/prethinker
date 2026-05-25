@@ -6,6 +6,7 @@ import prethinker
 from prethinker import (
     AuditTrace,
     CleanlinessCounters,
+    CompiledArtifactBundle,
     CompileResult,
     DocumentType,
     Engine,
@@ -20,13 +21,14 @@ class ExternalDocumentType(str, Enum):
 
 
 def test_public_package_exports_version_and_engine() -> None:
-    assert prethinker.__version__ == "0.3.0"
+    assert prethinker.__version__ == "0.4.0"
     assert Engine is prethinker.Engine
     assert all(
         item is not None
         for item in [
             AuditTrace,
             CleanlinessCounters,
+            CompiledArtifactBundle,
             CompileResult,
             DocumentType,
             KBMetadata,
@@ -56,6 +58,20 @@ def test_engine_compile_query_and_lifecycle(tmp_path) -> None:
     assert compiled.metadata.document_type == "md"
     assert compiled.metadata.source_record_count == 3
     assert [record.kb_id for record in compiled.source_records] == [compiled.kb_id] * 3
+    assert compiled.artifact_bundle is not None
+    assert compiled.artifact_bundle.schema_version == "semantic_artifact_bundle_v1"
+    assert compiled.artifact_bundle.query_policy["qa_writes_allowed"] is False
+    assert compiled.artifact_bundle.diagnostics["semantic_compile"]["status"] == "not_run"
+    assert any(fact.startswith("source_document(") for fact in compiled.artifact_bundle.world_facts)
+    assert any("source_record_text_atom" in fact for fact in compiled.artifact_bundle.ledger_facts)
+    bundle_dir = tmp_path / "kbs" / compiled.kb_id / "compiled_source"
+    assert (bundle_dir / "world.pl").exists()
+    assert (bundle_dir / "epistemic.pl").exists()
+    assert (bundle_dir / "ledgers.pl").exists()
+    assert (bundle_dir / "query_policy.json").exists()
+    assert (bundle_dir / "manifest.json").exists()
+    assert (bundle_dir / "diagnostics.json").exists()
+    assert "source_record_text" in (bundle_dir / "ledgers.pl").read_text(encoding="utf-8")
 
     listed = engine.list_kbs()
     assert [item.kb_id for item in listed] == [compiled.kb_id]
@@ -85,6 +101,25 @@ def test_engine_accepts_enum_like_document_type(tmp_path) -> None:
     )
 
     assert compiled.metadata.document_type == "md"
+
+
+def test_markdown_table_rows_compile_into_deterministic_ledger_fields(tmp_path) -> None:
+    engine = Engine(storage_dir=tmp_path / "kbs")
+    compiled = engine.compile_document(
+        document_name="table.md",
+        document_bytes=(
+            b"# Corrective Actions\n\n"
+            b"| Item | Status |\n"
+            b"| --- | --- |\n"
+            b"| Alarm calibration | Complete |\n"
+        ),
+        document_type="md",
+    )
+
+    assert compiled.artifact_bundle is not None
+    ledger_text = (tmp_path / "kbs" / compiled.kb_id / "compiled_source" / "ledgers.pl").read_text(encoding="utf-8")
+    assert 'source_record_field("src_line_0005", "Item", "Alarm calibration").' in ledger_text
+    assert 'source_record_field("src_line_0005", "Status", "Complete").' in ledger_text
 
 
 def test_query_missing_kb_returns_audit_trace(tmp_path) -> None:

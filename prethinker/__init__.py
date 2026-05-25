@@ -8,6 +8,7 @@ from prethinker.engine import Engine
 from prethinker.models import (
     AuditTrace,
     CleanlinessCounters,
+    CompiledArtifactBundle,
     CompileResult,
     DocumentType,
     KBMetadata,
@@ -15,11 +16,12 @@ from prethinker.models import (
     SourceRecord,
 )
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = [
     "AuditTrace",
     "CleanlinessCounters",
+    "CompiledArtifactBundle",
     "CompileResult",
     "DocumentType",
     "Engine",
