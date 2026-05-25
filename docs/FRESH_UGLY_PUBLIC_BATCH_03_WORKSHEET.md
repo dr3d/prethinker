@@ -336,3 +336,69 @@ Updated blocker read:
    and guardrail, not the final product surface.
 3. Any repair promoted from Batch 03 should require both the normal QA rerun and
    a regression-guard comparison against the current 300-row baseline.
+
+## 2026-05-25 QA Failure ACH Probe
+
+Question:
+
+Can ACH help QA without changing answers or KB state?
+
+Probe:
+
+```text
+script:
+  scripts/run_qa_failure_ach_probe.py
+
+default artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_failure_ach_probe.md
+
+with existing failure label as caged evidence:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_failure_ach_probe_with_label.md
+```
+
+The probe does not call an LLM, mutate verdicts, or write facts. It builds a
+fixed ACH matrix for each non-exact row over four patch-location hypotheses:
+
+```text
+h_compile_preservation
+h_query_route
+h_join_computation
+h_answer_assessment
+```
+
+Default result, not using the existing failure-surface label as evidence:
+
+```text
+rows: 30
+h_compile_preservation: 2
+h_join_computation: 20
+h_join_computation,h_query_route: 8
+agreement with existing failure-surface classifier: 6 / 30
+```
+
+With the existing failure-surface label included as one caged evidence row:
+
+```text
+rows: 30
+h_compile_preservation: 1
+h_query_route: 1
+h_join_computation: 20
+h_join_computation,h_query_route: 8
+agreement with existing failure-surface classifier: 9 / 30
+```
+
+Read:
+
+ACH did not improve QA by answering anything. It improved the research signal.
+The existing failure-surface classifier called `22 / 30` rows
+`compile_surface_gap`, but the ACH triage says many of those rows already have
+nonempty source-record or direct query evidence and look more like source-
+coordinate joining, list/order/group assembly, duration arithmetic, or route
+selection failures.
+
+That does not make the compile-surface read wrong. It means the phrase is
+describing one layer: the direct compile surface lacks a convenient reusable
+carrier. The immediate QA patch location may still be join/query mechanics over
+already-admitted source coordinates. The next useful inspection should focus on
+rows where the classifier says `compile_surface_gap` but ACH ranks
+`h_join_computation`.

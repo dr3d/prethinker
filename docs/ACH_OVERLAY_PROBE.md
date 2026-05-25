@@ -304,3 +304,87 @@ systemic data-integrity failure as the least-disconfirmed explanation. The
 quality-unit hypothesis remained plausible but lower-ranked, while narrower
 computer-control and import-alert-status explanations were disconfirmed by the
 broader inspection findings and remediation demands.
+
+## 2026-05-25 QA Failure Triage Probe
+
+Question:
+
+Can ACH improve QA without letting the LLM mutate answers, KB state, or
+verdicts?
+
+Probe:
+
+```text
+script:
+  scripts/run_qa_failure_ach_probe.py
+
+module:
+  src/qa_failure_ach.py
+
+baseline artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_r1_summary.json
+
+ACH artifacts:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_failure_ach_probe.md
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_failure_ach_probe_with_label.md
+```
+
+Shape:
+
+The probe builds a fixed ACH matrix for each non-exact QA row. The competing
+hypotheses are patch locations:
+
+```text
+h_compile_preservation
+h_query_route
+h_join_computation
+h_answer_assessment
+```
+
+Evidence comes only from archived row telemetry: response envelope status,
+query density, nonempty direct/source-record rows, support-surface presence,
+query error counts, and generic question-shape tags. The default run does not
+use the existing failure-surface classifier as evidence. A second run includes
+that classifier label as one caged evidence row.
+
+Result on Batch 03:
+
+```text
+rows:
+  30 non-exact
+
+default, not using existing failure label:
+  h_compile_preservation: 2
+  h_join_computation: 20
+  h_join_computation,h_query_route: 8
+  agreement with existing failure-surface classifier: 6 / 30
+
+with existing failure label as caged evidence:
+  h_compile_preservation: 1
+  h_query_route: 1
+  h_join_computation: 20
+  h_join_computation,h_query_route: 8
+  agreement with existing failure-surface classifier: 9 / 30
+```
+
+Read:
+
+This is a useful discomfort signal. The existing failure-surface classifier
+called `22 / 30` non-exact rows compile-surface gaps. The ACH triage says many
+of those rows already have substantial source-record or direct query evidence
+and look more like ordering, grouping, joining, or route-selection failures.
+
+Both readings can be true at different layers: the direct compile surface may
+be too thin while the source-record substrate still contains enough evidence to
+recover the answer. The product question is which patch location is most useful
+next. ACH helps by forcing that into a ranked, reviewable hypothesis rather
+than a single label.
+
+Near-term implication:
+
+Do not let ACH change QA scores. Use it as a diagnostic lens to decide whether
+the next repair should target direct compile preservation, query routing,
+source-coordinate joins, or answer assessment. On Batch 03, the next experiment
+should inspect the ACH-disagreement rows, especially rows labeled
+`compile_surface_gap` but ranked `h_join_computation`, before assuming a
+compile-side repair is the right first patch.
