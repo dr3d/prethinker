@@ -22,6 +22,7 @@ docs/drafts/
 # product language is intentionally ready to publish.
 docs/PRODUCT_OFFERING_EVIDENCE_WORKSTATION.md
 docs/PRETHINKER_CONSULTANT_HANDOFF.md
+demo/
 
 # Local runtime cache/index (do not publish by accident)
 docs/reports/*-stress-latest.html
