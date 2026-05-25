@@ -31,6 +31,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_date_pair_duration_companion,
     _source_record_elapsed_date_duration_companion,
     _source_record_date_range_duration_companion,
+    _source_record_exhibit_index_companion,
     _source_record_field_state_companion,
     _source_record_named_section_window_companion,
     _source_record_preceding_heading_companion,
@@ -2610,6 +2611,86 @@ def test_source_record_field_state_companion_surfaces_checkbox_state() -> None:
     row = companion["result"]["rows"][0]
     assert row["Field"] == "emerging_growth_company_unchecked_box"
     assert row["Value"] == "unchecked"
+
+
+def test_source_record_exhibit_index_support_collects_filed_and_furnished_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0010, labeled_line, 10, generic_filing, exhibit_1_1).",
+        "source_record_text_atom(src_line_0010, summary_is_filed_as_exhibit_1_1_hereto).",
+        "source_record_row(src_line_0012, labeled_line, 12, generic_filing, exhibit_99_1).",
+        "source_record_text_atom(src_line_0012, notice_is_furnished_as_exhibit_99_1_hereto).",
+        "source_record_row(src_line_0020, table_row, 20, generic_filing, exhibit_1_1).",
+        "source_record_text_atom(src_line_0020, exhibit_1_1_transition_agreement_dated_march_1_2026).",
+        "source_record_row(src_line_0022, table_row, 22, generic_filing, exhibit_99_1).",
+        "source_record_text_atom(src_line_0022, exhibit_99_1_press_release_dated_march_1_2026).",
+        "source_record_row(src_line_0024, table_row, 24, generic_filing, exhibit_104).",
+        "source_record_text_atom(src_line_0024, exhibit_104_cover_page_interactive_data_file_embedded_within_inline_xbrl_document).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_exhibit_index_companion(
+        runtime,
+        utterance="List the three exhibits filed or furnished with this report.",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    items = [row for row in rows if row["SupportKind"] == "source_record_exhibit_index_item"]
+    assert [row["ExhibitDisplay"] for row in items] == ["Exhibit 1.1", "Exhibit 99.1", "Exhibit 104"]
+    assert [row["FilingStatus"] for row in items] == ["filed", "furnished", "embedded"]
+    assert rows[-1]["ExhibitCount"] == "3"
+
+
+def test_source_record_exhibit_index_support_collects_field_based_table_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0010, agreement_is_filed_herewith_as_exhibit_1_1).",
+        "source_record_text_atom(src_line_0012, release_is_furnished_herewith_as_exhibit_99_1).",
+        "source_record_row(src_line_0020, table_row, 20, generic_filing, exhibit_no).",
+        "source_record_text_atom(src_line_0020, exhibit_no_description).",
+        "source_record_row(src_line_0022, table_row, 22, generic_filing, exhibit_no).",
+        "source_record_field(src_line_0022, exhibit_no, v_1_1).",
+        "source_record_field(src_line_0022, description, transition_agreement).",
+        "source_record_row(src_line_0024, table_row, 24, generic_filing, exhibit_no).",
+        "source_record_field(src_line_0024, exhibit_no, v_99_1).",
+        "source_record_field(src_line_0024, description, press_release).",
+        "source_record_row(src_line_0026, table_row, 26, generic_filing, exhibit_no).",
+        "source_record_field(src_line_0026, exhibit_no, v_104).",
+        "source_record_field(src_line_0026, description, cover_page_interactive_data_file_embedded_within_inline_xbrl_document).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_exhibit_index_companion(
+        runtime,
+        utterance="List the exhibits filed or furnished with this report by number and description.",
+    )
+
+    assert companion is not None
+    items = [row for row in companion["result"]["rows"] if row["SupportKind"] == "source_record_exhibit_index_item"]
+    assert [row["Exhibit"] for row in items] == ["exhibit_1_1", "exhibit_99_1", "exhibit_104"]
+    assert [row["DescriptionAtom"] for row in items] == [
+        "transition_agreement",
+        "press_release",
+        "cover_page_interactive_data_file_embedded_within_inline_xbrl_document",
+    ]
+    assert [row["FilingStatus"] for row in items] == ["filed", "furnished", "embedded"]
+
+
+def test_source_record_exhibit_index_support_ignores_body_mentions_without_index_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0010, labeled_line, 10, generic_filing, exhibit_1_1).",
+        "source_record_text_atom(src_line_0010, summary_is_filed_as_exhibit_1_1_hereto).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_exhibit_index_companion(
+        runtime,
+        utterance="Which exhibit is filed with this report?",
+    )
+
+    assert companion is None
 
 
 def test_source_record_messy_summary_extracts_destination_field() -> None:

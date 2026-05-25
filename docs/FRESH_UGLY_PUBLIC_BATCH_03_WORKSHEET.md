@@ -623,3 +623,84 @@ Current blocker read:
 4. The next intervention should target one generic SEC-shaped source-record
    support family at a time, then replay both the named miss rows and the
    previously exact SEC guard rows before another full Batch 03 sweep.
+
+## 2026-05-25 SEC Exhibit-Index Cage
+
+Question:
+
+Can one SEC-dense blocker be repaired as a generic public-filing table/list
+surface without introducing fixture vocabulary or broad helper overreach?
+
+Edit:
+
+```text
+source_record_exhibit_index_support:
+  query-only source-record support that collects admitted exhibit index rows
+  from table/list source records, handles both row-label style entries such as
+  exhibit_10_1 and field-table style entries such as exhibit_no = v_10_1, and
+  cross-checks filed/furnished/embedded status from admitted source text or the
+  exhibit description field.
+```
+
+The support reads only admitted `source_record_row`, `source_record_text_atom`,
+and `source_record_field` rows. It writes no durable facts and does not use
+fixture names, QA row IDs, answer strings, company names, or document-specific
+constants as trigger branches.
+
+Focused tests:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q
+
+288 passed
+```
+
+No-LLM compile probes:
+
+```text
+sec_ugly_001 q014 shape:
+  field-table exhibit_no rows with values v_10_1, v_99_1, v_104
+
+sec_ugly_003 q014 shape:
+  row-label exhibit_10_1, exhibit_99_1, exhibit_104 rows
+
+both shapes:
+  source_record_exhibit_index_support returns the three exhibit rows plus a
+  summary row
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_exhibit_index_20260525
+
+rows:
+  sec_ugly_001 q014: exact
+  sec_ugly_002 q014: exact
+  sec_ugly_003 q014: exact
+
+targeted total:
+  3 / 0 / 0
+
+hygiene:
+  runtime load errors: 0
+  write proposal rows: 0
+  compatibility rows: 0
+```
+
+Read:
+
+This is a clean mechanism result, not a new Batch 03 score. It repairs the
+`sec_ugly_003 q014` miss while keeping the two already-exact SEC exhibit rows
+exact in targeted replay. The first guard replay exposed the important shape
+variant: some public filings render exhibit indexes as `exhibit_no` fields
+rather than `exhibit_*` labels. The fix now covers both generic renderings.
+
+Next blocker:
+
+The remaining SEC-dense rows are not another exhibit problem. The next work
+should inspect the biography/employment-history rows (`sec_ugly_003 q012/q013`
+and the related `sec_ugly_001 q013`) and decide whether there is a generic
+source-record biographical-history surface, or whether that belongs in direct
+compile preservation instead of another query-only cage.

@@ -15985,6 +15985,7 @@ def _source_record_messy_summary_companions(
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
         _source_record_identifier_set_companion(runtime, utterance=utterance),
         _source_record_citation_list_companion(runtime, utterance=utterance),
+        _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -16917,6 +16918,193 @@ def _source_record_cfr_citations_from_atom(text_atom: str) -> list[dict[str, str
         seen.add(value)
         out.append({"CitationValue": value, "CitationDisplay": display})
     return out
+
+
+def _source_record_exhibit_index_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:exhibit|exhibits|filed|furnished|embedded)\b", text):
+        return None
+    if not re.search(r"\b(?:list|which|what|filed|furnished|contains?|with)\b", text):
+        return None
+
+    text_atoms = _source_record_text_atoms(runtime)
+    text_by_row = {source_row: _normalize_text_filter_atom(atom) for source_row, atom in text_atoms}
+    all_atoms = [atom for _source_row, atom in text_atoms]
+    row_meta = _source_record_row_metadata(runtime)
+    field_values_by_row = _source_record_all_field_values_by_row(runtime, include_items=False)
+    exhibit_rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for source_row, meta in row_meta.items():
+        kind = str(meta.get("Kind", "") or "")
+        if kind not in {"table_row", "list_row"}:
+            continue
+        label = _normalize_text_filter_atom(str(meta.get("Label", "") or ""))
+        atom = text_by_row.get(source_row, label)
+        fields = field_values_by_row.get(source_row, {})
+        exhibit_atom = (
+            _source_record_exhibit_atom(label)
+            or _source_record_exhibit_atom(atom)
+            or _source_record_exhibit_atom_from_fields(fields)
+        )
+        if not exhibit_atom or exhibit_atom in seen:
+            continue
+        description = _source_record_exhibit_description_from_fields(fields) or _source_record_exhibit_description_atom(
+            exhibit_atom,
+            atom,
+        )
+        filing_status = _source_record_exhibit_filing_status(exhibit_atom, all_atoms)
+        if not filing_status and "embedded_within" in description:
+            filing_status = "embedded"
+        row = {
+            "SupportKind": "source_record_exhibit_index_item",
+            "SourceRow": source_row,
+            "Line": str(meta.get("Line", "")),
+            "Exhibit": exhibit_atom,
+            "ExhibitDisplay": _display_source_record_exhibit(exhibit_atom),
+            "DescriptionAtom": description,
+            "DescriptionDisplay": _display_source_phrase(description),
+            "FilingStatus": filing_status,
+            "FilingStatusDisplay": _display_source_phrase(filing_status),
+            "FullAnswerDisplay": _source_record_exhibit_full_answer(
+                exhibit_atom=exhibit_atom,
+                description_atom=description,
+                filing_status=filing_status,
+            ),
+            "SourceTextAtom": atom,
+            "SourceTextDisplay": _display_source_phrase(atom),
+            "SupportClass": "deterministic-source-record-summary",
+        }
+        seen.add(exhibit_atom)
+        exhibit_rows.append(row)
+
+    if not exhibit_rows:
+        return None
+    exhibit_rows.sort(key=lambda row: _source_row_sort_key(row.get("SourceRow", "")))
+    summary = {
+        "SupportKind": "source_record_exhibit_index_summary",
+        "ExhibitCount": str(len(exhibit_rows)),
+        "ExhibitsDisplay": "; ".join(row["FullAnswerDisplay"] for row in exhibit_rows),
+        "SourceRow": "source_record_exhibit_index",
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    support_rows = [*exhibit_rows, summary]
+    return {
+        "query": "source_record_exhibit_index_support(Exhibit, Description, FilingStatus, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_exhibit_index_support",
+            "prolog_query": "source_record_exhibit_index_support(Exhibit, Description, FilingStatus, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only exhibit-index support collected admitted source-record exhibit "
+                    "table/list rows and cross-checked filed/furnished wording from admitted source text; "
+                    "no durable exhibit fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _source_record_exhibit_atom(*values: str) -> str:
+    for value in values:
+        text = _normalize_text_filter_atom(value)
+        match = re.search(r"(?:^|_)(exhibit_\d+(?:_\d+)?)(?:_|$)", text)
+        if match:
+            return match.group(1)
+    return ""
+
+
+def _source_record_exhibit_atom_from_fields(fields: dict[str, list[str]]) -> str:
+    for field, values in sorted(fields.items()):
+        field_tokens = set(_source_record_field_name_tokens(field))
+        if "exhibit" not in field_tokens:
+            continue
+        for value in values:
+            text = _normalize_text_filter_atom(value)
+            match = re.fullmatch(r"v_(\d+)(?:_(\d+))?", text)
+            if match:
+                suffix = f"_{match.group(2)}" if match.group(2) else ""
+                return f"exhibit_{match.group(1)}{suffix}"
+            exhibit = _source_record_exhibit_atom(text)
+            if exhibit:
+                return exhibit
+    return ""
+
+
+def _source_record_exhibit_description_from_fields(fields: dict[str, list[str]]) -> str:
+    for field, values in sorted(fields.items()):
+        field_tokens = set(_source_record_field_name_tokens(field))
+        if not ({"description", "title", "document"} & field_tokens):
+            continue
+        for value in values:
+            normalized = _normalize_text_filter_atom(value)
+            if normalized:
+                return normalized
+    return ""
+
+
+def _source_record_exhibit_description_atom(exhibit_atom: str, text_atom: str) -> str:
+    text = _normalize_text_filter_atom(text_atom)
+    exhibit = _normalize_text_filter_atom(exhibit_atom)
+    if exhibit and text.startswith(f"{exhibit}_"):
+        return text[len(exhibit) + 1 :].strip("_")
+    if exhibit:
+        return re.sub(rf"(?:^|_){re.escape(exhibit)}(?:_|$)", "_", text, count=1).strip("_")
+    return text
+
+
+def _source_record_exhibit_filing_status(exhibit_atom: str, text_atoms: list[str]) -> str:
+    exhibit = _normalize_text_filter_atom(exhibit_atom)
+    status = ""
+    for raw_atom in text_atoms:
+        atom = _normalize_text_filter_atom(raw_atom)
+        if exhibit not in atom:
+            continue
+        if re.search(rf"(?:^|_)furnished(?:_[a-z0-9]+){{0,4}}_as_{re.escape(exhibit)}(?:_|$)", atom):
+            return "furnished"
+        if re.search(rf"(?:^|_)filed(?:_[a-z0-9]+){{0,4}}_as_{re.escape(exhibit)}(?:_|$)", atom):
+            status = "filed"
+        elif "embedded_within" in atom and not status:
+            status = "embedded"
+    return status
+
+
+def _display_source_record_exhibit(exhibit_atom: str) -> str:
+    text = _normalize_text_filter_atom(exhibit_atom)
+    match = re.fullmatch(r"exhibit_(\d+)(?:_(\d+))?", text)
+    if not match:
+        return _display_source_phrase(exhibit_atom)
+    suffix = f".{match.group(2)}" if match.group(2) else ""
+    return f"Exhibit {match.group(1)}{suffix}"
+
+
+def _source_record_exhibit_full_answer(
+    *,
+    exhibit_atom: str,
+    description_atom: str,
+    filing_status: str,
+) -> str:
+    parts = [_display_source_record_exhibit(exhibit_atom)]
+    if description_atom:
+        parts.append(_display_source_phrase(description_atom))
+    if filing_status:
+        parts.append(f"({_display_source_phrase(filing_status)})")
+    return ": ".join(parts[:2]) + (f" {parts[2]}" if len(parts) > 2 else "")
 
 
 def _first_identifier_number(value: str) -> str:
@@ -23463,6 +23651,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_contact_signatory_support",
             "source_record_identifier_set_support",
             "source_record_citation_list_support",
+            "source_record_exhibit_index_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -23514,7 +23703,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
