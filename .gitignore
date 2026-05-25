@@ -7,6 +7,9 @@ tmp/
 .coverage
 htmlcov/
 *.log
+*.egg-info/
+build/
+dist/
 __pycache__/
 *.pyc
 *.pyo

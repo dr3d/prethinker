@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prethinker"
+version = "0.1.0"
+description = "Auditable evidence engine for compiling and querying messy documents."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Prethinker Contributors" }
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/dr3d/prethinker"
+
+[tool.setuptools.packages.find]
+include = ["prethinker*"]
+exclude = [
+  "adapters*",
+  "archives*",
+  "datasets*",
+  "demo*",
+  "docs*",
+  "experiments*",
+  "kb_scenarios*",
+  "kb_store*",
+  "scripts*",
+  "stories*",
+  "tests*",
+  "tmp*",
+  "ui_gateway*",
+]
+
+[tool.setuptools.package-data]
+prethinker = ["py.typed"]
