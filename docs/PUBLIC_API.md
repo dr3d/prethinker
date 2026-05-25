@@ -106,8 +106,9 @@ All models are dataclasses and provide `to_dict()` for JSON-facing adapters.
 
 ## Alpha Behavior
 
-The `0.2.0` Engine facade preserves deterministic source records for Markdown
-and plain-text documents. It stores KB artifacts in a local filesystem registry.
+The `0.3.0` Engine facade preserves deterministic source records for Markdown,
+plain-text documents, and PDFs with extractable text. It stores KB artifacts in
+a local filesystem registry.
 
 The alpha query path returns source-record evidence and an audit trace. When a
 source-record match is strong enough, `QueryResult.answer` contains a
@@ -122,8 +123,10 @@ should report evidence without overclaiming.
 The public query path does not use LLM synthesis, reference answers, or durable
 query-time writes.
 
-PDF input is accepted as an opaque stored document in this alpha. It does not
-yet produce text source records through the public facade.
+PDF input is parsed with `pypdf`. Extractable page text becomes source records
+with `page` and `page_line` payload fields. Scanned/image-only or malformed PDFs
+remain clean coverage gaps: they are stored, but no fake source records are
+created.
 
 ## Install Smoke
 

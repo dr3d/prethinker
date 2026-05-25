@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prethinker"
-version = "0.2.0"
+version = "0.3.0"
 description = "Auditable evidence engine for compiling and querying messy documents."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -18,7 +18,9 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-dependencies = []
+dependencies = [
+  "pypdf>=4",
+]
 
 [project.urls]
 Homepage = "https://github.com/dr3d/prethinker"

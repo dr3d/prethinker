@@ -6,10 +6,13 @@ KB lifecycle. It intentionally avoids exposing the research harness directly.
 
 from __future__ import annotations
 
+from io import BytesIO
 import os
 import re
 from pathlib import Path
 from typing import Any
+
+from pypdf import PdfReader
 
 from prethinker.models import (
     AuditTrace,
@@ -52,7 +55,8 @@ class Engine:
         """Compile a document into a local KB artifact.
 
         The alpha compile path preserves deterministic source records for text
-        documents. It does not yet run the full semantic compile harness.
+        documents and extractable PDFs. It does not yet run the full semantic
+        compile harness.
         """
 
         if not isinstance(document_name, str) or not document_name.strip():
@@ -61,8 +65,7 @@ class Engine:
             raise TypeError("document_bytes must be bytes")
 
         doc_type = _normalize_document_type(document_type)
-        text = _decode_text_document(document_bytes, doc_type)
-        source_records = _source_records_from_text(text)
+        source_records = _source_records_from_document(document_bytes, doc_type)
         metadata = self._store.create_kb(
             document_name=document_name.strip(),
             document_type=doc_type,
@@ -116,9 +119,7 @@ class Engine:
         if not records:
             failure_surface = "compile_surface_gap"
             status = "coverage_gap"
-            notes = [
-                "The stored KB has no text source records. Binary/PDF semantic compile is not exposed in this alpha API."
-            ]
+            notes = ["The stored KB has no text source records. The document may be binary or have no extractable text."]
         elif answer is not None:
             failure_surface = "not_applicable"
             status = "answered"
@@ -176,10 +177,13 @@ def _normalize_document_type(document_type: DocumentType | str | Any) -> str:
     return aliases.get(value, value)
 
 
-def _decode_text_document(document_bytes: bytes, document_type: str) -> str:
+def _source_records_from_document(document_bytes: bytes, document_type: str) -> list[SourceRecord]:
     if document_type in {"md", "txt"}:
-        return document_bytes.decode("utf-8", errors="replace")
-    return ""
+        text = document_bytes.decode("utf-8", errors="replace")
+        return _source_records_from_text(text)
+    if document_type == "pdf":
+        return _source_records_from_pdf(document_bytes)
+    return []
 
 
 def _source_records_from_text(text: str) -> list[SourceRecord]:
@@ -201,6 +205,41 @@ def _source_records_from_text(text: str) -> list[SourceRecord]:
                 },
             )
         )
+    return records
+
+
+def _source_records_from_pdf(document_bytes: bytes) -> list[SourceRecord]:
+    records: list[SourceRecord] = []
+    try:
+        reader = PdfReader(BytesIO(document_bytes))
+    except Exception:
+        return []
+
+    source_line_number = 0
+    for page_number, page in enumerate(reader.pages, start=1):
+        try:
+            page_text = page.extract_text() or ""
+        except Exception:
+            continue
+        for page_line_number, raw_line in enumerate(page_text.splitlines(), start=1):
+            line = raw_line.strip()
+            if not line:
+                continue
+            source_line_number += 1
+            records.append(
+                SourceRecord(
+                    record_id=f"src_page_{page_number:04d}_line_{page_line_number:04d}",
+                    kb_id="",
+                    payload={
+                        "line": source_line_number,
+                        "page": page_number,
+                        "page_line": page_line_number,
+                        "kind": _source_line_kind(line),
+                        "text": line,
+                        "text_atom": _text_atom(line),
+                    },
+                )
+            )
     return records
 
 

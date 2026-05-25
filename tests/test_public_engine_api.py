@@ -20,7 +20,7 @@ class ExternalDocumentType(str, Enum):
 
 
 def test_public_package_exports_version_and_engine() -> None:
-    assert prethinker.__version__ == "0.2.0"
+    assert prethinker.__version__ == "0.3.0"
     assert Engine is prethinker.Engine
     assert all(
         item is not None
@@ -114,7 +114,27 @@ def test_query_keeps_weak_evidence_as_answer_surface_gap(tmp_path) -> None:
     assert result.audit_trace.cleanliness_counters.write_proposals == 0
 
 
-def test_pdf_compile_is_opaque_without_fake_source_records(tmp_path) -> None:
+def test_pdf_compile_extracts_source_records_and_answers(tmp_path) -> None:
+    engine = Engine(storage_dir=tmp_path / "kbs")
+    compiled = engine.compile_document(
+        document_name="sample.pdf",
+        document_bytes=_minimal_pdf_bytes("Maria Chen signed the PDF notice."),
+        document_type=DocumentType.PDF,
+    )
+
+    assert compiled.metadata.document_type == "pdf"
+    assert compiled.metadata.source_record_count == 1
+    assert compiled.source_records[0].payload["page"] == 1
+    assert compiled.source_records[0].payload["page_line"] == 1
+    assert compiled.source_records[0].payload["text"] == "Maria Chen signed the PDF notice."
+
+    result = engine.query(kb_id=compiled.kb_id, question="Who signed the PDF notice?")
+    assert result.answer == "Maria Chen signed the PDF notice."
+    assert result.status == "answered"
+    assert result.audit_trace.failure_surface == "not_applicable"
+
+
+def test_unextractable_pdf_stays_coverage_gap_without_fake_source_records(tmp_path) -> None:
     engine = Engine(storage_dir=tmp_path / "kbs")
     compiled = engine.compile_document(
         document_name="sample.pdf",
@@ -127,3 +147,38 @@ def test_pdf_compile_is_opaque_without_fake_source_records(tmp_path) -> None:
     assert result.status == "coverage_gap"
     assert result.answer is None
     assert result.audit_trace.failure_surface == "compile_surface_gap"
+
+
+def _minimal_pdf_bytes(text: str) -> bytes:
+    escaped = text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    stream = f"BT /F1 12 Tf 72 100 Td ({escaped}) Tj ET".encode("ascii")
+    objects = [
+        b"1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+        b"2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n",
+        b"3 0 obj\n"
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 300 144] "
+        b"/Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>\n"
+        b"endobj\n",
+        b"4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+        b"5 0 obj\n<< /Length "
+        + str(len(stream)).encode("ascii")
+        + b" >>\nstream\n"
+        + stream
+        + b"\nendstream\nendobj\n",
+    ]
+    output = bytearray(b"%PDF-1.4\n")
+    offsets = [0]
+    for obj in objects:
+        offsets.append(len(output))
+        output.extend(obj)
+    xref_offset = len(output)
+    output.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
+    output.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        output.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
+    output.extend(
+        f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF\n".encode(
+            "ascii"
+        )
+    )
+    return bytes(output)
