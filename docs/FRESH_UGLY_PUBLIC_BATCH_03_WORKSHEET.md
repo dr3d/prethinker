@@ -704,3 +704,117 @@ should inspect the biography/employment-history rows (`sec_ugly_003 q012/q013`
 and the related `sec_ugly_001 q013`) and decide whether there is a generic
 source-record biographical-history surface, or whether that belongs in direct
 compile preservation instead of another query-only cage.
+
+## 2026-05-25 Biography / Employment-History Source-Record Cage
+
+Question:
+
+Can the SEC-dense biography residue be repaired without letting fixture
+company/person names or research-row shapes into the active instrument?
+
+Findings:
+
+Two different failures were hiding under the same "biography" label:
+
+1. `sec_ugly_001 q013` was a deterministic source-record preservation gap.
+   The source paragraph exceeded the prior `source_record_ledger` row cap, so
+   `source_record_text_atom(src_line_0088, ...)` clipped before the final prior
+   employers.
+2. `sec_ugly_003 q012/q013` had the full source paragraph admitted, but the QA
+   path surfaced it as undifferentiated source text. Prior employers and role
+   spans needed a structured query-only support surface.
+
+Edit:
+
+```text
+source_record_ledger:
+  max_chars_per_row 1200 -> 2400
+
+source_record_employment_history_support:
+  query-only biography/employment-history support over admitted
+  source_record_text_atom rows.
+
+  triggers:
+    role/title/position history questions
+    prior/former employer questions
+    biographical paragraph questions
+
+  scope split:
+    role-history asks return current/appointment/role-history entries
+    prior-employer asks return prior-employer entries
+
+  transition handling:
+    current role since X + later appointment effective Y is rendered as
+    "current role since X; next role effective Y" rather than as a durable
+    termination fact.
+```
+
+The support reads only admitted source-record text. It writes no durable facts
+and does not branch on fixture names, row IDs, company names, person names, or
+answer strings.
+
+Focused tests:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py tests\test_source_record_ledger.py -q
+
+320 passed
+```
+
+Leakage audit:
+
+```text
+python scripts\audit_active_instrument_leakage.py
+
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain-token warnings
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_biography_history_20260525
+
+sec_ugly_003, existing compile artifact:
+  q012 role chronology: exact
+  q013 prior employers: exact
+  total: 2 / 0 / 0
+
+sec_ugly_003 guard:
+  q025 cross-section role/gap/overlap row: exact
+
+sec_ugly_001, one-fixture recompile after longer source-record rows:
+  source_record_text_atom(src_line_0088) now preserves Cardiocore,
+  Thermo Fisher Scientific, Pfizer, Fourth Frontier, U.S. Army, and Norwich.
+  q013 prior employers: exact
+```
+
+Read:
+
+This is mechanism evidence, not a new Batch 03 score. The high-value part is
+that the two repair paths stayed generic:
+
+- source preservation for long official-document paragraphs;
+- query-only structured support for biography role/prior-employer history.
+
+The scoped role/prior-employer split matters. An earlier targeted replay moved
+`sec_ugly_003 q012` only to partial because prior-employer rows polluted a
+company-role-history question. Tightening the trigger to return role-history
+entries for role-history asks, and prior-employer entries for employer asks,
+made the targeted pair exact while keeping the nearby exact guard row exact.
+
+Residual:
+
+`q012` and `q025` still report `response_envelope.status =
+clarification_required` in targeted exact runs even though `reference_support`
+and the judge verdict are exact. That looks like envelope status assembly noise
+rather than QA evidence failure. Worth inspecting separately if it appears in a
+batch-level summary.
+
+Next blocker:
+
+The remaining SEC-dense residue is likely not biography. Next inspect dollar /
+percentage inventory (`sec_ugly_003 q015`) and restrictive-covenant / condition
+rows (`sec_ugly_003 q020/q021/q023`) before another Batch 03 sweep.

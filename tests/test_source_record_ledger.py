@@ -88,10 +88,26 @@ def test_source_record_ledger_preserves_long_statement_tail_clauses() -> None:
 
     ledger = extract_source_record_ledger("## Statements\n" + long_statement)
 
-    exact_rows = [row["exact"] for row in ledger["rows"] if row["kind"] == "anchored_line"]
+    exact_rows = [row["exact"] for row in ledger["rows"] if row["kind"] != "heading"]
     assert exact_rows
     assert "14:37 alarm at bedside" in exact_rows[0]
     assert "Room 502" in exact_rows[0]
+
+
+def test_source_record_ledger_preserves_long_biographical_tail_clauses() -> None:
+    long_statement = (
+        "Dr. Rivera has served as operations lead since March 2026. "
+        + "Earlier responsibilities included commercial planning, partner coordination, and field review. " * 18
+        + "She previously held senior leadership roles at North Harbor Analytics, Vale Scientific, and Cedar Labs."
+    )
+
+    ledger = extract_source_record_ledger("## Biography\n" + long_statement)
+
+    exact_rows = [row["exact"] for row in ledger["rows"] if row["kind"] == "anchored_line"]
+    assert exact_rows
+    assert "North Harbor Analytics" in exact_rows[0]
+    assert "Vale Scientific" in exact_rows[0]
+    assert "Cedar Labs" in exact_rows[0]
 
 
 def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:

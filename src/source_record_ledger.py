@@ -41,7 +41,7 @@ def extract_source_record_ledger(
     source_text: str,
     *,
     max_rows: int = 220,
-    max_chars_per_row: int = 1200,
+    max_chars_per_row: int = 2400,
 ) -> dict[str, object]:
     """Extract source row addressability without interpreting source meaning.
 

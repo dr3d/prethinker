@@ -15986,6 +15986,7 @@ def _source_record_messy_summary_companions(
         _source_record_identifier_set_companion(runtime, utterance=utterance),
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
+        _source_record_biography_history_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -17105,6 +17106,477 @@ def _source_record_exhibit_full_answer(
     if filing_status:
         parts.append(f"({_display_source_phrase(filing_status)})")
     return ": ".join(parts[:2]) + (f" {parts[2]}" if len(parts) > 2 else "")
+
+
+_BIOGRAPHY_DATE_PATTERN = (
+    r"(?:january|february|march|april|may|june|july|august|september|october|november|december)"
+    r"(?:_\d{1,2})?_\d{4}|\d{4}"
+)
+
+
+def _source_record_biography_history_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    asks_prior_employer = bool(
+        re.search(r"\b(?:prior|previous|former|earlier|pre[- ]?joining)\b", text)
+        and re.search(r"\b(?:employer|employers|employed|employment|worked|work history)\b", text)
+    )
+    asks_role_history = bool(
+        re.search(r"\b(?:role|roles|title|titles|position|positions)\b", text)
+        and re.search(r"\b(?:held|served|history|chronological|start|end|dates?)\b", text)
+    )
+    if not (asks_prior_employer or asks_role_history or "biographical paragraph" in text):
+        return None
+
+    query_tokens = set(_query_atom_tokens(utterance))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        atom = _normalize_text_filter_atom(text_atom)
+        if not _source_record_biography_history_signal(atom):
+            continue
+        if not _source_record_biography_row_matches_question(atom=atom, query_tokens=query_tokens):
+            continue
+        entries = _source_record_biography_history_entries(atom)
+        selected_entries = [
+            entry
+            for entry in entries
+            if (
+                asks_prior_employer
+                and entry.get("Employer")
+                and entry.get("HistoryKind") in {"prior_employer", "prior_employer_role", "prior_employer_group"}
+            )
+            or (asks_role_history and entry.get("HistoryKind") in {"appointment_role", "current_role", "role_history"})
+            or ("biographical paragraph" in text and (entry.get("Employer") or entry.get("Role")))
+        ]
+        for entry in selected_entries:
+            key = (
+                source_row,
+                entry.get("HistoryKind", ""),
+                entry.get("Employer", ""),
+                entry.get("Role", ""),
+                entry.get("StartDate", ""),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            full_answer = _source_record_biography_entry_display(entry)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_biography_history_item",
+                    "HistoryKind": entry.get("HistoryKind", ""),
+                    "SourceRow": source_row,
+                    "Employer": entry.get("Employer", ""),
+                    "EmployerDisplay": _display_source_phrase(entry.get("Employer", "")),
+                    "Role": entry.get("Role", ""),
+                    "RoleDisplay": _display_source_phrase(entry.get("Role", "")),
+                    "StartDate": entry.get("StartDate", ""),
+                    "StartDateDisplay": _source_record_biography_date_display(entry.get("StartDate", "")),
+                    "EndDate": entry.get("EndDate", ""),
+                    "EndDateDisplay": _source_record_biography_date_display(entry.get("EndDate", "")),
+                    "Qualifier": entry.get("Qualifier", ""),
+                    "QualifierDisplay": _display_source_phrase(entry.get("Qualifier", "")),
+                    "FullAnswerDisplay": full_answer,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+
+    if not support_rows:
+        return None
+    _source_record_biography_attach_transition_dates(support_rows)
+    support_rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRow", "")),
+            _source_record_biography_date_sort_key(row.get("StartDate", "")),
+            row.get("Role", ""),
+            row.get("Employer", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_biography_history_summary",
+        "SourceRow": "source_record_biography_history",
+        "HistoryItemCount": str(len(support_rows)),
+        "RoleHistoryDisplay": "; ".join(
+            row["FullAnswerDisplay"] for row in support_rows if row.get("RoleDisplay")
+        ),
+        "PriorEmployerDisplay": "; ".join(
+            row["FullAnswerDisplay"] for row in support_rows if row.get("EmployerDisplay")
+        ),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_employment_history_support(HistoryKind, Employer, Role, SourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_employment_history_support",
+            "prolog_query": "source_record_employment_history_support(HistoryKind, Employer, Role, SourceRow).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only biography/employment-history support summarized role and prior-employer "
+                    "phrases from admitted source_record_text_atom rows; no durable employment fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_biography_history_signal(atom: str) -> bool:
+    text = _normalize_text_filter_atom(atom)
+    return bool(
+        re.search(
+            r"(?:^|_)(?:has_served_as|served_as|previously|prior_to_joining|employed_by|before_that|"
+            r"earlier_in_his_career|earlier_in_her_career|held_several|held_senior|appointed)(?:_|$)",
+            text,
+        )
+    )
+
+
+def _source_record_biography_row_matches_question(*, atom: str, query_tokens: set[str]) -> bool:
+    if not query_tokens:
+        return False
+    row_tokens = set(_query_atom_tokens(atom))
+    focus_tokens = {
+        token
+        for token in query_tokens
+        if len(token) >= 4
+        and token
+        not in {
+            "biographical",
+            "chronological",
+            "date",
+            "dates",
+            "document",
+            "employer",
+            "employers",
+            "every",
+            "held",
+            "list",
+            "mentioned",
+            "named",
+            "order",
+            "paragraph",
+            "prior",
+            "role",
+            "roles",
+            "start",
+            "with",
+        }
+    }
+    return bool(focus_tokens & row_tokens) or bool({"prior", "previously", "served", "employed"} & row_tokens)
+
+
+def _source_record_biography_history_entries(atom: str) -> list[dict[str, str]]:
+    text = _normalize_text_filter_atom(atom)
+    entries: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str, str]] = set()
+
+    def add(
+        *,
+        history_kind: str,
+        employer: str = "",
+        role: str = "",
+        start_date: str = "",
+        end_date: str = "",
+        qualifier: str = "",
+    ) -> None:
+        employer_atom = _source_record_biography_clean_phrase(employer, kind="employer")
+        role_atom = _source_record_biography_clean_phrase(role, kind="role")
+        qualifier_atom = _source_record_biography_clean_phrase(qualifier, kind="qualifier")
+        if not employer_atom and not role_atom:
+            return
+        if role_atom and re.search(r"(?:^|_)(?:since|previously|prior_to_joining)(?:_|$)", role_atom):
+            return
+        if role_atom:
+            for existing in entries:
+                if (
+                    existing.get("HistoryKind") == history_kind
+                    and existing.get("Employer") == employer_atom
+                    and existing.get("StartDate") == start_date
+                    and existing.get("EndDate") == end_date
+                ):
+                    existing_role = str(existing.get("Role", ""))
+                    if role_atom != existing_role and role_atom in existing_role:
+                        return
+        key = (history_kind, employer_atom, role_atom, start_date, end_date)
+        if key in seen:
+            return
+        seen.add(key)
+        entries.append(
+            {
+                "HistoryKind": history_kind,
+                "Employer": employer_atom,
+                "Role": role_atom,
+                "StartDate": start_date,
+                "EndDate": end_date,
+                "Qualifier": qualifier_atom,
+            }
+        )
+
+    for match in re.finditer(
+        rf"(?:^|_)(?:has_)?served_as_(?P<role>[a-z0-9_]{{3,140}}?)_since_(?P<start>{_BIOGRAPHY_DATE_PATTERN})(?:_|$)",
+        text,
+    ):
+        add(history_kind="current_role", role=match.group("role"), start_date=match.group("start"))
+
+    prior_boundary_candidates = [
+        index
+        for marker in ("_prior_to_joining_", "_employed_by_", "_before_that_")
+        for index in [text.find(marker)]
+        if index >= 0
+    ]
+    prior_boundary = min(prior_boundary_candidates) if prior_boundary_candidates else -1
+
+    for match in re.finditer(
+        rf"(?=(?:^|_)(?:served_as|and)_(?P<role>[a-z0-9_]{{3,180}}?)_from_(?P<start>{_BIOGRAPHY_DATE_PATTERN})"
+        rf"_to_(?P<end>{_BIOGRAPHY_DATE_PATTERN})(?:_|$))",
+        text,
+    ):
+        if prior_boundary >= 0 and match.start() > prior_boundary:
+            continue
+        if not _source_record_biography_phrase_starts_like_role(match.group("role")):
+            continue
+        add(
+            history_kind="role_history",
+            role=match.group("role"),
+            start_date=match.group("start"),
+            end_date=match.group("end"),
+        )
+
+    for match in re.finditer(
+        rf"(?:^|_)employed_by_(?P<employer>[a-z0-9_]{{2,100}}?)_as_(?P<role>[a-z0-9_]{{3,140}}?)_from_"
+        rf"(?P<start>{_BIOGRAPHY_DATE_PATTERN})_to_(?P<end>{_BIOGRAPHY_DATE_PATTERN})(?:_|$)",
+        text,
+    ):
+        add(
+            history_kind="prior_employer_role",
+            employer=match.group("employer"),
+            role=match.group("role"),
+            start_date=match.group("start"),
+            end_date=match.group("end"),
+        )
+
+    for match in re.finditer(
+        rf"(?:^|_)served_as_(?P<role>[a-z0-9_]{{3,140}}?)_at_(?P<employer>[a-z0-9_]{{2,100}}?)_from_"
+        rf"(?P<start>{_BIOGRAPHY_DATE_PATTERN})_to_(?P<end>{_BIOGRAPHY_DATE_PATTERN})(?:_|$)",
+        text,
+    ):
+        add(
+            history_kind="prior_employer_role",
+            employer=match.group("employer"),
+            role=match.group("role"),
+            start_date=match.group("start"),
+            end_date=match.group("end"),
+        )
+
+    for match in re.finditer(
+        rf"(?:^|_)and_(?P<employer>[a-z][a-z0-9_]{{2,80}}?)_from_(?P<start>{_BIOGRAPHY_DATE_PATTERN})"
+        rf"_to_(?P<end>{_BIOGRAPHY_DATE_PATTERN})(?:_|$)",
+        text,
+    ):
+        candidate = match.group("employer")
+        if not _source_record_biography_phrase_looks_like_role(candidate):
+            add(
+                history_kind="prior_employer",
+                employer=candidate,
+                start_date=match.group("start"),
+                end_date=match.group("end"),
+            )
+
+    for match in re.finditer(
+        r"(?:^|_)spent_(?:more_than_)?(?:[a-z]+|\d+)_years_at_(?P<employer>[a-z0-9_]{2,140}?)(?:_including_|_helping_|_where_|$)",
+        text,
+    ):
+        add(history_kind="prior_employer", employer=match.group("employer"), qualifier="multi_year_tenure")
+
+    for match in re.finditer(
+        rf"(?:^|_)(?:held_several|held_senior|previously_held_senior).*?_(?:roles|positions)_at_(?P<employers>[a-z0-9_]+?)"
+        rf"(?:_from_(?P<start>{_BIOGRAPHY_DATE_PATTERN})_to_(?P<end>{_BIOGRAPHY_DATE_PATTERN})|_where_|$)",
+        text,
+    ):
+        for employer in _source_record_biography_split_employers(match.group("employers")):
+            add(
+                history_kind="prior_employer_group",
+                employer=employer,
+                role="management_positions" if "management_positions" in match.group(0) else "senior_leadership_roles",
+                start_date=match.group("start") or "",
+                end_date=match.group("end") or "",
+            )
+
+    for match in re.finditer(
+        rf"(?:^|_)appointed_(?:[a-z0-9_]{{0,80}}?)_as_(?:the_[a-z0-9_]+_s_)?(?P<role>[a-z0-9_]{{3,80}}?)"
+        rf"_effective_(?P<start>{_BIOGRAPHY_DATE_PATTERN})(?:_|$)",
+        text,
+    ):
+        add(history_kind="appointment_role", role=match.group("role"), start_date=match.group("start"))
+
+    return entries
+
+
+def _source_record_biography_attach_transition_dates(rows: list[dict[str, str]]) -> None:
+    appointment_rows = [
+        row
+        for row in rows
+        if row.get("HistoryKind") == "appointment_role" and row.get("StartDate") and row.get("Role")
+    ]
+    if not appointment_rows:
+        return
+    appointment_rows.sort(key=lambda row: _source_record_biography_date_sort_key(row.get("StartDate", "")))
+    for row in rows:
+        if row.get("HistoryKind") != "current_role" or row.get("EndDate") or not row.get("StartDate"):
+            continue
+        start_key = _source_record_biography_date_sort_key(row.get("StartDate", ""))
+        next_rows = [
+            appointment
+            for appointment in appointment_rows
+            if _source_record_biography_date_sort_key(appointment.get("StartDate", "")) >= start_key
+        ]
+        if not next_rows:
+            continue
+        appointment = next_rows[0]
+        transition_date = appointment.get("StartDate", "")
+        transition_role = appointment.get("Role", "")
+        row["TransitionDate"] = transition_date
+        row["TransitionDateDisplay"] = _source_record_biography_date_display(transition_date)
+        row["TransitionRole"] = transition_role
+        row["TransitionRoleDisplay"] = _display_source_phrase(transition_role)
+        if row["TransitionDateDisplay"]:
+            row["FullAnswerDisplay"] = (
+                f"{row.get('FullAnswerDisplay', '')}; next role "
+                f"{row['TransitionRoleDisplay']} effective {row['TransitionDateDisplay']}"
+            ).strip("; ")
+
+
+def _source_record_biography_phrase_looks_like_role(value: str) -> bool:
+    tokens = set(_query_atom_tokens(value))
+    return bool(
+        tokens
+        & {
+            "chief",
+            "counsel",
+            "director",
+            "executive",
+            "finance",
+            "financial",
+            "manager",
+            "management",
+            "officer",
+            "operations",
+            "president",
+            "strategy",
+            "vice",
+        }
+    )
+
+
+def _source_record_biography_phrase_starts_like_role(value: str) -> bool:
+    tokens = _query_atom_tokens(value)
+    return bool(tokens) and tokens[0] in {
+        "chief",
+        "director",
+        "executive",
+        "interim",
+        "manager",
+        "management",
+        "president",
+        "senior",
+        "vice",
+    }
+
+
+def _source_record_biography_split_employers(value: str) -> list[str]:
+    text = _source_record_biography_clean_phrase(value, kind="employer")
+    if not text:
+        return []
+    parts = [part for part in re.split(r"_and_", text) if part]
+    out: list[str] = []
+    for part in parts:
+        part = part.strip("_")
+        if not part:
+            continue
+        split_match = re.fullmatch(r"(?P<first>[a-z0-9_]+?_international)_(?P<second>[a-z0-9_]+)", part)
+        if split_match:
+            out.extend([split_match.group("first"), split_match.group("second")])
+        else:
+            out.append(part)
+    return _ordered_atom_unique(out)
+
+
+def _source_record_biography_clean_phrase(value: str, *, kind: str) -> str:
+    text = _normalize_text_filter_atom(value)
+    if not text:
+        return ""
+    text = re.sub(r"^(?:mr|ms|mrs|dr|he|she|they|previously|before_that|prior_to_joining|the_company|company_s)_+", "", text)
+    text = re.sub(r"_+(?:where|helping|including|from|to|and)$", "", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    if kind == "employer":
+        text = re.sub(r"_acquired_by_[a-z0-9_]+$", "", text)
+    if kind == "role":
+        text = re.sub(r"^(?:as|served_as|has_served_as|and)_+", "", text)
+    return text[:180]
+
+
+def _source_record_biography_entry_display(entry: dict[str, str]) -> str:
+    parts: list[str] = []
+    employer = _display_source_phrase(entry.get("Employer", ""))
+    role = _display_source_phrase(entry.get("Role", ""))
+    start = _source_record_biography_date_display(entry.get("StartDate", ""))
+    end = _source_record_biography_date_display(entry.get("EndDate", ""))
+    qualifier = _display_source_phrase(entry.get("Qualifier", ""))
+    if employer:
+        parts.append(employer)
+    if role:
+        parts.append(role)
+    if start and end:
+        parts.append(f"{start} to {end}")
+    elif start:
+        parts.append(f"since/effective {start}")
+    if qualifier:
+        parts.append(qualifier)
+    return " - ".join(part for part in parts if part)
+
+
+def _source_record_biography_date_display(value: str) -> str:
+    text = _normalize_text_filter_atom(value)
+    if not text:
+        return ""
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    match = re.fullmatch(rf"(?P<month>{month_pattern})_(?P<day>\d{{1,2}})_(?P<year>\d{{4}})", text)
+    if match:
+        return f"{match.group('month').title()} {int(match.group('day'))}, {match.group('year')}"
+    match = re.fullmatch(rf"(?P<month>{month_pattern})_(?P<year>\d{{4}})", text)
+    if match:
+        return f"{match.group('month').title()} {match.group('year')}"
+    if re.fullmatch(r"\d{4}", text):
+        return text
+    return _display_source_phrase(text)
+
+
+def _source_record_biography_date_sort_key(value: str) -> tuple[int, int, int]:
+    text = _normalize_text_filter_atom(value)
+    if re.fullmatch(r"\d{4}", text):
+        return (int(text), 0, 0)
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    match = re.fullmatch(rf"(?P<month>{month_pattern})_(?P<day>\d{{1,2}})_(?P<year>\d{{4}})", text)
+    if match:
+        return (int(match.group("year")), int(_SOURCE_MONTHS.get(match.group("month"), "0")), int(match.group("day")))
+    match = re.fullmatch(rf"(?P<month>{month_pattern})_(?P<year>\d{{4}})", text)
+    if match:
+        return (int(match.group("year")), int(_SOURCE_MONTHS.get(match.group("month"), "0")), 0)
+    return (9999, 99, 99)
 
 
 def _first_identifier_number(value: str) -> str:
@@ -23652,6 +24124,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_identifier_set_support",
             "source_record_citation_list_support",
             "source_record_exhibit_index_support",
+            "source_record_employment_history_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -23703,7 +24176,8 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",

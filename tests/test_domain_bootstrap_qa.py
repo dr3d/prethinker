@@ -2693,6 +2693,82 @@ def test_source_record_exhibit_index_support_ignores_body_mentions_without_index
     assert companion is None
 
 
+def test_source_record_messy_summary_extracts_biography_role_history() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "dr_rivera_age_44_has_served_as_chief_growth_strategy_officer_since_march_24_2026_"
+        "previously_dr_rivera_served_as_executive_vice_president_operations_and_chief_global_brand_officer_"
+        "from_september_2023_to_march_2026_and_chief_financial_officer_from_march_2017_to_september_2023_"
+        "prior_to_joining_the_company_he_was_employed_by_harbor_networks_as_chief_financial_officer_"
+        "from_july_2015_to_february_2017_and_vice_president_financial_planning_and_analysis_and_strategic_finance_"
+        "from_september_2014_to_july_2015_before_that_he_held_several_management_positions_at_"
+        "northstar_international_lumen_holdings_inc_and_summit_audit_from_2004_to_2014)."
+    ).get("status") == "success"
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0044, "
+        "on_may_20_2026_the_board_appointed_dr_rivera_the_company_s_chief_growth_strategy_officer_"
+        "as_the_company_s_interim_ceo_effective_may_20_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every role Dr. Rivera has held, in chronological order, with start and end dates.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_employment_history_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    assert any("chief growth strategy officer" in display for display in displays)
+    assert any("executive vice president operations and chief global brand officer" in display for display in displays)
+    assert any("chief financial officer" in display for display in displays)
+    assert any("March 24, 2026" in display for display in displays)
+    assert any("next role interim ceo effective May 20, 2026" in display for display in displays)
+
+
+def test_source_record_messy_summary_extracts_prior_employers_from_biography() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "dr_rivera_age_44_has_served_as_chief_growth_strategy_officer_since_march_24_2026_"
+        "prior_to_joining_the_company_he_was_employed_by_harbor_networks_as_chief_financial_officer_"
+        "from_july_2015_to_february_2017_and_vice_president_financial_planning_and_analysis_and_strategic_finance_"
+        "from_september_2014_to_july_2015_before_that_he_held_several_management_positions_at_"
+        "northstar_international_lumen_holdings_inc_and_summit_audit_from_2004_to_2014)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every prior employer of Dr. Rivera named in the document.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_employment_history_support"
+    )
+    displays = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "harbor networks" in displays
+    assert "northstar international" in displays
+    assert "lumen holdings inc" in displays
+    assert "summit audit" in displays
+
+
+def test_source_record_messy_summary_biography_does_not_fire_for_amount_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "dr_rivera_has_served_as_chief_growth_strategy_officer_since_march_24_2026_"
+        "and_will_receive_a_cash_bonus_of_500_000_on_december_31_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What cash bonus amount is payable on December 31, 2026?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_employment_history_support" for item in companions)
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
