@@ -2946,6 +2946,49 @@ def test_source_record_messy_summary_defined_term_contrast_requires_comparison()
     )
 
 
+def test_source_record_messy_summary_extracts_signature_mismatch() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_cell(src_line_0100, 2, by).",
+        "source_record_cell(src_line_0100, 3, s_alex_moorehead).",
+        "source_record_cell(src_line_0101, 2, name).",
+        "source_record_cell(src_line_0101, 3, alex_moorhead).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="The signature block contains an inconsistency between two lines. What is it?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_signature_mismatch_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "signed name alex moorehead differs from printed name alex moorhead" in joined
+
+
+def test_source_record_messy_summary_signature_mismatch_requires_inconsistency_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_cell(src_line_0100, 2, by).",
+        "source_record_cell(src_line_0100, 3, s_alex_moorehead).",
+        "source_record_cell(src_line_0101, 2, name).",
+        "source_record_cell(src_line_0101, 3, alex_moorhead).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Who signed the document?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_signature_mismatch_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_destination_field() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

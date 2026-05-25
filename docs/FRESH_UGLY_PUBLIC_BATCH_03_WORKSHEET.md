@@ -1121,3 +1121,193 @@ Residual:
 The full fixture guard still has three exact rows (`q022/q023/q025`) whose
 response envelope reports `clarification_required`. That remains envelope
 status assembly noise rather than answer evidence failure.
+
+## 2026-05-25 SEC Subset R3 OpenRouter Probe
+
+Purpose:
+
+Measure whether the SEC-targeted source-record cages transfer across the SEC
+slice of Batch 03 before spending a full 300-row OpenRouter run.
+
+Conditions:
+
+```text
+dataset:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_03
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_compile_r1
+out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_sec_subset_r3_or_20260525
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6
+cache:
+  disabled
+compatibility/runtime/write rows:
+  0/0/0
+```
+
+Note:
+
+An earlier attempted full Batch 03 OpenRouter run under
+`fresh_ugly_public_20260524_03_full_r3_after_sec_cages_20260525` is invalid:
+all rows returned `judge_uncertain` because the subprocess used the wrong auth
+header precedence and OpenRouter returned HTTP 401. It is archived as a failed
+run artifact only and is not a score.
+
+Valid SEC subset result:
+
+```text
+questions: 75
+exact / partial / miss: 69 / 2 / 4
+exact rate: 92.0%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Per-fixture:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `sec_ugly_001` | 23 | 0 | 2 |
+| `sec_ugly_002` | 21 | 2 | 2 |
+| `sec_ugly_003` | 25 | 0 | 0 |
+
+Remaining non-exact rows:
+
+```text
+sec_ugly_001 q010:
+  signature-block inconsistency between signed and printed name
+
+sec_ugly_001 q015:
+  ordered dated-event inventory across filing narrative
+
+sec_ugly_002 q015:
+  negative-fact assertions under an item section
+
+sec_ugly_002 q016:
+  resignation effective date plus continuing roles
+
+sec_ugly_002 q017:
+  advisory-period end is stated as fiscal-year end, not explicit calendar date
+
+sec_ugly_002 q022:
+  board-membership path / nominee / shareholder-election conditionality
+```
+
+Read:
+
+Compared with the R1 SEC family baseline (`64 / 7 / 4`) this is a material
+shape improvement: +5 exact and -5 partial with the miss count flat. Compared
+with the R2 SEC row totals (`60 / 6 / 9`), it is a stronger recovery. The
+important local signal is `sec_ugly_003`: the fixture that carried the amount,
+covenant, and defined-term residues now replays at `25 / 0 / 0` under
+OpenRouter, not just local targeted runs.
+
+Next blocker:
+
+The next narrow generic blocker is likely signature-block inconsistency
+(`sec_ugly_001 q010`): the source has the raw lines, but the surfaced signatory
+predicate normalizes away the mismatch that the question asks about.
+
+## 2026-05-25 Signature-Block Mismatch Source-Record Cage
+
+Question:
+
+Can a signature-block spelling inconsistency be recovered from source-record
+table cells without changing the durable signatory fact?
+
+Finding:
+
+`sec_ugly_001 q010` was not a source-preservation gap. The relevant source rows
+were admitted:
+
+```text
+src_line_0127:
+  cell 2 = by
+  cell 3 = s_daniel_moorehead
+
+src_line_0128:
+  cell 2 = name
+  cell 3 = daniel_moorhead
+```
+
+The miss happened because the durable signatory predicate normalized the block
+to `daniel_moorehead / chief_financial_officer`, which is correct for ordinary
+signatory questions but loses the intra-block spelling mismatch.
+
+Edit:
+
+```text
+source_record_signature_mismatch_support:
+  query-only signature-block mismatch support over admitted source_record_cell rows.
+
+  trigger:
+    signature/signature-block wording
+    AND inconsistency/mismatch/disagreement/different/two-lines wording
+
+  comparison:
+    adjacent table rows where one row has a By cell with an /s/ signed name
+    and a following row has a Name cell with a printed name
+    near-miss names are reported only when token structure matches and the
+    final token differs by a small edit distance
+```
+
+The support reads only admitted source-record cells. It writes no durable facts
+and does not branch on fixture names, person names, filing names, or answer
+strings.
+
+Focused tests:
+
+```text
+python -m pytest \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_extracts_signature_mismatch \
+  tests\test_domain_bootstrap_qa.py::test_source_record_messy_summary_signature_mismatch_requires_inconsistency_question -q
+
+2 passed
+```
+
+Targeted replay:
+
+```text
+artifact root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_signature_mismatch_20260525
+
+sec_ugly_001 q010 local:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  returned:
+    signed name Daniel Moorehead differs from printed name Daniel Moorhead
+  artifact:
+    targeted_sec_ugly_001_q010
+
+sec_ugly_001 q010 OpenRouter:
+  1 / 0 / 0
+  response envelope: established
+  compatibility/runtime/write rows: 0/0/0
+  artifact:
+    targeted_sec_ugly_001_q010_openrouter
+
+guards:
+  q011 cover-page filing-obligation list: exact, signature support absent
+  q023 agreement-location/exhibit cross-section: exact, signature support absent
+  q025 press-release/separation-date reconciliation: exact, signature support absent
+  artifact:
+    guard_sec_ugly_001_q011_q023_q025
+```
+
+Read:
+
+This is a useful distinction between ordinary normalized signatory identity and
+source-surface mismatch detection. The normal signatory predicate should not be
+made unstable to preserve typos; the query-only mismatch support should surface
+the typo only when the question asks about signature-block inconsistency.
+
+Next blocker:
+
+SEC subset residue after this targeted repair is mostly ordered dated-event
+inventory (`sec_ugly_001 q015`) and sparse source-claim/negative-fact rows in
+`sec_ugly_002`.

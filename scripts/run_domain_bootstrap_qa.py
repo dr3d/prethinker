@@ -15990,6 +15990,7 @@ def _source_record_messy_summary_companions(
         _source_record_amount_inventory_companion(runtime, utterance=utterance),
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
+        _source_record_signature_mismatch_companion(runtime, utterance=utterance),
         _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
@@ -18158,6 +18159,158 @@ def _source_record_defined_term_relation_row(rows: list[dict[str, str]]) -> dict
         "FullAnswerDisplay": relation,
         "SupportClass": "deterministic-source-record-summary",
     }
+
+
+def _source_record_signature_mismatch_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\bsignature(?:s| block)?\b", text):
+        return None
+    if not re.search(r"\b(?:inconsistency|inconsistent|mismatch|disagree|disagreement|different|two lines)\b", text):
+        return None
+
+    rows_by_source: dict[str, dict[int, str]] = {}
+    for row in _runtime_rows(runtime, "source_record_cell(SourceRow, Column, Value)."):
+        if not isinstance(row, dict):
+            continue
+        source_row = str(row.get("SourceRow", "")).strip()
+        column = _safe_int(row.get("Column"))
+        value = _normalize_text_filter_atom(str(row.get("Value", "")))
+        if not source_row or column is None or not value:
+            continue
+        rows_by_source.setdefault(source_row, {})[column] = value
+
+    support_rows: list[dict[str, str]] = []
+    sorted_rows = sorted(rows_by_source.items(), key=lambda item: _source_row_sort_key(item[0]))
+    for index, (source_row, cells) in enumerate(sorted_rows):
+        signed_name = _source_record_signature_signed_name(cells)
+        if not signed_name:
+            continue
+        for printed_row, printed_cells in sorted_rows[index + 1 : index + 4]:
+            printed_name = _source_record_signature_printed_name(printed_cells)
+            if not printed_name:
+                continue
+            if not _source_record_signature_names_mismatch(signed_name, printed_name):
+                continue
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_signature_mismatch",
+                    "SignedSourceRow": source_row,
+                    "PrintedSourceRow": printed_row,
+                    "SignedNameAtom": signed_name,
+                    "PrintedNameAtom": printed_name,
+                    "SignedNameDisplay": _display_source_phrase(signed_name),
+                    "PrintedNameDisplay": _display_source_phrase(printed_name),
+                    "FullAnswerDisplay": (
+                        f"signed name {_display_source_phrase(signed_name)} differs from printed name "
+                        f"{_display_source_phrase(printed_name)}"
+                    ),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+            break
+    if not support_rows:
+        return None
+    summary = {
+        "SupportKind": "source_record_signature_mismatch_summary",
+        "SourceRow": "source_record_signature_mismatch",
+        "MismatchCount": str(len(support_rows)),
+        "MismatchesDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [*support_rows, summary]
+    return {
+        "query": "source_record_signature_mismatch_support(SignedName, PrintedName, SignedSourceRow, PrintedSourceRow).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_signature_mismatch_support",
+            "prolog_query": (
+                "source_record_signature_mismatch_support(SignedName, PrintedName, SignedSourceRow, PrintedSourceRow)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:100],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only signature-mismatch support compared adjacent signed-name and printed-name "
+                    "source-record table cells; no durable signatory fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_cell(SourceRow, Column, Value)."],
+    }
+
+
+def _source_record_signature_signed_name(cells: dict[int, str]) -> str:
+    if not any(value == "by" for value in cells.values()):
+        return ""
+    for value in cells.values():
+        normalized = _normalize_text_filter_atom(value)
+        if normalized.startswith("s_") and len(normalized.split("_")) >= 3:
+            return normalized.removeprefix("s_")
+    return ""
+
+
+def _source_record_signature_printed_name(cells: dict[int, str]) -> str:
+    if not any(value == "name" for value in cells.values()):
+        return ""
+    for column, value in sorted(cells.items()):
+        normalized = _normalize_text_filter_atom(value)
+        if normalized == "name":
+            continue
+        if re.fullmatch(r"[a-z]+(?:_[a-z]+){1,4}", normalized):
+            return normalized
+    return ""
+
+
+def _source_record_signature_names_mismatch(signed_name: str, printed_name: str) -> bool:
+    signed = _normalize_text_filter_atom(signed_name)
+    printed = _normalize_text_filter_atom(printed_name)
+    if not signed or not printed or signed == printed:
+        return False
+    signed_tokens = signed.split("_")
+    printed_tokens = printed.split("_")
+    if len(signed_tokens) != len(printed_tokens):
+        return False
+    if signed_tokens[:-1] != printed_tokens[:-1]:
+        return False
+    return _source_record_signature_token_near_miss(signed_tokens[-1], printed_tokens[-1])
+
+
+def _source_record_signature_token_near_miss(left: str, right: str) -> bool:
+    if left == right or min(len(left), len(right)) < 4:
+        return False
+    if abs(len(left) - len(right)) > 2:
+        return False
+    common_prefix = 0
+    for left_char, right_char in zip(left, right):
+        if left_char != right_char:
+            break
+        common_prefix += 1
+    if common_prefix < 4:
+        return False
+    return _small_edit_distance(left, right) <= 2
+
+
+def _small_edit_distance(left: str, right: str, *, limit: int = 2) -> int:
+    previous = list(range(len(right) + 1))
+    for left_index, left_char in enumerate(left, start=1):
+        current = [left_index]
+        best = current[0]
+        for right_index, right_char in enumerate(right, start=1):
+            cost = 0 if left_char == right_char else 1
+            current.append(min(previous[right_index] + 1, current[right_index - 1] + 1, previous[right_index - 1] + cost))
+            best = min(best, current[-1])
+        if best > limit:
+            return best
+        previous = current
+    return previous[-1]
 
 
 def _first_identifier_number(value: str) -> str:
@@ -24709,6 +24862,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_amount_inventory_support",
             "source_record_restrictive_covenant_support",
             "source_record_defined_term_contrast_support",
+            "source_record_signature_mismatch_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
             "source_record_named_section_window_support",
@@ -24760,11 +24914,12 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
             "Defined-term contrast policy: source_record_defined_term_contrast_support rows are deterministic structured support rows for questions comparing quoted defined terms. They can fully support fixed-period versus conditional-date distinctions when the definitions are extracted from admitted source-record text; do not downgrade solely because primitive term_definition predicates are absent.",
+            "Signature-mismatch support policy: source_record_signature_mismatch_support rows are deterministic structured support rows for signature-block inconsistency questions. They can fully support spelling mismatches between adjacent signed-name and printed-name source-record table cells; do not downgrade solely because normalized signatory predicates collapse the names.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
