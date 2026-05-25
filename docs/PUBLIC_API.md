@@ -106,16 +106,21 @@ All models are dataclasses and provide `to_dict()` for JSON-facing adapters.
 
 ## Alpha Behavior
 
-The `0.1.0` Engine facade preserves deterministic source records for Markdown
+The `0.2.0` Engine facade preserves deterministic source records for Markdown
 and plain-text documents. It stores KB artifacts in a local filesystem registry.
 
-The alpha query path returns source-record evidence and an audit trace, but it
-does not synthesize final natural-language answers yet. When source evidence is
-available, `QueryResult.answer` remains `None` and `status` is
-`evidence_available` with `failure_surface = "answer_surface_gap"`.
+The alpha query path returns source-record evidence and an audit trace. When a
+source-record match is strong enough, `QueryResult.answer` contains a
+deterministic extractive answer copied from the source row, with
+`status = "answered"` and `failure_surface = "not_applicable"`.
 
-This is deliberate. The public API should not overclaim while the product-shaped
-non-oracle answer renderer is still being hardened.
+When source evidence exists but is too weak for deterministic answer rendering,
+`QueryResult.answer` remains `None` and `status` is `evidence_available` with
+`failure_surface = "answer_surface_gap"`. This is deliberate: the public API
+should report evidence without overclaiming.
+
+The public query path does not use LLM synthesis, reference answers, or durable
+query-time writes.
 
 PDF input is accepted as an opaque stored document in this alpha. It does not
 yet produce text source records through the public facade.

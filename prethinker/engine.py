@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import os
 import re
-from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -86,8 +85,8 @@ class Engine:
         """Run a product-shaped query over a stored KB.
 
         This alpha query returns source-record evidence and an audit trace. It
-        does not synthesize final answers yet, so successful evidence retrieval
-        is reported as an answer-surface gap rather than overclaiming.
+        renders a deterministic extractive answer only when the source-record
+        match is strong enough; otherwise it reports the appropriate gap.
         """
 
         if not question or not str(question).strip():
@@ -110,7 +109,9 @@ class Engine:
             )
 
         metadata, records = loaded
-        matches = _rank_source_records(records, str(question))
+        scored_matches = _score_source_records(records, str(question))
+        matches = [record for _score, _index, record in scored_matches[:8]]
+        answer = _render_extractive_answer(scored_matches)
         cleanliness = CleanlinessCounters()
         if not records:
             failure_surface = "compile_surface_gap"
@@ -118,11 +119,17 @@ class Engine:
             notes = [
                 "The stored KB has no text source records. Binary/PDF semantic compile is not exposed in this alpha API."
             ]
+        elif answer is not None:
+            failure_surface = "not_applicable"
+            status = "answered"
+            notes = [
+                "Deterministic extractive answer rendered from source-record evidence; no LLM synthesis or durable writes."
+            ]
         elif matches:
             failure_surface = "answer_surface_gap"
             status = "evidence_available"
             notes = [
-                "Source-record evidence was found, but alpha Engine.query does not synthesize final answers yet."
+                "Source-record evidence was found, but it was not strong enough for deterministic extractive answering."
             ]
         else:
             failure_surface = "query_surface_gap"
@@ -138,7 +145,7 @@ class Engine:
         return QueryResult(
             kb_id=metadata.kb_id,
             question=str(question),
-            answer=None,
+            answer=answer,
             status=status,
             audit_trace=trace,
         )
@@ -208,6 +215,10 @@ def _source_line_kind(line: str) -> str:
 
 
 def _rank_source_records(records: list[SourceRecord], question: str) -> list[SourceRecord]:
+    return [record for _score, _index, record in _score_source_records(records, question)[:8]]
+
+
+def _score_source_records(records: list[SourceRecord], question: str) -> list[tuple[int, int, SourceRecord]]:
     question_tokens = _token_set(question)
     if not question_tokens:
         return []
@@ -223,7 +234,27 @@ def _rank_source_records(records: list[SourceRecord], question: str) -> list[Sou
             score += 2
         scored.append((score, index, record))
     scored.sort(key=lambda item: (-item[0], item[1]))
-    return [record for _score, _index, record in scored[:8]]
+    return scored
+
+
+def _render_extractive_answer(scored_matches: list[tuple[int, int, SourceRecord]]) -> str | None:
+    for score, _index, record in scored_matches:
+        if score < 20:
+            return None
+        if record.payload.get("kind") == "heading":
+            continue
+        text = str(record.payload.get("text", "")).strip()
+        answer = _clean_source_text(text)
+        if answer:
+            return answer
+    return None
+
+
+def _clean_source_text(value: str) -> str:
+    text = re.sub(r"^#{1,6}\s*", "", value.strip())
+    text = re.sub(r"^[-*+]\s+", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
 
 def _token_set(value: str) -> set[str]:

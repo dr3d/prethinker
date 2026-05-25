@@ -20,7 +20,7 @@ class ExternalDocumentType(str, Enum):
 
 
 def test_public_package_exports_version_and_engine() -> None:
-    assert prethinker.__version__ == "0.1.0"
+    assert prethinker.__version__ == "0.2.0"
     assert Engine is prethinker.Engine
     assert all(
         item is not None
@@ -63,9 +63,9 @@ def test_engine_compile_query_and_lifecycle(tmp_path) -> None:
 
     result = engine.query(kb_id=compiled.kb_id, question="Who signed the inspection notice?")
     assert result.kb_id == compiled.kb_id
-    assert result.answer is None
-    assert result.status == "evidence_available"
-    assert result.audit_trace.failure_surface == "answer_surface_gap"
+    assert result.answer == "Maria Chen signed the inspection notice."
+    assert result.status == "answered"
+    assert result.audit_trace.failure_surface == "not_applicable"
     assert result.audit_trace.cleanliness_counters.is_clean is True
     assert result.audit_trace.cleanliness_counters.write_proposals == 0
     assert result.audit_trace.source_records
@@ -95,6 +95,23 @@ def test_query_missing_kb_returns_audit_trace(tmp_path) -> None:
     assert result.answer is None
     assert result.audit_trace.failure_surface == "kb_not_found"
     assert result.audit_trace.cleanliness_counters.runtime_load_errors == 1
+
+
+def test_query_keeps_weak_evidence_as_answer_surface_gap(tmp_path) -> None:
+    engine = Engine(storage_dir=tmp_path / "kbs")
+    compiled = engine.compile_document(
+        document_name="sample.md",
+        document_bytes=b"# Inspection Summary\n\nThe notice was logged.",
+        document_type=DocumentType.MD,
+    )
+
+    result = engine.query(kb_id=compiled.kb_id, question="Who signed the inspection notice?")
+
+    assert result.answer is None
+    assert result.status == "evidence_available"
+    assert result.audit_trace.failure_surface == "answer_surface_gap"
+    assert result.audit_trace.source_records
+    assert result.audit_trace.cleanliness_counters.write_proposals == 0
 
 
 def test_pdf_compile_is_opaque_without_fake_source_records(tmp_path) -> None:
