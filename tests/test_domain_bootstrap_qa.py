@@ -2017,6 +2017,40 @@ def test_source_record_section_list_detail_follows_question_matched_header() -> 
     assert all(row["HeaderSourceRow"] == "src_line_0084" for row in rows)
 
 
+def test_source_record_section_list_detail_follows_payment_benefit_table_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_row(src_line_0061, paragraph_line, 61, transition_section, "
+            "the_following_payments_and_benefits)."
+        ),
+        (
+            "source_record_text_atom(src_line_0061, "
+            "the_executive_will_be_entitled_to_the_following_payments_and_benefits)."
+        ),
+        "source_record_row(src_line_0063, table_row, 63, transition_section, no_label).",
+        (
+            "source_record_text_atom(src_line_0063, "
+            "cash_severance_equal_to_200_of_the_sum_of_base_salary_and_target_annual_bonus)."
+        ),
+        "source_record_row(src_line_0066, table_row, 66, transition_section, no_label).",
+        "source_record_text_atom(src_line_0066, continued_vesting_in_unvested_equity_awards).",
+        "source_record_row(src_line_0100, table_row, 100, other_section, unrelated_table_row).",
+        "source_record_text_atom(src_line_0100, unrelated_table_row).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_section_list_detail_companion(
+        runtime,
+        utterance="List the payments and benefits in source order.",
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert [row["SourceRow"] for row in rows] == ["src_line_0063", "src_line_0066"]
+    assert "base_salary_and_target_annual_bonus" in rows[0]["TextAtom"]
+
+
 def test_source_record_messy_summary_extracts_ais_speed_change_from_source_text() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -2815,6 +2849,29 @@ def test_source_record_messy_summary_extracts_prior_employers_from_biography() -
     assert "summit audit" in displays
 
 
+def test_source_record_messy_summary_extracts_prior_employer_list_after_acquisition_qualifier() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "earlier_in_his_career_he_previously_held_senior_leadership_roles_at_"
+        "bluecore_acquired_by_old_parent_silver_lake_scientific_and_northbridge_systems_"
+        "where_he_spent_15_years_in_progressively_senior_commercial_positions)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every prior employer named in the biographical paragraph.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_employment_history_support"
+    )
+    displays = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "bluecore" in displays
+    assert "silver lake scientific" in displays
+    assert "northbridge systems" in displays
+
+
 def test_source_record_messy_summary_biography_does_not_fire_for_amount_question() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(
@@ -2915,6 +2972,83 @@ def test_source_record_messy_summary_amount_inventory_ignores_bullet_list_compar
     )
 
     assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
+
+
+def test_source_record_identifier_set_extracts_labeled_list_identifiers() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_label(src_line_0010, "
+            "entity_file_number_2026_05_20_to_2026_05_20)."
+        ),
+        (
+            "source_record_text_atom(src_line_0010, "
+            "entity_file_number_2026_05_20_to_2026_05_20_001_99999)."
+        ),
+        (
+            "source_record_label(src_line_0011, "
+            "entity_tax_identification_number_2026_05_20_to_2026_05_20)."
+        ),
+        (
+            "source_record_text_atom(src_line_0011, "
+            "entity_tax_identification_number_2026_05_20_to_2026_05_20_52_1234567)."
+        ),
+        (
+            "source_record_label(src_line_0012, "
+            "trading_symbol_2026_05_20_to_2026_05_20)."
+        ),
+        "source_record_text_atom(src_line_0012, trading_symbol_2026_05_20_to_2026_05_20_abc).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What identifiers are presented in the bullet-list cover-page format?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_identifier_set_support"
+    )
+    displays = " ".join(row.get("IdentifierDisplay", "") for row in companion["result"]["rows"])
+    assert "entity file number (2026-05-20 to 2026-05-20): 001-99999" in displays
+    assert "entity tax identification number (2026-05-20 to 2026-05-20): 52-1234567" in displays
+    assert "trading symbol (2026-05-20 to 2026-05-20): abc" in displays
+
+
+def test_source_record_messy_summary_extracts_duration_quantity() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0084, "
+        "the_company_shall_also_pay_the_executive_cobra_premiums_for_12_months_as_more_specifically_described)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the duration of COBRA premium payments to the executive?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_duration_quantity_support"
+    )
+    rows = companion["result"]["rows"]
+    assert rows[1]["DurationDisplay"] == "12 months"
+    assert "cobra premiums" in rows[1]["ReferentDisplay"]
+    assert "cobra premiums" in rows[1]["FullAnswerDisplay"]
+
+
+def test_source_record_messy_summary_duration_quantity_requires_duration_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0084, "
+        "the_company_shall_also_pay_the_executive_cobra_premiums_for_12_months_as_more_specifically_described)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Which agreement describes COBRA premium payments?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_duration_quantity_support" for item in companions)
 
 
 def test_source_record_messy_summary_extracts_restrictive_covenants() -> None:
@@ -3100,6 +3234,38 @@ def test_source_record_messy_summary_extracts_dated_event_inventory() -> None:
     assert "april 1 2026" in joined
     assert "filing title filed" not in joined
     assert "v 10 1 agreement dated" not in joined
+
+
+def test_source_record_messy_summary_extracts_all_explicit_dates_inventory() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_kind(src_line_0017, paragraph_line).",
+        "source_record_text_atom(src_line_0017, date_of_report_date_of_earliest_event_reported_january_6_2026).",
+        "source_record_kind(src_line_0088, paragraph_line).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "the_board_appointed_the_successor_as_chief_executive_officer_effective_april_30_2026)."
+        ),
+        "source_record_kind(src_line_0102, paragraph_line).",
+        (
+            "source_record_text_atom(src_line_0102, "
+            "the_definitive_proxy_statement_on_schedule_14a_was_filed_on_march_19_2025)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List all dates explicitly mentioned in this filing.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "january 6 2026" in joined
+    assert "april 30 2026" in joined
+    assert "march 19 2025" in joined
 
 
 def test_source_record_messy_summary_dated_event_inventory_requires_inventory_question() -> None:
@@ -3298,6 +3464,34 @@ def test_source_record_messy_summary_extracts_appointment_and_succession_transit
     assert "jordan liao appointed chief executive officer effective 2026-04-30" in joined
     assert "casey moore has served on the board since 2019" in joined
     assert "casey moore appointed to succeed dr rivera as chair of the board effective 2026-04-30" in joined
+
+
+def test_source_record_messy_summary_role_transition_supports_direct_becomes_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0087, on_january_6_2026_the_board_of_directors_the_board).",
+        (
+            "source_record_text_atom(src_line_0088, "
+            "of_the_company_appointed_jordan_liao_the_company_s_current_executive_vice_president_operations)."
+        ),
+        (
+            "source_record_text_atom(src_line_0089, "
+            "as_president_of_the_company_effective_immediately_and_as_chief_executive_officer_"
+            "effective_april_30_2026)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="On what date does Jordan Liao become Chief Executive Officer?",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_role_transition_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "jordan liao appointed chief executive officer effective 2026-04-30" in joined
 
 
 def test_source_record_messy_summary_role_transition_supports_direct_assumed_role_question() -> None:

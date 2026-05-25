@@ -1534,3 +1534,123 @@ source-record support now keeps the answer path exact when the source text was
 admitted. The remaining caution is response-envelope calibration: q019 and q024
 can be judge-exact while still carrying `clarification_required` from the
 model's self-check because the narrower durable predicates are absent.
+
+## 2026-05-25 - SEC subset R4 stabilizers
+
+Question:
+
+Can the SEC subset be made stable under the current query-only source-record
+support without adding fixture-shaped language?
+
+Changes:
+
+```text
+source_record_duration_quantity_support:
+  extracts source-stated for/over N day/month/year durations for duration
+  questions.
+
+source_record_employment_history_support:
+  preserves prior-employer list tails when an acquisition parenthetical is
+  flattened into the same source atom.
+
+source_record_identifier_set_support:
+  recognizes labeled list-row identifier fields such as file number, tax
+  identifier, address fields, security title, trading symbol, and exchange name.
+
+source_record_section_list_detail_support:
+  follows question-matched payment/benefit list lead-ins into table-rendered
+  bullet rows.
+
+source_record_dated_event_inventory_support:
+  now fires for "all dates explicitly mentioned" inventory questions.
+
+source_record_role_transition_support:
+  now fires for direct "when does X become role" questions.
+```
+
+All changes are query-only over admitted source-record rows. Tests use synthetic
+names and generic source shapes; no fixture names, person names, company names,
+or answer strings were added to the instrument.
+
+Focused tests:
+
+```text
+duration quantity: 2 passed
+acquisition-flattened prior-employer list: passed
+labeled list identifiers: passed
+payment/benefit table-row list detail: passed
+explicit-date inventory trigger: passed
+direct becomes-role trigger: passed
+```
+
+Targeted OpenRouter replays:
+
+```text
+duration quantity:
+  sec_ugly_001 q005 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_duration_quantity_20260525\targeted_sec_ugly_001_q005_openrouter
+
+acquisition-flattened prior-employer list:
+  sec_ugly_001 q013 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_biography_history_20260525\targeted_sec_ugly_001_q013_after_employer_list_openrouter
+
+labeled list identifiers:
+  sec_ugly_003 q010 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_identifier_list_20260525\targeted_sec_ugly_003_q010_openrouter
+
+payment/benefit table-row list detail:
+  sec_ugly_003 q023 -> 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_section_list_detail_20260525\targeted_sec_ugly_003_q023_openrouter
+
+SEC002 stabilizer guard:
+  sec_ugly_002 q002/q013 -> 2 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_sec_subset_r4_or_20260525\qa\sec_ugly_002_targeted_q002_q013_after_stabilizers
+```
+
+Full SEC subset guard, current code:
+
+```text
+sec_ugly_001:
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_sec_subset_r4_or_20260525\qa\sec_ugly_001_after_stabilizers_full
+  result:
+    25 / 0 / 0
+    response envelopes: 24 established, 1 clarification_required
+    compatibility/runtime/write rows: 0/0/0
+
+sec_ugly_002:
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_sec_subset_r4_or_20260525\qa\sec_ugly_002_after_stabilizers_full
+  result:
+    25 / 0 / 0
+    response envelopes: 20 established, 5 clarification_required
+    compatibility/runtime/write rows: 0/0/0
+
+sec_ugly_003:
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_sec_subset_r4_or_20260525\qa\sec_ugly_003_after_identifier_list_section_detail
+  result:
+    25 / 0 / 0
+    response envelopes: 24 established, 1 clarification_required
+    compatibility/runtime/write rows: 0/0/0
+
+aggregate:
+  75 / 0 / 0 = 100.0% exact on the three SEC fixtures
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+The useful finding is not the 100% SEC subset number by itself. The useful
+finding is that the remaining SEC misses were deterministic source-record
+carrier gaps: duration quantity, acquisition-flattened employer lists, labeled
+identifier list rows, payment/benefit list rows rendered as tables, and direct
+date/role inventory triggers. The SEC subset is now clean under current code,
+but this should be treated as mechanism evidence and a regression guard, not as
+a product benchmark. The next generalization check still needs fresh ugly
+documents outside the tuned SEC slice.

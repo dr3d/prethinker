@@ -6916,7 +6916,11 @@ def _source_record_section_list_detail_companion(
     text = str(utterance or "").casefold()
     if not re.search(r"\b(?:list|enumerat(?:e|es|ed|ion)|source order|in order|which|what)\b", text):
         return None
-    if not re.search(r"\b(?:people|persons|occupants?|items?|entries|rows?|configuration|violations?|events?|dates?)\b", text):
+    if not re.search(
+        r"\b(?:people|persons|occupants?|items?|entries|rows?|configuration|violations?|events?|dates?|"
+        r"payments?|benefits?|compensation|packages?|identifiers?)\b",
+        text,
+    ):
         return None
 
     question_tokens = _source_record_overlap_question_tokens(utterance)
@@ -6965,8 +6969,13 @@ def _source_record_section_list_detail_companion(
             "included",
             "injured",
             "occupants",
+            "packages",
             "people",
             "persons",
+            "payments",
+            "benefits",
+            "compensation",
+            "severance",
             "seriously",
             "violation",
             "violations",
@@ -6984,11 +6993,11 @@ def _source_record_section_list_detail_companion(
                 break
             if int(follower["Line"]) - int(row["Line"]) > 35:
                 break
-            if str(follower["Kind"]) == "list_row":
+            if str(follower["Kind"]) in {"list_row", "table_row"}:
                 followers.append(follower)
                 last_line = int(follower["Line"])
                 continue
-            if followers and str(follower["Kind"]) not in {"list_row", "continuation_line"}:
+            if followers and str(follower["Kind"]) not in {"list_row", "table_row", "continuation_line"}:
                 break
         if not followers:
             continue
@@ -15988,6 +15997,7 @@ def _source_record_messy_summary_companions(
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance),
         _source_record_amount_inventory_companion(runtime, utterance=utterance),
+        _source_record_duration_quantity_companion(runtime, utterance=utterance),
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
@@ -16655,8 +16665,16 @@ def _source_record_identifier_set_companion(
     support_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
 
-    def append_row(*, source_row: str, label: str, value: str, source_predicate: str, text_atom: str = "") -> None:
-        display = _source_record_identifier_display(label=label, value=value, text_atom=text_atom)
+    def append_row(
+        *,
+        source_row: str,
+        label: str,
+        value: str,
+        source_predicate: str,
+        text_atom: str = "",
+        display_override: str = "",
+    ) -> None:
+        display = display_override or _source_record_identifier_display(label=label, value=value, text_atom=text_atom)
         if not display:
             return
         key = (source_row, label, display)
@@ -16677,10 +16695,13 @@ def _source_record_identifier_set_companion(
         )
 
     text_atoms_by_row = {source_row: atom for source_row, atom in _source_record_text_atoms(runtime)}
+    labels_by_row: dict[str, str] = {}
     numeric_by_row: dict[str, list[str]] = {}
     for fact in _runtime_fact_rows(runtime):
         predicate = str(fact.get("predicate", "")).strip()
         args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate == "source_record_label" and len(args) >= 2:
+            labels_by_row[args[0]] = args[1]
         if predicate == "source_record_numeric_token" and len(args) >= 2:
             numeric_by_row.setdefault(args[0], []).append(args[1])
 
@@ -16710,8 +16731,20 @@ def _source_record_identifier_set_companion(
                     )
 
     for source_row, text_atom in text_atoms_by_row.items():
-        label = _source_record_identifier_label(text_atom)
+        row_label = labels_by_row.get(source_row, "")
+        label = _source_record_identifier_label(row_label) or _source_record_identifier_label(text_atom)
         if not label:
+            continue
+        label_value_display = _source_record_identifier_label_value_display(label=row_label, text_atom=text_atom)
+        if label_value_display:
+            append_row(
+                source_row=source_row,
+                label=row_label or label,
+                value=_source_record_identifier_value_from_label(row_label, text_atom) or text_atom,
+                source_predicate="source_record_text_atom",
+                text_atom=text_atom,
+                display_override=label_value_display,
+            )
             continue
         values = numeric_by_row.get(source_row, [])
         if not values and re.search(r"\d", text_atom):
@@ -16761,6 +16794,29 @@ def _source_record_identifier_label(value: str) -> str:
     tokens = set(_source_record_field_name_tokens(value))
     if not tokens:
         return ""
+    if {"incorporation", "state", "country", "code"} <= tokens:
+        return "incorporation_state_country_code"
+    if {"file", "number"} <= tokens:
+        return "file_number"
+    if {"tax", "identification"} <= tokens or {"tax", "identifier"} <= tokens:
+        return "tax_identification_number"
+    if "address" in tokens:
+        if {"line", "1"} <= tokens:
+            return "address_line_1"
+        if {"line", "2"} <= tokens:
+            return "address_line_2"
+        if {"city", "town"} & tokens:
+            return "address_city_or_town"
+        if {"state", "province"} & tokens:
+            return "address_state_or_province"
+        if {"postal", "zip", "code"} & tokens:
+            return "address_postal_zip_code"
+    if {"security", "title"} <= tokens:
+        return "security_title"
+    if {"trading", "symbol"} <= tokens:
+        return "trading_symbol"
+    if {"exchange", "name"} <= tokens:
+        return "exchange_name"
     if {"marcs", "cms"} <= tokens:
         return "marcs_cms"
     if {"warning", "letter"} <= tokens:
@@ -16782,6 +16838,55 @@ def _source_record_identifier_label(value: str) -> str:
     if {"identifier", "identifiers", "id", "nr"} & tokens:
         return "_".join(sorted(tokens & {"identifier", "identifiers", "id", "nr"}))
     return ""
+
+
+def _source_record_identifier_label_value_display(*, label: str, text_atom: str) -> str:
+    label_atom = _normalize_text_filter_atom(label)
+    value_atom = _source_record_identifier_value_from_label(label_atom, text_atom)
+    if not label_atom or not value_atom:
+        return ""
+    match = re.search(
+        r"(?P<start>\d{4}_\d{2}_\d{2})_to_(?P<end>\d{4}_\d{2}_\d{2})(?:_|$)",
+        label_atom,
+    )
+    field_atom = label_atom[: match.start()].strip("_") if match else label_atom
+    field_display = _display_source_phrase(field_atom)
+    value_display = _source_record_identifier_value_display(field_atom=field_atom, value_atom=value_atom)
+    if not field_display or not value_display:
+        return ""
+    if match:
+        start = _display_source_date_atom(match.group("start"))
+        end = _display_source_date_atom(match.group("end"))
+        return f"{field_display} ({start} to {end}): {value_display}"
+    return f"{field_display}: {value_display}"
+
+
+def _source_record_identifier_value_from_label(label: str, text_atom: str) -> str:
+    label_atom = _normalize_text_filter_atom(label)
+    atom = _normalize_text_filter_atom(text_atom)
+    if not label_atom or not atom:
+        return ""
+    if atom == label_atom:
+        return ""
+    if atom.startswith(f"{label_atom}_"):
+        return atom[len(label_atom) + 1 :].strip("_")
+    return ""
+
+
+def _source_record_identifier_value_display(*, field_atom: str, value_atom: str) -> str:
+    field_tokens = set(_source_record_field_name_tokens(field_atom))
+    value = _normalize_source_record_display_value(value_atom)
+    if not value:
+        return ""
+    if {"file", "number"} <= field_tokens:
+        return _first_identifier_number(value).replace(".", "-") or _display_source_phrase(value)
+    if {"tax", "identification"} <= field_tokens:
+        return _joined_identifier_number(value)
+    if {"postal", "zip", "code"} & field_tokens:
+        return _first_identifier_number(value) or _display_source_phrase(value)
+    if {"security", "title"} <= field_tokens:
+        return _display_source_phrase(value).replace("0 01", "$0.01")
+    return _display_source_phrase(value)
 
 
 def _source_record_identifier_display(*, label: str, value: str, text_atom: str = "") -> str:
@@ -17507,7 +17612,7 @@ def _source_record_biography_phrase_starts_like_role(value: str) -> bool:
 
 
 def _source_record_biography_split_employers(value: str) -> list[str]:
-    text = _source_record_biography_clean_phrase(value, kind="employer")
+    text = _source_record_biography_clean_phrase(value, kind="employer_list")
     if not text:
         return []
     parts = [part for part in re.split(r"_and_", text) if part]
@@ -17516,12 +17621,74 @@ def _source_record_biography_split_employers(value: str) -> list[str]:
         part = part.strip("_")
         if not part:
             continue
-        split_match = re.fullmatch(r"(?P<first>[a-z0-9_]+?_international)_(?P<second>[a-z0-9_]+)", part)
-        if split_match:
-            out.extend([split_match.group("first"), split_match.group("second")])
-        else:
-            out.append(part)
-    return _ordered_atom_unique(out)
+        out.extend(_source_record_biography_split_employer_part(part))
+    return _ordered_atom_unique(
+        [
+            cleaned
+            for item in out
+            for cleaned in [_source_record_biography_clean_phrase(item, kind="employer")]
+            if cleaned
+        ]
+    )
+
+
+def _source_record_biography_split_employer_part(value: str) -> list[str]:
+    part = _normalize_text_filter_atom(value).strip("_")
+    if not part:
+        return []
+    if "_acquired_by_" in part:
+        primary, acquired_tail = part.split("_acquired_by_", 1)
+        out = [primary]
+        out.extend(_source_record_biography_trailing_employers_after_acquirer(acquired_tail))
+        return [item for item in out if item]
+    split_match = re.fullmatch(r"(?P<first>[a-z0-9_]+?_international)_(?P<second>[a-z0-9_]+)", part)
+    if split_match:
+        return [split_match.group("first"), split_match.group("second")]
+    return [part]
+
+
+def _source_record_biography_trailing_employers_after_acquirer(value: str) -> list[str]:
+    tokens = [token for token in _query_atom_tokens(value) if token]
+    if len(tokens) < 4:
+        return []
+    marker_indexes = [
+        index
+        for index, token in enumerate(tokens)
+        if token
+        in {
+            "clinical",
+            "corporation",
+            "group",
+            "health",
+            "healthcare",
+            "holdings",
+            "inc",
+            "international",
+            "laboratories",
+            "labs",
+            "llc",
+            "medical",
+            "networks",
+            "pharmaceuticals",
+            "scientific",
+            "services",
+            "systems",
+            "technologies",
+            "therapeutics",
+        }
+    ]
+    if not marker_indexes:
+        return []
+    terminal_marker = marker_indexes[-1]
+    if terminal_marker != len(tokens) - 1:
+        return []
+    start = max(1, len(tokens) - 4)
+    while start < len(tokens) - 1 and tokens[start] in {"the", "a", "an", "and", "of"}:
+        start += 1
+    candidate = "_".join(tokens[start:])
+    if candidate and len(candidate.split("_")) >= 2:
+        return [candidate]
+    return []
 
 
 def _source_record_biography_clean_phrase(value: str, *, kind: str) -> str:
@@ -17673,6 +17840,198 @@ def _source_record_amount_inventory_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_duration_quantity_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not _source_record_duration_quantity_question(text):
+        return None
+    query_tokens = set(_query_atom_tokens(utterance))
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        tokens = _query_atom_tokens(text_atom)
+        for entry in _source_record_duration_quantity_entries(tokens, query_tokens=query_tokens):
+            key = (source_row, entry["ReferentAtom"], entry["DurationValue"], entry["DurationUnit"])
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    **entry,
+                    "SupportKind": "source_record_duration_quantity",
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            -int(row.get("QuestionOverlap", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            int(row.get("DurationValue", "0") or "0"),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_duration_quantity_summary",
+        "SourceRow": "source_record_duration_quantities",
+        "QuantityCount": str(len(support_rows)),
+        "QuantitiesDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows[:12]),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    rows = [summary, *support_rows[:40]]
+    return {
+        "query": "source_record_duration_quantity_support(SourceRow, Referent, DurationValue, DurationUnit).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_duration_quantity_support",
+            "prolog_query": "source_record_duration_quantity_support(SourceRow, Referent, DurationValue, DurationUnit).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only duration-quantity support extracted source-stated for/over N month/day/year "
+                    "phrases from admitted source-record text; no durable duration fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_duration_quantity_question(text: str) -> bool:
+    if re.search(r"\b(?:duration|how long|for how long|period|term)\b", text):
+        return True
+    if re.search(r"\b(?:months?|years?|days?|business days)\b", text) and re.search(
+        r"\b(?:payment|payments|premium|premiums|continuation|exercisable|benefit|benefits)\b",
+        text,
+    ):
+        return True
+    return False
+
+
+def _source_record_duration_quantity_entries(
+    tokens: list[str],
+    *,
+    query_tokens: set[str],
+) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    for index, token in enumerate(tokens):
+        if token not in {"for", "over"}:
+            continue
+        parsed = _source_record_parse_duration_quantity(tokens, index + 1)
+        if not parsed:
+            continue
+        value, unit, consumed = parsed
+        context_tokens = tokens[max(0, index - 10) : index]
+        following_tokens = tokens[index + 1 + consumed : min(len(tokens), index + 1 + consumed + 6)]
+        overlap_tokens = set(context_tokens + following_tokens + [unit])
+        overlap = len(overlap_tokens & query_tokens)
+        if query_tokens and overlap == 0:
+            continue
+        referent_tokens = _source_record_duration_referent_tokens(context_tokens, query_tokens=query_tokens)
+        referent = "_".join(referent_tokens) if referent_tokens else "duration_quantity"
+        duration_display = f"{value} {_display_source_phrase(unit)}"
+        referent_display = _display_source_phrase(referent)
+        out.append(
+            {
+                "ReferentAtom": referent,
+                "ReferentDisplay": referent_display,
+                "DurationValue": str(value),
+                "DurationUnit": unit,
+                "DurationDisplay": duration_display,
+                "QuestionOverlap": str(overlap),
+                "FullAnswerDisplay": f"{referent_display}: {duration_display}",
+            }
+        )
+    return out
+
+
+def _source_record_parse_duration_quantity(tokens: list[str], start: int) -> tuple[int, str, int] | None:
+    if start >= len(tokens):
+        return None
+    first = tokens[start]
+    value = _source_record_quantity_token_value(first)
+    consumed = 1
+    if value is None and start + 1 < len(tokens):
+        combined = f"{first}_{tokens[start + 1]}"
+        value = _source_record_quantity_token_value(combined)
+        consumed = 2 if value is not None else 1
+    if start + consumed < len(tokens) and tokens[start + consumed].isdigit():
+        value = int(tokens[start + consumed])
+        consumed += 1
+    if value is None or start + consumed >= len(tokens):
+        return None
+    unit = tokens[start + consumed]
+    if unit == "business" and start + consumed + 1 < len(tokens) and tokens[start + consumed + 1] == "days":
+        return value, "business_days", consumed + 2
+    if unit in {"day", "days", "month", "months", "year", "years"}:
+        normalized_unit = {"day": "days", "month": "months", "year": "years"}.get(unit, unit)
+        return value, normalized_unit, consumed + 1
+    return None
+
+
+def _source_record_quantity_token_value(token: str) -> int | None:
+    text = str(token or "").strip().lower()
+    if text.isdigit():
+        return int(text)
+    values = {
+        "one": 1,
+        "two": 2,
+        "three": 3,
+        "four": 4,
+        "five": 5,
+        "six": 6,
+        "seven": 7,
+        "eight": 8,
+        "nine": 9,
+        "ten": 10,
+        "eleven": 11,
+        "twelve": 12,
+        "thirteen": 13,
+        "fourteen": 14,
+        "fifteen": 15,
+        "sixteen": 16,
+        "seventeen": 17,
+        "eighteen": 18,
+        "nineteen": 19,
+        "twenty": 20,
+        "twenty_one": 21,
+        "twenty_two": 22,
+        "twenty_three": 23,
+        "twenty_four": 24,
+    }
+    return values.get(text)
+
+
+def _source_record_duration_referent_tokens(tokens: list[str], *, query_tokens: set[str]) -> list[str]:
+    if not tokens:
+        return []
+    best: list[str] = []
+    best_score = -1
+    left = max(0, len(tokens) - 8)
+    for start in range(left, len(tokens)):
+        candidate = tokens[start:]
+        if not candidate:
+            continue
+        score = len(set(candidate) & query_tokens)
+        if score > best_score or (score == best_score and len(candidate) < len(best)):
+            best = candidate
+            best_score = score
+    while best and best[0] in {"the", "a", "an", "and", "or", "shall", "will", "also", "pay", "paid"}:
+        best = best[1:]
+    return best[-6:]
 
 
 def _source_record_amount_context_signal(atom: str) -> bool:
@@ -18326,7 +18685,11 @@ def _source_record_dated_event_inventory_companion(
     text = str(utterance or "").casefold()
     if not re.search(r"\b(?:list|every|all|inventory)\b", text):
         return None
-    if not re.search(r"\b(?:dated event|dated events|event date|event dates|dates? in .*order|order .*dates?)\b", text):
+    if not re.search(
+        r"\b(?:dated event|dated events|event date|event dates|dates? in .*order|order .*dates?|"
+        r"dates? explicitly mentioned|explicitly mentioned dates?|all dates?)\b",
+        text,
+    ):
         return None
 
     kind_by_row = {
@@ -18738,6 +19101,13 @@ def _source_record_role_transition_companion(
 
 
 def _source_record_role_transition_question(text: str) -> bool:
+    if re.search(r"\b(?:order|sequence|chronological)\b", text):
+        return False
+    if re.search(r"\b(?:become|becomes|became)\b", text) and re.search(
+        r"\b(?:chief executive|president|chair|advisor|officer|role|title|position)\b",
+        text,
+    ):
+        return True
     if re.search(r"\b(?:assume|assumes|assumed)\b", text) and re.search(r"\b(?:role|title|position)\b", text):
         return True
     if re.search(r"\b(?:appoint|appointed|appointment|succeed|succeeds|succession)\b", text) and re.search(
@@ -26093,6 +26463,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_exhibit_index_support",
             "source_record_employment_history_support",
             "source_record_amount_inventory_support",
+            "source_record_duration_quantity_support",
             "source_record_restrictive_covenant_support",
             "source_record_defined_term_contrast_support",
             "source_record_signature_mismatch_support",
@@ -26152,9 +26523,10 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
+            "Duration-quantity support policy: source_record_duration_quantity_support rows are deterministic structured support rows for source-stated duration quantities such as for/over N months, days, business days, or years. ReferentDisplay plus DurationDisplay can fully support duration questions for payments, premiums, continuation periods, benefits, and exercisable periods when derived from admitted source-record text.",
             "Restrictive-covenant support policy: source_record_restrictive_covenant_support rows are deterministic structured support rows for restrictive-covenant, confidentiality, non-competition, non-solicitation, non-disparagement, customary-term, and release-of-claims questions. They can fully support listed covenant terms when derived from admitted source-record text; do not downgrade solely because primitive covenant predicates are absent.",
             "Defined-term contrast policy: source_record_defined_term_contrast_support rows are deterministic structured support rows for questions comparing quoted defined terms. They can fully support fixed-period versus conditional-date distinctions when the definitions are extracted from admitted source-record text; do not downgrade solely because primitive term_definition predicates are absent.",
             "Signature-mismatch support policy: source_record_signature_mismatch_support rows are deterministic structured support rows for signature-block inconsistency questions. They can fully support spelling mismatches between adjacent signed-name and printed-name source-record table cells; do not downgrade solely because normalized signatory predicates collapse the names.",
