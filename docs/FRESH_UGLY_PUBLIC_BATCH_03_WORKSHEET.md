@@ -242,3 +242,97 @@ consistently available to both the gate and QA path.
    multiple families.
 5. Use Batch 03 exact rows as regression guards before any support surface is
    promoted.
+
+## 2026-05-25 Source-Record Summary Ablation
+
+Purpose:
+
+Measure whether Batch 03's baseline score depends on the current source-record
+summary layer before making repairs.
+
+Conditions:
+
+```text
+dataset root:
+  datasets/real_world_transfer/fresh_ugly_public_20260524_03
+compile root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_compile_r1
+QA out root:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_qa_r1_no_source_record_summaries
+ablation:
+  --disable-current-source-record-summaries
+model:
+  qwen/qwen3.6-35b-a3b via OpenRouter
+lanes:
+  6 requested
+cache:
+  disabled
+compatibility adapter row limit:
+  0
+```
+
+Ablation summary:
+
+```text
+questions: 300
+baseline exact / partial / miss:
+  270 / 14 / 16
+ablation exact / partial / miss:
+  264 / 18 / 18
+delta:
+  -6 exact, +4 partial, +2 miss
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Comparison:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_r1_20260524\fresh_ugly_public_20260524_03_source_record_summary_ablation_comparison.md
+
+changed rows:
+  25
+
+improved rows:
+  10
+
+regressed rows:
+  15
+
+baseline exact -> non-exact:
+  14
+
+baseline exact -> miss:
+  7
+
+regression guard:
+  fail
+```
+
+Read:
+
+The source-record summary layer is still load-bearing on fresh public
+documents. Removing it costs six exact rows on aggregate and causes fourteen
+previously exact rows to become non-exact. The dominant removed support surface
+on regressions is source-record question-overlap support, with contact-signatory,
+citation-list, section-list-detail, elapsed-date, and clock-duration support
+also appearing on a smaller number of changed rows.
+
+The ablation also improved ten rows, so the layer is not free. It can perturb
+route/judge behavior in some cases. But the net and row-guard result are clear:
+do not remove or broadly weaken source-record summaries. The next useful work
+is to make the direct compile surface preserve the answer-bearing coordinates
+that are currently being recovered through source-record support, then keep the
+ablation as a control for future changes.
+
+Updated blocker read:
+
+1. Compile preservation is the main Batch 03 blocker: source-claim, status,
+   authority, formal contact/signature blocks, ordered lists, and section
+   coordinates need stronger direct carriers.
+2. Source-record summaries are transferring, but should be treated as a bridge
+   and guardrail, not the final product surface.
+3. Any repair promoted from Batch 03 should require both the normal QA rerun and
+   a regression-guard comparison against the current 300-row baseline.
