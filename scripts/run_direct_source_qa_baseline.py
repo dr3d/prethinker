@@ -64,8 +64,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lanes", type=int, default=6, help="Concurrent OpenAI-compatible calls.")
     parser.add_argument("--backend", choices=["lmstudio"], default="lmstudio")
     parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
-    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "https://openrouter.ai/api/v1"))
-    parser.add_argument("--api-key", default="", help="Optional API key. Defaults to PRETHINKER_API_KEY/OPENROUTER_API_KEY.")
+    parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234"))
+    parser.add_argument(
+        "--api-key",
+        default="",
+        help="Optional OpenAI-compatible API key. Local LM Studio does not require one.",
+    )
     parser.add_argument("--out-dir", type=Path, default=DEFAULT_OUT_DIR)
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR)
     parser.add_argument("--no-cache", action="store_true")

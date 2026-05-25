@@ -1,9 +1,11 @@
 import json
+import sys
 from pathlib import Path
 
 from scripts.run_direct_source_qa_baseline import (
     cache_key_for_job,
     load_jobs,
+    parse_args,
     summarize,
 )
 
@@ -64,6 +66,15 @@ def test_cache_key_changes_when_reference_or_prompt_version_changes() -> None:
 
     assert first != second
     assert first != third
+
+
+def test_parse_args_defaults_to_local_lmstudio(monkeypatch) -> None:
+    monkeypatch.delenv("PRETHINKER_BASE_URL", raising=False)
+    monkeypatch.setattr(sys, "argv", ["run_direct_source_qa_baseline.py"])
+
+    args = parse_args()
+
+    assert args.base_url == "http://127.0.0.1:1234"
 
 
 def test_summarize_counts_fixture_verdicts() -> None:

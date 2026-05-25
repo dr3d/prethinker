@@ -34,6 +34,7 @@ from scripts.run_domain_bootstrap_file import (
     _attach_profile_admission_report,
     _flat_plus_surface_contribution,
     _profile_bootstrap_admission_context,
+    _chat_headers,
     _default_openrouter_title,
     _invalid_profile_retry_context,
     _lmstudio_chat_completions_url,
@@ -1082,6 +1083,20 @@ def test_openrouter_compile_title_uses_phase_and_fixture_only(monkeypatch) -> No
     title = _default_openrouter_title(Path("tmp") / "compile_run_20260514" / "fixture_a")
 
     assert title == "compile:fixture_a"
+
+
+def test_compile_chat_headers_do_not_send_openrouter_key_to_local_lmstudio(monkeypatch) -> None:
+    monkeypatch.delenv("PRETHINKER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-secret")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_TITLE", "Prethinker Hosted Lane")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_REFERER", "https://example.test/prethinker")
+
+    headers = _chat_headers(base_url="http://127.0.0.1:1234")
+
+    assert "Authorization" not in headers
+    assert "HTTP-Referer" not in headers
+    assert "X-Title" not in headers
+    assert "X-OpenRouter-Title" not in headers
 
 
 def test_source_pass_ops_schema_is_operations_only() -> None:

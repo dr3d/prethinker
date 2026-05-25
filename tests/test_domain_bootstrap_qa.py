@@ -638,6 +638,20 @@ def test_chat_headers_add_openrouter_title(monkeypatch) -> None:
     assert headers["HTTP-Referer"] == "https://example.test/prethinker/squad"
 
 
+def test_chat_headers_do_not_send_openrouter_key_to_local_lmstudio(monkeypatch) -> None:
+    monkeypatch.delenv("PRETHINKER_API_KEY", raising=False)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-secret")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_TITLE", "Prethinker Hosted Lane")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_REFERER", "https://example.test/prethinker")
+
+    headers = _chat_headers(base_url="http://127.0.0.1:1234")
+
+    assert "Authorization" not in headers
+    assert "HTTP-Referer" not in headers
+    assert "X-Title" not in headers
+    assert "X-OpenRouter-Title" not in headers
+
+
 def test_score_oracle_can_match_decision_predicate_and_answer_text() -> None:
     row = {
         "projected_decision": "answer",

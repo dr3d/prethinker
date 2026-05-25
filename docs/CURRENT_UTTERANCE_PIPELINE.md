@@ -212,11 +212,12 @@ The current guard audit buckets are:
 The healthy long-term motion is not infinite guard growth. It is direct
 compile-surface and ledger improvements retiring downstream selector scars.
 
-## OpenRouter And Environment
+## Local LM Studio And Environment
 
-OpenRouter is now an active research lane, not a future-only migration note.
-Local POWER runs are still useful for high-water research, but OpenRouter is
-fast enough for broad compile/QA sweeps and transfer tests.
+Local POWER / LM Studio is the default execution target for current development
+and product-adjacent API calls. OpenRouter remains an explicit hosted research
+lane for broad sweeps and provider-drift measurement, but it should not be the
+implicit default for Aver or ordinary Prethinker runs.
 
 Secrets live in `.env.local`, which is gitignored. The main compile, QA, batch,
 selector, and Semantic IR call paths now bootstrap local environment values
@@ -225,11 +226,14 @@ instead of relying on `tmp/.secrets`.
 Expected local variables:
 
 ```text
-OPENROUTER_API_KEY=...
-PRETHINKER_API_KEY=...
-PRETHINKER_BASE_URL=https://openrouter.ai/api/v1
+PRETHINKER_API_KEY=lm-studio-local
+PRETHINKER_BASE_URL=http://127.0.0.1:1234
 PRETHINKER_MODEL=qwen/qwen3.6-35b-a3b
 ```
+
+OpenRouter keys may remain in a local env file for explicit hosted runs, but
+the local LM Studio path should use `PRETHINKER_BASE_URL=http://127.0.0.1:1234`
+and should not need a real API key.
 
 The endpoint remains OpenAI-compatible. The architecture treats model/provider
 variation as measurement data: durable surfaces should transfer; sensitive

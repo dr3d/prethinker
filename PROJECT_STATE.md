@@ -145,8 +145,11 @@ the current public claim.
 
 ## Operating Notes
 
-- OpenRouter is available for hosted lanes; default hosted concurrency should
-  stay around six lanes unless provider behavior changes.
+- Local LM Studio on POWER is the default target for product-adjacent API calls
+  and ordinary development runs. Use `PRETHINKER_BASE_URL=http://127.0.0.1:1234`
+  and `PRETHINKER_MODEL=qwen/qwen3.6-35b-a3b`.
+- OpenRouter is available for explicit hosted lanes; default hosted concurrency
+  should stay around six lanes unless provider behavior changes.
 - Local LM Studio localhost should stay at or below four inference lanes for
   QA-scale work.
 - POWER is the local workstation with the RTX 5090. It is useful but can be

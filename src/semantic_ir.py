@@ -1058,7 +1058,7 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),
-        headers=_chat_headers(config.api_key),
+        headers=_chat_headers(config.api_key, base_url=config.base_url),
         method="POST",
     )
     started = time.perf_counter()
@@ -1083,18 +1083,25 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
     }
 
 
-def _chat_headers(api_key: str = "") -> dict[str, str]:
+def _chat_headers(api_key: str = "", *, base_url: str = "") -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
-    key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    openrouter_target = not str(base_url or "").strip() or _is_openrouter_base_url(base_url)
+    key = str(
+        api_key
+        or os.environ.get("PRETHINKER_API_KEY")
+        or (os.environ.get("OPENROUTER_API_KEY") if openrouter_target else "")
+        or ""
+    ).strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
-    referer = _openrouter_referer()
-    if referer:
-        headers["HTTP-Referer"] = referer
-    title = _openrouter_title()
-    if title:
-        headers["X-Title"] = title
-        headers["X-OpenRouter-Title"] = title
+    if openrouter_target:
+        referer = _openrouter_referer()
+        if referer:
+            headers["HTTP-Referer"] = referer
+        title = _openrouter_title()
+        if title:
+            headers["X-Title"] = title
+            headers["X-OpenRouter-Title"] = title
     return headers
 
 

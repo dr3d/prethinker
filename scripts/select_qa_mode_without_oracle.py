@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--api-key",
         default="",
-        help="Optional OpenAI-compatible API key. Defaults to PRETHINKER_API_KEY or OPENROUTER_API_KEY.",
+        help="Optional OpenAI-compatible API key. Local LM Studio does not require one.",
     )
     parser.add_argument("--timeout", type=int, default=240)
     parser.add_argument("--temperature", type=float, default=0.0)
@@ -538,7 +538,7 @@ def _selector_completion_content(
         if base_url.rstrip("/").endswith("/v1")
         else f"{base_url.rstrip('/')}/v1/chat/completions",
         data=json.dumps(payload).encode("utf-8"),
-        headers=_chat_headers(),
+        headers=_chat_headers(base_url=base_url),
         method="POST",
     )
     try:
@@ -555,9 +555,15 @@ def _selector_completion_content(
     return content
 
 
-def _chat_headers(api_key: str = "") -> dict[str, str]:
+def _chat_headers(api_key: str = "", *, base_url: str = "") -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
-    key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or "").strip()
+    openrouter_target = not str(base_url or "").strip() or _is_openrouter_base_url(base_url)
+    key = str(
+        api_key
+        or os.environ.get("PRETHINKER_API_KEY")
+        or (os.environ.get("OPENROUTER_API_KEY") if openrouter_target else "")
+        or ""
+    ).strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
     return headers
