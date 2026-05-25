@@ -54,6 +54,7 @@ def test_source_record_ledger_context_is_guidance_not_truth() -> None:
     assert "plain paragraph lines" in context
     assert "source_record_cell_item" in context
     assert "source_record_cell_item_pair" in context
+    assert "source_record_surface_mention/3" in context
 
 
 def test_source_record_ledger_preserves_plain_prose_lines_without_anchors() -> None:
@@ -146,6 +147,35 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
 
     assert field_result.get("status") == "success"
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
+
+
+def test_source_record_ledger_preserves_exact_surface_spelling_variants() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "The source listed Meter-CAL, Blue Gauge, and Pale Lydium Ring.",
+                "Later sections listed Meter-cal and Pale Lidium Ring.",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_surface_mention(src_line_0001, meter_cal, 'Meter-CAL')." in facts
+    assert "source_record_surface_mention(src_line_0001, pale_lydium_ring, 'Pale Lydium Ring')." in facts
+    assert "source_record_surface_mention(src_line_0002, meter_cal, 'Meter-cal')." in facts
+    assert "source_record_surface_mention(src_line_0002, pale_lidium_ring, 'Pale Lidium Ring')." in facts
+
+    runtime = CorePrologRuntime()
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    result = runtime.query_rows("source_record_surface_mention(Row, SurfaceAtom, SurfaceText).")
+
+    assert result.get("status") == "success"
+    rows = result.get("rows", [])
+    assert {"Row": "src_line_0001", "SurfaceAtom": "meter_cal", "SurfaceText": "Meter-CAL"} in rows
+    assert {"Row": "src_line_0002", "SurfaceAtom": "meter_cal", "SurfaceText": "Meter-cal"} in rows
 
 
 def test_source_record_ledger_preserves_blank_table_cells() -> None:

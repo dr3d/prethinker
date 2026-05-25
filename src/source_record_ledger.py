@@ -200,6 +200,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
         "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation. It also exposes printed table-cell list items, cross-cell item pairs, and parenthetical qualifiers as source_record_cell_item/source_record_cell_item_pair/source_record_cell_item_qualifier rows.",
+        "For exact printed names, identifiers, and casing/spelling variants, source_record_surface_mention/3 preserves the normalized lookup atom and the verbatim printed surface; it does not canonicalize variants or decide that two surfaces are the same entity.",
         "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
         "For heading/scope/list blocks, source_record_section_list_count/* counts contiguous printed source-list rows only. It is a source structure count, not a semantic claim that all listed items share any fact beyond the printed heading/scope text.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
@@ -268,6 +269,8 @@ def source_record_ledger_facts(
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
             facts.append(f"source_record_row_context({row_id}, {label_atom}, {exact}, {section}).")
             facts.extend(_checkbox_state_facts(str(raw.get("exact", "")), row_id=row_id, label_atom=label_atom))
+            for surface_atom, surface_text in _surface_mentions(str(raw.get("exact", ""))):
+                facts.append(f"source_record_surface_mention({row_id}, {surface_atom}, {surface_text}).")
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
         facts.extend(_citation_facts(str(raw.get("exact", "")), row_id=row_id))
@@ -670,6 +673,157 @@ def _numeric_tokens(text: str) -> list[str]:
         if atom:
             out.append(atom)
     return out
+
+
+_SURFACE_JOINERS = {
+    "and",
+    "as",
+    "at",
+    "by",
+    "for",
+    "from",
+    "in",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "under",
+    "with",
+}
+_SURFACE_SINGLE_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "by",
+    "for",
+    "from",
+    "in",
+    "of",
+    "on",
+    "or",
+    "the",
+    "to",
+    "under",
+    "with",
+    "you",
+    "your",
+}
+_SURFACE_UNIT_TOKENS = {"kg", "lb", "lbs", "mg", "ml", "mm", "ppm", "sq", "v"}
+_SURFACE_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9'&./+-]*")
+
+
+def _surface_mentions(text: str, *, max_mentions: int = 80) -> list[tuple[str, str]]:
+    """Preserve exact printed name/identifier surfaces without interpreting them."""
+
+    raw = re.sub(r"\*\*([^*]+)\*\*", r"\1", str(text or ""))
+    raw = re.sub(r"`([^`]+)`", r"\1", raw)
+    out: list[tuple[str, str]] = []
+    current: list[str] = []
+    previous_end = 0
+
+    def flush() -> None:
+        nonlocal current
+        if current:
+            _append_surface_mention(out, current, max_mentions=max_mentions)
+        current = []
+
+    for match in _SURFACE_TOKEN_RE.finditer(raw):
+        raw_token = match.group(0)
+        token = raw_token.strip(".,;:!?()[]{}\"'")
+        if not token:
+            continue
+        between = raw[previous_end : match.start()]
+        if current and re.search(r"[,;:.!?()\[\]{}\"“”]", between):
+            flush()
+        lower = token.casefold()
+        if _is_surface_token(token) or (current and lower in _SURFACE_JOINERS) or (
+            current and lower in _SURFACE_UNIT_TOKENS
+        ):
+            current.append(token)
+        else:
+            flush()
+        if raw_token.endswith(".") and current:
+            flush()
+        previous_end = match.end()
+    flush()
+    return _dedupe_pairs(out)
+
+
+def _append_surface_mention(
+    out: list[tuple[str, str]],
+    tokens: list[str],
+    *,
+    max_mentions: int,
+) -> None:
+    cleaned = [token.strip(".,;:!?()[]{}\"'") for token in tokens if token.strip(".,;:!?()[]{}\"'")]
+    while cleaned and cleaned[0].casefold() in _SURFACE_JOINERS:
+        cleaned.pop(0)
+    while cleaned and cleaned[-1].casefold() in _SURFACE_JOINERS:
+        cleaned.pop()
+    if not cleaned or len(cleaned) > 8:
+        return
+    surface = " ".join(cleaned)
+    if len(surface) > 160 or not re.search(r"[A-Za-z0-9]", surface):
+        return
+    atom = _atom(surface)
+    quoted = _quoted_atom(surface)
+    if not atom or not quoted:
+        return
+    lower_tokens = [token.casefold() for token in cleaned]
+    if len(cleaned) == 1:
+        token = cleaned[0]
+        if lower_tokens[0] in _SURFACE_SINGLE_STOPWORDS:
+            return
+        if not (
+            "-" in token
+            or "/" in token
+            or "." in token
+            or any(ch.isdigit() for ch in token)
+            or token.isupper()
+            or (token[:1].isupper() and len(token) >= 3)
+        ):
+            return
+    elif all(token in _SURFACE_SINGLE_STOPWORDS for token in lower_tokens):
+        return
+    out.append((atom, quoted))
+    for joiner in ("and", "or"):
+        if joiner not in lower_tokens:
+            continue
+        index = lower_tokens.index(joiner)
+        if index > 0:
+            _append_surface_mention(out, cleaned[:index], max_mentions=max_mentions)
+        if index + 1 < len(cleaned):
+            _append_surface_mention(out, cleaned[index + 1 :], max_mentions=max_mentions)
+    if len(out) >= max_mentions:
+        del out[max_mentions:]
+
+
+def _is_surface_token(token: str) -> bool:
+    raw = str(token or "").strip()
+    if not raw:
+        return False
+    lower = raw.casefold()
+    if lower in _SURFACE_SINGLE_STOPWORDS:
+        return False
+    return (
+        raw[:1].isupper()
+        or raw.isupper()
+        or any(ch.isdigit() for ch in raw)
+        or "-" in raw
+        or "/" in raw
+        or "." in raw
+        or "&" in raw
+    )
+
+
+def _quoted_atom(value: str) -> str:
+    cleaned = re.sub(r"\s+", " ", str(value or "").strip())
+    if not cleaned:
+        return ""
+    escaped = cleaned.replace("\\", "\\\\").replace("'", "\\'")
+    return f"'{escaped}'"
 
 
 def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:

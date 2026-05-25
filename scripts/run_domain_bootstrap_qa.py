@@ -2958,6 +2958,25 @@ def _source_record_compile_surface_hint_queries(
         out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("free_repair", TextAtom).')
     if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("break apart", "broke apart", "shoreline")):
         out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("broke_apart_on_the_shoreline_the_next_day", TextAtom).')
+    if "source_record_surface_mention/3" in signatures and any(
+        marker in text
+        for marker in (
+            "capitalization",
+            "capitalized",
+            "case variation",
+            "casing",
+            "exact spelling",
+            "exact wording",
+            "spelled",
+            "spelling",
+            "variant",
+            "variants",
+            "variation",
+            "variations",
+            "verbatim",
+        )
+    ):
+        out.append("source_record_surface_mention(SourceRow, SurfaceAtom, SurfaceText).")
     if "source_record_citation/2" in signatures and (
         "citation" in text or "federal register" in text or re.search(r"\bfr\b", text)
     ):

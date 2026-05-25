@@ -5,6 +5,7 @@ from scripts.audit_source_surface_gaps import audit_scorecard
 from scripts.run_domain_bootstrap_qa import (
     compiled_kb_inventory,
     _source_record_citation_list_companion,
+    _source_record_compile_surface_hint_queries,
     _source_record_identifier_set_companion,
     _source_field_question_key_hint_queries,
     _source_label_question_key_hint_queries,
@@ -41,6 +42,16 @@ def test_source_text_question_token_hints_include_quantity_questions() -> None:
 
     assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("the_pipe_burst", TextAtom).' in queries
     assert 'source_record_text_atom(SourceRow, TextAtom), memberchk("books", TextAtom).' in queries
+
+
+def test_source_surface_hint_queries_use_exact_surface_mentions_for_variant_questions() -> None:
+    queries = _source_record_compile_surface_hint_queries(
+        utterance="List every distinct spelling/casing variation that appears in the source.",
+        kb_inventory={"signatures": ["source_record_surface_mention/3", "source_record_text_atom/2"]},
+    )
+
+    assert "source_record_surface_mention(SourceRow, SurfaceAtom, SurfaceText)." in queries
+    assert all("Meter" not in query and "Lydium" not in query for query in queries)
 
 
 def test_source_field_question_key_hints_use_existing_source_field_headers() -> None:

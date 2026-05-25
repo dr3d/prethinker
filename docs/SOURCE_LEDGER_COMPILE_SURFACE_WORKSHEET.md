@@ -142,3 +142,60 @@ Post-retry NTSB QA:
 - Write proposal rows: `0`
 
 Current read: the real-world four-fixture batch now has a clean compile gate and clean latest fixture-level QA evidence. A full expensive native stamp is no longer blocked by known source-authority/source-claim gate failures.
+
+## 2026-05-25 Exact Surface Mention Pass
+
+Batch 03 exposed a source-fidelity gap where raw spelling/casing variants were
+present in `source_record_text_atom/2` only as normalized atoms. That made
+questions about exact printed variants depend on query-time reconstruction.
+
+Implemented deterministic source-record carrier:
+
+- `source_record_surface_mention/3`
+
+Shape:
+
+```prolog
+source_record_surface_mention(SourceRow, NormalizedSurfaceAtom, 'Exact Printed Surface').
+```
+
+This is source addressability only. It preserves exact printed names,
+identifiers, casing, and spelling variants; it does not decide whether two
+surface forms are aliases or the same entity. Query hinting now asks for this
+carrier only on generic spelling/casing/variant/verbatim questions.
+
+Validation:
+
+```text
+python -m pytest -q tests\test_source_record_ledger.py tests\test_source_surface_gap_audit.py
+  50 passed
+```
+
+Targeted Batch 03 replay:
+
+```text
+fixture: fda_ugly_003
+row: q015 spelling/casing variants
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_variants_20260525\qa\fda_ugly_003_q015_surface_mentions_or
+result:
+  1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Affected-fixture guard replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_variants_20260525\qa\fda_ugly_003_full_surface_mentions_or
+result:
+  25 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+The mechanism is transfer-safe in shape because it is a deterministic source
+ledger surface. The replay used a disposable compile artifact that appended
+current deterministic source-record facts to the prior Batch 03 compile; it is
+mechanism evidence and an affected-fixture guard, not a new corpus score.

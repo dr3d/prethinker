@@ -1888,3 +1888,41 @@ location distinctions, external convention questions, cross-document questions,
 and legal/administrative body inventories. Those should be handled as new
 mechanism work or declared oracle/external-evidence limits, not patched with
 fixture-specific strings.
+
+## 2026-05-25 Surface-Variant Carrier Replay
+
+Mechanism:
+
+- Added deterministic `source_record_surface_mention/3` carrier in the source
+  record ledger.
+- Added generic QA hinting for spelling/casing/variant/verbatim questions.
+- No fixture names, row ids, answer strings, product names, agency-specific
+  facts, or dataset labels were added to the instrument.
+
+Targeted old non-exact:
+
+```text
+fda_ugly_003 q015:
+  R7: miss, compile-surface gap
+  replay: 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_variants_20260525\qa\fda_ugly_003_q015_surface_mentions_or
+```
+
+Affected-fixture guard:
+
+```text
+fda_ugly_003 full replay:
+  R7: 23 / 1 / 1
+  replay: 25 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_variants_20260525\qa\fda_ugly_003_full_surface_mentions_or
+```
+
+Read:
+
+This removes one named Batch 03 residue class from the non-SEC list as a
+generic source-fidelity surface. It should not be reported as a new Batch 03
+aggregate until a fresh non-SEC or full Batch 03 guard is run, because this
+was a modified-compile replay for one affected fixture.
