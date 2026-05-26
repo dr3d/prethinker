@@ -199,3 +199,45 @@ The mechanism is transfer-safe in shape because it is a deterministic source
 ledger surface. The replay used a disposable compile artifact that appended
 current deterministic source-record facts to the prior Batch 03 compile; it is
 mechanism evidence and an affected-fixture guard, not a new corpus score.
+
+## 2026-05-25 Date Occurrence Coordinates
+
+Batch 03 also exposed a source-coordinate gap for questions asking where a
+date is first introduced. Month-name dates were visible in normalized row text,
+but the ledger did not preserve their occurrence coordinates.
+
+Implemented deterministic source-record carriers:
+
+- `source_record_date_occurrence/4`
+- `source_record_date_mention/4`
+- `source_record_first_date_occurrence/4`
+
+Shape:
+
+```prolog
+source_record_date_occurrence(SourceRow, CanonicalDate, OccurrenceIndex, SurfaceAtom).
+source_record_date_mention(SourceRow, CanonicalDate, 'Exact Printed Date', OccurrenceIndex).
+source_record_first_date_occurrence(CanonicalDate, SourceRow, Line, 'Exact Printed Date').
+```
+
+The facts preserve source coordinates only. They do not decide whether a date
+is a deadline, effective date, filing date, or trigger date. QA hinting now
+asks for `source_record_first_date_occurrence/4` only when the question uses
+generic first-occurrence wording.
+
+Targeted Batch 03 replay:
+
+```text
+fixture: fda_ugly_002
+row: q007 first date introduction
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_date_occurrence_20260525\qa\fda_ugly_002_q007_date_occurrence_or
+result:
+  1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+This is a deterministic source-coordinate repair. It should be measured in a
+fresh fixture guard before becoming a corpus claim.

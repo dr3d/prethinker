@@ -1926,3 +1926,51 @@ This removes one named Batch 03 residue class from the non-SEC list as a
 generic source-fidelity surface. It should not be reported as a new Batch 03
 aggregate until a fresh non-SEC or full Batch 03 guard is run, because this
 was a modified-compile replay for one affected fixture.
+
+## 2026-05-25 Date Occurrence And Address-Entity Replays
+
+Mechanisms:
+
+- Added deterministic date occurrence coordinates:
+  `source_record_date_occurrence/4`, `source_record_date_mention/4`, and
+  `source_record_first_date_occurrence/4`.
+- Added generic QA hinting for first-introduced / first-occurrence date
+  questions.
+- Tightened query-only `source_record_address_block_support` so two-line
+  street+city blocks can be paired with their immediately preceding entity /
+  attention lines when the question asks for associated entities.
+
+Targeted old non-exacts:
+
+```text
+fda_ugly_002 q007:
+  R7: miss, query-surface gap
+  replay: 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_date_occurrence_20260525\qa\fda_ugly_002_q007_date_occurrence_or
+
+fda_ugly_002 q012:
+  R7: partial, compile/hybrid address association gap
+  replay after address-entity scoping: 1 / 0 / 0
+  artifact:
+    C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_address_block_entity_20260525\qa\fda_ugly_002_q012_address_entity_scoped_or
+```
+
+Affected-fixture guard:
+
+```text
+fda_ugly_002 full replay:
+  R7: 23 / 1 / 1
+  date-only replay: 24 / 1 / 0
+  date+address replay: 24 / 1 / 0
+  remaining non-exact in the date+address replay: q004 signatory title partial
+  q004 targeted check immediately afterward: 1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+The q007 and q012 mechanisms are useful and fixture-free. The full fixture
+guard still showed one-row churn on q004, which recovered on targeted replay;
+treat that as variance requiring the next non-SEC guard, not as a new aggregate
+claim.

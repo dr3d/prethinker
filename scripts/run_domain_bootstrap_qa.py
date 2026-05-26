@@ -2983,6 +2983,20 @@ def _source_record_compile_surface_hint_queries(
         out.append("source_record_citation(SourceRow, Citation).")
     if "source_record_date_alias/3" in signatures and any(marker in text for marker in ("filed", "filing", "date", "stamped")):
         out.append("source_record_date_alias(SourceRow, CompactDate, CanonicalDate).")
+    if "source_record_first_date_occurrence/4" in signatures and "first" in text and any(
+        marker in text
+        for marker in (
+            "appears",
+            "introduced",
+            "mentions",
+            "mentioned",
+            "occurrence",
+            "occurs",
+            "shown",
+            "stated",
+        )
+    ):
+        out.append("source_record_first_date_occurrence(CanonicalDate, SourceRow, Line, SurfaceText).")
     if "source_record_count_word/3" in signatures and _utterance_asks_for_count(text):
         out.append("source_record_count_word(SourceRow, CountWord, Count).")
     if "source_record_section_list_count_detail/5" in signatures and _utterance_asks_for_count(text):
@@ -20849,7 +20863,7 @@ def _source_record_address_block_companion(
                     break
                 continue
             window.append(next_row)
-            if len(window) < 3:
+            if len(window) < 2:
                 continue
             block_text = " ".join(item.get("TextAtom", "") for item in window)
             if not _source_record_address_block_candidate(block_text):
@@ -20865,30 +20879,48 @@ def _source_record_address_block_companion(
             seen.add(key)
             source_rows = [item.get("SourceRow", "") for item in window if item.get("SourceRow")]
             labels = _ordered_atom_unique([item.get("Label", "") for item in window if item.get("Label")])
+            prefix_rows = _source_record_address_block_prefix_rows(contexts, start)
+            suffix_rows = _source_record_address_block_suffix_rows(contexts, start + len(window) - 1)
+            entity_display = _source_record_address_block_entity_display(prefix_rows)
+            attention_display = _source_record_address_block_attention_display(prefix_rows)
+            contact_display = _source_record_address_block_contact_display([*prefix_rows, *suffix_rows])
             state_codes = _ordered_atom_unique(
                 entry["StateCode"]
                 for item in window
                 for entry in _source_record_postal_state_mentions(item.get("TextAtom", ""))
             )
+            address_display = " / ".join(address_lines)
+            address_with_entity = " - ".join(part for part in (entity_display, address_display) if part)
+            association_bonus = 20 if entity_display and _address_question_requires_association(text) else 0
             rows.append(
                 {
                     "SupportKind": "source_record_address_block",
                     "StartSourceRow": source_rows[0] if source_rows else "",
                     "EndSourceRow": source_rows[-1] if source_rows else "",
                     "SourceRows": ",".join(source_rows),
+                    "ContextSourceRows": ",".join(
+                        row.get("SourceRow", "") for row in [*prefix_rows, *window, *suffix_rows] if row.get("SourceRow")
+                    ),
                     "Labels": ",".join(labels),
+                    "EntityDisplay": entity_display,
+                    "AttentionDisplay": attention_display,
+                    "ContactDisplay": contact_display,
                     "StateCodes": ",".join(state_codes),
                     "StateCodesDisplay": ", ".join(code.upper() for code in state_codes),
                     "AddressLineCount": str(len(address_lines)),
-                    "AddressDisplay": " / ".join(address_lines),
-                    "MatchScore": str(overlap + _source_record_address_block_score(block_text)),
+                    "AddressDisplay": address_display,
+                    "AddressWithEntityDisplay": address_with_entity,
+                    "MatchScore": str(overlap + _source_record_address_block_score(block_text) + association_bonus),
                     "SupportClass": "deterministic-source-record-summary",
                 }
             )
     if not rows:
         return None
+    if _address_question_requires_association(text) and any(row.get("EntityDisplay", "") for row in rows):
+        rows = [row for row in rows if row.get("EntityDisplay", "")]
     rows.sort(
         key=lambda row: (
+            0 if row.get("EntityDisplay", "") else 1,
             -int(row.get("MatchScore", "0")),
             _source_row_sort_key(row.get("StartSourceRow", "")),
             int(row.get("AddressLineCount", "0")),
@@ -20915,6 +20947,117 @@ def _source_record_address_block_companion(
         },
         "derived_from_queries": ["source_record_row_context(SourceRow, Label, TextAtom, Section)."],
     }
+
+
+def _address_question_requires_association(text: str) -> bool:
+    return bool(re.search(r"\b(?:associated|entity|entities|recipient|recipients|cc|c\.c\.)\b", str(text or "")))
+
+
+def _source_record_address_block_prefix_rows(contexts: list[dict[str, str]], start: int) -> list[dict[str, str]]:
+    if start <= 0 or start >= len(contexts):
+        return []
+    anchor = contexts[start]
+    anchor_line = _source_row_sort_key(anchor.get("SourceRow", ""))[0]
+    rows: list[dict[str, str]] = []
+    for index in range(start - 1, max(-1, start - 5), -1):
+        row = contexts[index]
+        if row.get("Section") != anchor.get("Section"):
+            break
+        line = _source_row_sort_key(row.get("SourceRow", ""))[0]
+        if line and anchor_line and anchor_line - line > 5:
+            break
+        text_atom = row.get("TextAtom", "")
+        if _source_record_address_line_like(text_atom):
+            break
+        if _source_record_address_block_context_line_like(text_atom):
+            rows.append(row)
+            continue
+        if rows:
+            break
+    rows.reverse()
+    return rows
+
+
+def _source_record_address_block_suffix_rows(contexts: list[dict[str, str]], end: int) -> list[dict[str, str]]:
+    if end < 0 or end >= len(contexts) - 1:
+        return []
+    anchor = contexts[end]
+    anchor_line = _source_row_sort_key(anchor.get("SourceRow", ""))[0]
+    rows: list[dict[str, str]] = []
+    for index in range(end + 1, min(len(contexts), end + 4)):
+        row = contexts[index]
+        if row.get("Section") != anchor.get("Section"):
+            break
+        line = _source_row_sort_key(row.get("SourceRow", ""))[0]
+        if line and anchor_line and line - anchor_line > 4:
+            break
+        text_atom = row.get("TextAtom", "")
+        if _source_record_address_line_like(text_atom):
+            break
+        if _source_record_address_block_context_line_like(text_atom):
+            rows.append(row)
+            continue
+        break
+    return rows
+
+
+def _source_record_address_block_context_line_like(value: str) -> bool:
+    tokens = set(_source_record_field_name_tokens(value))
+    if not tokens:
+        return False
+    if "attn" in tokens or "attention" in tokens:
+        return True
+    if "d" in tokens and "b" in tokens and "a" in tokens:
+        return True
+    if _source_record_email_address_display(value):
+        return True
+    if re.search(r"(?:^|_)b_\d+(?:_|$)", _normalize_text_filter_atom(value)):
+        return True
+    if tokens & {"llc", "inc", "corp", "corporation", "company", "limited", "co"}:
+        return True
+    return False
+
+
+def _source_record_address_block_entity_display(rows: list[dict[str, str]]) -> str:
+    for row in rows:
+        text_atom = row.get("TextAtom", "")
+        if not text_atom:
+            continue
+        tokens = set(_source_record_field_name_tokens(text_atom))
+        if "attn" in tokens or "attention" in tokens:
+            continue
+        if _source_record_email_address_display(text_atom):
+            continue
+        return _display_source_phrase(text_atom)
+    return ""
+
+
+def _source_record_address_block_attention_display(rows: list[dict[str, str]]) -> str:
+    displays: list[str] = []
+    for row in rows:
+        text_atom = row.get("TextAtom", "")
+        tokens = set(_source_record_field_name_tokens(text_atom))
+        if "attn" in tokens or "attention" in tokens:
+            displays.append(_display_source_phrase(text_atom))
+    return " / ".join(_dedupe_str(displays))
+
+
+def _source_record_address_block_contact_display(rows: list[dict[str, str]]) -> str:
+    displays: list[str] = []
+    for row in rows:
+        text_atom = row.get("TextAtom", "")
+        email = _source_record_email_address_display(text_atom)
+        if email:
+            displays.append(email)
+            continue
+        if re.search(r"(?:^|_)b_\d+(?:_|$)", _normalize_text_filter_atom(text_atom)):
+            displays.append(_display_source_phrase(text_atom))
+    return " / ".join(_dedupe_str(displays))
+
+
+def _source_record_email_address_display(value: str) -> str:
+    displays = _source_record_email_displays(value)
+    return displays[0] if displays else ""
 
 
 def _source_record_address_line_like(value: str) -> bool:

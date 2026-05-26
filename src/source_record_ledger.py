@@ -201,6 +201,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
         "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation. It also exposes printed table-cell list items, cross-cell item pairs, and parenthetical qualifiers as source_record_cell_item/source_record_cell_item_pair/source_record_cell_item_qualifier rows.",
         "For exact printed names, identifiers, and casing/spelling variants, source_record_surface_mention/3 preserves the normalized lookup atom and the verbatim printed surface; it does not canonicalize variants or decide that two surfaces are the same entity.",
+        "For printed dates, source_record_date_occurrence/4 and source_record_first_date_occurrence/4 preserve source-row occurrence coordinates without interpreting deadlines or effective dates.",
         "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
         "For heading/scope/list blocks, source_record_section_list_count/* counts contiguous printed source-list rows only. It is a source structure count, not a semantic claim that all listed items share any fact beyond the printed heading/scope text.",
         "Use this ledger only when the raw source supports the candidate operation and the allowed profile has compatible source/record predicates.",
@@ -230,6 +231,7 @@ def source_record_ledger_facts(
         return []
     facts: list[str] = []
     normalized_rows: list[dict[str, object]] = []
+    date_occurrences: list[dict[str, object]] = []
     for raw in rows[: max(0, int(max_rows))]:
         if not isinstance(raw, dict):
             continue
@@ -274,7 +276,10 @@ def source_record_ledger_facts(
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
         facts.extend(_citation_facts(str(raw.get("exact", "")), row_id=row_id))
-        facts.extend(_compact_date_facts(str(raw.get("exact", "")), row_id=row_id))
+        date_items = _date_occurrence_items(str(raw.get("exact", "")), row_id=row_id)
+        facts.extend(_date_occurrence_facts(date_items))
+        for item in date_items:
+            date_occurrences.append({**item, "line": line})
         facts.extend(_count_word_facts(str(raw.get("exact", "")), row_id=row_id))
         for field_name, field_value in _inline_key_value_fields(str(raw.get("exact", ""))):
             facts.append(f"source_record_inline_field({row_id}, {field_name}, {field_value}).")
@@ -325,6 +330,7 @@ def source_record_ledger_facts(
         for token in _numeric_tokens(str(raw.get("exact", ""))):
             facts.append(f"source_record_numeric_token({row_id}, {token}).")
         facts.extend(_parenthetical_alias_facts(str(raw.get("exact", "")), row_id=row_id))
+    facts.extend(_first_date_occurrence_facts(date_occurrences))
     facts.extend(_section_list_count_facts(normalized_rows))
     return _dedupe(facts)
 
@@ -380,20 +386,150 @@ def _citation_facts(text: str, *, row_id: str) -> list[str]:
     return facts
 
 
-def _compact_date_facts(text: str, *, row_id: str) -> list[str]:
-    facts: list[str] = []
-    for match in re.finditer(r"\b(?P<month>\d{1,2})[-/](?P<day>\d{1,2})[-/](?P<year>\d{2,4})\b", str(text or "")):
+_MONTHS = {
+    "january": 1,
+    "jan": 1,
+    "february": 2,
+    "feb": 2,
+    "march": 3,
+    "mar": 3,
+    "april": 4,
+    "apr": 4,
+    "may": 5,
+    "june": 6,
+    "jun": 6,
+    "july": 7,
+    "jul": 7,
+    "august": 8,
+    "aug": 8,
+    "september": 9,
+    "sept": 9,
+    "sep": 9,
+    "october": 10,
+    "oct": 10,
+    "november": 11,
+    "nov": 11,
+    "december": 12,
+    "dec": 12,
+}
+_MONTH_DATE_RE = re.compile(
+    r"\b(?P<month>"
+    r"Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|"
+    r"Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?|tember)?|Oct(?:ober)?|"
+    r"Nov(?:ember)?|Dec(?:ember)?)\.?\s+"
+    r"(?P<day>\d{1,2})(?:,\s*|\s+)(?P<year>\d{4})\b",
+    flags=re.IGNORECASE,
+)
+_NUMERIC_DATE_RE = re.compile(r"\b(?P<month>\d{1,2})[-/](?P<day>\d{1,2})[-/](?P<year>\d{2,4})\b")
+
+
+def _date_occurrence_items(text: str, *, row_id: str) -> list[dict[str, object]]:
+    items: list[dict[str, object]] = []
+    raw = str(text or "")
+    for match in _NUMERIC_DATE_RE.finditer(raw):
         month = int(match.group("month"))
         day = int(match.group("day"))
         year = match.group("year")
         if not (1 <= month <= 12 and 1 <= day <= 31):
             continue
         full_year = int(year) + 2000 if len(year) == 2 else int(year)
-        compact = _atom(match.group(0))
-        canonical = _atom(f"{full_year:04d}_{month:02d}_{day:02d}")
-        if compact and canonical:
-            facts.append(f"source_record_date_alias({row_id}, {compact}, {canonical}).")
-            facts.append(f"source_record_date_parts({row_id}, {full_year}, {month}, {day}).")
+        _append_date_occurrence(
+            items,
+            row_id=row_id,
+            surface=match.group(0),
+            year=full_year,
+            month=month,
+            day=day,
+            start=match.start(),
+        )
+    for match in _MONTH_DATE_RE.finditer(raw):
+        month_key = match.group("month").rstrip(".").casefold()
+        month = _MONTHS.get(month_key)
+        if month is None:
+            continue
+        day = int(match.group("day"))
+        if not (1 <= day <= 31):
+            continue
+        _append_date_occurrence(
+            items,
+            row_id=row_id,
+            surface=match.group(0),
+            year=int(match.group("year")),
+            month=month,
+            day=day,
+            start=match.start(),
+        )
+    return sorted(items, key=lambda item: int(item.get("start", 0)))
+
+
+def _append_date_occurrence(
+    items: list[dict[str, object]],
+    *,
+    row_id: str,
+    surface: str,
+    year: int,
+    month: int,
+    day: int,
+    start: int,
+) -> None:
+    surface_atom = _atom(surface)
+    surface_text = _quoted_atom(surface)
+    canonical = _atom(f"{year:04d}_{month:02d}_{day:02d}")
+    if not surface_atom or not surface_text or not canonical:
+        return
+    occurrence = 1 + sum(1 for item in items if item.get("canonical") == canonical)
+    items.append(
+        {
+            "row_id": row_id,
+            "canonical": canonical,
+            "surface_atom": surface_atom,
+            "surface_text": surface_text,
+            "year": year,
+            "month": month,
+            "day": day,
+            "occurrence": occurrence,
+            "start": start,
+        }
+    )
+
+
+def _date_occurrence_facts(items: list[dict[str, object]]) -> list[str]:
+    facts: list[str] = []
+    for item in items:
+        row_id = str(item["row_id"])
+        canonical = str(item["canonical"])
+        surface_atom = str(item["surface_atom"])
+        surface_text = str(item["surface_text"])
+        year = int(item["year"])
+        month = int(item["month"])
+        day = int(item["day"])
+        occurrence = int(item["occurrence"])
+        facts.append(f"source_record_date_alias({row_id}, {surface_atom}, {canonical}).")
+        facts.append(f"source_record_date_parts({row_id}, {year}, {month}, {day}).")
+        facts.append(f"source_record_date_occurrence({row_id}, {canonical}, {occurrence}, {surface_atom}).")
+        facts.append(f"source_record_date_mention({row_id}, {canonical}, {surface_text}, {occurrence}).")
+    return facts
+
+
+def _first_date_occurrence_facts(items: list[dict[str, object]]) -> list[str]:
+    first_by_date: dict[str, dict[str, object]] = {}
+    for item in sorted(
+        items,
+        key=lambda candidate: (
+            int(candidate.get("line", 0)),
+            int(candidate.get("start", 0)),
+            int(candidate.get("occurrence", 0)),
+        ),
+    ):
+        canonical = str(item.get("canonical", ""))
+        if canonical and canonical not in first_by_date:
+            first_by_date[canonical] = item
+    facts: list[str] = []
+    for canonical, item in first_by_date.items():
+        row_id = str(item["row_id"])
+        line = int(item.get("line", 0))
+        surface_text = str(item["surface_text"])
+        facts.append(f"source_record_first_date_occurrence({canonical}, {row_id}, {line}, {surface_text}).")
     return facts
 
 

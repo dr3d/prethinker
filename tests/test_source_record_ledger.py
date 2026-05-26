@@ -55,6 +55,7 @@ def test_source_record_ledger_context_is_guidance_not_truth() -> None:
     assert "source_record_cell_item" in context
     assert "source_record_cell_item_pair" in context
     assert "source_record_surface_mention/3" in context
+    assert "source_record_first_date_occurrence/4" in context
 
 
 def test_source_record_ledger_preserves_plain_prose_lines_without_anchors() -> None:
@@ -176,6 +177,30 @@ def test_source_record_ledger_preserves_exact_surface_spelling_variants() -> Non
     rows = result.get("rows", [])
     assert {"Row": "src_line_0001", "SurfaceAtom": "meter_cal", "SurfaceText": "Meter-CAL"} in rows
     assert {"Row": "src_line_0002", "SurfaceAtom": "meter_cal", "SurfaceText": "Meter-cal"} in rows
+
+
+def test_source_record_ledger_preserves_month_date_occurrence_coordinates() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "## Date Rules",
+                "The first cutoff was February 15, 2007, and the later reminder repeated February 15, 2007.",
+                "The same cutoff was restated as 2/15/2007.",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_date_alias(src_line_0002, february_15_2007, v_2007_02_15)." in facts
+    assert "source_record_date_occurrence(src_line_0002, v_2007_02_15, 1, february_15_2007)." in facts
+    assert "source_record_date_occurrence(src_line_0002, v_2007_02_15, 2, february_15_2007)." in facts
+    assert "source_record_date_mention(src_line_0002, v_2007_02_15, 'February 15, 2007', 1)." in facts
+    assert "source_record_date_alias(src_line_0003, v_2_15_2007, v_2007_02_15)." in facts
+    assert (
+        "source_record_first_date_occurrence(v_2007_02_15, src_line_0002, 2, 'February 15, 2007')."
+        in facts
+    )
 
 
 def test_source_record_ledger_preserves_blank_table_cells() -> None:

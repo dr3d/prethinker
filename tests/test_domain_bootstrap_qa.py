@@ -3137,6 +3137,30 @@ def test_source_record_messy_summary_extracts_address_block() -> None:
     assert "boise id 83702" in address
 
 
+def test_source_record_messy_summary_pairs_address_block_with_entity_prefix() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row_context(src_line_0100, alpha_holdings_llc_d_b_a_north_portal, alpha_holdings_llc_d_b_a_north_portal, letter).",
+        "source_record_row_context(src_line_0101, alpha_holdings_llc_d_b_a_north_portal, attn_mira_lane, letter).",
+        "source_record_row_context(src_line_0102, alpha_holdings_llc_d_b_a_north_portal, v_100_west_road_ste_4, letter).",
+        "source_record_row_context(src_line_0103, alpha_holdings_llc_d_b_a_north_portal, vega_az_85008, letter).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every street address with the entity associated with each.",
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_address_block_support"
+    )
+    row = companion["result"]["rows"][0]
+    assert row["EntityDisplay"] == "alpha holdings llc d b a north portal"
+    assert "100 west road ste 4" in row["AddressWithEntityDisplay"]
+    assert "alpha holdings llc d b a north portal" in row["AddressWithEntityDisplay"]
+
+
 def test_source_record_messy_summary_extracts_pdf_link_attachments() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

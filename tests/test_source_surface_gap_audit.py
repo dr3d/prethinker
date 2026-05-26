@@ -54,6 +54,15 @@ def test_source_surface_hint_queries_use_exact_surface_mentions_for_variant_ques
     assert all("Meter" not in query and "Lydium" not in query for query in queries)
 
 
+def test_source_surface_hint_queries_use_first_date_occurrence_for_first_mention_questions() -> None:
+    queries = _source_record_compile_surface_hint_queries(
+        utterance="In which named subsection is the date March 4, 2026 first introduced?",
+        kb_inventory={"signatures": ["source_record_first_date_occurrence/4", "source_record_date_alias/3"]},
+    )
+
+    assert "source_record_first_date_occurrence(CanonicalDate, SourceRow, Line, SurfaceText)." in queries
+
+
 def test_source_field_question_key_hints_use_existing_source_field_headers() -> None:
     queries = _source_field_question_key_hint_queries(
         utterance="What is the vendor and model number for device QR-17?",
