@@ -423,3 +423,59 @@ python -m pytest tests\test_domain_bootstrap_qa.py -q -k "section_list_detail or
 python -m pytest -q
 1818 passed, 2 subtests passed
 ```
+
+## Fresh Ugly Batch 04 R4 Thermometer
+
+After the heading/section migration, I reran
+`fresh_ugly_public_20260526_01` as a full thermometer batch rather than a
+targeted mechanism claim.
+
+Batch shape:
+
+```text
+datasets\real_world_transfer\fresh_ugly_public_20260526_01
+fixtures: 8
+questions: 200
+validation: pass, 0 issues, 0 warnings
+```
+
+Compile:
+
+```text
+fixtures: 8
+parsed OK: 8
+compile admitted / skipped: 1007 / 55
+diagnostic rejected flat-pass skips: 0
+quality gate pass / hold: 1 / 7
+```
+
+QA:
+
+```text
+exact / partial / miss: 181 / 11 / 7 = 90.5%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+R1b -> R4:
+
+```text
+R1b: 176 / 10 / 13 = 88.0%
+R4:  181 / 11 / 7  = 90.5%
+changed rows: 32
+improved rows: 18
+regressed rows: 14
+baseline exact -> non-exact: 13
+baseline exact -> miss: 3
+regression guard: fail
+```
+
+Governance read:
+
+- Removing raw English triggers from the heading/section routes did not sink
+  the batch; the aggregate improved.
+- The failed regression guard matters more than the pleasant headline. The
+  next work is route adjudication and compile-surface carrier delivery, not a
+  new layer of phrase parsing.
+- The active-instrument leakage audit still passes with `0` forbidden hits.

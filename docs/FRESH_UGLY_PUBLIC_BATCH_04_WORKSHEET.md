@@ -434,3 +434,187 @@ Current read:
   compile/query-path variance on repeated official-record entry rosters and
   finishing the source-authority/source-claim carrier lane that still holds the
   compile gate.
+
+## Repair Cycle 2026-05-26 - Query Intent Heading/Section R4
+
+Intent:
+
+Finish the next query-governance migration without allowing raw fixture or
+English phrase triggers to re-enter the active instrument.
+
+Scope:
+
+- Heading and source-section query-side routes only:
+  `source_record_preceding_heading_support`,
+  `source_record_under_heading_support`,
+  `source_record_named_section_window_support`,
+  `source_record_quote_heading_locator_support`, and
+  `source_record_section_list_detail_support`.
+- No compatibility adapters.
+- No write proposals.
+- No durable fact mutation from query-time support.
+- Raw utterance text may be passed through for answer rendering context, but
+  these routes no longer decide whether to fire by parsing English question
+  phrases.
+
+Understandings attained:
+
+1. The governed query lens often emits generic `heading_scope + target_terms`
+   rather than a route-specific intent label. That is acceptable for nearest or
+   enclosing heading support.
+2. Special order relations still need structured constraints. For example,
+   immediately-preceding heading questions should carry constraints such as
+   `immediately_precedes`, `preceding_heading`, or `previous_heading`.
+3. List and ordered-entry intents can legitimately activate section-window or
+   section-list support when their target terms match an admitted heading or
+   source label.
+4. The first strict replay failed two FDA rows. The right fix was to widen the
+   structured route contract; raw English regex was not restored.
+
+Changes applied:
+
+- `scripts/run_domain_bootstrap_qa.py`
+  - Derives heading/list query intents from structured Prolog query templates
+    and evidence-bundle support templates.
+  - Routes heading/section companions through `query_intents[]` rather than raw
+    question phrase interpretation.
+  - Removes dead raw-question helper functions for preceding-heading,
+    under-heading, named-section, quoted-target, and section-target parsing.
+- `tests/test_domain_bootstrap_qa.py`
+  - Adds structured-intent guards for section-list detail, preceding heading,
+    under heading, named section window, and quote heading locator.
+- `docs/SEMANTIC_IR_MAPPER_SPEC.md`
+  - Records that generic `heading_scope + target_terms` is sufficient for
+    nearest/enclosing heading support, while special relations require
+    structured constraints.
+
+Focused replay:
+
+```text
+artifact root:
+C:\prethinker_tmp_archive\query_intent_heading_migration_probe_20260526
+
+procurement_ugly_001 q006 under heading: exact / 0 compatibility rows
+fda_ugly_001 q007 preceding heading:     exact / 0 compatibility rows
+fda_ugly_001 q013 named section window:  exact / 0 compatibility rows
+fda_ugly_003 q006 quote heading:         exact / 0 compatibility rows
+fda_ugly_003 q014 section/list detail:   exact / 0 compatibility rows
+```
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q -k "section_list_detail or preceding_heading or under_heading or named_section_window or quote_heading_locator or query_intents"
+11 passed, 344 deselected
+
+python -m pytest -q
+1818 passed, 2 subtests passed
+
+python scripts\audit_utterance_regex_governance.py
+490 regex hits / 100 semantic_trigger
+
+python scripts\audit_active_instrument_leakage.py
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Full Batch 04 R4 thermometer:
+
+```text
+artifact root:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_r4_query_intent_20260526
+
+dataset:
+datasets\real_world_transfer\fresh_ugly_public_20260526_01
+
+validation:
+pass, 8/8 fixtures, 25 questions per fixture, 0 issues, 0 warnings
+
+compile:
+fixtures: 8
+parsed OK: 8
+candidate predicates: 176
+compile admitted / skipped: 1007 / 55
+effective admitted / skipped: 1007 / 55
+diagnostic rejected flat-pass skips: 0
+quality gate pass / hold: 1 / 7
+
+qa:
+questions: 200
+exact / partial / miss: 181 / 11 / 7
+exact rate: 90.5%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Per-fixture QA:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `court_ugly_001` | 22 | 0 | 3 |
+| `nhtsa_ugly_001` | 22 | 2 | 1 |
+| `nlrb_ugly_001` | 21 | 4 | 0 |
+| `ntsb_ugly_001` | 25 | 0 | 0 |
+| `ntsb_ugly_002` | 23 | 2 | 0 |
+| `procurement_ugly_001` | 22 | 1 | 2 |
+| `puc_ugly_001` | 23 | 1 | 1 |
+| `state_ag_ugly_001` | 23 | 1 | 0 |
+
+Failure-surface distribution:
+
+```text
+not_applicable: 181
+compile_surface_gap: 15
+hybrid_join_gap: 2
+answer_surface_gap: 1
+judge_uncertain: 1
+```
+
+R1b -> R4 comparison:
+
+```text
+R1b: 176 / 10 / 13 = 88.0%
+R4:  181 / 11 / 7  = 90.5%
+delta: +5 exact, +1 partial, -6 miss
+
+changed rows: 32
+improved rows: 18
+regressed rows: 14
+baseline exact -> non-exact: 13
+baseline exact -> miss: 3
+regressions with added support surfaces: 3
+regression guard: fail
+```
+
+Regressions with added support surfaces:
+
+- `nlrb_ugly_001 q011`: added
+  `source_record_named_section_window_support`, exact -> partial.
+- `puc_ugly_001 q019`: added `source_record_note_marker_support`, removed
+  `source_record_duration_quantity_support`, exact -> miss.
+- `state_ag_ugly_001 q010`: added `source_record_note_marker_support`,
+  exact -> partial.
+
+Read:
+
+- The aggregate moved back above 90%, with clean runtime/write/compatibility
+  hygiene. That is useful evidence that the query-intent migration did not
+  collapse the fresh ugly batch.
+- This is not release-clean. The compile gate still held 7/8 fixtures, and the
+  regression guard failed. The row churn is the signal to respect.
+- The query-intent migration should stay. The remaining failures point less at
+  English-question parsing and more at source-claim/source-authority/status
+  carrier delivery plus cross-route adjudication when multiple source-record
+  supports compete.
+
+Next blockers:
+
+1. Adjudicate the three regressions with added support surfaces before adding
+   another query-side mechanism.
+2. Resume the compile-surface carrier lane for `source_claim`,
+   `source_authority`, and `status_state` delivery. That is what the quality
+   gate is still complaining about.
+3. Keep the fresh-batch score as thermometer evidence only; do not tune toward
+   the fixture names or answer strings.
