@@ -206,6 +206,7 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
         "entities",
         "referents",
         "assertions",
+        "query_intents",
         "unsafe_implications",
         "candidate_operations",
         "truth_maintenance",
@@ -953,7 +954,8 @@ def build_semantic_ir_input_payload(
         payload["required_top_level_json_shape"] = SCHEMA_CONTRACT
         payload["output_instruction"] = (
             "Return exactly one JSON object using required_top_level_json_shape as the root shape. "
-            "Do not copy the key name required_top_level_json_shape into your response."
+            "Do not copy the key name required_top_level_json_shape into your response. "
+            "Always include query_intents; use an empty array when no query intent applies."
         )
     return payload
 

@@ -86,8 +86,9 @@ Projection is structural policy. It is not a phrase rewrite.
 
 ## Query Intent V1
 
-`semantic_ir_v1` may include optional `query_intents[]` entries on query turns.
-These entries are proposal metadata for the QA/query layer:
+`semantic_ir_v1` includes `query_intents[]` entries. The array may be empty,
+but it must be present so query-language routing has an explicit governed
+surface. These entries are proposal metadata for the QA/query layer:
 
 ```text
 question text

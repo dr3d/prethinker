@@ -234,7 +234,7 @@ language:
 The Batch 04 source-record repairs can remain because they are deterministic,
 source-generic, tested, and leakage-clean.
 
-The immediate course correction has started. Semantic IR now has an optional
+The immediate course correction has started. Semantic IR now has a required
 `query_intents[]` field for query-shape metadata. The first migrated source
 record routes are:
 
@@ -272,6 +272,20 @@ source-record atoms. Some amount/date/source parsers do too. That is source
 artifact parsing, not raw-question interpretation; the audit remains
 intentionally conservative and overcounts some artifact parsers as semantic
 triggers until they are manually classified or refactored.
+
+Model-lens check:
+
+- A five-question local LM Studio probe initially parsed query turns but omitted
+  `query_intents[]`.
+- `query_intents[]` is now required by the Semantic IR JSON schema and the
+  output instruction says to emit an empty array when none applies.
+- Re-running the same probe produced the expected intent types:
+  `amount_inventory`, `ratio_calculation`, `duration_quantity`,
+  `employment_history`, and `board_nominee_path`.
+
+This confirms the right lesson from possible score loss: if migrated routes
+stop firing, the missing piece is the governed query lens, not permission to
+restore Python phrase triggers.
 
 Remaining work:
 
