@@ -56,7 +56,7 @@ be conservative in admission.
 | `entities` | Maps entity IDs to normalized terms | If an operation arg references `e1`, mapper resolves it through `entities`. |
 | `referents` | Exposes unresolved or ambiguous references | Ambiguous/unresolved referents become clarification ambiguities. |
 | `assertions` | High-level semantic evidence | Used for projection such as claim plus direct observation -> `mixed`. |
-| `query_intents` | Optional query-shape metadata for QA routing | Lets Semantic IR say the requested answer shape without Python inferring it from English regex. Not durable truth. |
+| `query_intents` | Required query-shape metadata array for QA routing | Lets Semantic IR say the requested answer shape without Python inferring it from English regex. Empty array is allowed. Not durable truth. |
 | `propositions` | Optional v1-compatible meaning spine | Separates what the text appears to mean from what the model proposes to do with that meaning. Diagnostic only. |
 | `unsafe_implications` | Things the model considered but should not commit | Non-duplicate unsafe implications can project `commit` to `mixed`. |
 | `candidate_operations` | Only field that may produce clauses | Candidate operations still pass source/safety/polarity policy. |
@@ -100,9 +100,10 @@ question text
 The deterministic side may inspect `intent_type`, `target_terms`, and
 `answer_constraints`. It should not add new English keyword triggers over the
 raw user question. If a source-record support route needs to know whether the
-question is asking for a note marker, source-order roster, heading scope, date,
-count, or status, that signal belongs in `query_intents[]` or in a structured
-query template, not in a Python phrase list.
+question is asking for a note marker, source-order roster, heading scope,
+contact/reply information, signatory, date, count, or status, that signal
+belongs in `query_intents[]` or in a structured query template, not in a Python
+phrase list.
 
 `query_intents[]` does not authorize writes, does not become a KB fact, and
 does not bypass mapper/runtime predicate checks. It is the query-side analogue

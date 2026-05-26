@@ -197,7 +197,7 @@ Candidate fields:
 ```text
 intent_type:
   list | count | date | source_location | heading_scope |
-  note_marker | signatory | comparison | duration | status |
+  note_marker | contact | signatory | comparison | duration | status |
   ordered_labeled_entry | amount_inventory | ratio_calculation |
   duration_quantity | biography_history | employment_history |
   role_transition | board_nominee_path | named_role_roster |
@@ -252,6 +252,7 @@ record routes are:
 - `_source_record_ratio_calculation_companion`
 - `_source_record_duration_quantity_companion`
 - `_source_record_biography_history_companion`
+- `_source_record_contact_signatory_companion`
 
 These routes no longer activate from raw English regex over the question. They
 require structured query intent, either emitted by Semantic IR or inferred from
@@ -269,6 +270,7 @@ after first patch:   549 regex hits / 147 semantic_trigger
 after role patch:    526 regex hits / 127 semantic_trigger
 after amount patch:  513 regex hits / 115 semantic_trigger
 after bio patch:     509 regex hits / 111 semantic_trigger
+after contact patch: 503 regex hits / 108 semantic_trigger
 ```
 
 The role-transition source parsers still use regex over normalized admitted
@@ -343,3 +345,26 @@ Interpretation:
   underspecified query intent.
 - The repair discipline is unchanged: fix the governed query lens or structured
   route contract, not Python phrase triggers.
+
+## Contact/Signatory Intent Migration
+
+The contact/signatory route now requires structured intent:
+
+```text
+intent_type: signatory
+intent_type: named_role_roster
+intent_type: contact
+```
+
+The deterministic route no longer decides from raw English words such as
+`signed`, `title`, `reply`, `email`, or `attention` that contact/signatory
+support should fire. If the intent carries target terms or answer constraints,
+those structured fields can scope source-record contact rows by token overlap;
+the raw question text is not used for that decision.
+
+Focused guard:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q -k "contact_signatory or signatory_responsibility or signatory"
+9 passed, 340 deselected
+```

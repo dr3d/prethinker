@@ -4440,6 +4440,16 @@ def test_source_record_contact_signatory_supports_source_record_signature_block(
     companion = _source_record_contact_signatory_companion(
         runtime,
         utterance="Who signed the warning letter, and what is their title?",
+        query_intents=[
+            {
+                "intent_type": "signatory",
+                "target_terms": ["warning letter"],
+                "answer_constraints": ["title"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -4463,6 +4473,16 @@ def test_source_record_contact_signatory_supports_named_individual_role_roster()
     companion = _source_record_contact_signatory_companion(
         runtime,
         utterance="List every named individual in this report and their stated role(s).",
+        query_intents=[
+            {
+                "intent_type": "named_role_roster",
+                "target_terms": ["named individual", "stated role"],
+                "answer_constraints": ["person_role"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -4486,6 +4506,16 @@ def test_source_record_contact_signatory_supports_reply_email_attn_and_identifie
     companion = _source_record_contact_signatory_companion(
         runtime,
         utterance="Identify the email address for the firm's electronic reply and the investigator named in the ATTN line.",
+        query_intents=[
+            {
+                "intent_type": "contact",
+                "target_terms": ["electronic reply", "attn"],
+                "answer_constraints": ["email", "attention_line", "identifier"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -4508,6 +4538,16 @@ def test_source_record_contact_signatory_supports_public_gov_contact_emails() ->
     companion = _source_record_contact_signatory_companion(
         runtime,
         utterance="List the email addresses of all named media contacts.",
+        query_intents=[
+            {
+                "intent_type": "contact",
+                "target_terms": ["media contacts"],
+                "answer_constraints": ["email"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -4517,6 +4557,41 @@ def test_source_record_contact_signatory_supports_public_gov_contact_emails() ->
         "lucero.eric.r@dol.gov",
         "ruthman.erika.b@dol.gov",
     }
+
+
+def test_source_record_contact_signatory_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact(
+        "source_record_text_atom(src_line_0228, "
+        "send_your_electronic_reply_to_cder_oc_omq_communications_fda_hhs_gov_"
+        "identify_your_response_with_fei_2513595_and_attn_andrew_haack)."
+    )
+
+    assert (
+        _source_record_contact_signatory_companion(
+            runtime,
+            utterance="Identify the email address for the firm's electronic reply and the investigator named in the ATTN line.",
+        )
+        is None
+    )
+
+
+def test_source_record_contact_signatory_intent_can_come_from_structured_query() -> None:
+    intents = qa_module._query_intents_from_structured_queries(
+        ["source_record_contact_signatory_support(SupportKind, Display, SourceRow)."],
+        source="query_template",
+    )
+
+    assert intents == [
+        {
+            "intent_type": "contact",
+            "target_terms": [],
+            "answer_constraints": ["contact_or_signatory"],
+            "uncertainty_policy": "answer",
+            "language": "",
+            "source": "query_template",
+        }
+    ]
 
 
 def test_source_record_messy_summary_ignores_unrelated_person_mentions_for_signatory() -> None:

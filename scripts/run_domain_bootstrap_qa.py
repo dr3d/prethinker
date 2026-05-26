@@ -1768,6 +1768,7 @@ QUERY_INTENT_TYPES = {
     "source_location",
     "heading_scope",
     "note_marker",
+    "contact",
     "signatory",
     "comparison",
     "duration",
@@ -1939,6 +1940,17 @@ def _query_intents_from_structured_queries(
                         "intent_type": "named_role_roster",
                         "target_terms": [],
                         "answer_constraints": [],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_contact_signatory_support":
+                intents.append(
+                    {
+                        "intent_type": "contact",
+                        "target_terms": [],
+                        "answer_constraints": ["contact_or_signatory"],
                         "uncertainty_policy": "answer",
                         "language": "",
                         "source": source,
@@ -16724,7 +16736,7 @@ def _source_record_messy_summary_companions(
         _source_record_group_formation_exception_companion(runtime, utterance=utterance),
         _source_record_destination_companion(runtime, utterance=utterance),
         _source_record_signatory_responsibility_companion(runtime, utterance=utterance),
-        _source_record_contact_signatory_companion(runtime, utterance=utterance),
+        _source_record_contact_signatory_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_signatory_conflict_companion(runtime, utterance=utterance),
     ):
         if companion:
@@ -23911,14 +23923,12 @@ def _source_record_contact_signatory_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    wants_person_role_roster = bool(
-        re.search(r"\b(?:every|all|named)\b.{0,40}\b(?:named )?(?:individual|person|people)\b", text)
-        and re.search(r"\brole", text)
-    )
-    wants_signatory = bool(re.search(r"\b(?:sign|signed|signer|signatory|title)\b", text)) or wants_person_role_roster
-    wants_contact = bool(re.search(r"\b(?:reply|email|e-mail|attn|attention|contact|directed)\b", text))
+    signatory_intent = _first_query_intent(query_intents, "signatory", "named_role_roster")
+    contact_intent = _first_query_intent(query_intents, "contact")
+    wants_signatory = signatory_intent is not None
+    wants_contact = contact_intent is not None
     if not (wants_signatory or wants_contact):
         return None
 
@@ -23939,7 +23949,7 @@ def _source_record_contact_signatory_companion(
 
     if wants_contact:
         text_atoms = _source_record_text_atoms(runtime)
-        scoped_atoms = _source_record_scoped_contact_text_atoms(text_atoms, utterance=utterance)
+        scoped_atoms = _source_record_scoped_contact_text_atoms(text_atoms, contact_intent=contact_intent)
         for source_row, atom in scoped_atoms:
             emails = _source_record_email_displays(atom)
             attn = _source_record_attention_person_display(atom)
@@ -23957,6 +23967,7 @@ def _source_record_contact_signatory_companion(
                 "AttentionPersonDisplay": attn,
                 "IdentifierDisplay": "; ".join(identifiers),
                 "ContactDisplay": contact_display,
+                "QueryIntentOverlap": str(_source_record_contact_intent_overlap(atom, contact_intent)),
                 "SupportClass": "deterministic-source-record-summary",
             }
             key = (row["SupportKind"], source_row, contact_display)
@@ -23966,7 +23977,13 @@ def _source_record_contact_signatory_companion(
 
     if not support_rows:
         return None
-    support_rows.sort(key=lambda row: (_source_row_sort_key(row.get("SourceRow", "")), row.get("SupportKind", "")))
+    support_rows.sort(
+        key=lambda row: (
+            -int(row.get("QueryIntentOverlap", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SupportKind", ""),
+        )
+    )
     return {
         "query": "source_record_contact_signatory_support(SupportKind, Display, SourceRow).",
         "result": {
@@ -24262,17 +24279,38 @@ def _source_record_responsibility_score(role_tokens: list[str], issue_tokens: li
 def _source_record_scoped_contact_text_atoms(
     text_atoms: list[tuple[str, str]],
     *,
-    utterance: str,
+    contact_intent: dict[str, Any] | None,
 ) -> list[tuple[str, str]]:
-    question = str(utterance or "").casefold()
-    if not re.search(r"\b(?:reply|attn|attention|directed)\b", question):
+    intent_tokens = _source_record_contact_intent_tokens(contact_intent)
+    if not intent_tokens:
         return text_atoms
-    preferred: list[tuple[str, str]] = []
+    preferred: list[tuple[int, str, str]] = []
     for source_row, atom in text_atoms:
-        normalized = _normalize_text_filter_atom(atom)
-        if re.search(r"(?:^|_)(?:reply|attn|attention|directed)(?:_|$)", normalized):
-            preferred.append((source_row, atom))
-    return preferred or text_atoms
+        atom_tokens = set(_query_atom_tokens(atom))
+        score = len(intent_tokens & atom_tokens)
+        if score:
+            preferred.append((score, source_row, atom))
+    if not preferred:
+        return text_atoms
+    best_score = max(score for score, _, _ in preferred)
+    preferred = [item for item in preferred if item[0] == best_score]
+    preferred.sort(key=lambda item: (_source_row_sort_key(item[1])))
+    return [(source_row, atom) for _, source_row, atom in preferred]
+
+
+def _source_record_contact_intent_tokens(contact_intent: dict[str, Any] | None) -> set[str]:
+    intent_tokens = _query_intent_target_tokens(contact_intent)
+    if isinstance(contact_intent, dict):
+        for constraint in contact_intent.get("answer_constraints", []) or []:
+            intent_tokens.update(token for token in _query_atom_tokens(str(constraint)) if len(token) >= 3)
+    return intent_tokens
+
+
+def _source_record_contact_intent_overlap(atom: str, contact_intent: dict[str, Any] | None) -> int:
+    intent_tokens = _source_record_contact_intent_tokens(contact_intent)
+    if not intent_tokens:
+        return 0
+    return len(intent_tokens & set(_query_atom_tokens(atom)))
 
 
 def _source_record_context_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
