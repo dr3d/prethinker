@@ -26,6 +26,7 @@ from prethinker.models import (
 )
 from prethinker.semantic import (
     OpenAICompatibleSemanticCompiler,
+    OpenAICompatibleSemanticQueryPlanner,
     SemanticCompileAdmission,
     semantic_compile_error_payload,
     semantic_compile_skipped_payload,
@@ -36,10 +37,16 @@ from prethinker.storage import LocalKBStore
 class Engine:
     """Small public API for document compile, query, and KB lifecycle."""
 
-    def __init__(self, storage_dir: str | os.PathLike[str] | None = None, semantic_compiler: Any | None = None) -> None:
+    def __init__(
+        self,
+        storage_dir: str | os.PathLike[str] | None = None,
+        semantic_compiler: Any | None = None,
+        semantic_query_planner: Any | None = None,
+    ) -> None:
         self.storage_dir = Path(storage_dir or os.getenv("PRETHINKER_STORAGE_DIR", ".prethinker/kbs"))
         self._store = LocalKBStore(self.storage_dir)
         self._semantic_compiler = semantic_compiler
+        self._semantic_query_planner = semantic_query_planner
 
     @classmethod
     def from_env(cls) -> "Engine":
@@ -113,16 +120,18 @@ class Engine:
             artifact_bundle=artifact_bundle,
         )
 
-    def query(self, *, kb_id: str, question: str) -> QueryResult:
+    def query(self, *, kb_id: str, question: str, query_mode: str = "auto") -> QueryResult:
         """Run a product-shaped query over a stored KB.
 
-        This alpha query returns source-record evidence and an audit trace. It
-        renders a deterministic extractive answer only when the source-record
-        match is strong enough; otherwise it reports the appropriate gap.
+        Ledger mode returns source-record evidence and renders a deterministic
+        extractive answer only when the match is strong enough. Semantic mode
+        may use a source-anchored query planner over the compiled artifact
+        bundle, but only exact source-quote support is admitted.
         """
 
         if not question or not str(question).strip():
             raise ValueError("question must be a non-empty string")
+        mode = _normalize_query_mode(query_mode)
 
         loaded = self._store.load_kb(kb_id)
         if loaded is None:
@@ -141,6 +150,31 @@ class Engine:
             )
 
         metadata, records = loaded
+        bundle = self._store.load_artifact_bundle(kb_id)
+        if mode in {"auto", "semantic"} and _should_use_semantic_query(bundle, mode):
+            semantic_result = self._run_semantic_query(
+                kb_id=metadata.kb_id,
+                question=str(question),
+                source_records=records,
+                artifact_bundle=bundle,
+            )
+            if semantic_result is not None:
+                return semantic_result
+            if mode == "semantic":
+                trace = AuditTrace(
+                    failure_surface="query_surface_gap",
+                    cleanliness_counters=CleanlinessCounters(runtime_load_errors=1),
+                    source_records=[],
+                    notes=["Semantic query requested, but the semantic query planner could not return a valid result."],
+                )
+                return QueryResult(
+                    kb_id=metadata.kb_id,
+                    question=str(question),
+                    answer=None,
+                    status="coverage_gap",
+                    audit_trace=trace,
+                )
+
         scored_matches = _score_source_records(records, str(question))
         matches = [record for _score, _index, record in scored_matches[:8]]
         answer = _render_extractive_answer(scored_matches)
@@ -214,6 +248,55 @@ class Engine:
             return semantic_compile_error_payload(exc), CleanlinessCounters(runtime_load_errors=1)
         return _semantic_payload(result), CleanlinessCounters()
 
+    def _run_semantic_query(
+        self,
+        *,
+        kb_id: str,
+        question: str,
+        source_records: list[SourceRecord],
+        artifact_bundle: Any,
+    ) -> QueryResult | None:
+        planner = self._semantic_query_planner or OpenAICompatibleSemanticQueryPlanner.from_env()
+        try:
+            payload = planner.query(
+                kb_id=kb_id,
+                question=question,
+                source_records=source_records,
+                artifact_bundle=artifact_bundle,
+            )
+        except Exception:
+            return None
+        if not isinstance(payload, dict):
+            return None
+        status = str(payload.get("status") or "").strip()
+        if status not in {"answered", "evidence_available", "coverage_gap"}:
+            return None
+        answer = payload.get("answer")
+        answer_text = str(answer).strip() if answer is not None and str(answer).strip() else None
+        source_ids = {str(item).strip() for item in payload.get("source_record_ids") or [] if str(item).strip()}
+        evidence_records = [record for record in source_records if record.record_id in source_ids]
+        if status == "answered":
+            failure_surface = "not_applicable"
+        elif status == "evidence_available":
+            failure_surface = "answer_surface_gap"
+        else:
+            failure_surface = "query_surface_gap"
+        notes = [str(item).strip() for item in payload.get("notes") or [] if str(item).strip()]
+        notes.insert(0, "Semantic query planner used source-anchored evidence from the compiled artifact bundle.")
+        trace = AuditTrace(
+            failure_surface=failure_surface,
+            cleanliness_counters=CleanlinessCounters(),
+            source_records=evidence_records,
+            notes=notes,
+        )
+        return QueryResult(
+            kb_id=kb_id,
+            question=question,
+            answer=answer_text if status == "answered" else None,
+            status=status,
+            audit_trace=trace,
+        )
+
 
 def _normalize_document_type(document_type: DocumentType | str | Any) -> str:
     value = getattr(document_type, "value", document_type)
@@ -236,6 +319,36 @@ def _normalize_compile_mode(compile_mode: str) -> str:
     if value not in {"ledger", "semantic"}:
         raise ValueError("compile_mode must be 'ledger' or 'semantic'")
     return value
+
+
+def _normalize_query_mode(query_mode: str) -> str:
+    value = str(query_mode or "").strip().lower()
+    aliases = {
+        "deterministic": "ledger",
+        "extractive": "ledger",
+        "source": "ledger",
+        "source_records": "ledger",
+    }
+    value = aliases.get(value, value)
+    if value not in {"auto", "ledger", "semantic"}:
+        raise ValueError("query_mode must be 'auto', 'ledger', or 'semantic'")
+    return value
+
+
+def _should_use_semantic_query(artifact_bundle: Any, query_mode: str) -> bool:
+    if artifact_bundle is None:
+        return False
+    if query_mode == "semantic":
+        return True
+    query_policy = getattr(artifact_bundle, "query_policy", {}) or {}
+    diagnostics = getattr(artifact_bundle, "diagnostics", {}) or {}
+    semantic_compile = diagnostics.get("semantic_compile", {}) if isinstance(diagnostics, dict) else {}
+    return (
+        isinstance(query_policy, dict)
+        and query_policy.get("compile_mode") == "semantic"
+        and isinstance(semantic_compile, dict)
+        and semantic_compile.get("status") == "completed"
+    )
 
 
 def _semantic_payload(result: Any) -> dict[str, Any]:

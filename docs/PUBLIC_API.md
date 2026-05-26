@@ -58,7 +58,7 @@ engine.compile_document(
     compile_mode: str = "ledger",
 ) -> CompileResult
 
-engine.query(*, kb_id: str, question: str) -> QueryResult
+engine.query(*, kb_id: str, question: str, query_mode: str = "auto") -> QueryResult
 engine.list_kbs() -> list[KBMetadata]
 engine.get_kb(kb_id: str) -> KBMetadata | None
 engine.delete_kb(kb_id: str) -> bool
@@ -173,9 +173,18 @@ If the semantic endpoint is unavailable, compile still persists the deterministi
 bundle and records `semantic_compile.status = "error"` in `diagnostics.json`.
 The returned `CleanlinessCounters.runtime_load_errors` is incremented.
 
-The alpha query path returns source-record evidence and an audit trace. When a
-source-record match is strong enough, `QueryResult.answer` contains a
-deterministic extractive answer copied from the source row, with
+The alpha query path has two modes:
+
+```python
+engine.query(kb_id=compiled.kb_id, question="Who signed it?", query_mode="ledger")
+engine.query(kb_id=compiled.kb_id, question="What happened to the unsigned delivery?", query_mode="semantic")
+engine.query(kb_id=compiled.kb_id, question="What happened to the unsigned delivery?")  # auto
+```
+
+`query_mode="ledger"` is fast, local, deterministic, and extractive. It returns
+source-record evidence and an audit trace. When a source-record match is strong
+enough, `QueryResult.answer` contains a deterministic answer copied from the
+source row, with
 `status = "answered"` and `failure_surface = "not_applicable"`.
 
 When source evidence exists but is too weak for deterministic answer rendering,
@@ -183,8 +192,17 @@ When source evidence exists but is too weak for deterministic answer rendering,
 `failure_surface = "answer_surface_gap"`. This is deliberate: the public API
 should report evidence without overclaiming.
 
-The public query path does not use LLM synthesis, reference answers, or durable
-query-time writes.
+`query_mode="semantic"` calls the same OpenAI-compatible local endpoint used by
+semantic compile, but only as a query-time planner/renderer. The planner may
+accept messy human questions and return a conversational answer, but every
+support row must cite a `source_record_id` and an exact `source_quote` from the
+compiled source records. Unsupported support rows are rejected. The query path
+does not create durable facts, Prolog writes, compatibility rows, or reference
+answer rows.
+
+`query_mode="auto"` uses the semantic planner only when the stored KB was
+compiled with `compile_mode="semantic"` and the semantic compile completed.
+Otherwise it uses the deterministic ledger path.
 
 `query_policy.json` records that boundary:
 
@@ -192,7 +210,21 @@ query-time writes.
 {
   "default_query_mode": "deterministic_extractive_source_record",
   "compile_mode": "ledger",
+  "query_time_llm": false,
   "llm_synthesis": false,
+  "qa_writes_allowed": false,
+  "compatibility_adapters": "disabled"
+}
+```
+
+For a completed semantic compile, the same policy records:
+
+```json
+{
+  "default_query_mode": "semantic_source_anchored_query_planner",
+  "compile_mode": "semantic",
+  "query_time_llm": true,
+  "query_time_policy": "llm_query_planner_with_exact_source_quote_admission_no_writes",
   "qa_writes_allowed": false,
   "compatibility_adapters": "disabled"
 }

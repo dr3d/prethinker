@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 
 import prethinker
-from prethinker.semantic import admit_semantic_proposal
+from prethinker.semantic import admit_semantic_proposal, admit_semantic_query_response
 from prethinker import (
     AuditTrace,
     CleanlinessCounters,
@@ -154,6 +154,9 @@ def test_semantic_compile_mode_admits_only_source_anchored_facts(tmp_path) -> No
     assert compiled.cleanliness_counters.is_clean is True
     assert compiled.artifact_bundle is not None
     assert compiled.artifact_bundle.query_policy["compile_mode"] == "semantic"
+    assert compiled.artifact_bundle.query_policy["default_query_mode"] == "semantic_source_anchored_query_planner"
+    assert compiled.artifact_bundle.query_policy["query_time_llm"] is True
+    assert compiled.artifact_bundle.query_policy["qa_writes_allowed"] is False
     assert compiled.artifact_bundle.diagnostics["semantic_compile"]["status"] == "completed"
     assert compiled.artifact_bundle.diagnostics["semantic_compile"]["skipped_candidate_count"] == 1
     assert compiled.metadata.metadata["semantic_compile_status"] == "completed"
@@ -166,6 +169,128 @@ def test_semantic_compile_mode_admits_only_source_anchored_facts(tmp_path) -> No
     )
     assert "Hidden Reviewer" not in world_text
     assert "Hidden Reviewer" not in epistemic_text
+
+
+def test_semantic_query_mode_uses_source_anchored_conversational_planner(tmp_path) -> None:
+    class FakeSemanticCompiler:
+        def compile(self, *, kb_id, document_name, source_records):
+            return admit_semantic_proposal(
+                kb_id=kb_id,
+                source_records=source_records,
+                proposal={
+                    "statuses": [
+                        {
+                            "id": "unsigned_deliveries",
+                            "subject": "unsigned deliveries",
+                            "status": "rejected at intake",
+                            "source_record_id": "src_line_0002",
+                            "source_quote": "Unsigned deliveries are rejected at intake",
+                        }
+                    ]
+                },
+            )
+
+    class FakeSemanticQueryPlanner:
+        def query(self, *, kb_id, question, source_records, artifact_bundle):
+            return {
+                "status": "answered",
+                "answer": "Unsigned deliveries are rejected at intake.",
+                "source_record_ids": ["src_line_0002"],
+                "support": [
+                    {
+                        "source_record_id": "src_line_0002",
+                        "source_quote": "Unsigned deliveries are rejected at intake",
+                    }
+                ],
+                "notes": ["Conversational answer admitted from exact source quote."],
+            }
+
+    engine = Engine(
+        storage_dir=tmp_path / "kbs",
+        semantic_compiler=FakeSemanticCompiler(),
+        semantic_query_planner=FakeSemanticQueryPlanner(),
+    )
+    compiled = engine.compile_document(
+        document_name="deliveries.md",
+        document_bytes=b"# Policy\nUnsigned deliveries are rejected at intake.\n",
+        document_type="md",
+        compile_mode="semantic",
+    )
+
+    result = engine.query(kb_id=compiled.kb_id, question="What happens if a shipment lacks a signature?")
+
+    assert result.status == "answered"
+    assert result.answer == "Unsigned deliveries are rejected at intake."
+    assert result.audit_trace.failure_surface == "not_applicable"
+    assert result.audit_trace.cleanliness_counters.write_proposals == 0
+    assert [record.record_id for record in result.audit_trace.source_records] == ["src_line_0002"]
+    assert "Semantic query planner used source-anchored evidence" in result.audit_trace.notes[0]
+
+
+def test_ledger_query_mode_can_bypass_semantic_planner(tmp_path) -> None:
+    class FakeSemanticCompiler:
+        def compile(self, *, kb_id, document_name, source_records):
+            return admit_semantic_proposal(
+                kb_id=kb_id,
+                source_records=source_records,
+                proposal={},
+            )
+
+    class FailingSemanticQueryPlanner:
+        def query(self, **kwargs):
+            raise AssertionError("ledger query mode should not call semantic planner")
+
+    engine = Engine(
+        storage_dir=tmp_path / "kbs",
+        semantic_compiler=FakeSemanticCompiler(),
+        semantic_query_planner=FailingSemanticQueryPlanner(),
+    )
+    compiled = engine.compile_document(
+        document_name="deliveries.md",
+        document_bytes=b"# Policy\nUnsigned deliveries are rejected at intake.\n",
+        document_type="md",
+        compile_mode="semantic",
+    )
+
+    result = engine.query(
+        kb_id=compiled.kb_id,
+        question="What happens if a shipment lacks a signature?",
+        query_mode="ledger",
+    )
+
+    assert result.status == "coverage_gap"
+    assert result.answer is None
+    assert result.audit_trace.failure_surface == "query_surface_gap"
+
+
+def test_semantic_query_response_rejects_unsupported_source_quotes() -> None:
+    records = [
+        SourceRecord(
+            record_id="src_line_0001",
+            kb_id="kb_test",
+            payload={"text": "Unsigned deliveries are rejected at intake."},
+        )
+    ]
+
+    admitted = admit_semantic_query_response(
+        question="What happens if a shipment lacks a signature?",
+        source_records=records,
+        proposal={
+            "status": "answered",
+            "answer": "Unsigned deliveries are approved by Maria.",
+            "support": [
+                {
+                    "source_record_id": "src_line_0001",
+                    "source_quote": "approved by Maria",
+                }
+            ],
+        },
+    )
+
+    assert admitted["status"] == "coverage_gap"
+    assert admitted["answer"] is None
+    assert admitted["source_record_ids"] == []
+    assert admitted["rejected_support"][0]["reason"] == "unsupported_source_quote"
 
 
 def test_semantic_compile_failure_persists_error_diagnostics(tmp_path) -> None:

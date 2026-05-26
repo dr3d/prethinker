@@ -10,7 +10,7 @@ from typing import Any
 from urllib import error, request
 
 from prethinker.artifacts import prolog_fact
-from prethinker.models import SourceRecord
+from prethinker.models import CompiledArtifactBundle, SourceRecord
 
 
 SEMANTIC_CORE_SCHEMA_VERSION = "semantic_core_v1"
@@ -167,6 +167,102 @@ class OpenAICompatibleSemanticCompiler:
             raise RuntimeError(f"semantic compiler request failed: {exc}") from exc
 
 
+class OpenAICompatibleSemanticQueryPlanner:
+    """Source-anchored semantic query planner for compiled artifacts."""
+
+    def __init__(
+        self,
+        *,
+        base_url: str | None = None,
+        model: str | None = None,
+        api_key: str | None = None,
+        timeout_seconds: float | None = None,
+        context_record_limit: int | None = None,
+        semantic_fact_limit: int | None = None,
+    ) -> None:
+        self.base_url = (base_url or os.getenv("PRETHINKER_BASE_URL") or DEFAULT_BASE_URL).rstrip("/")
+        self.model = model or os.getenv("PRETHINKER_MODEL") or DEFAULT_MODEL
+        self.api_key = api_key if api_key is not None else os.getenv("PRETHINKER_API_KEY")
+        self.timeout_seconds = timeout_seconds or float(os.getenv("PRETHINKER_QUERY_TIMEOUT_SECONDS", "120"))
+        self.context_record_limit = context_record_limit or int(os.getenv("PRETHINKER_QUERY_CONTEXT_RECORD_LIMIT", "80"))
+        self.semantic_fact_limit = semantic_fact_limit or int(os.getenv("PRETHINKER_QUERY_SEMANTIC_FACT_LIMIT", "240"))
+
+    @classmethod
+    def from_env(cls) -> "OpenAICompatibleSemanticQueryPlanner":
+        return cls()
+
+    def query(
+        self,
+        *,
+        kb_id: str,
+        question: str,
+        source_records: list[SourceRecord],
+        artifact_bundle: CompiledArtifactBundle,
+    ) -> dict[str, Any]:
+        proposal = self._request_semantic_query(
+            kb_id=kb_id,
+            question=question,
+            source_records=source_records,
+            artifact_bundle=artifact_bundle,
+        )
+        return admit_semantic_query_response(question=question, proposal=proposal, source_records=source_records)
+
+    def _request_semantic_query(
+        self,
+        *,
+        kb_id: str,
+        question: str,
+        source_records: list[SourceRecord],
+        artifact_bundle: CompiledArtifactBundle,
+    ) -> dict[str, Any]:
+        payload = {
+            "model": self.model,
+            "messages": _semantic_query_messages(
+                kb_id=kb_id,
+                question=question,
+                source_records=source_records[: max(1, self.context_record_limit)],
+                artifact_bundle=artifact_bundle,
+                semantic_fact_limit=max(0, self.semantic_fact_limit),
+            ),
+            "temperature": 0,
+            "response_format": {"type": "json_object"},
+        }
+        try:
+            raw = self._post_chat_completion(payload)
+        except error.HTTPError as exc:
+            detail = _http_error_detail(exc)
+            if exc.code == 400 and "response_format" in payload:
+                fallback_payload = dict(payload)
+                fallback_payload.pop("response_format", None)
+                try:
+                    raw = self._post_chat_completion(fallback_payload)
+                except error.HTTPError as fallback_exc:
+                    fallback_detail = _http_error_detail(fallback_exc)
+                    raise RuntimeError(
+                        "semantic query request failed: "
+                        f"HTTP {exc.code}: {detail}; fallback HTTP {fallback_exc.code}: {fallback_detail}"
+                    ) from fallback_exc
+            else:
+                raise RuntimeError(f"semantic query request failed: HTTP {exc.code}: {detail}") from exc
+        data = json.loads(raw)
+        content = data["choices"][0]["message"]["content"]
+        return _parse_json_object(content)
+
+    def _post_chat_completion(self, payload: dict[str, Any]) -> str:
+        body = json.dumps(payload).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        req = request.Request(f"{self.base_url}/v1/chat/completions", data=body, headers=headers, method="POST")
+        try:
+            with request.urlopen(req, timeout=self.timeout_seconds) as response:
+                return response.read().decode("utf-8")
+        except error.HTTPError:
+            raise
+        except error.URLError as exc:
+            raise RuntimeError(f"semantic query request failed: {exc}") from exc
+
+
 def admit_semantic_proposal(
     *,
     kb_id: str,
@@ -273,6 +369,67 @@ def admit_semantic_proposal(
     )
 
 
+def admit_semantic_query_response(
+    *,
+    question: str,
+    proposal: dict[str, Any],
+    source_records: list[SourceRecord],
+) -> dict[str, Any]:
+    """Validate a query-time semantic answer against exact source quotes."""
+
+    source_by_id = {record.record_id: record for record in source_records}
+    supported: list[dict[str, str]] = []
+    rejected: list[dict[str, str]] = []
+    for index, item in enumerate(_items(proposal, "support"), start=1):
+        source_record_id = _text(item.get("source_record_id"))
+        source_quote = _text(item.get("source_quote"))
+        source_text = str(source_by_id.get(source_record_id, SourceRecord("", "", {})).payload.get("text", ""))
+        if source_record_id in source_by_id and source_quote and _squash(source_quote) in _squash(source_text):
+            supported.append({"source_record_id": source_record_id, "source_quote": source_quote})
+        else:
+            rejected.append(
+                {
+                    "index": str(index),
+                    "source_record_id": source_record_id,
+                    "reason": "unsupported_source_quote",
+                }
+            )
+
+    requested_status = _text(proposal.get("status")).casefold()
+    answer = _text(proposal.get("answer"))
+    if answer and supported:
+        status = "answered"
+        returned_answer: str | None = answer
+    elif supported or requested_status == "evidence_available":
+        status = "evidence_available"
+        returned_answer = None
+    else:
+        status = "coverage_gap"
+        returned_answer = None
+
+    notes = [
+        "Semantic query planner response was admitted only after exact source_quote validation.",
+        "No query-time writes or durable facts were created.",
+    ]
+    for note in proposal.get("notes") or []:
+        note_text = _text(note)
+        if note_text:
+            notes.append(note_text)
+    if rejected:
+        notes.append(f"Rejected {len(rejected)} unsupported semantic support row(s).")
+
+    return {
+        "schema_version": "semantic_query_response_v1",
+        "question": str(question),
+        "status": status,
+        "answer": returned_answer,
+        "source_record_ids": _dedupe([item["source_record_id"] for item in supported]),
+        "support": supported,
+        "rejected_support": rejected,
+        "notes": notes,
+    }
+
+
 def semantic_compile_error_payload(exc: Exception) -> dict[str, Any]:
     return SemanticCompileAdmission(
         status="error",
@@ -326,6 +483,47 @@ def _semantic_messages(
             "identifiers": ["id", "subject", "identifier", "value", "source_record_id", "source_quote"],
             "uncertainties": ["id", "kind", "description", "source_record_id", "source_quote"],
         },
+        "source_records": rows,
+    }
+    return [{"role": "system", "content": system}, {"role": "user", "content": json.dumps(user, ensure_ascii=False)}]
+
+
+def _semantic_query_messages(
+    *,
+    kb_id: str,
+    question: str,
+    source_records: list[SourceRecord],
+    artifact_bundle: CompiledArtifactBundle,
+    semantic_fact_limit: int,
+) -> list[dict[str, str]]:
+    rows = [
+        {
+            "record_id": record.record_id,
+            "section": record.payload.get("section", ""),
+            "label": record.payload.get("label", ""),
+            "text": record.payload.get("text", ""),
+        }
+        for record in source_records
+    ]
+    facts = [*artifact_bundle.world_facts, *artifact_bundle.epistemic_facts][:semantic_fact_limit]
+    system = (
+        "You answer questions for Prethinker using only the supplied source_records and admitted semantic facts. "
+        "Return only JSON. Do not invent facts, do not use outside knowledge, and do not write Prolog. "
+        "If the answer is not supported by exact source text, return status coverage_gap or evidence_available. "
+        "Every support row must include source_record_id and source_quote, where source_quote is an exact substring "
+        "of that source record's text."
+    )
+    user = {
+        "task": "Answer the question from source-grounded evidence only.",
+        "kb_id": kb_id,
+        "question": str(question),
+        "schema": {
+            "status": "answered | evidence_available | coverage_gap",
+            "answer": "string or null; concise source-grounded answer when status is answered",
+            "support": ["source_record_id", "source_quote"],
+            "notes": ["optional short caveats"],
+        },
+        "admitted_semantic_facts": facts,
         "source_records": rows,
     }
     return [{"role": "system", "content": system}, {"role": "user", "content": json.dumps(user, ensure_ascii=False)}]

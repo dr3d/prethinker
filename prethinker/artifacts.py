@@ -81,12 +81,22 @@ def build_compiled_artifact_bundle(
     epistemic_facts.extend(str(fact) for fact in semantic_compile.get("epistemic_facts") or [])
 
     ledger_facts = _source_record_ledger_facts(source_records)
+    default_query_mode = "deterministic_extractive_source_record"
+    query_time_llm = False
+    query_time_policy = "exact_source_record_overlap_then_extractive_answer"
+    if compile_mode == "semantic" and semantic_status == "completed":
+        default_query_mode = "semantic_source_anchored_query_planner"
+        query_time_llm = True
+        query_time_policy = "llm_query_planner_with_exact_source_quote_admission_no_writes"
     query_policy = {
         "schema_version": "query_policy_v1",
         "answer_surfaces": ["world", "epistemic", "ledgers", "source_records"],
         "compile_mode": compile_mode,
-        "default_query_mode": "deterministic_extractive_source_record",
-        "llm_synthesis": False,
+        "default_query_mode": default_query_mode,
+        "query_time_llm": query_time_llm,
+        "query_time_policy": query_time_policy,
+        "llm_synthesis": query_time_llm,
+        "llm_synthesis_boundary": "source_quote_admitted_conversational_rendering" if query_time_llm else "disabled",
         "qa_writes_allowed": False,
         "compatibility_adapters": "disabled",
     }
