@@ -1776,6 +1776,8 @@ QUERY_INTENT_TYPES = {
     "amount_inventory",
     "ratio_calculation",
     "duration_quantity",
+    "biography_history",
+    "employment_history",
     "role_transition",
     "board_nominee_path",
     "named_role_roster",
@@ -1975,6 +1977,22 @@ def _query_intents_from_structured_queries(
                         "source": source,
                     }
                 )
+            elif predicate == "source_record_employment_history_support":
+                terms = [
+                    str(value).strip()
+                    for value in args
+                    if str(value).strip() and not _is_prolog_variable(str(value).strip())
+                ]
+                intents.append(
+                    {
+                        "intent_type": "biography_history",
+                        "target_terms": terms[:12],
+                        "answer_constraints": [],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
     return intents
 
 
@@ -2043,6 +2061,12 @@ def _note_marker_scope_from_intent(intent: dict[str, Any]) -> str:
         if value.startswith("footnote_"):
             return "numbered"
     return "all"
+
+
+def _query_intent_constraints(intent: dict[str, Any] | None) -> set[str]:
+    if not isinstance(intent, dict):
+        return set()
+    return {str(item).strip() for item in intent.get("answer_constraints", []) or [] if str(item).strip()}
 
 
 def run_one_question(
@@ -16667,7 +16691,7 @@ def _source_record_messy_summary_companions(
         _source_record_identifier_set_companion(runtime, utterance=utterance),
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
-        _source_record_biography_history_companion(runtime, utterance=utterance),
+        _source_record_biography_history_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_amount_inventory_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_ratio_calculation_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_duration_quantity_companion(runtime, utterance=utterance, query_intents=query_intents),
@@ -17916,20 +17940,19 @@ def _source_record_biography_history_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    asks_prior_employer = bool(
-        re.search(r"\b(?:prior|previous|former|earlier|pre[- ]?joining)\b", text)
-        and re.search(r"\b(?:employer|employers|employed|employment|worked|work history)\b", text)
-    )
-    asks_role_history = bool(
-        re.search(r"\b(?:role|roles|title|titles|position|positions)\b", text)
-        and re.search(r"\b(?:held|served|history|chronological|start|end|dates?)\b", text)
-    )
-    if not (asks_prior_employer or asks_role_history or "biographical paragraph" in text):
+    intent = _first_query_intent(query_intents, "biography_history", "employment_history")
+    if not intent:
         return None
+    constraints = _query_intent_constraints(intent)
+    asks_prior_employer = bool(constraints & {"prior_employer", "prior_employers", "employer_history"})
+    asks_role_history = bool(constraints & {"role_history", "roles", "positions", "titles"})
+    include_all_history = not (asks_prior_employer or asks_role_history) or bool(
+        constraints & {"all", "biographical_paragraph"}
+    )
 
-    query_tokens = set(_query_atom_tokens(utterance))
+    query_tokens = _query_intent_target_tokens(intent)
     support_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str, str]] = set()
 
@@ -17949,7 +17972,7 @@ def _source_record_biography_history_companion(
                 and entry.get("HistoryKind") in {"prior_employer", "prior_employer_role", "prior_employer_group"}
             )
             or (asks_role_history and entry.get("HistoryKind") in {"appointment_role", "current_role", "role_history"})
-            or ("biographical paragraph" in text and (entry.get("Employer") or entry.get("Role")))
+            or (include_all_history and (entry.get("Employer") or entry.get("Role")))
         ]
         for entry in selected_entries:
             key = (
@@ -18023,9 +18046,10 @@ def _source_record_biography_history_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only biography/employment-history support summarized role and prior-employer "
-                    "phrases from admitted source_record_text_atom rows; no durable employment fact was written"
+                    "phrases from admitted source_record_text_atom rows after structured query-intent activation; "
+                    "no durable employment fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
@@ -18045,7 +18069,7 @@ def _source_record_biography_history_signal(atom: str) -> bool:
 
 def _source_record_biography_row_matches_question(*, atom: str, query_tokens: set[str]) -> bool:
     if not query_tokens:
-        return False
+        return True
     row_tokens = set(_query_atom_tokens(atom))
     focus_tokens = {
         token

@@ -247,13 +247,15 @@ record routes are:
 - `_source_record_amount_inventory_companion`
 - `_source_record_ratio_calculation_companion`
 - `_source_record_duration_quantity_companion`
+- `_source_record_biography_history_companion`
 
 These routes no longer activate from raw English regex over the question. They
 require structured query intent, either emitted by Semantic IR or inferred from
 structured Prolog query templates / evidence-bundle templates. The deterministic
 code still parses artifact structure and source-record rows; it does not decide
 that English words like "asterisk", "under", "list", "resign", "board path",
-"named individual", "per-unit", or "duration" mean those routes should fire.
+"named individual", "per-unit", "duration", or "prior employer" mean those
+routes should fire.
 
 Latest audit deltas:
 
@@ -262,6 +264,7 @@ initial audit:       556 regex hits / 152 semantic_trigger
 after first patch:   549 regex hits / 147 semantic_trigger
 after role patch:    526 regex hits / 127 semantic_trigger
 after amount patch:  513 regex hits / 115 semantic_trigger
+after bio patch:     509 regex hits / 111 semantic_trigger
 ```
 
 The role-transition source parsers still use regex over normalized admitted

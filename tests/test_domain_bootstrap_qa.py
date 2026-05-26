@@ -2976,6 +2976,16 @@ def test_source_record_messy_summary_extracts_biography_role_history() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="List every role Dr. Rivera has held, in chronological order, with start and end dates.",
+        query_intents=[
+            {
+                "intent_type": "biography_history",
+                "target_terms": ["Dr Rivera"],
+                "answer_constraints": ["role_history"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3003,6 +3013,16 @@ def test_source_record_messy_summary_extracts_prior_employers_from_biography() -
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="List every prior employer of Dr. Rivera named in the document.",
+        query_intents=[
+            {
+                "intent_type": "biography_history",
+                "target_terms": ["Dr Rivera"],
+                "answer_constraints": ["prior_employer"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3027,6 +3047,16 @@ def test_source_record_messy_summary_extracts_prior_employer_list_after_acquisit
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="List every prior employer named in the biographical paragraph.",
+        query_intents=[
+            {
+                "intent_type": "biography_history",
+                "target_terms": ["biographical paragraph"],
+                "answer_constraints": ["prior_employer", "biographical_paragraph"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3049,6 +3079,21 @@ def test_source_record_messy_summary_biography_does_not_fire_for_amount_question
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What cash bonus amount is payable on December 31, 2026?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_employment_history_support" for item in companions)
+
+
+def test_source_record_messy_summary_biography_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "dr_rivera_has_served_as_chief_growth_strategy_officer_since_march_24_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every role Dr. Rivera has held, in chronological order, with start and end dates.",
     )
 
     assert not any(item["result"]["predicate"] == "source_record_employment_history_support" for item in companions)
