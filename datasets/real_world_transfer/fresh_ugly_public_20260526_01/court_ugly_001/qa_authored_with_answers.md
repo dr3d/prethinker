@@ -1,0 +1,228 @@
+# Authored QA With Answers - court_ugly_001
+
+## Questions and Reference Answers
+
+**1. What is the case number of this proceeding in the U.S. District Court for the Northern District of Oklahoma?**
+
+**Reference answer.**
+Case No. 4:05-CV-00329-GKF-SH. In the Joint Motion caption it appears as '4:05-CV-00329-GKF-SH.' In the Exhibit 1 (Consent Judgment) caption it appears as '05-CV-0329-GKF-SH' — same case but with two formatting variations (no leading '4:' in the Exhibit; one fewer zero in the case digits). Both refer to the same docket.
+
+**Source coordinates.** Joint Motion caption; Exhibit 1 Consent Judgment caption
+
+**Pressure tags.** case_number_format_drift, two_captions_same_case
+
+**2. Who are the two named Plaintiffs?**
+
+**Reference answer.**
+(1) The State of Oklahoma ('State'); and (2) the Oklahoma Secretary of Energy and Environment, in his capacity as trustee for natural resources for the State of Oklahoma ('Secretary'). Together they are referred to as the 'Plaintiffs.' The Secretary is named in his trustee capacity, not in a personal capacity, and is not named by name.
+
+**Source coordinates.** Opening paragraph of Joint Motion; Recital A of Exhibit 1
+
+**Pressure tags.** plaintiff_in_official_capacity, trustee_role, unnamed_natural_person
+
+**3. Who are the four defendant entities collectively referred to as "Tyson"?**
+
+**Reference answer.**
+(1) Tyson Foods, Inc.; (2) Tyson Poultry, Inc.; (3) Tyson Chicken, Inc.; and (4) Cobb-Vantress, Inc. Note that Cobb-Vantress is included in the 'Tyson' collective label despite its name not starting with 'Tyson.' The Sidley Austin signature block attribution lists the entities in a different order — 'Tyson Foods, Inc., Tyson Chicken, Inc., Tyson Poultry, Inc., and Cobb-Vantress, Inc.' (Poultry and Chicken swapped). The header line at the start of the Defendants' signature block uses 'Tyson Poultry Inc.' (no comma) and 'Cobb-Vantress Inc.' (no comma), while the body of the Motion and the attribution line at the end use 'Tyson Poultry, Inc.' and 'Cobb-Vantress, Inc.' (with commas).
+
+**Source coordinates.** Opening paragraph; Recital A of Exhibit 1; defendants' signature block header and counsel attribution line
+
+**Pressure tags.** collective_label_includes_non_tyson_named_entity, name_order_drift, comma_punctuation_drift
+
+**4. What is the dollar amount of the one-time Monetary Relief Fund payment under the Consent Judgment?**
+
+**Reference answer.**
+$18,050,000.00 (Paragraph 4 of the Consent Judgment). The payment is made to the State for purposes 'including, but not limited to, remediation or conservation projects in the IRW and for payment of attorneys' fees and litigation costs in an amount to be determined either by order of the Court or by agreement between the State and its outside private lawyers.' Paragraph 5 explicitly excludes characterizations as penalties, fines, treble or multiple damages, forfeitures, or punitive recoveries.
+
+**Source coordinates.** Paragraph 4 of Exhibit 1; characterizations restricted by Paragraph 5
+
+**Pressure tags.** amount_with_cents_precision, purpose_open_ended_with_including, characterization_disclaimer_paragraph
+
+**5. What is the area of Tenkiller Ferry Lake, and what is the approximate total acreage of the Illinois River Watershed?**
+
+**Reference answer.**
+Tenkiller Ferry Lake (Lake Tenkiller): 12,900 acres. Illinois River Watershed (IRW): approximately 1,069,530 acres. Both figures appear in Recital A of Exhibit 1. The IRW acreage carries the qualifier 'approximately'; the lake acreage does not. The 8-Digit Hydrologic Unit Code for the IRW is also given as 11110103.
+
+**Source coordinates.** Recital A of Exhibit 1
+
+**Pressure tags.** two_acreage_figures_in_one_recital, approximate_vs_exact_qualifier_asymmetry, huc_identifier
+
+**6. In which paragraph of the Joint Motion is the December 29, 2025 filing of Tyson's Notice of Appeal recorded, and which document number is cited?**
+
+**Reference answer.**
+Numbered paragraph 4 of the 'In support' enumeration in the Joint Motion: 'Ten days later, on December 29, 2025, Tyson filed its Notice of Appeal of the Court's Final Judgment to the Tenth Circuit. Doc. 3199.' The phrasing 'Ten days later' anchors the date to the December 19, 2025 Final Judgment entry described in paragraph 3.
+
+**Source coordinates.** Joint Motion, numbered paragraph 4
+
+**Pressure tags.** relative_date_anchor, doc_number_cross_reference
+
+**7. In which paragraph of the Joint Motion is the 8-Digit Hydrologic Unit Code for the watershed disclosed? (Trick: is the HUC in the Motion or the Exhibit?)**
+
+**Reference answer.**
+The HUC (11110103) is NOT in the Joint Motion itself — it appears only in the Exhibit 1 Consent Judgment, Recital A. The Joint Motion (paragraphs 1-11) references the IRW conceptually but does not give the HUC. An extractor that searches the Joint Motion alone will not find it; the HUC is in the attached Consent Judgment document (Document 3268-1, separately paginated from Document 3268).
+
+**Source coordinates.** Exhibit 1 (Document 3268-1), Recital A; NOT in Joint Motion (Document 3268)
+
+**Pressure tags.** fact_in_exhibit_not_in_main_filing, separately_paginated_attachment, question_premise_check
+
+**8. The Joint Motion has two footnotes. Where are they located, and what does each address?**
+
+**Reference answer.**
+Footnote 1 is anchored to the citation 'Fed. R. Civ. P. 60(b)(5)-(6)' at the end of the second paragraph of the Joint Motion body. It addresses supplemental briefing ordered by the Court on February 5, 2026 with respect to the consent judgment proposed by the State and the George's defendants (Doc. 3265), and notes that the Parties to Settlement anticipate similarly submitting supplemental briefing on the issues identified by the Court in Doc. 3265. Footnote 2 is anchored to the end of numbered paragraph 10 ('consistent with the public interest'). It addresses the hearing date scheduling: the Parties request that any hearing on this Joint Motion be set for March 2, 2026 to align with hearing on the George's consent judgment, citing Doc. 3229, Doc. 3258, and Doc. 3263 to document the hearing reschedule chain.
+
+**Source coordinates.** Joint Motion, footnotes 1 and 2
+
+**Pressure tags.** two_footnotes_at_different_paragraphs, footnote_with_doc_chain, footnote_as_scheduling_logistics
+
+**9. Where in the document is the four-tier table of land application restrictions for litter, and which section heading does it sit under?**
+
+**Reference answer.**
+It is a three-row table (not four-tier — see qualification) in Paragraph 6 of the Exhibit 1 Consent Judgment, under section heading 'IV. LITTER REMOVAL.' The three rows cover Years 1 & 2 (40% cap), Years 3 & 4 (30% cap), and Years 5, 6 & 7 (20% cap). Each row has two columns: Time Period and Land Application Restrictions. The phrase 'four-tier' in the question premise is incorrect — the table is three-tier. An extractor should correct the premise rather than fabricate a fourth tier.
+
+**Source coordinates.** Exhibit 1, Section IV, Paragraph 6
+
+**Pressure tags.** question_premise_check, three_tier_not_four, section_paragraph_addressing
+
+**10. In which section of the Exhibit 1 Consent Judgment is the no-admission-of-liability disclaimer found, and what is the recital letter?**
+
+**Reference answer.**
+Recital B of the Exhibit 1 Consent Judgment (the 'WHEREAS'-equivalent recitals are lettered A–F, not Roman-numerated like the operative paragraphs). Recital B states: 'Tyson does not admit any liability to Plaintiffs arising out of the transactions or occurrences alleged in the Complaint. This Consent Judgment shall not be used against Tyson as evidence of liability, fault, or wrongdoing in any proceeding, and shall not have collateral estoppel or res judicata effect as to issues not expressly resolved herein.' The 'NOW, THEREFORE' clause introducing the operative paragraphs also restates: 'without admission by Tyson of the allegations in the Complaint.'
+
+**Source coordinates.** Exhibit 1, Recital B; 'NOW, THEREFORE' clause
+
+**Pressure tags.** recital_lettering_vs_numbered_paragraphs, no_admission_in_two_places, collateral_estoppel_disclaimer
+
+**11. List all of the Court document (Doc.) numbers referenced in the Joint Motion (including in footnotes), with a brief role for each.**
+
+**Reference answer.**
+(1) Doc. 2979 — January 18, 2023 Findings of Fact and Conclusions of Law, at 213; (2) Doc. 3161 — December 2024 Opinion and Order incorporating the 2023 Findings, at 2 and 6-7; (3) Doc. 3192 — December 19, 2025 Final Judgment in favor of the State, at 5 (injunction at 6-7); (4) Doc. 3199 — Tyson's December 29, 2025 Notice of Appeal; (5) Doc. 3203 — joint motion (Tyson + other Defendants) to stay the Judgment pending appeal; (6) Doc. 3229 — referenced in footnote 2: motion by Plaintiffs and the George's defendants to enter their consent judgment; (7) Doc. 3241 — January 16, 2026 order staying the monetary portions of the Judgment but not the injunctive portions; (8) Doc. 3249 — January 20, 2026 Plaintiffs' Notice of Appeal; (9) Doc. 3258 — referenced in footnote 2: order setting hearing on Doc. 3229 for February 2, 2026; (10) Doc. 3263 — referenced in footnote 2: order continuing the February 2, 2026 hearing to February 27, 2026; (11) Doc. 3265 — referenced in footnote 1: order on supplemental briefing concerning the George's consent judgment; (12) The Joint Motion itself is Doc. 3268; (13) Exhibit 1 (the Consent Judgment) is Doc. 3268-1 — page footer indicates 'Page 1 of 22.' Twelve cross-referenced docs plus the present filing.
+
+**Source coordinates.** Joint Motion paragraphs 1-7, footnotes 1 and 2; page footers
+
+**Pressure tags.** dense_doc_cross_references, footnote_doc_chain, exhibit_as_separate_doc
+
+**12. List the Tenth Circuit appellate case numbers under which the multi-defendant motion to stay was filed on January 23, 2026.**
+
+**Reference answer.**
+Six adjacent case numbers per paragraph 8: 26-5000, 26-5001, 26-5002, 26-5003, 26-5004, and 26-5005. The case caption used for these is 'State of Oklahoma, et al. v. Tyson Foods, Inc., et al.' Paragraph 4 of the Consent Judgment further identifies Tyson's specific notice of appeal as Case No. 26-5002 — i.e., 26-5002 is the Tyson appeal specifically, and the other five (26-5000, 26-5001, 26-5003, 26-5004, 26-5005) belong to the other defendants. Six numbers for six defendant groups appealing in parallel.
+
+**Source coordinates.** Joint Motion paragraph 8; Exhibit 1 paragraph 4
+
+**Pressure tags.** adjacent_appellate_case_numbers, parallel_defendant_appeals, specific_assignment_via_consent_judgment
+
+**13. List all four Plaintiffs' attorneys at the Office of Attorney General (Oklahoma) with their titles and OBA numbers.**
+
+**Reference answer.**
+(1) Gentner Drummond, OBA #16645 — Attorney General; (2) Amie Ely, OBA #35840 — First Assistant Attorney General; (3) Garry M. Gaskins, II, OBA #20212 — Solicitor General; (4) Jennifer L. Lewis, OBA #32819 — Deputy Attorney General. Office address: 313 N.E. 21st Street, Oklahoma City, OK 73105. Office phone: (405) 521-3921. Email contact: Jennifer.Lewis@oag.ok.gov. Note that the four-name block is signed only once (by Drummond via '/s/'); the other three are listed but not separately signed.
+
+**Source coordinates.** Joint Motion signature block
+
+**Pressure tags.** four_attorney_block_one_signature, oba_bar_numbers, name_with_generational_suffix
+
+**14. List the four counsel for Defendants at Sidley Austin LLP, with their email addresses.**
+
+**Reference answer.**
+The Sidley Austin LLP counsel block lists five names: (1) Mark D. Hopson — mhopson@sidley.com; (2) Frank R. Volpe — fvolpe@sidley.com; (3) Gordon D. Todd — gtodd@sidley.com (signed via '/s/'); (4) Peter A, Bruland — pbruland@sidley.com (note the typo: 'Peter A,' with a comma in place of an expected period after the middle initial); (5) Cody M. Akins — cakins@sidley.com. Five names, not four. The question premise of 'four counsel' is incorrect; the source lists five Sidley Austin attorneys plus separately A. Scott McDaniel at McDaniel Acord, PLLC. An extractor should preserve the typo 'Peter A,' verbatim.
+
+**Source coordinates.** Defendants' signature block, Sidley Austin LLP listing
+
+**Pressure tags.** question_premise_check_five_not_four, preserved_typo_middle_initial, two_law_firms_one_signature_block
+
+**15. List, in source order, the seven counties (across two states) that contain the IRW.**
+
+**Reference answer.**
+Per Recital A of Exhibit 1: Oklahoma (northeastern): (1) Adair, (2) Cherokee, (3) Delaware, (4) Sequoyah — four counties. Arkansas (northwestern): (1) Crawford, (2) Benton, (3) Washington — three counties. Total: seven counties across two states. The Oklahoma counties are listed in Oklahoma-then-Arkansas order. The watershed spans the Oklahoma-Arkansas border with its headwaters in Northwest Arkansas and its terminus at Tenkiller Ferry Lake in Oklahoma.
+
+**Source coordinates.** Exhibit 1, Recital A
+
+**Pressure tags.** counties_across_state_boundary, headwater_to_terminus_geography, inline_parenthetical_list
+
+**16. Reconstruct the chronological sequence of court events from January 18, 2023 through January 23, 2026.**
+
+**Reference answer.**
+Per Joint Motion paragraphs 1-8: (1) January 18, 2023 — Court issued Findings of Fact and Conclusions of Law (Doc. 2979) in favor of the State on five claims and directed parties to meet on remedies. (2) December 2024 — six-day evidentiary hearing. (3) [Sometime after] — Court entered Opinion and Order (Doc. 3161) incorporating the 2023 Findings. (4) December 19, 2025 — Court entered Final Judgment (Doc. 3192) in favor of the State plus permanent injunction against all Defendants. (5) December 29, 2025 (10 days later) — Tyson filed Notice of Appeal (Doc. 3199). (6) December 29, 2025 (same day) — Tyson + other Defendants jointly moved to stay the Judgment pending appeal (Doc. 3203). (7) January 16, 2026 — Court stayed the monetary portions but declined to stay the injunctive portions (Doc. 3241). (8) January 20, 2026 — Plaintiffs filed Notice of Appeal (Doc. 3249). (9) January 23, 2026 — Tyson + other Defendants moved the Tenth Circuit for a stay pending appeal (Tenth Circuit Nos. 26-5000 through 26-5005). The Joint Motion itself was filed February 12, 2026 (per Certificate of Service).
+
+**Source coordinates.** Joint Motion paragraphs 1-8; Certificate of Service
+
+**Pressure tags.** multi_year_chronology, doc_number_per_event, monetary_vs_injunctive_stay_distinction, ten_days_relative_anchor
+
+**17. The Joint Motion describes a hearing date chain for the George's defendants' consent judgment. What were the three different dates considered, and what was the latest date the State was "amenable to"?**
+
+**Reference answer.**
+Per footnote 2: (1) Doc. 3258 set the hearing on the George's consent judgment for February 2, 2026; (2) Doc. 3263 continued that hearing to February 27, 2026; (3) the Joint Motion (Tyson) requests March 2, 2026 if the Court sets a hearing on its own motion, and asks that the George's hearing also be held on March 2, 2026 in the interest of judicial economy. The latest date the State expressed willingness for is March 2, 2026 ('The State is amenable to the March 2, 2026, date.'). The reschedule chain runs Feb 2 → Feb 27 → Mar 2.
+
+**Source coordinates.** Joint Motion footnote 2
+
+**Pressure tags.** hearing_reschedule_chain, three_dates_in_one_footnote, amenable_qualifier
+
+**18. Within how many days of the Effective Date must Tyson withdraw as a movant from the request(s) for a stay of the December 19, 2025 Judgment?**
+
+**Reference answer.**
+Five (5) days. Recital F of Exhibit 1 states: 'Within five (5) days of the Effective Date, Tyson will withdraw as a movant from the request(s) for a stay of the December 19, 2025 Judgment.' The number is given both as English ('five') and in parentheses ('(5)').
+
+**Source coordinates.** Exhibit 1, Recital F
+
+**Pressure tags.** short_relative_deadline, english_plus_parenthetical_numeric, obligation_at_effective_date
+
+**19. Within how many days of the Effective Date must Tyson make the Monetary Relief Fund payment, and what conditional clause might suspend that obligation?**
+
+**Reference answer.**
+Thirty (30) days after the Effective Date. Two pre-conditions are stated in Paragraph 4: (a) no appeal or objection regarding the Consent Judgment is pending on the thirtieth day; and (b) Tyson's obligations are otherwise enforceable. If an appeal or objection is pending, the obligations under Paragraph 4 are suspended 'until thirty (30) days after the date when such appeal or objection is resolved.' If Tyson's obligations under Paragraph 4 are no longer enforceable as a result of the appeal or objection, the suspension does not lift (the obligations expire instead). The 30-day deadline is also the deadline for Tyson to dismiss its notice of appeal in the Tenth Circuit Case No. 26-5002.
+
+**Source coordinates.** Exhibit 1, Paragraph 4
+
+**Pressure tags.** thirty_day_deadline_with_two_preconditions, suspension_with_no_lift_condition, two_obligations_in_one_paragraph
+
+**20. What are the year-by-year land application restriction percentages under Paragraph 6 of the Consent Judgment, and what is the geographic scope of the restriction?**
+
+**Reference answer.**
+Three tiers in the litter-removal restriction table: Years 1 & 2 — no more than 40% of litter removed each year from IRW Growers' poultry houses may be land applied to soils within either the Oklahoma or Arkansas portions of the IRW; Years 3 & 4 — no more than 30%; Years 5, 6 & 7 — no more than 20%. Geographic scope of the restriction: soils within either the Oklahoma or Arkansas portions of the IRW (i.e., both sides of the watershed). Additional constraint: none of the litter exported from the IRW to meet these requirements may be land applied to soils located within the Oklahoma portion of any Oklahoma Nutrient Sensitive Watershed (ONSW). 'Year 1' is the 12-month period commencing on the Effective Date. The restrictions may be extended by mutual written agreement of the Parties or under conditions in Paragraph 24 (not extracted here).
+
+**Source coordinates.** Exhibit 1, Paragraph 6 and table
+
+**Pressure tags.** three_tier_declining_caps, dual_state_geographic_scope, export_side_constraint, extension_clause
+
+**21. The Consent Judgment includes a "least restrictive" election clause in Paragraph 6. What does it allow Tyson to do, and under what conditions?**
+
+**Reference answer.**
+Paragraph 6 allows Tyson, upon written election, to elect to apply 'the least restrictive land application restrictions contained within any binding and enforceable consent judgment or settlement agreement between the State and any other company named as a defendant in this case that continues to raise poultry in the IRW after the Effective Date' — instead of the percentages in Paragraph 6's table. The conditions are: (a) the alternative restrictions must come from a 'binding and enforceable' instrument; (b) the instrument must be between the State and another named defendant in this case; (c) that defendant must continue to raise poultry in the IRW after the Effective Date; (d) Tyson must make the election in writing. The clause functions as a most-favored-nation (MFN) provision — if a later defendant negotiates lighter restrictions, Tyson can opt in.
+
+**Source coordinates.** Exhibit 1, Paragraph 6 opening sentence
+
+**Pressure tags.** mfn_election_clause, four_part_conditional_trigger, written_election_required
+
+**22. The Monetary Relief Fund excludes certain characterizations under Paragraph 5. What five characterizations are explicitly excluded?**
+
+**Reference answer.**
+Paragraph 5 states: 'No part of the Monetary Relief Fund shall constitute, nor shall it be construed as, or treated as constituting payment for' — (1) penalties; (2) fines; (3) treble or multiple damages; (4) forfeitures; (5) punitive recoveries. Five excluded characterizations. The exclusions are consistent with positioning the Fund as a remedial payment, not a punitive one — which has tax and insurance-coverage implications outside the four corners of the document. The characterization-restriction operates 'shall not constitute, nor shall it be construed as, or treated as' — a three-verb phrasing intended to capture different doctrinal angles (interpretation, classification, treatment).
+
+**Source coordinates.** Exhibit 1, Paragraph 5
+
+**Pressure tags.** five_excluded_characterizations, three_verb_negation_construction, remedial_vs_punitive_framing
+
+**23. Compare the case number in the Joint Motion caption against the case number in the Exhibit 1 Consent Judgment caption. Are they the same? Discuss any discrepancy.**
+
+**Reference answer.**
+Functionally the same case but formatted differently. Joint Motion caption: 'Case No. 4:05-CV-00329-GKF-SH' (with leading '4:' division identifier, hyphenated, and the case digits as '00329' with two leading zeros). Exhibit 1 Consent Judgment caption: 'Case No. 05-CV-0329-GKF-SH' (no leading '4:' division identifier, case digits as '0329' with one leading zero only). The page footers on both documents use the longer canonical form '4:05-cv-00329-GKF-SH.' The Exhibit's caption appears to use an abbreviated form (likely a drafting carryover). An extractor should preserve both verbatim and tag the discrepancy as a known drafting inconsistency.
+
+**Source coordinates.** Joint Motion caption; Exhibit 1 caption; page footers
+
+**Pressure tags.** case_number_format_drift_within_document, abbreviated_caption_in_exhibit, page_footer_canonical_form
+
+**24. The defendants' four corporate names are listed in one order in the Joint Motion opening paragraph and in a different order in the signature block attribution ("Counsel for Defendants..."). Identify both orderings and any drift in punctuation.**
+
+**Reference answer.**
+Opening paragraph order: 'Tyson Foods, Inc., Tyson Poultry, Inc., Tyson Chicken, Inc., and Cobb-Vantress, Inc.' (Poultry before Chicken). Header of defendants' signature block: 'Tyson Foods, Inc., Tyson Poultry Inc., Tyson Chicken, Inc., and Cobb-Vantress Inc.' (Poultry before Chicken; but note 'Tyson Poultry Inc.' and 'Cobb-Vantress Inc.' lack the comma before 'Inc.' that is present elsewhere). Counsel for Defendants attribution line: 'Tyson Foods, Inc., Tyson Chicken, Inc., Tyson Poultry, Inc., and Cobb-Vantress, Inc.' (Chicken before Poultry — swapped; commas restored). Three orderings: (Foods, Poultry, Chicken, Cobb-Vantress) in opening paragraph and header; (Foods, Chicken, Poultry, Cobb-Vantress) in counsel attribution. Punctuation drift: commas before 'Inc.' appear/disappear between the three locations. Drafting inconsistency.
+
+**Source coordinates.** Joint Motion opening paragraph; defendants' signature block header; counsel-for-defendants attribution
+
+**Pressure tags.** entity_order_swap, comma_punctuation_drift, three_locations_three_renderings
+
+**25. The Joint Motion invokes both FRCP 60(b) and FRCP 62.1(a)(3). How do these two rules interact procedurally given that an appeal is pending, and what specific outcome is the Court being asked to issue?**
+
+**Reference answer.**
+FRCP 60(b)(5)-(6) is the substantive basis on which the parties seek relief from the December 19, 2025 Final Judgment — they argue that the Consent Judgment they have agreed to constitutes a change in circumstances that makes continued enforcement of the prior Judgment no longer equitable. But because Tyson's December 29, 2025 Notice of Appeal divested the district court of jurisdiction over the matters on appeal (per Griggs v. Provident, 459 U.S. 56 (1982)), the district court cannot itself grant the Rule 60(b) motion while the appeal is pending. FRCP 62.1(a)(3) provides the procedural bridge: it authorizes the district court to issue an 'indicative ruling' — a statement that it 'would grant the motion if the court of appeals remands for that purpose' or that 'the motion raises a substantial issue.' If the district court issues such an indicative ruling, the Tenth Circuit may then remand under FRAP 12.1(b) and 28 U.S.C. § 2106 to allow the district court to formally enter the Consent Judgment. The specific outcome sought from the Court: an indicative ruling stating that it 'would grant the parties' Rule 60(b) motion if the Tenth Circuit remands for that purpose.' The Court is NOT being asked to grant the Rule 60(b) motion directly at this stage; it is being asked to signal its intent.
+
+**Source coordinates.** Joint Motion second paragraph, third paragraph, paragraph 11, and Conclusion
+
+**Pressure tags.** procedural_rule_interaction, appeal_divests_jurisdiction_doctrine, indicative_ruling_vs_actual_ruling, signal_then_remand_workflow

@@ -1,0 +1,228 @@
+# Authored QA With Answers - nlrb_ugly_001
+
+## Questions and Reference Answers
+
+**1. What week does this NLRB Summary cover?**
+
+**Reference answer.**
+Week of February 23 - 27, 2026. The date range is in the document title. Individual decisions within the Summary are dated to specific days within (and adjacent to) this range — February 23, February 24, February 26, and one Appellate Court decision also on February 26.
+
+**Source coordinates.** Document title; individual decision date lines
+
+**Pressure tags.** title_range_vs_decision_dates
+
+**2. How many Summarized Board Decisions are reported (excluding the Appellate Court Decisions section)?**
+
+**Reference answer.**
+Four: (1) Browning-Ferris Industries (32-CA-160759 and 32-RC-109684; 374 NLRB No. 46) February 23; (2) GE Appliances, a Haier Company (09-CA-284214 and 09-CA-298179; 374 NLRB No. 47) February 24; (3) Hoffmann Brothers Heating and Air Conditioning (14-CA-344872) February 23; (4) Starbucks Corporation (14-CA-294830, et al.) February 26. The Brown-Forman entry is under 'Appellate Court Decisions,' which is a separate section.
+
+**Source coordinates.** Summarized Board Decisions section
+
+**Pressure tags.** section_boundary_disambiguation, appellate_vs_summarized_board
+
+**3. Which case in this Summary involved a "second remand from the D.C. Circuit Court"?**
+
+**Reference answer.**
+Browning-Ferris Industries of California, Inc. d/b/a BFI Newby Island Recyclery and FPR-II, LLC d/b/a Leadpoint Business Services (32-CA-160759 and 32-RC-109684; 374 NLRB No. 46). The case is described in the first paragraph as a 'test-of-certification case on second remand from the D.C. Circuit Court.' The first remand led to the 2020 decision (Browning-Ferris III, 369 NLRB No. 139); the second remand led to the present February 23, 2026 decision.
+
+**Source coordinates.** Browning-Ferris entry, paragraph 1
+
+**Pressure tags.** multiple_remands_in_one_case, case_lineage_tracking
+
+**4. In the GE Appliances case, what Section(s) of the NLRA did the Board find the Respondent violated?**
+
+**Reference answer.**
+Section 8(a)(5) and (1), within the meaning of Section 8(d). Three violations were adopted: (a) increasing certain employees' contractually established pay without the Union's consent (Section 8(a)(5) and (1), within the meaning of Section 8(d) — a unilateral change AND a midterm modification on the same facts); (b) unilaterally changing employees' pay (a separate Section 8(a)(5) and (1) finding); (c) unreasonably delaying in providing information requested by the Union (Section 8(a)(5) and (1)). The Board declined to extend the pay increases to all unit employees as a remedy.
+
+**Source coordinates.** GE Appliances entry
+
+**Pressure tags.** multi_section_violation, 8a5_and_1_within_meaning_of_8d, three_distinct_violation_findings
+
+**5. Who issued the underlying decision adopted in the Hoffmann Brothers case, and on what date?**
+
+**Reference answer.**
+Administrative Law Judge Andrew S. Gollin issued the underlying decision on January 5, 2026. No exceptions were filed, so the Board adopted the ALJ's findings, conclusions, and recommended Order without further substantive review. The Board's adoption was issued February 23, 2026 (consistent with the week-of-Feb-23-27 Summary).
+
+**Source coordinates.** Hoffmann Brothers entry
+
+**Pressure tags.** alj_name_with_decision_date, no_exceptions_adoption_path
+
+**6. Where in the document does the Board's authoritative-substitute disclaimer appear, and what phone number does it route inquiries to?**
+
+**Reference answer.**
+Immediately under the document title, before the 'Summarized Board Decisions' subheading. The disclaimer reads: 'The Summary of NLRB Decisions is provided for informational purposes only and is not intended to substitute for the opinions of the NLRB. Inquiries should be directed to the Office of the Executive Secretary at 202‑273‑1940.' Phone number: 202-273-1940 (note: rendered with non-breaking hyphens in the source).
+
+**Source coordinates.** Page preamble, between title and first decision entry
+
+**Pressure tags.** informational_only_disclaimer, non_breaking_hyphen_in_phone
+
+**7. In which paragraph does the Board state that the Browning-Ferris holding is "expressly limited" to a specific scope?**
+
+**Reference answer.**
+Paragraph 3 of the Browning-Ferris entry (the paragraph immediately before the 'Chairman Murphy and Members Prouty and Mayer participated' line). The relevant sentence: 'The Board expressly limited the holding to the facts of the instant case.' This is a case-specific limitation — the Board is not announcing a new generally-applicable rule, only applying the clarified Browning-Ferris I standard to these specific parties on these specific facts.
+
+**Source coordinates.** Browning-Ferris entry, paragraph 3
+
+**Pressure tags.** case_specific_holding_limitation, narrow_holding_signal
+
+**8. The GE Appliances entry references both a unilateral change and a midterm modification. In which sentence are both described as resting on the same facts?**
+
+**Reference answer.**
+Sentence 2 of paragraph 1 of the GE Appliances entry: 'Noting the absence of exceptions to the judge's finding of both a unilateral change and a midterm modification on the same facts, the Board also adopted the judge's conclusion that the Respondent violated Section 8(a)(5) and (1) by unilaterally changing employees' pay.' The 'on the same facts' language is the key — these are two doctrinal characterizations of the same underlying employer conduct (the pay increase without Union consent).
+
+**Source coordinates.** GE Appliances entry, paragraph 1, sentence 2
+
+**Pressure tags.** dual_doctrinal_characterization_same_facts, no_exceptions_procedural_locks
+
+**9. Where in the Summary are the three Board Members who participated in the Browning-Ferris and GE Appliances decisions named?**
+
+**Reference answer.**
+At the end of each substantive Board decision entry (just above the 'Charges filed by' attribution line), as a 'Chairman Murphy and Members Prouty and Mayer participated' line. Specifically: end of Browning-Ferris entry; end of GE Appliances entry; end of Starbucks entry. The same three-member panel sat for all three cases in this week's Summary. The Hoffmann Brothers entry — a no-exceptions adoption — does not name the participating Board Members (consistent with NLRB convention for routine adoptions).
+
+**Source coordinates.** Tail of each substantive entry
+
+**Pressure tags.** participation_line_at_entry_tail, absence_for_no_exceptions_adoption
+
+**10. In which section of the document does the Brown-Forman / Sixth Circuit opinion appear?**
+
+**Reference answer.**
+Under the section heading 'Appellate Court Decisions' — a distinct section that follows the 'Summarized Board Decisions' section. Appellate Court Decisions cover federal Court of Appeals rulings on prior Board decisions; the underlying Board decision (Brown-Forman Corp. d/b/a Woodford Reserve Distillery, Board No. 09-CA-307806, reported at 373 NLRB No. 145) is older than this week's Summary.
+
+**Source coordinates.** Appellate Court Decisions section
+
+**Pressure tags.** section_taxonomy, circuit_court_review_separate_from_board_decisions
+
+**11. List all case identifiers (case numbers and any NLRB citation) appearing in this Summary, with the geographic location for each.**
+
+**Reference answer.**
+(1) Browning-Ferris: 32-CA-160759 and 32-RC-109684; 374 NLRB No. 46 — Milpitas, CA. (2) GE Appliances: 09-CA-284214 and 09-CA-298179; 374 NLRB No. 47 — Louisville, KY. (3) Hoffmann Brothers: 14-CA-344872 — Brentwood, MO (no NLRB citation, consistent with no-exceptions adoption). (4) Starbucks Corporation: 14-CA-294830, et al. — Nichols Hills, OK (no NLRB citation provided here; multiple consolidated charges). (5) Brown-Forman (appellate): Board No. 09-CA-307806 (reported at 373 NLRB No. 145) — 6th Cir. Also referenced as historical citations: 362 NLRB 1599 (2015) for Browning-Ferris I; 369 NLRB No. 139 (2020) for Browning-Ferris III. Note: 'Browning-Ferris II' is not cited explicitly — the sequence jumps from I to III, implying a missing intermediate decision (or a numbering convention that skips II).
+
+**Source coordinates.** Case caption lines of each entry; cross-references within Browning-Ferris narrative
+
+**Pressure tags.** multi_format_case_numbers, consolidated_case_with_et_al, missing_browning_ferris_ii_in_sequence
+
+**12. List the unions or labor organizations identified as charging parties or petitioners across the cases.**
+
+**Reference answer.**
+(1) Browning-Ferris: Sanitary Truck Drivers and Helpers Local 350, International Brotherhood of Teamsters (charges and petition). (2) GE Appliances: IUE-CWA, the Industrial Division of the Communications Workers of America, AFL-CIO, CLC (charges). (3) Hoffmann Brothers: International Association of Sheet Metal, Air, Rail, and Transportation Workers, Local Union No. 36 (charge). (4) Starbucks Corporation: Workers United, a/w Service Employees International Union (charges). Four distinct unions, each with multi-part organizational names. Three follow the parent/local-affiliate convention (Local 350, IUE-CWA / CWA, Local Union No. 36); one ('Workers United') is an affiliate of SEIU.
+
+**Source coordinates.** 'Charges filed by' / 'Charges and petition filed by' lines at end of each entry
+
+**Pressure tags.** multi_part_union_names, parent_affiliate_local_convention, afl_cio_clc_postfix
+
+**13. List the three Board members named as having participated in the decisions.**
+
+**Reference answer.**
+(1) Chairman James R. Murphy; (2) Member David M. Prouty; (3) Member Scott A. Mayer. The participation line in the source reads 'Chairman Murphy and Members Prouty and Mayer participated.' Full first names ('James R.,' 'David M.,' 'Scott A.') are not provided in this Summary but can be recovered from the NLRB 'About / The Board' organizational reference. The three-member panel sat unanimously on all substantive decisions in this Summary.
+
+**Source coordinates.** End of each substantive entry
+
+**Pressure tags.** full_name_recovery_via_external_reference, panel_composition, last_name_only_in_summary
+
+**14. List, in source order, the prior NLRB iterations of the Browning-Ferris case cited or referred to in the document (Browning-Ferris I, II, III, etc., with their citations).**
+
+**Reference answer.**
+(1) Browning-Ferris I: 362 NLRB 1599 (2015) — the 2015 decision announcing a new joint-employer standard and applying it retroactively; (2) Browning-Ferris III: 369 NLRB No. 139 (2020) — the 2020 decision on first remand, which found Browning-Ferris was NOT a joint employer on manifestly-unjust grounds; (3) The present Board decision: 374 NLRB No. 46 (February 23, 2026) — on second remand, reaffirming joint-employer status. The document does NOT cite 'Browning-Ferris II.' The Roman numeral II is skipped in the document's labeling — possibly because what would have been II was a D.C. Circuit ruling rather than a Board decision, or possibly a numbering quirk. The 2026 decision is not numbered (no 'Browning-Ferris IV' label assigned in the source). The present decision could conceivably be Browning-Ferris IV but the document does not so label it.
+
+**Source coordinates.** Browning-Ferris entry, paragraphs 1 and 2
+
+**Pressure tags.** case_lineage_with_skipped_numbering, no_official_label_for_present_iteration, citation_format_variation_old_vs_new
+
+**15. List the two NLRA section violations the Board adopted in GE Appliances (one stemming from unilateral pay increases and one stemming from delayed information provision).**
+
+**Reference answer.**
+Both violations are Section 8(a)(5) and (1) of the NLRA. (1) Unilaterally changing employees' pay — Section 8(a)(5) and (1), with an additional finding (within the meaning of Section 8(d)) characterizing the conduct as a midterm modification of the collective bargaining agreement. The Board's reasoning emphasizes that the Respondent increased contractually established pay without the Union's consent. (2) Unreasonably delaying in providing information requested by the Union — Section 8(a)(5) and (1). Both are violations of the same statutory section but rest on different facts (pay change vs. information-request response). The two-violation enumeration is presented separately in two sentences of paragraph 1 plus 2 of the GE Appliances entry.
+
+**Source coordinates.** GE Appliances entry, paragraph 1 (pay) and paragraph 2 (information)
+
+**Pressure tags.** same_section_different_conduct, 8a5_1_with_within_meaning_of_8d_subcite, two_distinct_violations_one_section
+
+**16. Reconstruct the chronological sequence of decisions in the Browning-Ferris case from 2015 through February 23, 2026.**
+
+**Reference answer.**
+(1) August 2015 — Board issues Browning-Ferris I (362 NLRB 1599), announcing a new joint-employer standard and applying it retroactively to find Browning-Ferris and Leadpoint joint employers of the Leadpoint employees in the petitioned-for unit. (2) Sometime after 2015 — D.C. Circuit reviews and remands (first remand). (3) July 2020 — Board issues Browning-Ferris III (369 NLRB No. 139) on first remand, reversing in part and finding Browning-Ferris NOT a joint employer on grounds that retroactive application of any clarified variant of the new standard would be manifestly unjust. (4) Sometime after 2020 — D.C. Circuit rejects the 2020 position and remands again (second remand). (5) February 23, 2026 — Board issues the present decision (374 NLRB No. 46) on second remand, applying a 'clarified Browning-Ferris I standard' as 'law of the case' per the Court's instructions, and finding Browning-Ferris IS a joint employer. The Board limits the holding to the facts of the instant case. Three substantive Board decisions over an 11-year span, plus two D.C. Circuit remands.
+
+**Source coordinates.** Browning-Ferris entry, paragraphs 1-3
+
+**Pressure tags.** multi_decade_litigation_timeline, remand_pingpong, doctrine_law_of_the_case, 11_year_span
+
+**17. In the Hoffmann Brothers case, what is the gap between the ALJ's decision date and the Board's adoption date?**
+
+**Reference answer.**
+ALJ Andrew S. Gollin's decision: January 5, 2026. Board adoption: February 23, 2026. Gap: 49 days (approximately 7 weeks). This is consistent with the standard NLRB practice that a Board adoption follows when no exceptions are filed within the 28-day exception window (under § 102.46 of the NLRB Rules), with the Board's adoption issuing some weeks thereafter once the exception period closes.
+
+**Source coordinates.** Hoffmann Brothers entry
+
+**Pressure tags.** calendar_gap_alj_to_board_adoption, no_exceptions_procedural_path, internal_rule_reference
+
+**18. The Brown-Forman entry indicates the Sixth Circuit ruled on the Board's prior decision. What is the Board's case number, and what is its NLRB citation?**
+
+**Reference answer.**
+Board case number: 09-CA-307806. NLRB citation: 373 NLRB No. 145 (the Board's original decision being reviewed by the Sixth Circuit). The Sixth Circuit decision is dated February 26, 2026 (or the 6th Circuit's 'March 6, 2026' date may be inferred from other public commentary, but this Summary lists it under the February 23-27 week with the date February 26). The Sixth Circuit denied enforcement with respect to the bargaining-order remedy and remanded; otherwise enforced the findings of Section 8(a)(1) and (3) violations.
+
+**Source coordinates.** Appellate Court Decisions section, Brown-Forman entry
+
+**Pressure tags.** nlrb_citation_in_appellate_section, ambiguous_appellate_date, partial_enforcement_partial_remand
+
+**19. How many Summarized Board Decisions were issued on February 23, 2026 versus other dates in the week?**
+
+**Reference answer.**
+Two decisions issued on February 23, 2026: (1) Browning-Ferris (374 NLRB No. 46); and (2) Hoffmann Brothers (14-CA-344872). One decision issued on February 24, 2026: GE Appliances (374 NLRB No. 47). One decision issued on February 26, 2026: Starbucks Corporation (14-CA-294830, et al.). No Summarized Board Decisions are reported for February 25 or February 27, 2026. The Appellate Court Decision (Brown-Forman) is also dated February 26 but sits in a separate section. Total: 4 Summarized Board Decisions across 3 dates within the week.
+
+**Source coordinates.** Date lines of each Summarized Board Decision entry
+
+**Pressure tags.** per_date_count_aggregation, gap_days_in_week, appellate_decision_separate_count
+
+**20. What remedy did the Board decline to order in the GE Appliances case, and who had sought it?**
+
+**Reference answer.**
+The Board declined to order 'the novel monetary remedy of extending the pay increases to all unit employees' as a remedy. This remedy was sought by both the General Counsel and the Union. The Board characterizes the remedy as 'novel' — meaning it would have expanded the remedial scope from the violation conduct (pay increases for certain employees without Union consent) to a positive obligation (extending those same increases to all employees in the bargaining unit). Despite finding the underlying violations, the Board limited the remedial scope.
+
+**Source coordinates.** GE Appliances entry, paragraph 2
+
+**Pressure tags.** declined_novel_remedy, joint_motion_from_gc_and_union, remedy_narrower_than_violation_finding
+
+**21. In the Hoffmann Brothers case, what is the procedural mechanism by which the Board adopted the ALJ's recommended Order?**
+
+**Reference answer.**
+By default after the no-exceptions window closed. The entry's first sentence reads: 'No exceptions having been filed to the January 5, 2026 decision of Administrative Law Judge Andrew S. Gollin's finding that the Respondent had engaged in certain unfair labor practices, the Board adopted the judge's findings and conclusions, and ordered the Respondent to take the action set forth in the judge's recommended Order.' Under NLRB practice, if no party files exceptions within the prescribed period (typically 28 days under 29 C.F.R. § 102.46), the ALJ's decision becomes the Board's order automatically by adoption. The Board does not name participating Members for these routine adoptions.
+
+**Source coordinates.** Hoffmann Brothers entry
+
+**Pressure tags.** no_exceptions_default_adoption, 29_cfr_102_46_implicit, no_panel_named_for_adoption
+
+**22. In the Starbucks Corporation case, what did the Board grant, and what did the Board sever?**
+
+**Reference answer.**
+The Board granted the General Counsel's and the Union's joint motion for partial summary judgment with respect to certain alleged violations, finding that the Respondent's answer admitted facts sufficient to establish those violations as a matter of law. The Board severed the remaining allegations for further proceedings before the Administrative Law Judge. The procedural posture is therefore bifurcated: established violations on the partial-summary-judgment path, plus remaining allegations on the traditional ALJ-hearing path.
+
+**Source coordinates.** Starbucks Corporation entry
+
+**Pressure tags.** partial_summary_judgment, joint_motion_gc_and_union, severance_for_remaining_allegations
+
+**23. Compare the Browning-Ferris case as decided in February 2026 (instant case) with the 2020 Browning-Ferris III decision. What is the core substantive change, and what role did the D.C. Circuit play in driving it?**
+
+**Reference answer.**
+Core substantive change: from 'not a joint employer' (2020) to 'is a joint employer' (2026) — a reversal on the joint-employer finding for the same factual record. The 2020 Browning-Ferris III decision applied pre-Browning-Ferris I precedent and reasoned that retroactive application of the new (Browning-Ferris I, 2015) joint-employer standard would be manifestly unjust. The D.C. Circuit rejected that reasoning and remanded a second time. On second remand, the Board (the 2026 instant decision) explicitly states that the D.C. Circuit's 'remand instructions... are law of the case' — meaning the Board cannot revisit the question of whether to apply Browning-Ferris I. The Board therefore clarified the indirect-control and 'meaningful collective bargaining' elements of the Browning-Ferris I standard, applied that clarified standard, and found Browning-Ferris a joint employer. The D.C. Circuit drove the reversal by foreclosing the manifest-injustice escape route. The Board limited its holding to the facts of the instant case — signaling that it is not announcing a new general rule, only complying with the Circuit's remand.
+
+**Source coordinates.** Browning-Ferris entry, paragraphs 1-3
+
+**Pressure tags.** reversal_on_same_record, law_of_the_case_doctrine, circuit_drives_board_outcome, narrow_compliance_holding
+
+**24. The Brown-Forman appellate entry shows the Sixth Circuit "denied enforcement with respect to the Board's bargaining-order remedy and remanded for proceedings consistent with its opinion" but "otherwise enforced the Board's findings." Identify which specific Board findings were enforced and which were not, and explain the practical effect.**
+
+**Reference answer.**
+Enforced: the Board's findings of Section 8(a)(1) and (3) violations — i.e., the substantive unfair-labor-practice findings remain in force as adjudicated facts (the employer interfered with protected concerted activity under 8(a)(1) and discriminated against employees because of union activity under 8(a)(3)). Not enforced: the Board's bargaining-order remedy — i.e., the order that would have compelled the employer to bargain with the Union. The Sixth Circuit remanded the remedy question for proceedings consistent with its opinion. Practical effect: the employer is on the hook for the underlying violations (which means standard cease-and-desist, reinstatement, backpay, and notice-posting remedies remain), but is NOT compelled to bargain. The Board must reconsider the bargaining-order remedy on remand — likely either selecting a less aggressive remedy (e.g., a Gissel bargaining order under traditional standards) or none at all. This is consistent with the broader Sixth Circuit treatment of Cemex-era bargaining orders (per public commentary).
+
+**Source coordinates.** Appellate Court Decisions, Brown-Forman entry
+
+**Pressure tags.** partial_enforcement_partial_denial, remedy_severed_from_liability, section_8a1_and_8a3_distinctions, bargaining_order_doctrine_signal
+
+**25. The Browning-Ferris decision is captioned with TWO corporate defendants ("Browning-Ferris... and FPR-II, LLC d/b/a Leadpoint Business Services"). The Board's finding is that one is the joint employer of the other's employees. Which entity's employees were the petitioned-for unit, and which entity was found to be the joint employer?**
+
+**Reference answer.**
+The petitioned-for unit consists of Leadpoint Business Services employees (i.e., workers nominally employed by FPR-II, LLC d/b/a Leadpoint, who were supplied to BFI under a staffing contract). Browning-Ferris Industries of California, Inc. (the recycling facility operator) was found to be a joint employer of those Leadpoint employees. So: Leadpoint is the direct/primary employer; Browning-Ferris is the secondary/joint employer. The Section 8(a)(5) and (1) refusal-to-bargain violation runs against Browning-Ferris (it refused to bargain with the Union that the Leadpoint employees had selected via NLRB-supervised election). Both companies are named as Respondents on the consolidated case (32-CA-160759 and 32-RC-109684), reflecting both the unfair-labor-practice charge and the related representation case. Despite the dual caption, the Board's substantive finding focuses on Browning-Ferris's joint-employer status; Leadpoint's status as direct employer is not contested.
+
+**Source coordinates.** Browning-Ferris case caption; entry paragraphs 1-3
+
+**Pressure tags.** dual_respondent_caption, primary_vs_joint_employer_distinction, petitioned_for_unit_belongs_to_one_entity, consolidated_unfair_labor_practice_and_representation_case
