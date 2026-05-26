@@ -2167,3 +2167,50 @@ undated, and that the contest-deadline date depends on a receipt date not given
 in the release. Prethinker should not silently turn lack of a date fact into an
 admitted negative fact. Treat q019 as an absence/negative-evidence boundary for
 future design, not a row to force exact inside this corpus.
+
+## 2026-05-26 External-Scope Row Adjudication
+
+Question:
+
+Should the remaining `osha_ugly_002 q007` and `q025` rows drive instrument
+tuning?
+
+Adjudication:
+
+No. Both rows require evidence outside the single compiled source packet.
+
+`osha_ugly_002 q007` asks which regional office the release-number suffix
+`CHI` denotes. The document prints `26-210-CHI`, but it does not define the
+release-number convention or state "Chicago regional office." The oracle answer
+correctly qualifies that it relies on standard OSHA convention. Prethinker
+should not learn that convention from this fixture unless a convention table or
+second source is explicitly included in the document pack.
+
+`osha_ugly_002 q025` asks for a cross-check against another OSHA release. The
+compiled pack contains only the current source document. The run correctly
+supported the within-document observation that Lucero and Ruthman share the
+same printed number, but it cannot support the cross-document comparison to a
+different release not present in the pack.
+
+R7 evidence:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_nonsec_r7_current_surfaces_or_20260525\osha_ugly_002
+
+q007:
+  miss
+  reason: release suffix visible, office-convention mapping absent from source
+
+q025:
+  partial
+  reason: internal phone-number observation supported; external release absent
+```
+
+Read:
+
+Treat these as oracle/scope boundaries for single-document QA. They are useful
+product lessons: if a question requires external conventions or cross-document
+comparison, the pack must include those sources or the answer should remain
+qualified. They should not become active instrument constants or hidden helper
+knowledge.
