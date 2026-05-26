@@ -618,3 +618,148 @@ Next blockers:
    gate is still complaining about.
 3. Keep the fresh-batch score as thermometer evidence only; do not tune toward
    the fixture names or answer strings.
+
+## Repair Cycle 2026-05-26 - Regression Adjudication and Carrier Accounting
+
+Intent:
+
+Handle the next blocker without hiding the regression-guard failure: adjudicate
+the three rows where added source-record support coincided with regression, then
+inspect the compile-gate carrier lane.
+
+Regression adjudication:
+
+- `nlrb_ugly_001 q011`: the added
+  `source_record_named_section_window_support` was trigger overreach. A generic
+  `list` intent with only one token overlapping a broad document heading opened
+  a section window that was not the requested case/citation/location roster.
+  The route now requires a stronger heading-target match for generic list
+  intents. Replay no longer emits the section-window support, but the row still
+  lands `partial` / `judge_uncertain` because the compiled case/citation/location
+  surface is incomplete. This is a remaining compile/list representation issue,
+  not a heading-window issue.
+- `puc_ugly_001 q019`: generic note-marker intent from placeholder evidence
+  queries polluted the row, and duration support was too narrowly scoped to one
+  imperfect duration intent. Generic `marker_scope:all` placeholder intents no
+  longer fire note-marker support, and duration support may use sibling
+  structured intent targets from the same query. Focused replay recovered the
+  row to `exact`.
+- `state_ag_ugly_001 q010`: generic note-marker support produced large,
+  irrelevant note/anchor tables. The same note-marker guard removes that noise.
+  A source-generic `source_record_definition_entry_support` route was added for
+  enumerated definition rows, gated by structured `definition_entry_location`
+  intent. The focused replay recovered the row to `exact`; in this replay the
+  model did not emit that definition-entry constraint, so the recovery should be
+  read mainly as note-marker-noise removal plus ordinary direct evidence, not as
+  a proved definition-entry mechanism on this row.
+
+Changes applied:
+
+- Generic note-marker placeholders such as `footnote`, `note`, `marker`,
+  `symbol`, `line`, and `text` no longer create `note_marker` query intents
+  from structured Prolog query templates.
+- `source_record_note_marker_support` no longer fires for `marker_scope:all`
+  unless the structured intent carries target terms.
+- Generic list-derived named-section windows now require a strong heading match
+  instead of one shared broad token.
+- `source_record_duration_quantity_support` can consider target tokens from
+  sibling structured intents in the same query.
+- Added query-only `source_record_definition_entry_support` for source-record
+  text shaped like enumerated definition entries. It parses admitted
+  `source_record_text_atom` rows only and writes no durable facts.
+
+Focused replay:
+
+```text
+artifact root:
+C:\prethinker_tmp_archive\batch04_regression_adjudication_20260526
+
+nlrb_ugly_001 q011:     partial / judge_uncertain / 0 compatibility
+puc_ugly_001 q019:      exact / not_applicable / 0 compatibility
+state_ag_ugly_001 q010: exact / not_applicable / 0 compatibility
+```
+
+Carrier accounting inspection:
+
+The compile-gate carrier lane also exposed accounting false negatives. Some
+offered direct carriers were emitted but not counted as delivered by the
+delivery checker:
+
+- `appeal_filed/3` was emitted in court records but not counted as a
+  status/state delivery row.
+- `conditional_rule/4`, `reduction_rule/5`, and `vehicle_action/4` were emitted
+  in settlement-style conditional state/rule rows but not counted as
+  status/state delivery rows.
+- `source_attributed_legal_fact/4` was emitted but not counted as a
+  source-attributed-claim delivery row.
+
+Accounting changes:
+
+- Count `appeal_filed/3` as status/state delivery when it carries appellant,
+  target/subject, and date/status.
+- Count `conditional_rule/4`, `directive_with_scope/4`, `reduction_rule/5`, and
+  `vehicle_action/4` as status/state delivery when they carry joined
+  condition/action/state scope.
+- Count `source_attributed_legal_fact/4` as source-attributed-claim delivery.
+- Treat direct `appeal_window`-style rows as satisfying the appeal-filing
+  backbone group when the direct predicate keeps the appeal window joinable.
+
+Refreshing profile-delivery reports over the existing R4 compile artifacts,
+without recompiling, changes the carrier findings as follows:
+
+```text
+old:
+source_claim_carrier_offered_but_undelivered: 11
+status_state_carrier_offered_but_undelivered: 6
+source_claim_carrier_partially_delivered: 3
+source_authority_carrier_offered_but_undelivered: 2
+source_claim_backbone_coexistence_missing: 2
+source_authority_carrier_partially_delivered: 1
+
+new:
+source_claim_carrier_offered_but_undelivered: 10
+source_claim_carrier_partially_delivered: 4
+status_state_carrier_offered_but_undelivered: 3
+source_authority_carrier_offered_but_undelivered: 2
+status_state_carrier_partially_delivered: 1
+source_authority_carrier_partially_delivered: 1
+```
+
+Read:
+
+- This is not a new compile-gate score claim because the R4 artifacts were not
+  freshly recompiled. It is a delivery-accounting correction over existing
+  compile output.
+- The status-state lane had clear false negatives. Several held gates should no
+  longer complain that no status/state rows were delivered when direct joined
+  rows already exist.
+- The remaining carrier pressure is now more honestly concentrated in real
+  source-claim delivery and source-authority gaps, especially rows where the
+  compile still does not emit a source-to-claim carrier at all.
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q -k "note_marker or named_section_window or duration_quantity or definition_entry"
+14 passed, 347 deselected
+
+python -m pytest tests\test_domain_bootstrap_file.py -q -k "source_claim_delivery_accepts_source_attributed_legal_fact_rows or status_state_delivery_accepts_direct_appeal_filing_rows or status_state_delivery_accepts_conditional_rule_rows"
+3 passed, 143 deselected
+
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_qa.py -q
+507 passed
+
+python scripts\audit_active_instrument_leakage.py
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Next blockers:
+
+1. Do not chase `nlrb_ugly_001 q011` with a section-window patch. The remaining
+   issue is incomplete case/citation/location roster preservation.
+2. Continue the real source-claim lane: the largest remaining compile-gate
+   pressure is still `source_claim_carrier_*`, not status-state accounting.
+3. Recompile a small affected fixture set before claiming any compile-gate
+   improvement; the carrier accounting refresh is mechanism evidence only.

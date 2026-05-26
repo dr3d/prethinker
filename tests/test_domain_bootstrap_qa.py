@@ -31,6 +31,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_date_pair_duration_companion,
     _source_record_elapsed_date_duration_companion,
     _source_record_date_range_duration_companion,
+    _source_record_definition_entry_companion,
     _source_record_exhibit_index_companion,
     _source_record_field_state_companion,
     _source_record_named_section_window_companion,
@@ -2822,6 +2823,42 @@ def test_source_record_note_marker_companion_ignores_english_without_structured_
     assert companion is None
 
 
+def test_source_record_note_marker_companion_ignores_generic_all_marker_placeholder() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0001, the_notice_uses_a_marker_here).",
+        "source_record_note_anchor(src_line_0001, footnote_1).",
+        "source_record_symbol_definition(src_line_0002, footnote_1, marker_definition_text).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_note_marker_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "note_marker",
+                "target_terms": [],
+                "answer_constraints": ["marker_scope:all"],
+                "uncertainty_policy": "answer",
+                "language": "",
+                "source": "evidence_plan",
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_query_intents_from_note_marker_query_ignores_generic_placeholder_marker() -> None:
+    intents = qa_module._query_intents_from_structured_queries(
+        ["source_record_note_definition(Line, footnote, Text)."],
+        source="query_template",
+    )
+
+    assert not any(intent["intent_type"] == "note_marker" for intent in intents)
+
+
 def test_source_record_named_section_window_companion_returns_bounded_section_rows() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -2857,6 +2894,63 @@ def test_source_record_named_section_window_companion_returns_bounded_section_ro
     assert [row["SourceRow"] for row in rows] == ["src_line_0208", "src_line_0210"]
     assert rows[0]["SectionAtom"] == "process_controls"
     assert rows[1]["TextAtom"].endswith("gamma_three")
+
+
+def test_source_record_named_section_window_accepts_strong_list_heading_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0208, labeled_line, 208, public_record, process_controls).",
+        "source_record_text_atom(src_line_0208, process_controls).",
+        "source_record_row(src_line_0210, paragraph_line, 210, public_record, guidance_list).",
+        "source_record_text_atom(src_line_0210, agency_guidances_alpha_one_beta_two_and_gamma_three).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_named_section_window_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["Process Controls"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert companion["result"]["rows"][0]["SectionAtom"] == "process_controls"
+
+
+def test_source_record_named_section_window_rejects_weak_list_heading_overlap() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0001, heading, 1, public_record, weekly_agency_decisions).",
+        "source_record_text_atom(src_line_0001, weekly_agency_decisions).",
+        "source_record_row(src_line_0003, paragraph_line, 3, public_record, agency_contact_information).",
+        "source_record_text_atom(src_line_0003, agency_contact_information).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_named_section_window_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["case identifiers", "agency citation", "geographic location"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is None
 
 
 def test_source_record_named_section_window_requires_structured_intent() -> None:
@@ -3475,6 +3569,81 @@ def test_source_record_messy_summary_duration_quantity_extracts_deadline_anchor(
     joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
     assert "15 working days" in joined
     assert "from receipt" in joined
+
+
+def test_source_record_messy_summary_duration_quantity_uses_sibling_intent_targets() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0010, "
+            "applications_may_be_filed_every_12_months_under_the_standard_review_rule)."
+        ),
+        (
+            "source_record_text_atom(src_line_0020, "
+            "any_party_may_appeal_within_30_days_after_issuance_and_notice_of_the_order)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "duration",
+                "target_terms": ["statutory deadline"],
+                "answer_constraints": ["duration_value"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+            {
+                "intent_type": "source_location",
+                "target_terms": ["appeal destination", "filing location"],
+                "answer_constraints": ["entity_name"],
+                "uncertainty_policy": "abstain",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_duration_quantity_support"
+    )
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "30 days" in joined
+    assert "12 months" not in joined
+
+
+def test_source_record_definition_entry_companion_extracts_entry_label() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "bb_covered_device_means_a_covered_device_as_defined_in_the_master_control_order)."
+    ).get("status") == "success"
+
+    companion = _source_record_definition_entry_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["covered device"],
+                "answer_constraints": ["definition_entry_location"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["EntryLabelAtom"] == "bb"
+    assert row["EntryLabelDisplay"] == "(bb)"
+    assert row["DefinedTermAtom"] == "covered_device"
+    assert "master control order" in row["DefinitionDisplay"]
 
 
 def test_source_record_messy_summary_extracts_adjacent_label_value_pair() -> None:

@@ -479,3 +479,37 @@ Governance read:
   next work is route adjudication and compile-surface carrier delivery, not a
   new layer of phrase parsing.
 - The active-instrument leakage audit still passes with `0` forbidden hits.
+
+## Regression Adjudication After R4
+
+The three R4 regressions with added source-record support were adjudicated
+before adding another query-side mechanism.
+
+Governance changes:
+
+- Generic note-marker placeholders from structured Prolog templates no longer
+  create `note_marker` intent. Examples: `footnote`, `note`, `marker`,
+  `symbol`, `line`, and `text`.
+- `source_record_note_marker_support` no longer fires on `marker_scope:all`
+  unless the structured intent carries target terms.
+- Generic list-derived section windows now require a stronger heading match, so
+  a broad document heading cannot be opened by one shared topic token.
+- Duration support may use sibling structured intent target tokens from the
+  same query turn; this keeps the repair inside `query_intents[]` rather than
+  raw utterance parsing.
+
+Focused replay:
+
+```text
+nlrb_ugly_001 q011:     partial / judge_uncertain / no section-window support
+puc_ugly_001 q019:      exact / 0 compatibility
+state_ag_ugly_001 q010: exact / 0 compatibility
+```
+
+Read:
+
+- Two of the three added-support regressions recovered on focused replay.
+- The remaining row is no longer a heading-window trigger problem; it is an
+  incomplete compiled roster surface.
+- The language boundary held: no new raw-question English regex triggers were
+  added.

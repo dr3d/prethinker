@@ -3507,6 +3507,97 @@ def test_source_claim_delivery_accepts_counsel_opinion_rows() -> None:
     assert source_compile["profile_delivery"]["delivered_carriers"]["source_attributed_claim"] == ["counsel_opinion"]
 
 
+def test_source_claim_delivery_accepts_source_attributed_legal_fact_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "source_attributed_legal_fact(opinion_1, finding_scope, legal_opinion_available, src_line_0010).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source claim legal opinion source attribution",
+        source_text="Source record preserves legal-opinion attribution.",
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "source_attributed_legal_fact/4",
+                    "args": ["source", "subject", "claim_or_finding", "scope"],
+                }
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["source_attributed_claim"] == [
+        "source_attributed_legal_fact"
+    ]
+
+
+def test_status_state_delivery_accepts_direct_appeal_filing_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": ["appeal_filed(party_a, order_17, 2026_01_20)."],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="status/state appeal filing status",
+        source_text="Party A filed a formal appeal of Order 17 on January 20, 2026.",
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "appeal_filed/3",
+                    "args": ["appellant", "target_or_subject", "date_or_status"],
+                }
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["status_state"] == ["appeal_filed"]
+
+
+def test_status_state_delivery_accepts_conditional_rule_rows() -> None:
+    assert domain_bootstrap_file._fact_row_can_deliver_status_state(
+        "conditional_rule",
+        ["rule_a", "condition_met", "payment_not_owed", "source_row_17"],
+    )
+    assert domain_bootstrap_file._fact_row_can_deliver_status_state(
+        "reduction_rule",
+        ["obligation_a", "item_removed", "750", "per_item", "source_row_18"],
+    )
+    assert domain_bootstrap_file._fact_row_can_deliver_status_state(
+        "vehicle_action",
+        ["item_a", "removed_from_commerce", "2026_01_01", "source_row_19"],
+    )
+
+
 def test_profile_delivery_accepts_emitted_quantity_carrier_rows() -> None:
     source_compile = {
         "unique_fact_count": 3,

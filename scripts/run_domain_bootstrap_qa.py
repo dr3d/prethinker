@@ -1788,6 +1788,7 @@ QUERY_INTENT_TYPES = {
 
 QUERY_INTENT_POLICIES = {"answer", "clarify", "abstain", "unknown"}
 QUERY_INTENT_SOURCES = {"semantic_ir", "query_template", "evidence_plan"}
+GENERIC_NOTE_MARKER_PLACEHOLDERS = {"footnote", "note", "marker", "symbol", "line", "text"}
 
 
 def _compact_string_list(value: Any, *, limit: int = 12) -> list[str]:
@@ -1875,6 +1876,8 @@ def _query_intents_from_structured_queries(
                 constraints: list[str] = []
                 target_terms: list[str] = []
                 marker = str(args[1]).strip() if len(args) >= 2 and not _is_prolog_variable(args[1]) else ""
+                if marker in GENERIC_NOTE_MARKER_PLACEHOLDERS:
+                    continue
                 if marker:
                     target_terms.append(marker)
                     if marker == "asterisk":
@@ -2109,6 +2112,13 @@ def _query_intent_target_tokens(intent: dict[str, Any] | None) -> set[str]:
         return tokens
     for term in intent.get("target_terms", []) or []:
         tokens.update(token for token in _query_atom_tokens(str(term)) if len(token) >= 3)
+    return tokens
+
+
+def _query_intents_target_tokens(query_intents: list[dict[str, Any]] | None) -> set[str]:
+    tokens: set[str] = set()
+    for intent in query_intents or []:
+        tokens.update(_query_intent_target_tokens(intent))
     return tokens
 
 
@@ -2382,6 +2392,13 @@ def run_one_question(
     )
     if source_note_marker:
         query_results.append(source_note_marker)
+    source_definition_entry = _source_record_definition_entry_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
+    if source_definition_entry:
+        query_results.append(source_definition_entry)
     source_preceding_heading = _source_record_preceding_heading_companion(
         runtime,
         utterance=utterance,
@@ -6825,6 +6842,8 @@ def _source_record_note_marker_companion(
     if not intent:
         return None
     marker_scope = _note_marker_scope_from_intent(intent)
+    if marker_scope == "all" and not _query_intent_target_tokens(intent):
+        return None
     wants_asterisk = marker_scope == "asterisk"
     wants_numbered = marker_scope == "numbered"
     text_rows = {
@@ -6952,6 +6971,121 @@ def _display_note_marker(marker: str) -> str:
     return _display_source_phrase(value)
 
 
+def _source_record_definition_entry_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    intent = _first_query_intent(query_intents, "source_location", "heading_scope")
+    if not _query_intent_has_constraint(intent, "definition_entry_location", "definition_entry"):
+        return None
+    target_tokens = _query_intent_target_tokens(intent)
+    if not target_tokens:
+        return None
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        entry = _source_record_definition_entry_from_text_atom(text_atom, target_tokens=target_tokens)
+        if not entry:
+            continue
+        key = (source_row, entry["EntryLabelAtom"], entry["DefinedTermAtom"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "SupportKind": "source_record_definition_entry",
+                "SourceRow": source_row,
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "SupportClass": "deterministic-source-record-summary",
+                **entry,
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("MatchedTargetTokenCount", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+        )
+    )
+    return {
+        "query": "source_record_definition_entry_support(SourceRow, EntryLabel, DefinedTerm, DefinitionText).",
+        "result": {
+            "predicate": "source_record_definition_entry_support",
+            "prolog_query": (
+                "source_record_definition_entry_support"
+                "(SourceRow, EntryLabel, DefinedTerm, DefinitionText)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only definition-entry support parsed admitted source-record text for "
+                    "enumerated definition rows matching structured query-intent target terms; "
+                    "no durable fact was written"
+                ),
+                "query_intent": intent,
+            },
+        },
+        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+    }
+
+
+def _source_record_definition_entry_from_text_atom(
+    text_atom: str,
+    *,
+    target_tokens: set[str],
+) -> dict[str, str] | None:
+    tokens = _query_atom_tokens(text_atom)
+    if len(tokens) < 4:
+        return None
+    label = tokens[0]
+    if not re.fullmatch(r"[a-z]{1,3}|[ivxlcdm]{1,8}", label):
+        return None
+    connector_index = None
+    for index, token in enumerate(tokens[1:24], start=1):
+        if token in {"means", "mean"}:
+            connector_index = index
+            break
+        if token == "defined" and index + 1 < len(tokens) and tokens[index + 1] == "as":
+            connector_index = index
+            break
+    if connector_index is None or connector_index <= 1:
+        return None
+    term_tokens = [token for token in tokens[1:connector_index] if token not in {"or", "and"}]
+    term_token_set = set(term_tokens)
+    matched = target_tokens & term_token_set
+    if not matched:
+        return None
+    if len(target_tokens) >= 2 and len(matched) < min(2, len(target_tokens)):
+        return None
+    definition_start = connector_index + 1
+    if tokens[connector_index] == "defined" and definition_start < len(tokens) and tokens[definition_start] == "as":
+        definition_start += 1
+    definition_tokens = tokens[definition_start:]
+    if not definition_tokens:
+        return None
+    term_atom = "_".join(term_tokens)
+    definition_atom = "_".join(definition_tokens)
+    return {
+        "EntryLabelAtom": label,
+        "EntryLabelDisplay": f"({label})",
+        "DefinedTermAtom": term_atom,
+        "DefinedTermDisplay": _display_source_phrase(term_atom),
+        "DefinitionTextAtom": definition_atom,
+        "DefinitionDisplay": _display_source_phrase(definition_atom),
+        "MatchedTargetTokens": ",".join(sorted(matched)),
+        "MatchedTargetTokenCount": str(len(matched)),
+    }
+
+
 def _source_record_under_heading_companion(
     runtime: CorePrologRuntime,
     *,
@@ -7066,10 +7200,12 @@ def _source_record_named_section_window_companion(
     query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     intent = _first_query_intent(query_intents, "heading_scope", "source_location")
+    list_derived = False
     if not _query_intent_has_constraint(intent, "section_window", "bounded_section", "section_contents"):
         list_intent = _first_query_intent(query_intents, "list", "ordered_labeled_entry")
         if _query_intent_target_token_groups(list_intent):
             intent = list_intent
+            list_derived = True
         else:
             return None
 
@@ -7101,6 +7237,11 @@ def _source_record_named_section_window_companion(
         for target_index, target_tokens in enumerate(section_targets):
             overlap = row_tokens & target_tokens
             if not overlap:
+                continue
+            if list_derived and not _section_window_target_strongly_matches_heading(
+                target_tokens=target_tokens,
+                heading_tokens=row_tokens,
+            ):
                 continue
             score = len(overlap) * 12
             if target_tokens <= row_tokens:
@@ -7176,6 +7317,21 @@ def _source_record_named_section_window_companion(
             "source_record_text_atom(SourceRow, TextAtom).",
         ],
     }
+
+
+def _section_window_target_strongly_matches_heading(
+    *,
+    target_tokens: set[str],
+    heading_tokens: set[str],
+) -> bool:
+    if not target_tokens or not heading_tokens:
+        return False
+    overlap = target_tokens & heading_tokens
+    if target_tokens <= heading_tokens:
+        return True
+    if len(target_tokens) >= 2 and len(overlap) >= 2:
+        return True
+    return len(target_tokens) == 1 and bool(overlap)
 
 
 def _source_record_quote_heading_locator_companion(
@@ -18817,7 +18973,7 @@ def _source_record_duration_quantity_companion(
     intent = _first_query_intent(query_intents, "duration_quantity", "duration")
     if not intent:
         return None
-    query_tokens = _query_intent_target_tokens(intent)
+    query_tokens = _query_intent_target_tokens(intent) | _query_intents_target_tokens(query_intents)
     support_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str]] = set()
     for source_row, text_atom in _source_record_text_atoms(runtime):
@@ -28748,6 +28904,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_ratio_calculation_support",
             "source_record_date_pair_duration_support",
             "source_record_elapsed_date_duration_support",
+            "source_record_definition_entry_support",
             "source_record_named_section_window_support",
             "source_record_preceding_heading_support",
             "source_record_quote_heading_locator_support",
@@ -28797,7 +28954,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Ratio-calculation support policy: source_record_ratio_calculation_support rows are deterministic structured support for per-unit questions that ask to divide a source-stated money amount by a source-stated count. QuotientDisplay and RoundedQuotient can fully support approximate per-unit answers when the numerator and denominator source rows are admitted.",

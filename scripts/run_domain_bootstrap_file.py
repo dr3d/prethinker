@@ -4662,6 +4662,7 @@ SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES = {
     "public_comment",
     "reported_finding",
     "source_attributed_claim",
+    "source_attributed_legal_fact",
     "source_claim",
     "source_supports",
     "staff_assessment",
@@ -4671,8 +4672,11 @@ SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES = {
 }
 
 STATUS_STATE_DELIVERY_PREDICATE_NAMES = {
+    "appeal_filed",
     "authorization_status",
     "asset_state",
+    "conditional_rule",
+    "directive_with_scope",
     "document_status",
     "hearing_scheduled",
     "knowledge_assertion",
@@ -4682,8 +4686,10 @@ STATUS_STATE_DELIVERY_PREDICATE_NAMES = {
     "pending_determination",
     "permit_status",
     "policy_compliance",
+    "reduction_rule",
     "scheduled_event",
     "tree_protection_status",
+    "vehicle_action",
     "violation_claim",
     "vessel_state",
 }
@@ -4740,7 +4746,7 @@ SOURCE_CLAIM_BACKBONE_GROUPS: dict[str, dict[str, set[str]]] = {
         "source_any": {"appeal", "appealed"},
         "source_context": {"filed", "filing", "lodged", "notice", "challenge"},
         "direct_any": {"appeal", "appealed"},
-        "direct_context": {"filed", "filing", "lodged", "notice", "challenge", "status"},
+        "direct_context": {"filed", "filing", "lodged", "notice", "challenge", "status", "window"},
     },
     "board_finding": {
         "source_any": {"finding", "findings", "found", "concluded", "determined", "determination"},
@@ -4888,7 +4894,13 @@ def _fact_row_can_deliver_source_authority(predicate: str, args: list[str]) -> b
 
 def _fact_row_can_deliver_source_attributed_claim(predicate: str, args: list[str]) -> bool:
     name = str(predicate or "").casefold()
-    if name in {"source_attributed_claim", "source_claim", "statement_claim", "reported_finding"}:
+    if name in {
+        "reported_finding",
+        "source_attributed_claim",
+        "source_attributed_legal_fact",
+        "source_claim",
+        "statement_claim",
+    }:
         return len(args) >= 3
     if name not in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES or len(args) < 3:
         return False
@@ -4930,6 +4942,10 @@ def _source_attributed_claim_fact_key(
 
 def _fact_row_can_deliver_status_state(predicate: str, args: list[str]) -> bool:
     name = str(predicate or "").casefold()
+    if name == "appeal_filed":
+        return len(args) >= 3
+    if name in {"conditional_rule", "directive_with_scope", "reduction_rule", "vehicle_action"}:
+        return len(args) >= 4
     if name in {"asset_state", "vessel_state"}:
         return len(args) >= 3
     if name == "lease_term":
