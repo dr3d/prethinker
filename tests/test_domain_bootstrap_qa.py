@@ -94,6 +94,20 @@ def run_query_plan(
     return _run_query_plan(runtime, queries, **kwargs)
 
 
+def _query_intents_for(*intent_types: str) -> list[dict[str, object]]:
+    return [
+        {
+            "intent_type": intent_type,
+            "target_terms": [],
+            "answer_constraints": [],
+            "uncertainty_policy": "answer",
+            "language": "en",
+            "source": "semantic_ir",
+        }
+        for intent_type in intent_types
+    ]
+
+
 def test_parse_numbered_markdown_questions_keeps_phase_labels() -> None:
     text = """# Phase 1 - Straight Queries
 
@@ -3906,6 +3920,7 @@ def test_source_record_messy_summary_extracts_role_transition() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="On what date does Dr. Rivera's resignation as President take effect, and what roles continue after that?",
+        query_intents=_query_intents_for("role_transition"),
     )
 
     companion = next(
@@ -3930,6 +3945,31 @@ def test_source_record_messy_summary_role_transition_requires_transition_questio
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="Who signed the report?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_role_transition_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_role_transition_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_atom(src_line_0094, "
+            "dr_rivera_will_resign_as_the_company_s_president_effective)."
+        ),
+        (
+            "source_record_text_atom(src_line_0095, "
+            "immediately_and_will_remain_as_chief_executive_officer_and_chair_of_the_board_"
+            "through_april_30_2026)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="On what date does Dr. Rivera's resignation as President take effect?",
     )
 
     assert not any(
@@ -3993,6 +4033,7 @@ def test_source_record_messy_summary_extracts_appointment_and_succession_transit
             "For each executive, list the date their old role ends and the date their new role begins. "
             "Note any executive whose old role and new role overlap."
         ),
+        query_intents=_query_intents_for("role_transition"),
     )
 
     companion = next(
@@ -4026,6 +4067,7 @@ def test_source_record_messy_summary_role_transition_supports_direct_becomes_que
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="On what date does Jordan Liao become Chief Executive Officer?",
+        query_intents=_query_intents_for("role_transition"),
     )
 
     companion = next(
@@ -4053,6 +4095,7 @@ def test_source_record_messy_summary_role_transition_supports_direct_assumed_rol
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What role does Casey Moore assume on April 30, 2026?",
+        query_intents=_query_intents_for("role_transition"),
     )
 
     companion = next(
@@ -4087,6 +4130,7 @@ def test_source_record_messy_summary_extracts_board_nominee_path() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What does the document say about Ms. Liao's path to Board membership?",
+        query_intents=_query_intents_for("board_nominee_path"),
     )
 
     companion = next(
@@ -4109,6 +4153,23 @@ def test_source_record_messy_summary_board_nominee_path_requires_board_path_ques
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What compensation has been finalized for the officer?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_board_nominee_path_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_board_nominee_path_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0091, "
+        "ms_liao_will_also_be_named_as_a_director_nominee_seeking_election_at_the_annual_meeting)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What does the document say about Ms. Liao's path to Board membership?",
     )
 
     assert not any(
@@ -4148,6 +4209,7 @@ def test_source_record_messy_summary_extracts_named_role_roster() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="List every named individual in this report and their stated role(s).",
+        query_intents=_query_intents_for("named_role_roster"),
     )
 
     companion = next(
@@ -4173,6 +4235,20 @@ def test_source_record_messy_summary_named_role_roster_requires_roster_question(
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="When was the president appointed?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_named_role_roster_support" for item in companions
+    )
+
+
+def test_source_record_messy_summary_named_role_roster_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("appoints(company, jordan_liao, president, 2026_01_06).").get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every named individual in this report and their stated role(s).",
     )
 
     assert not any(

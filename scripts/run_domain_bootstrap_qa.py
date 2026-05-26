@@ -1773,6 +1773,10 @@ QUERY_INTENT_TYPES = {
     "duration",
     "status",
     "ordered_labeled_entry",
+    "role_transition",
+    "board_nominee_path",
+    "named_role_roster",
+    "document_chronology",
     "unknown",
 }
 
@@ -1892,6 +1896,44 @@ def _query_intents_from_structured_queries(
                         "intent_type": "ordered_labeled_entry",
                         "target_terms": terms,
                         "answer_constraints": ["source_order"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate in {"appoints", "resigns", "succeeds", "transition_role", "source_record_role_transition_support"}:
+                terms = [
+                    str(value).strip()
+                    for value in args
+                    if str(value).strip() and not _is_prolog_variable(str(value).strip())
+                ]
+                intents.append(
+                    {
+                        "intent_type": "role_transition",
+                        "target_terms": terms[:12],
+                        "answer_constraints": [],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_board_nominee_path_support":
+                intents.append(
+                    {
+                        "intent_type": "board_nominee_path",
+                        "target_terms": [],
+                        "answer_constraints": [],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_named_role_roster_support":
+                intents.append(
+                    {
+                        "intent_type": "named_role_roster",
+                        "target_terms": [],
+                        "answer_constraints": [],
                         "uncertainty_policy": "answer",
                         "language": "",
                         "source": source,
@@ -2217,7 +2259,11 @@ def run_one_question(
     event_elapsed_duration = _event_elapsed_duration_companion(query_results, utterance=utterance)
     if event_elapsed_duration:
         query_results.append(event_elapsed_duration)
-    for source_record_summary in _source_record_messy_summary_companions(runtime, utterance=utterance):
+    for source_record_summary in _source_record_messy_summary_companions(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    ):
         query_results.append(source_record_summary)
     vote_counterfactual = _vote_record_counterfactual_companion(query_results, utterance=utterance)
     if vote_counterfactual:
@@ -16562,6 +16608,7 @@ def _source_record_messy_summary_companions(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Return query-only summaries for messy source-record tables and prose.
 
@@ -16593,9 +16640,9 @@ def _source_record_messy_summary_companions(
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
         _source_record_dated_event_inventory_companion(runtime, utterance=utterance),
         _source_record_negative_assertion_companion(runtime, utterance=utterance),
-        _source_record_role_transition_companion(runtime, utterance=utterance),
-        _source_record_board_nominee_path_companion(runtime, utterance=utterance),
-        _source_record_named_role_roster_companion(runtime, utterance=utterance),
+        _source_record_role_transition_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_board_nominee_path_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_named_role_roster_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_label_value_pair_companion(runtime, utterance=utterance),
         _source_record_postal_state_code_companion(runtime, utterance=utterance),
         _source_record_address_block_companion(runtime, utterance=utterance),
@@ -19903,9 +19950,10 @@ def _source_record_role_transition_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not _source_record_role_transition_question(text):
+    intent = _first_query_intent(query_intents, "role_transition")
+    if not intent:
         return None
 
     text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
@@ -19967,48 +20015,14 @@ def _source_record_role_transition_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only role-transition support grouped source-stated appointment/succession/"
-                    "resign/remain/advisor phrases from admitted source-record text; no durable role fact was written"
+                    "resign/remain/advisor phrases from admitted source-record text after structured "
+                    "query-intent activation; no durable role fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
-
-
-def _source_record_role_transition_question(text: str) -> bool:
-    if re.search(r"\b(?:order|sequence|chronological)\b", text):
-        return False
-    if re.search(r"\b(?:become|becomes|became)\b", text) and re.search(
-        r"\b(?:chief executive|president|chair|advisor|officer|role|title|position)\b",
-        text,
-    ):
-        return True
-    if re.search(r"\b(?:assume|assumes|assumed)\b", text) and re.search(r"\b(?:role|title|position)\b", text):
-        return True
-    if re.search(r"\b(?:appoint|appointed|appointment|succeed|succeeds|succession)\b", text) and re.search(
-        r"\b(?:role|title|position|date|effective)\b",
-        text,
-    ):
-        return True
-    if re.search(r"\b(?:transition|transitions|old role|new role|overlap)\b", text) and re.search(
-        r"\b(?:executive|officer|role|roles|appoint|appointed|assume|succeed|resign|remain)\b",
-        text,
-    ):
-        return True
-    if re.search(r"\b(?:resign|resigns|resignation)\b", text) and re.search(
-        r"\b(?:effective|takes? effect|continue|continues|continued|hold|holds|role|roles|after)\b",
-        text,
-    ):
-        return True
-    if re.search(r"\b(?:advisory|advisor)\b", text) and re.search(r"\b(?:period|start|end|date|through)\b", text):
-        return True
-    if re.search(r"\b(?:continue|continues|continued|hold|holds|held)\b", text) and re.search(
-        r"\b(?:role|roles|after|through|date)\b",
-        text,
-    ):
-        return True
-    return False
 
 
 def _source_record_role_transition_entries(text: str) -> list[dict[str, str]]:
@@ -20272,9 +20286,10 @@ def _source_record_board_nominee_path_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not _source_record_board_nominee_path_question(text):
+    intent = _first_query_intent(query_intents, "board_nominee_path")
+    if not intent:
         return None
 
     text_atoms = sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0]))
@@ -20325,23 +20340,14 @@ def _source_record_board_nominee_path_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only board-nominee path support grouped source-stated nominee/election/meeting "
-                    "phrases from admitted source-record text; no durable director fact was written"
+                    "phrases from admitted source-record text after structured query-intent activation; "
+                    "no durable director fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
-
-
-def _source_record_board_nominee_path_question(text: str) -> bool:
-    if re.search(r"\bboard\b.{0,80}\b(?:membership|member|service|seat|path)\b", text):
-        return True
-    if re.search(r"\b(?:director nominee|nominee)\b", text) and re.search(r"\b(?:election|elect|meeting)\b", text):
-        return True
-    if re.search(r"\bpath\b", text) and re.search(r"\bboard\b", text):
-        return True
-    return False
 
 
 def _source_record_board_nominee_entries(text: str) -> list[dict[str, str]]:
@@ -20386,9 +20392,10 @@ def _source_record_named_role_roster_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not _source_record_named_role_roster_question(text):
+    intent = _first_query_intent(query_intents, "named_role_roster")
+    if not intent:
         return None
 
     entries_by_person: dict[str, list[str]] = {}
@@ -20500,9 +20507,10 @@ def _source_record_named_role_roster_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only named-role roster support grouped admitted role predicates, source-record "
-                    "transition/nominee phrases, and signature-block name/title cells; no durable role fact was written"
+                    "transition/nominee phrases, and signature-block name/title cells after structured "
+                    "query-intent activation; no durable role fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -20514,14 +20522,6 @@ def _source_record_named_role_roster_companion(
             "source_record_cell(SourceRow, Column, Value).",
         ],
     }
-
-
-def _source_record_named_role_roster_question(text: str) -> bool:
-    return bool(
-        re.search(r"\b(?:list|show|build|give)\b", text)
-        and re.search(r"\b(?:every|all)\b.{0,50}\b(?:named )?(?:individual|person|people)\b", text)
-        and re.search(r"\brole", text)
-    )
 
 
 def _source_record_named_role_roster_text_entries(text: str) -> list[dict[str, str]]:

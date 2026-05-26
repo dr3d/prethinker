@@ -241,13 +241,28 @@ record routes are:
 - `_source_record_note_marker_companion`
 - `_source_record_under_heading_companion`
 - `_source_record_ordered_labeled_entry_companion`
+- `_source_record_role_transition_companion`
+- `_source_record_board_nominee_path_companion`
+- `_source_record_named_role_roster_companion`
 
 These routes no longer activate from raw English regex over the question. They
 require structured query intent, either emitted by Semantic IR or inferred from
 structured Prolog query templates / evidence-bundle templates. The deterministic
 code still parses artifact structure and source-record rows; it does not decide
-that English words like "asterisk", "under", or "list" mean those routes should
-fire.
+that English words like "asterisk", "under", "list", "resign", "board path", or
+"named individual" mean those routes should fire.
+
+Latest audit deltas:
+
+```text
+initial audit:       556 regex hits / 152 semantic_trigger
+after first patch:   549 regex hits / 147 semantic_trigger
+after role patch:    526 regex hits / 127 semantic_trigger
+```
+
+The role-transition source parsers still use regex over normalized admitted
+source-record atoms. That is source artifact parsing, not raw-question
+interpretation.
 
 Remaining work:
 

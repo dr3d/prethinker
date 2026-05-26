@@ -72,7 +72,7 @@ SCHEMA_CONTRACT: dict[str, Any] = {
     ],
     "query_intents": [
         {
-            "intent_type": "list|count|date|source_location|heading_scope|note_marker|signatory|comparison|duration|status|ordered_labeled_entry|unknown",
+            "intent_type": "list|count|date|source_location|heading_scope|note_marker|signatory|comparison|duration|status|ordered_labeled_entry|role_transition|board_nominee_path|named_role_roster|document_chronology|unknown",
             "target_terms": [],
             "answer_constraints": [],
             "uncertainty_policy": "answer|clarify|abstain|unknown",
@@ -312,6 +312,10 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                             "duration",
                             "status",
                             "ordered_labeled_entry",
+                            "role_transition",
+                            "board_nominee_path",
+                            "named_role_roster",
+                            "document_chronology",
                             "unknown",
                         ],
                     },
@@ -810,7 +814,7 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Every safe candidate_operation that writes, retracts, queries, or proposes a rule should have at least one truth_maintenance.support_links entry with the same operation_index. Use support_ref='current_utterance' for direct utterance support, or cite the exact context/KB clause when context grounds a correction, query, or conflict.\n"
     "- In truth_maintenance.conflicts, point to the candidate operation index and the existing context/source/rule it conflicts with. In truth_maintenance.retraction_plan, point to explicit correction targets. In derived_consequences, mark consequences query_only, quarantine, future_rule_support, or do_not_commit instead of committing them as facts.\n"
     "- kb_context_pack contains deterministic KB retrieval. Treat exact KB clauses as current committed state for resolving references, corrections, and conflicts. Do not restate KB clauses as new writes. Use candidate_operations only for the current utterance, and use truth_maintenance to cite KB support or conflict pressure.\n"
-    "- For query turns, populate query_intents[] when the question asks for a particular answer shape, source location, note marker, ordered list, date, count, status, duration, comparison, or signatory. query_intents is proposal metadata for deterministic query routing; it is not durable truth and does not authorize writes.\n"
+    "- For query turns, populate query_intents[] when the question asks for a particular answer shape, source location, note marker, ordered list, date, count, status, duration, comparison, signatory, role transition, board-nominee path, named-role roster, or document chronology. query_intents is proposal metadata for deterministic query routing; it is not durable truth and does not authorize writes.\n"
     "- Keep query_intents language-preserving: target_terms should carry the exact source-local term or atom being requested, while intent_type and answer_constraints carry the normalized answer shape. Do not rely on downstream Python keyword parsing to infer these from English wording.\n"
     "- If kb_context_pack.current_state_candidates contains an old current-state fact and the utterance explicitly corrects it with words like actually, instead, wrong, not X, or no longer, propose a safe retract for the old clause and a safe assert for the replacement when the target and replacement are clear.\n"
     "- If a pronoun or short referent has exactly one plausible entity in kb_context_pack.current_state_subject_candidates, and the utterance is an explicit correction of that entity's current state, you may resolve the referent from KB context and propose the retract/assert pair. If there are multiple plausible candidates, clarify instead.\n"
