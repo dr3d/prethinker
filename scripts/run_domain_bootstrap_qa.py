@@ -1950,9 +1950,15 @@ def run_one_question(
     source_overlap_support = _source_record_question_overlap_companion(runtime, utterance=utterance)
     if source_overlap_support:
         query_results.append(source_overlap_support)
+    source_note_marker = _source_record_note_marker_companion(runtime, utterance=utterance)
+    if source_note_marker:
+        query_results.append(source_note_marker)
     source_preceding_heading = _source_record_preceding_heading_companion(runtime, utterance=utterance)
     if source_preceding_heading:
         query_results.append(source_preceding_heading)
+    source_under_heading = _source_record_under_heading_companion(runtime, utterance=utterance)
+    if source_under_heading:
+        query_results.append(source_under_heading)
     source_named_section_window = _source_record_named_section_window_companion(runtime, utterance=utterance)
     if source_named_section_window:
         query_results.append(source_named_section_window)
@@ -1962,6 +1968,9 @@ def run_one_question(
     source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
     if source_list_window:
         query_results.append(source_list_window)
+    source_ordered_entries = _source_record_ordered_labeled_entry_companion(runtime, utterance=utterance)
+    if source_ordered_entries:
+        query_results.append(source_ordered_entries)
     source_section_list_detail = _source_record_section_list_detail_companion(runtime, utterance=utterance)
     if source_section_list_detail:
         query_results.append(source_section_list_detail)
@@ -6365,6 +6374,279 @@ def _preceding_heading_target_tokens(utterance: str) -> set[str]:
     return set()
 
 
+def _source_record_note_marker_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:asterisk|footnotes?|note marker|numbered note|notation|symbol)\b", text):
+        return None
+    wants_asterisk = "asterisk" in text or "*" in str(utterance or "")
+    wants_numbered = bool(re.search(r"\b(?:footnotes?|numbered)\b", text))
+    text_rows = {
+        str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
+        for row in _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
+        if isinstance(row, dict)
+    }
+    line_by_row = {
+        source_row: str(meta.get("Line", ""))
+        for source_row, meta in _source_record_row_metadata(runtime).items()
+    }
+    definition_by_marker: dict[str, list[dict[str, str]]] = {}
+    anchors_by_marker: dict[str, list[dict[str, str]]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate in {"source_record_note_definition", "source_record_symbol_definition"} and len(args) >= 3:
+            source_row, marker, definition = args[:3]
+            if wants_asterisk and marker != "asterisk":
+                continue
+            if wants_numbered and marker == "asterisk" and not wants_asterisk:
+                continue
+            definition_by_marker.setdefault(marker, []).append(
+                {
+                    "DefinitionRow": source_row,
+                    "DefinitionLine": line_by_row.get(source_row, ""),
+                    "Marker": marker,
+                    "MarkerDisplay": _display_note_marker(marker),
+                    "DefinitionAtom": definition,
+                    "DefinitionDisplay": _display_source_phrase(definition),
+                    "DefinitionTextAtom": text_rows.get(source_row, ""),
+                }
+            )
+        elif predicate == "source_record_note_anchor" and len(args) >= 2:
+            source_row, marker = args[:2]
+            if wants_asterisk and marker != "asterisk":
+                continue
+            if wants_numbered and marker == "asterisk" and not wants_asterisk:
+                continue
+            anchors_by_marker.setdefault(marker, []).append(
+                {
+                    "AnchorRow": source_row,
+                    "AnchorLine": line_by_row.get(source_row, ""),
+                    "AnchorTextAtom": text_rows.get(source_row, ""),
+                }
+            )
+    rows: list[dict[str, str]] = []
+    for marker in sorted(set(definition_by_marker) | set(anchors_by_marker)):
+        definitions = sorted(definition_by_marker.get(marker, []), key=lambda row: _source_row_sort_key(row["DefinitionRow"]))
+        anchors = sorted(anchors_by_marker.get(marker, []), key=lambda row: _source_row_sort_key(row["AnchorRow"]))
+        if definitions:
+            for definition in definitions[:4]:
+                anchor = anchors[0] if anchors else {}
+                rows.append(
+                    {
+                        "SupportKind": "source_record_note_marker_definition",
+                        **definition,
+                        "AnchorRow": anchor.get("AnchorRow", ""),
+                        "AnchorLine": anchor.get("AnchorLine", ""),
+                        "AnchorTextAtom": anchor.get("AnchorTextAtom", ""),
+                        "AnchorDisplay": _display_source_phrase(anchor.get("AnchorTextAtom", "")),
+                        "SupportClass": "deterministic-source-record-summary",
+                    }
+                )
+        definition = definitions[0] if definitions else {}
+        for anchor in anchors[:40]:
+            rows.append(
+                {
+                    "SupportKind": "source_record_note_marker_anchor",
+                    "Marker": marker,
+                    "MarkerDisplay": _display_note_marker(marker),
+                    "DefinitionRow": definition.get("DefinitionRow", ""),
+                    "DefinitionLine": definition.get("DefinitionLine", ""),
+                    "DefinitionAtom": definition.get("DefinitionAtom", ""),
+                    "DefinitionDisplay": definition.get("DefinitionDisplay", ""),
+                    **anchor,
+                    "AnchorDisplay": _display_source_phrase(anchor.get("AnchorTextAtom", "")),
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            row.get("Marker", ""),
+            _safe_int(row.get("DefinitionLine")) or 999999,
+            _safe_int(row.get("AnchorLine")) or 999999,
+        )
+    )
+    return {
+        "query": "source_record_note_marker_support(Marker, DefinitionRow, DefinitionDisplay, AnchorRow).",
+        "result": {
+            "predicate": "source_record_note_marker_support",
+            "prolog_query": "source_record_note_marker_support(Marker, DefinitionRow, DefinitionDisplay, AnchorRow).",
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only note-marker support paired admitted source-record note definitions "
+                    "and note anchors; no durable semantic fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_note_definition(SourceRow, Marker, Definition).",
+            "source_record_symbol_definition(SourceRow, Marker, Definition).",
+            "source_record_note_anchor(SourceRow, Marker).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _display_note_marker(marker: str) -> str:
+    value = str(marker or "").strip()
+    if value == "asterisk":
+        return "*"
+    match = re.fullmatch(r"footnote_(\d+)", value)
+    if match:
+        return f"Footnote {match.group(1)}"
+    return _display_source_phrase(value)
+
+
+def _source_record_under_heading_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:under|beneath|within)\b", text):
+        return None
+    if not re.search(r"\b(?:heading|section)\b", text):
+        return None
+    target_tokens = _under_heading_target_tokens(utterance)
+    if not target_tokens:
+        return None
+    ordered = _source_record_ordered_rows(runtime)
+    if not ordered:
+        return None
+    heading_indexes = [
+        index
+        for index, row in enumerate(ordered)
+        if _source_record_row_looks_like_heading(row)
+    ]
+    if not heading_indexes:
+        return None
+
+    candidates: list[tuple[int, int, dict[str, Any], dict[str, Any]]] = []
+    for index, row in enumerate(ordered):
+        if _source_record_row_looks_like_heading(row):
+            continue
+        row_tokens = set(row["Tokens"])
+        overlap = target_tokens & row_tokens
+        if not overlap:
+            continue
+        min_overlap = 2 if len(target_tokens) >= 2 else 1
+        if len(overlap) < min_overlap:
+            continue
+        previous_heading = None
+        for heading_index in heading_indexes:
+            if heading_index < index:
+                previous_heading = ordered[heading_index]
+            else:
+                break
+        if not previous_heading:
+            continue
+        score = len(overlap) * 12
+        if target_tokens <= row_tokens:
+            score += 24
+        candidates.append((score, int(row["Line"]), previous_heading, row))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda item: (-item[0], item[1]))
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for _score, _line, heading, target in candidates[:8]:
+        key = (str(heading["SourceRow"]), str(target["SourceRow"]))
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "SupportKind": "source_record_under_heading",
+                "HeadingSourceRow": str(heading["SourceRow"]),
+                "HeadingLine": str(heading["Line"]),
+                "HeadingAtom": str(heading["TextAtom"]),
+                "HeadingDisplay": _display_source_phrase(str(heading["TextAtom"])),
+                "TargetSourceRow": str(target["SourceRow"]),
+                "TargetLine": str(target["Line"]),
+                "TargetTextAtom": str(target["TextAtom"]),
+                "TargetDisplay": _display_source_phrase(str(target["TextAtom"])),
+                "MatchedTargetTokens": ",".join(sorted(target_tokens & set(target["Tokens"]))),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not rows:
+        return None
+    return {
+        "query": "source_record_under_heading_support(HeadingSourceRow, TargetSourceRow, HeadingAtom, TargetTextAtom).",
+        "result": {
+            "predicate": "source_record_under_heading_support",
+            "prolog_query": (
+                "source_record_under_heading_support"
+                "(HeadingSourceRow, TargetSourceRow, HeadingAtom, TargetTextAtom)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only heading-scope support found source rows matching question target "
+                    "tokens and returned their nearest preceding admitted heading-like row; no "
+                    "durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+        ],
+    }
+
+
+def _under_heading_target_tokens(utterance: str) -> set[str]:
+    quoted = _quoted_target_token_candidates(utterance)
+    if quoted:
+        return quoted[0]
+    proper_tokens: set[str] = set()
+    for match in re.finditer(
+        r"\b[A-Z][A-Za-z0-9&]*(?:\s+(?:&|and|of|the|[A-Z][A-Za-z0-9&]*)){0,6}\b",
+        str(utterance or ""),
+    ):
+        value = match.group(0).strip()
+        tokens = {
+            token
+            for token in _query_atom_tokens(value)
+            if len(token) >= 3 and token.casefold() not in {"under", "which", "what", "where", "heading", "section"}
+        }
+        if len(tokens) >= 2:
+            proper_tokens.update(tokens)
+    if proper_tokens:
+        return proper_tokens
+    stop = {
+        "agency",
+        "appear",
+        "appears",
+        "award",
+        "heading",
+        "section",
+        "under",
+        "which",
+        "what",
+        "where",
+    }
+    return {token for token in _source_record_overlap_question_tokens(utterance) if token not in stop}
+
+
 def _source_record_named_section_window_companion(
     runtime: CorePrologRuntime,
     *,
@@ -6918,6 +7200,82 @@ def _source_record_list_window_companion(
         "derived_from_queries": [
             "source_record_text_atom(SourceRow, TextAtom).",
             "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+        ],
+    }
+
+
+def _source_record_ordered_labeled_entry_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+) -> dict[str, Any] | None:
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:list|name|identify|which)\b", text):
+        return None
+    if not re.search(r"\b(?:source order|every|each|all|across)\b", text):
+        return None
+    if not re.search(
+        r"\b(?:entries?|rows?|records?|items?|awards?|contracts?|identifiers?|designations?|customers?|contractors?)\b",
+        text,
+    ):
+        return None
+    quoted_targets = _quoted_target_token_candidates(utterance)
+    if not quoted_targets:
+        return None
+
+    ordered = _source_record_ordered_rows(runtime)
+    entries = [
+        row
+        for row in ordered
+        if str(row.get("Kind", "")) == "labeled_line"
+        and str(row.get("TextAtom", "")).strip()
+        and str(row.get("Label", "")).strip()
+        and str(row.get("Label", "")).strip() != "no_label"
+    ]
+    if len(entries) < 2 or len(entries) > 80:
+        return None
+
+    rows: list[dict[str, str]] = []
+    for entry in entries:
+        rows.append(
+            {
+                "SupportKind": "source_record_ordered_labeled_entry",
+                "SourceRow": str(entry["SourceRow"]),
+                "Line": str(entry["Line"]),
+                "SectionAtom": str(entry.get("Section", "")),
+                "SectionDisplay": _display_source_phrase(str(entry.get("Section", ""))),
+                "LabelAtom": str(entry.get("Label", "")),
+                "LabelDisplay": _display_source_phrase(str(entry.get("Label", ""))),
+                "TextAtom": str(entry.get("TextAtom", "")),
+                "TextDisplay": _display_source_phrase(str(entry.get("TextAtom", ""))),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    return {
+        "query": "source_record_ordered_labeled_entry_support(SourceRow, Line, SectionAtom, LabelAtom, TextAtom).",
+        "result": {
+            "predicate": "source_record_ordered_labeled_entry_support",
+            "prolog_query": (
+                "source_record_ordered_labeled_entry_support"
+                "(SourceRow, Line, SectionAtom, LabelAtom, TextAtom)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only ordered-entry support returned admitted labeled source-record rows "
+                    "in source order for roster-style questions; no durable fact was written"
+                ),
+                "utterance": utterance,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_atom(SourceRow, TextAtom).",
         ],
     }
 
@@ -16061,10 +16419,13 @@ def _query_independent_source_record_support(
         _source_record_section_list_count_companion(runtime, utterance=utterance),
         _source_record_relative_next_day_companion(runtime, utterance=utterance),
         _source_record_question_overlap_companion(runtime, utterance=utterance),
+        _source_record_note_marker_companion(runtime, utterance=utterance),
         _source_record_preceding_heading_companion(runtime, utterance=utterance),
+        _source_record_under_heading_companion(runtime, utterance=utterance),
         _source_record_named_section_window_companion(runtime, utterance=utterance),
         _source_record_quote_heading_locator_companion(runtime, utterance=utterance),
         _source_record_list_window_companion(runtime, utterance=utterance),
+        _source_record_ordered_labeled_entry_companion(runtime, utterance=utterance),
         _source_record_section_list_detail_companion(runtime, utterance=utterance),
         _source_record_speaker_window_companion(runtime, utterance=utterance),
         _source_record_discrepancy_list_companion(runtime, utterance=utterance),
@@ -20424,6 +20785,7 @@ def _source_record_field_state_companion(
     target_field = _best_source_record_field_for_tokens(runtime, text)
     rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str]] = set()
+    blank_like_values = {"blank", "slash_no_data_marker", "not_applicable"}
 
     for fact in _runtime_fact_rows(runtime):
         predicate = str(fact.get("predicate", "")).strip()
@@ -20436,7 +20798,7 @@ def _source_record_field_state_companion(
             value_tokens = set(_query_atom_tokens(value))
             if not target_field and not ((field_tokens | value_tokens) & query_tokens):
                 continue
-            if value not in {"blank", "checked", "unchecked"} and not (
+            if value not in {*blank_like_values, "checked", "unchecked"} and not (
                 {"blank", "empty", "checked", "unchecked"} & query_tokens
             ):
                 continue
@@ -20482,7 +20844,7 @@ def _source_record_field_state_companion(
         return None
     rows.sort(
         key=lambda row: (
-            0 if row.get("Value") in {"blank", "unchecked", "checked"} else 1,
+            0 if row.get("Value") in blank_like_values | {"unchecked", "checked"} else 1,
             -len(set(_source_record_field_name_tokens(row.get("Field", ""))) & query_tokens),
             _source_row_sort_key(row.get("SourceRow", "")),
         )

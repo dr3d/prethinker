@@ -34,6 +34,8 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_exhibit_index_companion,
     _source_record_field_state_companion,
     _source_record_named_section_window_companion,
+    _source_record_note_marker_companion,
+    _source_record_ordered_labeled_entry_companion,
     _source_record_preceding_heading_companion,
     _source_record_quote_heading_locator_companion,
     _source_record_same_day_event_time_companion,
@@ -56,6 +58,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_column_text_hint_queries,
     _source_section_question_key_hint_queries,
     _source_record_table_count_hint_queries,
+    _source_record_under_heading_companion,
     _source_text_question_token_hint_queries,
     _temporal_join_with_previous,
     _urlopen_json_with_transient_retries,
@@ -2567,6 +2570,105 @@ def test_source_record_preceding_heading_companion_finds_heading_before_target()
     row = companion["result"]["rows"][0]
     assert row["PreviousHeadingAtom"] == "recommendation"
     assert row["TargetHeadingAtom"] == "closing_section"
+
+
+def test_source_record_note_marker_companion_pairs_marker_definitions_and_anchors() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0001, paragraph_line, 1, no_section, body).",
+        "source_record_text_atom(src_line_0001, the_notice_uses_a_marker_here).",
+        "source_record_note_anchor(src_line_0001, asterisk).",
+        "source_record_row(src_line_0003, paragraph_line, 3, no_section, second_marked_notice).",
+        "source_record_text_atom(src_line_0003, a_second_marked_notice_row).",
+        "source_record_note_anchor(src_line_0003, asterisk).",
+        "source_record_row(src_line_0002, paragraph_line, 2, no_section, small_business).",
+        "source_record_text_atom(src_line_0002, small_business).",
+        "source_record_symbol_definition(src_line_0002, asterisk, small_business).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_note_marker_companion(
+        runtime,
+        utterance="What is the asterisk notation and what does it indicate?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["Marker"] == "asterisk"
+    assert row["DefinitionAtom"] == "small_business"
+    assert row["AnchorRow"] == "src_line_0001"
+    anchor_rows = [
+        item
+        for item in companion["result"]["rows"]
+        if item["SupportKind"] == "source_record_note_marker_anchor"
+    ]
+    assert [item["AnchorRow"] for item in anchor_rows] == ["src_line_0001", "src_line_0003"]
+    assert {item["DefinitionAtom"] for item in anchor_rows} == {"small_business"}
+
+
+def test_source_record_under_heading_companion_finds_nearest_heading_for_target_row() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0001, heading, 1, awards, awards).",
+        "source_record_text_atom(src_line_0001, awards).",
+        "source_record_row(src_line_0002, heading, 2, army, army).",
+        "source_record_text_atom(src_line_0002, army).",
+        "source_record_row(src_line_0003, paragraph_line, 3, army, harbor_works_llc_received_award).",
+        "source_record_text_atom(src_line_0003, harbor_works_llc_received_award).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_under_heading_companion(
+        runtime,
+        utterance="Under which agency heading does Harbor Works LLC appear?",
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["HeadingAtom"] == "army"
+    assert row["TargetSourceRow"] == "src_line_0003"
+
+
+def test_source_record_ordered_labeled_entry_companion_returns_roster_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0001, heading, 1, awards, awards).",
+        "source_record_text_atom(src_line_0001, awards).",
+        "source_record_row(src_line_0002, labeled_line, 2, awards, entry_a).",
+        "source_record_text_atom(src_line_0002, alpha_company_first_entry).",
+        "source_record_row(src_line_0003, labeled_line, 3, awards, entry_b).",
+        "source_record_text_atom(src_line_0003, beta_company_second_entry).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_ordered_labeled_entry_companion(
+        runtime,
+        utterance='List, in source order, every "Entry" row and identifier.',
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert [row["SourceRow"] for row in rows] == ["src_line_0002", "src_line_0003"]
+    assert rows[0]["LabelAtom"] == "entry_a"
+    assert rows[1]["TextAtom"] == "beta_company_second_entry"
+
+
+def test_source_record_ordered_labeled_entry_companion_requires_quoted_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0002, labeled_line, 2, awards, entry_a).",
+        "source_record_text_atom(src_line_0002, alpha_company_first_entry).",
+        "source_record_row(src_line_0003, labeled_line, 3, awards, entry_b).",
+        "source_record_text_atom(src_line_0003, beta_company_second_entry).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_ordered_labeled_entry_companion(
+        runtime,
+        utterance="List, in source order, every entry and identifier.",
+    )
+
+    assert companion is None
 
 
 def test_source_record_named_section_window_companion_returns_bounded_section_rows() -> None:

@@ -22,6 +22,7 @@ class SourceRecordRow:
 
 
 HEADING_RE = re.compile(r"^\s{0,3}(#{1,6})\s+(.+?)\s*$")
+BOLD_HEADING_RE = re.compile(r"^\s{0,3}\*\*(?P<label>[^*\n]{1,140})\*\*\s*$")
 TABLE_RE = re.compile(r"^\s*\|(.+)\|\s*$")
 BULLET_RE = re.compile(r"^\s*(?:[-*+]|[0-9]{1,3}[.)])\s+(.+?)\s*$")
 LABEL_RE = re.compile(
@@ -67,6 +68,22 @@ def extract_source_record_ledger(
         heading = HEADING_RE.match(line)
         if heading:
             current_section = _clean_text(heading.group(2), max_chars=120)
+            pending_table_header = None
+            active_table_header = None
+            continuation_label = ""
+            continuation_line = 0
+            rows.append(
+                SourceRecordRow(
+                    row_id=_row_id(line_no),
+                    kind="heading",
+                    line=line_no,
+                    section=current_section,
+                    exact=_clean_text(line, max_chars=max_chars_per_row),
+                    label=current_section,
+                )
+            )
+        elif bold_heading := _standalone_bold_heading(line):
+            current_section = _clean_text(bold_heading, max_chars=120)
             pending_table_header = None
             active_table_header = None
             continuation_label = ""
@@ -271,6 +288,7 @@ def source_record_ledger_facts(
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
             facts.append(f"source_record_row_context({row_id}, {label_atom}, {exact}, {section}).")
             facts.extend(_checkbox_state_facts(str(raw.get("exact", "")), row_id=row_id, label_atom=label_atom))
+            facts.extend(_note_marker_facts(str(raw.get("exact", "")), row_id=row_id))
             for surface_atom, surface_text in _surface_mentions(str(raw.get("exact", ""))):
                 facts.append(f"source_record_surface_mention({row_id}, {surface_atom}, {surface_text}).")
         if exact_key:
@@ -333,6 +351,22 @@ def source_record_ledger_facts(
     facts.extend(_first_date_occurrence_facts(date_occurrences))
     facts.extend(_section_list_count_facts(normalized_rows))
     return _dedupe(facts)
+
+
+def _standalone_bold_heading(line: str) -> str:
+    match = BOLD_HEADING_RE.match(str(line or ""))
+    if not match:
+        return ""
+    label = _clean_text(match.group("label"), max_chars=120).strip()
+    if not label or not re.search(r"[A-Za-z]", label):
+        return ""
+    words = re.findall(r"[A-Za-z]+", label)
+    if not words:
+        return ""
+    uppercase_words = [word for word in words if word.upper() == word]
+    if len(uppercase_words) < max(1, len(words) - 1):
+        return ""
+    return label
 
 
 def _cross_cell_item_pair_facts(
@@ -982,7 +1016,7 @@ def _quoted_atom(value: str) -> str:
     return f"'{escaped}'"
 
 
-def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
+def _legacy_inline_key_value_fields_unused(text: str) -> list[tuple[str, str]]:
     """Extract literal ``Key: Value`` pairs from one source row.
 
     This is source addressability only. It preserves printed key/value pairs but
@@ -1018,6 +1052,120 @@ def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
         active_key_raw = key_raw
         out.append((key, value))
     return _dedupe_pairs(out)
+
+
+INLINE_KEY_VALUE_PREFIXES = {"None", "Unknown", "No", "Yes", "N/A"}
+INLINE_KEY_CONNECTORS = "a|an|and|by|for|in|of|on|or|per|the|to|with|without"
+INLINE_KEY_WORD = (
+    r"(?:"
+    r"[A-Z][A-Za-z0-9]*(?:[&/.-][A-Za-z0-9]+)*"
+    r"|\([A-Z0-9 /.-]{1,16}\)"
+    rf"|(?:{INLINE_KEY_CONNECTORS})"
+    r")"
+)
+INLINE_KEY_PREFIX_PATTERN = "|".join(
+    re.escape(item) for item in sorted(INLINE_KEY_VALUE_PREFIXES, key=len, reverse=True)
+)
+INLINE_KEY_RE = re.compile(
+    rf"(?:(?<=^)|(?<=\s))(?P<key>(?:(?:{INLINE_KEY_PREFIX_PATTERN})\s+)?"
+    rf"{INLINE_KEY_WORD}(?:\s+{INLINE_KEY_WORD}){{0,7}}):"
+)
+
+
+def _inline_key_value_fields(text: str) -> list[tuple[str, str]]:
+    """Extract literal ``Key: Value`` pairs from one source row.
+
+    This version also preserves multiple same-line form fields and explicit
+    blank/slash no-data fields. It is still only source addressability.
+    """
+
+    clean = re.sub(r"\*\*([^*]+)\*\*", r"\1", str(text or ""))
+    clean = re.sub(r"`([^`]+)`", r"\1", clean)
+    out: list[tuple[str, str]] = []
+    active_key_raw = ""
+    for segment in re.split(r"[;|]", clean):
+        parsed_segment = _inline_key_value_segment_fields(segment)
+        if parsed_segment:
+            out.extend(parsed_segment)
+            active_key_raw = parsed_segment[-1][0]
+            continue
+        if not active_key_raw:
+            continue
+        value = _inline_field_value_atom(segment)
+        if not value:
+            continue
+        key = _atom(active_key_raw)
+        if key and key != value:
+            out.append((key, value))
+    return _dedupe_pairs(out)
+
+
+def _inline_key_value_segment_fields(segment: str) -> list[tuple[str, str]]:
+    raw = str(segment or "")
+    matches = list(INLINE_KEY_RE.finditer(raw))
+    if not matches:
+        return []
+    out: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        key_raw = _clean_inline_field_key(match.group("key"))
+        if not key_raw:
+            continue
+        value_start = match.end()
+        value_end = matches[index + 1].start() if index + 1 < len(matches) else len(raw)
+        value_raw = raw[value_start:value_end]
+        if index + 1 < len(matches):
+            next_prefix = _inline_field_leading_value_prefix(matches[index + 1].group("key"))
+            if next_prefix and _prefix_belongs_to_previous_inline_value(value_raw):
+                value_raw = f"{value_raw} {next_prefix}"
+        value = _inline_field_value_atom(value_raw)
+        key = _atom(key_raw)
+        if not key or not value or key == value:
+            continue
+        out.append((key, value))
+    return out
+
+
+def _clean_inline_field_key(value: str) -> str:
+    key = re.split(r"\s+(?:â€”|â€“|--)\s*", str(value or ""))[-1].strip(" .")
+    for prefix in tuple(f"{item} " for item in sorted(INLINE_KEY_VALUE_PREFIXES, key=len, reverse=True)):
+        if key.startswith(prefix) and len(key.split()) >= 2:
+            key = key[len(prefix) :].strip()
+            break
+    if len(key) > 44:
+        return ""
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9 &()/.-]{0,43}", key):
+        return ""
+    return key
+
+
+def _inline_field_leading_value_prefix(value: str) -> str:
+    key = str(value or "").strip()
+    for prefix in sorted(INLINE_KEY_VALUE_PREFIXES, key=len, reverse=True):
+        if key.startswith(f"{prefix} ") and len(key.split()) >= 2:
+            return prefix
+    return ""
+
+
+def _prefix_belongs_to_previous_inline_value(value: str) -> bool:
+    stripped = str(value or "").strip()
+    if not stripped:
+        return True
+    return stripped.endswith(("/", "-", "--"))
+
+
+def _inline_field_value_atom(value: str) -> str:
+    raw = str(value or "").strip(" .")
+    if not raw:
+        return "blank"
+    if re.fullmatch(r"/+", raw):
+        return "slash_no_data_marker"
+    if raw.casefold() in {"n/a", "na", "not applicable"}:
+        return "not_applicable"
+    if len(raw) > 180:
+        return ""
+    if not re.search(r"[A-Za-z0-9/]", raw):
+        return ""
+    return _atom(raw)
 
 
 def _cell_list_items(text: str) -> list[tuple[str, str]]:
@@ -1122,6 +1270,74 @@ def _parenthetical_alias_facts(text: str, *, row_id: str) -> list[str]:
         out.append(f"source_record_alias({row_id}, {abbr}, {expansion}).")
         out.append(f"source_record_alias({row_id}, {expansion}, {abbr}).")
     return out
+
+
+NOTE_MARKER_ALIASES = {
+    "*": "asterisk",
+    "1": "footnote_1",
+    "2": "footnote_2",
+    "3": "footnote_3",
+    "4": "footnote_4",
+    "5": "footnote_5",
+    "\u00b9": "footnote_1",
+    "\u00b2": "footnote_2",
+    "\u00b3": "footnote_3",
+    "\u2074": "footnote_4",
+    "\u2075": "footnote_5",
+    "\u00c2\u00b9": "footnote_1",
+    "\u00c2\u00b2": "footnote_2",
+    "\u00c2\u00b3": "footnote_3",
+}
+
+
+def _note_marker_facts(text: str, *, row_id: str) -> list[str]:
+    raw = str(text or "").strip()
+    if not raw:
+        return []
+    out: list[str] = []
+    leading = _leading_note_marker(raw)
+    if leading:
+        marker_atom, body = leading
+        body_atom = _atom(body)
+        out.append(f"source_record_note_marker({row_id}, {marker_atom}).")
+        if body_atom:
+            out.append(f"source_record_note_definition({row_id}, {marker_atom}, {body_atom}).")
+        if marker_atom == "asterisk" and body_atom:
+            out.append(f"source_record_symbol_definition({row_id}, {marker_atom}, {body_atom}).")
+    for marker_atom in _inline_note_markers(raw):
+        out.append(f"source_record_note_anchor({row_id}, {marker_atom}).")
+    return _dedupe(out)
+
+
+def _leading_note_marker(raw: str) -> tuple[str, str] | None:
+    text = str(raw or "").strip()
+    if text.startswith("*") and not text.startswith("**"):
+        body = text.lstrip("*").strip()
+        if body:
+            return "asterisk", body
+    for printed, atom in NOTE_MARKER_ALIASES.items():
+        if printed == "*" or not text.startswith(printed):
+            continue
+        body = text[len(printed) :].strip()
+        if body:
+            return atom, body
+    match = re.match(r"^(?P<num>\d{1,3})[.)]\s+(?P<body>.+)$", text)
+    if match:
+        return f"footnote_{int(match.group('num'))}", match.group("body").strip()
+    return None
+
+
+def _inline_note_markers(raw: str) -> list[str]:
+    text = str(raw or "")
+    out: list[str] = []
+    for printed, atom in NOTE_MARKER_ALIASES.items():
+        if printed == "*":
+            continue
+        if printed in text and not text.strip().startswith(printed):
+            out.append(atom)
+    if "*" in text and not text.strip().startswith("*"):
+        out.append("asterisk")
+    return _dedupe(out)
 
 
 def _dedupe_pairs(values: list[tuple[str, str]]) -> list[tuple[str, str]]:

@@ -417,6 +417,76 @@ def test_source_record_ledger_emits_inline_key_value_fields() -> None:
     assert "source_record_field(src_line_0003, location, bay_3)." in facts
 
 
+def test_source_record_ledger_promotes_standalone_bold_headings_to_sections() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "# Awards",
+                "",
+                "**AIR FORCE**",
+                "",
+                "North Pier LLC received the first award.",
+                "",
+                "**ARMY**",
+                "",
+                "Harbor Works LLC received the second award.",
+            ]
+        )
+    )
+
+    rows = {row["line"]: row for row in ledger["rows"]}
+    facts = source_record_ledger_facts(ledger)
+
+    assert rows[3]["kind"] == "heading"
+    assert rows[9]["section"] == "ARMY"
+    assert "source_record_section(src_line_0009, army)." in facts
+    assert "source_record_row(src_line_0007, heading, 7, army, army)." in facts
+
+
+def test_source_record_ledger_preserves_multi_field_blanks_and_slash_markers() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "Lowest Ceiling: None Visibility (RVR):",
+                "Wind Speed/Gusts: 17 knots / None Turbulence Type Forecast/Actual: /",
+                "Departure Time: Type of Airspace: Class G",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_field(src_line_0001, lowest_ceiling, none)." in facts
+    assert "source_record_field(src_line_0001, visibility_rvr, blank)." in facts
+    assert "source_record_field(src_line_0002, wind_speed_gusts, v_17_knots_none)." in facts
+    assert "source_record_field(src_line_0002, turbulence_type_forecast_actual, slash_no_data_marker)." in facts
+    assert "source_record_field(src_line_0003, departure_time, blank)." in facts
+    assert "source_record_field(src_line_0003, type_of_airspace, class_g)." in facts
+
+
+def test_source_record_ledger_preserves_note_markers_and_definitions() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "The filing deadline is controlled by the statute.\u00c2\u00b9",
+                "\u00c2\u00b9 The cited statute sets the annual filing rule.",
+                "*Small Business",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_note_anchor(src_line_0001, footnote_1)." in facts
+    assert "source_record_note_marker(src_line_0002, footnote_1)." in facts
+    assert (
+        "source_record_note_definition(src_line_0002, footnote_1, "
+        "the_cited_statute_sets_the_annual_filing_rule)."
+    ) in facts
+    assert "source_record_note_marker(src_line_0003, asterisk)." in facts
+    assert "source_record_symbol_definition(src_line_0003, asterisk, small_business)." in facts
+
+
 def test_source_record_ledger_does_not_treat_clock_times_as_inline_fields() -> None:
     ledger = extract_source_record_ledger(
         "Camera CAM-7 was offline from 2026-04-15 06:00:00 UTC to 2026-04-15 14:00:00 UTC."

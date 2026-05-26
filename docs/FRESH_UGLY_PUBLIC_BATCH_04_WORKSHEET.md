@@ -270,3 +270,167 @@ Immediate next blockers:
    changing the corpus score claim.
 4. Only after mechanism grouping, implement transfer-safe compile-surface
    repairs and replay targeted rows as mechanism evidence.
+
+## Repair Cycle 2026-05-26 - Source-Record Scaffolding R2/R3
+
+Intent:
+
+Rectify the Batch 04 source-shape gaps without promoting fixture vocabulary,
+document names, answer strings, or one-off public-record facts into the active
+instrument.
+
+Scope:
+
+- Affected source-shape mechanisms only: official-form blank fields, printed
+  note/symbol markers, standalone bold headings, and quoted source-label entry
+  rosters.
+- No compatibility adapters.
+- No write proposals.
+- No durable semantic truth mutation from query-time code.
+
+Understandings attained:
+
+1. Several misses were not failures to "know" the source; they were failures to
+   keep enough deterministic source scaffolding addressable after compile.
+2. Same-line official forms can contain multiple `Key: Value` fields, including
+   explicit blank-after-colon cells and slash no-data markers. The previous
+   source-record field parser treated some of these as one broad field or lost
+   the blank state.
+3. Printed note and symbol systems need two surfaces, not one: the definition
+   row (`*Small Business`, numbered footnote bodies) and the anchor rows where
+   the printed marker appears.
+4. Standalone bold uppercase markdown lines are often real section headings.
+   Treating them as ordinary labeled lines stranded downstream rows under the
+   previous section.
+5. A companion that returns all ordered labeled entries is useful only when the
+   question names a quoted source label or phrase. The broad version over-fired
+   on general roster questions and was rejected before finalizing.
+6. The three-fixture guard is noisy. Rows improved exactly where the new
+   source-record support fired, but unrelated rows still churned under fresh
+   QA calls. This is evidence for mechanism value, not a clean affected-slice
+   score claim.
+
+Changes applied:
+
+- `src/source_record_ledger.py`
+  - Promotes standalone bold headings to `heading` source-record rows and
+    updates current section.
+  - Preserves multi-field same-line key/value forms.
+  - Emits explicit `blank`, `slash_no_data_marker`, and `not_applicable`
+    source-record field values.
+  - Emits note/symbol marker facts:
+    `source_record_note_marker/2`, `source_record_note_definition/3`,
+    `source_record_symbol_definition/3`, and `source_record_note_anchor/2`.
+- `scripts/run_domain_bootstrap_qa.py`
+  - Treats slash/no-data and not-applicable field states as blank-like for
+    field-state questions.
+  - Adds query-only source-record support for note markers and their anchors.
+  - Adds query-only source-record support for "under which heading/section"
+    questions using nearest preceding admitted heading rows.
+  - Adds narrowed ordered labeled-entry support, gated by quoted source targets,
+    after a broad version caused roster-question overreach.
+- Tests added in:
+  - `tests/test_source_record_ledger.py`
+  - `tests/test_domain_bootstrap_qa.py`
+
+Verification:
+
+```text
+python -m pytest tests/test_source_record_ledger.py tests/test_domain_bootstrap_qa.py -q
+376 passed
+
+python scripts\audit_active_instrument_leakage.py
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+
+python -m py_compile src\source_record_ledger.py scripts\run_domain_bootstrap_qa.py
+pass
+
+python -m pytest -q
+1801 passed, 2 subtests passed
+```
+
+Focused compile replay:
+
+```text
+artifact root:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_r2_mechanism_20260526
+
+fixtures: procurement_ugly_001, puc_ugly_001, ntsb_ugly_001
+parsed OK: 3/3
+compile admitted / skipped: 417 / 69
+quality gate pass / hold: 0 / 3
+runtime/write/compatibility: 0 / 0 / 0
+```
+
+Compile-gate read:
+
+- These repairs did not solve the source-authority/source-claim carrier gate.
+- Holds remained on source-authority and source-claim/status-state carrier
+  delivery. That is the next compile-surface lane, not a reason to discard the
+  source-record repairs.
+
+Focused QA replays:
+
+```text
+R1 baseline subset, same three fixtures:
+62 / 5 / 8 on 75 rows
+
+R2 mechanism QA, same three fixtures:
+64 / 4 / 7 on 75 rows
+changed rows: 19
+improved rows: 10
+regressed rows: 9
+baseline exact -> non-exact: 7
+regression guard: fail
+
+R3 final guard, same three fixtures, final narrowed code:
+61 / 4 / 9 on 75 rows
+changed rows: 18
+improved rows: 8
+regressed rows: 10
+baseline exact -> non-exact: 8
+regressions with added support surfaces: 0
+regression guard: fail
+```
+
+Important row-level mechanism evidence:
+
+- Official-form blank/no-data fields:
+  - `ntsb_ugly_001 q013` recovered in R2 from `miss` to `exact`.
+  - This is direct evidence for multi-field blank/slash preservation.
+- Printed note/symbol markers:
+  - `procurement_ugly_001 q004` recovered from `miss` to `exact`.
+  - `procurement_ugly_001 q009` recovered from `miss` to `exact`.
+  - `puc_ugly_001 q007` recovered from `miss` to `exact`.
+  - These rows used `source_record_note_marker_support` or direct
+    note-definition/anchor rows.
+- Heading scope:
+  - `procurement_ugly_001 q006` recovered from `miss` to `exact` when
+    `source_record_under_heading_support` fired.
+- Quoted source-label roster:
+  - `procurement_ugly_001 q013` recovered in the narrowed procurement replay
+    when `source_record_ordered_labeled_entry_support` fired.
+
+Rejected/narrowed intervention:
+
+- A broad ordered-entry companion was tried against procurement.
+- It improved one row but attached to general roster questions and caused
+  exact-to-miss regressions on rows that did not need it.
+- Final code requires a quoted source target before ordered labeled-entry
+  support can fire.
+- This is the right lesson: source-record companions need explicit trigger
+  discrimination, not just useful-looking rows.
+
+Current read:
+
+- Keep the source-record scaffolding repairs. They are source-generic,
+  unit-tested, leakage-clean, and improved rows exactly where their support
+  surfaces fired.
+- Do not claim an affected-slice score improvement from R3. The guard failed
+  on aggregate due to unrelated QA/query variance.
+- The next blocker is not more one-row source-record polish. It is reducing
+  compile/query-path variance on repeated official-record entry rosters and
+  finishing the source-authority/source-claim carrier lane that still holds the
+  compile gate.
