@@ -1,7 +1,10 @@
 import json
+from pathlib import Path
+from types import SimpleNamespace
 
 from scripts.run_domain_bootstrap_file_batch import (
     CompileJob,
+    _build_command,
     _detail_wrapper_drift_flags,
     _extract_compile_summary,
     _merge_quality_retry_context_lines,
@@ -14,6 +17,43 @@ from scripts.run_domain_bootstrap_file_batch import (
     _summarize_existing_job,
     _summarize,
 )
+
+
+def test_build_command_forwards_profile_delivery_repair_pass() -> None:
+    args = SimpleNamespace(
+        domain_hint="",
+        profile_registry=None,
+        use_profile_registry_direct=False,
+        profile_registry_palette_prior=False,
+        allow_global_first_profile_registry_palette_prior=False,
+        compile_source=True,
+        compile_plan_passes=False,
+        compile_flat_plus_plan_passes=True,
+        focused_pass_ops_schema=True,
+        source_entity_ledger=False,
+        archival_identifier_ledger=False,
+        source_record_ledger=True,
+        source_record_ledger_facts=True,
+        profile_delivery_repair_pass=True,
+        intake_registry_context=False,
+        review_profile=False,
+        profile_review_retry=False,
+        max_plan_passes=6,
+        extra_compile_context_line=[],
+    )
+    command = _build_command(
+        CompileJob(
+            fixture="fixture_a",
+            text_file=Path("datasets/fixture_a/source.md"),
+            out_dir=Path("tmp/out/fixture_a"),
+        ),
+        args=args,
+        model="model-a",
+        base_url="http://127.0.0.1:1234",
+        timeout=1200,
+    )
+
+    assert "--profile-delivery-repair-pass" in command
 
 
 def test_compile_batch_summary_extracts_quality_gate_signals() -> None:

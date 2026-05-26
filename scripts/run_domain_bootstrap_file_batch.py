@@ -274,6 +274,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--archival-identifier-ledger", action="store_true")
     parser.add_argument("--source-record-ledger", action="store_true")
     parser.add_argument("--source-record-ledger-facts", action="store_true")
+    parser.add_argument("--profile-delivery-repair-pass", action="store_true")
     parser.add_argument("--intake-registry-context", action="store_true")
     parser.add_argument("--review-profile", action="store_true")
     parser.add_argument("--profile-review-retry", action="store_true")
@@ -445,6 +446,7 @@ def _build_command(
         "archival_identifier_ledger",
         "source_record_ledger",
         "source_record_ledger_facts",
+        "profile_delivery_repair_pass",
         "intake_registry_context",
         "review_profile",
         "profile_review_retry",

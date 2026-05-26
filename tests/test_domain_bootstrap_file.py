@@ -3424,6 +3424,234 @@ def test_source_pass_profile_delivery_target_names_appeal_filing_carrier() -> No
     assert "does not replace the direct appeal/filing row" in joined
 
 
+def test_profile_delivery_repair_context_targets_carrier_findings() -> None:
+    lines = domain_bootstrap_file._profile_delivery_repair_context_lines(
+        {
+            "findings": [
+                {
+                    "class": "source_claim_carrier_offered_but_undelivered",
+                    "offered_carriers": ["source_attributed_claim/4"],
+                    "missing_signal_keys": ["statement:claim:status"],
+                },
+                {
+                    "class": "source_authority_carrier_partially_delivered",
+                    "offered_carriers": ["source_authority/3"],
+                },
+                {
+                    "class": "status_state_carrier_offered_but_undelivered",
+                    "offered_carriers": ["appeal_filed/3"],
+                },
+            ]
+        }
+    )
+
+    joined = "\n".join(lines)
+    assert "PROFILE DELIVERY REPAIR PASS" in joined
+    assert "proposal-only" in joined
+    assert "source_attributed_claim/4" in joined
+    assert "source_authority/3" in joined
+    assert "appeal_filed/3" in joined
+    assert "statement:claim:status" in joined
+    assert "source-to-claim relation" in joined
+    assert "governed subject or scope" in joined
+    assert "joined state surface" in joined
+
+
+def test_profile_delivery_repair_ignores_nonrepair_findings() -> None:
+    lines = domain_bootstrap_file._profile_delivery_repair_context_lines(
+        {
+            "findings": [
+                {
+                    "class": "quantity_carrier_offered_but_undelivered",
+                    "offered_carriers": ["event_measurement/4"],
+                }
+            ]
+        }
+    )
+
+    assert lines == []
+
+
+def test_source_claim_mentions_ignore_sole_source_support_purpose() -> None:
+    mentions = domain_bootstrap_file._source_attributed_claim_mentions(
+        "One company was solicited for this sole-source requirement pursuant to the authority "
+        "set forth in 10 U.S. Code 3204(a)(1) in support of the aircraft platform."
+    )
+
+    assert mentions == []
+
+
+def test_source_claim_mentions_ignore_generic_status_label() -> None:
+    assert domain_bootstrap_file._source_attributed_claim_mentions("- **Status:** Ongoing") == []
+
+
+def test_source_claim_mentions_ignore_document_availability_link() -> None:
+    mentions = domain_bootstrap_file._source_attributed_claim_mentions(
+        "The factual report is available here: https://example.invalid/report.pdf"
+    )
+
+    assert mentions == []
+    assert domain_bootstrap_file._source_attributed_claim_mentions(
+        "A factual report that may be admissible is available here."
+    ) == []
+
+
+def test_source_claim_mentions_ignore_certification_condition_without_claim_frame() -> None:
+    mentions = domain_bootstrap_file._source_attributed_claim_mentions(
+        "Within sixty days of receipt of a signed certification on letterhead, the payment obligation begins."
+    )
+
+    assert mentions == []
+
+
+def test_source_claim_mentions_keep_speaker_statement_frame() -> None:
+    mentions = domain_bootstrap_file._source_attributed_claim_mentions(
+        "**Kowalski:** The draft remains under review and is not binding."
+    )
+
+    assert mentions == ["**Kowalski:** The draft remains under review and is not binding."]
+
+
+def test_source_claim_delivery_does_not_treat_fund_source_as_claim_carrier() -> None:
+    candidate = {
+        "signature": "fund_source_details/3",
+        "args": ["fund_source_id", "fund_description", "expiration_status"],
+    }
+
+    assert not domain_bootstrap_file._candidate_can_carry_source_attributed_claim_delivery_unit(candidate)
+    assert not domain_bootstrap_file._fact_row_can_deliver_source_attributed_claim(
+        "fund_source_details",
+        ["navy_working_capital_funds", "fiscal_2026_funds", "not_expiring"],
+    )
+
+
+def test_profile_delivery_accepts_solicitation_authority_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": [
+            "solicitation_authority(contract_1, 10_u_s_code_3204_a_1).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+
+    _attach_profile_admission_report(
+        source_compile=source_compile,
+        domain_hint="source authority procurement contract",
+        source_text=(
+            "One company was solicited for this sole-source requirement pursuant to the authority "
+            "set forth in 10 U.S. Code 3204(a)(1)."
+        ),
+        parsed_profile={
+            "candidate_predicates": [
+                {
+                    "signature": "solicitation_authority/2",
+                    "args": ["contract_id", "authority_code"],
+                }
+            ]
+        },
+    )
+
+    assert source_compile["profile_delivery"]["findings"] == []
+    assert source_compile["profile_delivery"]["delivered_carriers"]["source_authority"] == [
+        "solicitation_authority"
+    ]
+
+
+def test_status_state_mentions_ignore_state_as_government_party() -> None:
+    mentions = domain_bootstrap_file._status_state_source_mentions(
+        "The People of the State of New York brought this action against Defendants."
+    )
+
+    assert mentions == []
+
+
+def test_status_state_mentions_keep_actual_status_value() -> None:
+    mentions = domain_bootstrap_file._status_state_source_mentions(
+        "The permit application status remained pending as of 2026-04-01."
+    )
+
+    assert mentions == ["The permit application status remained pending as of 2026-04-01."]
+
+
+def test_merge_profile_delivery_repair_pass_adds_unique_rows_and_health() -> None:
+    source_compile = {
+        "admitted_count": 1,
+        "skipped_count": 0,
+        "effective_admitted_count": 1,
+        "effective_skipped_count": 0,
+        "facts": ["base_fact(alpha)."],
+        "rules": [],
+        "queries": [],
+        "surface_contribution": [
+            {
+                "pass_index": 0,
+                "pass_id": "flat_skeleton",
+                "purpose": "broad skeleton",
+                "focus": "source-wide structure",
+                "ok": True,
+                "admitted_count": 1,
+                "skipped_count": 0,
+                "effective_skipped_count": 0,
+                "diagnostic_flags": [],
+                "fact_count": 1,
+                "rule_count": 0,
+                "query_count": 0,
+                "unique_fact_count": 1,
+                "unique_rule_count": 0,
+                "unique_query_count": 0,
+                "duplicate_count": 0,
+                "unique_contribution_count": 1,
+                "unique_contribution_ratio": 1.0,
+                "health_flags": [],
+            }
+        ],
+    }
+    repair_pass = {
+        "ok": True,
+        "pass_id": "profile_delivery_repair",
+        "purpose": "repair direct carrier delivery",
+        "focus": "missing carrier rows",
+        "admitted_count": 2,
+        "skipped_count": 1,
+        "facts": [
+            "base_fact(alpha).",
+            "source_attributed_claim(claim_1, report, status_available, src_line_001).",
+        ],
+        "rules": [],
+        "queries": ["source_attributed_claim(Source, Subject, Claim, Scope)."],
+    }
+
+    domain_bootstrap_file._merge_profile_delivery_repair_pass(source_compile, repair_pass)
+
+    assert source_compile["facts"] == [
+        "base_fact(alpha).",
+        "source_attributed_claim(claim_1, report, status_available, src_line_001).",
+    ]
+    assert source_compile["unique_fact_count"] == 2
+    assert source_compile["admitted_count"] == 3
+    assert source_compile["skipped_count"] == 1
+    assert source_compile["effective_admitted_count"] == 3
+    assert source_compile["effective_skipped_count"] == 1
+    assert source_compile["repair_passes"] == [repair_pass]
+    assert repair_pass["_profile_delivery_repair_new_facts"] == [
+        "source_attributed_claim(claim_1, report, status_available, src_line_001)."
+    ]
+    assert source_compile["surface_contribution"][-1]["pass_id"] == "profile_delivery_repair"
+    assert source_compile["surface_contribution"][-1]["unique_fact_count"] == 1
+    assert source_compile["compile_health"]["verdict"] in {"healthy", "warning"}
+
+
 def test_source_claim_key_treats_justified_source_statement_as_finding() -> None:
     key = domain_bootstrap_file._source_attributed_claim_fact_key(
         "source_attributed_claim",

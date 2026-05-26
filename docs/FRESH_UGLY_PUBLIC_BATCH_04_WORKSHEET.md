@@ -763,3 +763,113 @@ Next blockers:
    pressure is still `source_claim_carrier_*`, not status-state accounting.
 3. Recompile a small affected fixture set before claiming any compile-gate
    improvement; the carrier accounting refresh is mechanism evidence only.
+
+## Repair Cycle 2026-05-26 - Profile-Delivery Repair Pass and Detector Cleanup
+
+Intent:
+
+Hit the next carrier blocker without letting Python extract source facts. The
+mechanism added here gives the LLM one bounded proposal-only repair pass after a
+deterministic profile-delivery diagnostic, then still routes every proposed row
+through `source_pass_ops_v1` and the normal mapper.
+
+Changes applied:
+
+- Added `--profile-delivery-repair-pass` to
+  `scripts\run_domain_bootstrap_file.py`.
+- Added batch pass-through for `--profile-delivery-repair-pass` in
+  `scripts\run_domain_bootstrap_file_batch.py`.
+- The repair pass only runs when profile-delivery findings show repairable
+  source-claim, source-authority, source-claim-backbone, or status-state carrier
+  pressure.
+- The repair pass receives structural diagnostics and offered carrier
+  signatures. It does not receive target facts, oracle answers, or fixture
+  language, and it writes nothing directly.
+
+Probe:
+
+```text
+fixture: procurement_ugly_001
+artifact:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_profile_delivery_repair_probe_20260526
+```
+
+Read from the probe:
+
+- The repair pass ran and added 47 new unique facts with no compile-health
+  flags.
+- It emitted `solicitation_authority(mathtech_inc, 10_u_s_code_3204_a_1)`, but
+  the checker originally refused to count that source-local authority row.
+- The checker also treated `fund_source_details/3` and a `sole-source ... in
+  support of ...` phrase as source-attributed-claim pressure.
+- That means the first blocker was not "the LLM ignored the instruction"; it was
+  a profile-delivery detector/accounting mismatch.
+
+Detector/accounting cleanup:
+
+- Count `solicitation_authority/2` as source-authority delivery when it carries
+  governed contract/subject and authority code.
+- Do not treat fund/appropriation source predicates such as
+  `fund_source_details/3` as source-attributed-claim carriers unless the
+  predicate name also carries an actual claim/comment/finding/opinion/report
+  surface.
+- Do not treat generic markdown field labels such as `Status:` as
+  source-attributed speaker frames.
+- Do not treat document-availability lines such as "report is available here"
+  as source-attributed claims.
+- Do not treat legal certification/payment-condition language as
+  source-attributed claim pressure unless the certification itself is framed as
+  saying, stating, confirming, or supporting a claim.
+- Do not treat `state` by itself as status/state pressure. This prevents legal
+  sources that mention a government party such as a State from creating
+  condition/status obligations unless another actual status term is present.
+
+Refresh over existing R4 compile artifacts:
+
+```text
+original R4 quality gate summary: 1 pass / 7 hold
+current refreshed summary:       3 pass / 5 hold
+
+remaining holds:
+- court_ugly_001: source-claim partial plus a zero-yield legal-findings pass
+- nlrb_ugly_001: rough_score-only hold
+- procurement_ugly_001: source-authority miss in the old R4 artifact; the new
+  repair probe shows this is recoverable when the repair pass emits
+  solicitation_authority/2
+- puc_ugly_001: mixed source-claim/status-state/backbone coexistence pressure
+- state_ag_ugly_001: status-state pressure reduced from six signals to three
+  after removing government-State noise; the remaining settlement/vehicle
+  status pressure still needs adjudication
+```
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_file.py -q -k "source_claim_mentions or fund_source or solicitation_authority or profile_delivery_repair"
+12 passed, 146 deselected
+
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_file_batch.py -q
+220 passed
+
+python -m pytest -q
+1840 passed, 2 subtests passed
+
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_file_batch.py
+pass
+
+python scripts\audit_active_instrument_leakage.py --out-json C:\prethinker_tmp_archive\active_instrument_leakage_after_profile_delivery_repair_20260526.json --out-md C:\prethinker_tmp_archive\active_instrument_leakage_after_profile_delivery_repair_20260526.md
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Next blockers:
+
+1. Adjudicate `state_ag_ugly_001` status-state pressure. Determine whether
+   `vehicle_action/4` is a real missing carrier or whether settlement reduction
+   and vehicle-class rows already deliver the source's actual status surface.
+2. Run a small affected-set recompile with `--profile-delivery-repair-pass`
+   enabled before claiming compile-gate improvement.
+3. Keep the repair pass off any public score claim until it is tested on a
+   fresh ugly batch, because the first evidence is one-fixture mechanism
+   evidence plus refreshed accounting.

@@ -951,6 +951,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--profile-delivery-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass when "
+            "profile-delivery diagnostics show offered direct carriers with missing emitted rows."
+        ),
+    )
+    parser.add_argument(
         "--extra-compile-context-line",
         action="append",
         default=[],
@@ -1418,6 +1426,20 @@ def main() -> int:
             source_text=source_text,
             parsed_profile=parsed,
             intake_plan=intake_plan,
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_delivery_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_delivery_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
             args=args,
             extra_context=extra_compile_context,
         )
@@ -2792,6 +2814,267 @@ def _compile_source_flat_plus_plan_passes(
     result["surface_contribution"] = _flat_plus_surface_contribution(flat=flat, focused=focused)
     result["compile_health"] = _compile_health_summary(result["surface_contribution"])
     return result
+
+
+PROFILE_DELIVERY_REPAIR_CLASSES = {
+    "source_authority_carrier_offered_but_undelivered",
+    "source_authority_carrier_partially_delivered",
+    "source_claim_carrier_offered_but_undelivered",
+    "source_claim_carrier_partially_delivered",
+    "source_claim_backbone_coexistence_missing",
+    "status_state_carrier_offered_but_undelivered",
+    "status_state_carrier_partially_delivered",
+}
+
+
+def _profile_delivery_repair_findings(delivery_report: dict[str, Any]) -> list[dict[str, Any]]:
+    findings = delivery_report.get("findings") if isinstance(delivery_report, dict) else []
+    return [
+        item
+        for item in findings
+        if isinstance(item, dict)
+        and str(item.get("class", "")).strip() in PROFILE_DELIVERY_REPAIR_CLASSES
+    ]
+
+
+def _profile_delivery_repair_offered_carriers(findings: list[dict[str, Any]]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    for finding in findings:
+        for carrier in finding.get("offered_carriers", []) if isinstance(finding.get("offered_carriers"), list) else []:
+            text = str(carrier).strip()
+            if text and text not in seen:
+                seen.add(text)
+                carriers.append(text)
+    return carriers
+
+
+def _profile_delivery_repair_missing_keys(findings: list[dict[str, Any]]) -> list[str]:
+    keys: list[str] = []
+    seen: set[str] = set()
+    for finding in findings:
+        for key in finding.get("missing_signal_keys", []) if isinstance(finding.get("missing_signal_keys"), list) else []:
+            text = str(key).strip()
+            if text and text not in seen:
+                seen.add(text)
+                keys.append(text)
+    return keys
+
+
+def _profile_delivery_repair_context_lines(delivery_report: dict[str, Any]) -> list[str]:
+    findings = _profile_delivery_repair_findings(delivery_report)
+    if not findings:
+        return []
+    classes = {
+        str(finding.get("class", "")).strip()
+        for finding in findings
+        if str(finding.get("class", "")).strip()
+    }
+    carriers = _profile_delivery_repair_offered_carriers(findings)
+    missing_keys = _profile_delivery_repair_missing_keys(findings)
+    lines = [
+        (
+            "PROFILE DELIVERY REPAIR PASS: deterministic diagnostics found offered direct carrier predicates "
+            "with missing or partial emitted rows. This pass is proposal-only; emit only source-grounded rows "
+            "through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE DELIVERY REPAIR PASS: populate direct carrier rows only when the raw source states the "
+            "underlying source/speaker, authority/rule, status/state, claim/finding, and source row or scope. "
+            "Do not infer new facts from the diagnostic labels; use the labels only to choose which source "
+            "surface to revisit."
+        ),
+    ]
+    if carriers:
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: offered carrier signatures to consider: "
+            + ", ".join(carriers[:12])
+            + ". Use exact allowed predicate names and argument order."
+        )
+    if missing_keys:
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: missing structural signal kinds from the prior compile: "
+            + ", ".join(missing_keys[:12])
+            + ". Treat these as diagnostic row-class labels, not source facts."
+        )
+    if any(cls.startswith("source_claim_") for cls in classes):
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: for source-attributed claim pressure, preserve source/speaker or "
+            "document, asserted content/status/finding, and source row or scope in one direct carrier row. "
+            "A note, description, source_detail, or source_record row is provenance only unless the direct "
+            "source-to-claim relation is also joinable."
+        )
+    if "source_claim_backbone_coexistence_missing" in classes:
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: source-attributed claim rows are additive evidence. Also preserve "
+            "ordinary backbone rows for stated votes, measurements, permit/application status, appeals, filings, "
+            "board findings, quorum facts, participant roles, and repeated-record details when the allowed "
+            "profile has compatible predicates."
+        )
+    if any(cls.startswith("source_authority_") for cls in classes):
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: for source-authority pressure, preserve governed subject or scope, "
+            "authority/source/rule/order, and authorized action/status/decision in one direct carrier row. "
+            "Do not leave the authority only in prose, a rule label, or an unjoined activity row."
+        )
+    if any(cls.startswith("status_state_") for cls in classes):
+        lines.append(
+            "PROFILE DELIVERY REPAIR PASS: for status/state pressure, preserve subject or subset, state/status "
+            "value, and temporal/source/effective scope in one direct carrier row. Split status-only and date-only "
+            "rows are useful anchors but do not deliver the joined state surface."
+        )
+    return lines
+
+
+def _apply_profile_delivery_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    admission_report = _profile_admission_report(parsed_profile=parsed_profile, source_text=source_text)
+    delivery_report = _profile_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=parsed_profile,
+        admission_report=admission_report,
+        source_text=source_text,
+    )
+    findings = _profile_delivery_repair_findings(delivery_report)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_delivery_repair_pass_v1",
+        "attempted": False,
+        "initial_finding_classes": [
+            str(finding.get("class", "")).strip()
+            for finding in findings
+            if str(finding.get("class", "")).strip()
+        ],
+    }
+    if not findings:
+        metadata["reason"] = "no_repairable_profile_delivery_findings"
+        source_compile["profile_delivery_repair"] = metadata
+        return metadata
+
+    carriers = _profile_delivery_repair_offered_carriers(findings)
+    context_lines = _profile_delivery_repair_context_lines(delivery_report)
+    if not context_lines:
+        metadata["reason"] = "no_repair_context"
+        source_compile["profile_delivery_repair"] = metadata
+        return metadata
+
+    target = max(12, min(48, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_delivery_repair",
+        purpose="repair direct carrier delivery after deterministic profile-delivery diagnostics",
+        focus="missing direct source-claim, source-authority, and status/state carrier rows",
+        completion=(
+            "Emit only source-grounded carrier rows and necessary backbone rows for the diagnostic row classes; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:12]) or "Use compatible allowed direct carrier predicates.",
+        coverage_goals="Deliver missing source-to-claim, source-authority, and status/state carrier rows when source-stated.",
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_delivery_repair"
+    compiled["purpose"] = "repair direct carrier delivery after deterministic profile-delivery diagnostics"
+    compiled["focus"] = "missing direct source-claim, source-authority, and status/state carrier rows"
+    _merge_profile_delivery_repair_pass(source_compile, compiled)
+    refreshed = _profile_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=parsed_profile,
+        admission_report=admission_report,
+        source_text=source_text,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_delivery_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_delivery_repair_new_facts"), list)
+            else 0,
+            "offered_carriers": carriers[:12],
+            "initial_finding_count": len(findings),
+            "remaining_finding_classes": [
+                str(finding.get("class", "")).strip()
+                for finding in _profile_delivery_repair_findings(refreshed)
+                if str(finding.get("class", "")).strip()
+            ],
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_delivery_repair"] = metadata
+    return metadata
+
+
+def _merge_profile_delivery_repair_pass(source_compile: dict[str, Any], pass_record: dict[str, Any]) -> None:
+    before_facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    before_rules = [str(item).strip() for item in source_compile.get("rules", []) if str(item).strip()]
+    before_queries = [str(item).strip() for item in source_compile.get("queries", []) if str(item).strip()]
+    initial_fact_set = set(before_facts)
+    initial_rule_set = set(before_rules)
+    initial_query_set = set(before_queries)
+    old_admitted_count = int(source_compile.get("admitted_count", 0) or 0)
+    old_skipped_count = int(source_compile.get("skipped_count", 0) or 0)
+    old_effective_admitted_count = int(source_compile.get("effective_admitted_count", old_admitted_count) or 0)
+    old_effective_skipped_count = int(source_compile.get("effective_skipped_count", old_skipped_count) or 0)
+    before_fact_set = set(before_facts)
+    before_rule_set = set(before_rules)
+    before_query_set = set(before_queries)
+
+    def extend_unique(existing: list[str], seen: set[str], values: Any) -> list[str]:
+        added: list[str] = []
+        for value in values if isinstance(values, list) else []:
+            text = str(value).strip()
+            if text and text not in seen:
+                seen.add(text)
+                existing.append(text)
+                added.append(text)
+        return added
+
+    added_facts = extend_unique(before_facts, before_fact_set, pass_record.get("facts", []))
+    added_rules = extend_unique(before_rules, before_rule_set, pass_record.get("rules", []))
+    added_queries = extend_unique(before_queries, before_query_set, pass_record.get("queries", []))
+    pass_record["_profile_delivery_repair_new_facts"] = added_facts
+    pass_record["_profile_delivery_repair_new_rules"] = added_rules
+    pass_record["_profile_delivery_repair_new_queries"] = added_queries
+
+    source_compile["facts"] = before_facts
+    source_compile["rules"] = before_rules
+    source_compile["queries"] = before_queries
+    source_compile["unique_fact_count"] = len(before_facts)
+    source_compile["unique_rule_count"] = len(before_rules)
+    source_compile["unique_query_count"] = len(before_queries)
+    source_compile["admitted_count"] = old_admitted_count + int(pass_record.get("admitted_count", 0) or 0)
+    source_compile["skipped_count"] = old_skipped_count + int(pass_record.get("skipped_count", 0) or 0)
+    source_compile["effective_admitted_count"] = old_effective_admitted_count + int(pass_record.get("admitted_count", 0) or 0)
+    source_compile["effective_skipped_count"] = old_effective_skipped_count + int(pass_record.get("skipped_count", 0) or 0)
+
+    repair_passes = source_compile.get("repair_passes")
+    if not isinstance(repair_passes, list):
+        repair_passes = []
+    repair_passes.append(pass_record)
+    source_compile["repair_passes"] = repair_passes
+
+    surface_rows = source_compile.get("surface_contribution")
+    if not isinstance(surface_rows, list):
+        surface_rows = []
+    repair_rows = _pass_surface_contribution(
+        [pass_record],
+        initial_seen_facts=initial_fact_set,
+        initial_seen_rules=initial_rule_set,
+        initial_seen_queries=initial_query_set,
+    )
+    source_compile["surface_contribution"] = [*surface_rows, *repair_rows]
+    source_compile["compile_health"] = _compile_health_summary(source_compile["surface_contribution"])
 
 
 def _append_source_record_ledger_facts(source_compile: dict[str, Any], ledger: dict[str, Any]) -> None:
@@ -4650,6 +4933,7 @@ SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES = {
     "policy_rule",
     "rule_exception",
     "rule_threshold",
+    "solicitation_authority",
     "source_authority",
     "statutory_authority",
 }
@@ -4844,6 +5128,8 @@ def _fact_row_can_deliver_source_authority(predicate: str, args: list[str]) -> b
     name = str(predicate or "").casefold()
     if name == "source_authority":
         return len(args) >= 3
+    if name == "solicitation_authority":
+        return len(args) >= 2
     if name == "statutory_authority":
         return len(args) >= 2
     if name == "amendment_author":
@@ -4903,6 +5189,11 @@ def _fact_row_can_deliver_source_attributed_claim(predicate: str, args: list[str
     }:
         return len(args) >= 3
     if name not in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES or len(args) < 3:
+        return False
+    name_tokens = set(name.split("_"))
+    if name_tokens & {"appropriation", "appropriations", "fund", "funding"} and not (
+        name_tokens & {"claim", "comment", "finding", "memo", "note", "opinion", "report", "statement"}
+    ):
         return False
     tokens = _fact_row_tokens(name, args)
     claim_terms = {
@@ -5727,12 +6018,68 @@ def _source_attributed_claim_mentions(source_text: str) -> list[str]:
         tokens = _profile_admission_tokens(lowered)
         has_speaker_frame = _line_has_source_attributed_speaker_frame(line)
         if (
-            (tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS or has_speaker_frame)
+            _line_has_source_attributed_claim_source_signal(line, tokens, has_speaker_frame)
             and tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS
             and not _source_claim_line_is_administrative_lifecycle(line, tokens)
         ):
             mentions.append(line[:500])
     return mentions
+
+
+def _line_has_source_attributed_claim_source_signal(line: str, tokens: set[str], has_speaker_frame: bool) -> bool:
+    lowered = str(line or "").casefold()
+    if (
+        "available" in tokens
+        and re.search(r"\b(?:available\s+(?:at|here|from)|is\s+available)\b", lowered)
+        and (re.search(r"https?://|\bwww\.", lowered) or "here" in tokens or "download" in tokens)
+    ):
+        return False
+    if has_speaker_frame:
+        return not _line_has_generic_source_field_label(line)
+    source_terms = tokens & PROFILE_ADMISSION_SOURCE_CLAIM_SOURCE_TERMS
+    if not source_terms:
+        return False
+    strong_source_terms = source_terms - {"certification", "said", "source"}
+    if strong_source_terms:
+        return True
+    if "certification" in source_terms and re.search(
+        r"\b(?:certification\s+(?:asserts?|claims?|confirms?|concludes?|determines?|finds?|notes?|"
+        r"reports?|says|said|states?|stated|supports?)|"
+        r"(?:asserts?|claims?|confirms?|concludes?|determines?|finds?|notes?|reports?|says|said|"
+        r"states?|stated|supports?)\s+(?:in\s+)?(?:a\s+)?certification)\b",
+        lowered,
+    ):
+        return True
+    return bool(
+        re.search(
+            r"\bsource\s+(?:asserts?|claims?|confirms?|concludes?|determines?|finds?|notes?|opin(?:es|ed)?|"
+            r"reports?|says|said|states?|stated|supports?)\b",
+            lowered,
+        )
+        or re.search(r"\b(?:letter|memo|memorandum|opinion|report|statement|testimony)\s+source\b", lowered)
+    )
+
+
+def _line_has_generic_source_field_label(line: str) -> bool:
+    stripped = str(line or "").strip()
+    match = re.match(r"^(?:[-*]\s*)?(?:\*\*)?([A-Za-z][A-Za-z0-9 _/-]{1,40})(?:\*\*)?:", stripped)
+    if not match:
+        return False
+    label_tokens = _profile_admission_tokens(match.group(1))
+    if not label_tokens:
+        return False
+    generic_labels = {
+        "agency",
+        "case",
+        "date",
+        "id",
+        "identifier",
+        "location",
+        "phase",
+        "status",
+        "type",
+    }
+    return label_tokens <= generic_labels
 
 
 def _line_has_source_attributed_speaker_frame(line: str) -> bool:
@@ -5989,9 +6336,12 @@ def _status_state_source_mentions(source_text: str) -> list[str]:
             continue
         lowered = line.lower()
         tokens = _profile_admission_tokens(lowered)
+        status_terms = tokens & PROFILE_ADMISSION_STATUS_STATE_TERMS
+        if status_terms == {"state"}:
+            continue
         if (
             tokens & PROFILE_ADMISSION_SUBJECT_SLOTS
-            and tokens & PROFILE_ADMISSION_STATUS_STATE_TERMS
+            and status_terms
             and (
                 PROFILE_ADMISSION_DATE_RE.search(lowered)
                 or tokens & PROFILE_ADMISSION_SCOPE_SLOTS
@@ -6171,6 +6521,10 @@ def _candidate_can_carry_source_attributed_claim_unit(candidate: dict[str, Any])
         return False
     name_tokens = set(name.split("_"))
     if name in {"claim_source", "source_supports"}:
+        return False
+    if name_tokens & {"appropriation", "appropriations", "fund", "funding"} and not (
+        name_tokens & {"claim", "comment", "finding", "memo", "note", "opinion", "report", "statement"}
+    ):
         return False
     if (
         name_tokens & {"status", "state", "change", "transition"}
