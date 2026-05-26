@@ -1974,3 +1974,140 @@ The q007 and q012 mechanisms are useful and fixture-free. The full fixture
 guard still showed one-row churn on q004, which recovered on targeted replay;
 treat that as variance requiring the next non-SEC guard, not as a new aggregate
 claim.
+
+## 2026-05-26 Named Legal/Admin Body Probe, Not Promoted
+
+Question:
+
+Can the `osha_ugly_003 q014` residue be repaired by a generic query-only
+source-record inventory of named legal or administrative bodies?
+
+Prototype tested:
+
+```text
+source_record_named_body_inventory_support(NamedKind, NameAtom, NameDisplay, SourceRow)
+```
+
+The prototype extracted departments, source acronyms, commission/body names,
+and statute-like legal instruments from admitted `source_record_text_atom/2`
+rows only. It did not write durable facts and did not expand source acronyms to
+official names beyond the source surface.
+
+Targeted replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_named_body_inventory_20260526\qa\osha_ugly_003_q014_named_body_tight_or
+
+result:
+  1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Ablation:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_named_body_inventory_20260526\qa\osha_ugly_003_q014_named_body_disabled_or
+
+result with source_record_named_body_inventory_support disabled:
+  1 / 0 / 0
+```
+
+Affected-fixture guard while the prototype was present:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_named_body_inventory_20260526\qa\osha_ugly_003_full_named_body_guard_or
+
+old R7:
+  23 / 2 / 0
+
+guard:
+  22 / 2 / 1
+
+movement:
+  q014 partial -> exact
+  q006 exact -> miss
+  q023 exact -> partial
+```
+
+Direct-interference check:
+
+`source_record_named_body_inventory_support` fired on `q014`, `q024`, and
+`q025`. `q014` improved; `q024` and `q025` stayed exact. The two regressions
+did not use the prototype support row, so the guard movement reads as ordinary
+judge/query variance on an old compile artifact rather than direct prototype
+interference.
+
+Decision:
+
+Do not promote the prototype. It is plausible product-shaped support, but the
+ablation also landed exact, so it is not load-bearing evidence. Adding another
+query-only support surface without load-bearing proof would increase hidden
+path competition in exactly the area being watched for overreach.
+
+Current read:
+
+Keep legal/admin body inventory on the watchlist for fresh ugly documents. If a
+new unseen fixture fails because source-stated administrative bodies are visible
+but not query-addressable, revisit this mechanism with that fresh evidence.
+
+## 2026-05-26 Parenthetical Printed Identifier Surface
+
+Question:
+
+Can the `osha_ugly_003 q006` release-number residue be repaired without adding
+a semantic carrier or document-class helper?
+
+Mechanism:
+
+Extend deterministic `source_record_surface_mention/3` so a printed identifier
+followed immediately by a parenthetical suffix is preserved as one exact source
+surface:
+
+```prolog
+source_record_surface_mention(SourceRow, NormalizedSurfaceAtom, 'Exact-ID (Suffix)').
+```
+
+This is source fidelity only. It does not interpret what the parenthetical
+means, decide whether it is a case number, or add any OSHA/FDA/SEC-specific
+knowledge. QA hinting asks for this carrier only when the question explicitly
+asks for exact surface form, full identifier/release number, printed form, or a
+parenthetical.
+
+Disposable compile artifact:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_parenthetical_20260526\compile\osha_ugly_003\domain_bootstrap_file_20260526T_parenthetical_surface_replay.json
+```
+
+The artifact appended current deterministic source-record rows to the old
+compile. It is mechanism evidence, not a fresh aggregate compile.
+
+Targeted replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_parenthetical_20260526\qa\osha_ugly_003_q006_parenthetical_surface_or
+
+result:
+  1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Validation:
+
+```text
+python -m pytest -q
+  1790 passed, 2 subtests passed
+
+python scripts\audit_active_instrument_leakage.py
+  forbidden hits: 0
+```
+
+Read:
+
+Promote the mechanism. It is a narrow extension of an existing deterministic
+source-surface carrier, not a new helper lane. Fresh ugly Batch 04 should tell
+whether the exact-surface carrier continues to help without row churn.

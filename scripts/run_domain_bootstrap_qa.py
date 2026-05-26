@@ -2958,24 +2958,7 @@ def _source_record_compile_surface_hint_queries(
         out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("free_repair", TextAtom).')
     if "source_record_text_atom/2" in signatures and any(marker in text for marker in ("break apart", "broke apart", "shoreline")):
         out.append('source_record_text_atom(SourceRow, TextAtom), memberchk("broke_apart_on_the_shoreline_the_next_day", TextAtom).')
-    if "source_record_surface_mention/3" in signatures and any(
-        marker in text
-        for marker in (
-            "capitalization",
-            "capitalized",
-            "case variation",
-            "casing",
-            "exact spelling",
-            "exact wording",
-            "spelled",
-            "spelling",
-            "variant",
-            "variants",
-            "variation",
-            "variations",
-            "verbatim",
-        )
-    ):
+    if "source_record_surface_mention/3" in signatures and _asks_for_source_record_surface_mention(text):
         out.append("source_record_surface_mention(SourceRow, SurfaceAtom, SurfaceText).")
     if "source_record_citation/2" in signatures and (
         "citation" in text or "federal register" in text or re.search(r"\bfr\b", text)
@@ -3006,6 +2989,37 @@ def _source_record_compile_surface_hint_queries(
     ):
         out.append("source_record_section_list_count_member(HeadingRow, ScopeRow, Position, MemberRow, MemberText).")
     return out
+
+
+def _asks_for_source_record_surface_mention(text: str) -> bool:
+    if any(
+        marker in text
+        for marker in (
+            "capitalization",
+            "capitalized",
+            "case variation",
+            "casing",
+            "exact spelling",
+            "exact wording",
+            "spelled",
+            "spelling",
+            "variant",
+            "variants",
+            "variation",
+            "variations",
+            "verbatim",
+        )
+    ):
+        return True
+    if any(marker in text for marker in ("parenthetical", "as printed", "exact identifier", "full identifier")):
+        return True
+    if "printed" in text and any(
+        marker in text for marker in ("identifier", " id", "label", "name", "number", "release number")
+    ):
+        return True
+    if "full" in text and any(marker in text for marker in ("identifier", " id", "release number")):
+        return True
+    return False
 
 
 def _source_record_field_headers(kb_inventory: dict[str, Any]) -> list[str]:

@@ -855,7 +855,7 @@ def _surface_mentions(text: str, *, max_mentions: int = 80) -> list[tuple[str, s
 
     raw = re.sub(r"\*\*([^*]+)\*\*", r"\1", str(text or ""))
     raw = re.sub(r"`([^`]+)`", r"\1", raw)
-    out: list[tuple[str, str]] = []
+    out: list[tuple[str, str]] = _surface_parenthetical_identifier_mentions(raw, max_mentions=max_mentions)
     current: list[str] = []
     previous_end = 0
 
@@ -885,6 +885,26 @@ def _surface_mentions(text: str, *, max_mentions: int = 80) -> list[tuple[str, s
         previous_end = match.end()
     flush()
     return _dedupe_pairs(out)
+
+
+_SURFACE_PARENTHETICAL_IDENTIFIER_RE = re.compile(
+    r"\b(?P<identifier>[A-Za-z0-9]+(?:[-/][A-Za-z0-9]+)+)\s*"
+    r"(?P<parenthetical>\([A-Za-z0-9][A-Za-z0-9 .:/+-]{0,40}\))"
+)
+
+
+def _surface_parenthetical_identifier_mentions(text: str, *, max_mentions: int) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    for match in _SURFACE_PARENTHETICAL_IDENTIFIER_RE.finditer(str(text or "")):
+        surface = f"{match.group('identifier')} {match.group('parenthetical')}"
+        atom = _atom(surface)
+        quoted = _quoted_atom(surface)
+        if not atom or not quoted:
+            continue
+        out.append((atom, quoted))
+        if len(out) >= max_mentions:
+            break
+    return out
 
 
 def _append_surface_mention(

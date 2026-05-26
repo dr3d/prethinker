@@ -179,6 +179,17 @@ def test_source_record_ledger_preserves_exact_surface_spelling_variants() -> Non
     assert {"Row": "src_line_0002", "SurfaceAtom": "meter_cal", "SurfaceText": "Meter-cal"} in rows
 
 
+def test_source_record_ledger_preserves_parenthetical_identifier_surface() -> None:
+    ledger = extract_source_record_ledger("Release Number: 25-1508-ATL (123)")
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert (
+        "source_record_surface_mention(src_line_0001, v_25_1508_atl_123, '25-1508-ATL (123)')."
+        in facts
+    )
+
+
 def test_source_record_ledger_preserves_month_date_occurrence_coordinates() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

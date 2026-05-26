@@ -241,3 +241,48 @@ Read:
 
 This is a deterministic source-coordinate repair. It should be measured in a
 fresh fixture guard before becoming a corpus claim.
+
+## 2026-05-26 Parenthetical Identifier Surfaces
+
+The exact surface carrier now preserves immediate parenthetical suffixes on
+printed identifiers as one surface:
+
+```prolog
+source_record_surface_mention(SourceRow, NormalizedSurfaceAtom, '25-1508-ATL (123)').
+```
+
+The rule is intentionally narrow: an identifier with hyphen or slash structure
+followed directly by a short parenthetical. It preserves source typography for
+questions that explicitly ask for full printed identifiers or parentheticals.
+It does not interpret the parenthetical or create any domain-specific semantic
+row.
+
+Validation:
+
+```text
+python -m pytest tests\test_source_record_ledger.py tests\test_source_surface_gap_audit.py -q
+  54 passed
+
+python -m pytest -q
+  1790 passed, 2 subtests passed
+
+python scripts\audit_active_instrument_leakage.py
+  forbidden hits: 0
+```
+
+Targeted Batch 03 replay:
+
+```text
+fixture: osha_ugly_003
+row: q006 full release number including parenthetical
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_surface_parenthetical_20260526\qa\osha_ugly_003_q006_parenthetical_surface_or
+result:
+  1 / 0 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+This is a source-ledger fidelity repair. It should be treated as mechanism
+evidence until the next fresh ugly batch tests whether the behavior transfers.

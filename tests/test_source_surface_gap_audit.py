@@ -54,6 +54,16 @@ def test_source_surface_hint_queries_use_exact_surface_mentions_for_variant_ques
     assert all("Meter" not in query and "Lydium" not in query for query in queries)
 
 
+def test_source_surface_hint_queries_use_surface_mentions_for_printed_parenthetical_ids() -> None:
+    queries = _source_record_compile_surface_hint_queries(
+        utterance="What is the full release number printed at the bottom of this document, including any parenthetical?",
+        kb_inventory={"signatures": ["source_record_surface_mention/3", "source_record_text_atom/2"]},
+    )
+
+    assert "source_record_surface_mention(SourceRow, SurfaceAtom, SurfaceText)." in queries
+    assert all("25-1508" not in query and "ATL" not in query for query in queries)
+
+
 def test_source_surface_hint_queries_use_first_date_occurrence_for_first_mention_questions() -> None:
     queries = _source_record_compile_surface_hint_queries(
         utterance="In which named subsection is the date March 4, 2026 first introduced?",
