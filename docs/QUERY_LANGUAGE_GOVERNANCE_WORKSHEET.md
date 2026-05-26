@@ -217,8 +217,7 @@ language:
 1. Keep `audit_utterance_regex_governance.py` informational and rerun it after
    query-side changes.
 2. Pick one narrow companion family, probably note-marker or heading-scope, and
-   prototype a structured-intent entrypoint while leaving the existing regex
-   gate as a fallback.
+   move activation to structured intent without an English regex fallback.
 3. Add a tiny multilingual compile+QA probe, not just router/SIR:
    - non-English source with same-language questions
    - English questions over non-English source
@@ -226,7 +225,7 @@ language:
    - translation/source-status trap
 4. Track whether deterministic source-record support activated because of:
    - structured query intent
-   - legacy regex fallback
+   - missing structured intent
    - no support path
 5. Do not add Spanish/French/German keyword regex as the fix.
 
@@ -235,11 +234,25 @@ language:
 The Batch 04 source-record repairs can remain because they are deterministic,
 source-generic, tested, and leakage-clean.
 
-But they now sit under a governance warning:
+The immediate course correction has started. Semantic IR now has an optional
+`query_intents[]` field for query-shape metadata. The first migrated source
+record routes are:
 
-```text
-useful mechanism, wrong long-term switchboard
-```
+- `_source_record_note_marker_companion`
+- `_source_record_under_heading_companion`
+- `_source_record_ordered_labeled_entry_companion`
 
-The next architectural correction is not removing deterministic support. It is
-moving activation from English regex gates into a governed semantic query lens.
+These routes no longer activate from raw English regex over the question. They
+require structured query intent, either emitted by Semantic IR or inferred from
+structured Prolog query templates / evidence-bundle templates. The deterministic
+code still parses artifact structure and source-record rows; it does not decide
+that English words like "asterisk", "under", or "list" mean those routes should
+fire.
+
+Remaining work:
+
+1. Keep migrating older query-side routes from raw `utterance` triggers to
+   `query_intents[]`.
+2. Rerun the governance audit after each migration batch.
+3. Treat any score drop from missing intent as an honest lens/route gap, not as
+   permission to restore English keyword fallbacks.

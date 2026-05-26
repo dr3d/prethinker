@@ -70,6 +70,16 @@ SCHEMA_CONTRACT: dict[str, Any] = {
             "certainty": 0.0,
         }
     ],
+    "query_intents": [
+        {
+            "intent_type": "list|count|date|source_location|heading_scope|note_marker|signatory|comparison|duration|status|ordered_labeled_entry|unknown",
+            "target_terms": [],
+            "answer_constraints": [],
+            "uncertainty_policy": "answer|clarify|abstain|unknown",
+            "language": "",
+            "source": "semantic_ir",
+        }
+    ],
     "propositions": [
         {
             "id": "prop_1",
@@ -270,6 +280,49 @@ SEMANTIC_IR_JSON_SCHEMA: dict[str, Any] = {
                     "object": {"type": "string"},
                     "polarity": {"type": "string", "enum": ["positive", "negative"]},
                     "certainty": {"type": "number"},
+                },
+            },
+        },
+        "query_intents": {
+            "type": "array",
+            "maxItems": 8,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "intent_type",
+                    "target_terms",
+                    "answer_constraints",
+                    "uncertainty_policy",
+                    "language",
+                    "source",
+                ],
+                "properties": {
+                    "intent_type": {
+                        "type": "string",
+                        "enum": [
+                            "list",
+                            "count",
+                            "date",
+                            "source_location",
+                            "heading_scope",
+                            "note_marker",
+                            "signatory",
+                            "comparison",
+                            "duration",
+                            "status",
+                            "ordered_labeled_entry",
+                            "unknown",
+                        ],
+                    },
+                    "target_terms": {"type": "array", "maxItems": 12, "items": {"type": "string"}},
+                    "answer_constraints": {"type": "array", "maxItems": 8, "items": {"type": "string"}},
+                    "uncertainty_policy": {
+                        "type": "string",
+                        "enum": ["answer", "clarify", "abstain", "unknown"],
+                    },
+                    "language": {"type": "string", "maxLength": 40},
+                    "source": {"type": "string", "enum": ["semantic_ir", "query_template", "evidence_plan"]},
                 },
             },
         },
@@ -757,6 +810,8 @@ BEST_GUARDED_V2_GUIDANCE = (
     "- Every safe candidate_operation that writes, retracts, queries, or proposes a rule should have at least one truth_maintenance.support_links entry with the same operation_index. Use support_ref='current_utterance' for direct utterance support, or cite the exact context/KB clause when context grounds a correction, query, or conflict.\n"
     "- In truth_maintenance.conflicts, point to the candidate operation index and the existing context/source/rule it conflicts with. In truth_maintenance.retraction_plan, point to explicit correction targets. In derived_consequences, mark consequences query_only, quarantine, future_rule_support, or do_not_commit instead of committing them as facts.\n"
     "- kb_context_pack contains deterministic KB retrieval. Treat exact KB clauses as current committed state for resolving references, corrections, and conflicts. Do not restate KB clauses as new writes. Use candidate_operations only for the current utterance, and use truth_maintenance to cite KB support or conflict pressure.\n"
+    "- For query turns, populate query_intents[] when the question asks for a particular answer shape, source location, note marker, ordered list, date, count, status, duration, comparison, or signatory. query_intents is proposal metadata for deterministic query routing; it is not durable truth and does not authorize writes.\n"
+    "- Keep query_intents language-preserving: target_terms should carry the exact source-local term or atom being requested, while intent_type and answer_constraints carry the normalized answer shape. Do not rely on downstream Python keyword parsing to infer these from English wording.\n"
     "- If kb_context_pack.current_state_candidates contains an old current-state fact and the utterance explicitly corrects it with words like actually, instead, wrong, not X, or no longer, propose a safe retract for the old clause and a safe assert for the replacement when the target and replacement are clear.\n"
     "- If a pronoun or short referent has exactly one plausible entity in kb_context_pack.current_state_subject_candidates, and the utterance is an explicit correction of that entity's current state, you may resolve the referent from KB context and propose the retract/assert pair. If there are multiple plausible candidates, clarify instead.\n"
     "- If an explicit correction preserves the same ambiguous alias from an existing clause and changes only a non-identity slot such as date, room, status, or amount, you may retract/assert using the alias atom without resolving the underlying person. Treat the alias as the record key; identity ambiguity is irrelevant when the corrected clause keeps the same alias atom. Do not invent same_person or candidate_identity writes, and do not ask for clarification solely to resolve that preserved alias.\n"

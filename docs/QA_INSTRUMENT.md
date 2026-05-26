@@ -23,6 +23,12 @@ classify an answer row. Deterministic code still controls what evidence can be
 queried, what query shapes are legal, whether any proposed operation can run,
 whether writes are blocked, and how the row is recorded.
 
+Current language boundary: messy human query language should enter the
+deterministic QA layer through Semantic IR / structured `query_intents[]` or
+structured query templates. Python source-record support may parse admitted
+artifacts and source-row structure, but it should not grow new English regex
+switchboards over raw user questions.
+
 ## The Shape
 
 ```text
@@ -80,6 +86,7 @@ the current support reading.
 The QA stage can involve model calls for:
 
 - interpreting the natural-language question into structured query candidates;
+- emitting structured `query_intents[]` for answer shape and target terms;
 - proposing compact evidence-bundle plans over the compiled artifact;
 - comparing returned support with reference answers;
 - classifying a non-exact row as compile-surface, query-surface, hybrid-join,

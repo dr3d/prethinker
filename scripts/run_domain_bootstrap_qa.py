@@ -1761,6 +1761,212 @@ def build_evidence_bundle_plan(
         }
 
 
+QUERY_INTENT_TYPES = {
+    "list",
+    "count",
+    "date",
+    "source_location",
+    "heading_scope",
+    "note_marker",
+    "signatory",
+    "comparison",
+    "duration",
+    "status",
+    "ordered_labeled_entry",
+    "unknown",
+}
+
+QUERY_INTENT_POLICIES = {"answer", "clarify", "abstain", "unknown"}
+QUERY_INTENT_SOURCES = {"semantic_ir", "query_template", "evidence_plan"}
+
+
+def _compact_string_list(value: Any, *, limit: int = 12) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in value:
+        text = str(item or "").strip()
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        out.append(text[:240])
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _normalize_query_intent(intent: Any, *, source_hint: str = "semantic_ir") -> dict[str, Any] | None:
+    if not isinstance(intent, dict):
+        return None
+    intent_type = str(intent.get("intent_type", "")).strip()
+    if intent_type not in QUERY_INTENT_TYPES:
+        intent_type = "unknown"
+    target_terms = _compact_string_list(intent.get("target_terms", []), limit=12)
+    answer_constraints = _compact_string_list(intent.get("answer_constraints", []), limit=8)
+    uncertainty_policy = str(intent.get("uncertainty_policy", "")).strip()
+    if uncertainty_policy not in QUERY_INTENT_POLICIES:
+        uncertainty_policy = "unknown"
+    source = str(intent.get("source", "") or source_hint).strip()
+    if source not in QUERY_INTENT_SOURCES:
+        source = source_hint if source_hint in QUERY_INTENT_SOURCES else "semantic_ir"
+    language = str(intent.get("language", "")).strip()[:40]
+    if intent_type == "unknown" and not target_terms and not answer_constraints:
+        return None
+    return {
+        "intent_type": intent_type,
+        "target_terms": target_terms,
+        "answer_constraints": answer_constraints,
+        "uncertainty_policy": uncertainty_policy,
+        "language": language,
+        "source": source,
+    }
+
+
+def _query_intent_signature(intent: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        intent.get("intent_type", ""),
+        tuple(intent.get("target_terms", []) or []),
+        tuple(intent.get("answer_constraints", []) or []),
+        intent.get("uncertainty_policy", ""),
+        intent.get("language", ""),
+        intent.get("source", ""),
+    )
+
+
+def _query_templates_from_evidence_plan(evidence_plan: dict[str, Any] | None) -> list[str]:
+    if not isinstance(evidence_plan, dict):
+        return []
+    out: list[str] = []
+    for bundle in evidence_plan.get("support_bundles", []) or []:
+        if not isinstance(bundle, dict):
+            continue
+        out.extend(str(template or "").strip() for template in bundle.get("query_templates", []) or [])
+    return [query for query in out if query]
+
+
+def _query_intents_from_structured_queries(
+    queries: list[str],
+    *,
+    source: str,
+) -> list[dict[str, Any]]:
+    intents: list[dict[str, Any]] = []
+    for query in queries:
+        goals = parse_prolog_query_goals(query)
+        if not goals:
+            continue
+        for predicate, args in goals:
+            if predicate in {
+                "source_record_note_definition",
+                "source_record_symbol_definition",
+                "source_record_note_anchor",
+                "source_record_note_marker",
+            }:
+                constraints: list[str] = []
+                target_terms: list[str] = []
+                marker = str(args[1]).strip() if len(args) >= 2 and not _is_prolog_variable(args[1]) else ""
+                if marker:
+                    target_terms.append(marker)
+                    if marker == "asterisk":
+                        constraints.append("marker_scope:asterisk")
+                    elif marker.startswith("footnote_"):
+                        constraints.append("marker_scope:numbered")
+                intents.append(
+                    {
+                        "intent_type": "note_marker",
+                        "target_terms": target_terms,
+                        "answer_constraints": constraints or ["marker_scope:all"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_row" and len(args) >= 5 and str(args[1]).strip() == "labeled_line":
+                terms = [
+                    str(value).strip()
+                    for value in (args[3], args[4])
+                    if str(value).strip() and not _is_prolog_variable(str(value).strip())
+                ]
+                intents.append(
+                    {
+                        "intent_type": "ordered_labeled_entry",
+                        "target_terms": terms,
+                        "answer_constraints": ["source_order"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+    return intents
+
+
+def _query_intents_from_semantic_ir(
+    ir: dict[str, Any],
+    *,
+    queries: list[str],
+    evidence_plan: dict[str, Any] | None,
+) -> list[dict[str, Any]]:
+    raw_intents = ir.get("query_intents", []) if isinstance(ir, dict) else []
+    intents = [
+        normalized
+        for normalized in (_normalize_query_intent(item, source_hint="semantic_ir") for item in raw_intents)
+        if normalized is not None
+    ]
+    intents.extend(_query_intents_from_structured_queries(queries, source="query_template"))
+    intents.extend(
+        _query_intents_from_structured_queries(
+            _query_templates_from_evidence_plan(evidence_plan),
+            source="evidence_plan",
+        )
+    )
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[Any, ...]] = set()
+    for intent in intents:
+        signature = _query_intent_signature(intent)
+        if signature in seen:
+            continue
+        seen.add(signature)
+        out.append(intent)
+    return out[:16]
+
+
+def _first_query_intent(query_intents: list[dict[str, Any]] | None, *intent_types: str) -> dict[str, Any] | None:
+    wanted = {intent_type for intent_type in intent_types if intent_type}
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        if str(intent.get("intent_type", "")).strip() in wanted:
+            return intent
+    return None
+
+
+def _query_intent_target_tokens(intent: dict[str, Any] | None) -> set[str]:
+    tokens: set[str] = set()
+    if not isinstance(intent, dict):
+        return tokens
+    for term in intent.get("target_terms", []) or []:
+        tokens.update(token for token in _query_atom_tokens(str(term)) if len(token) >= 3)
+    return tokens
+
+
+def _note_marker_scope_from_intent(intent: dict[str, Any]) -> str:
+    constraints = [str(item).strip() for item in intent.get("answer_constraints", []) or []]
+    for constraint in constraints:
+        if constraint in {"marker_scope:asterisk", "marker:asterisk"}:
+            return "asterisk"
+        if constraint in {"marker_scope:numbered", "marker:numbered"}:
+            return "numbered"
+        if constraint == "marker_scope:all":
+            return "all"
+    for term in intent.get("target_terms", []) or []:
+        value = str(term).strip()
+        if value == "asterisk":
+            return "asterisk"
+        if value.startswith("footnote_"):
+            return "numbered"
+    return "all"
+
+
 def run_one_question(
     *,
     item: dict[str, Any],
@@ -1885,9 +2091,16 @@ def run_one_question(
     )
     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
     clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
-    queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
-    if not queries:
-        queries = _fallback_queries_from_semantic_ir(ir, allowed_predicates=allowed_predicates)
+    model_queries = [str(q).strip() for q in clauses.get("queries", []) if str(q).strip()]
+    if not model_queries:
+        model_queries = _fallback_queries_from_semantic_ir(ir, allowed_predicates=allowed_predicates)
+    query_intents = _query_intents_from_semantic_ir(
+        ir,
+        queries=model_queries,
+        evidence_plan=evidence_plan,
+    )
+    row["query_intents"] = query_intents
+    queries = model_queries
     queries = _ordered_query_unique(
         [
             *queries,
@@ -1950,13 +2163,21 @@ def run_one_question(
     source_overlap_support = _source_record_question_overlap_companion(runtime, utterance=utterance)
     if source_overlap_support:
         query_results.append(source_overlap_support)
-    source_note_marker = _source_record_note_marker_companion(runtime, utterance=utterance)
+    source_note_marker = _source_record_note_marker_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_note_marker:
         query_results.append(source_note_marker)
     source_preceding_heading = _source_record_preceding_heading_companion(runtime, utterance=utterance)
     if source_preceding_heading:
         query_results.append(source_preceding_heading)
-    source_under_heading = _source_record_under_heading_companion(runtime, utterance=utterance)
+    source_under_heading = _source_record_under_heading_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_under_heading:
         query_results.append(source_under_heading)
     source_named_section_window = _source_record_named_section_window_companion(runtime, utterance=utterance)
@@ -1968,7 +2189,11 @@ def run_one_question(
     source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
     if source_list_window:
         query_results.append(source_list_window)
-    source_ordered_entries = _source_record_ordered_labeled_entry_companion(runtime, utterance=utterance)
+    source_ordered_entries = _source_record_ordered_labeled_entry_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_ordered_entries:
         query_results.append(source_ordered_entries)
     source_section_list_detail = _source_record_section_list_detail_companion(runtime, utterance=utterance)
@@ -6378,12 +6603,14 @@ def _source_record_note_marker_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:asterisk|footnotes?|note marker|numbered note|notation|symbol)\b", text):
+    intent = _first_query_intent(query_intents, "note_marker")
+    if not intent:
         return None
-    wants_asterisk = "asterisk" in text or "*" in str(utterance or "")
-    wants_numbered = bool(re.search(r"\b(?:footnotes?|numbered)\b", text))
+    marker_scope = _note_marker_scope_from_intent(intent)
+    wants_asterisk = marker_scope == "asterisk"
+    wants_numbered = marker_scope == "numbered"
     text_rows = {
         str(row.get("SourceRow", "")): _normalize_text_filter_atom(str(row.get("TextAtom", "")))
         for row in _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
@@ -6485,9 +6712,9 @@ def _source_record_note_marker_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only note-marker support paired admitted source-record note definitions "
-                    "and note anchors; no durable semantic fact was written"
+                    "and note anchors after structured query-intent activation; no durable semantic fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -6513,13 +6740,12 @@ def _source_record_under_heading_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:under|beneath|within)\b", text):
+    intent = _first_query_intent(query_intents, "heading_scope", "source_location")
+    if not intent:
         return None
-    if not re.search(r"\b(?:heading|section)\b", text):
-        return None
-    target_tokens = _under_heading_target_tokens(utterance)
+    target_tokens = _query_intent_target_tokens(intent)
     if not target_tokens:
         return None
     ordered = _source_record_ordered_rows(runtime)
@@ -6599,11 +6825,11 @@ def _source_record_under_heading_companion(
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only heading-scope support found source rows matching question target "
+                    "query-only heading-scope support found source rows matching structured intent target "
                     "tokens and returned their nearest preceding admitted heading-like row; no "
                     "durable fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -7208,19 +7434,10 @@ def _source_record_ordered_labeled_entry_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:list|name|identify|which)\b", text):
-        return None
-    if not re.search(r"\b(?:source order|every|each|all|across)\b", text):
-        return None
-    if not re.search(
-        r"\b(?:entries?|rows?|records?|items?|awards?|contracts?|identifiers?|designations?|customers?|contractors?)\b",
-        text,
-    ):
-        return None
-    quoted_targets = _quoted_target_token_candidates(utterance)
-    if not quoted_targets:
+    intent = _first_query_intent(query_intents, "ordered_labeled_entry")
+    if not intent:
         return None
 
     ordered = _source_record_ordered_rows(runtime)
@@ -7268,9 +7485,9 @@ def _source_record_ordered_labeled_entry_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only ordered-entry support returned admitted labeled source-record rows "
-                    "in source order for roster-style questions; no durable fact was written"
+                    "in source order after structured query-intent activation; no durable fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [

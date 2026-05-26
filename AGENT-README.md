@@ -75,6 +75,10 @@ when priorities change.
 
 - Deterministic code decides what becomes durable truth.
 - Model output is proposal material until mapper/runtime gates admit it.
+- LLM/router/Semantic IR owns messy human language. Deterministic query support
+  may consume structured `query_intents[]`, query templates, predicates,
+  identifiers, and source artifacts; it must not add new English keyword gates
+  over raw user questions.
 - Keep source claims, established facts, uncertainty, corrections, and derived
   conclusions separate.
 - Do not teach the harness fixture names, row IDs, answer strings, local people,

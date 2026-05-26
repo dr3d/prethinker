@@ -2590,6 +2590,16 @@ def test_source_record_note_marker_companion_pairs_marker_definitions_and_anchor
     companion = _source_record_note_marker_companion(
         runtime,
         utterance="What is the asterisk notation and what does it indicate?",
+        query_intents=[
+            {
+                "intent_type": "note_marker",
+                "target_terms": ["asterisk"],
+                "answer_constraints": ["marker_scope:asterisk"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2621,6 +2631,16 @@ def test_source_record_under_heading_companion_finds_nearest_heading_for_target_
     companion = _source_record_under_heading_companion(
         runtime,
         utterance="Under which agency heading does Harbor Works LLC appear?",
+        query_intents=[
+            {
+                "intent_type": "heading_scope",
+                "target_terms": ["Harbor Works LLC"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2644,6 +2664,16 @@ def test_source_record_ordered_labeled_entry_companion_returns_roster_rows() -> 
     companion = _source_record_ordered_labeled_entry_companion(
         runtime,
         utterance='List, in source order, every "Entry" row and identifier.',
+        query_intents=[
+            {
+                "intent_type": "ordered_labeled_entry",
+                "target_terms": ["Entry"],
+                "answer_constraints": ["source_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2653,7 +2683,7 @@ def test_source_record_ordered_labeled_entry_companion_returns_roster_rows() -> 
     assert rows[1]["TextAtom"] == "beta_company_second_entry"
 
 
-def test_source_record_ordered_labeled_entry_companion_requires_quoted_target() -> None:
+def test_source_record_ordered_labeled_entry_companion_requires_structured_intent() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
         "source_record_row(src_line_0002, labeled_line, 2, awards, entry_a).",
@@ -2665,7 +2695,27 @@ def test_source_record_ordered_labeled_entry_companion_requires_quoted_target() 
 
     companion = _source_record_ordered_labeled_entry_companion(
         runtime,
-        utterance="List, in source order, every entry and identifier.",
+        utterance='List, in source order, every "Entry" row and identifier.',
+    )
+
+    assert companion is None
+
+
+def test_source_record_note_marker_companion_ignores_english_without_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0001, paragraph_line, 1, no_section, body).",
+        "source_record_text_atom(src_line_0001, the_notice_uses_a_marker_here).",
+        "source_record_note_anchor(src_line_0001, asterisk).",
+        "source_record_row(src_line_0002, paragraph_line, 2, no_section, small_business).",
+        "source_record_text_atom(src_line_0002, small_business).",
+        "source_record_symbol_definition(src_line_0002, asterisk, small_business).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_note_marker_companion(
+        runtime,
+        utterance="What is the asterisk notation and what does it indicate?",
     )
 
     assert companion is None

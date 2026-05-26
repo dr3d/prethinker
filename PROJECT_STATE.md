@@ -1,12 +1,12 @@
 # Project State
 
-Last updated: 2026-05-25
+Last updated: 2026-05-26
 
 ## One-Sentence Shape
 
 Prethinker compiles source documents into queryable symbolic knowledge bases,
-then uses LLMs as planners over admitted state while deterministic gates decide
-what can become durable truth.
+then uses LLMs as language/intent planners over admitted state while
+deterministic gates decide what can become durable truth.
 
 ## Current Center
 
@@ -92,7 +92,7 @@ should remain distinct from externally sourced real-world documents.
 The current full-suite verification is:
 
 ```text
-1788 passed, 2 subtests passed
+1804 passed, 2 subtests passed
 ```
 
 These numbers are the current public measurement anchor, not a permanent
@@ -116,6 +116,8 @@ The important boundary is source meaning versus durable truth:
 - LLMs may propose predicates, rows, rules, query plans, and evidence bundles.
 - Deterministic mappers admit only palette-valid, arity-valid, contract-valid
   operations.
+- Query-side language understanding belongs in Semantic IR / structured
+  `query_intents[]`, not in Python regex gates over raw user questions.
 - QA should answer from admitted KB state, deterministic ledgers, and runtime
   virtual predicates, not by re-reading source prose.
 - Query-only diagnostics cannot authorize writes.
