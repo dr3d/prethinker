@@ -197,7 +197,11 @@ Candidate fields:
 ```text
 intent_type:
   list | count | date | source_location | heading_scope |
-  note_marker | signatory | comparison | duration | status
+  note_marker | signatory | comparison | duration | status |
+  ordered_labeled_entry | amount_inventory | ratio_calculation |
+  duration_quantity | biography_history | employment_history |
+  role_transition | board_nominee_path | named_role_roster |
+  document_chronology | unknown
 
 target_terms:
   source-language-preserving target atoms/spans
@@ -294,3 +298,48 @@ Remaining work:
 2. Rerun the governance audit after each migration batch.
 3. Treat any score drop from missing intent as an honest lens/route gap, not as
    permission to restore English keyword fallbacks.
+
+## Targeted Replay After Required Query Intents
+
+After making `query_intents[]` required, I replayed seven rows that had depended
+on the migrated source-record routes. The purpose was not to make a corpus
+claim; it was to test whether the stricter lane still carries the repaired
+mechanisms without raw English fallback.
+
+Temporary authored-answer oracle files were derived into:
+
+```text
+C:\prethinker_tmp_archive\query_intent_migration_probe_20260526\oracles
+```
+
+That was necessary because the harness' markdown answer-key parser recognizes
+an explicit `# Answers` section, while these fixture files use a
+question-followed-by-indented-answer format. Using `qa.md` plus the temporary
+oracle avoids treating numbered answer-list items as extra questions.
+
+Replay results:
+
+```text
+sec_ugly_003 q015 amount inventory:      exact / 0 compatibility rows
+sec_ugly_001 q005 duration quantity:     exact / 0 compatibility rows
+sec_ugly_001 q013 employment history:    exact / 0 compatibility rows
+sec_ugly_002 q016 role transition:       exact / 0 compatibility rows
+sec_ugly_002 q017 role transition:       exact / 0 compatibility rows
+sec_ugly_002 q019 role transition/order: exact / 0 compatibility rows
+sec_ugly_002 q022 board nominee path:    exact / 0 compatibility rows
+```
+
+Observed structured intents included `amount_inventory`, `duration`,
+`employment_history`, `role_transition`, `ordered_labeled_entry`, and
+`board_nominee_path`. The duration row emitted the broader `duration` intent
+rather than the narrower `duration_quantity` label, but the route still fired
+from structured query intent rather than from raw question wording.
+
+Interpretation:
+
+- The first migrated routes did not lose their targeted rows when raw-English
+  activation was removed.
+- A future score drop remains acceptable evidence if it points to a missing or
+  underspecified query intent.
+- The repair discipline is unchanged: fix the governed query lens or structured
+  route contract, not Python phrase triggers.
