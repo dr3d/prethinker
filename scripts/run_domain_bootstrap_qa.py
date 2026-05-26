@@ -2507,9 +2507,12 @@ def _source_text_question_needles(utterance: str) -> list[str]:
             "arrivals": ["arrived"],
             "departure": ["departed"],
             "departures": ["departed"],
+            "issuance": ["issued"],
         }
         for token in tokens:
             derived_needles.extend(temporal_event_aliases.get(token, []))
+        if re.search(r"\b(?:at\s+what\s+time|what\s+time|when)\b.*\brelease\b", raw, flags=re.IGNORECASE):
+            derived_needles.append("released")
         derived_needles.extend(_generic_question_token_inflection_needles(tokens))
     state_phrase_aliases = {
         "kentucky": "ky",
@@ -2607,12 +2610,15 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "initially",
         "issued",
         "citation",
+        "citations",
         "component",
         "damaged",
         "days",
+        "deadline",
         "direction",
         "diver",
         "farms",
+        "fatality",
         "letter",
         "loaner",
         "launch",
@@ -2623,6 +2629,7 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "minutes",
         "notice",
         "opinion",
+        "investigation",
         "original",
         "originally",
         "packet",
@@ -2653,7 +2660,9 @@ def _source_text_question_needles(utterance: str) -> list[str]:
         "zone",
     }
     if _is_temporal_source_text_question(raw):
-        priority_unigram_markers.update({"accident", "arrival", "departure"})
+        priority_unigram_markers.update(
+            {"accident", "arrival", "contest", "deadline", "departure", "expiration", "expires"}
+        )
     priority_unigram_needles = [token for token in tokens if token in priority_unigram_markers]
     unigram_needles = [token for token in tokens if len(token) >= 4 and not token.isdigit()]
     return _ordered_atom_unique([*identifier_needles, *derived_needles, *priority_unigram_needles, *phrase_needles, *unigram_needles])
@@ -2702,55 +2711,13 @@ def _generic_question_token_inflection_needles(tokens: list[str]) -> list[str]:
     out: list[str] = []
     irregular_aliases = {
         "arrival": ["arrived"],
+        "arrivals": ["arrived"],
         "departure": ["departed"],
-    }
-    skip = {
-        "what",
-        "when",
-        "where",
-        "which",
-        "how",
-        "many",
-        "much",
-        "time",
-        "date",
-        "hour",
-        "hours",
-        "minute",
-        "minutes",
-        "second",
-        "seconds",
-        "day",
-        "days",
-        "approximately",
-        "does",
-        "and",
-        "the",
-        "with",
-        "from",
-        "between",
-        "that",
-        "this",
-        "than",
-        "then",
-        "they",
-        "them",
-        "were",
+        "departures": ["departed"],
+        "issuance": ["issued"],
     }
     for token in tokens:
-        if len(token) < 4 or token in skip or token.isdigit():
-            continue
         out.extend(irregular_aliases.get(token, []))
-        if token in irregular_aliases:
-            continue
-        if token.endswith("ed"):
-            out.append(token)
-        elif token.endswith("e"):
-            out.append(f"{token}d")
-        elif token.endswith("y") and len(token) > 4:
-            out.append(f"{token[:-1]}ied")
-        else:
-            out.append(f"{token}ed")
     return out
 
 

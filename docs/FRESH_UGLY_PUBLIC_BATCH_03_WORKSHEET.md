@@ -2111,3 +2111,59 @@ Read:
 Promote the mechanism. It is a narrow extension of an existing deterministic
 source-surface carrier, not a new helper lane. Fresh ugly Batch 04 should tell
 whether the exact-surface carrier continues to help without row churn.
+
+## 2026-05-26 Temporal Source-Text Needle Cleanup
+
+Question:
+
+Was `osha_ugly_003 q019` failing because the query hint layer was crowding out
+useful source rows with bad temporal inflections?
+
+Finding:
+
+Yes, partly. The generic temporal source-text hint path was producing invented
+needles such as `issuanced`, `fatalitied`, `investigationed`, and `deadlined`.
+Those came from a broad fallback that added past-tense endings to ordinary
+question tokens. This is a generic query-routing bug, not a document-specific
+surface.
+
+Edit:
+
+- Keep narrow event aliases such as `departure -> departed`, `arrival ->
+  arrived`, and `issuance -> issued`.
+- Keep the existing timed release alias through a specific time-question
+  pattern.
+- Remove the broad regular-past-tense fallback.
+- Prioritize generic event anchors such as `citations`, `fatality`,
+  `investigation`, `deadline`, `contest`, and `expires` for temporal questions.
+
+Validation:
+
+```text
+python -m pytest -q
+  1791 passed, 2 subtests passed
+
+python scripts\audit_active_instrument_leakage.py
+  forbidden hits: 0
+```
+
+Targeted q019 replay:
+
+```text
+artifact:
+  C:\prethinker_tmp_archive\fresh_ugly_public_20260524_03_temporal_needles_20260526\qa\osha_ugly_003_q019_clean_needles_or
+
+result:
+  0 / 1 / 0
+  compatibility/runtime/write rows: 0/0/0
+```
+
+Read:
+
+The cleanup improved retrieval shape but did not make q019 exact. The remaining
+gap is not safe to patch by inventing absence facts: the reference asks for the
+claim that the fatality, investigation, and deadline-expiration date are
+undated, and that the contest-deadline date depends on a receipt date not given
+in the release. Prethinker should not silently turn lack of a date fact into an
+admitted negative fact. Treat q019 as an absence/negative-evidence boundary for
+future design, not a row to force exact inside this corpus.

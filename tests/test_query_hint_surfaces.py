@@ -164,6 +164,17 @@ def test_source_text_needles_include_common_travel_event_inflections() -> None:
     assert needles.index("accident") < 10
 
 
+def test_source_text_needles_do_not_invent_regular_past_tense_garbage() -> None:
+    needles = _source_text_question_needles(
+        "Place these in chronological order: (a) issuance of citations; (b) worker fatality; "
+        "(c) OSHA investigation; (d) the deadline to contest expires. Note any items the release "
+        "does not place in time."
+    )
+
+    assert needles[:6] == ["issued", "citations", "fatality", "investigation", "deadline", "contest"]
+    assert not {"issuanced", "fatalitied", "investigationed", "deadlined"} & set(needles)
+
+
 def test_source_text_needles_bridge_salvage_to_recovery_language() -> None:
     needles = _source_text_question_needles(
         "What impact did salvage operations have on the physical evidence examination?"
