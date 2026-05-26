@@ -271,6 +271,7 @@ after role patch:    526 regex hits / 127 semantic_trigger
 after amount patch:  513 regex hits / 115 semantic_trigger
 after bio patch:     509 regex hits / 111 semantic_trigger
 after contact patch: 503 regex hits / 108 semantic_trigger
+after heading patch: 490 regex hits / 100 semantic_trigger
 ```
 
 The role-transition source parsers still use regex over normalized admitted
@@ -367,4 +368,58 @@ Focused guard:
 ```text
 python -m pytest tests\test_domain_bootstrap_qa.py -q -k "contact_signatory or signatory_responsibility or signatory"
 9 passed, 340 deselected
+```
+
+## Heading/Section Intent Migration
+
+The heading and source-section routes now consume structured query intent
+instead of interpreting raw question text:
+
+```text
+_source_record_preceding_heading_companion
+_source_record_under_heading_companion
+_source_record_named_section_window_companion
+_source_record_quote_heading_locator_companion
+_source_record_section_list_detail_companion
+```
+
+Live route contract:
+
+- `heading_scope + target_terms` is sufficient for nearest-heading / enclosing
+  heading support.
+- Special ordering such as "what immediately precedes X" requires a structured
+  constraint such as `immediately_precedes`, `preceding_heading`, or
+  `previous_heading`.
+- A `list` or `ordered_labeled_entry` intent may activate section-window/list
+  detail support when its target terms match an admitted heading/list header.
+
+Focused replay exposed the useful failure mode. The first strict pass dropped
+two old FDA rows because the model emitted structured variants the route did
+not yet accept:
+
+```text
+q007: heading_scope + immediately_precedes
+q013: list + target_terms ["ICH guidance documents", "Quality Systems"]
+```
+
+The fix was to widen the structured contract, not to restore raw English regex.
+
+Final focused replay:
+
+```text
+procurement_ugly_001 q006 under heading: exact / 0 compatibility rows
+fda_ugly_001 q007 preceding heading:     exact / 0 compatibility rows
+fda_ugly_001 q013 named section window:  exact / 0 compatibility rows
+fda_ugly_003 q006 quote heading:         exact / 0 compatibility rows
+fda_ugly_003 q014 section/list detail:   exact / 0 compatibility rows
+```
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q -k "section_list_detail or preceding_heading or under_heading or named_section_window or quote_heading_locator or query_intents"
+11 passed, 344 deselected
+
+python -m pytest -q
+1818 passed, 2 subtests passed
 ```

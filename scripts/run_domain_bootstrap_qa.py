@@ -1956,6 +1956,61 @@ def _query_intents_from_structured_queries(
                         "source": source,
                     }
                 )
+            elif predicate == "source_record_preceding_heading_support":
+                intents.append(
+                    {
+                        "intent_type": "heading_scope",
+                        "target_terms": [],
+                        "answer_constraints": ["preceding_heading"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_under_heading_support":
+                intents.append(
+                    {
+                        "intent_type": "heading_scope",
+                        "target_terms": [],
+                        "answer_constraints": ["under_heading"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_named_section_window_support":
+                intents.append(
+                    {
+                        "intent_type": "heading_scope",
+                        "target_terms": [],
+                        "answer_constraints": ["section_window"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_quote_heading_locator_support":
+                intents.append(
+                    {
+                        "intent_type": "heading_scope",
+                        "target_terms": [],
+                        "answer_constraints": ["quote_heading_locator"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_section_list_detail_support":
+                intents.append(
+                    {
+                        "intent_type": "ordered_labeled_entry",
+                        "target_terms": [],
+                        "answer_constraints": ["section_list_detail", "source_order"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
             elif predicate == "source_record_amount_inventory_support":
                 intents.append(
                     {
@@ -2055,6 +2110,49 @@ def _query_intent_target_tokens(intent: dict[str, Any] | None) -> set[str]:
     for term in intent.get("target_terms", []) or []:
         tokens.update(token for token in _query_atom_tokens(str(term)) if len(token) >= 3)
     return tokens
+
+
+def _query_intent_target_token_groups(intent: dict[str, Any] | None) -> list[set[str]]:
+    if not isinstance(intent, dict):
+        return []
+    groups: list[set[str]] = []
+    seen: set[tuple[str, ...]] = set()
+    for term in intent.get("target_terms", []) or []:
+        tokens = {token for token in _query_atom_tokens(str(term)) if len(token) >= 3}
+        if not tokens:
+            continue
+        key = tuple(sorted(tokens))
+        if key in seen:
+            continue
+        seen.add(key)
+        groups.append(tokens)
+    return groups
+
+
+def _query_intent_constraint_tokens(intent: dict[str, Any] | None) -> set[str]:
+    tokens: set[str] = set()
+    if not isinstance(intent, dict):
+        return tokens
+    for constraint in intent.get("answer_constraints", []) or []:
+        tokens.update(token for token in _query_atom_tokens(str(constraint)) if len(token) >= 3)
+    return tokens
+
+
+def _query_intent_has_constraint(intent: dict[str, Any] | None, *constraints: str) -> bool:
+    if not isinstance(intent, dict):
+        return False
+    values = {str(value or "").strip().casefold() for value in intent.get("answer_constraints", []) or []}
+    tokens = _query_intent_constraint_tokens(intent)
+    for constraint in constraints:
+        normalized = str(constraint or "").strip().casefold()
+        if not normalized:
+            continue
+        if normalized in values:
+            return True
+        constraint_tokens = {token for token in _query_atom_tokens(normalized) if len(token) >= 3}
+        if constraint_tokens and constraint_tokens <= tokens:
+            return True
+    return False
 
 
 def _note_marker_scope_from_intent(intent: dict[str, Any]) -> str:
@@ -2284,7 +2382,11 @@ def run_one_question(
     )
     if source_note_marker:
         query_results.append(source_note_marker)
-    source_preceding_heading = _source_record_preceding_heading_companion(runtime, utterance=utterance)
+    source_preceding_heading = _source_record_preceding_heading_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_preceding_heading:
         query_results.append(source_preceding_heading)
     source_under_heading = _source_record_under_heading_companion(
@@ -2294,10 +2396,18 @@ def run_one_question(
     )
     if source_under_heading:
         query_results.append(source_under_heading)
-    source_named_section_window = _source_record_named_section_window_companion(runtime, utterance=utterance)
+    source_named_section_window = _source_record_named_section_window_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_named_section_window:
         query_results.append(source_named_section_window)
-    source_quote_heading = _source_record_quote_heading_locator_companion(runtime, utterance=utterance)
+    source_quote_heading = _source_record_quote_heading_locator_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_quote_heading:
         query_results.append(source_quote_heading)
     source_list_window = _source_record_list_window_companion(runtime, utterance=utterance)
@@ -2310,7 +2420,11 @@ def run_one_question(
     )
     if source_ordered_entries:
         query_results.append(source_ordered_entries)
-    source_section_list_detail = _source_record_section_list_detail_companion(runtime, utterance=utterance)
+    source_section_list_detail = _source_record_section_list_detail_companion(
+        runtime,
+        utterance=utterance,
+        query_intents=query_intents,
+    )
     if source_section_list_detail:
         query_results.append(source_section_list_detail)
     source_speaker_window = _source_record_speaker_window_companion(runtime, utterance=utterance)
@@ -6574,14 +6688,20 @@ def _source_record_preceding_heading_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:heading|section)\b", text):
-        return None
-    if not re.search(r"\b(?:preced(?:e|es|ed|ing)|immediately before|before)\b", text):
+    intent = _first_query_intent(query_intents, "heading_scope", "source_location")
+    if not _query_intent_has_constraint(
+        intent,
+        "preceding_heading",
+        "previous_heading",
+        "immediately_before",
+        "immediately_precedes",
+        "precedes",
+    ):
         return None
 
-    target_tokens = _preceding_heading_target_tokens(utterance)
+    target_tokens = _query_intent_target_tokens(intent)
     if not target_tokens:
         return None
 
@@ -6685,7 +6805,7 @@ def _source_record_preceding_heading_companion(
                     "by source line and selected the heading immediately before the target heading; "
                     "no durable fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -6693,28 +6813,6 @@ def _source_record_preceding_heading_companion(
             "source_record_text_atom(SourceRow, TextAtom).",
         ],
     }
-
-
-def _preceding_heading_target_tokens(utterance: str) -> set[str]:
-    text = str(utterance or "")
-    quoted = re.findall(r'"([^"]+)"|`([^`]+)`|' + r"'([^']+)'", text)
-    for groups in quoted:
-        value = next((item for item in groups if item), "")
-        tokens = {token for token in _query_atom_tokens(value) if len(token) >= 3}
-        if tokens:
-            return tokens
-    match = re.search(
-        r"\b(?:precedes?|preceding|before)\s+(?:the\s+)?(?P<target>[A-Za-z0-9][A-Za-z0-9 _/-]{1,80}?)(?:\?|\.|$)",
-        text,
-        flags=re.IGNORECASE,
-    )
-    if match:
-        return {
-            token
-            for token in _query_atom_tokens(match.group("target"))
-            if len(token) >= 3 and token not in {"heading", "section"}
-        }
-    return set()
 
 
 def _source_record_note_marker_companion(
@@ -6860,7 +6958,11 @@ def _source_record_under_heading_companion(
     utterance: str,
     query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    intent = _first_query_intent(query_intents, "heading_scope", "source_location")
+    intent = _first_query_intent(query_intents, "heading_scope")
+    if not intent:
+        source_location_intent = _first_query_intent(query_intents, "source_location")
+        if _query_intent_has_constraint(source_location_intent, "under_heading", "enclosing_heading", "nearest_heading"):
+            intent = source_location_intent
     if not intent:
         return None
     target_tokens = _query_intent_target_tokens(intent)
@@ -6957,54 +7059,21 @@ def _source_record_under_heading_companion(
     }
 
 
-def _under_heading_target_tokens(utterance: str) -> set[str]:
-    quoted = _quoted_target_token_candidates(utterance)
-    if quoted:
-        return quoted[0]
-    proper_tokens: set[str] = set()
-    for match in re.finditer(
-        r"\b[A-Z][A-Za-z0-9&]*(?:\s+(?:&|and|of|the|[A-Z][A-Za-z0-9&]*)){0,6}\b",
-        str(utterance or ""),
-    ):
-        value = match.group(0).strip()
-        tokens = {
-            token
-            for token in _query_atom_tokens(value)
-            if len(token) >= 3 and token.casefold() not in {"under", "which", "what", "where", "heading", "section"}
-        }
-        if len(tokens) >= 2:
-            proper_tokens.update(tokens)
-    if proper_tokens:
-        return proper_tokens
-    stop = {
-        "agency",
-        "appear",
-        "appears",
-        "award",
-        "heading",
-        "section",
-        "under",
-        "which",
-        "what",
-        "where",
-    }
-    return {token for token in _source_record_overlap_question_tokens(utterance) if token not in stop}
-
-
 def _source_record_named_section_window_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if "section" not in text:
-        return None
-    if re.search(r"\b(?:preced(?:e|es|ed|ing)|immediately before)\b", text):
-        return None
-    if not re.search(r"\b(?:list|name|cite|cited|mentions?|under|inside|within|located|appears?)\b", text):
-        return None
+    intent = _first_query_intent(query_intents, "heading_scope", "source_location")
+    if not _query_intent_has_constraint(intent, "section_window", "bounded_section", "section_contents"):
+        list_intent = _first_query_intent(query_intents, "list", "ordered_labeled_entry")
+        if _query_intent_target_token_groups(list_intent):
+            intent = list_intent
+        else:
+            return None
 
-    section_targets = _named_section_target_candidates(utterance)
+    section_targets = _query_intent_target_token_groups(intent)
     if not section_targets:
         return None
 
@@ -7096,10 +7165,10 @@ def _source_record_named_section_window_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only named-section support matched an admitted source-record heading "
-                    "from the question and returned the bounded source rows until the next heading; "
+                    "from structured query-intent target terms and returned the bounded source rows until the next heading; "
                     "no durable fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -7113,15 +7182,18 @@ def _source_record_quote_heading_locator_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:section|heading)\b", text):
-        return None
-    if not re.search(r"\b(?:under|inside|within|located|appears?)\b", text):
+    intent = _first_query_intent(query_intents, "heading_scope")
+    if not intent:
+        source_location_intent = _first_query_intent(query_intents, "source_location")
+        if _query_intent_has_constraint(source_location_intent, "quote_heading_locator", "enclosing_heading", "quote_location"):
+            intent = source_location_intent
+    if not intent:
         return None
     quote_targets = [
         tokens
-        for tokens in _quoted_target_token_candidates(utterance)
+        for tokens in _query_intent_target_token_groups(intent)
         if len(tokens) >= 3 and not {"section", "heading"} & tokens
     ]
     if not quote_targets:
@@ -7212,73 +7284,13 @@ def _source_record_quote_heading_locator_companion(
                     "text and returned the nearest preceding admitted heading-like row; no durable fact "
                     "was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
             "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
             "source_record_text_atom(SourceRow, TextAtom).",
         ],
-    }
-
-
-def _named_section_target_candidates(utterance: str) -> list[set[str]]:
-    candidates: list[set[str]] = []
-    candidates.extend(_quoted_target_token_candidates(utterance))
-    text = str(utterance or "")
-    for match in re.finditer(
-        r"\b(?:in|under|inside|within|from)\s+(?:the\s+)?(?P<section>[A-Za-z0-9][A-Za-z0-9 _&/().,-]{1,80}?)\s+section\b",
-        text,
-        flags=re.IGNORECASE,
-    ):
-        tokens = _section_target_tokens(match.group("section"))
-        if tokens:
-            candidates.append(tokens)
-    deduped: list[set[str]] = []
-    seen: set[tuple[str, ...]] = set()
-    for tokens in candidates:
-        filtered = {token for token in tokens if token not in {"section", "heading"}}
-        if not filtered:
-            continue
-        key = tuple(sorted(filtered))
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(filtered)
-    return deduped[:6]
-
-
-def _quoted_target_token_candidates(utterance: str) -> list[set[str]]:
-    candidates: list[set[str]] = []
-    for groups in re.findall(r'"([^"]+)"|`([^`]+)`|' + r"'([^']+)'", str(utterance or "")):
-        value = next((item for item in groups if item), "")
-        tokens = _section_target_tokens(value)
-        if tokens:
-            candidates.append(tokens)
-    return candidates
-
-
-def _section_target_tokens(value: str) -> set[str]:
-    return {
-        token
-        for token in _query_atom_tokens(value)
-        if len(token) >= 3
-        and token not in GENERIC_QUERY_PLACEHOLDERS
-        and token
-        not in {
-            "the",
-            "and",
-            "with",
-            "from",
-            "which",
-            "what",
-            "where",
-            "under",
-            "inside",
-            "within",
-            "located",
-            "appears",
-        }
     }
 
 
@@ -7619,19 +7631,37 @@ def _source_record_section_list_detail_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:list|enumerat(?:e|es|ed|ion)|source order|in order|which|what)\b", text):
-        return None
-    if not re.search(
-        r"\b(?:people|persons|occupants?|items?|entries|rows?|configuration|violations?|events?|dates?|"
-        r"payments?|benefits?|compensation|packages?|identifiers?)\b",
-        text,
-    ):
-        return None
+    intent = _first_query_intent(query_intents, "ordered_labeled_entry", "list", "heading_scope")
+    has_section_list_constraint = _query_intent_has_constraint(
+        intent,
+        "section_list_detail",
+        "source_order",
+        "section_rows",
+    )
+    list_cue_tokens = {
+        "configuration",
+        "fatally",
+        "include",
+        "included",
+        "injured",
+        "occupants",
+        "packages",
+        "people",
+        "persons",
+        "payments",
+        "benefits",
+        "compensation",
+        "severance",
+        "violation",
+        "violations",
+    }
 
-    question_tokens = _source_record_overlap_question_tokens(utterance)
-    if not question_tokens:
+    target_tokens = _query_intent_target_tokens(intent)
+    if not target_tokens:
+        return None
+    if not has_section_list_constraint and not (target_tokens & list_cue_tokens):
         return None
     text_rows = _runtime_rows(runtime, "source_record_text_atom(SourceRow, TextAtom).")
     row_meta = _source_record_row_metadata(runtime)
@@ -7666,28 +7696,10 @@ def _source_record_section_list_detail_companion(
     for index, row in enumerate(ordered):
         if row["Kind"] == "list_row":
             continue
-        overlap = question_tokens & set(row["Tokens"])
+        overlap = target_tokens & set(row["Tokens"])
         if len(overlap) < 2:
             continue
-        list_cue_tokens = {
-            "configuration",
-            "fatally",
-            "include",
-            "included",
-            "injured",
-            "occupants",
-            "packages",
-            "people",
-            "persons",
-            "payments",
-            "benefits",
-            "compensation",
-            "severance",
-            "seriously",
-            "violation",
-            "violations",
-        }
-        if not (overlap & list_cue_tokens or {"section", "source"} & question_tokens):
+        if not (overlap & list_cue_tokens or has_section_list_constraint):
             continue
         section = str(row["Section"])
         followers: list[dict[str, Any]] = []
@@ -7750,9 +7762,9 @@ def _source_record_section_list_detail_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only source-section list detail support followed an admitted "
-                    "question-matched source-record header to same-section list rows; no durable fact was written"
+                    "query-intent-matched source-record header to same-section list rows; no durable fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": [
@@ -16756,13 +16768,13 @@ def _query_independent_source_record_support(
         _source_record_relative_next_day_companion(runtime, utterance=utterance),
         _source_record_question_overlap_companion(runtime, utterance=utterance),
         _source_record_note_marker_companion(runtime, utterance=utterance),
-        _source_record_preceding_heading_companion(runtime, utterance=utterance),
-        _source_record_under_heading_companion(runtime, utterance=utterance),
-        _source_record_named_section_window_companion(runtime, utterance=utterance),
-        _source_record_quote_heading_locator_companion(runtime, utterance=utterance),
+        _source_record_preceding_heading_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_under_heading_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_named_section_window_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_quote_heading_locator_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_list_window_companion(runtime, utterance=utterance),
         _source_record_ordered_labeled_entry_companion(runtime, utterance=utterance),
-        _source_record_section_list_detail_companion(runtime, utterance=utterance),
+        _source_record_section_list_detail_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_speaker_window_companion(runtime, utterance=utterance),
         _source_record_discrepancy_list_companion(runtime, utterance=utterance),
         *_source_record_messy_summary_companions(runtime, utterance=utterance),

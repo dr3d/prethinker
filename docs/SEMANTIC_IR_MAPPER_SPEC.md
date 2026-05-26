@@ -105,6 +105,14 @@ contact/reply information, signatory, date, count, or status, that signal
 belongs in `query_intents[]` or in a structured query template, not in a Python
 phrase list.
 
+For heading/source-location queries, a generic `heading_scope` intent with
+source-local `target_terms` is enough to activate nearest-heading support.
+Special relations such as an immediately preceding heading should be expressed
+as structured `answer_constraints` like `immediately_precedes` or
+`preceding_heading`. The deterministic side may match those target terms
+against admitted source-record rows, but it must not rediscover the user's
+meaning by regexing the raw utterance.
+
 `query_intents[]` does not authorize writes, does not become a KB fact, and
 does not bypass mapper/runtime predicate checks. It is the query-side analogue
 of candidate operations: useful proposal shape, still governed downstream.

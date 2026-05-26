@@ -2023,6 +2023,16 @@ def test_source_record_section_list_detail_follows_question_matched_header() -> 
     companion = _source_record_section_list_detail_companion(
         runtime,
         utterance="List the five fatally injured people in source order, including vehicle details.",
+        query_intents=[
+            {
+                "intent_type": "ordered_labeled_entry",
+                "target_terms": ["fatally injured people"],
+                "answer_constraints": ["section_list_detail", "source_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2060,12 +2070,41 @@ def test_source_record_section_list_detail_follows_payment_benefit_table_rows() 
     companion = _source_record_section_list_detail_companion(
         runtime,
         utterance="List the payments and benefits in source order.",
+        query_intents=[
+            {
+                "intent_type": "ordered_labeled_entry",
+                "target_terms": ["payments and benefits"],
+                "answer_constraints": ["section_list_detail", "source_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
     rows = companion["result"]["rows"]
     assert [row["SourceRow"] for row in rows] == ["src_line_0063", "src_line_0066"]
     assert "base_salary_and_target_annual_bonus" in rows[0]["TextAtom"]
+
+
+def test_source_record_section_list_detail_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0061, paragraph_line, 61, transition_section, the_following_payments_and_benefits).",
+        "source_record_text_atom(src_line_0061, the_executive_will_be_entitled_to_the_following_payments_and_benefits).",
+        "source_record_row(src_line_0063, table_row, 63, transition_section, no_label).",
+        "source_record_text_atom(src_line_0063, cash_severance_equal_to_200_of_the_sum_of_base_salary_and_target_annual_bonus).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    assert (
+        _source_record_section_list_detail_companion(
+            runtime,
+            utterance="List the payments and benefits in source order.",
+        )
+        is None
+    )
 
 
 def test_source_record_messy_summary_extracts_ais_speed_change_from_source_text() -> None:
@@ -2578,12 +2617,41 @@ def test_source_record_preceding_heading_companion_finds_heading_before_target()
     companion = _source_record_preceding_heading_companion(
         runtime,
         utterance='What is the section heading that immediately precedes "Closing Section"?',
+        query_intents=[
+            {
+                "intent_type": "heading_scope",
+                "target_terms": ["Closing Section"],
+                "answer_constraints": ["preceding_heading"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
     row = companion["result"]["rows"][0]
     assert row["PreviousHeadingAtom"] == "recommendation"
     assert row["TargetHeadingAtom"] == "closing_section"
+
+
+def test_source_record_preceding_heading_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0212, heading, 212, recommendation, recommendation).",
+        "source_record_text_atom(src_line_0212, recommendation).",
+        "source_record_row(src_line_0216, heading, 216, closing_section, closing_section).",
+        "source_record_text_atom(src_line_0216, closing_section).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    assert (
+        _source_record_preceding_heading_companion(
+            runtime,
+            utterance='What is the section heading that immediately precedes "Closing Section"?',
+        )
+        is None
+    )
 
 
 def test_source_record_note_marker_companion_pairs_marker_definitions_and_anchors() -> None:
@@ -2649,7 +2717,7 @@ def test_source_record_under_heading_companion_finds_nearest_heading_for_target_
             {
                 "intent_type": "heading_scope",
                 "target_terms": ["Harbor Works LLC"],
-                "answer_constraints": [],
+                "answer_constraints": ["under_heading"],
                 "uncertainty_policy": "answer",
                 "language": "en",
                 "source": "semantic_ir",
@@ -2661,6 +2729,25 @@ def test_source_record_under_heading_companion_finds_nearest_heading_for_target_
     row = companion["result"]["rows"][0]
     assert row["HeadingAtom"] == "army"
     assert row["TargetSourceRow"] == "src_line_0003"
+
+
+def test_source_record_under_heading_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0002, heading, 2, army, army).",
+        "source_record_text_atom(src_line_0002, army).",
+        "source_record_row(src_line_0003, paragraph_line, 3, army, harbor_works_llc_received_award).",
+        "source_record_text_atom(src_line_0003, harbor_works_llc_received_award).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    assert (
+        _source_record_under_heading_companion(
+            runtime,
+            utterance="Under which agency heading does Harbor Works LLC appear?",
+        )
+        is None
+    )
 
 
 def test_source_record_ordered_labeled_entry_companion_returns_roster_rows() -> None:
@@ -2753,6 +2840,16 @@ def test_source_record_named_section_window_companion_returns_bounded_section_ro
     companion = _source_record_named_section_window_companion(
         runtime,
         utterance='Name the three guidance documents cited in the "Process Controls" section.',
+        query_intents=[
+            {
+                "intent_type": "heading_scope",
+                "target_terms": ["Process Controls"],
+                "answer_constraints": ["section_window"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2760,6 +2857,25 @@ def test_source_record_named_section_window_companion_returns_bounded_section_ro
     assert [row["SourceRow"] for row in rows] == ["src_line_0208", "src_line_0210"]
     assert rows[0]["SectionAtom"] == "process_controls"
     assert rows[1]["TextAtom"].endswith("gamma_three")
+
+
+def test_source_record_named_section_window_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0208, labeled_line, 208, public_record, process_controls).",
+        "source_record_text_atom(src_line_0208, process_controls).",
+        "source_record_row(src_line_0210, paragraph_line, 210, public_record, guidance_list).",
+        "source_record_text_atom(src_line_0210, agency_guidances_alpha_one_beta_two_and_gamma_three).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    assert (
+        _source_record_named_section_window_companion(
+            runtime,
+            utterance='Name the three guidance documents cited in the "Process Controls" section.',
+        )
+        is None
+    )
 
 
 def test_source_record_quote_heading_locator_companion_finds_enclosing_heading() -> None:
@@ -2779,6 +2895,16 @@ def test_source_record_quote_heading_locator_companion_finds_enclosing_heading()
     companion = _source_record_quote_heading_locator_companion(
         runtime,
         utterance='Under which named section heading is the inline quote "alpha phrase contains quoted terms for review" located?',
+        query_intents=[
+            {
+                "intent_type": "heading_scope",
+                "target_terms": ["alpha phrase contains quoted terms for review"],
+                "answer_constraints": ["quote_heading_locator"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
@@ -2786,6 +2912,25 @@ def test_source_record_quote_heading_locator_companion_finds_enclosing_heading()
     assert row["HeadingAtom"] == "first_findings"
     assert row["MatchedSourceRow"] == "src_line_0073"
     assert row["PreviousContextTextAtom"] == "source_states_the_following_under_topic_label"
+
+
+def test_source_record_quote_heading_locator_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0040, labeled_line, 40, public_record, first_findings).",
+        "source_record_text_atom(src_line_0040, first_findings).",
+        "source_record_row(src_line_0073, list_row, 73, public_record, alpha_phrase_contains_quoted_terms_for_review).",
+        "source_record_text_atom(src_line_0073, alpha_phrase_contains_quoted_terms_for_review).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    assert (
+        _source_record_quote_heading_locator_companion(
+            runtime,
+            utterance='Under which named section heading is the inline quote "alpha phrase contains quoted terms for review" located?',
+        )
+        is None
+    )
 
 
 def test_source_record_date_range_duration_companion_computes_closing_extension() -> None:
