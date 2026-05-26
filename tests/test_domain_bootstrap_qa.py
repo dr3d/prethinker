@@ -3087,6 +3087,7 @@ def test_source_record_messy_summary_extracts_amount_inventory() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="List every dollar amount and percentage appearing in the document, with what each refers to.",
+        query_intents=_query_intents_for("amount_inventory"),
     )
 
     companion = next(
@@ -3118,6 +3119,20 @@ def test_source_record_messy_summary_amount_inventory_requires_inventory_questio
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What cash bonus amount will the officer receive?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
+
+
+def test_source_record_messy_summary_amount_inventory_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0012, officer_will_receive_a_cash_bonus_of_500_000)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="List every dollar amount and percentage appearing in the document, with what each refers to.",
     )
 
     assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
@@ -3191,6 +3206,16 @@ def test_source_record_messy_summary_extracts_duration_quantity() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What is the duration of COBRA premium payments to the executive?",
+        query_intents=[
+            {
+                "intent_type": "duration_quantity",
+                "target_terms": ["COBRA premium payments"],
+                "answer_constraints": ["duration"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3217,6 +3242,21 @@ def test_source_record_messy_summary_duration_quantity_requires_duration_questio
     assert not any(item["result"]["predicate"] == "source_record_duration_quantity_support" for item in companions)
 
 
+def test_source_record_messy_summary_duration_quantity_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0084, "
+        "the_company_shall_also_pay_the_executive_cobra_premiums_for_12_months_as_more_specifically_described)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the duration of COBRA premium payments to the executive?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_duration_quantity_support" for item in companions)
+
+
 def test_source_record_messy_summary_duration_quantity_extracts_deadline_anchor() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(
@@ -3227,6 +3267,16 @@ def test_source_record_messy_summary_duration_quantity_extracts_deadline_anchor(
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What is the response deadline and from what event is it measured?",
+        query_intents=[
+            {
+                "intent_type": "duration_quantity",
+                "target_terms": ["response deadline receipt"],
+                "answer_constraints": ["duration", "anchor"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3563,6 +3613,16 @@ def test_source_record_messy_summary_calculates_per_unit_ratio() -> None:
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What is the per-unit civil penalty if one divides the penalty by the recalled-unit count?",
+        query_intents=[
+            {
+                "intent_type": "ratio_calculation",
+                "target_terms": ["civil penalty recalled units"],
+                "answer_constraints": ["calculation"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -3575,6 +3635,24 @@ def test_source_record_messy_summary_calculates_per_unit_ratio() -> None:
     assert row["DenominatorDisplay"] == "over 45,000 recalled units"
     assert row["RoundedQuotient"] == "80"
     assert row["QuotientDisplay"] == "approximately $80 per recalled unit"
+
+
+def test_source_record_messy_summary_ratio_calculation_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0020, settlement_requires_a_3_6_million_civil_penalty).",
+        "source_record_text_atom(src_line_0030, the_company_sold_over_45_000_recalled_units_during_the_period).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="What is the per-unit civil penalty if one divides the penalty by the recalled-unit count?",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_ratio_calculation_support" for item in companions
+    )
 
 
 def test_ratio_calculation_reference_supports_per_unit_answers() -> None:

@@ -1773,6 +1773,9 @@ QUERY_INTENT_TYPES = {
     "duration",
     "status",
     "ordered_labeled_entry",
+    "amount_inventory",
+    "ratio_calculation",
+    "duration_quantity",
     "role_transition",
     "board_nominee_path",
     "named_role_roster",
@@ -1934,6 +1937,39 @@ def _query_intents_from_structured_queries(
                         "intent_type": "named_role_roster",
                         "target_terms": [],
                         "answer_constraints": [],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_amount_inventory_support":
+                intents.append(
+                    {
+                        "intent_type": "amount_inventory",
+                        "target_terms": [],
+                        "answer_constraints": ["inventory"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_ratio_calculation_support":
+                intents.append(
+                    {
+                        "intent_type": "ratio_calculation",
+                        "target_terms": [],
+                        "answer_constraints": ["calculation"],
+                        "uncertainty_policy": "answer",
+                        "language": "",
+                        "source": source,
+                    }
+                )
+            elif predicate == "source_record_duration_quantity_support":
+                intents.append(
+                    {
+                        "intent_type": "duration_quantity",
+                        "target_terms": [],
+                        "answer_constraints": ["duration"],
                         "uncertainty_policy": "answer",
                         "language": "",
                         "source": source,
@@ -16632,9 +16668,9 @@ def _source_record_messy_summary_companions(
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance),
-        _source_record_amount_inventory_companion(runtime, utterance=utterance),
-        _source_record_ratio_calculation_companion(runtime, utterance=utterance),
-        _source_record_duration_quantity_companion(runtime, utterance=utterance),
+        _source_record_amount_inventory_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_ratio_calculation_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_duration_quantity_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
@@ -18407,18 +18443,10 @@ def _source_record_amount_inventory_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    list_intent = bool(re.search(r"\b(?:list|enumerate|inventory)\b", text)) and not bool(
-        re.search(r"\b(?:bullet|numbered|ordered)[-\s]+list\b", text)
-    )
-    exhaustive_amount_intent = bool(
-        re.search(r"\b(?:every|all)\b.{0,80}\b(?:dollar|amount|amounts|percentage|percent|value|values)\b", text)
-        or re.search(r"\b(?:dollar|amount|amounts|percentage|percent|value|values)\b.{0,80}\b(?:every|all)\b", text)
-    )
-    if not (list_intent or exhaustive_amount_intent):
-        return None
-    if not re.search(r"\b(?:dollar|amount|amounts|percentage|percent|value|values)\b|%", text):
+    intent = _first_query_intent(query_intents, "amount_inventory")
+    if not intent:
         return None
 
     support_rows: list[dict[str, str]] = []
@@ -18481,9 +18509,10 @@ def _source_record_amount_inventory_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only amount-inventory support paired amount-like numeric tokens with nearby "
-                    "admitted source-record context; no durable amount fact was written"
+                    "admitted source-record context after structured query-intent activation; "
+                    "no durable amount fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
@@ -18494,14 +18523,12 @@ def _source_record_ratio_calculation_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:per[-\s]?\w+|divide|divides|dividing|ratio|quotient)\b", text):
+    intent = _first_query_intent(query_intents, "ratio_calculation")
+    if not intent:
         return None
-    if not re.search(r"\b(?:penalty|amount|cost|price|fine|payment|count|devices?|units?|shares?|employees?)\b", text):
-        return None
-
-    query_tokens = set(_source_record_field_name_tokens(utterance))
+    query_tokens = _query_intent_target_tokens(intent)
     money_entries: list[dict[str, Any]] = []
     count_entries: list[dict[str, Any]] = []
     for source_row, text_atom in _source_record_text_atoms(runtime):
@@ -18583,9 +18610,9 @@ def _source_record_ratio_calculation_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only ratio-calculation support divided source-stated money amounts by source-stated "
-                    "counts for per-unit questions; no durable arithmetic fact was written"
+                    "counts after structured query-intent activation; no durable arithmetic fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
@@ -18652,6 +18679,8 @@ def _source_record_ratio_count_entries(
             continue
         nearby = tokens[max(0, index - 8) : number_index + consumed + 10]
         score = len((set(nearby) | set(_source_record_field_name_tokens(unit_atom))) & query_tokens)
+        if not query_tokens:
+            score = 1
         if score == 0:
             continue
         out.append(
@@ -18735,11 +18764,12 @@ def _source_record_duration_quantity_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not _source_record_duration_quantity_question(text):
+    intent = _first_query_intent(query_intents, "duration_quantity", "duration")
+    if not intent:
         return None
-    query_tokens = set(_query_atom_tokens(utterance))
+    query_tokens = _query_intent_target_tokens(intent)
     support_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str, str]] = set()
     for source_row, text_atom in _source_record_text_atoms(runtime):
@@ -18790,29 +18820,14 @@ def _source_record_duration_quantity_companion(
                 "kind": "core-local",
                 "note": (
                     "query-only duration-quantity support extracted source-stated for/over/within N month/day/year "
-                    "phrases from admitted source-record text; no durable duration fact was written"
+                    "phrases from admitted source-record text after structured query-intent activation; "
+                    "no durable duration fact was written"
                 ),
-                "utterance": utterance,
+                "query_intent": intent,
             },
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
-
-
-def _source_record_duration_quantity_question(text: str) -> bool:
-    if re.search(r"\b(?:duration|how long|for how long|period|term)\b", text):
-        return True
-    if re.search(r"\b(?:deadline|due|response|respond|receipt)\b", text) and (
-        re.search(r"\b(?:days?|working days|business days)\b", text)
-        or re.search(r"\b(?:measured|anchor|event|from what)\b", text)
-    ):
-        return True
-    if re.search(r"\b(?:months?|years?|days?|business days)\b", text) and re.search(
-        r"\b(?:payment|payments|premium|premiums|continuation|exercisable|benefit|benefits)\b",
-        text,
-    ):
-        return True
-    return False
 
 
 def _source_record_duration_quantity_entries(
