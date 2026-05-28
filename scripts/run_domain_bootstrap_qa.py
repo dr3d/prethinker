@@ -1052,6 +1052,16 @@ def parse_numbered_markdown_questions(text: str) -> list[dict[str, Any]]:
             qid = f"q{number:03d}"
             utterance = match.group(2)
         else:
+            match = re.match(
+                r"^\*\*Q(\d{1,3})(?:\s*\[[^\]]+\])?\*\*\s+(.*\S)\s*$",
+                line,
+                flags=re.IGNORECASE,
+            )
+            if match:
+                number = int(match.group(1))
+                qid = f"q{number:03d}"
+                utterance = match.group(2)
+        if not match:
             match = re.match(r"^(q(\d{3,})):\s+(.*\S)\s*$", line, flags=re.IGNORECASE)
             if match:
                 qid = match.group(1).lower()

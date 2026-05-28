@@ -1,0 +1,90 @@
+# FDA Warning Letter — AACE Pharmaceuticals, Inc. (MARCS-CMS 701310), May 13, 2025
+
+> Source document: FDA Warning Letter 320-25-72 to AACE Pharmaceuticals, Inc. US Government work (public domain). Transcribed from the FDA.gov warning-letter page. Section tags in [BRACKETS] are added as citation coordinates; all body text is verbatim, including the FDA's "(b)(4)" redaction markers.
+
+---
+
+[HEADER]
+Delivery Method: VIA UPS. Reference #: 320-25-72. Product: Drugs.
+Recipient: Mr. Atul B. Mehta, President, Co-Chairman, and Co-Founder, AACE Pharmaceuticals, Inc., 15 Gardner Road, Fairfield, NJ 07004, United States.
+Issuing Office: Center for Drug Evaluation and Research (CDER).
+Warning Letter 320-25-72. May 13, 2025.
+
+---
+
+[OPENING]
+Dear Mr. Mehta:
+
+The United States Food and Drug Administration (FDA) inspected your drug manufacturing facility, AACE Pharmaceuticals, Inc., FEI 3013433273, at 15 Gardner Road, Fairfield, from November 12 to 22, 2024, after an FDA inspection revealed violative conditions at Brassica Pharma Private Limited, a contract manufacturing organization (CMO) used to manufacture ophthalmic drugs for AACE Pharmaceuticals, Inc.
+
+The FDA inspection of this foreign facility revealed significant violations of Current Good Manufacturing Practice (CGMP) regulations for finished pharmaceuticals, Title 21, Code of Federal Regulations, Parts 210 and 211 (21 CFR Parts 210 and 211), causing these drug products to be adulterated, including within the meaning of section 501(a)(2)(B) of the Federal Food, Drug, and Cosmetic Act (FD&C Act), 21 U.S.C. 351(a)(2)(B).
+
+The inspection of your facility revealed that you operated as a distributor of AACE Pharmaceuticals brand name products, including Lubricant PM Ointment. Your receipt in interstate commerce of adulterated drugs, and the delivery or proffered delivery thereof, is a violation of section 301(c) of the FD&C Act, 21 U.S.C. 331(c), and your introduction into interstate commerce of adulterated drugs violates section 301(a) of the FD&C Act, 21 U.S.C. 331(a).
+
+---
+
+[INSPECTION OF YOUR CMO]
+An inspection of Brassica Pharma Private Limited ("Brassica"), FEI 3014129013, conducted from January 15 to 19, 2024, revealed multiple CGMP violations, including but not limited to poor aseptic practices for the manufacture of sterile drugs; fabrication of microbiology laboratory records; microbial recoveries of incubating samples from ISO 5 manufacturing areas and sterility tests exhibiting turbidity during incubation; inadequate media fill program and airflow visualization studies; and use of ripped and visibly dirty gowning in the aseptic processing areas. These CGMP violations render the products manufactured by Brassica adulterated within the meaning of section 501(a)(2)(B) of the FD&C Act.
+
+On January 30, 2024, Brassica was placed on Import Alert 66-40 and recalled all drug products within expiry on February 22, 2024. On July 11, 2024, Brassica received a warning letter (Warning Letter #320-24-52).
+
+---
+
+[RECEIPT AND DISTRIBUTION OF ADULTERATED DRUGS]
+Our inspection of your firm and review of your import records indicated that (b)(4) shipments of AACE Pharmaceuticals Lubricant PM Ointment were imported from a third-party, (b)(4), manufactured by your CMO Brassica Pharma Private Limited, received by AACE Pharmaceuticals, and further distributed to customers. Your receipt in interstate commerce of adulterated drugs, and the delivery or proffered delivery thereof, is a violation of section 301(c) of the FD&C Act, and your introduction into interstate commerce of adulterated drugs violates section 301(a) of the FD&C Act.
+
+---
+
+[INSPECTION OF AACE — VIOLATION 1: QUALITY CONTROL UNIT]
+We reviewed your December 11, 2024, response to our Form FDA 483 in detail. During our inspection, our investigators observed specific violations including, but not limited to, the following.
+
+1. Your firm failed to establish an adequate quality control unit with the responsibility and authority to approve or reject all components, drug product containers, closures, in-process materials, packaging materials, labeling, and drug products and the authority to review production records to assure that no errors have occurred or, if errors have occurred, that they have been fully investigated (21 CFR 211.22(a)).
+
+Your ophthalmic drug product, Lubricant PM Ointment, is intended to be sterile. Your firm utilized a CMO to manufacture your ophthalmic drug products. However, your quality unit failed to have adequate supplier qualification procedures to ensure that the drug products received from your CMO were manufactured in compliance with CGMP prior to being distributed in the United States.
+
+For example, our investigators observed that your firm identified several CGMP deficiencies with Brassica in September 2020, such as a failure to maintain raw testing data. Despite identifying these deficiencies, your firm qualified Brassica as an approved CMO. Furthermore, you requalified Brassica in 2023, without evaluating whether subsequent corrective actions and preventive actions adequately addressed the identified deficiencies.
+
+Your firm's quality unit released Lubricant PM Ointment for distribution without adequate procedures to ensure that the ophthalmic drug products produced for your firm met appropriate quality attributes.
+
+---
+
+[AACE RESPONSE AND FDA ASSESSMENT]
+In your response, you state that your procedures have been revised to assess CGMP findings of your CMOs, and that your Quality Assurance must evaluate corrective action and preventive action (CAPA) plans implemented by CMOs.
+
+Your response is inadequate. While you have revised your procedures, you did not provide sufficient details on how you will assess findings that include CGMP deficiencies. Your procedure lacks a process for disqualifying CMOs or maintaining disqualification across product lines. Also, you did not propose evaluating the qualification status of your other CMOs.
+
+In addition, you state that you will be comparing the data reported on the certificate of analysis (COA) against the pre-approved specification before releasing finished product. We note that your quality unit is ultimately responsible for ensuring that your drug products are manufactured in accordance with CGMP. Comparing a COA from a CMO to pre-approved specifications does not overcome your responsibility to evaluate, qualify, audit, and monitor your contract manufacturers. The suitability and competence of potential contractors should be assessed, based on quality risk management principles, before outsourcing operations, and should implement any needed improvements. Your firm should have a robust qualification process of your CMOs, commensurate with risk, ahead of making product disposition determinations based on a COA.
+
+You are responsible for ensuring that the drugs you distribute are not adulterated and are manufactured in accordance with CGMP requirements.
+
+[REQUESTED PLAN]
+In response to this letter, provide a detailed plan to ensure you do not receive or deliver adulterated drugs in interstate commerce. Items should minimally include:
+- A thorough evaluation of your current CMOs' qualification. If gaps are identified, include your plan for remediation or discontinuation of use of that CMO.
+- A description of improvements to your procedures for qualifying your contract manufacturers to ensure that they operate in compliance with CGMP, including a plan to conduct periodic audits of your CMOs, with sufficient details on how you will assess findings that include CGMP deficiencies or disqualification from use.
+
+---
+
+[OPHTHALMIC RECALL AND DISTRIBUTION CEASED]
+On January 30, 2024, you notified your customers that Brassica recalled Lubricant PM Ointment batches A2G01, A2G02, A3F08, A3F09, A3J17, and A3J18. We acknowledge that as of January 31, 2024, you commit to discontinue distributing AACE Pharmaceuticals Lubricant PM Ointment manufactured by Brassica. In response to this letter, clarify whether you intend to distribute ophthalmic or sterile drugs for the U.S. market.
+
+---
+
+[USE OF CONTRACT MANUFACTURERS]
+Drugs must be manufactured in conformance with CGMP. FDA is aware that many drug manufacturers use independent contractors such as production facilities, testing laboratories, packagers, and labelers. FDA regards contractors as extensions of the manufacturer.
+
+You are responsible for the quality of your drugs regardless of agreements in place with your contract facilities. You are required to ensure that the drugs you deliver into interstate commerce are not adulterated.
+
+---
+
+[CGMP CONSULTANT RECOMMENDED]
+Based upon the nature of the violations we identified at your firm, you should engage a consultant qualified as set forth in 21 CFR 211.34 to assist your firm in meeting CGMP requirements. Your use of a consultant does not relieve your firm's obligation to comply with CGMP. Your firm's executive management remains responsible for resolving all deficiencies and systemic flaws to ensure ongoing CGMP compliance.
+
+---
+
+[CONCLUSION]
+The violations cited in this letter are not intended to be an all-inclusive list of violations that exist at your facility. You are responsible for investigating and determining the causes of any violations and for preventing their recurrence or the occurrence of other violations. Respond to this office in writing within 15 working days.
+
+Sincerely, /S/ Francis Godwin, Director, Office of Manufacturing Quality, Office of Compliance, Center for Drug Evaluation and Research.
+
+[CONTENT CURRENT AS OF]
+05/27/2025

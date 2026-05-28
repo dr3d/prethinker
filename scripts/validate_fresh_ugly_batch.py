@@ -13,10 +13,13 @@ from typing import Any
 REQUIRED_FILES = (
     "source.md",
     "qa.md",
-    "qa_authored_with_answers.md",
     "oracle.jsonl",
     "fixture_notes.md",
     "metadata.json",
+)
+
+OPTIONAL_ANSWER_KEY_FILES = (
+    "qa_authored_with_answers.md",
 )
 
 
@@ -104,9 +107,14 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
     questions = _numbered_questions(qa_text)
     if len(questions) != expected_questions:
         issues.append(f"qa_question_count:{len(questions)} expected:{expected_questions}")
-    answers = _reference_answer_count(authored_text)
     oracle_count, oracle_issues = _oracle_row_count(fixture_dir / "oracle.jsonl")
     oracle_complete = (fixture_dir / "oracle.jsonl").exists() and oracle_count == expected_questions and not oracle_issues
+    qa_answers = _reference_answer_count(qa_text)
+    authored_answers = _reference_answer_count(authored_text)
+    answers = authored_answers or (qa_answers if not (fixture_dir / "qa_authored_with_answers.md").exists() else 0)
+    for name in OPTIONAL_ANSWER_KEY_FILES:
+        if not (fixture_dir / name).exists() and not oracle_complete and qa_answers != expected_questions:
+            issues.append(f"missing_file:{name}")
     if answers != expected_questions and not oracle_complete:
         issues.append(f"reference_answer_count:{answers} expected:{expected_questions}")
     issues.extend(oracle_issues)
@@ -171,6 +179,14 @@ def _numbered_questions(text: str) -> list[str]:
         match = re.match(r"^\s*(\d{1,3})\.\s+(.+?)\s*$", line)
         if match:
             out.append(match.group(2))
+            continue
+        match = re.match(r"^\s*\*\*Q\d{1,3}\b(?:\s*\[[^\]]+\])?\*\*\s+(.+?)\s*$", line, flags=re.IGNORECASE)
+        if match:
+            out.append(match.group(1))
+            continue
+        match = re.match(r"^\s*\*\*Q\d{1,3}\b(?:\s*\[[^\]]+\])?\s+(.+?)\*\*\s*$", line, flags=re.IGNORECASE)
+        if match:
+            out.append(match.group(1))
     return out
 
 
@@ -178,6 +194,9 @@ def _reference_answer_count(text: str) -> int:
     markers = re.findall(r"(?im)^\s*\*\*Reference answer\.\*\*", text)
     if markers:
         return len(markers)
+    qa_markers = re.findall(r"(?im)^\s*\*\*A\s*:?\*\*", text)
+    if qa_markers:
+        return len(qa_markers)
     bold_numbered_questions = re.findall(r"(?m)^\s*\*\*\d{1,3}\.\s+.+?\*\*\s*$", text)
     if bold_numbered_questions:
         return len(bold_numbered_questions)

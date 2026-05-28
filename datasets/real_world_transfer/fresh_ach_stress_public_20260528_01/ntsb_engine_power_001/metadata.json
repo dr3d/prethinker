@@ -1,0 +1,42 @@
+{
+  "batch_id": "fresh_ach_stress_public_20260528_01",
+  "document_id": "ntsb_engine_power_001",
+  "target_category": "NTSB/OSHA incident with >=3 competing causes",
+  "source_family": "NTSB — Aviation Investigation Final Report (CAROL)",
+  "document_type": "General-aviation accident final report; probable-cause determination with competing causal explanations weighed in the Analysis section",
+  "accident_number": "CEN22LA036",
+  "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/104257/pdf",
+  "publication_date": "2023-06-08",
+  "event_date": "2021-10-30",
+  "collected_utc": "2026-05-28T00:00:00Z",
+  "public_domain_or_public_record": "US Government work (NTSB); public domain",
+  "source_language": "en",
+  "source_contained": true,
+  "competing_hypotheses_count": 3,
+  "balanced_fixture": true,
+  "pivotal_evidence_row": "e1",
+  "expected_best_hypothesis": "h1",
+  "sensitivity_expectation": "high",
+  "question_count": 15,
+  "category_counts": {
+    "direct_fact": 3,
+    "evidence_extraction": 2,
+    "competing_cause": 5,
+    "pattern_evidence": 1,
+    "sensitivity": 1,
+    "negation": 1,
+    "premise_check": 2
+  },
+  "pressure_tags": [
+    "competing_hypotheses",
+    "affirmative_support",
+    "counter_evidence",
+    "absence_of_evidence",
+    "double_edged",
+    "weakly_diagnostic",
+    "sensitivity",
+    "counterfactual",
+    "negation",
+    "false_premise"
+  ]
+}

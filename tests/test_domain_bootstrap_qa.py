@@ -159,6 +159,25 @@ q025: How does the reader learn the plan?
     assert rows[1]["utterance"] == "How does the reader learn the plan?"
 
 
+def test_parse_numbered_markdown_questions_accepts_bold_q_labels() -> None:
+    text = """# QA
+
+**Q1 [direct_fact]** What did the report find?
+**A:** The answer is in the oracle.
+
+**Q12 [sensitivity]** If one row were removed, what changes?
+**A:** The answer is in the oracle.
+"""
+
+    rows = parse_numbered_markdown_questions(text)
+
+    assert [row["id"] for row in rows] == ["q001", "q012"]
+    assert [row["utterance"] for row in rows] == [
+        "What did the report find?",
+        "If one row were removed, what changes?",
+    ]
+
+
 def test_parse_markdown_answer_key_reads_answer_section_only() -> None:
     text = """# Questions
 

@@ -161,6 +161,43 @@ def test_validate_fresh_ugly_batch_accepts_complete_oracle_when_markdown_answer_
     assert report["fixtures"][0]["oracle_row_count"] == 25
 
 
+def test_validate_fresh_ugly_batch_accepts_qa_markdown_as_answer_key(tmp_path) -> None:
+    batch = tmp_path / "fresh_ach_stress_public_20260528_01"
+    _write_fixture(batch, "ntsb_engine_power_001", question_count=15, answer_count=15)
+    fixture = batch / "ntsb_engine_power_001"
+    (fixture / "qa_authored_with_answers.md").unlink()
+    (fixture / "qa.md").write_text(
+        "# QA\n\n"
+        + "\n\n".join(
+            f"**Q{index} [direct_fact]** Question {index}?\n"
+            f"**A:** Answer {index}.\n"
+            f"**Coords:** [SECTION {index}]"
+            for index in range(1, 16)
+        ),
+        encoding="utf-8",
+    )
+    (fixture / "metadata.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "fresh_ach_stress_public_batch_v1",
+                "document_id": "ntsb_engine_power_001",
+                "source_url": "https://example.com/source",
+                "llm_authored_source": False,
+                "llm_rewritten_source": False,
+                "question_count": 15,
+                "pressure_tags": ["ach"],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_batch(batch, expected_documents=1, expected_questions=15)
+
+    assert report["summary"]["status"] == "pass"
+    assert report["fixtures"][0]["question_count"] == 15
+    assert report["fixtures"][0]["reference_answer_count"] == 15
+
+
 def test_validate_fresh_ugly_batch_checks_oracle_jsonl_shape(tmp_path) -> None:
     batch = tmp_path / "fresh_ugly_public_20260524_03"
     _write_fixture(batch, "fda_ugly_006")

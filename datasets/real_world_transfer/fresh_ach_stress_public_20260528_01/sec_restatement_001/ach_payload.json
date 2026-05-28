@@ -1,0 +1,80 @@
+{
+  "fixture_id": "sec_restatement_001",
+  "ach_question": "On the evidence in this 8-K, what best explains why the Company concluded its prior filings should no longer be relied upon and must be restated?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Material weakness in internal control over financial reporting",
+      "claim": "The restatement is driven by a recognized material weakness in the Company's internal control over financial reporting for intersegment sales, which is still being remediated and which allowed misclassifications to recur."
+    },
+    {
+      "id": "h2",
+      "label": "Contained segment-disclosure reclassification (no earnings impact)",
+      "claim": "The restatement is a narrow segment-presentation matter (intrasegment vs intersegment classification) with no material impact on consolidated earnings, balance sheet, or cash flows, i.e., a disclosure-level reclassification rather than a substantive misstatement."
+    },
+    {
+      "id": "h3",
+      "label": "SEC-staff-dialogue-driven change",
+      "claim": "The restatement was prompted primarily by the Company's ongoing dialogue with SEC staff, i.e., a regulator-driven change rather than an internally identified control failure."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Material weakness in ICFR for intersegment sales (identified)",
+      "source_coords": "[PRIOR-CORRECTED ERRORS AND MATERIAL WEAKNESS]",
+      "text_anchor": "the Company identified a material weakness in its internal control over financial reporting related to its accounting practices and procedures for intersegment sales",
+      "expected_relevance": "Primary affirmative support for h1: the Company itself attributes the intersegment-sales error condition to a material weakness in ICFR."
+    },
+    {
+      "id": "e2",
+      "label": "New errors found while testing remediation controls",
+      "source_coords": "[NEWLY IDENTIFIED ERRORS — DISCOVERED DURING REMEDIATION TESTING]",
+      "text_anchor": "In the course of testing new controls implemented as part of the Company's material weakness remediation plan in the third quarter of 2024, the Company identified additional misclassified intersegment transactions",
+      "expected_relevance": "Reinforces h1 (additional misclassifications existed and the weakness was not yet remediated). The discovery-via-testing context could be read as detection improving, but the substance — additional errors existed — supports the control-weakness reading."
+    },
+    {
+      "id": "e3",
+      "label": "Ongoing remediation of previously identified material weakness",
+      "source_coords": "[REMEDIATION STATUS]",
+      "text_anchor": "continuing to focus on implementing enhancements to its internal controls to remediate its previously identified material weakness",
+      "expected_relevance": "Third independent anchor for h1: the material weakness is still open and being remediated at the time of the filing. Redundant support is why h1 is robust to single-row removal."
+    },
+    {
+      "id": "e4",
+      "label": "No material impact on consolidated financial statements",
+      "source_coords": "[IMPACT STATEMENT]",
+      "text_anchor": "not expected to result in any material impact on the Company's Consolidated Statements of Earnings ... Consolidated Balance Sheets ... Consolidated Statements of Cash Flow",
+      "expected_relevance": "Primary affirmative support for h2: the restatement is bounded to segment-disclosure presentation, with no impact on the consolidated primary statements. Sole anchor for h2."
+    },
+    {
+      "id": "e5",
+      "label": "Errors are intrasegment-vs-intersegment classification",
+      "source_coords": "[PRIOR-CORRECTED ERRORS AND MATERIAL WEAKNESS]; [NEWLY IDENTIFIED ERRORS — DISCOVERED DURING REMEDIATION TESTING]",
+      "text_anchor": "included certain intrasegment sales ... and should have included exclusively intersegment sales",
+      "expected_relevance": "Supports h2 on the nature of the error (a classification/presentation matter), but is double-edged: the recurrence of the same classification error across periods and segments also supports h1 (the control over this exact item failed repeatedly)."
+    },
+    {
+      "id": "e6",
+      "label": "Decision followed ongoing dialogue with SEC staff",
+      "source_coords": "[ITEM 4.02 — TRIGGER AND SCOPE]",
+      "text_anchor": "following the Company's ongoing dialogue with the staff of the United States Securities and Exchange Commission",
+      "expected_relevance": "Sole affirmative support for h3: the Board's conclusion is temporally tied to SEC-staff dialogue. Establishes regulator involvement but does not, by itself, identify the cause of the underlying errors."
+    },
+    {
+      "id": "e7",
+      "label": "Scope limited to segment-information notes",
+      "source_coords": "[ITEM 4.02 — TRIGGER AND SCOPE]",
+      "text_anchor": "to restate the segment information disclosure (Note 17 ... and Note 13 ...)",
+      "expected_relevance": "Supports h2 (the restatement is confined to the segment-information footnotes). Bounds scope without explaining cause."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The document's through-line is the material weakness in internal control over financial reporting for intersegment sales. It is established three times over: the weakness was identified in connection with the original error corrections (e1), additional misclassifications were found while testing the remediation controls (e2), and the weakness remained open and under remediation at the filing date (e3). h2 captures something true and important — the restatement does not affect the consolidated primary statements (e4) and is confined to segment footnotes (e7) — but that bounds the consequence of the errors, not their cause. h3 is supported only by the temporal link to SEC-staff dialogue (e6), which establishes regulator involvement without identifying the cause of the underlying errors. The best explanation for why a restatement was necessary is the control weakness (h1).",
+    "sensitivity_expectation": "low",
+    "pivotal_evidence": null,
+    "flip_note": "This fixture is the low-sensitivity counterpart to the balanced NTSB fixture. The winner h1 is anchored by three independent rows (e1, e2, e3), so no single-row removal flips the winner: removing the no-material-impact row (e4) only weakens h2 and strengthens h1; removing the SEC-dialogue row (e6) only removes h3; removing any one of e1/e2/e3 still leaves the material weakness established by the other two. A correct ACH read should report low sensitivity here and should NOT manufacture a flip. The contrast with the NTSB fixture (single-row flip) is the intended discrimination test: an engine that reports identical sensitivity for both is not measuring sensitivity."
+  }
+}

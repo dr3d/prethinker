@@ -1,0 +1,96 @@
+# source_original — verbatim text capture of the live public document
+# Document ID: legal_order_chronology_001
+# Source URL: https://www.sec.gov/files/litigation/admin/2024/33-11323.pdf
+# Document: SEC Order Instituting Cease-and-Desist Proceedings, In the Matter of Unisys Corporation
+# Securities Act Release No. 11323 / Exchange Act Release No. 101401 / Admin Proceeding File No. 3-22272 (Oct. 22, 2024)
+# Capture method: direct PDF text extraction via web_fetch (SEC.gov)
+# Capture UTC: 2026-05-28T00:00:00Z
+# Provenance: US Government work (SEC), public record. Substantive findings (paragraphs 1-32) below; administrative payment/boilerplate summarized in source.md note.
+# ---------------- BEGIN VERBATIM SOURCE TEXT ----------------
+# SEC Order Instituting Cease-and-Desist Proceedings — In the Matter of Unisys Corporation (Oct. 22, 2024)
+
+> Source document: SEC Administrative Proceeding File No. 3-22272; Securities Act Release No. 11323 / Exchange Act Release No. 101401 (October 22, 2024). US Government work (public record). Transcribed from the SEC order PDF. Section tags in [BRACKETS] are added as citation coordinates; numbered findings retain the order's own paragraph numbers; body text is verbatim. The order's own footnote definitions are reproduced inline in [DEFINITIONS] so that the document is self-contained.
+
+---
+
+[CAPTION]
+United States of America before the Securities and Exchange Commission. Securities Act of 1933 Release No. 11323 / October 22, 2024. Securities Exchange Act of 1934 Release No. 101401 / October 22, 2024. Administrative Proceeding File No. 3-22272. In the Matter of Unisys Corporation, Respondent. Order Instituting Cease-and-Desist Proceedings, Pursuant to Section 8A of the Securities Act of 1933 and Section 21C of the Securities Exchange Act of 1934, Making Findings, and Imposing a Cease-and-Desist Order.
+
+[SETTLEMENT POSTURE]
+In anticipation of the institution of these proceedings, Respondent has submitted an Offer of Settlement which the Commission has determined to accept. Without admitting or denying the findings herein (except as to jurisdiction), Respondent consents to the entry of this Order. The findings herein are made pursuant to Respondent's Offer and are not binding on any other person or entity.
+
+[DEFINITIONS]
+- "Threat actor" refers to an individual, group, organization, or government that conducts or has the intent to conduct unauthorized activities against the networks and data of or used by others.
+- "Credential" refers to a username and password combination or key used to access resources on a network. Administrative credentials generally have broader access and allow the operator to take actions a standard user could not, such as adding new credentials or modifying access. A threat actor that compromises more credentials, and credentials with higher privileges, will be more persistent and harder to eradicate.
+- "Exfiltration" refers to the unauthorized transfer of data from an information system.
+
+---
+
+[SUMMARY]
+1. This matter concerns materially misleading statements that Unisys, a global provider of technical and enterprise information technology ("IT") services and solutions, negligently made regarding cybersecurity risks and events, as well as Unisys's violations of disclosure controls and procedures requirements.
+
+2. In December 2020, Unisys identified one computer in its network that had a version of SolarWinds Orion software, which a likely nation-state threat actor infected with malicious code that could have allowed for unauthorized activity ("SolarWinds Compromise"). Unisys also received notifications about and discovered compromises of its environment likely by the same threat actor. The compromises took place over a combined span of at least sixteen months starting in January 2020 and were persistent and impacted several parts of its corporate network and non-customer facing cloud environment. Specifically, the activity involved the compromise of at least seven network credentials and 34 cloud-based accounts, including those with administrative privileges, repeated connections into Unisys's network with at least 33 gigabytes ("GB") of data transferred, and access to cloud-based shared files and mailboxes, including those of senior IT personnel. Unisys was aware that its investigations involved significant gaps in its ability to identify the full scope of the unauthorized activity due to the lack of availability of the forensic evidence.
+
+3. Unisys filed annual reports on Form 10-K for fiscal years ended December 31, 2020 and 2021 that included cybersecurity risk disclosures that were materially misleading and not sufficiently tailored to its particular risks and incidents. In these disclosures, Unisys inaccurately described the existence of successful intrusions and the risk of unauthorized access in hypothetical terms, despite knowing that the above-described intrusions had actually happened and in fact involved unauthorized access and exfiltration of confidential and/or proprietary information.
+
+4. Unisys's materially misleading statements resulted in part from the company's failure to design controls and procedures to ensure (1) that information about potentially material cybersecurity incidents was timely recorded, processed, summarized and reported within the time period specified in the Commission's rules and forms, and (2) that information was accumulated and communicated to the company's management to allow timely decisions regarding required disclosures. As a result, decision makers failed at the time to reasonably assess the materiality of these events and new risks arising therefrom.
+
+5. Separately, in July 2022, a separate threat actor — a Russian-speaking ransomware group — successfully compromised Unisys's network and exfiltrated certain cybersecurity and product and platform software code for products the company offers to its customers.
+
+6. Before December 2022, Unisys's incident response policies did not reasonably require cybersecurity personnel to report information to Unisys's disclosure decision makers and contained no criteria for determining which incidents or information should be reported outside the information security organization. Consequently, Unisys's senior cybersecurity personnel repeatedly failed to report the above incidents to executive management and the legal department in a timely manner.
+
+7. Unisys has taken a number of remedial steps, including enhancing its incident response policies and procedures in December 2022 and augmenting its cybersecurity personnel and tools. Also, after investigating the 2022 extortion event and its cybersecurity controls, Unisys publicly disclosed a material weakness in its disclosure controls and procedures and internal control over financial reporting related to the design and maintenance of effective formal policies and procedures over information being communicated by the IT function and the legal and compliance function to those responsible for governance to allow timely decisions related to both financial reporting and other non-financial reporting.
+
+8. Based on the foregoing conduct, Unisys violated Sections 17(a)(2) and 17(a)(3) of the Securities Act and Section 13(a) of the Exchange Act and Rules 12b-20, 13a-1, and 13a-15(a) thereunder.
+
+---
+
+[FACTS — SOLARWINDS COMPROMISE-RELATED ACTIVITY]
+11. In December 2020, Unisys identified an infected version of the SolarWinds software on at least one computer in its network. In a subsequent investigation, it learned that the infected software was loaded on seven dates (but found no evidence that the malicious implant was exploited by the SolarWinds threat actor) and that two other computers made one internet connection each to a known malicious command-and-control server via an internet browser. At the time of Unisys's investigation, its logs and forensic evidence were insufficient to rule out unauthorized activity for some of the installations. The company retained a third-party service provider to review the available forensic evidence; the service provider did not identify evidence of exploitation but recommended a forensic review of the three computers with evidence of potentially unauthorized activity. Unisys determined that the level and nature of known activity on these computers did not necessitate such additional investigation.
+
+12. Throughout December 2020, Unisys learned that the threat actor behind the SolarWinds Orion compromise was a hacking group likely associated with a nation-state. On January 5, 2021, a joint public statement by the FBI, the Office of the Director of National Intelligence, the NSA, and the Cybersecurity and Infrastructure Security Agency attributed the attack to an intelligence gathering operation "likely Russian in origin."
+
+13. On December 13, 2020, Unisys's then-senior cybersecurity personnel received credible information that likely the same threat actor had compromised Unisys's network and non-customer facing cloud environment using means other than SolarWinds software beginning in February 2020. The company's subsequent investigation uncovered evidence that the threat actor, between January 2020 and February 2021, compromised at least three network user accounts and gained access to eight cloud-based user accounts (including accounts with global administrative privileges and internal accounts of employees who serviced certain customers); repeatedly initiated and completed VPN connections during which approximately 23GB of data was transferred to and approximately seven gigabytes from the company's network; and accessed the contents of at least five cloud-based mailboxes, including high-level IT personnel and a Chief Information Officer for the company's then federal government business. Unisys took various remedial measures after investigating the activity.
+
+14. In August 2021, Unisys received credible information that the same threat actor accessed the company's VPN and non-customer facing cloud environment again between April and August 2021. The investigation identified additional persistent unauthorized activity, compromise of at least four network user accounts and 28 cloud-based accounts, access to 14 systems, repeated VPN sessions, and access to approximately 27,000 email messages and 130 cloud-based shared files. Unisys's policies did not include adequate escalation procedures in the event of a cybersecurity incident, and Unisys cybersecurity personnel did not report this activity to senior management. Unisys also failed to review the contents of the messages and shared files until 2022, by which point only half of these documents remained available.
+
+15. In April 2023, Unisys received yet another notification of unauthorized activity by likely the same threat actor. Unisys's investigation determined that the threat actor attempted but failed to access company resources at that time. However, after receipt of new information from law enforcement in May 2023, the company determined that the same threat actor accessed its non-customer facing cloud environment with administrative privileges for approximately a month, activity which Unisys was not aware of previously. Unisys's cybersecurity personnel reported this activity to senior management the same day they received the notification.
+
+16. Unisys's investigations consisted of reviewing forensic evidence on the infected computers and logs of network and cloud activity. However, at the time of the investigations, the company lacked visibility into the incidents due to a number of factors. For example, the company could not identify all of the relevant activity and mechanisms of persistence because it did not have access to logs and forensic evidence covering the full scope of the activity.
+
+---
+
+[FACTS — MATERIALLY MISLEADING CYBERSECURITY RISK DISCLOSURES]
+18. Unisys's cybersecurity risk profile changed materially as a result of the SolarWinds Compromise-related activity because: (1) a persistent and reportedly nation-state-supported threat actor compromised the company's environment; (2) the threat actor persisted in the environment unmonitored for a combined span of at least sixteen months; and (3) the company's investigation suffered from gaps that prevented it from identifying the full scope of the compromise.
+
+19. On February 26, 2021 and February 22, 2022, Unisys filed its annual reports for the years ending 2020 and 2021, respectively, on Form 10-K. In both reports, Unisys negligently framed risks from cybersecurity events as hypothetical despite the company's awareness of the SolarWinds Compromise-related activity, thereby rendering these disclosures materially misleading. For example, these disclosures stated that cyberattacks "could … result in the loss … or the unauthorized disclosure or misuse of information of the company" and that "[i]f our systems are accessed without our authorization … we could … experience data loss." Moreover, Unisys's disclosures on Forms 10-K for years 2020 and 2021 were substantially unchanged from those on its Form 10-K for 2019, which were made before discovering the information described above about the SolarWinds Compromise-related activity.
+
+---
+
+[FACTS — 2022 EXTORTION EVENT]
+21. Between July 7 and 12, 2022, Unisys's internal cybersecurity systems issued at least 10 alerts about the presence and execution of powerful password-stealing malware, Mimikatz, on seven computers in its non-customer facing software development network. Unisys's cybersecurity personnel were not sufficiently familiar with the format of the alerts and erroneously believed that the malware was deployed on only one machine and only on July 7, 2022. The cybersecurity personnel also assigned a low priority to the activity because one of the alerts stated that the malware was quarantined. As a result, no cybersecurity personnel took steps to investigate the activity until July 13, almost a week after the initial alert.
+
+22. Unisys's cybersecurity personnel determined on July 14, 2022 that the malware was not in fact quarantined, conducted additional investigation, and identified an active intrusion by another threat actor, a Russian-speaking ransomware group. The next day, Unisys took the compromised lab network off the internet. However, during the eight days between the initial alerts and the disconnection, the threat actor exfiltrated certain cybersecurity and product and platform software code. Unisys notified criminal law enforcement.
+
+23. By July 22, 2022, Unisys identified evidence of code exfiltration and found a copy of the code on a threat actor-controlled server. On July 25 and 30, 2022, the threat actor provided evidence it still had a copy. On August 3, 2022, to pressure Unisys into paying a ransom, the threat actor briefly posted on its darkweb site a message alleging it had exfiltrated all of Unisys's code. The post was up for less than one hour and did not receive media coverage.
+
+24. In the course of the incident, Unisys discovered that its endpoint detection and response system was not set up properly to automatically send alerts to its centralized Security Information and Event Management system, which Unisys's policies and procedures required to be monitored regularly by cybersecurity personnel. Unisys was unable to determine how long the misconfiguration persisted and how many alerts were not reviewed as a result.
+
+25. On November 21, 2022, after investigating the 2022 extortion event and its cybersecurity controls, Unisys filed a Form 8-K that disclosed a material weakness in its disclosure controls and procedures and internal control over financial reporting related to the design and maintenance of effective formal policies and procedures over information being communicated by the IT function and the legal and compliance function to those responsible for governance.
+
+---
+
+[FACTS — FAILURE TO MAINTAIN DISCLOSURE CONTROLS AND PROCEDURES]
+26. Unisys's cybersecurity personnel failed to report the 2020 and 2021 activity to disclosure decision-makers until a year after discovering it, and the 2022 extortion incident until the hackers' public statement. At the time of these events, Unisys did not maintain effective controls requiring escalation of potentially material incidents to senior management and disclosure decision-makers. At the same time, Unisys did not have controls and procedures designed to ensure that its disclosure decision-makers reviewed cybersecurity incident information in Unisys's possession in order to determine which information may be required to be disclosed. Accordingly, the company failed to maintain disclosure controls and procedures designed to ensure that information around material cybersecurity incidents was reported to management responsible for disclosures and therefore timely reported to investors. Specifically, Unisys's deficient controls contributed to Unisys's materially misleading risk factor disclosures for the years ending 2020 and 2021.
+
+27. Following its disclosure of a material weakness on November 21, 2022, Unisys took steps to remediate its control deficiencies, including enhancing cyber-related policies and procedures and augmenting its cybersecurity personnel and tools.
+
+---
+
+[VIOLATIONS]
+28–31. As a result of the conduct described above, Unisys violated Section 17(a)(2) of the Securities Act (proscribing obtaining money or property by means of any untrue statement of a material fact or any material omission), Section 17(a)(3) (proscribing any transaction, practice, or course of business which operates as a fraud or deceit upon the purchaser), Section 13(a) of the Exchange Act and Rule 13a-1 (annual-report requirements), Rule 12b-20 (requiring material information necessary to make required statements not misleading), and Rule 13a-15(a) (requiring issuers to maintain disclosure controls and procedures designed to ensure required information is recorded, processed, summarized, and reported within the specified time periods). Negligence is sufficient to establish violations of Sections 17(a)(2) and 17(a)(3).
+
+[COOPERATION AND SANCTION]
+32. In determining to accept the Offer, the Commission considered remedial acts undertaken by Unisys and Unisys's cooperation. Unisys undertook to cooperate fully with the Commission in any related investigations, litigations, or other proceedings. The Commission ordered Unisys to cease and desist from violations of the cited provisions and to pay a civil money penalty of $4,000,000.
+
+> Note: The Order's payment-mechanics, penalty-offset, and signature paragraphs are administrative boilerplate and contain no facts load-bearing for the analysis; they are summarized rather than reproduced.

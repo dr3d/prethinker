@@ -1,0 +1,43 @@
+{
+  "batch_id": "fresh_ach_stress_public_20260528_01",
+  "document_id": "fda_warning_letter_001",
+  "target_category": "FDA warning letter where responsibility could be framed as process / documentation / quality-system / vendor-supplier failure",
+  "source_family": "FDA — Warning Letter (CDER, Office of Manufacturing Quality)",
+  "document_type": "CGMP warning letter to a distributor/product-owner whose contract manufacturer was the source of adulteration; cites a single 21 CFR 211.22(a) quality-control-unit violation against the recipient",
+  "warning_letter_number": "320-25-72 (MARCS-CMS 701310)",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/aace-pharmaceuticals-inc-701310-05132025",
+  "publication_date": "2025-05-13",
+  "collected_utc": "2026-05-28T00:00:00Z",
+  "public_domain_or_public_record": "US Government work (FDA); public domain",
+  "source_language": "en",
+  "source_contained": true,
+  "competing_hypotheses_count": 4,
+  "balanced_fixture": false,
+  "pivotal_evidence_row": "e2",
+  "expected_best_hypothesis": "h2",
+  "sensitivity_expectation": "medium",
+  "question_count": 15,
+  "category_counts": {
+    "direct_fact": 2,
+    "evidence_extraction": 2,
+    "competing_cause": 5,
+    "dates_sequence": 1,
+    "responsibility_framing": 1,
+    "sensitivity": 1,
+    "negation": 1,
+    "premise_check": 2
+  },
+  "pressure_tags": [
+    "competing_hypotheses",
+    "framing",
+    "system_vs_instance",
+    "counter_evidence",
+    "knocks_down_h1",
+    "knocks_down_h4",
+    "robust_winner",
+    "sensitivity",
+    "counterfactual",
+    "negation",
+    "false_premise"
+  ]
+}

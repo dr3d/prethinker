@@ -1,0 +1,92 @@
+{
+  "fixture_id": "fda_warning_letter_001",
+  "ach_question": "On the evidence in this warning letter, how does the FDA primarily locate AACE Pharmaceuticals' own responsibility for distributing adulterated ophthalmic drugs?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Vendor/supplier failure",
+      "claim": "Responsibility lies primarily with the contract manufacturer (Brassica), whose CGMP violations caused the adulteration; AACE is essentially a downstream recipient of a bad supplier's output."
+    },
+    {
+      "id": "h2",
+      "label": "Quality-system failure",
+      "claim": "AACE's own quality control unit was inadequate: it lacked the systems, procedures, and authority required to qualify suppliers and to approve/reject product, cited as a 21 CFR 211.22(a) failure."
+    },
+    {
+      "id": "h3",
+      "label": "Process/decision-execution failure",
+      "claim": "The failure was in specific qualification decisions: AACE qualified Brassica in 2020 despite identified deficiencies and requalified it in 2023 without evaluating corrective actions."
+    },
+    {
+      "id": "h4",
+      "label": "Documentation failure",
+      "claim": "The failure was essentially a record-keeping/paperwork matter, e.g. relying on a certificate of analysis (COA) and gaps in maintaining raw testing data."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Brassica CGMP violations",
+      "source_coords": "[INSPECTION OF YOUR CMO]",
+      "text_anchor": "poor aseptic practices for the manufacture of sterile drugs; fabrication of microbiology laboratory records; ... use of ripped and visibly dirty gowning in the aseptic processing areas",
+      "expected_relevance": "Establishes that the adulteration originated at the supplier (h1). It explains why the product was bad, but does not by itself locate AACE's responsibility."
+    },
+    {
+      "id": "e2",
+      "label": "211.22(a) quality-control-unit citation",
+      "source_coords": "[INSPECTION OF AACE — VIOLATION 1: QUALITY CONTROL UNIT]",
+      "text_anchor": "Your firm failed to establish an adequate quality control unit ... (21 CFR 211.22(a))",
+      "expected_relevance": "The single cited violation against AACE is a quality-control-unit failure. This is the strongest direct support for h2 (quality-system framing)."
+    },
+    {
+      "id": "e3",
+      "label": "Inadequate supplier-qualification procedures",
+      "source_coords": "[INSPECTION OF AACE — VIOLATION 1: QUALITY CONTROL UNIT]",
+      "text_anchor": "your quality unit failed to have adequate supplier qualification procedures",
+      "expected_relevance": "Supports h2: the QU's qualification system itself was deficient, not just one decision."
+    },
+    {
+      "id": "e4",
+      "label": "Qualified Brassica in 2020 despite known deficiencies",
+      "source_coords": "[INSPECTION OF AACE — VIOLATION 1: QUALITY CONTROL UNIT]",
+      "text_anchor": "your firm identified several CGMP deficiencies with Brassica in September 2020 ... Despite identifying these deficiencies, your firm qualified Brassica as an approved CMO",
+      "expected_relevance": "Supports h3 (a specific bad qualification decision); the 'failure to maintain raw testing data' detail also touches h4 (documentation). Double-edged: it is the concrete instance the FDA uses to evidence the systemic h2 problem."
+    },
+    {
+      "id": "e5",
+      "label": "Requalified in 2023 without evaluating CAPA",
+      "source_coords": "[INSPECTION OF AACE — VIOLATION 1: QUALITY CONTROL UNIT]",
+      "text_anchor": "you requalified Brassica in 2023, without evaluating whether subsequent corrective actions and preventive actions adequately addressed the identified deficiencies",
+      "expected_relevance": "Supports h3 (a second specific execution failure). Together with e4 it could read as a pure process-decision story rather than a systemic one."
+    },
+    {
+      "id": "e6",
+      "label": "FDA rejects the COA / documentation framing",
+      "source_coords": "[AACE RESPONSE AND FDA ASSESSMENT]",
+      "text_anchor": "Comparing a COA from a CMO to pre-approved specifications does not overcome your responsibility to evaluate, qualify, audit, and monitor your contract manufacturers",
+      "expected_relevance": "Directly knocks down h4: the FDA states that documentation/COA checking does not discharge AACE's obligation. Pivotal for eliminating the documentation framing."
+    },
+    {
+      "id": "e7",
+      "label": "Contractors are extensions of the manufacturer",
+      "source_coords": "[USE OF CONTRACT MANUFACTURERS]",
+      "text_anchor": "FDA regards contractors as extensions of the manufacturer. You are responsible for the quality of your drugs regardless of agreements in place with your contract facilities",
+      "expected_relevance": "Knocks down h1 as an excuse: even though Brassica caused the adulteration (e1), AACE remains responsible. Prevents h1 from winning regardless of e1."
+    },
+    {
+      "id": "e8",
+      "label": "Systemic gaps: no disqualification process, other CMOs unassessed",
+      "source_coords": "[AACE RESPONSE AND FDA ASSESSMENT]",
+      "text_anchor": "Your procedure lacks a process for disqualifying CMOs or maintaining disqualification across product lines. Also, you did not propose evaluating the qualification status of your other CMOs",
+      "expected_relevance": "Supports h2 over h3: the deficiency is framed as a systemic procedural gap spanning all CMOs, not a one-off decision about Brassica."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h2",
+    "rationale": "The only violation the FDA cites against AACE is a quality-control-unit failure under 21 CFR 211.22(a) (e2), elaborated as inadequate supplier-qualification procedures (e3) and systemic gaps spanning all CMOs (e8). The specific 2020 qualification and 2023 requalification decisions (e4, e5) are presented as instances of that underlying system failure rather than as the failure itself. The vendor framing (h1) is explicitly foreclosed: the FDA states contractors are extensions of the manufacturer and AACE is responsible regardless of agreements (e7). The documentation framing (h4) is explicitly rejected: comparing a COA to specifications does not discharge AACE's obligation (e6). The process framing (h3) is the closest competitor and shares the same responsible actor, but the document generalizes the decisions into a systemic procedural deficiency.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": "e2",
+    "flip_note": "The winner is robust against single-row removal because AACE's responsibility is established by multiple independent rows: removing e1 does not revive h1 (still foreclosed by e7); removing e6 does not let h4 win (the cited violation is still 211.22(a)); removing e2 leaves e3 and e8 supporting the same quality-system framing. The only live competition is h2 vs h3, and both keep responsibility with AACE; removing e8 (the systemic-gap row) is what most weakens h2 relative to h3, which is why sensitivity is medium rather than low. No single removal flips the winner to h1 or h4."
+  }
+}

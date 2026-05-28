@@ -1,0 +1,80 @@
+{
+  "fixture_id": "ntsb_engine_power_001",
+  "ach_question": "What is the best-supported explanation, on the evidence contained in this report, for the partial loss of engine power on the accident flight?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Fuel exhaustion",
+      "claim": "The engine lost power because the airplane ran out of usable fuel, owing to incorrect fuel planning by the pilot."
+    },
+    {
+      "id": "h2",
+      "label": "Carburetor icing",
+      "claim": "The engine lost power because carburetor ice formed at glide power in conditions conducive to serious icing, restricting induction airflow."
+    },
+    {
+      "id": "h3",
+      "label": "Throttle/mechanical malfunction",
+      "claim": "The engine stopped responding because of a throttle-control or other mechanical malfunction in the engine/induction system."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Empty tanks, no leak",
+      "source_coords": "[ANALYSIS]; [WRECKAGE — FUEL]",
+      "text_anchor": "no evidence of fuel in the tanks, but fuel did not appear to have leaked from the tanks",
+      "expected_relevance": "Physical post-accident finding of empty tanks with no leak is the strongest direct support for h1 (fuel exhaustion); it is the pivotal evidence row. If the tanks were dry and fuel did not leak out during the crash, the fuel was consumed in flight."
+    },
+    {
+      "id": "e2",
+      "label": "Pilot expected 10+ gallons aboard",
+      "source_coords": "[ANALYSIS]; [WRECKAGE — FUEL]",
+      "text_anchor": "the airplane should have contained at least 10 gallons of fuel",
+      "expected_relevance": "Cuts against h1 on its face (fuel should have remained), but the report reframes it as evidence the pilot's fuel calculations were wrong, which supports h1's contributing-factor of improper fuel planning. Ambiguous/double-edged row."
+    },
+    {
+      "id": "e3",
+      "label": "Conditions conducive to serious icing",
+      "source_coords": "[CARBURETOR ICING ASSESSMENT]",
+      "text_anchor": "the conditions in which the airplane was operating were conducive to the formation of serious icing at glide power",
+      "expected_relevance": "Affirmative environmental support for h2 (carburetor icing): the FAA icing probability chart placed the flight in the serious-icing-at-glide-power band."
+    },
+    {
+      "id": "e4",
+      "label": "Pilot applied carburetor heat",
+      "source_coords": "[ANALYSIS]; [HISTORY OF FLIGHT]",
+      "text_anchor": "the pilot stated that he applied carburetor heat and enrichened the mixture when he began descending",
+      "expected_relevance": "The principal evidence against h2 (carburetor icing): carb heat is the standard mitigation, so if applied it weakens the icing explanation. Removing e4 strengthens h2."
+    },
+    {
+      "id": "e5",
+      "label": "Gradual, throttle-unresponsive power loss",
+      "source_coords": "[HISTORY OF FLIGHT]",
+      "text_anchor": "a sudden loss of engine power (stop or change in rpm) did not occur",
+      "expected_relevance": "Pattern evidence. A gradual fade with no sudden rpm change is consistent with progressive fuel starvation/exhaustion (h1) or ice accretion (h2), and the 'stopped responding to throttle inputs' phrasing is also superficially consistent with h3; weakly diagnostic, points away from an abrupt single mechanical seizure."
+    },
+    {
+      "id": "e6",
+      "label": "Throttle cable travel undocumentable",
+      "source_coords": "[ANALYSIS]; [WRECKAGE — ENGINE/THROTTLE]",
+      "text_anchor": "damage in the engine area that precluded documentation of the throttle cable's full range of travel",
+      "expected_relevance": "Keeps h3 alive: investigators could not fully rule out a throttle-linkage problem because impact damage prevented checking the cable's full travel. Absence-of-evidence row that prevents fully eliminating h3."
+    },
+    {
+      "id": "e7",
+      "label": "No restriction / no preimpact anomalies",
+      "source_coords": "[WRECKAGE — ENGINE/THROTTLE]; [ANALYSIS]",
+      "text_anchor": "The cabling remained properly attached to the carburetor, and no restriction to the throttle arm was noted. No preimpact anomalies were found",
+      "expected_relevance": "Cuts strongly against h3 (mechanical): everything that could be examined on the throttle and engine was normal, leaving only the undocumentable cable travel as a gap."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "On the full evidence set, h1 (fuel exhaustion) is best supported: the tanks were dry post-accident with no fuel leak (e1), the gradual throttle-unresponsive fade fits progressive fuel starvation (e5), and the pilot's expectation of 10+ gallons is reframed as faulty fuel planning (e2). h2 (carburetor icing) has genuine affirmative support from the conducive-icing conditions (e3) but is knocked down by the pilot applying carburetor heat (e4). h3 (mechanical) survives only because impact damage prevented documenting throttle-cable travel (e6), while everything examinable was normal (e7). The report reaches the same conclusion.",
+    "sensitivity_expectation": "high",
+    "pivotal_evidence": "e1",
+    "flip_note": "Removing e1 (empty tanks, no leak) removes the only direct physical anchor for fuel exhaustion. Without it, the affirmative environmental support for carburetor icing (e3) — only partially offset by the carb-heat statement (e4) — plausibly makes h2 the best-supported hypothesis, while h1 would rest only on the speculative 'fuel calculations could have been incorrect.' A real ACH/sensitivity analysis should report that dropping e1 can change the winner from h1 to h2; an engine that reports zero sensitivity here is broken."
+  }
+}

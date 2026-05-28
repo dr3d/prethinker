@@ -1,0 +1,45 @@
+# SEC Form 8-K (Item 4.02) — Archer-Daniels-Midland Company, dated November 4, 2024 (filed November 5, 2024)
+
+> Source document: ADM Form 8-K, Item 4.02 (Non-Reliance on Previously Issued Financial Statements), Commission File No. 1-44. Public record on SEC EDGAR. Transcribed from the filed 8-K. Section tags in [BRACKETS] are added as citation coordinates; all body text is verbatim.
+
+---
+
+[COVER]
+Form 8-K Current Report pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934. Date of Report (Date of earliest event reported): November 4, 2024. Registrant: Archer-Daniels-Midland Company. State of incorporation: Delaware. Commission File Number: 1-44. Principal executive offices: 77 West Wacker Drive, Suite 4600, Chicago, Illinois 60601. Securities registered: Common Stock, no par value (ADM, NYSE); 1.000% Notes due 2025 (NYSE).
+
+---
+
+[ITEM 4.02 — TRIGGER AND SCOPE]
+Item 4.02: Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review.
+
+On November 4, 2024, the Board of Directors (the "Board") of Archer-Daniels-Midland Company (the "Company"), after discussion with management of the Company and following the Company's ongoing dialogue with the staff of the United States Securities and Exchange Commission, concluded that the Company will amend its fiscal year 2023 Form 10-K (the "FY2023 Form 10-K") and Form 10-Qs for the first and second quarters of 2024 (collectively, the "Q1 and Q2 2024 Form 10-Qs") to restate the segment information disclosure (Note 17 included in the FY2023 Form 10-K and Note 13 included in the Q1 and Q2 2024 Form 10-Qs) for each of the periods included in those filings, including fiscal years 2021, 2022 and 2023 in the FY2023 Form 10-K and each of the quarterly and year-to-date periods included in the Q1 and Q2 2024 Form 10-Qs (collectively, the "Prior Filings"). The Prior Filings should no longer be relied upon because of errors identified in such financial statements, as described below.
+
+---
+
+[PRIOR-CORRECTED ERRORS AND MATERIAL WEAKNESS]
+As previously disclosed in Note 17, Segment and Geographic Information, to the Company's consolidated financial statements included in the FY2023 Form 10-K, the Company identified and corrected certain intersegment sales amounts that either (i) were not in accordance with prior disclosures about presenting such sales at amounts approximating market or (ii) included intrasegment sales (resulting from sales within the segment) and should have included exclusively intersegment sales (resulting from sales from one segment to the other). In connection with the error corrections, the Company identified a material weakness in its internal control over financial reporting related to its accounting practices and procedures for intersegment sales. The Company put in place a plan to remediate this material weakness, as disclosed in the FY2023 Form 10-K and Q1 and Q2 2024 Form 10-Qs.
+
+---
+
+[NEWLY IDENTIFIED ERRORS — DISCOVERED DURING REMEDIATION TESTING]
+In the course of testing new controls implemented as part of the Company's material weakness remediation plan in the third quarter of 2024, the Company identified additional misclassified intersegment transactions. These newly identified errors concern additional intersegment sales for each of its Ag Services and Oilseeds, Carbohydrate Solutions and Nutrition segments that included certain intrasegment sales and should have included exclusively intersegment sales. The Company also identified some intersegment transactions between Ag Services and Oilseeds and Carbohydrate Solutions that were not accounted for consistently in accordance with revenue recognition and segment reporting standards and should not have been reported as intersegment sales.
+
+---
+
+[IMPACT STATEMENT]
+The restatements of the Prior Filings are not expected to result in any material impact on the Company's Consolidated Statements of Earnings, Consolidated Statements of Comprehensive Income (Loss), Consolidated Balance Sheets, Consolidated Statements of Cash Flow or Consolidated Statements of Shareholders' Equity as of and for the periods presented therein. The restated Prior Filings will include corrections for the newly identified errors related to intersegment sales (described in the paragraph immediately above), will reflect the previously-corrected errors related to intersegment sales, and other segment disclosure corrections.
+
+---
+
+[REMEDIATION STATUS]
+The Company is working to complete these restatements as soon as reasonably practical. The Company is evaluating its remediation measures and is continuing to focus on implementing enhancements to its internal controls to remediate its previously identified material weakness, taking action to enhance its integrity and accuracy within internal controls and financial reporting related to intersegment sales. Among other things, the design and documentation of the execution of pricing and measurement and reporting controls for segment disclosure purposes and projected financial information used in impairment analyses have been enhanced, and testing of these controls will continue throughout the balance of the year. Further, training for relevant personnel on the measurement of intersegment sales and application of relevant accounting guidance to intersegment sales has been provided and remains ongoing.
+
+[AUDITOR DISCUSSION]
+The Company's management and the Chair of the Company's Audit Committee have discussed the matters disclosed in this Item 4.02 with the Company's independent registered public accounting firm, Ernst & Young LLP.
+
+---
+
+[SIGNATURE]
+Date: November 5, 2024. By: /s/ R. B. Jones, Senior Vice President, General Counsel, and Secretary.
+
+> Note: The 8-K also contains a standard "Cautionary Note Regarding Forward-Looking Statements." It identifies as forward-looking the statements regarding the timing of the restatement, the impact of the restatements, the proposed remediation measures, and the timing of remediation of the identified material weakness. No financial figures or new factual allegations are contained in that cautionary note.

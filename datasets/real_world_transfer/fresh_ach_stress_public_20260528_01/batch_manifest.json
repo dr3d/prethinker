@@ -1,0 +1,97 @@
+{
+  "batch_id": "fresh_ach_stress_public_20260528_01",
+  "batch_description": "ACH (Analysis of Competing Hypotheses) stress-test batch built from real, public, source-contained documents. Each fixture pairs a verbatim source document with an ach_payload.json that names competing hypotheses, diagnostic evidence rows anchored to exact source phrases, and an expected_read (best hypothesis + grounded rationale + sensitivity expectation). The batch is designed to test whether an ACH routine measures real evidentiary sensitivity rather than always reporting zero: it contains a deliberate spread of sensitivities, from a balanced single-row-flip fixture to a triple-anchored robust-winner fixture. Each fixture also carries 15 source-contained QA pairs (60 total).",
+  "collected_utc": "2026-05-28T00:00:00Z",
+  "total_fixtures": 4,
+  "total_question_count": 60,
+  "balanced_fixture_count": 1,
+  "sensitivity_spread": {
+    "high": ["ntsb_engine_power_001"],
+    "medium": ["fda_warning_letter_001", "legal_order_chronology_001"],
+    "low": ["sec_restatement_001"]
+  },
+  "sensitivity_discrimination_pair": {
+    "high_sensitivity": "ntsb_engine_power_001",
+    "low_sensitivity": "sec_restatement_001",
+    "note": "These two fixtures bracket the test. The NTSB report flips its winning hypothesis when a single evidence row (empty tanks, no leak) is removed; the SEC 8-K does not flip under any single-row removal because its winner is anchored by three independent passages. An ACH engine that reports the same sensitivity for both, or that cannot tell a flip case from a no-flip case, is not measuring sensitivity."
+  },
+  "fixtures": [
+    {
+      "document_id": "ntsb_engine_power_001",
+      "target_category": "NTSB/OSHA incident with >=3 competing causes",
+      "document_type": "NTSB Aviation Investigation Final Report (general-aviation accident, probable cause weighed against alternatives)",
+      "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/104257/pdf",
+      "publication_date": "2023-06-08",
+      "competing_hypotheses_count": 3,
+      "balanced_fixture": true,
+      "expected_best_hypothesis": "h1",
+      "sensitivity_expectation": "high",
+      "pivotal_evidence_row": "e1",
+      "question_count": 15,
+      "why_good_ach": "Three genuinely competing single-cause explanations (fuel exhaustion, carburetor icing, throttle/mechanical), each with affirmative and undercutting evidence in the same report. THE designated balanced fixture: removing the empty-tanks/no-leak finding plausibly flips the winner from fuel exhaustion to carburetor icing."
+    },
+    {
+      "document_id": "fda_warning_letter_001",
+      "target_category": "FDA warning letter: process / documentation / quality-system / vendor-supplier responsibility framings",
+      "document_type": "FDA CGMP warning letter to a distributor/product-owner whose contract manufacturer was the source of adulteration",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/aace-pharmaceuticals-inc-701310-05132025",
+      "publication_date": "2025-05-13",
+      "competing_hypotheses_count": 4,
+      "balanced_fixture": false,
+      "expected_best_hypothesis": "h2",
+      "sensitivity_expectation": "medium",
+      "pivotal_evidence_row": "e2",
+      "question_count": 15,
+      "why_good_ach": "All four responsibility framings the brief names are present in the source, and the document explicitly forecloses two (vendor-only and documentation/COA) while subsuming a third (specific decisions) into the cited quality-system violation. Robust-winner counterpart that tests whether the engine correctly reports NO single-row flip."
+    },
+    {
+      "document_id": "sec_restatement_001",
+      "target_category": "SEC 8-K / financial disclosure: competing explanations for a restatement / control weakness",
+      "document_type": "Form 8-K Item 4.02 (non-reliance) restating segment-information footnotes, tied to a previously identified material weakness",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/7084/000000708424000034/adm-20241104.htm",
+      "publication_date": "2024-11-05",
+      "competing_hypotheses_count": 3,
+      "balanced_fixture": false,
+      "expected_best_hypothesis": "h1",
+      "sensitivity_expectation": "low",
+      "pivotal_evidence_row": null,
+      "question_count": 15,
+      "why_good_ach": "Competing reads (material-weakness vs contained no-earnings-impact reclassification vs SEC-staff-driven change) all have textual support, but the winning material-weakness reading is anchored by three independent passages, so no single-row removal flips it. The low-sensitivity control in the discrimination pair."
+    },
+    {
+      "document_id": "legal_order_chronology_001",
+      "target_category": "Legal/regulatory order with contested chronology or actor responsibility",
+      "document_type": "SEC settled administrative cease-and-desist order making findings; locates responsibility across disclosure controls, cybersecurity personnel, and disclosure drafters",
+      "source_url": "https://www.sec.gov/files/litigation/admin/2024/33-11323.pdf",
+      "publication_date": "2024-10-22",
+      "competing_hypotheses_count": 3,
+      "balanced_fixture": false,
+      "expected_best_hypothesis": "h1",
+      "sensitivity_expectation": "medium",
+      "pivotal_evidence_row": "e1",
+      "question_count": 15,
+      "why_good_ach": "Three competing loci of responsibility for misleading disclosures, with the order framing personnel failures as downstream of a controls-design gap. Several evidence rows are double-edged. Winner is robust to single-row removal but flips under a plausible two-row removal (medium), plus a forensically-gapped chronology for date/sequence reasoning."
+    }
+  ],
+  "ach_payload_contract": {
+    "fields": ["fixture_id", "ach_question", "balanced_fixture", "hypotheses[].{id,label,claim}", "evidence_rows[].{id,label,source_coords,text_anchor,expected_relevance}", "expected_read.{best_hypothesis,rationale,sensitivity_expectation,pivotal_evidence,flip_note}"],
+    "note": "Every text_anchor is an exact or near-exact phrase from the corresponding source.md, locatable via the bracketed section coordinates. Every expected_read.rationale is grounded only in source.md."
+  },
+  "discipline_notes": [
+    "All four sources are real, public documents (NTSB CAROL, FDA.gov, SEC EDGAR, SEC.gov litigation). URLs are preserved in each fixture's source_url.txt.",
+    "Source-contained: no QA answer and no ACH read requires outside legal translation, agency background, acronym expansion, or 'everyone knows' domain facts unless that fact is also stated in source.md. Where a regulation, statute section, or technical term is load-bearing, the source document itself states what it means.",
+    "Exactly one fixture (ntsb_engine_power_001) is balanced with a single-row winner flip; the SEC fixture is the deliberate low-sensitivity control; together they form the sensitivity discrimination pair.",
+    "No Prethinker internals (predicates, helpers, carriers, compile-surface terms) are referenced anywhere in the batch; fixture_notes.md describes only properties of the source documents.",
+    "Government-authored sources (NTSB, FDA, SEC order) are public domain; the SEC EDGAR 8-K is a public record. Redaction markers and forensic-gap caveats in the originals are preserved or faithfully summarized."
+  ],
+  "fixture_files_per_folder": [
+    "source.md — verbatim source text with bracketed section coordinates",
+    "source_url.txt — canonical public URL of the source document",
+    "source_original.txt — verbatim text capture with provenance header",
+    "metadata.json — fixture-level metadata (category, counts, expected best hypothesis, sensitivity, pivotal row)",
+    "fixture_notes.md — narrative on why the document is a good ACH test, how it adjudicates, and why the sensitivity level is what it is",
+    "qa.md — 15 source-contained questions with answers and coordinates",
+    "oracle.jsonl — one JSON record per question (id, question, answer, reference_answer, category, source_coords, ach_link, pressure_tags, source_contained)",
+    "ach_payload.json — the ACH payload (hypotheses, evidence_rows, expected_read)"
+  ]
+}

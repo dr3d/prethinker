@@ -1,0 +1,87 @@
+{
+  "fixture_id": "legal_order_chronology_001",
+  "ach_question": "On the findings in this order, where does the order primarily locate responsibility for investors being misled about Unisys's cybersecurity risks and incidents?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Deficient disclosure controls (institutional/design failure)",
+      "claim": "Responsibility lies in the design of the company's disclosure controls and incident-response policies, which did not require escalation of incident information to disclosure decision-makers, so material information never reached the people who decide what to disclose."
+    },
+    {
+      "id": "h2",
+      "label": "Cybersecurity personnel operational failure",
+      "claim": "Responsibility lies with cybersecurity personnel who, even where systems flagged activity, misread alerts, under-prioritized them, misconfigured monitoring, and did not escalate incidents to senior management and legal."
+    },
+    {
+      "id": "h3",
+      "label": "Disclosure decision-makers / drafting failure",
+      "claim": "Responsibility lies with those who drafted and approved the Form 10-K risk factors, which described actual, known intrusions as merely hypothetical and were substantially unchanged from the pre-breach 2019 language."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Misleading statements resulted in part from failure to design controls",
+      "source_coords": "[SUMMARY] para 4",
+      "text_anchor": "Unisys's materially misleading statements resulted in part from the company's failure to design controls and procedures",
+      "expected_relevance": "The order's explicit causal bridge attributing the misleading disclosures to a controls-design failure. Primary support for h1 and the pivotal link in the order's causal chain."
+    },
+    {
+      "id": "e2",
+      "label": "Pre-Dec-2022 policies did not require escalation; personnel consequently did not report",
+      "source_coords": "[SUMMARY] para 6",
+      "text_anchor": "incident response policies did not reasonably require cybersecurity personnel to report information to Unisys's disclosure decision makers ... Consequently, Unisys's senior cybersecurity personnel repeatedly failed to report",
+      "expected_relevance": "Supports h1 and frames h2 as a downstream consequence of the policy gap ('Consequently'). Diagnostic between h1 and h2: the order treats the personnel non-reporting as caused by the controls gap, not as an independent root cause."
+    },
+    {
+      "id": "e3",
+      "label": "Dedicated disclosure-controls failure finding",
+      "source_coords": "[FACTS — FAILURE TO MAINTAIN DISCLOSURE CONTROLS AND PROCEDURES] para 26",
+      "text_anchor": "Unisys did not maintain effective controls requiring escalation ... did not have controls and procedures designed to ensure that its disclosure decision-makers reviewed cybersecurity incident information ... deficient controls contributed to Unisys's materially misleading risk factor disclosures",
+      "expected_relevance": "Second independent anchor for h1: a dedicated findings section plus the distinct Rule 13a-15(a) charge. Redundancy with e1 is why h1 is robust to single-row removal."
+    },
+    {
+      "id": "e4",
+      "label": "Personnel misread/under-prioritized the 2022 Mimikatz alerts",
+      "source_coords": "[FACTS — 2022 EXTORTION EVENT] para 21",
+      "text_anchor": "cybersecurity personnel were not sufficiently familiar with the format of the alerts and erroneously believed that the malware was deployed on only one machine ... assigned a low priority",
+      "expected_relevance": "Supports h2 as an independent operational failure not fully explained by policy design: the controls fired alerts, but personnel misjudged them. The strongest evidence that h2 is more than a consequence of h1."
+    },
+    {
+      "id": "e5",
+      "label": "EDR-to-SIEM misconfiguration",
+      "source_coords": "[FACTS — 2022 EXTORTION EVENT] para 24",
+      "text_anchor": "its endpoint detection and response system was not set up properly to automatically send alerts to its centralized Security Information and Event Management system",
+      "expected_relevance": "Supports h2 (operational/configuration failure). Double-edged: a missing automated control could also be read as h1 (controls design), so the row is genuinely shared between h1 and h2."
+    },
+    {
+      "id": "e6",
+      "label": "Risk factors framed known intrusions as hypothetical",
+      "source_coords": "[FACTS — MATERIALLY MISLEADING CYBERSECURITY RISK DISCLOSURES] para 19",
+      "text_anchor": "Unisys negligently framed risks from cybersecurity events as hypothetical despite the company's awareness of the SolarWinds Compromise-related activity",
+      "expected_relevance": "Primary support for h3: the disclosure content itself was negligent — describing real, known intrusions in hypothetical terms. This is the conduct underlying the charged 17(a) and 13(a) violations."
+    },
+    {
+      "id": "e7",
+      "label": "2020/2021 risk factors substantially unchanged from pre-breach 2019",
+      "source_coords": "[FACTS — MATERIALLY MISLEADING CYBERSECURITY RISK DISCLOSURES] para 19",
+      "text_anchor": "Unisys's disclosures on Forms 10-K for years 2020 and 2021 were substantially unchanged from those on its Form 10-K for 2019",
+      "expected_relevance": "Supports h3: the drafters carried forward pre-breach language unchanged after the breaches were known. Double-edged — copying prior language despite known incidents can also be read as a controls failure to update disclosures (h1)."
+    },
+    {
+      "id": "e8",
+      "label": "Material weakness in disclosure controls disclosed",
+      "source_coords": "[SUMMARY] para 7; [FACTS — 2022 EXTORTION EVENT] para 25",
+      "text_anchor": "disclosed a material weakness in its disclosure controls and procedures ... related to the design and maintenance of effective formal policies and procedures over information being communicated by the IT function and the legal and compliance function to those responsible for governance",
+      "expected_relevance": "Third anchor for h1: the company's own post-event remediation diagnosis located the problem in the design/maintenance of escalation policies, i.e., disclosure controls."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The order locates the root responsibility in deficient disclosure controls. It states the misleading statements 'resulted in part from the company's failure to design controls' (e1), devotes a findings section and a distinct Rule 13a-15(a) charge to the controls failure (e3), and notes the company's own material-weakness disclosure pinned the problem to the design of escalation policies (e8). The order frames the cybersecurity personnel's non-reporting as a consequence of the policy gap ('Consequently,' e2), making h2 largely downstream of h1. The negligent hypothetical-risk framing (e6, e7) is the conduct the securities-law charges rest on (h3), but the order's causal account treats that framing as the result of decision-makers never receiving the incident information because the controls did not route it to them.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": "e1",
+    "flip_note": "The live competition is h1 vs h3. h1 is anchored by three rows (e1, e3, e8), so removing the single causal-bridge row e1 narrows but does not cleanly flip the winner — the dedicated controls findings (e3) and the company's own material-weakness diagnosis (e8) still support h1. If, however, BOTH e1 and e3 were removed, the remaining record would foreground the negligent disclosure content (e6, e7) and the best read would shift to h3. h2 cannot win on this record: the order frames the personnel failures as a consequence of the controls gap (e2), and the clearest operational-only failures (e4, e5) concern the 2022 extortion event rather than the 2020/2021 risk-factor disclosures that are the heart of the charges. Sensitivity is therefore medium: the winner is robust to any single-row removal but flips under a plausible two-row removal, sitting between the NTSB single-row flip (high) and the SEC triple-anchored winner (low)."
+  }
+}

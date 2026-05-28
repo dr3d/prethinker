@@ -36,6 +36,11 @@ FORBIDDEN_PATTERNS = {
         re.IGNORECASE,
     ),
     "narrative_probe_name": re.compile(r"\b(?:sherlock|holmes|red_headed_league|airlock)\b", re.IGNORECASE),
+    "narrative_fixture_vocabulary": re.compile(
+        r"\b(?:little slip|great long otter|tilly tumbletop|little wee bear|"
+        r"papa_bear|mama_bear|baby_bear|porridge|just_brisk_enough)\b",
+        re.IGNORECASE,
+    ),
     "public_fixture_answer_phrase": re.compile(
         r"\b(?:Medical Products Laboratories|Baylor J\.? Tregre|Pool Corporation|"
         r"American Airlines flight 191|Plexion|Hydro-Q)\b",
