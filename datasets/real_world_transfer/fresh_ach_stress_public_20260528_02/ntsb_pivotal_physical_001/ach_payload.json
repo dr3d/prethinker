@@ -1,0 +1,92 @@
+{
+  "fixture_id": "ntsb_pivotal_physical_001",
+  "ach_question": "What is the best-supported cause of the uncontained engine failure and fire?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Internal manufacturing anomaly caused disk fatigue",
+      "claim": "The engine failure was caused by low-cycle fatigue cracks initiated from an internal subsurface manufacturing anomaly in the HPT stage 2 disk."
+    },
+    {
+      "id": "h2",
+      "label": "Airline maintenance missed a required defect",
+      "claim": "The incident primarily resulted from American Airlines or maintenance personnel missing a defect that required inspection should have found."
+    },
+    {
+      "id": "h3",
+      "label": "Flight crew action caused the loss",
+      "claim": "The rejected takeoff or evacuation decision was the primary cause of the incident severity."
+    },
+    {
+      "id": "h4",
+      "label": "Independent airframe or fuel-system defect caused the fire",
+      "claim": "A separate wing, fuel-line, or airframe failure independent of the disk rupture was the best-supported cause of the fire."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Probable cause names internal anomaly",
+      "source_coords": "[PROBABLE CAUSE]",
+      "text_anchor": "The HPT stage 2 disk failed because of low-cycle fatigue cracks that initiated from an internal subsurface manufacturing anomaly",
+      "expected_relevance": "Direct, central support for h1 and the intended pivotal sensitivity row."
+    },
+    {
+      "id": "e2",
+      "label": "Metallurgy found discrete dirty white spot",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "multiple low-cycle fatigue cracks that initiated from an internal material anomaly, known as a discrete dirty white spot",
+      "expected_relevance": "Direct support for h1; corroborates the mechanism independently of the probable-cause sentence."
+    },
+    {
+      "id": "e3",
+      "label": "Fragment caused fuel-fed fire",
+      "source_coords": "[POSTACCIDENT OBSERVATIONS]",
+      "text_anchor": "severing the main engine fuel feed line and breaching the right-wing fuel tank, which led to a fuel-fed fire",
+      "expected_relevance": "Directly links disk rupture to the fire, weakening h4 as an independent-cause explanation."
+    },
+    {
+      "id": "e4",
+      "label": "No prior structural or system failure",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "No evidence indicated any structural, engine, or system failures before the uncontained engine failure occurred",
+      "expected_relevance": "Counters h4 and limits support for a preexisting non-disk failure theory."
+    },
+    {
+      "id": "e5",
+      "label": "Required surface inspection could not detect cracks",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "not detectable at the time of the HPT stage 2 disk's last inspection using the surface-based inspection techniques",
+      "expected_relevance": "Weakens h2 by explaining why required inspection did not reveal the cracks."
+    },
+    {
+      "id": "e6",
+      "label": "Captain rejected takeoff properly",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "the captain made a timely decision to reject the takeoff and performed the maneuver in accordance with company training and procedures",
+      "expected_relevance": "Counters h3 and keeps crew action off the causal center."
+    },
+    {
+      "id": "e7",
+      "label": "Ultrasonic inspection would have helped",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "If a subsurface inspection technique, such as an ultrasonic inspection, had been required",
+      "expected_relevance": "Double-edged: it supports a prevention avenue while not proving airline maintenance fault under then-required procedures."
+    },
+    {
+      "id": "e8",
+      "label": "Maintenance background",
+      "source_coords": "[MAINTENANCE]",
+      "text_anchor": "the engine had accumulated 19,139 hours and 3,057 cycles",
+      "expected_relevance": "Background scope row; relevant to maintenance context but not sufficient to make h2 best."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The report explicitly identifies an internal subsurface manufacturing anomaly and low-cycle fatigue as the cause, while maintenance and crew alternatives are countered or only prevention-related.",
+    "sensitivity_expectation": "high",
+    "pivotal_evidence": "e1",
+    "flip_note": "Removing e1 should not make h2 or h3 win outright, but it removes the clearest official cause statement and should sharply weaken the expected winner; e2 then becomes the next strongest support."
+  }
+}

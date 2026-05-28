@@ -1,0 +1,15 @@
+{
+  "fixture_id": "ntsb_pivotal_physical_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "ntsb",
+  "source_title": "National Transportation Safety Board",
+  "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/AAR1801.pdf",
+  "source_date": "2018-01-30",
+  "collected_at": "2026-05-28",
+  "document_type": "NTSB aviation accident report",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "high",
+  "primary_pressure": "one physical finding anchors probable cause while maintenance and crew alternatives remain plausible decoys",
+  "notes": "The physical metallurgy and probable-cause wording make this a clean pivotal-row test."
+}

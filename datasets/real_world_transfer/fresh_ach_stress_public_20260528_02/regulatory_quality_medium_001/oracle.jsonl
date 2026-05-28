@@ -1,0 +1,13 @@
+{"id": "q001", "question": "What company received the warning letter?", "expected": "Wisconsin Pharmacal Company, LLC.", "expected_relevance": "Tests recipient extraction."}
+{"id": "q002", "question": "What was the warning letter date?", "expected": "August 22, 2025.", "expected_relevance": "Tests document date."}
+{"id": "q003", "question": "Where was the inspected facility located?", "expected": "N168 W 22223 Main St., Jackson, Wisconsin.", "expected_relevance": "Tests address extraction."}
+{"id": "q004", "question": "What was the inspection date range?", "expected": "March 3 to March 7, 2025.", "expected_relevance": "Tests inspection timing."}
+{"id": "q005", "question": "What FEI number is listed?", "expected": "2124143.", "expected_relevance": "Tests identifier extraction."}
+{"id": "q006", "question": "What CFR provision is cited for quality unit responsibility?", "expected": "21 CFR 211.22.", "expected_relevance": "Tests cited rule."}
+{"id": "q007", "question": "What happened to some rejected drug product?", "expected": "Approximately half of the rejected drug product was distributed.", "expected_relevance": "Tests concrete finding."}
+{"id": "q008", "question": "What did the firm's response attribute the rejected product problem to?", "expected": "Improper scanning procedure and inadequate identification/containment.", "expected_relevance": "Tests alternative explanation."}
+{"id": "q009", "question": "What microorganism was identified in testing?", "expected": "Staphylococcus aureus.", "expected_relevance": "Tests technical extraction."}
+{"id": "q010", "question": "What two dates were associated with the Staphylococcus aureus findings?", "expected": "November 11, 2024, and August 19, 2024.", "expected_relevance": "Tests date extraction."}
+{"id": "q011", "question": "What CFR provision is cited for failure investigations?", "expected": "21 CFR 211.192.", "expected_relevance": "Tests cited rule."}
+{"id": "q012", "question": "Why did FDA say retesting alone was not enough?", "expected": "Microbial contamination may not be uniformly distributed within a batch.", "expected_relevance": "Tests reasoning extraction."}
+{"id": "q013", "question": "What did FDA request about computer systems?", "expected": "Identification and evaluation of vulnerabilities in performance and security of computer systems.", "expected_relevance": "Tests remediation detail."}

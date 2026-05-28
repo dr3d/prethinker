@@ -1,0 +1,15 @@
+{
+  "fixture_id": "public_order_low_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "other",
+  "source_title": "UNITED STATES OF AMERICA",
+  "source_url": "https://www.ftc.gov/system/files/ftc_gov/pdf/242_3052_-_general_motors_decisionandorder.pdf",
+  "source_date": "unknown",
+  "collected_at": "2026-05-28",
+  "document_type": "FTC decision and order",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "low",
+  "primary_pressure": "redundant independent support for a broad consent/control remedy; narrower true provisions are off-axis",
+  "notes": "The order contains many independent remedy provisions, making it a low-sensitivity ACH fixture."
+}

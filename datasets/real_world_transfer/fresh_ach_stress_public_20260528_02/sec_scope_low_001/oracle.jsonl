@@ -1,0 +1,14 @@
+{"id": "q001", "question": "What company filed the Form 8-K?", "expected": "Axon Enterprise, Inc.", "expected_relevance": "Tests registrant extraction."}
+{"id": "q002", "question": "What was the Date of Report?", "expected": "May 1, 2025.", "expected_relevance": "Tests report date."}
+{"id": "q003", "question": "When was the 8-K signed/filed in the excerpt?", "expected": "May 7, 2025.", "expected_relevance": "Tests filed/signature date."}
+{"id": "q004", "question": "What trading symbol is listed?", "expected": "AXON.", "expected_relevance": "Tests identifier extraction."}
+{"id": "q005", "question": "Which board body concluded the statements should no longer be relied upon?", "expected": "The Audit Committee of the Board of Directors.", "expected_relevance": "Tests actor extraction."}
+{"id": "q006", "question": "What debt instrument caused the presentation error?", "expected": "The $690.0 million aggregate principal amount of 0.50% Convertible Senior Notes due 2027.", "expected_relevance": "Tests instrument detail."}
+{"id": "q007", "question": "How should the 2027 Notes have been presented?", "expected": "As current liabilities rather than long-term liabilities.", "expected_relevance": "Tests cause detail."}
+{"id": "q008", "question": "What stock-price condition is mentioned?", "expected": "The common stock price exceeded 130% of the conversion price for the required number of trading days.", "expected_relevance": "Tests conditional trigger."}
+{"id": "q009", "question": "Which annual period was affected?", "expected": "The year ended December 31, 2024.", "expected_relevance": "Tests affected period."}
+{"id": "q010", "question": "Which 2024 quarters were affected?", "expected": "The quarters ended March 31, June 30, and September 30, 2024.", "expected_relevance": "Tests affected periods."}
+{"id": "q011", "question": "Did the correction impact total assets, total liabilities, or stockholders' equity?", "expected": "No.", "expected_relevance": "Tests scope limitation."}
+{"id": "q012", "question": "What new material weakness did management identify?", "expected": "A lack of effectively designed control activity to monitor contingent conversion provisions and assess current versus long-term classification.", "expected_relevance": "Tests internal-control finding."}
+{"id": "q013", "question": "Which auditor is named?", "expected": "PricewaterhouseCoopers LLP / PwC.", "expected_relevance": "Tests named entity."}
+{"id": "q014", "question": "Who signed for Axon?", "expected": "Brittany Bagley, Chief Operating Officer and Chief Financial Officer.", "expected_relevance": "Tests signer/title extraction."}

@@ -1,0 +1,55 @@
+{
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "created_at": "2026-05-28",
+  "purpose": "Fresh unseen ACH stress batch for ranking and sensitivity generalization.",
+  "fixtures": [
+    {
+      "fixture_id": "ntsb_pivotal_physical_001",
+      "domain": "ntsb",
+      "sensitivity_target": "high",
+      "source_url": "https://www.ntsb.gov/investigations/AccidentReports/Reports/AAR1801.pdf",
+      "document_type": "NTSB aviation accident report"
+    },
+    {
+      "fixture_id": "enforcement_single_document_hook_001",
+      "domain": "fda",
+      "sensitivity_target": "high",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nelson-co-ltd-720283-02122026",
+      "document_type": "FDA warning letter"
+    },
+    {
+      "fixture_id": "legal_controls_medium_001",
+      "domain": "sec",
+      "sensitivity_target": "medium",
+      "source_url": "https://www.sec.gov/files/litigation/admin/2025/33-11356.pdf",
+      "document_type": "SEC administrative order"
+    },
+    {
+      "fixture_id": "regulatory_quality_medium_001",
+      "domain": "fda",
+      "sensitivity_target": "medium",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/wisconsin-pharmacal-company-llc-710329-08222025",
+      "document_type": "FDA warning letter"
+    },
+    {
+      "fixture_id": "sec_scope_low_001",
+      "domain": "sec",
+      "sensitivity_target": "low",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1069183/000106918325000074/axon-20250501.htm",
+      "document_type": "SEC Form 8-K"
+    },
+    {
+      "fixture_id": "public_order_low_001",
+      "domain": "other",
+      "sensitivity_target": "low",
+      "source_url": "https://www.ftc.gov/system/files/ftc_gov/pdf/242_3052_-_general_motors_decisionandorder.pdf",
+      "document_type": "FTC decision and order"
+    }
+  ],
+  "expected_distribution": {
+    "high": 2,
+    "medium": 2,
+    "low": 2
+  },
+  "notes": "Do not tune to Prethinker. This is an unseen transfer batch."
+}

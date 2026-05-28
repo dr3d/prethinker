@@ -1,0 +1,99 @@
+{
+  "fixture_id": "regulatory_quality_medium_001",
+  "ach_question": "Which hypothesis best explains the agency's theory of responsibility?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Systemic quality-unit oversight failure",
+      "claim": "FDA's responsibility theory is that the quality unit and quality system failed to prevent release/distribution of nonconforming product and failed to investigate adequately."
+    },
+    {
+      "id": "h2",
+      "label": "Isolated scanning error",
+      "claim": "The document primarily treats the incident as a one-off scanning or warehouse identification problem."
+    },
+    {
+      "id": "h3",
+      "label": "Microbial retest failure only",
+      "claim": "The document primarily locates responsibility in microbiological retesting and investigation problems, not broader quality oversight."
+    },
+    {
+      "id": "h4",
+      "label": "Computer-system data integrity only",
+      "claim": "The document primarily concerns computer system vulnerabilities and data integrity controls."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "QU failed CGMP responsibility",
+      "source_coords": "[VIOLATION 1]",
+      "text_anchor": "quality control unit failed to exercise its responsibility",
+      "expected_relevance": "Direct support for h1 and the top-level violation."
+    },
+    {
+      "id": "e2",
+      "label": "Rejected product distributed",
+      "source_coords": "[VIOLATION 1]",
+      "text_anchor": "later allowed the distribution of approximately half of the rejected drug product",
+      "expected_relevance": "Direct support for h1; the concrete release/distribution failure."
+    },
+    {
+      "id": "e3",
+      "label": "Scanning procedure explanation",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "not adequately identified and contained due to improper scanning procedure",
+      "expected_relevance": "Supports h2 as a tempting narrower explanation but is framed as inadequate."
+    },
+    {
+      "id": "e4",
+      "label": "Fundamental QU deficiencies",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "You fail to address the fundamental deficiencies in your QU",
+      "expected_relevance": "Causal bridge for h1; medium sensitivity because it transforms the scanning issue into systemic quality failure."
+    },
+    {
+      "id": "e5",
+      "label": "Quality systems inadequate",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "Your firm's quality systems are inadequate",
+      "expected_relevance": "Direct support for h1; broadens beyond one event."
+    },
+    {
+      "id": "e6",
+      "label": "Failure to thoroughly investigate",
+      "source_coords": "[VIOLATION 2]",
+      "text_anchor": "failed to thoroughly investigate any unexplained discrepancy or failure of a batch",
+      "expected_relevance": "Direct support for h3 and partial support for h1 as a quality-system element."
+    },
+    {
+      "id": "e7",
+      "label": "Released based on passing retest",
+      "source_coords": "[VIOLATION 2]",
+      "text_anchor": "released the referenced batch for commercial distribution based on a passing retest result",
+      "expected_relevance": "Direct support for h3 and partial support for h1."
+    },
+    {
+      "id": "e8",
+      "label": "Microbial contamination not uniform",
+      "source_coords": "[VIOLATION 2]",
+      "text_anchor": "Microbial contamination may not be uniformly distributed",
+      "expected_relevance": "Explains why retesting alone was inadequate; supports h3 but not enough to beat h1."
+    },
+    {
+      "id": "e9",
+      "label": "Computer system vulnerabilities",
+      "source_coords": "[DATA INTEGRITY]",
+      "text_anchor": "Identify and evaluate vulnerabilities in performance and security of all of these computer systems",
+      "expected_relevance": "Supports h4 as an adjacent remediation issue, mostly partial/off-axis to the core release/distribution theory."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The warning letter starts with the quality unit's failure and repeatedly frames the concrete scanning and retesting episodes as symptoms of broader quality-system and QU deficiencies.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": null,
+    "flip_note": "Removing e4 or e5 should weaken the systemic reading, but h1 should survive because e1 and e2 still supply direct support. Removing several systemic rows could make h2 or h3 appear more competitive."
+  }
+}

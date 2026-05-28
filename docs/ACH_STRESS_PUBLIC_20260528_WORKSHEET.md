@@ -354,6 +354,124 @@ stronger: ACH ranking now looks product-plausible on this batch; sensitivity has
 clear high/low discrimination and a partially working dependency story, with
 medium sensitivity still the next blocker.
 
+## Fresh ACH Stress Batch 02
+
+Dataset:
+
+```text
+datasets\real_world_transfer\fresh_ach_stress_public_20260528_02
+```
+
+Intake:
+
+- 6 fixtures present.
+- Sensitivity distribution: 2 high, 2 medium, 2 low.
+- Required ACH files present for each fixture:
+  `source.md`, `source_original.txt`, `source_url.txt`, `metadata.json`,
+  `fixture_notes.md`, `qa.md`, `oracle.jsonl`, `ach_payload.json`.
+- `batch_manifest.json` present.
+- `ach_payload.json` parses for all fixtures.
+- `oracle.jsonl` parses for all fixtures.
+- Evidence anchors appear in `source.md`.
+- Evidence coordinates map to bracketed source headings.
+- No `expected_read` / `expected_relevance` leakage in `source.md`.
+- No source URL duplicates found against maintained `datasets\real_world_transfer`
+  batches.
+
+Note: `scripts\validate_fresh_ugly_batch.py` fails this batch because that
+validator is shaped for 25-row ordinary QA batches with
+`qa_authored_with_answers.md`. This ACH stress batch intentionally has 13-14 QA
+rows plus `ach_payload.json`, so the validator failure is not treated as an ACH
+intake failure.
+
+ACH locked R1:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r1_20260528\ach_locked_r1
+```
+
+Runner settings:
+
+```text
+model: qwen/qwen3.6-35b-a3b
+base_url: https://openrouter.ai/api/v1
+provider fallbacks: false
+require parameters: true
+temperature: 0
+proposal contract retries: 2
+support-drop threshold: locked at 0.30
+```
+
+Aggregate:
+
+```text
+ranking: 6/6 expected winners
+matrix completeness: 6/6 complete
+warnings: 0/6
+low-sensitivity controls: 2/2 clean
+high-sensitivity expected pivotal rows: 0/2 exact
+medium-sensitivity rows: 0/2 detected
+proposal contract residual violations: 2 fixtures
+```
+
+Per fixture:
+
+```text
+enforcement_single_document_hook_001 (high):
+  top: h1, expected h1
+  sensitivity: 0
+  expected pivotal: e4
+  proposal contract: 1 residual violation after 2 retries
+  read: ranking works; high sensitivity missed
+
+ntsb_pivotal_physical_001 (high):
+  top: h1, expected h1
+  sensitivity: e5
+  expected pivotal: e1
+  proposal contract: 1 residual violation after 2 retries
+  read: sensitivity exists, but the wrong row is flagged; the proposer made the
+        inspection-detectability row load-bearing instead of the official
+        cause / physical-anomaly row
+
+legal_controls_medium_001 (medium):
+  top: h1, expected h1
+  sensitivity: 0
+  read: medium sensitivity missed
+
+regulatory_quality_medium_001 (medium):
+  top: h1, expected h1
+  sensitivity: 0
+  read: medium sensitivity missed
+
+public_order_low_001 (low):
+  top: h1, expected h1
+  sensitivity: 0
+  read: low control clean
+
+sec_scope_low_001 (low):
+  top: h1, expected h1
+  sensitivity: 0
+  read: low control clean
+```
+
+Current read:
+
+- The ranking story generalized strongly: all six unseen fixtures selected the
+  expected winner with complete matrices and zero scorer warnings.
+- The axis-fit change transferred: both low controls stayed quiet, including
+  the SEC scope/consequence trap.
+- Sensitivity did not generalize yet. The decisive failure is not threshold
+  calibration; it is dependency declaration. The proposer often reaches the
+  correct winner but does not emit the dependency rows needed for deterministic
+  sensitivity, even after retries.
+- The most useful blocker is now narrow: improve dependency extraction or add a
+  deterministic post-pass that detects cross-row dependence from structured
+  rationales without using fixture/source vocabulary.
+
+Do not use batch 02 to claim solved ACH sensitivity. Use it to claim that ACH
+ranking is robust on unseen official documents, and that sensitivity remains
+the active product blocker.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were

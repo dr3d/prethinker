@@ -1,0 +1,13 @@
+{"id": "q001", "question": "What company received the warning letter?", "expected": "A. Nelson & Co. Ltd.", "expected_relevance": "Tests recipient extraction."}
+{"id": "q002", "question": "What was the warning letter date?", "expected": "February 12, 2026.", "expected_relevance": "Tests document date."}
+{"id": "q003", "question": "Where was the inspected facility located?", "expected": "5 Endeavour Way, London, SW19 8UH, United Kingdom.", "expected_relevance": "Tests address extraction."}
+{"id": "q004", "question": "What was the inspection date range?", "expected": "September 15 to 19, 2025.", "expected_relevance": "Tests inspection timing."}
+{"id": "q005", "question": "What CFR provision is cited in Violation 1?", "expected": "21 CFR 211.165(b).", "expected_relevance": "Tests cited rule extraction."}
+{"id": "q006", "question": "What testing did FDA say was missing?", "expected": "Appropriate laboratory testing for each batch to show freedom from objectionable microorganisms.", "expected_relevance": "Tests violation detail."}
+{"id": "q007", "question": "What age group was mentioned on some product labeling?", "expected": "Children as young as two years old.", "expected_relevance": "Tests risk/context extraction."}
+{"id": "q008", "question": "What did FDA testing find at the U.S. border?", "expected": "Microbiological contamination.", "expected_relevance": "Tests pivotal evidence extraction."}
+{"id": "q009", "question": "Did the firm commit to testing retain samples?", "expected": "No; the letter says it did not commit to testing retain samples.", "expected_relevance": "Tests remediation limitation."}
+{"id": "q010", "question": "What CFR provision is cited for quality unit written responsibilities?", "expected": "21 CFR 211.22(d).", "expected_relevance": "Tests statute/rule extraction."}
+{"id": "q011", "question": "What kind of discarded note did investigators observe?", "expected": "A handwritten sticky note marked out-of-trend among discarded materials.", "expected_relevance": "Tests messy evidence detail."}
+{"id": "q012", "question": "What consultant provision did FDA cite?", "expected": "21 CFR 211.34.", "expected_relevance": "Tests remedy detail."}
+{"id": "q013", "question": "Who signed the letter?", "expected": "Francis Godwin, Director, Office of Manufacturing Quality.", "expected_relevance": "Tests signer extraction."}

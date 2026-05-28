@@ -1,0 +1,44 @@
+[REPORT IDENTIFICATION]
+National Transportation Safety Board
+Aircraft Accident Report
+Uncontained Engine Failure and Subsequent Fire
+American Airlines Flight 383
+Boeing 767-323, N345AN
+Chicago, Illinois
+October 28, 2016
+
+Accident Report NTSB/AAR-18/01
+PB2018-100344
+Adopted January 30, 2018
+
+[SUMMARY]
+On October 28, 2016, about 1432 central daylight time, American Airlines flight 383, a Boeing 767-323, N345AN, experienced an uncontained engine failure and subsequent fire during the takeoff ground roll on runway 28R at Chicago O'Hare International Airport, Chicago, Illinois. The flight crew rejected the takeoff, stopped the airplane on the runway, and commanded an evacuation. One passenger received a serious injury, and 20 passengers and one flight attendant received minor injuries during the evacuation.
+
+A stage 2 high-pressure turbine disk from the right engine fractured into at least four pieces. One disk fragment traveled through the engine case and airplane structure, severing the main engine fuel feed line and breaching the right-wing fuel tank, which led to a fuel-fed fire.
+
+[PROBABLE CAUSE]
+The National Transportation Safety Board determines that the probable cause of this accident was the failure of the high-pressure turbine (HPT) stage 2 disk, which resulted from low-cycle fatigue cracks that initiated from an internal subsurface manufacturing anomaly known as a discrete dirty white spot. The HPT stage 2 disk failed because of low-cycle fatigue cracks that initiated from an internal subsurface manufacturing anomaly, which was not detectable using the inspection procedures in place at the time of manufacture or at the disk's last inspection.
+
+[FINDINGS]
+1. The captain made a timely decision to reject the takeoff and performed the maneuver in accordance with company training and procedures.
+2. No evidence indicated any structural, engine, or system failures before the uncontained engine failure occurred.
+3. The right engine experienced an uncontained HPT stage 2 disk rupture.
+4. The HPT stage 2 disk failed because of multiple low-cycle fatigue cracks that initiated from an internal material anomaly, known as a discrete dirty white spot.
+5. The discrete dirty white spot anomaly was not detectable at the time of the HPT stage 2 disk's manufacture using the inspection procedures then in place.
+6. The fatigue cracks were not detectable at the time of the HPT stage 2 disk's last inspection using the surface-based inspection techniques required by the engine manufacturer's inspection procedures.
+
+[ANALYSIS]
+Metallurgical examination found multiple low-cycle fatigue cracks that initiated from an internal material anomaly, known as a discrete dirty white spot. The cracks propagated until the disk could no longer sustain normal operating loads.
+
+The disk's most recent overhaul inspection included the required surface-based inspections. The fatigue cracks were not detectable at the time of the HPT stage 2 disk's last inspection using the surface-based inspection techniques. If a subsurface inspection technique, such as an ultrasonic inspection, had been required for the HPT stage 2 disk at overhaul, the cracks should have been detectable.
+
+The airplane had been maintained in accordance with applicable requirements. No evidence indicated any structural, engine, or system failures before the uncontained engine failure occurred. The captain made a timely decision to reject the takeoff and performed the maneuver in accordance with company training and procedures.
+
+[POSTACCIDENT OBSERVATIONS]
+The disk fragment damage included severing the main engine fuel feed line and breaching the right-wing fuel tank, which led to a fuel-fed fire on the right side of the airplane. Fire damage was concentrated around the right wing, right engine, and right side of the fuselage.
+
+[MAINTENANCE]
+At the time of the accident, the engine had accumulated 19,139 hours and 3,057 cycles since new. The HPT stage 2 disk had undergone previous inspection in accordance with the engine manufacturer's instructions. The investigation did not identify a missed required maintenance task that would have revealed the internal anomaly under the required inspection regime.
+
+[RECOMMENDATIONS]
+As a result of this investigation, the National Transportation Safety Board issued safety recommendations addressing subsurface inspection of high-pressure turbine disks and engine design measures to reduce the hazards of uncontained engine failures.

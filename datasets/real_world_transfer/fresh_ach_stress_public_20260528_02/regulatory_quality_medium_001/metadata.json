@@ -1,0 +1,15 @@
+{
+  "fixture_id": "regulatory_quality_medium_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "fda",
+  "source_title": "WARNING LETTER",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/wisconsin-pharmacal-company-llc-710329-08222025",
+  "source_date": "2025-08-22",
+  "collected_at": "2026-05-28",
+  "document_type": "FDA warning letter",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "medium",
+  "primary_pressure": "systemic quality/process failure versus specific bad decision or data-integrity-only reading",
+  "notes": "This document has multiple direct quality-system rows, but one or two bridge rows strongly shape the systemic interpretation."
+}

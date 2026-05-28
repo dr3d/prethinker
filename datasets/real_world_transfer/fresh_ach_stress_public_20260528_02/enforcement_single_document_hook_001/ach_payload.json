@@ -1,0 +1,92 @@
+{
+  "fixture_id": "enforcement_single_document_hook_001",
+  "ach_question": "Where does the document primarily locate responsibility or violation theory?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Batch microbial testing failure",
+      "claim": "The warning letter primarily locates responsibility in failing to test each batch for objectionable microorganisms before release."
+    },
+    {
+      "id": "h2",
+      "label": "Quality unit data integrity failure",
+      "claim": "The warning letter primarily locates responsibility in quality-unit oversight and data-integrity failures."
+    },
+    {
+      "id": "h3",
+      "label": "Stability or expiration dating failure",
+      "claim": "The warning letter primarily locates responsibility in stability testing or expiration dating failures."
+    },
+    {
+      "id": "h4",
+      "label": "Border refusal outcome only",
+      "claim": "The core agency theory is simply that one shipment was refused at the border, not that a manufacturing system violated CGMP."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Regulation and failure to test each batch",
+      "source_coords": "[VIOLATION 1]",
+      "text_anchor": "failed to conduct, for each batch of drug product, appropriate laboratory testing",
+      "expected_relevance": "Direct support for h1 and anchors the first enumerated violation."
+    },
+    {
+      "id": "e2",
+      "label": "Products released without microbial testing",
+      "source_coords": "[VIOLATION 1]",
+      "text_anchor": "without adequate testing for critical microbial attributes",
+      "expected_relevance": "Direct support for h1; strengthens the public-health consequence."
+    },
+    {
+      "id": "e3",
+      "label": "Sampling some batches instead of every batch",
+      "source_coords": "[VIOLATION 1]",
+      "text_anchor": "Rather than testing every batch, you conducted (b)(4) tests on some of your batches",
+      "expected_relevance": "Direct support for h1 and distinguishes systematic release testing from mere paperwork."
+    },
+    {
+      "id": "e4",
+      "label": "FDA contamination finding at border",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "FDA testing found microbiological contamination",
+      "expected_relevance": "Pivotal direct support for h1: it supplies the single concrete hook showing why the missing microbial testing matters."
+    },
+    {
+      "id": "e5",
+      "label": "No scientific evidence all batches were free of contamination",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "you did not have scientific evidence that all (b)(4) drug product batches were free of objectionable microbial contamination",
+      "expected_relevance": "Direct support for h1 and links testing omission to lack of batch assurance."
+    },
+    {
+      "id": "e6",
+      "label": "No retain-sample commitment",
+      "source_coords": "[RESPONSE ASSESSMENT]",
+      "text_anchor": "did not commit to testing your retain samples",
+      "expected_relevance": "Partial support for h1; also supports ongoing remediation inadequacy."
+    },
+    {
+      "id": "e7",
+      "label": "QU data reliability issue",
+      "source_coords": "[VIOLATION 2]",
+      "text_anchor": "quality unit (QU) failed to provide adequate oversight and to ensure the reliability of data",
+      "expected_relevance": "Direct support for h2, a plausible but secondary responsibility theory."
+    },
+    {
+      "id": "e8",
+      "label": "Consultant recommendation",
+      "source_coords": "[CONSULTANT]",
+      "text_anchor": "should engage a consultant qualified as set forth in 21 CFR 211.34",
+      "expected_relevance": "Partial support for systemic CGMP remediation; not specific enough to make h2 or h3 win."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The first and most concrete violation is failure to test every batch for objectionable microorganisms, reinforced by FDA's contamination finding. Data integrity is important but presented as a second violation.",
+    "sensitivity_expectation": "high",
+    "pivotal_evidence": "e4",
+    "flip_note": "Removing e4 removes the single concrete contamination hook and should make h1 much less dominant, allowing h2 to look more competitive even if h1 can still be supported by e1-e3 and e5."
+  }
+}

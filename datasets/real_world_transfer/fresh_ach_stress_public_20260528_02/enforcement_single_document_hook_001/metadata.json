@@ -1,0 +1,15 @@
+{
+  "fixture_id": "enforcement_single_document_hook_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "fda",
+  "source_title": "WARNING LETTER",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/nelson-co-ltd-720283-02122026",
+  "source_date": "2026-02-12",
+  "collected_at": "2026-05-28",
+  "document_type": "FDA warning letter",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "high",
+  "primary_pressure": "one contamination finding turns a testing omission into a concrete responsibility theory",
+  "notes": "This source contains two plausible CGMP theories, but one lab/border finding is the sharpest hook."
+}

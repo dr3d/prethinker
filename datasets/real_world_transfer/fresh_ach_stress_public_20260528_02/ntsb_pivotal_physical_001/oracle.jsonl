@@ -1,0 +1,13 @@
+{"id": "q001", "question": "What flight was involved?", "expected": "American Airlines flight 383.", "expected_relevance": "Tests named event extraction."}
+{"id": "q002", "question": "Where did the accident occur?", "expected": "Chicago O'Hare International Airport, Chicago, Illinois, on runway 28R.", "expected_relevance": "Tests place extraction."}
+{"id": "q003", "question": "What was the date of the accident?", "expected": "October 28, 2016.", "expected_relevance": "Tests date extraction."}
+{"id": "q004", "question": "What airplane model was involved?", "expected": "A Boeing 767-323, registration N345AN.", "expected_relevance": "Tests equipment identification."}
+{"id": "q005", "question": "Which engine component failed?", "expected": "The right engine HPT stage 2 disk.", "expected_relevance": "Tests physical finding extraction."}
+{"id": "q006", "question": "What internal anomaly did the NTSB identify?", "expected": "A discrete dirty white spot, an internal subsurface manufacturing anomaly.", "expected_relevance": "Tests cause detail."}
+{"id": "q007", "question": "What did the disk fragment damage?", "expected": "It severed the main engine fuel feed line and breached the right-wing fuel tank.", "expected_relevance": "Tests causal chain."}
+{"id": "q008", "question": "How many serious injuries were reported?", "expected": "One passenger received a serious injury.", "expected_relevance": "Tests outcome extraction."}
+{"id": "q009", "question": "How many minor injuries were reported?", "expected": "Twenty passengers and one flight attendant received minor injuries.", "expected_relevance": "Tests numeric extraction."}
+{"id": "q010", "question": "Did the report identify structural, engine, or system failures before the uncontained failure?", "expected": "No; it stated no evidence indicated such failures before the uncontained engine failure.", "expected_relevance": "Tests negative finding."}
+{"id": "q011", "question": "What did the report say about the captain's rejected takeoff?", "expected": "The captain made a timely decision and performed it according to company training and procedures.", "expected_relevance": "Tests actor-action evaluation."}
+{"id": "q012", "question": "What inspection technique did the report mention as potentially detecting subsurface cracks?", "expected": "Ultrasonic inspection or another subsurface inspection technique.", "expected_relevance": "Tests prevention/recommendation detail."}
+{"id": "q013", "question": "What was the NTSB report number?", "expected": "NTSB/AAR-18/01.", "expected_relevance": "Tests document metadata."}

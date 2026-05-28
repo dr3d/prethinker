@@ -1,0 +1,99 @@
+{
+  "fixture_id": "public_order_low_001",
+  "ach_question": "What best explains the order's finding, remedy, and responsibility allocation?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Consumer control and consent for driver data",
+      "claim": "The order allocates responsibility through a broad consumer-control, affirmative-consent, minimization, deletion, and access framework for Covered Driver Data."
+    },
+    {
+      "id": "h2",
+      "label": "Consumer reporting agency ban only",
+      "claim": "The order is primarily just a five-year ban on disclosures to consumer reporting agencies."
+    },
+    {
+      "id": "h3",
+      "label": "Safety diagnostics exceptions",
+      "claim": "The order is primarily designed to preserve safety, diagnostics, warranty, and emergency-response exceptions."
+    },
+    {
+      "id": "h4",
+      "label": "Jurisdiction admission only",
+      "claim": "The order primarily establishes jurisdiction rather than requiring substantive data-practice remedies."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "FTC violation finding context",
+      "source_coords": "[DECISION]",
+      "text_anchor": "reason to believe that Respondents have violated the Federal Trade Commission Act",
+      "expected_relevance": "Context support for a remedy/responsibility allocation; not sufficient alone."
+    },
+    {
+      "id": "e2",
+      "label": "Covered driver data definition",
+      "source_coords": "[COVERED DRIVER DATA]",
+      "text_anchor": "hard braking, hard acceleration, hard cornering, crossing of a designated high-speed threshold",
+      "expected_relevance": "Directly scopes the driver data at issue, supporting h1."
+    },
+    {
+      "id": "e3",
+      "label": "CRA disclosure ban",
+      "source_coords": "[PROVISION I]",
+      "text_anchor": "must not disclose Covered Driver Data to any person when that person is acting in the capacity of a Consumer Reporting Agency",
+      "expected_relevance": "Direct support for h2, but it is only one provision within broader remedies."
+    },
+    {
+      "id": "e4",
+      "label": "Affirmative consent for collection/use/disclosure",
+      "source_coords": "[PROVISION II]",
+      "text_anchor": "must obtain the relevant U.S. consumer's Affirmative Express Consent prior to collecting, using, or disclosing",
+      "expected_relevance": "Direct central support for h1."
+    },
+    {
+      "id": "e5",
+      "label": "No coercive degradation for withholding consent",
+      "source_coords": "[PROVISION III]",
+      "text_anchor": "must not limit a U.S. consumer's ability to withhold or withdraw Affirmative Express Consent",
+      "expected_relevance": "Direct support for h1 by protecting consumer control."
+    },
+    {
+      "id": "e6",
+      "label": "Data minimization",
+      "source_coords": "[PROVISION IV]",
+      "text_anchor": "must refrain from collecting more Covered Driver Data than reasonably necessary",
+      "expected_relevance": "Direct support for h1, independent of consent."
+    },
+    {
+      "id": "e7",
+      "label": "Access and deletion rights",
+      "source_coords": "[PROVISION VII]",
+      "text_anchor": "request a copy of their Covered Driver Data and to request that Respondents Delete their Covered Driver Data",
+      "expected_relevance": "Direct support for h1, independent remedy category."
+    },
+    {
+      "id": "e8",
+      "label": "Emergency responder exception",
+      "source_coords": "[PROVISION II]",
+      "text_anchor": "To disclose Covered Driver Data to emergency responders",
+      "expected_relevance": "Supports h3 as a true exception but off-axis to the primary remedial framework."
+    },
+    {
+      "id": "e9",
+      "label": "Misrepresentation prohibition",
+      "source_coords": "[PROVISION XI]",
+      "text_anchor": "must not misrepresent, in any manner, expressly or by implication",
+      "expected_relevance": "Direct support for h1's accountability and consumer-control framing."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The order contains several independent remedies around consent, withholding/withdrawal, minimization, retention, deletion, access, third-party deletion, location-data disabling, and misrepresentation. The CRA ban and safety exceptions are true but narrower.",
+    "sensitivity_expectation": "low",
+    "pivotal_evidence": null,
+    "flip_note": "No single row should materially change the winner; h1 is supported by many independent remedial provisions. Removing e4 weakens but does not flip the expected read."
+  }
+}

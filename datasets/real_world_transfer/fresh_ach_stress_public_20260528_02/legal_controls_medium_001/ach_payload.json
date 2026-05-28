@@ -1,0 +1,92 @@
+{
+  "fixture_id": "legal_controls_medium_001",
+  "ach_question": "Where does the order primarily locate responsibility?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Corporate control and disclosure-control failure",
+      "claim": "The order primarily locates responsibility in American Electric Power's control/funding of Empowering Ohio and related disclosure, books-and-records, and internal-control failures."
+    },
+    {
+      "id": "h2",
+      "label": "Householder and Generation Now criminality",
+      "claim": "The order primarily locates responsibility in the criminal conduct of Householder and Generation Now rather than in AEP's controls."
+    },
+    {
+      "id": "h3",
+      "label": "Press release wording only",
+      "claim": "The responsibility theory is only that a press release was worded poorly, not that controls or accounting disclosures failed."
+    },
+    {
+      "id": "h4",
+      "label": "Fair Fund administration",
+      "claim": "The order is primarily about administering a Fair Fund rather than assigning responsibility for violations."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "AEP formed, funded, and controlled entity",
+      "source_coords": "[SUMMARY]",
+      "text_anchor": "American Electric Power formed, fully funded, and controlled",
+      "expected_relevance": "Direct support for h1 by linking AEP to the intermediary entity."
+    },
+    {
+      "id": "e2",
+      "label": "Press release omitted key facts",
+      "source_coords": "[SUMMARY]",
+      "text_anchor": "The press release was misleading because it omitted key facts",
+      "expected_relevance": "Direct support for h3 but also partial support for h1 because the omission concerns AEP's relationship and controls."
+    },
+    {
+      "id": "e3",
+      "label": "AEP employee directed contributions",
+      "source_coords": "[SUMMARY]",
+      "text_anchor": "an American Electric Power employee directed Empowering Ohio's contributions to Generation Now",
+      "expected_relevance": "A causal bridge row for h1; removing it materially weakens the control-to-contribution link."
+    },
+    {
+      "id": "e4",
+      "label": "Related party disclosure failure",
+      "source_coords": "[RELATED PARTY DISCLOSURES]",
+      "text_anchor": "did not disclose the 2019 payments to Empowering Ohio as related party transactions",
+      "expected_relevance": "Direct support for h1's accounting/disclosure theory."
+    },
+    {
+      "id": "e5",
+      "label": "Insufficient internal accounting controls",
+      "source_coords": "[INTERNAL CONTROLS]",
+      "text_anchor": "lacked sufficient internal accounting controls to provide reasonable assurances",
+      "expected_relevance": "Direct support for h1; major medium-sensitivity row."
+    },
+    {
+      "id": "e6",
+      "label": "Books and records lacked related-party indication",
+      "source_coords": "[BOOKS AND RECORDS]",
+      "text_anchor": "recorded within American Electric Power's accounting system with no indication that the payments were made to a related party",
+      "expected_relevance": "Direct support for h1's records/control theory."
+    },
+    {
+      "id": "e7",
+      "label": "Generation Now pleaded guilty",
+      "source_coords": "[OTHER RELEVANT ENTITIES]",
+      "text_anchor": "Generation Now pleaded guilty to RICO charges",
+      "expected_relevance": "Supports h2 as tempting context, but it does not answer where this SEC order locates AEP's responsibility."
+    },
+    {
+      "id": "e8",
+      "label": "Penalty and Fair Fund",
+      "source_coords": "[ORDER]",
+      "text_anchor": "pay a civil money penalty in the amount of $19,000,000",
+      "expected_relevance": "Outcome/remedy row; partial/off-axis for h4 and not the causal responsibility theory."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The order repeatedly ties AEP's own control over Empowering Ohio to misleading disclosures, related-party omissions, books-and-records failures, and internal-control failures. Criminal context is real but not the order's primary responsibility allocation.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": null,
+    "flip_note": "No single row should flip the winner, but removing e3 or e5 should materially weaken h1; removing both would create serious uncertainty between h1 and a narrower h3/h2 reading."
+  }
+}

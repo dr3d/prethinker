@@ -1,0 +1,15 @@
+{
+  "fixture_id": "sec_scope_low_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "sec",
+  "source_title": "UNITED STATES",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1069183/000106918325000074/axon-20250501.htm",
+  "source_date": "2025-05-07",
+  "collected_at": "2026-05-28",
+  "document_type": "SEC Form 8-K",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "low",
+  "primary_pressure": "distinguish cause/driver from scope/consequence and concurrent filing items",
+  "notes": "This is intentionally low-sensitivity: several independent rows point to the same balance-sheet presentation error."
+}

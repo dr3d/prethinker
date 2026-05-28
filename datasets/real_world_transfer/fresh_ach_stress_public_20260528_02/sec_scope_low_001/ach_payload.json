@@ -1,0 +1,92 @@
+{
+  "fixture_id": "sec_scope_low_001",
+  "ach_question": "What best explains why the company took the action?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Convertible-note balance-sheet presentation error",
+      "claim": "The company acted because it had to restate prior financial statements due to a current-versus-long-term liability presentation error for its 2027 Notes."
+    },
+    {
+      "id": "h2",
+      "label": "No material financial-statement impact",
+      "claim": "The company acted because the correction had no impact on total assets, total liabilities, stockholders' equity, operations, or cash flows."
+    },
+    {
+      "id": "h3",
+      "label": "Prior revenue-recognition weakness",
+      "claim": "The company acted because of the separate previously reported revenue-recognition material weakness."
+    },
+    {
+      "id": "h4",
+      "label": "Quarterly shareholder-letter release",
+      "claim": "The company acted primarily to release quarterly earnings information and a shareholder letter."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "No-reliance and restatement because of presentation error",
+      "source_coords": "[ITEM 4.02]",
+      "text_anchor": "should no longer be relied upon and need to be restated because of an error in the balance sheet presentation",
+      "expected_relevance": "Direct support for h1 and a clean answer to the action question."
+    },
+    {
+      "id": "e2",
+      "label": "Error identified in 2027 Notes presentation",
+      "source_coords": "[CAUSE]",
+      "text_anchor": "identified an error in the balance sheet presentation of the 2027 Notes",
+      "expected_relevance": "Direct support for h1."
+    },
+    {
+      "id": "e3",
+      "label": "Current versus long-term liability classification",
+      "source_coords": "[CAUSE]",
+      "text_anchor": "should have been presented as current liabilities rather than long-term liabilities",
+      "expected_relevance": "Direct support for h1 and specifies the cause."
+    },
+    {
+      "id": "e4",
+      "label": "No total/cash-flow impact",
+      "source_coords": "[SUMMARY OF IMPACTS]",
+      "text_anchor": "did not impact Total Assets, Total Liabilities, or Stockholders' Equity",
+      "expected_relevance": "True scope/consequence row; partial/off-axis support for h2, not the reason for action."
+    },
+    {
+      "id": "e5",
+      "label": "Control weakness around conversion provisions",
+      "source_coords": "[INTERNAL CONTROL]",
+      "text_anchor": "lack of an effectively designed control activity to periodically monitor the satisfaction of contingent conversion provisions",
+      "expected_relevance": "Direct support for h1's mechanism and remediation, independent of e1-e3."
+    },
+    {
+      "id": "e6",
+      "label": "Revenue weakness is separate",
+      "source_coords": "[INTERNAL CONTROL]",
+      "text_anchor": "separate from the previously reported material weakness related to revenue recognition",
+      "expected_relevance": "Counters h3 by making revenue recognition a separate issue."
+    },
+    {
+      "id": "e7",
+      "label": "PwC ICFR opinion no longer reliable",
+      "source_coords": "[AUDITOR]",
+      "text_anchor": "PwC's opinion on the effectiveness of the Company's ICFR as of December 31, 2024, should no longer be relied upon",
+      "expected_relevance": "Consequence/remedy support tied to h1 but not the central cause."
+    },
+    {
+      "id": "e8",
+      "label": "Shareholder letter item",
+      "source_coords": "[ITEM 2.02]",
+      "text_anchor": "issued a shareholder letter regarding the Company's financial results",
+      "expected_relevance": "Supports h4 as a real but off-axis concurrent filing item."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "Several independent rows identify the convertible-note presentation error and current/liability classification as the reason for non-reliance and restatement. The no-impact statement is true but describes scope, not cause.",
+    "sensitivity_expectation": "low",
+    "pivotal_evidence": null,
+    "flip_note": "No single row should materially change the winner because e1, e2, e3, and e5 independently support h1. The scope row e4 should not be misread as the causal explanation."
+  }
+}

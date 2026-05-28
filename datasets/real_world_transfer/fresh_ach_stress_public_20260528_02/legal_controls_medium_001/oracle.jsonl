@@ -1,0 +1,14 @@
+{"id": "q001", "question": "What company is the respondent?", "expected": "American Electric Power Company, Inc.", "expected_relevance": "Tests respondent extraction."}
+{"id": "q002", "question": "What was the date of the SEC order?", "expected": "January 17, 2025.", "expected_relevance": "Tests document date."}
+{"id": "q003", "question": "What entity did AEP form, fund, and control?", "expected": "Empowering Ohio, Inc.", "expected_relevance": "Tests entity relationship extraction."}
+{"id": "q004", "question": "What type of entity was Empowering Ohio?", "expected": "An Ohio 501(c)(4) entity.", "expected_relevance": "Tests legal entity type."}
+{"id": "q005", "question": "Which entity was associated with Larry Householder?", "expected": "Generation Now.", "expected_relevance": "Tests actor/entity mapping."}
+{"id": "q006", "question": "What did the press release omit?", "expected": "Key facts about AEP's relationship with Empowering Ohio and Empowering Ohio's contributions to Generation Now.", "expected_relevance": "Tests omission finding."}
+{"id": "q007", "question": "What did AEP fail to disclose in its 2019 Form 10-K?", "expected": "The 2019 payments to Empowering Ohio as related party transactions.", "expected_relevance": "Tests disclosure failure."}
+{"id": "q008", "question": "What two payments amount is mentioned in the books-and-records discussion?", "expected": "Two payments totaling $700,000.", "expected_relevance": "Tests monetary amount extraction."}
+{"id": "q009", "question": "What criminal charge did Generation Now plead guilty to?", "expected": "RICO charges.", "expected_relevance": "Tests external proceeding detail."}
+{"id": "q010", "question": "What was Householder's sentence?", "expected": "20 years in prison.", "expected_relevance": "Tests outcome extraction."}
+{"id": "q011", "question": "What civil penalty did the SEC order impose?", "expected": "$19,000,000.", "expected_relevance": "Tests remedy amount."}
+{"id": "q012", "question": "What Securities Act provision did the Commission find was violated?", "expected": "Section 17(a)(2) of the Securities Act.", "expected_relevance": "Tests cited statute."}
+{"id": "q013", "question": "What Exchange Act provisions did the Commission find were violated?", "expected": "Sections 13(a), 13(b)(2)(A), and 13(b)(2)(B).", "expected_relevance": "Tests cited statutes."}
+{"id": "q014", "question": "What fund did the order create?", "expected": "A Fair Fund.", "expected_relevance": "Tests remedy/status extraction."}
