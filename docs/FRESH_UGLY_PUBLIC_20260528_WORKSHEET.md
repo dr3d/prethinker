@@ -70,6 +70,12 @@ already accepted numbered and bold-Q forms, so it was extended to accept plain
 qid-prefixed question lines. This changes intake parsing only; it does not
 touch compile, QA, prompts, or scoring.
 
+QA parser note:
+
+The same plain `q001. Question?` form was added to the QA markdown parser after
+an initial QA attempt produced `0` parsed questions per fixture and therefore
+made no model calls. This is also file-format parsing only.
+
 Active-instrument leakage audit after the validator fix:
 
 ```text
@@ -81,4 +87,3 @@ warning hits: 0
 
 Compile and QA should use the normal OpenRouter measured lane, six lanes, and
 the current fresh ugly Batch 04 protocol. Do not repair during R1.
-

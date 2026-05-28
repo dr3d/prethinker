@@ -160,6 +160,19 @@ q025: How does the reader learn the plan?
     assert rows[1]["utterance"] == "How does the reader learn the plan?"
 
 
+def test_parse_numbered_markdown_questions_accepts_plain_qid_period_lines() -> None:
+    text = """# QA
+
+q001. Which court issued this decision?
+q025. Trace the procedural path.
+"""
+
+    rows = parse_numbered_markdown_questions(text)
+
+    assert [row["id"] for row in rows] == ["q001", "q025"]
+    assert rows[0]["utterance"] == "Which court issued this decision?"
+
+
 def test_parse_numbered_markdown_questions_accepts_bold_q_labels() -> None:
     text = """# QA
 

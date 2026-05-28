@@ -1043,7 +1043,7 @@ def parse_numbered_markdown_questions(text: str) -> list[dict[str, Any]]:
         if line.startswith("#"):
             phase = line.lstrip("#").strip()
             continue
-        match = re.match(r"^(\d+)\.\s+(.*\S)\s*$", line)
+        match = re.match(r"^(?:q)?(\d+)\.\s+(.*\S)\s*$", line, flags=re.IGNORECASE)
         qid = ""
         number = 0
         utterance = ""
