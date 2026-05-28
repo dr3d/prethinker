@@ -196,6 +196,83 @@ control enough to justify the migration.
 This is the discipline Prethinker needs for any future model swap, not only the
 local Q4/Q8 Qwen question.
 
+## Compile / Query Split Certification
+
+The product may want different model paths for different phases:
+
+```text
+compile model path:
+  high source fidelity, schema discipline, conservative admission
+
+query model path:
+  cheap/local if possible, strong intent parsing, answer-shape selection,
+  citation-disciplined rendering over admitted evidence
+```
+
+That split is economically attractive, but it creates a tuning-overlap risk.
+The compile model shapes the artifact vocabulary, predicate density, source
+ledger surface, and diagnostics. The query model then learns to route against
+that artifact shape. A query lane can look good because it has adapted to one
+compiler's omissions and idioms, while a compile lane can look good because the
+query path has been tuned to compensate for it.
+
+Treat a compile/query pair as a certified product lane, not as two independent
+model swaps.
+
+Required comparison matrix before promoting a split lane:
+
+```text
+reference compile + reference query
+reference compile + candidate query
+candidate compile + reference query
+candidate compile + candidate query
+```
+
+Read the four cells separately:
+
+- If `reference compile + candidate query` regresses, the local/cheap query
+  model does not yet understand the governed query contract.
+- If `candidate compile + reference query` regresses, the new compiler changed
+  artifact shape or coverage.
+- If only `candidate compile + candidate query` looks good, suspect paired
+  overfitting: the two paths may be compensating for each other's quirks.
+- If both cross-pairs hold and the paired lane holds, the split is much more
+  product-plausible.
+
+Calibration fixtures for this matrix should include:
+
+- direct lookup rows;
+- source-record/list/identifier rows;
+- table and section-coordinate rows;
+- chronology/date/quantity rows;
+- conflict/source-claim rows;
+- ACH/evidence-matrix payloads if the query model proposes overlay inputs;
+- one fresh ugly heldout slice that did not shape either lane.
+
+Retuning rules:
+
+- Tune compile for source preservation and admitted-surface quality.
+- Tune query for intent emission, evidence selection, clarification, and
+  renderer discipline.
+- Do not tune query to hide compile omissions as if they were established
+  facts.
+- Do not tune compile around one query model's preferred predicate names unless
+  the names are part of a documented shared contract.
+- Record failures as compile-surface, query-surface, hybrid-join, or
+  answer-surface gaps before repairing.
+
+Promotion standard:
+
+```text
+A split lane is viable when each cross-pair remains within SLA, hygiene counters
+stay clean, and the paired lane improves latency/cost/control without hiding
+new compile/query coupling.
+```
+
+Local query remains the right product target, but it has to be certified as a
+query lane over stable compiled artifacts, not merely tested with the same
+compiler it was implicitly tuned beside.
+
 ## Future Decoding-Settings Probe
 
 Do not casually change decoding settings inside a stamp or transfer claim.
