@@ -1398,3 +1398,45 @@ Discipline note:
 This is targeted mechanism evidence, not a new Batch 04 score. The next fresh
 ugly batch should tell whether official-record roster grouping transfers
 outside this NLRB row.
+
+## Gate Tier Rescore 2026-05-28
+
+Question:
+
+After native gate-noise triage, does the Batch 04 R4 compile gate look like
+real blocking failure, or mostly diagnostic pressure?
+
+Artifact:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_r4_query_intent_20260526\compile_r4_tiered_rescore_20260528.md
+```
+
+Result:
+
+```text
+old pass/hold headline: 2 / 6
+blocking holds:         0
+diagnostic holds:       6
+advisory holds:         0
+all 8 artifacts readable
+```
+
+Read:
+
+- The old overloaded gate made Batch 04 R4 sound dirtier than it was. Under the
+  tiered gate, the six holds are diagnostic-only, not blocking.
+- This does not turn R4 into a fresh benchmark. The regression guard still
+  matters, and this batch has already shaped repairs.
+- It does mean the compile artifacts are operationally usable for comparison:
+  the remaining gate signal is profile/schema/delivery pressure to track on a
+  fresh batch, not a reason to discard the run.
+
+Validation:
+
+```text
+python scripts\audit_active_instrument_leakage.py --out-json C:\prethinker_tmp_archive\active_instrument_leakage_after_gate_tiering_20260528.json --out-md C:\prethinker_tmp_archive\active_instrument_leakage_after_gate_tiering_20260528.md
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
