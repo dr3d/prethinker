@@ -35,13 +35,36 @@ from src.semantic_ir import bootstrap_env_local  # noqa: E402
 DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "ach_payload_proposer_runs"
 VALID_ASSESSMENTS = {"consistent", "inconsistent", "neutral", "not_applicable"}
 VALID_DIAGNOSTICITY = {"low", "medium", "high", "critical"}
+VALID_QUESTION_AXES = {"cause", "responsibility", "scope", "chronology", "status", "identity", "comparison", "other"}
+VALID_HYPOTHESIS_AXIS_FITS = {"direct", "partial", "off_axis"}
 
 
 PROPOSER_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
-    "required": ["evidence_diagnosticity", "judgments"],
+    "required": [
+        "question_axis",
+        "hypothesis_axis_fit",
+        "evidence_diagnosticity",
+        "judgments",
+        "judgment_dependencies",
+        "omission_effects",
+    ],
     "properties": {
+        "question_axis": {"type": "string", "enum": sorted(VALID_QUESTION_AXES)},
+        "hypothesis_axis_fit": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["hypothesis_id", "axis_fit", "rationale"],
+                "properties": {
+                    "hypothesis_id": {"type": "string"},
+                    "axis_fit": {"type": "string", "enum": sorted(VALID_HYPOTHESIS_AXIS_FITS)},
+                    "rationale": {"type": "string", "maxLength": 360},
+                },
+            },
+        },
         "evidence_diagnosticity": {
             "type": "array",
             "items": {
@@ -60,11 +83,58 @@ PROPOSER_SCHEMA: dict[str, Any] = {
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["evidence_id", "hypothesis_id", "assessment", "rationale"],
+                "required": ["evidence_id", "hypothesis_id", "assessment", "weight", "rationale"],
                 "properties": {
                     "evidence_id": {"type": "string"},
                     "hypothesis_id": {"type": "string"},
                     "assessment": {"type": "string", "enum": sorted(VALID_ASSESSMENTS)},
+                    "weight": {"type": "integer", "minimum": 1, "maximum": 5},
+                    "rationale": {"type": "string", "maxLength": 360},
+                },
+            },
+        },
+        "judgment_dependencies": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "evidence_id",
+                    "hypothesis_id",
+                    "depends_on_evidence_id",
+                    "assessment_without_dependency",
+                    "weight_without_dependency",
+                    "rationale",
+                ],
+                "properties": {
+                    "evidence_id": {"type": "string"},
+                    "hypothesis_id": {"type": "string"},
+                    "depends_on_evidence_id": {"type": "string"},
+                    "assessment_without_dependency": {"type": "string", "enum": sorted(VALID_ASSESSMENTS)},
+                    "weight_without_dependency": {"type": "integer", "minimum": 1, "maximum": 5},
+                    "rationale": {"type": "string", "maxLength": 360},
+                },
+            },
+        },
+        "omission_effects": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "omitted_evidence_id",
+                    "evidence_id",
+                    "hypothesis_id",
+                    "assessment",
+                    "weight",
+                    "rationale",
+                ],
+                "properties": {
+                    "omitted_evidence_id": {"type": "string"},
+                    "evidence_id": {"type": "string"},
+                    "hypothesis_id": {"type": "string"},
+                    "assessment": {"type": "string", "enum": sorted(VALID_ASSESSMENTS)},
+                    "weight": {"type": "integer", "minimum": 1, "maximum": 5},
                     "rationale": {"type": "string", "maxLength": 360},
                 },
             },
@@ -86,12 +156,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--top-p", type=float, default=1.0)
     parser.add_argument("--max-tokens", type=int, default=6000)
+    parser.add_argument("--proposal-contract-retries", type=int, default=1)
     parser.add_argument("--openrouter-provider-order", default="")
     parser.add_argument("--openrouter-provider-only", default="")
     parser.add_argument("--openrouter-provider-ignore", default="")
     parser.add_argument("--openrouter-quantizations", default="")
     parser.add_argument("--openrouter-allow-fallbacks", choices=["", "true", "false"], default="")
     parser.add_argument("--openrouter-require-parameters", choices=["", "true", "false"], default="")
+    parser.add_argument(
+        "--counterfactual-sensitivity",
+        action="store_true",
+        help="Re-propose the ACH matrix once per omitted evidence row and report winner flips.",
+    )
     return parser.parse_args()
 
 
@@ -111,21 +187,35 @@ def main() -> int:
     source_path = _resolve(args.source) if args.source else payload_path.parent / "source.md"
     source_text = source_path.read_text(encoding="utf-8-sig", errors="replace") if source_path.exists() else ""
 
-    messages = build_messages(payload=payload, source_text=source_text)
-    call = call_json_schema(
+    baseline = propose_and_score(
+        payload=payload,
+        source_text=source_text,
         base_url=str(args.base_url),
         model=str(args.model),
-        messages=messages,
-        schema=PROPOSER_SCHEMA,
-        schema_name="ach_judgment_proposal_v1",
         timeout=int(args.timeout),
         temperature=float(args.temperature),
         top_p=float(args.top_p),
         max_tokens=int(args.max_tokens),
+        proposal_contract_retries=int(args.proposal_contract_retries),
     )
-    proposal = json.loads(call["content"])
-    scorer_payload = build_scorer_payload(payload, proposal)
-    ach_report = analyze_ach_overlay(scorer_payload)
+    proposal = baseline["proposal"]
+    scorer_payload = baseline["scorer_payload"]
+    ach_report = baseline["ach_report"]
+    call = baseline["call"]
+    counterfactual_sensitivity = []
+    if bool(args.counterfactual_sensitivity):
+        counterfactual_sensitivity = run_counterfactual_sensitivity(
+            payload=payload,
+            source_text=source_text,
+            baseline_top=_top_hypotheses(ach_report),
+            base_url=str(args.base_url),
+            model=str(args.model),
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=int(args.max_tokens),
+            proposal_contract_retries=int(args.proposal_contract_retries),
+        )
     report = build_report(
         payload=payload,
         payload_path=payload_path,
@@ -136,6 +226,7 @@ def main() -> int:
         call=call,
         model=str(args.model),
         base_url=str(args.base_url),
+        counterfactual_sensitivity=counterfactual_sensitivity,
     )
 
     out_dir = _resolve(args.out_dir)
@@ -152,8 +243,126 @@ def main() -> int:
     return 0
 
 
-def build_messages(*, payload: dict[str, Any], source_text: str) -> list[dict[str, str]]:
-    prompt_payload = public_prompt_payload(payload)
+def propose_and_score(
+    *,
+    payload: dict[str, Any],
+    source_text: str,
+    base_url: str,
+    model: str,
+    timeout: int,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+    proposal_contract_retries: int = 0,
+    omitted_evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    messages = build_messages(payload=payload, source_text=source_text, omitted_evidence=omitted_evidence)
+    contract_violations: list[dict[str, Any]] = []
+    for attempt in range(max(0, proposal_contract_retries) + 1):
+        call = call_json_schema(
+            base_url=base_url,
+            model=model,
+            messages=messages,
+            schema=PROPOSER_SCHEMA,
+            schema_name="ach_judgment_proposal_v1",
+            timeout=timeout,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+        )
+        proposal = json.loads(call["content"])
+        contract_violations = proposal_contract_violations(payload, proposal)
+        if not contract_violations or attempt >= max(0, proposal_contract_retries):
+            break
+        messages = [
+            *messages,
+            {"role": "assistant", "content": call["content"]},
+            {
+                "role": "user",
+                "content": (
+                    "Your proposal violated the structured dependency contract. "
+                    "When a judgment rationale cites another evidence id, it must include a matching judgment_dependencies row. "
+                    "Return a corrected complete JSON proposal with the same schema.\n\n"
+                    + json.dumps({"contract_violations": contract_violations}, ensure_ascii=False, indent=2, sort_keys=True)
+                ),
+            },
+        ]
+    call["proposal_contract_retry_count"] = attempt
+    call["proposal_contract_violations"] = contract_violations
+    scorer_payload = build_scorer_payload(payload, proposal)
+    ach_report = analyze_ach_overlay(scorer_payload)
+    return {"proposal": proposal, "scorer_payload": scorer_payload, "ach_report": ach_report, "call": call}
+
+
+
+
+def run_counterfactual_sensitivity(
+    *,
+    payload: dict[str, Any],
+    source_text: str,
+    baseline_top: list[str],
+    base_url: str,
+    model: str,
+    timeout: int,
+    temperature: float,
+    top_p: float,
+    max_tokens: int,
+    proposal_contract_retries: int = 0,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for evidence_item in payload.get("evidence_rows", []) or []:
+        if not isinstance(evidence_item, dict):
+            continue
+        evidence_id = str(evidence_item.get("id") or "").strip()
+        if not evidence_id:
+            continue
+        reduced_payload = {
+            **payload,
+            "evidence_rows": [
+                item
+                for item in payload.get("evidence_rows", []) or []
+                if isinstance(item, dict) and str(item.get("id") or "").strip() != evidence_id
+            ],
+        }
+        run = propose_and_score(
+            payload=reduced_payload,
+            source_text="",
+            base_url=base_url,
+            model=model,
+            timeout=timeout,
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens,
+            proposal_contract_retries=proposal_contract_retries,
+            omitted_evidence=evidence_item,
+        )
+        top = _top_hypotheses(run["ach_report"])
+        rows.append(
+            {
+                "evidence_id": evidence_id,
+                "label": str(evidence_item.get("label") or evidence_id),
+                "baseline_top": list(baseline_top),
+                "top_without_evidence": top,
+                "winner_changed": top != baseline_top,
+                "matrix_complete": bool(run["ach_report"].get("matrix_complete")),
+                "warning_count": len(run["ach_report"].get("warnings", []) or []),
+                "judgment_count": int(run["ach_report"].get("judgment_count", 0) or 0),
+                "latency_ms": int((run.get("call") or {}).get("latency_ms", 0) or 0),
+            }
+        )
+    return rows
+
+
+def build_messages(
+    *,
+    payload: dict[str, Any],
+    source_text: str,
+    omitted_evidence: dict[str, Any] | None = None,
+) -> list[dict[str, str]]:
+    prompt_payload = public_prompt_payload(payload, omitted_evidence=omitted_evidence)
+    hypothesis_count = len(prompt_payload.get("hypotheses", []) or [])
+    evidence_count = len(prompt_payload.get("evidence_rows", []) or [])
+    required_judgment_count = hypothesis_count * evidence_count
     source = str(source_text or "")
     if len(source) > 36000:
         source = source[:36000] + "\n[TRUNCATED]"
@@ -164,9 +373,24 @@ def build_messages(*, payload: dict[str, Any], source_text: str) -> list[dict[st
                 "/no_think\n"
                 "You populate an Analysis of Competing Hypotheses matrix. "
                 "Use only the supplied source text, hypotheses, and evidence anchors. "
+                "First classify the ACH question_axis. The question axis controls cell weights. "
                 "Do not decide by counting supportive rows; mark each evidence row against each hypothesis. "
+                "If the question asks for a cause, driver, explanation, or responsibility, give decisive weight only to evidence that bears on that axis. "
+                "Evidence about scope, severity, consequence, timing, or background may be true and consistent, but it should be neutral or low weight unless it answers the question axis. "
+                "If two hypotheses can both be true, do not let proof of a narrower compatible claim outrank the broader explanatory claim unless the narrower claim contradicts or better answers the question axis. "
+                "For each hypothesis, set hypothesis_axis_fit to direct only when the hypothesis directly answers the ACH question; partial when it is true or relevant but mainly qualifies scope, consequence, timing, or background; and off_axis when it does not answer the question. "
                 "Assessments must be one of consistent, inconsistent, neutral, or not_applicable. "
-                "Diagnosticity describes how much the evidence discriminates among hypotheses."
+                "Use weight 1 for weak evidence and 5 for decisive evidence in each evidence-hypothesis cell. "
+                "Diagnosticity describes how much the evidence discriminates among hypotheses. "
+                "Use omission_effects only when removing one evidence row changes how another evidence row should be assessed. "
+                "For example, if a physical finding or source conclusion reframes an otherwise ambiguous row, omitting the anchor may make the ambiguous row neutral, inconsistent, or supportive of a competing hypothesis. "
+                "Also fill judgment_dependencies when a cell judgment depends on another evidence row for its interpretation; leave it empty only when every cell is independent of every other evidence row. "
+                "Assess each judgment first from that evidence row's own text_anchor. If you need any fact from another row or from a source conclusion to make the assessment, declare the dependency. "
+                "Do not make a dependent judgment look independent by omitting the other row's id from the rationale. "
+                "Do not cite another evidence id in a judgment rationale unless you also add the matching judgment_dependencies row. "
+                "Do not add omission effects for ordinary independent rows. "
+                "In counterfactual mode, use only the evidence rows listed in the task payload. Do not infer any missing evidence row. "
+                "The judgments array must contain exactly one item for every evidence_id and hypothesis_id pair."
             ),
         },
         {
@@ -176,13 +400,21 @@ def build_messages(*, payload: dict[str, Any], source_text: str) -> list[dict[st
                 + json.dumps(prompt_payload, ensure_ascii=False, indent=2, sort_keys=True)
                 + "\n\nSOURCE TEXT:\n"
                 + source
+                + f"\n\nRequired matrix size: {evidence_count} evidence rows x {hypothesis_count} hypotheses = {required_judgment_count} judgments. "
+                + "Return a complete matrix: every evidence row against every hypothesis. "
+                + "Do not stop after the most important evidence row. "
+                + "Return judgment_dependencies and omission_effects as empty arrays only when no conditional reassessment is justified by the source."
             ),
         },
     ]
 
 
-def public_prompt_payload(payload: dict[str, Any]) -> dict[str, Any]:
-    return {
+def public_prompt_payload(
+    payload: dict[str, Any],
+    *,
+    omitted_evidence: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    out = {
         "fixture_id": payload.get("fixture_id", ""),
         "ach_question": payload.get("ach_question", ""),
         "hypotheses": [
@@ -205,9 +437,75 @@ def public_prompt_payload(payload: dict[str, Any]) -> dict[str, Any]:
             if isinstance(item, dict)
         ],
     }
+    if isinstance(omitted_evidence, dict):
+        out["counterfactual_mode"] = True
+        out["counterfactual_instruction"] = "This is a reduced evidence set. Assess only the listed evidence rows."
+    return out
+
+
+def proposal_contract_violations(payload: dict[str, Any], proposal: dict[str, Any]) -> list[dict[str, Any]]:
+    evidence_ids = {
+        str(item.get("id") or "").strip()
+        for item in payload.get("evidence_rows", []) or []
+        if isinstance(item, dict) and str(item.get("id") or "").strip()
+    }
+    dependency_keys = set()
+    for item in proposal.get("judgment_dependencies", []) or []:
+        if not isinstance(item, dict):
+            continue
+        dependency_keys.add(
+            (
+                str(item.get("evidence_id") or "").strip(),
+                str(item.get("hypothesis_id") or "").strip(),
+                str(item.get("depends_on_evidence_id") or "").strip(),
+            )
+        )
+    for item in proposal.get("omission_effects", []) or []:
+        if not isinstance(item, dict):
+            continue
+        dependency_keys.add(
+            (
+                str(item.get("evidence_id") or "").strip(),
+                str(item.get("hypothesis_id") or "").strip(),
+                str(item.get("omitted_evidence_id") or "").strip(),
+            )
+        )
+
+    out: list[dict[str, Any]] = []
+    for item in proposal.get("judgments", []) or []:
+        if not isinstance(item, dict):
+            continue
+        evidence_id = str(item.get("evidence_id") or "").strip()
+        hypothesis_id = str(item.get("hypothesis_id") or "").strip()
+        rationale = str(item.get("rationale") or "")
+        for referenced_id in _referenced_evidence_ids(rationale, evidence_ids):
+            if referenced_id == evidence_id:
+                continue
+            if (evidence_id, hypothesis_id, referenced_id) in dependency_keys:
+                continue
+            out.append(
+                {
+                    "kind": "missing_judgment_dependency",
+                    "evidence_id": evidence_id,
+                    "hypothesis_id": hypothesis_id,
+                    "referenced_evidence_id": referenced_id,
+                }
+            )
+    return out
+
+
+def _referenced_evidence_ids(text: str, evidence_ids: set[str]) -> list[str]:
+    normalized = "".join(char if char.isalnum() else " " for char in text.casefold())
+    tokens = set(normalized.split())
+    return sorted(evidence_id for evidence_id in evidence_ids if evidence_id.casefold() in tokens)
 
 
 def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> dict[str, Any]:
+    axis_fit_by_id = {
+        str(item.get("hypothesis_id") or "").strip(): str(item.get("axis_fit") or "direct").strip().casefold()
+        for item in proposal.get("hypothesis_axis_fit", [])
+        if isinstance(item, dict)
+    }
     diagnosticity_by_id = {
         str(item.get("evidence_id") or "").strip(): str(item.get("diagnosticity") or "medium").strip().casefold()
         for item in proposal.get("evidence_diagnosticity", [])
@@ -251,19 +549,73 @@ def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> d
                 "evidence_id": evidence_id,
                 "hypothesis_id": hypothesis_id,
                 "assessment": assessment,
+                "weight": _bounded_weight(item.get("weight"), default=1),
+                "rationale": str(item.get("rationale") or "").strip()[:360],
+            }
+        )
+    omission_effects = []
+    for item in _combined_omission_effect_items(proposal):
+        if not isinstance(item, dict):
+            continue
+        omitted_evidence_id = str(item.get("omitted_evidence_id") or "").strip()
+        evidence_id = str(item.get("evidence_id") or "").strip()
+        hypothesis_id = str(item.get("hypothesis_id") or "").strip()
+        assessment = str(item.get("assessment") or "").strip().casefold()
+        if omitted_evidence_id not in evidence_ids or evidence_id not in evidence_ids or hypothesis_id not in hypothesis_ids:
+            continue
+        if omitted_evidence_id == evidence_id or assessment not in VALID_ASSESSMENTS:
+            continue
+        omission_effects.append(
+            {
+                "omitted_evidence_id": omitted_evidence_id,
+                "evidence_id": evidence_id,
+                "hypothesis_id": hypothesis_id,
+                "assessment": assessment,
+                "weight": _bounded_weight(item.get("weight"), default=1),
                 "rationale": str(item.get("rationale") or "").strip()[:360],
             }
         )
     return {
         "schema_version": "ach_overlay_payload_v1",
         "hypotheses": [
-            {"id": str(item.get("id") or ""), "label": str(item.get("label") or ""), "claim": str(item.get("claim") or "")}
+            {
+                "id": str(item.get("id") or ""),
+                "label": str(item.get("label") or ""),
+                "claim": str(item.get("claim") or ""),
+                "axis_fit": (
+                    axis_fit_by_id.get(str(item.get("id") or "").strip())
+                    if axis_fit_by_id.get(str(item.get("id") or "").strip()) in VALID_HYPOTHESIS_AXIS_FITS
+                    else "direct"
+                ),
+            }
             for item in payload.get("hypotheses", [])
             if isinstance(item, dict)
         ],
         "evidence": evidence,
         "judgments": judgments,
+        "omission_effects": omission_effects,
     }
+
+
+def _combined_omission_effect_items(proposal: dict[str, Any]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for item in proposal.get("omission_effects", []) or []:
+        if isinstance(item, dict):
+            items.append(item)
+    for item in proposal.get("judgment_dependencies", []) or []:
+        if not isinstance(item, dict):
+            continue
+        items.append(
+            {
+                "omitted_evidence_id": item.get("depends_on_evidence_id", ""),
+                "evidence_id": item.get("evidence_id", ""),
+                "hypothesis_id": item.get("hypothesis_id", ""),
+                "assessment": item.get("assessment_without_dependency", ""),
+                "weight": item.get("weight_without_dependency", 1),
+                "rationale": item.get("rationale", ""),
+            }
+        )
+    return items
 
 
 def build_report(
@@ -277,16 +629,15 @@ def build_report(
     call: dict[str, Any],
     model: str,
     base_url: str,
+    counterfactual_sensitivity: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    top = [
-        item["hypothesis_id"]
-        for item in ach_report.get("hypothesis_scores", []) or []
-        if isinstance(item, dict) and item.get("rank") == 1
-    ]
+    top = _top_hypotheses(ach_report)
     expected = payload.get("expected_read") if isinstance(payload.get("expected_read"), dict) else {}
     expected_best = str(expected.get("best_hypothesis") or "").strip()
     sensitivity = ach_report.get("sensitivity", []) if isinstance(ach_report.get("sensitivity"), list) else []
     pivotal = str(expected.get("pivotal_evidence") or "").strip()
+    counterfactual_rows = counterfactual_sensitivity or []
+    counterfactual_flips = [row for row in counterfactual_rows if isinstance(row, dict) and row.get("winner_changed")]
     return {
         "schema_version": "ach_payload_proposal_run_v1",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -306,6 +657,7 @@ def build_report(
         "openrouter_generation_metadata": call.get("openrouter_generation_metadata", {}),
         "summary": {
             "fixture_id": str(payload.get("fixture_id") or ""),
+            "question_axis": str(proposal.get("question_axis") or ""),
             "matrix_complete": bool(ach_report.get("matrix_complete")),
             "warning_count": len(ach_report.get("warnings", []) or []),
             "hypothesis_count": int(ach_report.get("hypothesis_count", 0) or 0),
@@ -316,14 +668,28 @@ def build_report(
             "best_matches_expected": bool(expected_best and top == [expected_best]),
             "sensitivity_count": len(sensitivity),
             "sensitivity_evidence_ids": [str(item.get("evidence_id") or "") for item in sensitivity if isinstance(item, dict)],
+            "omission_effect_count": len(scorer_payload.get("omission_effects", []) or []),
+            "proposal_contract_retry_count": int(call.get("proposal_contract_retry_count", 0) or 0),
+            "proposal_contract_violation_count": len(call.get("proposal_contract_violations", []) or []),
+            "counterfactual_sensitivity_count": len(counterfactual_flips),
+            "counterfactual_sensitivity_evidence_ids": [
+                str(item.get("evidence_id") or "") for item in counterfactual_flips
+            ],
             "expected_sensitivity": str(expected.get("sensitivity_expectation") or ""),
             "expected_pivotal_evidence": pivotal,
-            "pivotal_found_in_sensitivity": bool(pivotal and any(item.get("evidence_id") == pivotal for item in sensitivity if isinstance(item, dict))),
+            "pivotal_found_in_sensitivity": bool(
+                pivotal
+                and (
+                    any(item.get("evidence_id") == pivotal for item in sensitivity if isinstance(item, dict))
+                    or any(item.get("evidence_id") == pivotal for item in counterfactual_flips if isinstance(item, dict))
+                )
+            ),
             "latency_ms": int(call.get("latency_ms", 0) or 0),
         },
         "scorer_payload": scorer_payload,
         "proposal": proposal,
         "ach_report": ach_report,
+        "counterfactual_sensitivity": counterfactual_rows,
     }
 
 
@@ -339,6 +705,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "## Summary",
         "",
         f"- Fixture: `{summary.get('fixture_id', '')}`",
+        f"- Question axis: `{summary.get('question_axis', '')}`",
         f"- Matrix complete: `{summary.get('matrix_complete', False)}`",
         f"- Hypotheses / evidence / judgments: `{summary.get('hypothesis_count', 0)} / {summary.get('evidence_count', 0)} / {summary.get('judgment_count', 0)}`",
         f"- Warnings: `{summary.get('warning_count', 0)}`",
@@ -347,6 +714,11 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Best matches expected: `{summary.get('best_matches_expected', False)}`",
         f"- Sensitivity rows: `{summary.get('sensitivity_count', 0)}`",
         f"- Sensitivity evidence ids: `{summary.get('sensitivity_evidence_ids', [])}`",
+        f"- Omission effects: `{summary.get('omission_effect_count', 0)}`",
+        f"- Proposal contract retries: `{summary.get('proposal_contract_retry_count', 0)}`",
+        f"- Proposal contract violations: `{summary.get('proposal_contract_violation_count', 0)}`",
+        f"- Counterfactual sensitivity rows: `{summary.get('counterfactual_sensitivity_count', 0)}`",
+        f"- Counterfactual sensitivity evidence ids: `{summary.get('counterfactual_sensitivity_evidence_ids', [])}`",
         f"- Expected sensitivity: `{summary.get('expected_sensitivity', '')}`",
         f"- Expected pivotal evidence: `{summary.get('expected_pivotal_evidence', '')}`",
         f"- Pivotal found in sensitivity: `{summary.get('pivotal_found_in_sensitivity', False)}`",
@@ -377,8 +749,35 @@ def render_markdown(report: dict[str, Any]) -> str:
                 f"| `{row.get('evidence_id', '')}` {label} | `{row.get('baseline_top', [])}` | "
                 f"`{row.get('top_without_evidence', [])}` |"
             )
+    counterfactual_rows = report.get("counterfactual_sensitivity", [])
+    if isinstance(counterfactual_rows, list) and counterfactual_rows:
+        lines.extend(
+            [
+                "",
+                "## Counterfactual Sensitivity",
+                "",
+                "| Evidence | Changed | Baseline Top | Top Without Evidence |",
+                "| --- | ---: | --- | --- |",
+            ]
+        )
+        for row in counterfactual_rows:
+            if not isinstance(row, dict):
+                continue
+            label = str(row.get("label", row.get("evidence_id", ""))).replace("|", "/")
+            lines.append(
+                f"| `{row.get('evidence_id', '')}` {label} | `{row.get('winner_changed', False)}` | "
+                f"`{row.get('baseline_top', [])}` | `{row.get('top_without_evidence', [])}` |"
+            )
     lines.append("")
     return "\n".join(lines)
+
+
+def _top_hypotheses(ach_report: dict[str, Any]) -> list[str]:
+    return [
+        str(item.get("hypothesis_id") or "")
+        for item in ach_report.get("hypothesis_scores", []) or []
+        if isinstance(item, dict) and item.get("rank") == 1
+    ]
 
 
 def call_json_schema(
@@ -419,12 +818,17 @@ def call_json_schema(
         headers=_headers(base_url),
         method="POST",
     )
-    try:
-        with urllib.request.urlopen(request, timeout=int(timeout)) as response:
-            raw = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+    raw: dict[str, Any] = {}
+    for attempt in range(1, 5):
+        try:
+            with urllib.request.urlopen(request, timeout=int(timeout)) as response:
+                raw = json.loads(response.read().decode("utf-8"))
+            break
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="replace")
+            if int(exc.code) != 429 or attempt >= 4:
+                raise RuntimeError(f"HTTP {exc.code}: {body}") from exc
+            time.sleep(_retry_after_seconds(exc, body, default=attempt))
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
     content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
@@ -447,6 +851,21 @@ def call_json_schema(
     }
 
 
+def _retry_after_seconds(exc: urllib.error.HTTPError, body: str, *, default: int) -> float:
+    header = str(exc.headers.get("Retry-After", "") if exc.headers else "").strip()
+    try:
+        return max(1.0, float(header))
+    except ValueError:
+        pass
+    try:
+        payload = json.loads(body)
+        error = payload.get("error") if isinstance(payload, dict) else {}
+        retry_after = error.get("metadata", {}).get("retry_after_seconds") if isinstance(error, dict) else None
+        return max(1.0, float(retry_after))
+    except Exception:
+        return float(max(1, default))
+
+
 def _headers(base_url: str) -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
     if is_openrouter_base_url(base_url):
@@ -467,6 +886,14 @@ def _headers(base_url: str) -> dict[str, str]:
 def _chat_url(base_url: str) -> str:
     base = str(base_url or "").rstrip("/")
     return f"{base}/chat/completions" if base.endswith("/v1") else f"{base}/v1/chat/completions"
+
+
+def _bounded_weight(value: Any, *, default: int) -> int:
+    try:
+        out = int(value)
+    except (TypeError, ValueError):
+        out = int(default)
+    return max(1, min(5, out))
 
 
 def _resolve(path: Path) -> Path:

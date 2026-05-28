@@ -19,6 +19,12 @@ DEFAULT_DIAGNOSTIC_WEIGHTS = {
     "high": 3,
     "critical": 5,
 }
+SUPPORT_DROP_SENSITIVITY_RATIO = 0.3
+AXIS_FIT_PENALTIES = {
+    "direct": 0,
+    "partial": 3,
+    "off_axis": 6,
+}
 
 
 def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
@@ -81,6 +87,12 @@ def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
             }
     if missing_judgments:
         warnings.append({"kind": "missing_judgments", "items": missing_judgments})
+    omission_effects = _omission_effects(
+        payload.get("omission_effects", []),
+        hypothesis_ids=set(hypothesis_ids),
+        evidence_ids=set(evidence_ids),
+        warnings=warnings,
+    )
 
     hypothesis_scores = _score_hypotheses(
         hypotheses=hypotheses,
@@ -92,6 +104,7 @@ def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
         evidence=evidence,
         matrix=matrix,
         baseline_scores=hypothesis_scores,
+        omission_effects=omission_effects,
     )
 
     return {
@@ -104,6 +117,7 @@ def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
         "hypotheses": list(hypotheses.values()),
         "evidence": list(evidence.values()),
         "matrix": matrix,
+        "omission_effects": omission_effects,
         "hypothesis_scores": hypothesis_scores,
         "diagnostic_evidence": _diagnostic_evidence(evidence=evidence, matrix=matrix),
         "sensitivity": sensitivity,
@@ -172,12 +186,66 @@ def _positive_int(value: Any, *, field_name: str) -> int:
     return out
 
 
+def _omission_effects(
+    items: Any,
+    *,
+    hypothesis_ids: set[str],
+    evidence_ids: set[str],
+    warnings: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    if not items:
+        return []
+    if not isinstance(items, list):
+        warnings.append({"kind": "invalid_omission_effects", "value": items})
+        return []
+    out: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            warnings.append({"kind": "invalid_omission_effect", "effect": item})
+            continue
+        omitted_evidence_id = str(item.get("omitted_evidence_id", "")).strip()
+        evidence_id = str(item.get("evidence_id", "")).strip()
+        hypothesis_id = str(item.get("hypothesis_id", "")).strip()
+        if omitted_evidence_id not in evidence_ids or evidence_id not in evidence_ids or hypothesis_id not in hypothesis_ids:
+            warnings.append(
+                {
+                    "kind": "unknown_omission_effect_reference",
+                    "omitted_evidence_id": omitted_evidence_id,
+                    "evidence_id": evidence_id,
+                    "hypothesis_id": hypothesis_id,
+                }
+            )
+            continue
+        if evidence_id == omitted_evidence_id:
+            warnings.append(
+                {
+                    "kind": "self_omission_effect_ignored",
+                    "omitted_evidence_id": omitted_evidence_id,
+                    "evidence_id": evidence_id,
+                    "hypothesis_id": hypothesis_id,
+                }
+            )
+            continue
+        out.append(
+            {
+                "omitted_evidence_id": omitted_evidence_id,
+                "evidence_id": evidence_id,
+                "hypothesis_id": hypothesis_id,
+                "assessment": _assessment(item.get("assessment")),
+                "weight": _positive_int(item.get("weight", 1), field_name="omission_effect.weight"),
+                "rationale": str(item.get("rationale", "")).strip(),
+            }
+        )
+    return out
+
+
 def _score_hypotheses(
     *,
     hypotheses: dict[str, dict[str, Any]],
     evidence: dict[str, dict[str, Any]],
     matrix: dict[str, dict[str, dict[str, Any]]],
     omitted_evidence_id: str | None = None,
+    omission_effects: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     counters: dict[str, dict[str, int]] = {
         hypothesis_id: defaultdict(int) for hypothesis_id in hypotheses
@@ -186,7 +254,13 @@ def _score_hypotheses(
         if evidence_id == omitted_evidence_id:
             continue
         for hypothesis_id in hypotheses:
-            judgment = matrix[evidence_id][hypothesis_id]
+            judgment = _sensitivity_judgment(
+                evidence_id=evidence_id,
+                hypothesis_id=hypothesis_id,
+                matrix=matrix,
+                omitted_evidence_id=omitted_evidence_id,
+                omission_effects=omission_effects or [],
+            )
             assessment = judgment["assessment"]
             weight = int(judgment["weight"])
             if assessment == "inconsistent":
@@ -207,6 +281,8 @@ def _score_hypotheses(
         item = {
             "hypothesis_id": hypothesis_id,
             "label": str(hypothesis.get("label", hypothesis_id)),
+            "axis_fit": _axis_fit(hypothesis),
+            "axis_fit_penalty": _axis_fit_penalty(hypothesis),
             "inconsistency_weight": int(counters[hypothesis_id]["inconsistency_weight"]),
             "inconsistent_count": int(counters[hypothesis_id]["inconsistent_count"]),
             "consistency_weight": int(counters[hypothesis_id]["consistency_weight"]),
@@ -215,11 +291,12 @@ def _score_hypotheses(
             "not_applicable_count": int(counters[hypothesis_id]["not_applicable_count"]),
             "missing_judgment_count": int(counters[hypothesis_id]["missing_judgment_count"]),
         }
+        item["disconfirmation_score"] = item["inconsistency_weight"] + item["axis_fit_penalty"]
         scored.append(item)
 
     scored.sort(
         key=lambda item: (
-            item["inconsistency_weight"],
+            item["disconfirmation_score"],
             item["missing_judgment_count"],
             -item["consistency_weight"],
             item["hypothesis_id"],
@@ -229,7 +306,7 @@ def _score_hypotheses(
     rank = 0
     for index, item in enumerate(scored, start=1):
         key = (
-            item["inconsistency_weight"],
+            item["disconfirmation_score"],
             item["missing_judgment_count"],
             -item["consistency_weight"],
         )
@@ -238,6 +315,50 @@ def _score_hypotheses(
             previous_key = key
         item["rank"] = rank
     return scored
+
+
+def _axis_fit(hypothesis: dict[str, Any]) -> str:
+    fit = str(hypothesis.get("axis_fit", "direct")).strip().casefold()
+    if fit not in AXIS_FIT_PENALTIES:
+        return "direct"
+    return fit
+
+
+def _axis_fit_penalty(hypothesis: dict[str, Any]) -> int:
+    return AXIS_FIT_PENALTIES[_axis_fit(hypothesis)]
+
+
+def _sensitivity_judgment(
+    *,
+    evidence_id: str,
+    hypothesis_id: str,
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    omitted_evidence_id: str | None,
+    omission_effects: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not omitted_evidence_id:
+        return matrix[evidence_id][hypothesis_id]
+    for effect in omission_effects:
+        if (
+            effect["omitted_evidence_id"] == omitted_evidence_id
+            and effect["evidence_id"] == evidence_id
+            and effect["hypothesis_id"] == hypothesis_id
+        ):
+            return {
+                "assessment": effect["assessment"],
+                "weight": effect["weight"],
+                "rationale": effect.get("rationale", ""),
+            }
+    if any(
+        effect["omitted_evidence_id"] == omitted_evidence_id and effect["evidence_id"] == evidence_id
+        for effect in omission_effects
+    ):
+        return {
+            "assessment": "neutral",
+            "weight": 1,
+            "rationale": "neutralized by row-level omission dependency",
+        }
+    return matrix[evidence_id][hypothesis_id]
 
 
 def _diagnostic_evidence(
@@ -271,6 +392,7 @@ def _sensitivity_analysis(
     evidence: dict[str, dict[str, Any]],
     matrix: dict[str, dict[str, dict[str, Any]]],
     baseline_scores: list[dict[str, Any]],
+    omission_effects: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     baseline_top = {
         item["hypothesis_id"]
@@ -284,8 +406,14 @@ def _sensitivity_analysis(
             evidence=evidence,
             matrix=matrix,
             omitted_evidence_id=evidence_id,
+            omission_effects=omission_effects,
         )
         new_top = {item["hypothesis_id"] for item in rescored if item["rank"] == 1}
+        applied_effects = [
+            effect
+            for effect in omission_effects
+            if effect.get("omitted_evidence_id") == evidence_id
+        ]
         if new_top != baseline_top:
             sensitivity_rows.append(
                 {
@@ -293,7 +421,52 @@ def _sensitivity_analysis(
                     "label": str(evidence[evidence_id].get("label", evidence_id)),
                     "baseline_top": sorted(baseline_top),
                     "top_without_evidence": sorted(new_top),
-                    "reason": "top_hypothesis_set_changes_if_evidence_removed",
+                    "reason": (
+                        "top_hypothesis_set_changes_after_evidence_omission_effects"
+                        if applied_effects
+                        else "top_hypothesis_set_changes_if_evidence_removed"
+                    ),
+                    "applied_omission_effect_count": len(applied_effects),
+                }
+            )
+            continue
+        support_drop = _top_support_drop(
+            baseline_scores=baseline_scores,
+            rescored_scores=rescored,
+            baseline_top=baseline_top,
+        )
+        if applied_effects and support_drop["drop_ratio"] >= SUPPORT_DROP_SENSITIVITY_RATIO:
+            sensitivity_rows.append(
+                {
+                    "evidence_id": evidence_id,
+                    "label": str(evidence[evidence_id].get("label", evidence_id)),
+                    "baseline_top": sorted(baseline_top),
+                    "top_without_evidence": sorted(new_top),
+                    "reason": "top_hypothesis_support_drops_after_evidence_omission_effects",
+                    "applied_omission_effect_count": len(applied_effects),
+                    "support_drop": support_drop["drop"],
+                    "support_drop_ratio": support_drop["drop_ratio"],
                 }
             )
     return sensitivity_rows
+
+
+def _top_support_drop(
+    *,
+    baseline_scores: list[dict[str, Any]],
+    rescored_scores: list[dict[str, Any]],
+    baseline_top: set[str],
+) -> dict[str, Any]:
+    if len(baseline_top) != 1:
+        return {"drop": 0, "drop_ratio": 0.0}
+    hypothesis_id = next(iter(baseline_top))
+    baseline = next((item for item in baseline_scores if item["hypothesis_id"] == hypothesis_id), None)
+    rescored = next((item for item in rescored_scores if item["hypothesis_id"] == hypothesis_id), None)
+    if not baseline or not rescored:
+        return {"drop": 0, "drop_ratio": 0.0}
+    baseline_support = int(baseline.get("consistency_weight", 0) or 0)
+    new_support = int(rescored.get("consistency_weight", 0) or 0)
+    if baseline_support <= 0:
+        return {"drop": 0, "drop_ratio": 0.0}
+    drop = max(0, baseline_support - new_support)
+    return {"drop": drop, "drop_ratio": round(drop / baseline_support, 4)}

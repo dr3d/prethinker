@@ -271,6 +271,89 @@ measure sensitivity reliably. Two causes are visible:
 
 Do not claim ACH sensitivity is solved from this run.
 
+## ACH Sensitivity R2: Axis Fit, Dependencies, Support Drop
+
+Intervention:
+
+- Added `question_axis` to the ACH proposer output.
+- Added `hypothesis_axis_fit` (`direct`, `partial`, `off_axis`) so a true but
+  compatible scope/consequence claim does not outrank a direct answer to the
+  ACH question.
+- Added per-cell judgment weights.
+- Added `judgment_dependencies` / `omission_effects` for conditional evidence
+  interpretation.
+- Added proposal-contract retry: if a rationale cites another evidence id
+  without declaring the dependency, the runner asks for a corrected complete
+  matrix.
+- Added deterministic support-drop sensitivity: a row can be sensitive even
+  when the top hypothesis does not flip, if declared omission effects collapse
+  the top hypothesis's support.
+
+Artifact directory:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_01_r10_20260528\ach_axis_dependency_support_r10
+```
+
+R10 emitted summaries:
+
+```text
+ntsb_engine_power_001:
+  top: h1, expected h1
+  sensitivity rows: e1
+  read: high-sensitivity pivotal physical row now detected
+
+sec_restatement_001:
+  top: h1, expected h1
+  sensitivity rows: 0
+  read: low-sensitivity control now clean; h2 correctly treated as partial
+        axis fit (scope/consequence), not the causal explanation
+
+fda_warning_letter_001:
+  top: h2, expected h2
+  sensitivity rows: 0
+  read: ranking fixed; medium sensitivity still under-detected
+
+legal_order_chronology_001:
+  top: h1, expected h1
+  sensitivity rows: 0 in emitted R10 summary
+  proposal contract: 1 residual violation after 2 retries
+  read: ranking fixed; medium sensitivity still not clean in emitted summary
+```
+
+After calibrating support-drop sensitivity to `0.30`, rescoring the same R10
+scorer payloads gives:
+
+```text
+ntsb_engine_power_001: e1
+sec_restatement_001: 0
+fda_warning_letter_001: 0
+legal_order_chronology_001: e2, e3
+```
+
+Current read:
+
+- ACH ranking is materially better: R10 selected the expected winner on all
+  four stress fixtures.
+- The axis-fit addition fixed the SEC failure mode: compatible
+  scope/consequence hypotheses are visible as partial-axis claims instead of
+  winning by accumulated support.
+- High sensitivity is now detected on the NTSB control without requiring a fake
+  winner flip; support-collapse is the right product signal there.
+- Low sensitivity stays clean on the SEC control at the `0.30` support-drop
+  threshold.
+- Medium sensitivity remains immature. Legal now shows medium-ish support-drop
+  rows under rescoring, but FDA is still quiet, and exact expected pivotal-row
+  matching is not reliable enough to claim.
+- The dependency-contract retry is useful but incomplete: it catches explicit
+  evidence-id leakage in rationales, but the model can still describe another
+  row indirectly. Treat this as a cage, not a solved dependency parser.
+
+Do not claim ACH sensitivity is solved. The honest claim is narrower and
+stronger: ACH ranking now looks product-plausible on this batch; sensitivity has
+clear high/low discrimination and a partially working dependency story, with
+medium sensitivity still the next blocker.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were

@@ -73,8 +73,133 @@ def test_ach_surfaces_diagnostic_and_sensitivity_evidence() -> None:
             "baseline_top": ["h1"],
             "top_without_evidence": ["h1", "h2"],
             "reason": "top_hypothesis_set_changes_if_evidence_removed",
+            "applied_omission_effect_count": 0,
         }
     ]
+
+
+def test_ach_axis_fit_keeps_compatible_side_claim_from_winning() -> None:
+    report = analyze_ach_overlay(
+        {
+            "hypotheses": [
+                {"id": "h_cause", "axis_fit": "direct"},
+                {"id": "h_scope", "axis_fit": "partial"},
+            ],
+            "evidence": [{"id": "e1"}, {"id": "e2"}],
+            "judgments": [
+                {"evidence_id": "e1", "hypothesis_id": "h_cause", "assessment": "consistent", "weight": 4},
+                {"evidence_id": "e1", "hypothesis_id": "h_scope", "assessment": "consistent", "weight": 4},
+                {"evidence_id": "e2", "hypothesis_id": "h_cause", "assessment": "neutral", "weight": 1},
+                {"evidence_id": "e2", "hypothesis_id": "h_scope", "assessment": "consistent", "weight": 5},
+            ],
+        }
+    )
+
+    assert report["hypothesis_scores"][0]["hypothesis_id"] == "h_cause"
+    assert report["hypothesis_scores"][0]["axis_fit_penalty"] == 0
+    assert report["hypothesis_scores"][1]["axis_fit"] == "partial"
+
+
+def test_ach_sensitivity_can_apply_omission_effects() -> None:
+    report = analyze_ach_overlay(
+        {
+            "hypotheses": [{"id": "h1"}, {"id": "h2"}],
+            "evidence": [{"id": "e1", "diagnosticity": "critical"}, {"id": "e2", "diagnosticity": "critical"}],
+            "judgments": [
+                {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e1", "hypothesis_id": "h2", "assessment": "inconsistent"},
+                {"evidence_id": "e2", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e2", "hypothesis_id": "h2", "assessment": "consistent"},
+            ],
+            "omission_effects": [
+                {
+                    "omitted_evidence_id": "e1",
+                    "evidence_id": "e2",
+                    "hypothesis_id": "h1",
+                    "assessment": "inconsistent",
+                    "weight": 5,
+                    "rationale": "Without e1, e2 no longer supports h1.",
+                }
+            ],
+        }
+    )
+
+    assert report["hypothesis_scores"][0]["hypothesis_id"] == "h1"
+    assert report["sensitivity"] == [
+        {
+            "evidence_id": "e1",
+            "label": "e1",
+            "baseline_top": ["h1"],
+            "top_without_evidence": ["h2"],
+            "reason": "top_hypothesis_set_changes_after_evidence_omission_effects",
+            "applied_omission_effect_count": 1,
+        }
+    ]
+
+
+def test_ach_sensitivity_surfaces_top_support_drop_from_row_dependency() -> None:
+    report = analyze_ach_overlay(
+        {
+            "hypotheses": [{"id": "h1"}, {"id": "h2"}],
+            "evidence": [{"id": "e1"}, {"id": "e2"}, {"id": "e3"}],
+            "judgments": [
+                {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent", "weight": 5},
+                {"evidence_id": "e1", "hypothesis_id": "h2", "assessment": "neutral", "weight": 1},
+                {"evidence_id": "e2", "hypothesis_id": "h1", "assessment": "consistent", "weight": 5},
+                {"evidence_id": "e2", "hypothesis_id": "h2", "assessment": "neutral", "weight": 1},
+                {"evidence_id": "e3", "hypothesis_id": "h1", "assessment": "consistent", "weight": 1},
+                {"evidence_id": "e3", "hypothesis_id": "h2", "assessment": "inconsistent", "weight": 1},
+            ],
+            "omission_effects": [
+                {
+                    "omitted_evidence_id": "e1",
+                    "evidence_id": "e2",
+                    "hypothesis_id": "h2",
+                    "assessment": "neutral",
+                    "weight": 1,
+                    "rationale": "row e2 depends on e1",
+                }
+            ],
+        }
+    )
+
+    assert report["sensitivity"] == [
+        {
+            "evidence_id": "e1",
+            "label": "e1",
+            "baseline_top": ["h1"],
+            "top_without_evidence": ["h1"],
+            "reason": "top_hypothesis_support_drops_after_evidence_omission_effects",
+            "applied_omission_effect_count": 1,
+            "support_drop": 10,
+            "support_drop_ratio": 0.9091,
+        }
+    ]
+
+
+def test_ach_ignores_invalid_omission_effect_references() -> None:
+    report = analyze_ach_overlay(
+        {
+            "hypotheses": [{"id": "h1"}, {"id": "h2"}],
+            "evidence": [{"id": "e1"}],
+            "judgments": [
+                {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e1", "hypothesis_id": "h2", "assessment": "inconsistent"},
+            ],
+            "omission_effects": [
+                {
+                    "omitted_evidence_id": "missing",
+                    "evidence_id": "e1",
+                    "hypothesis_id": "h1",
+                    "assessment": "inconsistent",
+                    "weight": 3,
+                    "rationale": "bad reference",
+                }
+            ],
+        }
+    )
+
+    assert report["warnings"][0]["kind"] == "unknown_omission_effect_reference"
 
 
 def test_ach_rejects_invalid_assessment() -> None:
