@@ -472,6 +472,42 @@ Do not use batch 02 to claim solved ACH sensitivity. Use it to claim that ACH
 ranking is robust on unseen official documents, and that sensitivity remains
 the active product blocker.
 
+## ACH Stress Summarizer
+
+Added a dedicated ACH stress-run summarizer so future ACH batches are scored
+against ACH expectations rather than ordinary QA fixture assumptions.
+
+Tool:
+
+```text
+scripts\summarize_ach_stress_run.py
+```
+
+Batch 02 R1 summary artifacts:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r1_20260528\ach_locked_r1_summary.json
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r1_20260528\ach_locked_r1_summary.md
+```
+
+Generated aggregate:
+
+```text
+fixtures: 6
+ranking correct: 6
+matrix complete: 6
+warnings: 0
+contract residual fixtures: 2
+high pivotal detected: 0
+medium detected: 0
+low clean: 2
+alignment: clean 2, missed 3, wrong_or_partial_sensitivity 1
+```
+
+This confirms the worksheet read with a repeatable scorecard: ranking and low
+controls are stable; high/medium sensitivity remains blocked on dependency
+capture and contract adherence.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were
