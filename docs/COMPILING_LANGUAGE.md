@@ -1,12 +1,12 @@
 # Compiling Language
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
-How Prethinker treats ordinary source language as compilable input and turns it
-into a queryable, auditable knowledge program.
+How Prethinker treats ordinary English as compilable input and turns it into a
+queryable, auditable knowledge program.
 
-This document is the visitor-friendly mental model. For the exact current
-artifact contract, read
+This document is the visitor-friendly mental model. It explains the idea, not
+every implementation detail. For the exact current artifact contract, read
 [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md).
 For QA measurement, read
 [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md).
@@ -18,6 +18,9 @@ JavaScript, Rust, SQL, or Prolog, and a machine executes it.
 
 Prethinker starts somewhere softer and more dangerous: ordinary source
 language.
+
+English is the rhetorical case in this explainer because the contrast with
+Prolog is vivid. The architecture is not meant to be English-only.
 
 A source document might say:
 
@@ -33,9 +36,9 @@ A human can read that sentence and answer many questions:
 - What status came after the failure?
 - Is the old approval still current?
 
-Prethinker's job is to turn that source language into a compiled KB package
-that can answer those questions later. The target is Prolog-like: a world made
-of facts, rules, ledgers, epistemic state, and queries.
+Prethinker's job is to turn English source language into a compiled KB package
+that can answer those questions later. The package is Prolog-like: facts and
+rules, plus ledgers, epistemic state, and query policy.
 
 For example, a good compile might contain facts like:
 
@@ -60,7 +63,7 @@ What = hold_notice_h_2.
 That is the core mental shift. Prethinker is not "asking an LLM to answer from
 a document." It is asking an LLM to help compile a document into durable,
 inspectable state. The answer should come from the compiled artifact package,
-not from the model's memory or mood.
+not from the model's memory, hidden retrieval, or sampling variance.
 
 ## Current Shape
 
@@ -415,8 +418,10 @@ diagnostics.json  skipped, blocked, and coverage notes
 ```
 
 The source remains available for audit and recompilation, but ordinary QA is
-supposed to answer from the compiled package. If QA needs to reread raw source
-prose to get an answer, that is evidence that the compile did not preserve the
+supposed to answer from the compiled package. Admitted source-record display
+rows inside `ledgers.pl` are part of that package; hidden rereading of raw
+source prose outside the artifact is not. If QA can only answer by going back
+to raw source prose, that is evidence that the compile did not preserve the
 right answer-bearing surface yet.
 
 ### 7. Run Governed QA
