@@ -333,12 +333,12 @@ That is also why the repo is careful about honesty:
 
 ## What We Know Today
 
-As of May 25, 2026:
+As of May 28, 2026:
 
 ### Internal Health
 
 - the full-suite verification headline is maintained in `PROJECT_STATE.md`
-- full-suite verification is green at `1779 passed, 2 subtests passed`
+- full-suite verification is green at `2009 passed, 2 subtests passed`
 - the console is the canonical interactive front door
 - `semantic_router_v1 -> semantic_ir_v1` is the active research lane for model-owned context planning and richer model understanding before deterministic admission
 - the latest semantic IR edge runtime A/B is `20/20` decision labels with `0.976` average score

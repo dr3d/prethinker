@@ -105,7 +105,7 @@ should remain distinct from externally sourced real-world documents.
 The current full-suite verification is:
 
 ```text
-1811 passed, 2 subtests passed
+2009 passed, 2 subtests passed
 ```
 
 These numbers are the current public measurement anchor, not a permanent

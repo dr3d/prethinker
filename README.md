@@ -160,10 +160,11 @@ work:
 
 ```powershell
 python -m pytest -q
-# 1779 passed, 2 subtests passed
+# 2009 passed, 2 subtests passed
 
 python scripts\audit_active_instrument_leakage.py
 # forbidden hits: 0
+# warning hits: 0
 ```
 
 Current high-signal evidence:
