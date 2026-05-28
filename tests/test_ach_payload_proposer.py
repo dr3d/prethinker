@@ -32,6 +32,7 @@ def test_ach_payload_prompt_omits_oracle_fields() -> None:
     assert "expected_read" not in joined
     assert "expected_relevance" not in joined
     assert "oracle-only explanation" not in joined
+    assert "audit every evidence row as a possible interpretation anchor" in joined
 
 
 def test_counterfactual_prompt_omits_evidence_row_but_names_omission() -> None:

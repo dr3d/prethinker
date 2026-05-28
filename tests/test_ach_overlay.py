@@ -66,6 +66,17 @@ def test_ach_surfaces_diagnostic_and_sensitivity_evidence() -> None:
 
     assert report["diagnostic_evidence"][0]["evidence_id"] == "e1"
     assert report["diagnostic_evidence"][0]["diagnostic_score"] == 10
+    assert report["top_support_contributions"] == [
+        {
+            "evidence_id": "e1",
+            "label": "e1",
+            "top_hypothesis_id": "h1",
+            "assessment": "consistent",
+            "weight": 5,
+            "support_weight": 5,
+            "support_share": 1.0,
+        }
+    ]
     assert report["sensitivity"] == [
         {
             "evidence_id": "e1",

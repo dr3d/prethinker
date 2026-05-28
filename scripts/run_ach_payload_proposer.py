@@ -386,6 +386,8 @@ def build_messages(
                 "For example, if a physical finding or source conclusion reframes an otherwise ambiguous row, omitting the anchor may make the ambiguous row neutral, inconsistent, or supportive of a competing hypothesis. "
                 "Also fill judgment_dependencies when a cell judgment depends on another evidence row for its interpretation; leave it empty only when every cell is independent of every other evidence row. "
                 "Assess each judgment first from that evidence row's own text_anchor. If you need any fact from another row or from a source conclusion to make the assessment, declare the dependency. "
+                "After filling the matrix, audit every evidence row as a possible interpretation anchor: if removing that row would change any other evidence-hypothesis assessment or weight, add the matching judgment_dependencies and omission_effects rows. "
+                "This dependency audit is required even when the judgment rationale does not explicitly name the other evidence id. "
                 "Do not make a dependent judgment look independent by omitting the other row's id from the rationale. "
                 "Do not cite another evidence id in a judgment rationale unless you also add the matching judgment_dependencies row. "
                 "Do not add omission effects for ordinary independent rows. "
@@ -638,6 +640,11 @@ def build_report(
     pivotal = str(expected.get("pivotal_evidence") or "").strip()
     counterfactual_rows = counterfactual_sensitivity or []
     counterfactual_flips = [row for row in counterfactual_rows if isinstance(row, dict) and row.get("winner_changed")]
+    support_contributions = (
+        ach_report.get("top_support_contributions", [])
+        if isinstance(ach_report.get("top_support_contributions"), list)
+        else []
+    )
     return {
         "schema_version": "ach_payload_proposal_run_v1",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -655,6 +662,7 @@ def build_report(
             "provider_routing": openrouter_provider_routing_from_env() if is_openrouter_base_url(base_url) else {},
         },
         "openrouter_generation_metadata": call.get("openrouter_generation_metadata", {}),
+        "proposal_contract_violations": call.get("proposal_contract_violations", []),
         "summary": {
             "fixture_id": str(payload.get("fixture_id") or ""),
             "question_axis": str(proposal.get("question_axis") or ""),
@@ -675,6 +683,11 @@ def build_report(
             "counterfactual_sensitivity_evidence_ids": [
                 str(item.get("evidence_id") or "") for item in counterfactual_flips
             ],
+            "top_support_evidence_ids": [
+                str(item.get("evidence_id") or "")
+                for item in support_contributions
+                if isinstance(item, dict) and int(item.get("support_weight", 0) or 0) > 0
+            ][:5],
             "expected_sensitivity": str(expected.get("sensitivity_expectation") or ""),
             "expected_pivotal_evidence": pivotal,
             "pivotal_found_in_sensitivity": bool(
@@ -719,6 +732,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Proposal contract violations: `{summary.get('proposal_contract_violation_count', 0)}`",
         f"- Counterfactual sensitivity rows: `{summary.get('counterfactual_sensitivity_count', 0)}`",
         f"- Counterfactual sensitivity evidence ids: `{summary.get('counterfactual_sensitivity_evidence_ids', [])}`",
+        f"- Top support evidence ids: `{summary.get('top_support_evidence_ids', [])}`",
         f"- Expected sensitivity: `{summary.get('expected_sensitivity', '')}`",
         f"- Expected pivotal evidence: `{summary.get('expected_pivotal_evidence', '')}`",
         f"- Pivotal found in sensitivity: `{summary.get('pivotal_found_in_sensitivity', False)}`",

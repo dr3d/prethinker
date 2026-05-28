@@ -508,6 +508,79 @@ This confirms the worksheet read with a repeatable scorecard: ranking and low
 controls are stable; high/medium sensitivity remains blocked on dependency
 capture and contract adherence.
 
+## Batch 02 R2 Dependency-Audit Prompt
+
+Change tested:
+
+- The ACH payload proposer now explicitly audits every evidence row as a
+  possible interpretation anchor after filling the matrix.
+- The audit is fixture-free and structural: if removing one row would change
+  any other evidence-hypothesis assessment or weight, the proposer should emit
+  matching `judgment_dependencies` and `omission_effects`.
+- Reports now preserve `proposal_contract_violations` so residual contract
+  failures are inspectable, not only counted.
+
+R2 artifact directory:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r2_dependency_prompt_20260528\ach_high_probe
+```
+
+R2 summary artifacts:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r2_dependency_prompt_20260528\ach_dependency_prompt_r2_summary.json
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r2_dependency_prompt_20260528\ach_dependency_prompt_r2_summary.md
+```
+
+R1 -> R2:
+
+```text
+ranking correct: 6/6 -> 6/6
+matrix complete: 6/6 -> 6/6
+warnings: 0 -> 0
+contract residual fixtures: 2 -> 0
+high pivotal detected: 0/2 -> 1/2
+medium detected: 0/2 -> 0/2
+low clean: 2/2 -> 2/2
+```
+
+Per-fixture R2:
+
+```text
+enforcement_single_document_hook_001: high, top h1, no sensitivity rows
+ntsb_pivotal_physical_001: high, top h1, sensitivity e1/e3/e5/e6, expected e1 found
+legal_controls_medium_001: medium, top h1, no sensitivity rows
+regulatory_quality_medium_001: medium, top h1, no sensitivity rows
+public_order_low_001: low, top h1, no sensitivity rows
+sec_scope_low_001: low, top h1, no sensitivity rows
+```
+
+Read:
+
+- The dependency-audit prompt is a real improvement: it removed residual
+  contract violations, preserved the low controls, and recovered one high
+  pivotal case.
+- It is not a complete sensitivity solution. The remaining high miss is not an
+  explicit row-dependency failure; it is an evidence-role failure where a row is
+  expected to matter because it is the only concrete occurrence/outcome hook for
+  an otherwise well-supported responsibility theory.
+- Medium sensitivity remains immature. Current scoring detects single-row
+  flips and support drops, but not multi-row weakening or family-level
+  dependence.
+- Do not tune thresholds on this batch. The next ACH mechanism should be
+  evaluated against a fresh heldout ACH set.
+
+Follow-up instrumentation:
+
+- The deterministic ACH report now includes `top_support_contributions`, a
+  per-evidence breakdown of support weight and support share for the single
+  top hypothesis.
+- The proposer harness summary now records the leading `top_support_evidence_ids`.
+- This does not change ranking or sensitivity. It is a diagnostic surface for
+  separating missed dependency capture from underweighted direct-support or
+  concrete-hook evidence.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were

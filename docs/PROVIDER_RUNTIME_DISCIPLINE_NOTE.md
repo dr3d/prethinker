@@ -195,3 +195,57 @@ control enough to justify the migration.
 
 This is the discipline Prethinker needs for any future model swap, not only the
 local Q4/Q8 Qwen question.
+
+## Future Decoding-Settings Probe
+
+Do not casually change decoding settings inside a stamp or transfer claim.
+Settings are part of the reproducibility unit. A decoding probe belongs in its
+own locked experiment lane, with row-level churn analysis and no simultaneous
+architecture repair.
+
+The only current decoding hypothesis worth carrying forward is source-fidelity
+pressure from `top_p`.
+
+Current observed defaults:
+
+```text
+temperature: 0.0
+top_p: 0.82
+top_k: 20 in semantic settings, but not sent on LM Studio/OpenRouter paths
+thinking: off
+reasoning_effort: none
+min_p: not exposed
+```
+
+Hypothesis:
+
+```text
+For compile/extraction work, top_p < 1.0 may prune rare but source-critical
+tokens: proper names, citation strings, unusual legal phrasing, identifiers,
+and non-English fragments. A top_p=1.0 arm might improve source fidelity
+without changing the architecture.
+```
+
+If tested, run only the smallest useful A/B:
+
+1. Freeze code, model slug, provider path, source corpus, prompt/schema
+   versions, cache policy, and judge settings.
+2. Compare current `top_p=0.82` against `top_p=1.0`.
+3. Do not treat `top_k` as an OpenRouter/LM Studio audit-lane lever unless the
+   payload actually sends it; on recent measured paths it was a no-op.
+4. Keep thinking/reasoning off for benchmark claims. If thinking is tested,
+   wall it off as a separate experimental lane because it adds cost and
+   provider-behavior variance.
+5. Exclude `min_p` unless a specific failure points to prose-quality filtering;
+   the known problem class is source fidelity, not fluent generation.
+6. Stratify row churn by source-fidelity hardness, not only aggregate score:
+   non-ASCII rows, citation/identifier rows, proper-name rows, exact-quote
+   rows, and rare-token rows should move disproportionately if the hypothesis
+   is real.
+7. Promote a settings change only if it improves the targeted strata, preserves
+   ordinary exact rows, keeps compatibility/runtime/write hygiene at zero, and
+   repeats under at least an N=2 draw or unlike transfer slice.
+
+Stop the settings lane if movement is uniform, random, or mostly churn between
+previously exact rows. The goal is not to tune prose. The goal is to preserve
+source-contained facts more faithfully.

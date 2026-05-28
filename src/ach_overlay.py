@@ -120,6 +120,11 @@ def analyze_ach_overlay(payload: dict[str, Any]) -> dict[str, Any]:
         "omission_effects": omission_effects,
         "hypothesis_scores": hypothesis_scores,
         "diagnostic_evidence": _diagnostic_evidence(evidence=evidence, matrix=matrix),
+        "top_support_contributions": _top_support_contributions(
+            evidence=evidence,
+            matrix=matrix,
+            hypothesis_scores=hypothesis_scores,
+        ),
         "sensitivity": sensitivity,
         "surviving_hypotheses": [
             item
@@ -383,6 +388,43 @@ def _diagnostic_evidence(
             }
         )
     rows.sort(key=lambda item: (-item["diagnostic_score"], item["evidence_id"]))
+    return rows
+
+
+def _top_support_contributions(
+    *,
+    evidence: dict[str, dict[str, Any]],
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    hypothesis_scores: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    top_ids = [
+        str(item.get("hypothesis_id", ""))
+        for item in hypothesis_scores
+        if item.get("rank") == 1
+    ]
+    if len(top_ids) != 1:
+        return []
+    top_id = top_ids[0]
+    top_score = next((item for item in hypothesis_scores if item.get("hypothesis_id") == top_id), {})
+    total_support = int(top_score.get("consistency_weight", 0) or 0)
+    rows: list[dict[str, Any]] = []
+    for evidence_id, evidence_item in evidence.items():
+        judgment = matrix[evidence_id][top_id]
+        assessment = str(judgment.get("assessment", ""))
+        weight = int(judgment.get("weight", 0) or 0)
+        support_weight = weight if assessment == "consistent" else 0
+        rows.append(
+            {
+                "evidence_id": evidence_id,
+                "label": str(evidence_item.get("label", evidence_id)),
+                "top_hypothesis_id": top_id,
+                "assessment": assessment,
+                "weight": weight,
+                "support_weight": support_weight,
+                "support_share": round(support_weight / total_support, 4) if total_support > 0 else 0.0,
+            }
+        )
+    rows.sort(key=lambda item: (-item["support_weight"], item["evidence_id"]))
     return rows
 
 
