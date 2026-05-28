@@ -15,6 +15,7 @@ from scripts.run_domain_bootstrap_qa import (
     _counsel_opinion_hint_queries,
     _classification_deferral_effect_companion,
     _complementary_relation_hint_queries,
+    _compiled_case_identifier_location_roster_companion,
     _conversion_assessment_delta_companion,
     _clinic_device_recall_companion,
     _dedupe_helper_query_results,
@@ -3568,6 +3569,59 @@ def test_source_record_named_section_window_rejects_weak_list_heading_overlap() 
     )
 
     assert companion is None
+
+
+def test_compiled_case_identifier_location_roster_groups_same_row_case_ids() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "case_id(32_ca_160759).",
+        "case_id(32_rc_109684).",
+        "case_id(374_nlrb_no_46).",
+        "case_id(09_ca_307806).",
+        "case_id(373_nlrb_no_145).",
+        "case_location(32_ca_160759, milpitas_ca).",
+        "case_location(374_nlrb_no_46, milpitas_ca).",
+        "source_record_row(src_line_0010, labeled_line, 10, agency_summary, first_entry).",
+        "source_record_text_atom(src_line_0010, first_entry_32_ca_160759_and_32_rc_109684_374_nlrb_no_46_milpitas_ca).",
+        "source_record_surface_mention(src_line_0010, v_32_ca_160759, '32-CA-160759').",
+        "source_record_surface_mention(src_line_0010, v_32_rc_109684, '32-RC-109684').",
+        "source_record_surface_mention(src_line_0010, v_374_nlrb_no, '374 NLRB No').",
+        "source_record_surface_mention(src_line_0010, v_46, '46').",
+        "source_record_surface_mention(src_line_0010, milpitas_ca, 'Milpitas CA').",
+        "source_record_row(src_line_0020, labeled_line, 20, agency_summary, appellate_entry).",
+        "source_record_text_atom(src_line_0020, appellate_entry_board_no_09_ca_307806_reported_at_373_nlrb_no_145_6th_cir).",
+        "source_record_surface_mention(src_line_0020, v_09_ca_307806, '09-CA-307806').",
+        "source_record_surface_mention(src_line_0020, v_373_nlrb_no_145, '373 NLRB No. 145').",
+        "source_record_surface_mention(src_line_0020, v_6th_cir, '6th Cir').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _compiled_case_identifier_location_roster_companion(
+        runtime,
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["case identifiers", "geographic location"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    first = rows[0]
+    assert first["SourceRow"] == "src_line_0010"
+    assert first["CaseIDAtoms"] == "32_ca_160759,32_rc_109684,374_nlrb_no_46"
+    assert "32-RC-109684" in first["CaseIDDisplay"]
+    assert first["LocationAtoms"] == "milpitas_ca"
+    assert first["LocationDisplay"] == "Milpitas CA"
+    second = rows[1]
+    assert second["SourceRow"] == "src_line_0020"
+    assert second["CaseIDAtoms"] == "09_ca_307806,373_nlrb_no_145"
+    assert second["LocationDisplay"] == "6th Cir"
 
 
 def test_source_record_named_section_window_requires_structured_intent() -> None:

@@ -18726,6 +18726,7 @@ def _source_record_messy_summary_companions(
         _source_record_assessment_contrast_companion(runtime, utterance=utterance),
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
         _source_record_identifier_set_companion(runtime, utterance=utterance),
+        _compiled_case_identifier_location_roster_companion(runtime, query_intents=query_intents),
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance, query_intents=query_intents),
@@ -19891,6 +19892,250 @@ def _source_record_identifier_display(*, label: str, value: str, text_atom: str 
         number = _first_identifier_number(normalized)
         return f"FEI {number}" if number else _display_source_phrase(raw_value)
     return _display_source_phrase(raw_value)
+
+
+def _compiled_case_identifier_location_roster_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    if not _compiled_case_identifier_location_roster_active(query_intents):
+        return None
+
+    case_ids = _compiled_case_ids(runtime)
+    if not case_ids:
+        return None
+    direct_locations = _compiled_case_locations(runtime)
+    text_atoms = _source_record_text_atoms(runtime)
+    if not text_atoms:
+        return None
+    surfaces_by_row = _source_record_surface_mentions_by_row(runtime)
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for source_row, text_atom in sorted(text_atoms, key=lambda item: _source_row_sort_key(item[0])):
+        row_case_ids = [
+            case_id
+            for case_id in case_ids
+            if _source_record_row_contains_case_id(
+                case_id=case_id,
+                text_atom=text_atom,
+                surface_mentions=surfaces_by_row.get(source_row, []),
+            )
+        ]
+        if not row_case_ids:
+            continue
+        row_location_atoms = [
+            direct_locations[case_id]
+            for case_id in row_case_ids
+            if case_id in direct_locations and direct_locations[case_id]
+        ]
+        if not row_location_atoms:
+            row_location_atoms = _source_record_row_location_like_atoms(surfaces_by_row.get(source_row, []))
+        if not row_location_atoms:
+            continue
+        location_display = "; ".join(
+            _source_record_surface_or_atom_display(
+                atom=location_atom,
+                surface_mentions=surfaces_by_row.get(source_row, []),
+            )
+            for location_atom in _dedupe_preserve_order(row_location_atoms)
+        )
+        identifier_display = "; ".join(
+            _source_record_case_identifier_display(
+                case_id,
+                surface_mentions=surfaces_by_row.get(source_row, []),
+                text_atom=text_atom,
+            )
+            for case_id in row_case_ids
+        )
+        key = (source_row, ",".join(row_case_ids))
+        if key in seen:
+            continue
+        seen.add(key)
+        support_rows.append(
+            {
+                "SupportKind": "compiled_case_identifier_location_roster_item",
+                "SourceRow": source_row,
+                "CaseIDAtoms": ",".join(row_case_ids),
+                "CaseIDDisplay": identifier_display,
+                "LocationAtoms": ",".join(_dedupe_preserve_order(row_location_atoms)),
+                "LocationDisplay": location_display,
+                "SourceTextAtom": text_atom,
+                "SourceTextDisplay": _display_source_phrase(text_atom),
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+
+    if not support_rows:
+        return None
+    summary_display = "; ".join(
+        f"{row['CaseIDDisplay']} - {row['LocationDisplay']}" for row in support_rows
+    )
+    rows = [
+        *support_rows,
+        {
+            "SupportKind": "compiled_case_identifier_location_roster_summary",
+            "SourceRow": "compiled_case_identifier_location_roster",
+            "EntryCount": str(len(support_rows)),
+            "RosterDisplay": summary_display,
+            "SupportClass": "deterministic-source-record-summary",
+        },
+    ]
+    return {
+        "query": "compiled_case_identifier_location_roster_support(SourceRow, CaseIDAtoms, LocationAtoms).",
+        "result": {
+            "status": "success",
+            "predicate": "compiled_case_identifier_location_roster_support",
+            "prolog_query": "compiled_case_identifier_location_roster_support(SourceRow, CaseIDAtoms, LocationAtoms).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only case identifier/location roster support grouped admitted case_id rows by "
+                    "admitted source-record rows and location evidence; no durable case or location fact was written"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "case_id(CaseID).",
+            "case_location(CaseID, Location).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_surface_mention(SourceRow, MentionAtom, MentionDisplay).",
+        ],
+    }
+
+
+def _compiled_case_identifier_location_roster_active(query_intents: list[dict[str, Any]] | None) -> bool:
+    intent = _first_query_intent(query_intents, "list", "source_location")
+    if not intent:
+        return False
+    tokens = _query_intents_target_tokens(query_intents) | _query_intent_constraint_tokens(intent)
+    identifier_tokens = {
+        "case",
+        "cases",
+        "citation",
+        "citations",
+        "docket",
+        "identifier",
+        "identifiers",
+        "number",
+        "numbers",
+    }
+    location_tokens = {"geographic", "location", "locations", "place", "venue"}
+    return bool(tokens & identifier_tokens) and bool(tokens & location_tokens)
+
+
+def _compiled_case_ids(runtime: CorePrologRuntime) -> list[str]:
+    out: list[str] = []
+    for row in _runtime_rows(runtime, "case_id(CaseID)."):
+        case_id = str(row.get("CaseID", "")).strip()
+        if case_id and case_id not in out:
+            out.append(case_id)
+    return out
+
+
+def _compiled_case_locations(runtime: CorePrologRuntime) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for row in _runtime_rows(runtime, "case_location(CaseID, Location)."):
+        case_id = str(row.get("CaseID", "")).strip()
+        location = str(row.get("Location", "")).strip()
+        if case_id and location and case_id not in out:
+            out[case_id] = location
+    return out
+
+
+def _source_record_surface_mentions_by_row(runtime: CorePrologRuntime) -> dict[str, list[tuple[str, str]]]:
+    out: dict[str, list[tuple[str, str]]] = {}
+    for fact in _runtime_fact_rows(runtime):
+        if str(fact.get("predicate", "")).strip() != "source_record_surface_mention":
+            continue
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if len(args) < 3:
+            continue
+        out.setdefault(args[0], []).append((args[1], args[2].strip("'")))
+    return out
+
+
+def _source_record_row_contains_case_id(
+    *,
+    case_id: str,
+    text_atom: str,
+    surface_mentions: list[tuple[str, str]],
+) -> bool:
+    case_key = _compact_identifier_key(case_id)
+    if not case_key:
+        return False
+    if case_key in _compact_identifier_key(text_atom):
+        return True
+    for atom, display in surface_mentions:
+        if case_key in _compact_identifier_key(atom) or case_key in _compact_identifier_key(display):
+            return True
+    return False
+
+
+def _source_record_case_identifier_display(
+    case_id: str,
+    *,
+    surface_mentions: list[tuple[str, str]],
+    text_atom: str,
+) -> str:
+    case_key = _compact_identifier_key(case_id)
+    for atom, display in surface_mentions:
+        atom_key = _compact_identifier_key(atom)
+        display_key = _compact_identifier_key(display)
+        normalized_atom_key = _compact_identifier_key(_normalize_source_record_display_value(atom))
+        if case_key and case_key in {atom_key, display_key, normalized_atom_key}:
+            return display
+    return _display_case_identifier_atom(case_id, text_atom=text_atom)
+
+
+def _display_case_identifier_atom(case_id: str, *, text_atom: str = "") -> str:
+    atom = _normalize_source_record_display_value(case_id)
+    reporter_match = re.fullmatch(r"(?P<volume>\d+)_(?P<reporter>[a-z][a-z0-9]*)_no_(?P<number>\d+)", atom)
+    if reporter_match:
+        return (
+            f"{reporter_match.group('volume')} "
+            f"{reporter_match.group('reporter').upper()} No. "
+            f"{reporter_match.group('number')}"
+        )
+    if re.fullmatch(r"\d{2}_[a-z]{2}_\d{5,6}", atom):
+        parts = atom.split("_", 2)
+        return f"{parts[0]}-{parts[1].upper()}-{parts[2]}"
+    if atom and atom in _normalize_text_filter_atom(text_atom):
+        return _display_source_phrase(atom)
+    return _display_source_phrase(atom)
+
+
+def _source_record_surface_or_atom_display(*, atom: str, surface_mentions: list[tuple[str, str]]) -> str:
+    atom_key = _compact_identifier_key(atom)
+    for surface_atom, display in surface_mentions:
+        surface_key = _compact_identifier_key(surface_atom)
+        normalized_surface_key = _compact_identifier_key(_normalize_source_record_display_value(surface_atom))
+        if atom_key and atom_key in {surface_key, normalized_surface_key}:
+            return display
+    return _display_source_phrase(atom)
+
+
+def _source_record_row_location_like_atoms(surface_mentions: list[tuple[str, str]]) -> list[str]:
+    out: list[str] = []
+    for atom, _display in surface_mentions:
+        normalized = _normalize_source_record_display_value(atom)
+        if re.fullmatch(r"\d+(?:st|nd|rd|th)_cir", normalized) and normalized not in out:
+            out.append(normalized)
+    return out
+
+
+def _dedupe_preserve_order(values: list[str]) -> list[str]:
+    out: list[str] = []
+    for value in values:
+        if value and value not in out:
+            out.append(value)
+    return out
 
 
 def _source_record_citation_list_companion(
@@ -33297,7 +33542,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_case_identifier_location_roster_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Calendar-authority policy: source_record_era_date_conversion_support rows are not source-stated facts; they are deterministic calendar conversions triggered by admitted source-display era dates and must be treated as external calendar authority support.",
             "Parenthetical role/name support policy: source_record_parenthetical_role_name_support rows are display evidence only. They can support source-stated entity/person/role rosters when activated by admitted person_role query results, but they do not create durable identity or alias facts.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",

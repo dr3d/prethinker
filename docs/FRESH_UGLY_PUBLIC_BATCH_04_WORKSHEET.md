@@ -1337,3 +1337,64 @@ Run the next fresh ugly batch as a thermometer before doing more mechanism work
 on these same fixtures. The affected-set blockers now all have current targeted
 passes; continuing to polish this set risks learning the fixture instead of the
 instrument.
+
+## Targeted Residue Repair 2026-05-28 - Case Identifier/Location Roster
+
+Question:
+
+`nlrb_ugly_001 q011` remained the cleanest visible residue after the
+section-window overreach was removed. The row asked for all case identifiers,
+citations, and geographic locations in an official decision-summary roster.
+
+Read:
+
+- This was not a raw source absence. The compile had admitted `case_id/1`,
+  partial `case_location/2`, and source-record rows/surface mentions carrying
+  the missing same-entry identifiers.
+- The failed relationship was roster-shaped: identifiers appearing in the same
+  admitted source-record entry needed to be grouped with the entry location
+  without creating new durable `case_location/2` facts.
+- The rejected path remains rejected: do not restore broad named-section-window
+  support for this row. That caused trigger overreach and returned a section
+  window instead of the requested identifier/location roster.
+
+Harness change:
+
+- Added `compiled_case_identifier_location_roster_support/3` as a query-only
+  support surface.
+- Activation is caged behind structured `query_intents` asking for a
+  list/source-location shape whose target or constraint tokens include both an
+  identifier/citation/case shape and a location/venue shape.
+- Inputs are admitted `case_id/1`, admitted `case_location/2`, admitted
+  `source_record_text_atom/2`, and admitted `source_record_surface_mention/3`.
+  It does not read raw fixture files and does not write durable facts.
+
+Replay:
+
+```text
+C:\prethinker_tmp_archive\nlrb_q011_case_roster_replay_20260528\
+
+q011:
+partial -> exact
+response envelope: established
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+wallclock: ~42s on OpenRouter
+```
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -q
+445 passed
+
+python -m py_compile scripts\run_domain_bootstrap_qa.py
+pass
+```
+
+Discipline note:
+
+This is targeted mechanism evidence, not a new Batch 04 score. The next fresh
+ugly batch should tell whether official-record roster grouping transfers
+outside this NLRB row.
