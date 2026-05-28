@@ -281,8 +281,8 @@ caveats.
   [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
 - Real-world source-surface worksheet:
   [Source Ledger Compile Surface Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_LEDGER_COMPILE_SURFACE_WORKSHEET.md)
-- Fresh ugly Batch 03 worksheet:
-  [Fresh Ugly Public Batch 03 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_03_WORKSHEET.md)
+- Fresh ugly transfer worksheet:
+  [Fresh Ugly Public Batch 04 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md)
 - QA boundary:
   [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
 - Compiled artifact contract:

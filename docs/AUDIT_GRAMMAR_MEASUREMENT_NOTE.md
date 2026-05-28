@@ -80,8 +80,8 @@ runtime writes rescue weak compiles.
   `datasets/real_world_transfer/20260521`
 - Fresh ugly public Batch 03 fixture inputs:
   `datasets/real_world_transfer/fresh_ugly_public_20260524_03`
-- Fresh ugly public Batch 03 worksheet:
-  `docs/FRESH_UGLY_PUBLIC_BATCH_03_WORKSHEET.md`
+- Fresh ugly public transfer worksheet:
+  `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
 - Sealed unseen fixture inputs:
   `datasets/sealed_unseen/20260521`
 - Native compile summary:
