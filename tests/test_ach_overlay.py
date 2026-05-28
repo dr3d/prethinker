@@ -189,6 +189,65 @@ def test_ach_sensitivity_surfaces_top_support_drop_from_row_dependency() -> None
     ]
 
 
+def test_ach_sensitivity_surfaces_family_support_drop() -> None:
+    report = analyze_ach_overlay(
+        {
+            "hypotheses": [{"id": "h1"}, {"id": "h2"}],
+            "evidence": [
+                {"id": "e1", "diagnosticity": "medium"},
+                {"id": "e2", "diagnosticity": "medium"},
+                {"id": "e3", "diagnosticity": "medium"},
+                {"id": "e4", "diagnosticity": "critical"},
+                {"id": "e5", "diagnosticity": "critical"},
+            ],
+            "judgments": [
+                {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e1", "hypothesis_id": "h2", "assessment": "neutral"},
+                {"evidence_id": "e2", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e2", "hypothesis_id": "h2", "assessment": "neutral"},
+                {"evidence_id": "e3", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e3", "hypothesis_id": "h2", "assessment": "neutral"},
+                {"evidence_id": "e4", "hypothesis_id": "h1", "assessment": "consistent"},
+                {"evidence_id": "e4", "hypothesis_id": "h2", "assessment": "neutral"},
+                {"evidence_id": "e5", "hypothesis_id": "h1", "assessment": "consistent", "weight": 4},
+                {"evidence_id": "e5", "hypothesis_id": "h2", "assessment": "neutral"},
+            ],
+            "omission_effects": [
+                {
+                    "omitted_evidence_id": "e1",
+                    "evidence_id": "e3",
+                    "hypothesis_id": "h1",
+                    "assessment": "neutral",
+                    "weight": 1,
+                    "rationale": "e3 needs e1 for support.",
+                },
+                {
+                    "omitted_evidence_id": "e2",
+                    "evidence_id": "e3",
+                    "hypothesis_id": "h1",
+                    "assessment": "neutral",
+                    "weight": 1,
+                    "rationale": "e3 also needs e2 for support.",
+                },
+            ],
+        }
+    )
+
+    assert report["sensitivity"] == [
+        {
+            "evidence_id": "e1+e2",
+            "evidence_ids": ["e1", "e2"],
+            "label": "e1 + e2",
+            "baseline_top": ["h1"],
+            "top_without_evidence": ["h1"],
+            "reason": "top_hypothesis_support_drops_after_evidence_family_omission",
+            "applied_omission_effect_count": 2,
+            "support_drop": 6,
+            "support_drop_ratio": 0.4,
+        }
+    ]
+
+
 def test_ach_ignores_invalid_omission_effect_references() -> None:
     report = analyze_ach_overlay(
         {

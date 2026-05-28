@@ -20,6 +20,7 @@ DEFAULT_DIAGNOSTIC_WEIGHTS = {
     "critical": 5,
 }
 SUPPORT_DROP_SENSITIVITY_RATIO = 0.3
+FAMILY_SUPPORT_DROP_SENSITIVITY_RATIO = 0.4
 AXIS_FIT_PENALTIES = {
     "direct": 0,
     "partial": 3,
@@ -250,20 +251,24 @@ def _score_hypotheses(
     evidence: dict[str, dict[str, Any]],
     matrix: dict[str, dict[str, dict[str, Any]]],
     omitted_evidence_id: str | None = None,
+    omitted_evidence_ids: set[str] | None = None,
     omission_effects: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
+    omitted_ids = set(omitted_evidence_ids or set())
+    if omitted_evidence_id:
+        omitted_ids.add(omitted_evidence_id)
     counters: dict[str, dict[str, int]] = {
         hypothesis_id: defaultdict(int) for hypothesis_id in hypotheses
     }
     for evidence_id in evidence:
-        if evidence_id == omitted_evidence_id:
+        if evidence_id in omitted_ids:
             continue
         for hypothesis_id in hypotheses:
             judgment = _sensitivity_judgment(
                 evidence_id=evidence_id,
                 hypothesis_id=hypothesis_id,
                 matrix=matrix,
-                omitted_evidence_id=omitted_evidence_id,
+                omitted_evidence_ids=omitted_ids,
                 omission_effects=omission_effects or [],
             )
             assessment = judgment["assessment"]
@@ -338,14 +343,14 @@ def _sensitivity_judgment(
     evidence_id: str,
     hypothesis_id: str,
     matrix: dict[str, dict[str, dict[str, Any]]],
-    omitted_evidence_id: str | None,
+    omitted_evidence_ids: set[str],
     omission_effects: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    if not omitted_evidence_id:
+    if not omitted_evidence_ids:
         return matrix[evidence_id][hypothesis_id]
     for effect in omission_effects:
         if (
-            effect["omitted_evidence_id"] == omitted_evidence_id
+            effect["omitted_evidence_id"] in omitted_evidence_ids
             and effect["evidence_id"] == evidence_id
             and effect["hypothesis_id"] == hypothesis_id
         ):
@@ -482,7 +487,154 @@ def _sensitivity_analysis(
                     "support_drop_ratio": support_drop["drop_ratio"],
                 }
             )
+    sensitivity_rows.extend(
+        _family_sensitivity_analysis(
+            hypotheses=hypotheses,
+            evidence=evidence,
+            matrix=matrix,
+            baseline_scores=baseline_scores,
+            baseline_top=baseline_top,
+            existing_rows=sensitivity_rows,
+            omission_effects=omission_effects,
+        )
+    )
     return sensitivity_rows
+
+
+def _family_sensitivity_analysis(
+    *,
+    hypotheses: dict[str, dict[str, Any]],
+    evidence: dict[str, dict[str, Any]],
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    baseline_scores: list[dict[str, Any]],
+    baseline_top: set[str],
+    existing_rows: list[dict[str, Any]],
+    omission_effects: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    if len(baseline_top) != 1 or not omission_effects:
+        return []
+    nearest_margin = _nearest_disconfirmation_margin(
+        baseline_scores=baseline_scores,
+        baseline_top=baseline_top,
+    )
+    if nearest_margin > AXIS_FIT_PENALTIES["off_axis"]:
+        return []
+    top_id = next(iter(baseline_top))
+    already_sensitive = {
+        str(row.get("evidence_id", ""))
+        for row in existing_rows
+        if isinstance(row.get("evidence_id", ""), str)
+    }
+    candidate_ids = _family_sensitivity_candidate_ids(
+        matrix=matrix,
+        top_id=top_id,
+        omission_effects=omission_effects,
+    )
+    out: list[dict[str, Any]] = []
+    for group in _family_candidate_groups(candidate_ids, already_sensitive=already_sensitive):
+        rescored = _score_hypotheses(
+            hypotheses=hypotheses,
+            evidence=evidence,
+            matrix=matrix,
+            omitted_evidence_ids=set(group),
+            omission_effects=omission_effects,
+        )
+        new_top = {item["hypothesis_id"] for item in rescored if item["rank"] == 1}
+        applied_effects = [
+            effect
+            for effect in omission_effects
+            if effect.get("omitted_evidence_id") in group
+            and effect.get("evidence_id") not in group
+        ]
+        top_support_effects = [
+            effect
+            for effect in applied_effects
+            if effect.get("hypothesis_id") in baseline_top
+            and matrix[str(effect.get("evidence_id"))][str(effect.get("hypothesis_id"))]["assessment"]
+            == "consistent"
+            and str(effect.get("assessment")) != "consistent"
+        ]
+        if not top_support_effects:
+            continue
+        support_drop = _top_support_drop(
+            baseline_scores=baseline_scores,
+            rescored_scores=rescored,
+            baseline_top=baseline_top,
+        )
+        if new_top == baseline_top and support_drop["drop_ratio"] < FAMILY_SUPPORT_DROP_SENSITIVITY_RATIO:
+            continue
+        out.append(
+            {
+                "evidence_id": "+".join(group),
+                "evidence_ids": list(group),
+                "label": " + ".join(str(evidence[evidence_id].get("label", evidence_id)) for evidence_id in group),
+                "baseline_top": sorted(baseline_top),
+                "top_without_evidence": sorted(new_top),
+                "reason": (
+                    "top_hypothesis_set_changes_after_evidence_family_omission"
+                    if new_top != baseline_top
+                    else "top_hypothesis_support_drops_after_evidence_family_omission"
+                ),
+                "applied_omission_effect_count": len(applied_effects),
+                "support_drop": support_drop["drop"],
+                "support_drop_ratio": support_drop["drop_ratio"],
+            }
+        )
+    return out
+
+
+def _nearest_disconfirmation_margin(
+    *,
+    baseline_scores: list[dict[str, Any]],
+    baseline_top: set[str],
+) -> int:
+    if len(baseline_top) != 1:
+        return 999
+    top_id = next(iter(baseline_top))
+    top = next((item for item in baseline_scores if item.get("hypothesis_id") == top_id), None)
+    if not top:
+        return 999
+    top_score = int(top.get("disconfirmation_score", 0) or 0)
+    alternatives = [
+        int(item.get("disconfirmation_score", 0) or 0) - top_score
+        for item in baseline_scores
+        if item.get("hypothesis_id") != top_id
+    ]
+    return min(alternatives) if alternatives else 999
+
+
+def _family_sensitivity_candidate_ids(
+    *,
+    matrix: dict[str, dict[str, dict[str, Any]]],
+    top_id: str,
+    omission_effects: list[dict[str, Any]],
+) -> list[str]:
+    ids: list[str] = []
+    for effect in omission_effects:
+        for field in ("omitted_evidence_id", "evidence_id"):
+            evidence_id = str(effect.get(field, "")).strip()
+            if not evidence_id or evidence_id in ids:
+                continue
+            if evidence_id not in matrix:
+                continue
+            if matrix[evidence_id][top_id]["assessment"] != "consistent":
+                continue
+            ids.append(evidence_id)
+    return ids
+
+
+def _family_candidate_groups(
+    candidate_ids: list[str],
+    *,
+    already_sensitive: set[str],
+) -> list[tuple[str, str]]:
+    out: list[tuple[str, str]] = []
+    for left_index, left in enumerate(candidate_ids):
+        for right in candidate_ids[left_index + 1 :]:
+            if left in already_sensitive and right in already_sensitive:
+                continue
+            out.append(tuple(sorted((left, right))))
+    return sorted(set(out))
 
 
 def _top_support_drop(

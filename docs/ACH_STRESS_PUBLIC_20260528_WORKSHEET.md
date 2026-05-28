@@ -784,3 +784,76 @@ python -m py_compile src\semantic_ir.py scripts\run_domain_bootstrap_file.py scr
 4. Keep `--evidence-role-diagnostics` optional until it proves it can coexist
    with dependency capture.
 5. Do not let ACH reports mutate compile, QA, or KB truth.
+
+## Batch 03 R3 Family-Sensitivity Rescore
+
+Question:
+
+The remaining medium blocker was not single-row pivotal evidence. It was
+family-level weakening: two or more pieces of evidence jointly frame the top
+hypothesis, but omitting either one alone may not cross the support-drop
+threshold.
+
+Implementation:
+
+- Added deterministic evidence-family sensitivity inside `src/ach_overlay.py`.
+- The family pass considers small omission-effect-linked evidence pairs only
+  after ordinary single-row sensitivity has run.
+- It reports a family row when:
+  - the baseline matrix has one top hypothesis;
+  - the nearest alternative is close enough to make support weakening
+    meaningful;
+  - at least one applied omission effect changes a top-hypothesis support cell;
+  - the family omission changes the top set or drops top support at the locked
+    family threshold.
+- This remains overlay-only. It does not call the LLM, mutate the KB, mutate QA
+  verdicts, or write compile facts.
+
+R3 rescore:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_03_family_sensitivity_rescore_r3_20260528\ach_family_rescore_r3
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_03_family_sensitivity_rescore_r3_20260528\ach_family_rescore_r3_summary.md
+```
+
+Aggregate:
+
+```text
+ranking correct: 6 / 6
+matrix complete: 6 / 6
+warnings: 0
+contract residual fixtures: 0
+high pivotal detected: 2 / 2
+medium detected: 2 / 2
+low clean: 2 / 2
+```
+
+Per-fixture read:
+
+```text
+enforcement_single_document_hook_001: high, pivotal e1 detected
+ntsb_pivotal_physical_001: high, pivotal e1 detected
+legal_controls_medium_001: medium detected, includes family rows
+regulatory_quality_medium_001: medium detected, e1+e2 family row
+public_order_low_001: low clean
+sec_scope_low_001: low clean
+```
+
+Read:
+
+- Medium sensitivity is no longer uniformly immature on this batch: the
+  deterministic family pass recovers the previously missed medium fixture
+  without reintroducing low-control false positives.
+- This is still a same-batch rescore, not a solved-product claim. The next
+  confirmation must be a fresh ACH stress batch with the family threshold
+  locked before the run.
+
+Validation:
+
+```text
+python -m pytest tests\test_ach_overlay.py tests\test_ach_payload_proposer.py -q
+18 passed
+
+python -m py_compile src\ach_overlay.py scripts\run_ach_payload_proposer.py scripts\summarize_ach_stress_run.py
+pass
+```
