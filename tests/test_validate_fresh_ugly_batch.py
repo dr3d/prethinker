@@ -199,6 +199,52 @@ def test_validate_fresh_ugly_batch_flags_bad_ach_payload_shape(tmp_path) -> None
     assert "ach_payload_expected_read_not_object" in issues
 
 
+def test_validate_fresh_ugly_batch_checks_ach_batch_distribution(tmp_path) -> None:
+    batch = tmp_path / "fresh_ach_stress_public_20260528_04"
+    for name, sensitivity in [
+        ("ach_high_single_pivot_001", "high"),
+        ("ach_low_redundant_support_001", "low"),
+    ]:
+        _write_fixture(batch, name, question_count=10, answer_count=10)
+        _write_extended_files(batch, name, question_count=10)
+        _write_ach_payload(batch, name, sensitivity=sensitivity)
+        metadata = batch / name / "metadata.json"
+        data = json.loads(metadata.read_text(encoding="utf-8"))
+        data.update(
+            {
+                "schema_version": "fresh_ach_stress_batch_v2",
+                "batch_id": "fresh_ach_stress_public_20260528_04",
+                "fixture_id": name,
+                "language": "en",
+                "public_source": True,
+                "question_count": 10,
+                "sensitivity_target": sensitivity,
+            }
+        )
+        metadata.write_text(json.dumps(data), encoding="utf-8")
+    (batch / "batch_manifest.json").write_text(
+        json.dumps(
+            {
+                "batch_id": "fresh_ach_stress_public_20260528_04",
+                "expected_distribution": {"high": 2, "medium": 0, "low": 0},
+                "fixtures": [
+                    {"fixture_id": "ach_high_single_pivot_001"},
+                    {"fixture_id": "missing_fixture"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_batch(batch, expected_documents=2, expected_questions=10, package_profile="ach")
+
+    assert report["summary"]["status"] == "fail"
+    assert "sensitivity_distribution_high:1 expected:2" in report["summary"]["batch_issues"]
+    assert "sensitivity_distribution_low:1 expected:0" in report["summary"]["batch_issues"]
+    assert "batch_manifest_missing_fixture_ids:ach_low_redundant_support_001" in report["summary"]["batch_issues"]
+    assert "batch_manifest_fixture_ids_not_found:missing_fixture" in report["summary"]["batch_issues"]
+
+
 def test_validate_fresh_ugly_batch_flags_missing_files_and_count_mismatch(tmp_path) -> None:
     batch = tmp_path / "fresh_ugly_public_20260524_03"
     _write_fixture(batch, "osha_incident_ugly_006", question_count=24, answer_count=23)

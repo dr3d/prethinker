@@ -105,6 +105,8 @@ def validate_batch(
                 package_profile=package_profile,
             )
         )
+    if package_profile == "ach":
+        batch_issues.extend(_ach_batch_issues(root, rows))
     issue_count = sum(len(row["issues"]) for row in rows) + len(batch_issues)
     warning_count = sum(len(row["warnings"]) for row in rows)
     return {
@@ -204,6 +206,9 @@ def _validate_fixture(
         "oracle_row_count": oracle_count,
         "source_chars": len(source_text),
         "ach_payload": ach_payload_summary,
+        "sensitivity_target": str(metadata.get("sensitivity_target") or "").strip().lower()
+        if isinstance(metadata, dict)
+        else "",
         "issues": issues,
         "warnings": warnings,
         "warning_details": source_support["details"],
@@ -454,6 +459,51 @@ def _validate_ach_payload(path: Path, *, issues: list[str]) -> dict[str, Any] | 
         "evidence_count": evidence_count,
         "sensitivity_expectation": sensitivity,
     }
+
+
+def _ach_batch_issues(root: Path, rows: list[dict[str, Any]]) -> list[str]:
+    issues: list[str] = []
+    manifest_path = root / "batch_manifest.json"
+    manifest: dict[str, Any] = {}
+    if manifest_path.exists():
+        try:
+            value = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if isinstance(value, dict):
+                manifest = value
+        except Exception:
+            manifest = {}
+    fixture_names = {str(row.get("fixture") or "") for row in rows}
+    manifest_fixtures = manifest.get("fixtures")
+    if isinstance(manifest_fixtures, list):
+        manifest_ids = {
+            str(item.get("fixture_id") or "").strip()
+            for item in manifest_fixtures
+            if isinstance(item, dict) and str(item.get("fixture_id") or "").strip()
+        }
+        missing_from_manifest = sorted(fixture_names - manifest_ids)
+        missing_from_tree = sorted(manifest_ids - fixture_names)
+        if missing_from_manifest:
+            issues.append(f"batch_manifest_missing_fixture_ids:{','.join(missing_from_manifest)}")
+        if missing_from_tree:
+            issues.append(f"batch_manifest_fixture_ids_not_found:{','.join(missing_from_tree)}")
+    distribution = {"high": 0, "medium": 0, "low": 0}
+    for row in rows:
+        sensitivity = str(row.get("sensitivity_target") or "").strip().lower()
+        if sensitivity in distribution:
+            distribution[sensitivity] += 1
+    expected_distribution = manifest.get("expected_distribution")
+    if isinstance(expected_distribution, dict):
+        for key in ("high", "medium", "low"):
+            try:
+                expected = int(expected_distribution.get(key, 0))
+            except (TypeError, ValueError):
+                issues.append(f"batch_manifest_expected_distribution_invalid:{key}")
+                continue
+            if distribution[key] != expected:
+                issues.append(f"sensitivity_distribution_{key}:{distribution[key]} expected:{expected}")
+    elif rows:
+        issues.append("batch_manifest_expected_distribution_missing")
+    return issues
 
 
 def _reference_source_support_report(
