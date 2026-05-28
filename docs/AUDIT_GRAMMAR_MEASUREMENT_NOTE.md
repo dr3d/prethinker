@@ -1,6 +1,6 @@
 # Audit Grammar Measurement Note
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 This note captures the current public measurement claim for Prethinker. It is
 not a benchmark leaderboard. It is a disciplined snapshot of the instrument as
@@ -57,8 +57,12 @@ runtime writes rescue weak compiles.
   comparability claim is therefore same named corpus, not proven
   byte-identical corpus.
 - The compile quality gate became noisier on the native restamp:
-  `26 / 30 -> 9 / 47` pass/hold. QA improved despite that, so the gate noise is
-  a calibration and diagnostic problem, not a native QA blocker.
+  `26 / 30 -> 9 / 47` pass/hold under the old overloaded gate. Current tooling
+  also reports reason tiers; a 2026-05-28 rescore of saved May 22 native compile
+  artifacts reads `2 / 54` old-style pass/hold, with `11` blocking-tier holds,
+  `53` diagnostic-tier holds, and `0` advisory holds. QA improved despite the
+  gate noise, so the gate is a calibration and diagnostic problem, not a native
+  QA blocker.
 - The diagnostic rejected flat-pass skip count changed from `128 -> 0`; this is
   useful evidence but should be interpreted with the gate-change caveat.
 - Query-surface gaps increased from `20 -> 29` even as compile-surface,
@@ -90,6 +94,8 @@ runtime writes rescue weak compiles.
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_qa_stamp_20260522_openrouter6_summary.json`
 - Fresh ugly public transfer worksheet:
   `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
+- Current fresh fixture request spec:
+  `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`
 - Retired sealed-unseen worksheet in the local cold archive:
   `C:\prethinker_tmp_archive\prestamp_hardening_worksheet_retired_20260522\PRESTAMP_HARDENING_WORKSHEET.md`
 
@@ -102,3 +108,5 @@ sealed-unseen authored result remains 95.0%, and the older four-fixture
 real-world spotcheck remains clean at latest fixture-level 160/0/0. The caveat
 is open: Batch 03 is not a single fresh rerun and has become partly tuned
 evidence, so the next product-useful check is another fresh ugly document set.
+Current active-instrument leakage audit is clean at `0` forbidden hits and `0`
+warning hits.

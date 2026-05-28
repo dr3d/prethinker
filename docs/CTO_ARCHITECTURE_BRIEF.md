@@ -1,6 +1,6 @@
 # CTO Architecture Brief
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 This is the fastest orientation for a new high-context collaborator. Read it
 as the current operating doctrine, not as a research diary.
@@ -180,11 +180,11 @@ Continue only if you find one of these:
 3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
 4. active code paths that would re-enable compatibility adapters by default.
 
-The next-cycle investigation is Batch 03 remaining residue, source-record/query
-surface boundaries, native compile-gate noise (`26 / 30 -> 9 / 47` pass/hold),
-and whether the next fresh ugly batch confirms transfer. Do not hide those
-caveats; they are part of the audit discipline that makes the measurement
-credible.
+The next-cycle investigation is fresh-transfer confirmation, source-record/query
+surface boundaries, and native compile-gate tiering. The old native gate
+headline shifted `26 / 30 -> 9 / 47` pass/hold; current tooling also separates
+blocking, diagnostic, and advisory reasons. Do not hide those caveats; they are
+part of the audit discipline that makes the measurement credible.
 
 ## Repo Hygiene
 

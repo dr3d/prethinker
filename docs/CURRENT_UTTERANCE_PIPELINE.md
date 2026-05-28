@@ -1,6 +1,6 @@
 # Current Utterance And Document Pipeline
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language

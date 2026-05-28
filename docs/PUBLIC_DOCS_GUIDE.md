@@ -1,6 +1,6 @@
 # Public Docs Guide
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 This is the public reading map. It should stay short and current. Git history
 and `C:\prethinker_tmp_archive` keep older research diaries, prompt snapshots,
@@ -33,6 +33,7 @@ dated run reports, and retired product lanes.
 - [Audit Grammar Technical Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)
+- [Next Fresh Fixture Requests](https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md)
 
 ## Lens And Product Story
 

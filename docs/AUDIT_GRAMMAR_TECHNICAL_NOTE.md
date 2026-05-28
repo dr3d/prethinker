@@ -1,6 +1,6 @@
 # Audit Grammar Technical Note
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 This is the public technical note for Prethinker's current measurement method.
 It explains what the audit grammar measures, why the discipline metrics matter,
@@ -13,7 +13,7 @@ what can be queried, and what gets counted.
 
 ## The Short Claim
 
-As of May 25, 2026, Prethinker measures as follows:
+As of May 28, 2026, Prethinker measures as follows:
 
 | Evidence class | Corpus | Result | Cleanliness counters |
 | --- | --- | ---: | --- |
@@ -168,11 +168,23 @@ May 22 restamp: 9 pass / 47 hold
 
 That is not hidden. It travels with the claim.
 
+The old pass/hold headline is now preserved as a continuity metric, not the
+only release signal. Current tooling also emits reason tiers:
+
+```text
+May 22 saved native artifacts, rescored on May 28:
+old-style gate: 2 pass / 54 hold
+blocking-tier holds: 11
+diagnostic-tier holds: 53
+advisory-tier holds: 0
+```
+
 QA improved to `92.33%` despite the gate shift. Operationally, this means the
 gate is flagging many source-claim, source-authority, vote-tally, quantity, and
 coexistence surfaces that did not all become answer misses. The gate may be
 useful diagnostic pressure, or it may be over-sensitive. The next cycle has to
-separate those cases rather than suppress the gate or loosen it blindly.
+separate blocking, diagnostic, and advisory cases rather than suppress the gate
+or loosen it blindly.
 
 ## Why Multiple Evidence Classes
 
@@ -227,7 +239,7 @@ These measurements do not claim:
 - proof that LLM-authored fixtures represent messy real-world documents;
 - proof that Batch 03 is an untouched benchmark after the May 25 mechanism
   work;
-- proof that the compile gate is calibrated correctly;
+- proof that the compile gate is calibrated correctly at every tier;
 - proof that `91.12%` and `92.33%` are strictly comparable under identical gate
   behavior;
 - proof that `92.33%` is a stable ceiling or floor.
@@ -265,7 +277,8 @@ The best reading is balanced:
   measurement, but the two runs carried different gate calibration behavior.
 - The sealed unseen authored transfer at `95.0%` is useful, but it is not a
   substitute for messy external documents.
-- The compile gate is noisy and must be investigated.
+- The compile gate is noisy, now tiered, and must be read by tier rather than
+  as one overloaded pass/hold number.
 - Query-surface regression is the most direct next technical pressure.
 - Three native-corpus regressions need structural reading from the worksheet
   trail, but their local names are not public doctrine.
@@ -281,6 +294,8 @@ caveats.
   [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
 - Fresh ugly transfer worksheet:
   [Fresh Ugly Public Batch 04 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md)
+- Current fresh fixture request spec:
+  [Next Fresh Fixture Requests](https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md)
 - QA boundary:
   [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
 - Compiled artifact contract:

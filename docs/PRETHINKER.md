@@ -146,7 +146,7 @@ role.
 
 ## Current Reality
 
-As of May 25, 2026:
+As of May 28, 2026:
 
 - the canonical interactive entryway is `process_utterance()` in [src/mcp_server.py](https://github.com/dr3d/prethinker/blob/main/src/mcp_server.py)
 - the console in [ui_gateway/](https://github.com/dr3d/prethinker/tree/main/ui_gateway) is the main manual test cockpit
@@ -162,6 +162,8 @@ As of May 25, 2026:
   a slice-combined current view, with zero compatibility rows, runtime load
   errors, or write proposals
 - compile-surface stability, source-fidelity preservation, palette governance, and unlike-document transfer are the active research pressures
+- compile-gate accounting now separates blocking, diagnostic, and advisory
+  reason tiers instead of treating every hold as the same kind of failure
 - lab automation, public benchmarking, and publishing are retired lanes; git history is the archive for that work
 
 That means the repo already supports the governed compiler shape directly.

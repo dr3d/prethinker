@@ -1,6 +1,6 @@
 # Product And Palette Governance
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 Prethinker has two related governance problems that should be kept together:
 
@@ -253,11 +253,12 @@ explicit caveat that Batch 03 is no longer untouched after mechanism repair and
 is not one single fresh 300-row rerun.
 
 The unresolved pressure is more specific: the native compile gate shifted from
-`26 / 30` pass/hold in the prior baseline to `9 / 47`, and query-surface gaps
-rose from `20` to `29`. Palette governance should now support that diagnosis:
-which unstable candidate signatures affect answer-bearing surfaces, which are
-only diagnostic noise, and which deserve profile-local retrieval, multi-draw
-priors, or direct compile-surface promotion.
+`26 / 30` pass/hold in the prior baseline to `9 / 47` under the old overloaded
+gate, current tooling now separates blocking/diagnostic/advisory gate reasons,
+and query-surface gaps rose from `20` to `29`. Palette governance should now
+support that diagnosis: which unstable candidate signatures affect
+answer-bearing surfaces, which are only diagnostic noise, and which deserve
+profile-local retrieval, multi-draw priors, or direct compile-surface promotion.
 
 The response path should stay audit-first:
 
