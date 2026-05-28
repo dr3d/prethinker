@@ -101,7 +101,8 @@ Current follow-up blockers:
   official-record roster and profile-contract repairs;
 - run a fresh ACH stress batch with family sensitivity locked before claiming
   ACH sensitivity is solved;
-- explain native compile-gate noise: `26 / 30 -> 9 / 47` pass/hold;
+- split native compile-gate output into blocking, diagnostic, and advisory
+  tiers before treating a noisy pass/hold headline as a release claim;
 - keep fixture nouns, row IDs, answer strings, and dataset labels out of the
   harness.
 

@@ -88,8 +88,8 @@ runtime writes rescue weak compiles.
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_compile_stamp_20260522_current_summary.json`
 - Native QA summary:
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_qa_stamp_20260522_openrouter6_summary.json`
-- Real-world surface worksheet:
-  `docs/SOURCE_LEDGER_COMPILE_SURFACE_WORKSHEET.md`
+- Fresh ugly public transfer worksheet:
+  `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
 - Retired sealed-unseen worksheet in the local cold archive:
   `C:\prethinker_tmp_archive\prestamp_hardening_worksheet_retired_20260522\PRESTAMP_HARDENING_WORKSHEET.md`
 

@@ -2272,11 +2272,16 @@ def _quality_gate_result(
     diagnostic_rejected_skipped = _optional_int(item.get("compile_diagnostic_rejected_skipped")) or 0
     if admitted <= 0:
         reasons.append("compile_admitted<=0")
+    tiered_reasons = _quality_gate_reason_tiers(reasons)
     return {
         "fixture": str(result.get("fixture", "")),
         "passed": not reasons,
+        "blocking_passed": not tiered_reasons["blocking_reasons"],
         "decision": "pass" if not reasons else "hold",
         "reasons": reasons,
+        "blocking_reasons": tiered_reasons["blocking_reasons"],
+        "diagnostic_reasons": tiered_reasons["diagnostic_reasons"],
+        "advisory_reasons": tiered_reasons["advisory_reasons"],
         "rough_score": rough_score,
         "risk_count": risk_count,
         "compile_admitted": admitted,
@@ -2298,6 +2303,47 @@ def _quality_gate_result(
         "identity_canonicality_flags": identity_flags,
         "compile_health_flags": compile_health_flags,
     }
+
+
+def _quality_gate_reason_tiers(reasons: list[str]) -> dict[str, list[str]]:
+    blocking: list[str] = []
+    diagnostic: list[str] = []
+    advisory: list[str] = []
+    for reason in reasons:
+        if _quality_gate_reason_is_blocking(reason):
+            blocking.append(reason)
+        elif _quality_gate_reason_is_diagnostic(reason):
+            diagnostic.append(reason)
+        else:
+            advisory.append(reason)
+    return {
+        "blocking_reasons": blocking,
+        "diagnostic_reasons": diagnostic,
+        "advisory_reasons": advisory,
+    }
+
+
+def _quality_gate_reason_is_blocking(reason: str) -> bool:
+    return (
+        reason.startswith("returncode=")
+        or reason in {"parsed_ok=false", "rough_score_missing", "risk_count_missing", "compile_admitted<=0"}
+        or reason.startswith("rough_score<")
+        or reason.startswith("risk_count>")
+        or reason.startswith("detail_wrapper_drift:")
+        or reason.startswith("compile_surface_contract:")
+        or reason.startswith("public_recall_surface:")
+        or reason.startswith("table_list_surface:")
+        or reason.startswith("identity_canonicality:")
+    )
+
+
+def _quality_gate_reason_is_diagnostic(reason: str) -> bool:
+    return (
+        reason.startswith("profile_schema_contract:")
+        or reason.startswith("profile_delivery:")
+        or reason.startswith("table_list_surface_coverage:")
+        or reason.startswith("compile_health:")
+    )
 
 
 def _summarize(
@@ -2371,11 +2417,16 @@ def _summarize(
         ]
         summary["quality_gate"] = {
             "schema_version": "compile_quality_gate_v1",
+            "tier_schema_version": "compile_quality_gate_reason_tiers_v1",
             "min_rough_score": quality_min_rough_score,
             "max_risk_count": quality_max_risk_count,
             "passed": all(row["passed"] for row in gate_rows),
+            "blocking_passed": all(row["blocking_passed"] for row in gate_rows),
             "pass_count": sum(1 for row in gate_rows if row["passed"]),
             "hold_count": sum(1 for row in gate_rows if not row["passed"]),
+            "blocking_hold_count": sum(1 for row in gate_rows if row["blocking_reasons"]),
+            "diagnostic_hold_count": sum(1 for row in gate_rows if row["diagnostic_reasons"]),
+            "advisory_hold_count": sum(1 for row in gate_rows if row["advisory_reasons"]),
             "rows": gate_rows,
         }
     return summary
@@ -2430,22 +2481,28 @@ def _render_md(summary: dict[str, Any]) -> str:
                 "",
                 f"- Decision: `{'pass' if quality_gate.get('passed') else 'hold'}`",
                 f"- Passed / held: `{quality_gate.get('pass_count', 0)} / {quality_gate.get('hold_count', 0)}`",
+                f"- Blocking tier: `{'pass' if quality_gate.get('blocking_passed') else 'hold'}`",
+                f"- Blocking / diagnostic / advisory holds: `{quality_gate.get('blocking_hold_count', 0)} / {quality_gate.get('diagnostic_hold_count', 0)} / {quality_gate.get('advisory_hold_count', 0)}`",
                 f"- Minimum rough score: `{quality_gate.get('min_rough_score')}`",
                 f"- Maximum risk count: `{quality_gate.get('max_risk_count')}`",
                 "",
-                "| Fixture | Decision | Reasons | Rough | Risk | Admitted | Skipped | Effective Skipped | Diagnostic Skips | Effective Skipped Share |",
-                "| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+                "| Fixture | Decision | Blocking | Diagnostic | Advisory | Rough | Risk | Admitted | Skipped | Effective Skipped | Diagnostic Skips | Effective Skipped Share |",
+                "| --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
             ]
         )
         for row in quality_gate.get("rows", []):
             if not isinstance(row, dict):
                 continue
-            reasons = ", ".join(str(item) for item in row.get("reasons", [])) or "n/a"
+            blocking = ", ".join(str(item) for item in row.get("blocking_reasons", [])) or "n/a"
+            diagnostic = ", ".join(str(item) for item in row.get("diagnostic_reasons", [])) or "n/a"
+            advisory = ", ".join(str(item) for item in row.get("advisory_reasons", [])) or "n/a"
             lines.append(
-                "| `{fixture}` | `{decision}` | {reasons} | {rough} | {risk} | {admitted} | {skipped} | {effective_skipped} | {diagnostic_skipped} | {share} |".format(
+                "| `{fixture}` | `{decision}` | {blocking} | {diagnostic} | {advisory} | {rough} | {risk} | {admitted} | {skipped} | {effective_skipped} | {diagnostic_skipped} | {share} |".format(
                     fixture=row.get("fixture", ""),
                     decision=row.get("decision", ""),
-                    reasons=reasons,
+                    blocking=blocking,
+                    diagnostic=diagnostic,
+                    advisory=advisory,
                     rough=row.get("rough_score", ""),
                     risk=row.get("risk_count", ""),
                     admitted=row.get("compile_admitted", 0),

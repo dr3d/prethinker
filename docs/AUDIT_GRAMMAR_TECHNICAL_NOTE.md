@@ -279,8 +279,6 @@ caveats.
   [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
 - Native restamp worksheet:
   [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
-- Real-world source-surface worksheet:
-  [Source Ledger Compile Surface Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/SOURCE_LEDGER_COMPILE_SURFACE_WORKSHEET.md)
 - Fresh ugly transfer worksheet:
   [Fresh Ugly Public Batch 04 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md)
 - QA boundary:

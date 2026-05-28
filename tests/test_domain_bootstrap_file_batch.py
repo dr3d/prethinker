@@ -987,6 +987,89 @@ def test_compile_batch_summary_flags_duplicate_named_subjects_without_alias() ->
     ]
 
 
+def test_quality_gate_tiers_blocking_and_diagnostic_reasons() -> None:
+    gate = _quality_gate_result(
+        {
+            "fixture": "fixture",
+            "returncode": 0,
+            "compile_json": "compile.json",
+            "summary": {
+                "parsed_ok": True,
+                "rough_score": 0.9,
+                "risk_count": 2,
+                "compile_admitted": 4,
+                "compile_skipped": 0,
+                "profile_delivery_flags": [
+                    "source_claim_carrier_partially_delivered:source=1:offered=source_attributed_claim/4"
+                ],
+                "compile_surface_contract_flags": [
+                    "source_authority_pair_preservation:ledger_only:source=1:direct=0"
+                ],
+                "compile_health_flags": ["zero_yield=1"],
+            },
+        },
+        min_rough_score=0.775,
+        max_risk_count=5,
+    )
+
+    assert gate["passed"] is False
+    assert gate["blocking_passed"] is False
+    assert gate["blocking_reasons"] == [
+        "compile_surface_contract:source_authority_pair_preservation:ledger_only:source=1:direct=0"
+    ]
+    assert gate["diagnostic_reasons"] == [
+        "profile_delivery:source_claim_carrier_partially_delivered:source=1:offered=source_attributed_claim/4",
+        "compile_health:zero_yield=1",
+    ]
+    assert gate["advisory_reasons"] == []
+
+
+def test_compile_batch_summary_counts_quality_gate_tiers() -> None:
+    summary = _summarize(
+        [
+            {
+                "fixture": "blocking",
+                "returncode": 0,
+                "compile_json": "blocking.json",
+                "summary": {
+                    "parsed_ok": True,
+                    "rough_score": 0.9,
+                    "risk_count": 2,
+                    "compile_admitted": 4,
+                    "compile_skipped": 0,
+                    "identity_canonicality_flags": ["duplicate_named_subjects_without_alias:groups=1"],
+                },
+            },
+            {
+                "fixture": "diagnostic",
+                "returncode": 0,
+                "compile_json": "diagnostic.json",
+                "summary": {
+                    "parsed_ok": True,
+                    "rough_score": 0.9,
+                    "risk_count": 2,
+                    "compile_admitted": 4,
+                    "compile_skipped": 0,
+                    "profile_delivery_flags": ["vote_tally_carrier_offered_but_undelivered:source=1"],
+                },
+            },
+        ],
+        lanes=1,
+        base_timeout=1,
+        effective_timeout=1,
+        quality_gate=True,
+    )
+
+    gate = summary["quality_gate"]
+    assert gate["passed"] is False
+    assert gate["blocking_passed"] is False
+    assert gate["hold_count"] == 2
+    assert gate["blocking_hold_count"] == 1
+    assert gate["diagnostic_hold_count"] == 1
+    rendered = _render_md(summary)
+    assert "Blocking / diagnostic / advisory holds: `1 / 1 / 0`" in rendered
+
+
 def test_compile_batch_summary_accepts_duplicate_names_with_alias() -> None:
     facts = [
         "product_name(prod_bulk_anaheim_peppers, anaheim_peppers).",
