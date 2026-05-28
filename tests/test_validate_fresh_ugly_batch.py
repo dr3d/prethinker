@@ -47,6 +47,60 @@ def _write_fixture(root: Path, name: str, *, question_count: int = 25, answer_co
     )
 
 
+def _write_extended_files(root: Path, name: str, *, question_count: int = 25) -> None:
+    fixture = root / name
+    (fixture / "source_original.txt").write_text("Raw official source text.\n", encoding="utf-8")
+    (fixture / "qa_questions.jsonl").write_text(
+        "\n".join(
+            json.dumps({"id": f"q{index:03d}", "question": f"Question {index}?"})
+            for index in range(1, question_count + 1)
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (fixture / "provenance.md").write_text("Public official URL. Extracted from source.\n", encoding="utf-8")
+    (fixture / "anti_leakage_manifest.md").write_text(
+        "The source was not LLM-authored and not LLM-rewritten. No Prethinker artifacts were inspected.\n",
+        encoding="utf-8",
+    )
+
+
+def _write_ach_payload(root: Path, name: str, *, sensitivity: str = "high") -> None:
+    fixture = root / name
+    (fixture / "ach_payload.json").write_text(
+        json.dumps(
+            {
+                "fixture_id": name,
+                "ach_question": "Which hypothesis is best supported?",
+                "balanced_fixture": True,
+                "hypotheses": [
+                    {"id": "h1", "label": "First", "claim": "First hypothesis."},
+                    {"id": "h2", "label": "Second", "claim": "Second hypothesis."},
+                    {"id": "h3", "label": "Third", "claim": "Third hypothesis."},
+                ],
+                "evidence_rows": [
+                    {
+                        "id": f"e{index}",
+                        "label": f"Evidence {index}",
+                        "source_coords": f"Section {index}",
+                        "text_anchor": f"Source anchor {index}",
+                        "expected_relevance": "Explains how this evidence affects the hypotheses.",
+                    }
+                    for index in range(1, 7)
+                ],
+                "expected_read": {
+                    "best_hypothesis": "h1",
+                    "rationale": "h1 is best supported by the cited rows.",
+                    "sensitivity_expectation": sensitivity,
+                    "pivotal_evidence": "e1" if sensitivity != "low" else "none",
+                    "flip_note": "Removing the pivotal evidence weakens the conclusion.",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_validate_fresh_ugly_batch_accepts_complete_batch(tmp_path) -> None:
     batch = tmp_path / "fresh_ugly_public_20260524_03"
     _write_fixture(batch, "fda_warning_ugly_006")
@@ -58,6 +112,91 @@ def test_validate_fresh_ugly_batch_accepts_complete_batch(tmp_path) -> None:
     assert report["fixtures"][0]["question_count"] == 25
     assert report["fixtures"][0]["reference_answer_count"] == 25
     assert report["fixtures"][0]["oracle_row_count"] == 25
+
+
+def test_validate_fresh_ugly_batch_accepts_extended_package_profile(tmp_path) -> None:
+    batch = tmp_path / "fresh_ugly_public_20260528_01"
+    _write_fixture(batch, "court_order_ugly_002")
+    _write_extended_files(batch, "court_order_ugly_002")
+    metadata = batch / "court_order_ugly_002" / "metadata.json"
+    data = json.loads(metadata.read_text(encoding="utf-8"))
+    data.update(
+        {
+            "schema_version": "fresh_ugly_public_batch_v2",
+            "batch_id": "fresh_ugly_public_20260528_01",
+            "fixture_id": "court_order_ugly_002",
+            "language": "en",
+            "public_source": True,
+        }
+    )
+    metadata.write_text(json.dumps(data), encoding="utf-8")
+
+    report = validate_batch(batch, expected_documents=1, expected_questions=25, package_profile="extended")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["package_profile"] == "extended"
+
+
+def test_validate_fresh_ugly_batch_accepts_ach_package_profile(tmp_path) -> None:
+    batch = tmp_path / "fresh_ach_stress_public_20260528_04"
+    _write_fixture(batch, "ach_high_single_pivot_001", question_count=10, answer_count=10)
+    _write_extended_files(batch, "ach_high_single_pivot_001", question_count=10)
+    _write_ach_payload(batch, "ach_high_single_pivot_001", sensitivity="high")
+    (batch / "batch_manifest.json").write_text(
+        json.dumps(
+            {
+                "batch_id": "fresh_ach_stress_public_20260528_04",
+                "expected_distribution": {"high": 1, "medium": 0, "low": 0},
+                "fixtures": [{"fixture_id": "ach_high_single_pivot_001"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    metadata = batch / "ach_high_single_pivot_001" / "metadata.json"
+    data = json.loads(metadata.read_text(encoding="utf-8"))
+    data.update(
+        {
+            "schema_version": "fresh_ach_stress_batch_v2",
+            "batch_id": "fresh_ach_stress_public_20260528_04",
+            "fixture_id": "ach_high_single_pivot_001",
+            "language": "en",
+            "public_source": True,
+            "question_count": 10,
+            "sensitivity_target": "high",
+        }
+    )
+    metadata.write_text(json.dumps(data), encoding="utf-8")
+
+    report = validate_batch(batch, expected_documents=1, expected_questions=10, package_profile="ach")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["fixtures"][0]["ach_payload"] == {
+        "hypothesis_count": 3,
+        "evidence_count": 6,
+        "sensitivity_expectation": "high",
+    }
+
+
+def test_validate_fresh_ugly_batch_flags_bad_ach_payload_shape(tmp_path) -> None:
+    batch = tmp_path / "fresh_ach_stress_public_20260528_04"
+    _write_fixture(batch, "ach_medium_family_dependence_001", question_count=10, answer_count=10)
+    _write_extended_files(batch, "ach_medium_family_dependence_001", question_count=10)
+    (batch / "batch_manifest.json").write_text("{}", encoding="utf-8")
+    fixture = batch / "ach_medium_family_dependence_001"
+    (fixture / "ach_payload.json").write_text(json.dumps({"hypotheses": [], "evidence_rows": []}), encoding="utf-8")
+    metadata = fixture / "metadata.json"
+    data = json.loads(metadata.read_text(encoding="utf-8"))
+    data.update({"question_count": 10, "sensitivity_target": "medium", "language": "en", "public_source": True})
+    metadata.write_text(json.dumps(data), encoding="utf-8")
+
+    report = validate_batch(batch, expected_documents=1, expected_questions=10, package_profile="ach")
+    issues = report["fixtures"][0]["issues"]
+
+    assert report["summary"]["status"] == "fail"
+    assert "ach_payload_missing_fixture_id" in issues
+    assert "ach_payload_hypothesis_count:0 expected:3-5" in issues
+    assert "ach_payload_evidence_count:0 expected:6-10" in issues
+    assert "ach_payload_expected_read_not_object" in issues
 
 
 def test_validate_fresh_ugly_batch_flags_missing_files_and_count_mismatch(tmp_path) -> None:

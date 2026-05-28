@@ -18,6 +18,20 @@ REQUIRED_FILES = (
     "metadata.json",
 )
 
+EXTENDED_REQUIRED_FILES = (
+    *REQUIRED_FILES,
+    "source_original.txt",
+    "qa_questions.jsonl",
+    "provenance.md",
+    "anti_leakage_manifest.md",
+    "qa_authored_with_answers.md",
+)
+
+ACH_REQUIRED_FILES = (
+    *EXTENDED_REQUIRED_FILES,
+    "ach_payload.json",
+)
+
 OPTIONAL_ANSWER_KEY_FILES = (
     "qa_authored_with_answers.md",
 )
@@ -28,6 +42,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("batch_dir", type=Path)
     parser.add_argument("--expected-documents", type=int, default=12)
     parser.add_argument("--expected-questions", type=int, default=25)
+    parser.add_argument(
+        "--package-profile",
+        choices=("legacy", "extended", "ach"),
+        default="legacy",
+        help="Validation profile. Use extended for current fresh ugly requests and ach for ACH heldout packages.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     return parser.parse_args()
@@ -39,6 +59,7 @@ def main() -> int:
         args.batch_dir,
         expected_documents=args.expected_documents,
         expected_questions=args.expected_questions,
+        package_profile=args.package_profile,
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +77,7 @@ def validate_batch(
     *,
     expected_documents: int = 12,
     expected_questions: int = 25,
+    package_profile: str = "legacy",
 ) -> dict[str, Any]:
     root = batch_dir if batch_dir.is_absolute() else Path.cwd() / batch_dir
     rows: list[dict[str, Any]] = []
@@ -65,10 +87,24 @@ def validate_batch(
         fixture_dirs: list[Path] = []
     else:
         fixture_dirs = sorted(path for path in root.iterdir() if path.is_dir())
+    if package_profile == "ach":
+        batch_manifest = root / "batch_manifest.json"
+        if not batch_manifest.exists():
+            batch_issues.append("missing_file:batch_manifest.json")
+        else:
+            manifest_error = _json_file_error(batch_manifest, expected_object=True)
+            if manifest_error:
+                batch_issues.append(f"batch_manifest_{manifest_error}")
     if len(fixture_dirs) != expected_documents:
         batch_issues.append(f"document_count:{len(fixture_dirs)} expected:{expected_documents}")
     for fixture_dir in fixture_dirs:
-        rows.append(_validate_fixture(fixture_dir, expected_questions=expected_questions))
+        rows.append(
+            _validate_fixture(
+                fixture_dir,
+                expected_questions=expected_questions,
+                package_profile=package_profile,
+            )
+        )
     issue_count = sum(len(row["issues"]) for row in rows) + len(batch_issues)
     warning_count = sum(len(row["warnings"]) for row in rows)
     return {
@@ -78,6 +114,7 @@ def validate_batch(
             "status": "pass" if issue_count == 0 else "fail",
             "fixture_count": len(rows),
             "expected_documents": expected_documents,
+            "package_profile": package_profile,
             "issue_count": issue_count,
             "warning_count": warning_count,
             "batch_issues": batch_issues,
@@ -86,10 +123,16 @@ def validate_batch(
     }
 
 
-def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str, Any]:
+def _validate_fixture(
+    fixture_dir: Path,
+    *,
+    expected_questions: int,
+    package_profile: str,
+) -> dict[str, Any]:
     issues: list[str] = []
     warnings: list[str] = []
-    for name in REQUIRED_FILES:
+    required_files = _required_files_for_profile(package_profile)
+    for name in required_files:
         if not (fixture_dir / name).exists():
             issues.append(f"missing_file:{name}")
     source_text = _read_text(fixture_dir / "source.md")
@@ -97,6 +140,8 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
     authored_text = _read_text(fixture_dir / "qa_authored_with_answers.md")
     notes_text = _read_text(fixture_dir / "fixture_notes.md")
     metadata_text = _read_text(fixture_dir / "metadata.json")
+    provenance_text = _read_text(fixture_dir / "provenance.md")
+    anti_leakage_text = _read_text(fixture_dir / "anti_leakage_manifest.md")
     metadata, metadata_error = _read_metadata(fixture_dir / "metadata.json")
     if metadata_error:
         issues.append(metadata_error)
@@ -107,6 +152,11 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
     questions = _numbered_questions(qa_text)
     if len(questions) != expected_questions:
         issues.append(f"qa_question_count:{len(questions)} expected:{expected_questions}")
+    if (fixture_dir / "qa_questions.jsonl").exists():
+        qa_question_count, qa_question_issues = _question_jsonl_row_count(fixture_dir / "qa_questions.jsonl")
+        issues.extend(qa_question_issues)
+        if qa_question_count != expected_questions:
+            issues.append(f"qa_questions_jsonl_row_count:{qa_question_count} expected:{expected_questions}")
     oracle_count, oracle_issues = _oracle_row_count(fixture_dir / "oracle.jsonl")
     oracle_complete = (fixture_dir / "oracle.jsonl").exists() and oracle_count == expected_questions and not oracle_issues
     qa_answers = _reference_answer_count(qa_text)
@@ -125,9 +175,20 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
             metadata,
             fixture_dir=fixture_dir,
             expected_questions=expected_questions,
+            package_profile=package_profile,
             issues=issues,
             warnings=warnings,
         )
+    if package_profile in {"extended", "ach"}:
+        if not provenance_text.strip():
+            issues.append("empty_provenance")
+        if not anti_leakage_text.strip():
+            issues.append("empty_anti_leakage_manifest")
+        if not _declares_no_llm_source(anti_leakage_text):
+            warnings.append("anti_leakage_manifest_no_llm_source_not_explicit")
+    ach_payload_summary: dict[str, Any] | None = None
+    if package_profile == "ach":
+        ach_payload_summary = _validate_ach_payload(fixture_dir / "ach_payload.json", issues=issues)
     source_support = _reference_source_support_report(
         fixture_dir / "oracle.jsonl",
         source_text=source_text,
@@ -142,10 +203,19 @@ def _validate_fixture(fixture_dir: Path, *, expected_questions: int) -> dict[str
         "reference_answer_count": answers,
         "oracle_row_count": oracle_count,
         "source_chars": len(source_text),
+        "ach_payload": ach_payload_summary,
         "issues": issues,
         "warnings": warnings,
         "warning_details": source_support["details"],
     }
+
+
+def _required_files_for_profile(package_profile: str) -> tuple[str, ...]:
+    if package_profile == "ach":
+        return ACH_REQUIRED_FILES
+    if package_profile == "extended":
+        return EXTENDED_REQUIRED_FILES
+    return REQUIRED_FILES
 
 
 def _validate_metadata(
@@ -153,6 +223,7 @@ def _validate_metadata(
     *,
     fixture_dir: Path,
     expected_questions: int,
+    package_profile: str,
     issues: list[str],
     warnings: list[str],
 ) -> None:
@@ -163,6 +234,10 @@ def _validate_metadata(
         issues.append("metadata_llm_authored_source_true")
     if metadata.get("llm_rewritten_source") is True:
         issues.append("metadata_llm_rewritten_source_true")
+    if metadata.get("llm_authored_source") is not False:
+        warnings.append("metadata_llm_authored_source_not_false")
+    if metadata.get("llm_rewritten_source") is not False:
+        warnings.append("metadata_llm_rewritten_source_not_false")
     question_count = metadata.get("question_count")
     if question_count is not None and int(question_count) != expected_questions:
         issues.append(f"metadata_question_count:{question_count} expected:{expected_questions}")
@@ -171,6 +246,15 @@ def _validate_metadata(
         warnings.append(f"metadata_document_id_differs:{document_id}")
     if not isinstance(metadata.get("pressure_tags", []), list) or not metadata.get("pressure_tags", []):
         warnings.append("metadata_pressure_tags_missing")
+    if package_profile == "ach":
+        sensitivity = str(metadata.get("sensitivity_target") or "").strip().lower()
+        if sensitivity not in {"high", "medium", "low"}:
+            issues.append("metadata_sensitivity_target_missing_or_invalid")
+    if package_profile in {"extended", "ach"}:
+        if str(metadata.get("language") or "").strip().lower() != "en":
+            warnings.append("metadata_language_not_en")
+        if metadata.get("public_source") is not True:
+            warnings.append("metadata_public_source_not_true")
 
 
 def _numbered_questions(text: str) -> list[str]:
@@ -222,6 +306,44 @@ def _read_metadata(path: Path) -> tuple[dict[str, Any] | None, str]:
     return value, ""
 
 
+def _json_file_error(path: Path, *, expected_object: bool = False) -> str:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return f"json_error:{exc}"
+    if expected_object and not isinstance(value, dict):
+        return "json_not_object"
+    return ""
+
+
+def _question_jsonl_row_count(path: Path) -> tuple[int, list[str]]:
+    issues: list[str] = []
+    ids: set[str] = set()
+    count = 0
+    for line_number, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
+        if not line.strip():
+            continue
+        count += 1
+        try:
+            row = json.loads(line)
+        except Exception as exc:
+            issues.append(f"qa_questions_jsonl_error:line_{line_number}:{exc}")
+            continue
+        if not isinstance(row, dict):
+            issues.append(f"qa_questions_jsonl_row_not_object:line_{line_number}")
+            continue
+        row_id = str(row.get("id") or "").strip()
+        if not row_id:
+            issues.append(f"qa_questions_jsonl_missing_id:line_{line_number}")
+        elif row_id in ids:
+            issues.append(f"qa_questions_jsonl_duplicate_id:{row_id}")
+        else:
+            ids.add(row_id)
+        if not str(row.get("question") or "").strip():
+            issues.append(f"qa_questions_jsonl_missing_question:{row_id or 'line_' + str(line_number)}")
+    return count, issues
+
+
 def _oracle_row_count(path: Path) -> tuple[int, list[str]]:
     if not path.exists():
         return 0, []
@@ -250,6 +372,88 @@ def _oracle_row_count(path: Path) -> tuple[int, list[str]]:
         if not str(row.get("reference_answer") or row.get("answer") or "").strip():
             issues.append(f"oracle_jsonl_missing_reference_answer:{row_id or 'line_' + str(line_number)}")
     return count, issues
+
+
+def _declares_no_llm_source(text: str) -> bool:
+    lowered = str(text or "").casefold()
+    authored_declared = (
+        "not llm-authored" in lowered
+        or "not llm authored" in lowered
+        or "llm_authored_source" in lowered and "false" in lowered
+        or "no llm-authored" in lowered
+        or "no llm authored" in lowered
+    )
+    rewritten_declared = (
+        "not llm-rewritten" in lowered
+        or "not llm rewritten" in lowered
+        or "llm_rewritten_source" in lowered and "false" in lowered
+        or "no llm-rewritten" in lowered
+        or "no llm rewritten" in lowered
+    )
+    return authored_declared and rewritten_declared
+
+
+def _validate_ach_payload(path: Path, *, issues: list[str]) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        issues.append(f"ach_payload_json_error:{exc}")
+        return None
+    if not isinstance(payload, dict):
+        issues.append("ach_payload_not_object")
+        return None
+    hypotheses = payload.get("hypotheses")
+    evidence_rows = payload.get("evidence_rows")
+    expected_read = payload.get("expected_read")
+    if not str(payload.get("fixture_id") or "").strip():
+        issues.append("ach_payload_missing_fixture_id")
+    if not str(payload.get("ach_question") or "").strip():
+        issues.append("ach_payload_missing_ach_question")
+    if not isinstance(hypotheses, list):
+        issues.append("ach_payload_hypotheses_not_list")
+        hypothesis_count = 0
+    else:
+        hypothesis_count = len(hypotheses)
+        if not 3 <= hypothesis_count <= 5:
+            issues.append(f"ach_payload_hypothesis_count:{hypothesis_count} expected:3-5")
+        for index, item in enumerate(hypotheses, start=1):
+            if not isinstance(item, dict):
+                issues.append(f"ach_payload_hypothesis_not_object:{index}")
+                continue
+            for key in ("id", "label", "claim"):
+                if not str(item.get(key) or "").strip():
+                    issues.append(f"ach_payload_hypothesis_missing_{key}:{index}")
+    if not isinstance(evidence_rows, list):
+        issues.append("ach_payload_evidence_rows_not_list")
+        evidence_count = 0
+    else:
+        evidence_count = len(evidence_rows)
+        if not 6 <= evidence_count <= 10:
+            issues.append(f"ach_payload_evidence_count:{evidence_count} expected:6-10")
+        for index, item in enumerate(evidence_rows, start=1):
+            if not isinstance(item, dict):
+                issues.append(f"ach_payload_evidence_not_object:{index}")
+                continue
+            for key in ("id", "label", "source_coords", "text_anchor", "expected_relevance"):
+                if not str(item.get(key) or "").strip():
+                    issues.append(f"ach_payload_evidence_missing_{key}:{index}")
+    if not isinstance(expected_read, dict):
+        issues.append("ach_payload_expected_read_not_object")
+        sensitivity = ""
+    else:
+        for key in ("best_hypothesis", "rationale", "sensitivity_expectation", "pivotal_evidence", "flip_note"):
+            if not str(expected_read.get(key) or "").strip():
+                issues.append(f"ach_payload_expected_read_missing_{key}")
+        sensitivity = str(expected_read.get("sensitivity_expectation") or "").strip().lower()
+        if sensitivity not in {"high", "medium", "low"}:
+            issues.append("ach_payload_sensitivity_expectation_invalid")
+    return {
+        "hypothesis_count": hypothesis_count,
+        "evidence_count": evidence_count,
+        "sensitivity_expectation": sensitivity,
+    }
 
 
 def _reference_source_support_report(

@@ -205,6 +205,12 @@ Before delivery, verify:
 - all llm_authored_source and llm_rewritten_source fields are false.
 ```
 
+Codex-side validation after unpacking:
+
+```text
+python scripts\validate_fresh_ugly_batch.py datasets\real_world_transfer\fresh_ugly_public_20260528_01 --expected-documents 8 --expected-questions 25 --package-profile extended --out-json tmp\fresh_ugly_public_20260528_01_validation.json --out-md tmp\fresh_ugly_public_20260528_01_validation.md
+```
+
 ## Request B - Fresh ACH Heldout Batch 04
 
 Copy/paste to the collecting agent:
@@ -416,6 +422,12 @@ Before delivery, verify:
 - all llm_authored_source and llm_rewritten_source fields are false;
 - no Prethinker internals, prior worksheets, prior fixture answers, or run
   artifacts were used.
+```
+
+Codex-side validation after unpacking:
+
+```text
+python scripts\validate_fresh_ugly_batch.py datasets\real_world_transfer\fresh_ach_stress_public_20260528_04 --expected-documents 6 --expected-questions 10 --package-profile ach --out-json tmp\fresh_ach_stress_public_20260528_04_validation.json --out-md tmp\fresh_ach_stress_public_20260528_04_validation.md
 ```
 
 ## Which One To Prioritize
