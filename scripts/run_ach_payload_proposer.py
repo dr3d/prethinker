@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 from datetime import datetime, timezone
 import json
 import os
@@ -37,6 +38,16 @@ VALID_ASSESSMENTS = {"consistent", "inconsistent", "neutral", "not_applicable"}
 VALID_DIAGNOSTICITY = {"low", "medium", "high", "critical"}
 VALID_QUESTION_AXES = {"cause", "responsibility", "scope", "chronology", "status", "identity", "comparison", "other"}
 VALID_HYPOTHESIS_AXIS_FITS = {"direct", "partial", "off_axis"}
+VALID_EVIDENCE_ROLES = {
+    "question_anchor",
+    "occurrence_anchor",
+    "mechanism_support",
+    "exclusion_or_counterevidence",
+    "scope_boundary",
+    "context",
+    "remedy_or_consequence",
+    "other",
+}
 
 
 PROPOSER_SCHEMA: dict[str, Any] = {
@@ -45,6 +56,7 @@ PROPOSER_SCHEMA: dict[str, Any] = {
     "required": [
         "question_axis",
         "hypothesis_axis_fit",
+        "evidence_roles",
         "evidence_diagnosticity",
         "judgments",
         "judgment_dependencies",
@@ -61,6 +73,19 @@ PROPOSER_SCHEMA: dict[str, Any] = {
                 "properties": {
                     "hypothesis_id": {"type": "string"},
                     "axis_fit": {"type": "string", "enum": sorted(VALID_HYPOTHESIS_AXIS_FITS)},
+                    "rationale": {"type": "string", "maxLength": 360},
+                },
+            },
+        },
+        "evidence_roles": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["evidence_id", "role", "rationale"],
+                "properties": {
+                    "evidence_id": {"type": "string"},
+                    "role": {"type": "string", "enum": sorted(VALID_EVIDENCE_ROLES)},
                     "rationale": {"type": "string", "maxLength": 360},
                 },
             },
@@ -143,6 +168,19 @@ PROPOSER_SCHEMA: dict[str, Any] = {
 }
 
 
+def proposer_schema(*, evidence_role_diagnostics: bool = False) -> dict[str, Any]:
+    schema = deepcopy(PROPOSER_SCHEMA)
+    if evidence_role_diagnostics:
+        return schema
+    required = [
+        item
+        for item in schema.get("required", [])
+        if item != "evidence_roles"
+    ]
+    schema["required"] = required
+    return schema
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--payload", type=Path, required=True, help="ACH stress payload JSON.")
@@ -157,6 +195,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-p", type=float, default=1.0)
     parser.add_argument("--max-tokens", type=int, default=6000)
     parser.add_argument("--proposal-contract-retries", type=int, default=1)
+    parser.add_argument(
+        "--evidence-role-diagnostics",
+        action="store_true",
+        help="Require one structural role classification per evidence row for diagnostic reporting.",
+    )
     parser.add_argument("--openrouter-provider-order", default="")
     parser.add_argument("--openrouter-provider-only", default="")
     parser.add_argument("--openrouter-provider-ignore", default="")
@@ -197,6 +240,7 @@ def main() -> int:
         top_p=float(args.top_p),
         max_tokens=int(args.max_tokens),
         proposal_contract_retries=int(args.proposal_contract_retries),
+        evidence_role_diagnostics=bool(args.evidence_role_diagnostics),
     )
     proposal = baseline["proposal"]
     scorer_payload = baseline["scorer_payload"]
@@ -215,6 +259,7 @@ def main() -> int:
             top_p=float(args.top_p),
             max_tokens=int(args.max_tokens),
             proposal_contract_retries=int(args.proposal_contract_retries),
+            evidence_role_diagnostics=bool(args.evidence_role_diagnostics),
         )
     report = build_report(
         payload=payload,
@@ -255,15 +300,21 @@ def propose_and_score(
     max_tokens: int,
     proposal_contract_retries: int = 0,
     omitted_evidence: dict[str, Any] | None = None,
+    evidence_role_diagnostics: bool = False,
 ) -> dict[str, Any]:
-    messages = build_messages(payload=payload, source_text=source_text, omitted_evidence=omitted_evidence)
+    messages = build_messages(
+        payload=payload,
+        source_text=source_text,
+        omitted_evidence=omitted_evidence,
+        evidence_role_diagnostics=evidence_role_diagnostics,
+    )
     contract_violations: list[dict[str, Any]] = []
     for attempt in range(max(0, proposal_contract_retries) + 1):
         call = call_json_schema(
             base_url=base_url,
             model=model,
             messages=messages,
-            schema=PROPOSER_SCHEMA,
+            schema=proposer_schema(evidence_role_diagnostics=evidence_role_diagnostics),
             schema_name="ach_judgment_proposal_v1",
             timeout=timeout,
             temperature=temperature,
@@ -271,7 +322,11 @@ def propose_and_score(
             max_tokens=max_tokens,
         )
         proposal = json.loads(call["content"])
-        contract_violations = proposal_contract_violations(payload, proposal)
+        contract_violations = proposal_contract_violations(
+            payload,
+            proposal,
+            require_evidence_roles=evidence_role_diagnostics,
+        )
         if not contract_violations or attempt >= max(0, proposal_contract_retries):
             break
         messages = [
@@ -308,6 +363,7 @@ def run_counterfactual_sensitivity(
     top_p: float,
     max_tokens: int,
     proposal_contract_retries: int = 0,
+    evidence_role_diagnostics: bool = False,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for evidence_item in payload.get("evidence_rows", []) or []:
@@ -335,6 +391,7 @@ def run_counterfactual_sensitivity(
             max_tokens=max_tokens,
             proposal_contract_retries=proposal_contract_retries,
             omitted_evidence=evidence_item,
+            evidence_role_diagnostics=evidence_role_diagnostics,
         )
         top = _top_hypotheses(run["ach_report"])
         rows.append(
@@ -358,6 +415,7 @@ def build_messages(
     payload: dict[str, Any],
     source_text: str,
     omitted_evidence: dict[str, Any] | None = None,
+    evidence_role_diagnostics: bool = False,
 ) -> list[dict[str, str]]:
     prompt_payload = public_prompt_payload(payload, omitted_evidence=omitted_evidence)
     hypothesis_count = len(prompt_payload.get("hypotheses", []) or [])
@@ -366,6 +424,18 @@ def build_messages(
     source = str(source_text or "")
     if len(source) > 36000:
         source = source[:36000] + "\n[TRUNCATED]"
+    evidence_role_instruction = (
+        "For each evidence row, set exactly one evidence_roles item. "
+        "Use question_anchor when the row directly states the answer to the ACH question; "
+        "occurrence_anchor when it is the concrete finding, event, or outcome that anchors whether the questioned issue occurred; "
+        "mechanism_support when it explains how or why; "
+        "exclusion_or_counterevidence when it rules in or rules out alternatives; "
+        "scope_boundary for limits, timing, status, or jurisdiction; "
+        "context for background; remedy_or_consequence for later penalties, fixes, or effects; "
+        "other only when none fit. "
+        if evidence_role_diagnostics
+        else ""
+    )
     return [
         {
             "role": "system",
@@ -379,6 +449,8 @@ def build_messages(
                 "Evidence about scope, severity, consequence, timing, or background may be true and consistent, but it should be neutral or low weight unless it answers the question axis. "
                 "If two hypotheses can both be true, do not let proof of a narrower compatible claim outrank the broader explanatory claim unless the narrower claim contradicts or better answers the question axis. "
                 "For each hypothesis, set hypothesis_axis_fit to direct only when the hypothesis directly answers the ACH question; partial when it is true or relevant but mainly qualifies scope, consequence, timing, or background; and off_axis when it does not answer the question. "
+                + evidence_role_instruction
+                +
                 "Assessments must be one of consistent, inconsistent, neutral, or not_applicable. "
                 "Use weight 1 for weak evidence and 5 for decisive evidence in each evidence-hypothesis cell. "
                 "Diagnosticity describes how much the evidence discriminates among hypotheses. "
@@ -445,11 +517,21 @@ def public_prompt_payload(
     return out
 
 
-def proposal_contract_violations(payload: dict[str, Any], proposal: dict[str, Any]) -> list[dict[str, Any]]:
+def proposal_contract_violations(
+    payload: dict[str, Any],
+    proposal: dict[str, Any],
+    *,
+    require_evidence_roles: bool = False,
+) -> list[dict[str, Any]]:
     evidence_ids = {
         str(item.get("id") or "").strip()
         for item in payload.get("evidence_rows", []) or []
         if isinstance(item, dict) and str(item.get("id") or "").strip()
+    }
+    role_ids = {
+        str(item.get("evidence_id") or "").strip()
+        for item in proposal.get("evidence_roles", []) or []
+        if isinstance(item, dict) and str(item.get("evidence_id") or "").strip()
     }
     dependency_keys = set()
     for item in proposal.get("judgment_dependencies", []) or []:
@@ -474,6 +556,9 @@ def proposal_contract_violations(payload: dict[str, Any], proposal: dict[str, An
         )
 
     out: list[dict[str, Any]] = []
+    if require_evidence_roles:
+        for evidence_id in sorted(evidence_ids - role_ids):
+            out.append({"kind": "missing_evidence_role", "evidence_id": evidence_id})
     for item in proposal.get("judgments", []) or []:
         if not isinstance(item, dict):
             continue
@@ -513,6 +598,11 @@ def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> d
         for item in proposal.get("evidence_diagnosticity", [])
         if isinstance(item, dict)
     }
+    evidence_role_by_id = {
+        str(item.get("evidence_id") or "").strip(): str(item.get("role") or "other").strip().casefold()
+        for item in proposal.get("evidence_roles", [])
+        if isinstance(item, dict)
+    }
     evidence = []
     for item in payload.get("evidence_rows", []) or []:
         if not isinstance(item, dict):
@@ -521,10 +611,14 @@ def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> d
         diagnosticity = diagnosticity_by_id.get(evidence_id, "medium")
         if diagnosticity not in VALID_DIAGNOSTICITY:
             diagnosticity = "medium"
+        evidence_role = evidence_role_by_id.get(evidence_id, "other")
+        if evidence_role not in VALID_EVIDENCE_ROLES:
+            evidence_role = "other"
         evidence.append(
             {
                 "id": evidence_id,
                 "label": str(item.get("label") or evidence_id),
+                "role": evidence_role,
                 "diagnosticity": diagnosticity,
                 "source_coords": str(item.get("source_coords") or ""),
                 "text_anchor": str(item.get("text_anchor") or ""),
@@ -645,6 +739,14 @@ def build_report(
         if isinstance(ach_report.get("top_support_contributions"), list)
         else []
     )
+    evidence_roles = {
+        str(item.get("id") or ""): str(item.get("role") or "other")
+        for item in scorer_payload.get("evidence", []) or []
+        if isinstance(item, dict)
+    }
+    evidence_role_counts: dict[str, int] = {}
+    for role in evidence_roles.values():
+        evidence_role_counts[role] = evidence_role_counts.get(role, 0) + 1
     return {
         "schema_version": "ach_payload_proposal_run_v1",
         "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -688,8 +790,10 @@ def build_report(
                 for item in support_contributions
                 if isinstance(item, dict) and int(item.get("support_weight", 0) or 0) > 0
             ][:5],
+            "evidence_role_counts": dict(sorted(evidence_role_counts.items())),
             "expected_sensitivity": str(expected.get("sensitivity_expectation") or ""),
             "expected_pivotal_evidence": pivotal,
+            "expected_pivotal_evidence_role": evidence_roles.get(pivotal, ""),
             "pivotal_found_in_sensitivity": bool(
                 pivotal
                 and (
@@ -733,8 +837,10 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Counterfactual sensitivity rows: `{summary.get('counterfactual_sensitivity_count', 0)}`",
         f"- Counterfactual sensitivity evidence ids: `{summary.get('counterfactual_sensitivity_evidence_ids', [])}`",
         f"- Top support evidence ids: `{summary.get('top_support_evidence_ids', [])}`",
+        f"- Evidence role counts: `{summary.get('evidence_role_counts', {})}`",
         f"- Expected sensitivity: `{summary.get('expected_sensitivity', '')}`",
         f"- Expected pivotal evidence: `{summary.get('expected_pivotal_evidence', '')}`",
+        f"- Expected pivotal evidence role: `{summary.get('expected_pivotal_evidence_role', '')}`",
         f"- Pivotal found in sensitivity: `{summary.get('pivotal_found_in_sensitivity', False)}`",
         "",
         "## Hypothesis Scores",

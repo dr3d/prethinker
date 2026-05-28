@@ -97,6 +97,7 @@ def _fixture_summary(
         "expected_pivotal_evidence": expected_pivotal,
         "expected_pivotal_support_rank": int(pivotal_support.get("support_rank", 0) or 0),
         "expected_pivotal_support_share": float(pivotal_support.get("support_share", 0.0) or 0.0),
+        "expected_pivotal_evidence_role": str(pivotal_support.get("role", "")),
         "top_support_evidence_ids": [
             str(item.get("evidence_id") or "")
             for item in top_support
@@ -132,6 +133,11 @@ def _top_support_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
         for item in scorer_payload.get("evidence", []) or []
         if isinstance(item, dict)
     }
+    roles = {
+        str(item.get("id") or ""): str(item.get("role") or "")
+        for item in scorer_payload.get("evidence", []) or []
+        if isinstance(item, dict)
+    }
     support_rows: list[dict[str, Any]] = []
     total_support = 0
     for item in judgments:
@@ -148,6 +154,7 @@ def _top_support_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
             {
                 "evidence_id": evidence_id,
                 "label": labels.get(evidence_id, evidence_id),
+                "role": roles.get(evidence_id, ""),
                 "top_hypothesis_id": top_id,
                 "assessment": assessment,
                 "weight": weight,
@@ -165,6 +172,7 @@ def _ranked_support_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         {
             "evidence_id": str(item.get("evidence_id") or ""),
             "label": str(item.get("label") or item.get("evidence_id") or ""),
+            "role": str(item.get("role") or ""),
             "top_hypothesis_id": str(item.get("top_hypothesis_id") or ""),
             "assessment": str(item.get("assessment") or ""),
             "weight": int(item.get("weight", 0) or 0),
@@ -231,8 +239,8 @@ def render_markdown(summary: dict[str, Any]) -> str:
         f"- Medium detected: `{aggregate.get('medium_detected_count', 0)}`",
         f"- Low clean: `{aggregate.get('low_clean_count', 0)}`",
         "",
-        "| Fixture | Target | Top | Sensitivity | Pivotal Support | Alignment | Contract |",
-        "| --- | --- | --- | --- | ---: | --- | ---: |",
+        "| Fixture | Target | Top | Sensitivity | Pivotal Support | Pivotal Role | Alignment | Contract |",
+        "| --- | --- | --- | --- | ---: | --- | --- | ---: |",
     ]
     for row in summary.get("fixtures", []):
         lines.append(
@@ -244,6 +252,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
                     f"`{row.get('top_hypotheses', [])}`",
                     f"`{row.get('sensitivity_evidence_ids', [])}`",
                     f"`{row.get('expected_pivotal_support_rank', 0)} / {row.get('expected_pivotal_support_share', 0.0)}`",
+                    f"`{row.get('expected_pivotal_evidence_role', '')}`",
                     f"`{row.get('sensitivity_alignment', '')}`",
                     f"`{row.get('proposal_contract_violation_count', 0)}`",
                 ]

@@ -593,6 +593,58 @@ classic dependency failure. The proposer treated the expected pivotal row as a
 low-share consequence/hook row, while the recovered NTSB pivotal row was the
 top direct support row and also generated omission effects.
 
+## Batch 02 R3 Evidence-Role Diagnostic
+
+Question:
+
+Would an explicit evidence-role lens distinguish a direct answer anchor from a
+concrete occurrence/outcome anchor without changing the core ACH overlay?
+
+Implementation:
+
+- Added optional `--evidence-role-diagnostics` to the ACH payload proposer.
+- When enabled, the proposer must emit one `evidence_roles` row per evidence
+  row using structural roles such as `question_anchor`, `occurrence_anchor`,
+  `mechanism_support`, `exclusion_or_counterevidence`, `scope_boundary`,
+  `context`, and `remedy_or_consequence`.
+- The deterministic overlay records roles and summaries, but roles do not
+  alter ranking or sensitivity.
+- The mode is explicitly optional. It is not the default proposer contract,
+  because the first probe showed role classification can consume attention that
+  previously went into omission-effect/dependency capture.
+
+R3 high-case artifact directory:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_02_r3_evidence_roles_20260528\ach_high_probe
+```
+
+High-case R3 read:
+
+```text
+enforcement_single_document_hook_001:
+  expected pivotal e4 role: occurrence_anchor
+  sensitivity rows: 0
+  omission effects: 0
+  contract violations: 0
+
+ntsb_pivotal_physical_001:
+  expected pivotal e1 role: question_anchor
+  sensitivity rows: 0
+  omission effects: 0
+  contract violations: 0
+```
+
+Read:
+
+- The role lens is meaningful: it correctly separated the remaining high miss
+  as an `occurrence_anchor` from the NTSB direct-cause `question_anchor`.
+- It is not yet a sensitivity mechanism. In this probe, requiring roles
+  regressed omission-effect capture, including on the previously recovered NTSB
+  high case.
+- Keep evidence roles as an overlay diagnostic mode until a fresh ACH batch
+  shows they can coexist with dependency capture without sensitivity churn.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were

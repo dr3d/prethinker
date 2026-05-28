@@ -2,6 +2,7 @@ from scripts.run_ach_payload_proposer import (
     build_messages,
     build_scorer_payload,
     proposal_contract_violations,
+    proposer_schema,
     public_prompt_payload,
 )
 
@@ -24,7 +25,7 @@ def test_ach_payload_prompt_omits_oracle_fields() -> None:
     }
 
     prompt_payload = public_prompt_payload(payload)
-    messages = build_messages(payload=payload, source_text="finding text")
+    messages = build_messages(payload=payload, source_text="finding text", evidence_role_diagnostics=True)
     joined = "\n".join(message["content"] for message in messages)
 
     assert "expected_read" not in prompt_payload
@@ -33,6 +34,22 @@ def test_ach_payload_prompt_omits_oracle_fields() -> None:
     assert "expected_relevance" not in joined
     assert "oracle-only explanation" not in joined
     assert "audit every evidence row as a possible interpretation anchor" in joined
+    assert "occurrence_anchor" in joined
+
+
+def test_evidence_role_diagnostics_are_optional() -> None:
+    default_schema = proposer_schema()
+    diagnostic_schema = proposer_schema(evidence_role_diagnostics=True)
+
+    assert "evidence_roles" not in default_schema["required"]
+    assert "evidence_roles" in diagnostic_schema["required"]
+    assert "occurrence_anchor" not in "\n".join(
+        message["content"]
+        for message in build_messages(
+            payload={"ach_question": "Which hypothesis survives?", "hypotheses": [], "evidence_rows": []},
+            source_text="",
+        )
+    )
 
 
 def test_counterfactual_prompt_omits_evidence_row_but_names_omission() -> None:
@@ -61,6 +78,7 @@ def test_build_scorer_payload_maps_evidence_rows_and_filters_invalid_judgments()
     }
     proposal = {
         "hypothesis_axis_fit": [{"hypothesis_id": "h1", "axis_fit": "partial", "rationale": "qualifies"}],
+        "evidence_roles": [{"evidence_id": "e1", "role": "question_anchor", "rationale": "direct"}],
         "evidence_diagnosticity": [{"evidence_id": "e1", "diagnosticity": "critical", "rationale": "direct"}],
         "judgments": [
             {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent", "weight": 4, "rationale": "fits"},
@@ -86,6 +104,7 @@ def test_build_scorer_payload_maps_evidence_rows_and_filters_invalid_judgments()
         {
             "id": "e1",
             "label": "Row 1",
+            "role": "question_anchor",
             "diagnosticity": "critical",
             "source_coords": "[A]",
             "text_anchor": "A",
@@ -108,6 +127,7 @@ def test_build_scorer_payload_preserves_valid_omission_effects() -> None:
         "evidence_rows": [{"id": "e1"}, {"id": "e2"}],
     }
     proposal = {
+        "evidence_roles": [],
         "evidence_diagnosticity": [],
         "judgments": [
             {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent", "weight": 3, "rationale": ""},
@@ -147,6 +167,7 @@ def test_build_scorer_payload_converts_judgment_dependencies_to_omission_effects
         "evidence_rows": [{"id": "e_anchor"}, {"id": "e_dependent"}],
     }
     proposal = {
+        "evidence_roles": [],
         "evidence_diagnosticity": [],
         "judgments": [
             {"evidence_id": "e_anchor", "hypothesis_id": "h1", "assessment": "consistent", "weight": 5, "rationale": ""},
@@ -186,6 +207,7 @@ def test_proposal_contract_flags_cross_evidence_reference_without_dependency() -
         "evidence_rows": [{"id": "e1"}, {"id": "e2"}],
     }
     proposal = {
+        "evidence_roles": [{"evidence_id": "e1", "role": "context", "rationale": ""}, {"evidence_id": "e2", "role": "context", "rationale": ""}],
         "judgments": [
             {
                 "evidence_id": "e2",
@@ -216,3 +238,17 @@ def test_proposal_contract_flags_cross_evidence_reference_without_dependency() -
         }
     ]
     assert proposal_contract_violations(payload, proposal) == []
+
+
+def test_proposal_contract_requires_evidence_roles() -> None:
+    payload = {"evidence_rows": [{"id": "e1"}, {"id": "e2"}]}
+    proposal = {
+        "evidence_roles": [{"evidence_id": "e1", "role": "context", "rationale": ""}],
+        "judgments": [],
+        "judgment_dependencies": [],
+        "omission_effects": [],
+    }
+
+    assert proposal_contract_violations(payload, proposal, require_evidence_roles=True) == [
+        {"kind": "missing_evidence_role", "evidence_id": "e2"}
+    ]

@@ -66,6 +66,7 @@ def test_summarize_ach_stress_run_reports_pivotal_support_share(tmp_path) -> Non
     assert summary["fixtures"][0]["top_support_evidence_ids"] == ["e1", "e2"]
     assert summary["fixtures"][0]["expected_pivotal_support_rank"] == 2
     assert summary["fixtures"][0]["expected_pivotal_support_share"] == 0.25
+    assert summary["fixtures"][0]["expected_pivotal_evidence_role"] == "occurrence_anchor"
 
 
 def _write_fixture(root, *, fixture_id: str, target: str, pivotal: str | None) -> None:
@@ -115,7 +116,10 @@ def _write_report(
                     "question_axis": "cause",
                 },
                 "scorer_payload": {
-                    "evidence": [{"id": "e1", "label": "One"}, {"id": "e2", "label": "Two"}],
+                    "evidence": [
+                        {"id": "e1", "label": "One", "role": "context"},
+                        {"id": "e2", "label": "Two", "role": "occurrence_anchor"},
+                    ],
                     "judgments": judgments or [],
                 },
             }

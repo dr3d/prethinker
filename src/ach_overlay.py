@@ -417,6 +417,7 @@ def _top_support_contributions(
             {
                 "evidence_id": evidence_id,
                 "label": str(evidence_item.get("label", evidence_id)),
+                "role": str(evidence_item.get("role", "")),
                 "top_hypothesis_id": top_id,
                 "assessment": assessment,
                 "weight": weight,

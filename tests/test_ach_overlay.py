@@ -70,6 +70,7 @@ def test_ach_surfaces_diagnostic_and_sensitivity_evidence() -> None:
         {
             "evidence_id": "e1",
             "label": "e1",
+            "role": "",
             "top_hypothesis_id": "h1",
             "assessment": "consistent",
             "weight": 5,
