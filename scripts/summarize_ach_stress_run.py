@@ -75,6 +75,11 @@ def _fixture_summary(
         for item in report_summary.get("sensitivity_evidence_ids", [])
         if str(item)
     ] if isinstance(report_summary.get("sensitivity_evidence_ids"), list) else []
+    top_support = _top_support_rows(report)
+    pivotal_support = next(
+        (item for item in top_support if item.get("evidence_id") == expected_pivotal),
+        {},
+    )
     sensitivity_alignment = _sensitivity_alignment(
         target=target,
         expected_pivotal=expected_pivotal,
@@ -90,6 +95,13 @@ def _fixture_summary(
         "top_hypotheses": top,
         "best_matches_expected": bool(expected_best and top == [expected_best]),
         "expected_pivotal_evidence": expected_pivotal,
+        "expected_pivotal_support_rank": int(pivotal_support.get("support_rank", 0) or 0),
+        "expected_pivotal_support_share": float(pivotal_support.get("support_share", 0.0) or 0.0),
+        "top_support_evidence_ids": [
+            str(item.get("evidence_id") or "")
+            for item in top_support
+            if int(item.get("support_weight", 0) or 0) > 0
+        ][:5],
         "sensitivity_evidence_ids": sensitivity_ids,
         "sensitivity_count": len(sensitivity_ids),
         "sensitivity_alignment": sensitivity_alignment,
@@ -100,6 +112,72 @@ def _fixture_summary(
         "question_axis": str(report_summary.get("question_axis") or ""),
         "report_missing": not bool(report),
     }
+
+
+def _top_support_rows(report: dict[str, Any]) -> list[dict[str, Any]]:
+    ach_report = report.get("ach_report") if isinstance(report.get("ach_report"), dict) else {}
+    rows = ach_report.get("top_support_contributions") if isinstance(ach_report.get("top_support_contributions"), list) else []
+    if rows:
+        return _ranked_support_rows(rows)
+
+    summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
+    top = summary.get("top_hypotheses")
+    if not isinstance(top, list) or len(top) != 1:
+        return []
+    top_id = str(top[0])
+    scorer_payload = report.get("scorer_payload") if isinstance(report.get("scorer_payload"), dict) else {}
+    judgments = scorer_payload.get("judgments") if isinstance(scorer_payload.get("judgments"), list) else []
+    labels = {
+        str(item.get("id") or ""): str(item.get("label") or item.get("id") or "")
+        for item in scorer_payload.get("evidence", []) or []
+        if isinstance(item, dict)
+    }
+    support_rows: list[dict[str, Any]] = []
+    total_support = 0
+    for item in judgments:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("hypothesis_id") or "") != top_id:
+            continue
+        evidence_id = str(item.get("evidence_id") or "")
+        assessment = str(item.get("assessment") or "")
+        weight = int(item.get("weight", 0) or 0)
+        support_weight = weight if assessment == "consistent" else 0
+        total_support += support_weight
+        support_rows.append(
+            {
+                "evidence_id": evidence_id,
+                "label": labels.get(evidence_id, evidence_id),
+                "top_hypothesis_id": top_id,
+                "assessment": assessment,
+                "weight": weight,
+                "support_weight": support_weight,
+                "support_share": 0.0,
+            }
+        )
+    for item in support_rows:
+        item["support_share"] = round(int(item["support_weight"]) / total_support, 4) if total_support > 0 else 0.0
+    return _ranked_support_rows(support_rows)
+
+
+def _ranked_support_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    out = [
+        {
+            "evidence_id": str(item.get("evidence_id") or ""),
+            "label": str(item.get("label") or item.get("evidence_id") or ""),
+            "top_hypothesis_id": str(item.get("top_hypothesis_id") or ""),
+            "assessment": str(item.get("assessment") or ""),
+            "weight": int(item.get("weight", 0) or 0),
+            "support_weight": int(item.get("support_weight", 0) or 0),
+            "support_share": float(item.get("support_share", 0.0) or 0.0),
+        }
+        for item in rows
+        if isinstance(item, dict)
+    ]
+    out.sort(key=lambda item: (-item["support_weight"], item["evidence_id"]))
+    for index, item in enumerate(out, start=1):
+        item["support_rank"] = index
+    return out
 
 
 def _sensitivity_alignment(*, target: str, expected_pivotal: str, sensitivity_ids: list[str]) -> str:
@@ -153,8 +231,8 @@ def render_markdown(summary: dict[str, Any]) -> str:
         f"- Medium detected: `{aggregate.get('medium_detected_count', 0)}`",
         f"- Low clean: `{aggregate.get('low_clean_count', 0)}`",
         "",
-        "| Fixture | Target | Top | Sensitivity | Alignment | Contract |",
-        "| --- | --- | --- | --- | --- | ---: |",
+        "| Fixture | Target | Top | Sensitivity | Pivotal Support | Alignment | Contract |",
+        "| --- | --- | --- | --- | ---: | --- | ---: |",
     ]
     for row in summary.get("fixtures", []):
         lines.append(
@@ -165,6 +243,7 @@ def render_markdown(summary: dict[str, Any]) -> str:
                     f"`{row.get('sensitivity_target', '')}`",
                     f"`{row.get('top_hypotheses', [])}`",
                     f"`{row.get('sensitivity_evidence_ids', [])}`",
+                    f"`{row.get('expected_pivotal_support_rank', 0)} / {row.get('expected_pivotal_support_share', 0.0)}`",
                     f"`{row.get('sensitivity_alignment', '')}`",
                     f"`{row.get('proposal_contract_violation_count', 0)}`",
                 ]

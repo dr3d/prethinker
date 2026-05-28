@@ -40,6 +40,34 @@ def test_summarize_ach_stress_run_flags_wrong_high_sensitivity(tmp_path) -> None
     assert summary["aggregate"]["high_pivotal_detected_count"] == 0
 
 
+def test_summarize_ach_stress_run_reports_pivotal_support_share(tmp_path) -> None:
+    dataset = tmp_path / "dataset"
+    run_dir = tmp_path / "run"
+    dataset.mkdir()
+    run_dir.mkdir()
+
+    _write_fixture(dataset, fixture_id="high_case", target="high", pivotal="e2")
+    _write_report(
+        run_dir,
+        "high-case",
+        top=["h1"],
+        sensitivity=[],
+        contract_violations=0,
+        judgments=[
+            {"evidence_id": "e1", "hypothesis_id": "h1", "assessment": "consistent", "weight": 3},
+            {"evidence_id": "e2", "hypothesis_id": "h1", "assessment": "consistent", "weight": 1},
+            {"evidence_id": "e1", "hypothesis_id": "h2", "assessment": "neutral", "weight": 1},
+            {"evidence_id": "e2", "hypothesis_id": "h2", "assessment": "neutral", "weight": 1},
+        ],
+    )
+
+    summary = summarize_ach_stress_run(dataset_root=dataset, run_dir=run_dir)
+
+    assert summary["fixtures"][0]["top_support_evidence_ids"] == ["e1", "e2"]
+    assert summary["fixtures"][0]["expected_pivotal_support_rank"] == 2
+    assert summary["fixtures"][0]["expected_pivotal_support_share"] == 0.25
+
+
 def _write_fixture(root, *, fixture_id: str, target: str, pivotal: str | None) -> None:
     fixture = root / fixture_id
     fixture.mkdir()
@@ -65,7 +93,15 @@ def _write_fixture(root, *, fixture_id: str, target: str, pivotal: str | None) -
     )
 
 
-def _write_report(run_dir, slug: str, *, top: list[str], sensitivity: list[str], contract_violations: int) -> None:
+def _write_report(
+    run_dir,
+    slug: str,
+    *,
+    top: list[str],
+    sensitivity: list[str],
+    contract_violations: int,
+    judgments: list[dict] | None = None,
+) -> None:
     (run_dir / f"{slug}_ach_payload_proposal.json").write_text(
         json.dumps(
             {
@@ -77,7 +113,11 @@ def _write_report(run_dir, slug: str, *, top: list[str], sensitivity: list[str],
                     "proposal_contract_violation_count": contract_violations,
                     "proposal_contract_retry_count": 2,
                     "question_axis": "cause",
-                }
+                },
+                "scorer_payload": {
+                    "evidence": [{"id": "e1", "label": "One"}, {"id": "e2", "label": "Two"}],
+                    "judgments": judgments or [],
+                },
             }
         ),
         encoding="utf-8",

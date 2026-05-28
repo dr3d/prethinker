@@ -581,6 +581,18 @@ Follow-up instrumentation:
   separating missed dependency capture from underweighted direct-support or
   concrete-hook evidence.
 
+Regenerated R2 summary with support diagnostics:
+
+```text
+enforcement expected pivotal support: rank 5, share 0.1154
+ntsb expected pivotal support: rank 1, share 0.1923
+```
+
+This supports the current blocker read: the remaining high miss is not a
+classic dependency failure. The proposer treated the expected pivotal row as a
+low-share consequence/hook row, while the recovered NTSB pivotal row was the
+top direct support row and also generated omission effects.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were
