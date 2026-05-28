@@ -116,10 +116,13 @@ fresh stamp artifacts, prompt guidance, or selector outputs.
 ## Long Run Hygiene
 
 - Keep `tmp/` lean; move bulky scratch output to `C:\prethinker_tmp_archive`.
-- Use OpenRouter or POWER according to wall-clock throughput and provider
-  stability. Hosted runs usually default to six lanes or fewer.
+- Use OpenRouter as the default measured lane for stamps, transfer batches, and
+  provider-variance work. Local LM Studio / POWER is a smoke/probe lane until it
+  proves benchmark equivalence under captured local metadata.
 - Tag OpenRouter calls by experiment family/phase/fixture when possible.
 - Treat transport/provider failures as transport evidence, not architecture
   evidence.
+- Treat provider/backend, quantization, loaded context, routing, and prompt
+  packing as measurement conditions, not incidental runtime details.
 - If an archived artifact becomes important again, summarize the lesson in a
   current tracked doc instead of relinking the whole notebook.

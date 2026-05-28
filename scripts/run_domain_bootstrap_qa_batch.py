@@ -24,6 +24,13 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.model_path import (  # noqa: E402
+    apply_openrouter_provider_env,
+    local_lmstudio_model_metadata,
+    model_serving_path_metadata,
+    openrouter_provider_routing_from_env,
+)
+
 DEFAULT_DATASET_ROOT = REPO_ROOT / "datasets" / "story_worlds"
 DEFAULT_COMPILE_ROOT = REPO_ROOT / "tmp" / "incoming_6_cold_compile_20260508"
 DEFAULT_OUT_ROOT = REPO_ROOT / "tmp" / "incoming_6_full40_qa_20260508"
@@ -47,6 +54,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fixture", action="append", default=[], help="Fixture name. Repeat to include multiple.")
     parser.add_argument("--model", default="qwen/qwen3.6-35b-a3b")
     parser.add_argument("--base-url", default="http://127.0.0.1:1234")
+    parser.add_argument("--openrouter-provider-order", default="", help="Comma-separated OpenRouter provider slugs to try in order.")
+    parser.add_argument("--openrouter-provider-only", default="", help="Comma-separated OpenRouter provider slugs to allow.")
+    parser.add_argument("--openrouter-provider-ignore", default="", help="Comma-separated OpenRouter provider slugs to exclude.")
+    parser.add_argument("--openrouter-quantizations", default="", help="Comma-separated OpenRouter quantization filters.")
+    parser.add_argument("--openrouter-allow-fallbacks", choices=["", "true", "false"], default="")
+    parser.add_argument("--openrouter-require-parameters", choices=["", "true", "false"], default="")
     parser.add_argument("--limit", type=int, default=40)
     parser.add_argument("--timeout", type=int, default=420, help="Base per-call LM timeout passed to QA runner.")
     parser.add_argument("--lanes", type=int, default=1, help="Concurrent QA runner processes.")
@@ -95,6 +108,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    apply_openrouter_provider_env(
+        order=getattr(args, "openrouter_provider_order", ""),
+        only=getattr(args, "openrouter_provider_only", ""),
+        ignore=getattr(args, "openrouter_provider_ignore", ""),
+        quantizations=getattr(args, "openrouter_quantizations", ""),
+        allow_fallbacks=getattr(args, "openrouter_allow_fallbacks", ""),
+        require_parameters=getattr(args, "openrouter_require_parameters", ""),
+    )
     lanes = max(1, int(args.lanes))
     timeout_scale = float(args.timeout_scale) if float(args.timeout_scale) > 0 else float(lanes)
     effective_timeout = max(1, int(round(int(args.timeout) * timeout_scale)))
@@ -118,6 +139,12 @@ def main() -> int:
             include_retired_native_compatibility_adapters=bool(args.include_retired_native_compatibility_adapters),
             disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
             disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
+            openrouter_provider_order=str(args.openrouter_provider_order or ""),
+            openrouter_provider_only=str(args.openrouter_provider_only or ""),
+            openrouter_provider_ignore=str(args.openrouter_provider_ignore or ""),
+            openrouter_quantizations=str(args.openrouter_quantizations or ""),
+            openrouter_allow_fallbacks=str(args.openrouter_allow_fallbacks or ""),
+            openrouter_require_parameters=str(args.openrouter_require_parameters or ""),
         )
         for job in jobs
     ]
@@ -144,7 +171,15 @@ def main() -> int:
                 print(json.dumps(result, ensure_ascii=False, sort_keys=True))
 
     results.sort(key=lambda item: str(item.get("fixture", "")))
-    summary = _summarize(results, lanes=lanes, base_timeout=int(args.timeout), effective_timeout=effective_timeout)
+    summary = _summarize(
+        results,
+        lanes=lanes,
+        base_timeout=int(args.timeout),
+        effective_timeout=effective_timeout,
+        model=str(args.model),
+        base_url=str(args.base_url),
+        cache_enabled=not bool(args.no_cache),
+    )
     out_json = _abs(args.out_json) if args.out_json else out_root / "qa_batch_summary.json"
     out_md = _abs(args.out_md) if args.out_md else out_root / "qa_batch_summary.md"
     out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -202,6 +237,12 @@ def _build_command(
     include_retired_native_compatibility_adapters: bool = False,
     disable_current_source_record_summaries: bool = False,
     disabled_support_predicates: tuple[str, ...] = (),
+    openrouter_provider_order: str = "",
+    openrouter_provider_only: str = "",
+    openrouter_provider_ignore: str = "",
+    openrouter_quantizations: str = "",
+    openrouter_allow_fallbacks: str = "",
+    openrouter_require_parameters: str = "",
 ) -> list[str]:
     command = [
         sys.executable,
@@ -225,6 +266,17 @@ def _build_command(
         command.extend(["--oracle-jsonl", str(job.oracle_jsonl)])
     if job.judge_reference_answers:
         command.append("--judge-reference-answers")
+    for value, option in (
+        (openrouter_provider_order, "--openrouter-provider-order"),
+        (openrouter_provider_only, "--openrouter-provider-only"),
+        (openrouter_provider_ignore, "--openrouter-provider-ignore"),
+        (openrouter_quantizations, "--openrouter-quantizations"),
+        (openrouter_allow_fallbacks, "--openrouter-allow-fallbacks"),
+        (openrouter_require_parameters, "--openrouter-require-parameters"),
+    ):
+        value = str(value or "").strip()
+        if value:
+            command.extend([option, value])
     if classify_failure_surfaces:
         command.append("--classify-failure-surfaces")
     if not cache:
@@ -306,7 +358,16 @@ def _qa_markdown_has_answer_key(path: Path) -> bool:
     return any(line.strip().lower() == "## answers" for line in text.splitlines())
 
 
-def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, effective_timeout: int) -> dict[str, Any]:
+def _summarize(
+    results: list[dict[str, Any]],
+    *,
+    lanes: int,
+    base_timeout: int,
+    effective_timeout: int,
+    model: str = "",
+    base_url: str = "",
+    cache_enabled: bool | None = None,
+) -> dict[str, Any]:
     totals = {
         "question_count": 0,
         "judge_exact": 0,
@@ -328,6 +389,28 @@ def _summarize(results: list[dict[str, Any]], *, lanes: int, base_timeout: int, 
         "lanes": lanes,
         "base_timeout": base_timeout,
         "effective_timeout": effective_timeout,
+        "model_serving_path": model_serving_path_metadata(
+            backend="lmstudio",
+            base_url=str(base_url or ""),
+            model=str(model or ""),
+            temperature=0.0,
+            top_p=0.82,
+            top_k=None,
+            context_length=None,
+            max_tokens=None,
+            timeout=effective_timeout,
+            run_role="qa_batch",
+            cache_enabled=cache_enabled,
+            lanes=lanes,
+            fresh_compile=False,
+            provider_routing=openrouter_provider_routing_from_env(),
+            observed_runtime=local_lmstudio_model_metadata(
+                backend="lmstudio",
+                base_url=str(base_url or ""),
+                model=str(model or ""),
+                timeout=min(int(effective_timeout), 3),
+            ),
+        ),
         "totals": {**totals, "exact_rate": round(exact_rate, 4)},
         "compatibility_pressure_summary": compatibility_pressure,
         "results": results,
@@ -381,11 +464,16 @@ def _summarize_compatibility_pressure(*, results: list[dict[str, Any]], totals: 
 def _render_md(summary: dict[str, Any]) -> str:
     totals = summary.get("totals", {})
     compatibility_pressure = summary.get("compatibility_pressure_summary", {})
+    serving_path = summary.get("model_serving_path") if isinstance(summary.get("model_serving_path"), dict) else {}
     lines = [
         "# Domain Bootstrap QA Batch Summary",
         "",
         f"Generated: {summary.get('generated')}",
         "",
+        f"- Provider family: `{serving_path.get('provider_family', '')}`",
+        f"- Model: `{serving_path.get('model', '')}`",
+        f"- Base URL: `{serving_path.get('base_url', '')}`",
+        f"- Provider routing: `{serving_path.get('provider_routing', {})}`",
         f"- Lanes: `{summary.get('lanes')}`",
         f"- Base timeout: `{summary.get('base_timeout')}`",
         f"- Effective per-call timeout: `{summary.get('effective_timeout')}`",

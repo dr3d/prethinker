@@ -162,15 +162,20 @@ the current public claim.
 
 ## Operating Notes
 
-- Local LM Studio on POWER is the default target for product-adjacent API calls
-  and ordinary development runs. Use `PRETHINKER_BASE_URL=http://127.0.0.1:1234`
-  and `PRETHINKER_MODEL=qwen/qwen3.6-35b-a3b`.
-- OpenRouter is available for explicit hosted lanes; default hosted concurrency
-  should stay around six lanes unless provider behavior changes.
+- OpenRouter is the default measured lane for stamps, transfer batches, and
+  provider-variance investigations. Default hosted concurrency should stay
+  around six lanes unless provider behavior changes.
+- Local LM Studio on POWER remains useful for package/API development,
+  one-row smoke tests, and small affected-set probes. It is not currently the
+  default lane for broad compiles, QA batches, or release claims.
 - Local LM Studio localhost should stay at or below four inference lanes for
-  QA-scale work.
-- POWER is the local workstation with the RTX 5090. It is useful but can be
-  slower than hosted lanes for long compile batches.
+  QA-scale work when used at all.
+- POWER is the local workstation with the RTX 5090. Current Q8 LM Studio probes
+  showed low GPU utilization, CPU-heavy prefill, and slower broad compile/QA
+  economics than hosted lanes.
+- Model-path metadata matters: provider/backend, quantization, loaded context,
+  routing, and prompt packing are measurement conditions. See
+  `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
 - Use OpenAI-compatible structured output where possible.
 - Keep run titles granular enough to distinguish compile versus QA and corpus
   or fixture group.

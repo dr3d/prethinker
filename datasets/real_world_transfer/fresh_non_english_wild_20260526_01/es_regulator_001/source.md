@@ -1,0 +1,347 @@
+# RESOLUCIÓN DE TERMINACIÓN DEL PROCEDIMIENTO POR PAGO VOLUNTARIO
+
+**Expediente N.º:** EXP202304685
+**Procedimiento sancionador:** PS/00238/2024
+**Autoridad:** Agencia Española de Protección de Datos (AEPD)
+**Directora:** Mar España Martí
+**Domicilio AEPD:** C/ Jorge Juan, 6 — 28001 Madrid — www.aepd.es / sedeagpd.gob.es
+
+---
+
+[page 1]
+
+Del procedimiento instruido por la Agencia Española de Protección de Datos y en base a los siguientes
+
+## ANTECEDENTES
+
+**PRIMERO:** Con fecha 5 de julio de 2024, la Directora de la Agencia Española de Protección de Datos acordó iniciar procedimiento sancionador a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA (en adelante, la parte reclamada), mediante el Acuerdo que se transcribe:
+
+> << Expediente N.º: EXP202304685 (PS/00238/2024)
+>
+> ACUERDO DE INICIO DE PROCEDIMIENTO SANCIONADOR
+>
+> De las actuaciones practicadas por la Agencia Española de Protección de Datos y en base a los siguientes
+>
+> ### HECHOS
+>
+> **PRIMERO:** A.A.A. y B.B.B. (en adelante, la parte reclamante) con fecha 31 de marzo de 2023 interpuso reclamación ante la Agencia Española de Protección de Datos. Los hechos reclamados ponen de manifiesto una posible infracción imputable a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA con NIF W8266168G (en adelante, UNIQLO).
+>
+> Los hechos conocidos son los siguientes:
+>
+> La primera reclamación interpuesta por la parte reclamante, que prestaba servicios en la entidad reclamada, manifiesta que con fecha 8 de agosto de 2022, tras solicitar su nómina a la entidad, recibió un correo electrónico con un documento PDF adjunto que incluía su nómina y la de 446 trabajadores más de la plantilla.
+>
+> Junto con la reclamación aporta el documento PDF que contiene las nóminas de 447 trabajadores de la entidad reclamada, constando nombre y apellidos, DNI, número de afiliación de la SS y número de cuenta bancaria, entre otros datos.
+
+[page 2]
+
+> La segunda reclamación se origina a partir de recibir la comunicación informativa de la brecha, enviada por UNIQLO a los empleados afectados mediante correo electrónico. La parte reclamante de esta segunda reclamación, que manifiesta pertenecer al Comité de Empresa, aporta captura de pantalla del correo recibido el 4 de mayo de 2023.
+>
+> **SEGUNDO:** De conformidad con el artículo 65.4 de la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (en adelante LOPDGDD), se dio traslado de dicha reclamación a UNIQLO, para que procediese a su análisis e informase a esta Agencia en el plazo de un mes, de las acciones llevadas a cabo para adecuarse a los requisitos previstos en la normativa de protección de datos.
+>
+> UNIQLO responde al traslado de la reclamación con fecha 18 de mayo de 2023. Sin embargo, se observa que, de la respuesta al traslado de la reclamación, se infiere una posible vulneración de la normativa de protección de datos.
+>
+> **TERCERO:** Con fecha 8 de junio de 2023, de conformidad con el artículo 65 de la LOPDGDD, se admitió a trámite la reclamación presentada por la parte reclamante.
+>
+> **CUARTO:** La Subdirección General de Inspección de Datos procedió a la realización de actuaciones previas de investigación para el esclarecimiento de los hechos en cuestión, en virtud de las funciones asignadas a las autoridades de control en el artículo 57.1 y de los poderes otorgados en el artículo 58.1 del Reglamento (UE) 2016/679 (Reglamento General de Protección de Datos, en adelante RGPD), y de conformidad con lo establecido en el Título VIII, de la LOPDGDD.
+>
+> Como consecuencia de las actuaciones realizadas, se ha tenido conocimiento de los siguientes extremos:
+>
+> **1.- Constatación de los hechos reclamados.**
+>
+> Como primer aspecto de estas actuaciones de investigación se ha analizado la información proporcionada en la reclamación y por la parte reclamada, tanto en el traslado como en posteriores requerimientos en relación con el origen del incidente.
+>
+> El objeto causante de la brecha sería un archivo PDF que contendría la información de toda la plantilla de UNIQLO relativa a las nóminas del mes de julio. Dicho archivo ha sido aportado por la parte reclamante y se ha procedido a contrastar la información contenida en él, así como la causa de que fuera enviado indebidamente a una persona no autorizada.
+>
+> La parte reclamada admite los hechos reclamados: Con motivo de la terminación del contrato laboral de la parte reclamante, esta solicitó su nómina de julio de 2022 al departamento de recursos humanos. Manifiestan que, en el contexto del intercambio de información por correo electrónico, su departamento de recursos humanos envió por error el archivo indicado, con la información de toda la plantilla. Atribuyen este hecho a un error humano, tanto en el documento de notificación de brecha de datos personales: "the breach was caused by an HR staff by mistake (human error) who did
+
+[page 3]
+
+> not follow the internal process" (en castellano: "la brecha fue causada por un error del personal de RRHH (error humano) que no siguió el proceso interno") y en numerosos puntos de las alegaciones "el Empleado de RRHH remitió un archivo que, por error, contenía las nóminas del mes de julio de todos los trabajadores de Uniqlo y los siguientes datos personales:..".
+>
+> La parte reclamada manifiesta que el archivo contenía la información 446 trabajadores de UNIQLO. Tras la revisión del listado proporcionado en la reclamación, se constata que, aunque el archivo contiene 471 nóminas, corresponden a 447 empleados, ya que hay algunos casos en que una misma persona tenía asociada distintas nóminas durante el mes por diferentes motivos laborales (cambio de contrato, bajas, etc.). En la reclamación se indica la cifra de 470 trabajadores, sin contar al propio empleado reclamante, pero la cifra correcta sería efectivamente de 446.
+>
+> La parte reclamada manifiesta que dicho archivo contenía los siguientes datos personales: nombre, apellido, número de DNI/NIE, número de la Seguridad Social, número de cuenta bancaria y retribución percibida. Se comprueba que las manifestaciones de la parte reclamada son acordes a la información proporcionada por la parte reclamante y el archivo filtrado aportado.
+>
+> Adicionalmente, la parte reclamada aporta comunicaciones mantenidas en ese momento entre la parte reclamante y la persona que intervino de recursos humanos, a través de correo electrónico. Mediante estos mensajes se puede acreditar la fecha del incidente, enviándose el archivo el 8 de agosto de 2022. Se desprende por las comunicaciones intercambiadas a partir de ello que la parte reclamante eliminaría el archivo ("Para tu tranquilidad, te informo de que no llegué a descargarlo, lo abrí online y en cuanto vi la primera página lo cerré, así que no te preocupes que no está en mis archivos"), hecho que pudo condicionar la actuación del personal de la parte reclamada.
+>
+> Según manifiesta la parte reclamada, el empleado de recursos humanos que remitió el archivo no informó de ellos a sus responsables ni lo puso en conocimiento de la empresa, por lo que la brecha no trascendió ni se actuó de forma proactiva ante ella. Únicamente se tuvo constancia, tal como manifiestan, cuando recibieron la notificación del traslado de la reclamación: "el pasado 18 de abril de 2023 Uniqlo recibió una notificación de la AEPD por la que se le daba traslado de la reclamación presentada y se le requería cierta información. Fue en este preciso instante en el que Uniqlo, como organización empresarial, pudo conocer el incidente de seguridad del pasado agosto, hasta entonces, desconocido".
+>
+> **2.- Comunicación informativa de la brecha.**
+>
+> **2.1. Notificación a la autoridad de control.**
+>
+> Puesto que la información de esta brecha a la Agencia llegó a través de reclamación, se solicitó a la parte reclamada la motivación de por qué no fue notificada la brecha. Como se ha indicado en el punto anterior, la argumentación presentada por la parte reclamada es que directamente desconocían la existencia de la brecha hasta que recibieron el traslado de la reclamación. Internamente culpan de esta situación a la persona de recursos humanos que incurrió en el envío de la información: "el empleado
+
+[page 4]
+
+> de RRHH – en un flagrante incumplimiento de las políticas internas de Uniqlo – no informó en ningún momento a su superior jerárquico ni a la dirección de Uniqlo del incidente, motivo por el que la compañía no pudo conocer en tiempo y forma que éste se había producido y, por consiguiente, tampoco pudo noticiar a la AEPD de conformidad con el artículo 33 del Reglamento 2016/769 General de Protección de Datos"
+>
+> Posteriormente realizaron la notificación formal de la brecha de datos personales, a fecha 24 de abril de 2023, y se incorporó al expediente. En dicha notificación constan los siguientes puntos relevantes:
+>
+> - Responsable: UNIQLO EUROPE LTD, sucursal en España.
+> - Encargado: No hay encargado del tratamiento.
+> - Afectados: 471 empleados.
+> - Datos afectados: Datos básicos de contacto, número de identidad, datos económicos (sin datos de pago) y datos de contacto.
+> - Causa de la brecha: Accidental, de origen interno. Se aporta la explicación previamente mencionada en el punto 1 del informe relativa al error de recursos humanos.
+> - Consecuencias para los afectados: Afectada la confidencialidad. Podrían sufrir inconvenientes severos como phishing o intentos de suplantación, aunque se considera improbable que se materialice.
+> - Transfronteriza: No, únicamente en España.
+> - Menores: No hay menores entre los afectados.
+>
+> **2.2. Comunicación a los interesados:**
+>
+> Por otra parte, se requirió la información relativa a la comunicación a los interesados. La parte reclamada manifiesta que se realizó la comunicación informándoles del incidente a los pocos días de que tuvieron constancia del mismo, el 4 de mayo de 2023.
+>
+> Aportan la comunicación remitida, que dispone de versión en castellano y en inglés. En ella se informa del incidente, explicando las causas y su magnitud con un lenguaje claro y conciso ("el marco de la respuesta a una solicitud legítima, un archivo con su nómina correspondiente al mes de julio de 2022 fue enviado por error a una antigua persona trabajadora por parte de UNIQLO. La información que contiene una hoja de nómina incluye los siguientes datos personales: nombre, dirección, número de DNI/NIE, número de la Seguridad Social, número de la cuenta bancaria, salario y su desglose"). Se reitera que no se tuvo constancia a nivel de dirección hasta que se comunicó por la AEPD, justificando así el decalaje de varios meses entre los hechos y la comunicación. Se facilita un correo electrónico de contacto para consultas
+
+[page 5]
+
+> adicionales. Manifiestan haber recibido 10 comunicaciones al respecto, que habrían sido debidamente atendidas.
+>
+> En la comunicación se manifiesta que no se tiene constancia de evidencias de exfiltración de los datos personales y se indica una referencia al INCIBE (Instituto Nacional de Ciberseguridad) para que los afectados puedan consultar recursos adicionales de ciberseguridad. No se concretan las posibles consecuencias que podría tener esta brecha, aunque se manifiesta: "recomendamos que esté atento a cualquier riesgo potencial que pudiera derivarse de un uso indebido de sus datos personales".
+>
+> Por último, se indican las medidas que tomará UNIQLO para tratar de garantizar que no se produzcan más incidentes de este tipo: formación para el personal en ciberseguridad y privacidad de los datos, junto con la revisión de los procedimientos y políticas internas.
+>
+> Adicionalmente al texto de la comunicación se aporta un cuadro de 15 preguntas y respuestas remitido a los afectados, que sintetizan la descripción de la brecha y los puntos comentados anteriormente. También se aporta un correo dirigido al Comité de Empresa, en la misma fecha, informando de este suceso y solicitando su colaboración.
+>
+> Manifiestan que realizaron la comunicación por correo electrónico a la totalidad de los afectados, compuesta por 287 empleados y 160 exempleados en mayo de 2023, al no tener ya relación laboral con un importante grupo de los afectados. Teniendo en cuenta que entre los trabajadores también se encontraba la primera persona reclamante, la comunicación se habría realizado a la totalidad de los afectados. Se ha requerido acreditación de que la comunicación se ha realizado de forma efectiva a todo el personal afectado, pero no se ha recibido confirmación al respecto, aunque sí se aportan muestras de los correos dirigidos tanto a trabajadores en activo como a exempleados.
+>
+> El contenido de la comunicación se aporta por doble partida, ya que la segunda reclamación también lo adjunta. En dicha reclamación, que proviene de una persona que manifiesta ser del Comité de Empresa, se indica "la empresa está dirigiendo un correo electrónico (se adjunta) a todas las personas trabajadoras en el cual comunica y reconoce que ha existido una comunicación a terceras personas la cual contenía datos de carácter personal", por lo que puede confirmarse que la comunicación se ha realizado de manera efectiva a, al menos, todo el personal en activo en esos momentos.
+>
+> **3.- Gestión de las nóminas.**
+>
+> Puesto que la brecha se ha ocasionado con motivo de la gestión de nóminas de la empresa, se ha profundizado en su funcionamiento y organización.
+>
+> (…). (…). (…). (…).
+
+[page 6]
+
+> (…). (…). (…).
+>
+> No obstante, en este caso particular el encargado del tratamiento, aun siendo una cuestión relativa a las nóminas, no tuvo ninguna implicación en el incidente al circunscribirse internamente al responsable.
+>
+> **4.- Medidas de seguridad.**
+>
+> **4.1. Medidas previas al incidente.**
+>
+> Se ha requerido a la parte reclamada información sobre las medidas previas al incidente en materia de protección de datos, así como la normativa al respecto que desarrolle los protocolos de actuación.
+>
+> La parte reclamada manifiesta que cuentan con las siguientes medidas técnicas y organizativas: (…).
+>
+> Relativo al tratamiento de datos para la gestión de nóminas, la parte reclamada manifiesta que no se ha realizado una evaluación de impacto específica, ya que interpretan que no es considerado un tratamiento que requiera esta evaluación. En consecuencia, manifiestan que tampoco se ha documentado un análisis de riesgo específico para este tratamiento: "En lo que al tratamiento de datos relativo a la gestión de nóminas se refiere, la empresa no ha llevado a cabo una evaluación de impacto ya que, de conformidad con el artículo 35.3 del RGPD, la gestión de las nóminas no es considerado un tratamiento que requiera de esta evaluación. Asimismo, y en consecuencia con lo anterior, la empresa tampoco ha documentado un análisis del riesgo específico de este tratamiento".
+>
+> En cualquier caso, manifiestan una serie de medidas de seguridad que son de aplicación para este tratamiento. Entre ellas: (…). (…). (…). (…). (…). (…). (…). (…).
+
+[page 7]
+
+> UNIQLO dispone de una plataforma digital denominada portal ISO. Es un portal en línea operado por la oficina de seguridad de la información del grupo corporativo, en el que se pone a disposición de los empleados los materiales y documentación relativos a seguridad de la información. Entre la documentación que se encuentra en el portal, está el mencionado reglamento básico de seguridad ("Fast Retailing Group - Information Security Basic Regulations") y el manual de seguridad de la información ("Informacion Security Handbook"). Se aporta acreditación de que dichos protocolos son accesibles dentro del portal. Como se desarrollará posteriormente, también se aporta información relativa a la difusión del uso de este portal entre los empleados.
+>
+> Adicionalmente a lo expuesto, se encontrarían las medidas con el encargado del tratamiento, GM Integra RRHH S.L., aunque en este caso la brecha sería ajena a ellas.
+>
+> En el marco normativo, se aporta la siguiente documentación al respecto:
+>
+> - Procedimiento para la gestión de incidentes. En dicho procedimiento consta la obligación de comunicar tanto al departamento de seguridad de la información como a su responsable directo cualquier tipo de incidente, aunque no haya sido malintencionado: "All Officers and Employees are required to report Information Security Incidents (hereinafter Incidents) to their direct manager and ISO immediately through the ISO Portal. Reporting must include actual, suspected events or anomalies with or without malicious intent" (en castellano: "Todos los Responsables y Empleados están obligados a notificar Incidentes de Seguridad de la Información (en adelante Incidentes) a su responsable directo y a ISO inmediatamente a través del Portal ISO. La notificación debe incluir sucesos o anomalías reales o presuntos, con o sin intención maliciosa.").
+> - Reglamento básico de seguridad de la información ("Fast Retailing Group - Information Security Basic Regulations"). Manifiestan estaba en vigor desde febrero de 2017 y en él se hace mención a la obligación de confidencialidad que deben mantener los empleados cuando divulguen activos de información a través de medios digitales, así como la necesidad de informar en caso de pérdida de información.
+> - Manual de seguridad de la información ("Informacion Security Handbook").
+> - Registro de Actividades de Tratamiento, en el que consta la actividad de gestión de nóminas y los datos personales afectados por este tratamiento.
+> - Protocolo de protección de datos del departamento de recursos humanos. En dicho protocolo consta la necesidad de comunicar al departamento de seguridad de la información (ISO) en caso de haberse producido una brecha.
+> - Matriz de riesgos
+> - Manual para empleados de tienda
+
+[page 8]
+
+> En el punto 5 de este informe se ahondará en la efectiva difusión de esta normativa entre los empleados de UNIQLO.
+>
+> En relación con las medidas contractuales con el personal de recursos humanos, se aporta el Código de Conducta que se pone a disposición de los empleados en el momento de su contratación. Entre los principios que constan se encuentra el respeto a la información personal y confidencial, así como el uso indebido o inapropiado. También se aportan las cláusulas de protección de datos para empleados. Dichas cláusulas se encuentran orientadas a los datos facilitados por el trabajador, no de cara a la gestión de datos personales de otros empleados.
+>
+> **4.2. Medidas adoptadas con posterioridad.**
+>
+> Manifiestan nuevamente que todas las acciones se han realizado a partir del traslado de la reclamación por parte de la AEPD, no tras producirse los hechos en agosto de 2022. Entre ellas se encuentran las siguientes:
+>
+> - Apertura interna del incidente e inclusión de la brecha de seguridad en el registro de brechas de la organización. Se aporta dicho registro, donde consta el incidente junto con la matriz de riesgo asociada.
+> - Notificación a la AEPD, como se ha comentado previamente en el punto 2.1.
+> - Notificación a los afectados y al Comité de Empresa, como se ha comentado previamente en el punto 2.2.
+> - Contratación de servicios jurídicos externos para asesoría sobre este caso.
+> - Implementación de la herramienta de inteligencia de amenazas (...), que se desarrollará en el punto 6 relativo a la exfiltración de los datos.
+> - Revisión de los protocolos internos del departamento de recursos humanos y del proceso de envío de nóminas. Entre los cambios realizados, manifiestan: los antiguos empleados podrán descargar sus nóminas (…). Complementariamente, el departamento de recursos humanos de UNIQLO intercambiará las nóminas con la gestoría encargada de este tratamiento de manera individualizada, enviando las nóminas específicas de cada trabajador y no de manera conjunta.
+>
+> A nivel de personal de la organización, manifiestan haber realizado las siguientes acciones:
+>
+> - Apertura de un expediente disciplinario al empleado de recursos humanos por incumplimiento grave de los deberes de buena fe y confianza legítima al no haber seguido los protocolos existentes. Manifiestan que se considera una falta muy grave que incluso podría acarrear el despido.
+
+[page 9]
+
+> - Formación a los afectados en materia de protección de datos, enfocada a la protección frente a las posibles consecuencias. Aportan correo electrónico de la convocatoria, fechada en mayo de 2023.
+> - Formación a los empleados de UNIQLO orientada al refuerzo sobre la protección de datos y sobre los protocolos y políticas internas de la empresa. Se proporciona un calendario tentativo de las acciones de formación.
+>
+> Adicionalmente indican que se mantendrá una actitud vigilante en lo relativo a este incidente y se revisará periódicamente que los datos comprometidos no se han publicado en Internet.
+>
+> Por último, aunque la parte reclamada no lo manifiesta expresamente como una medida adoptada a raíz del incidente, se destaca la adenda suscrita con la gestoría GM Integra RRHH S.L., encargada del tratamiento para los servicios de gestión de nóminas, que fue suscrita en mayo de 2023 y como se manifestó, la finalidad era reforzar la responsabilidad proactiva.
+>
+> **5.- Traslado de los protocolos a los empleados.**
+>
+> Se aportan las siguientes circulares de ejemplo:
+> - Primera circular, enviada el 20 de octubre de 2020. En esta circular el Director de seguridad de la información informa a los empleados de los aplicativos que están permitidos para el envío de información de la empresa.
+> - Segunda circular, del 6 de agosto de 2021, enviada también por el Director de seguridad de la información. En ella se recuerda a los empleados que la filtración de información personal constituye una violación y que los archivos que se compartan con terceros ajenos a UNIQLO deben ser enviados mediante la herramienta (...).
+> - Tercera circular, del 26 de octubre de 2021, igualmente remitida por el mismo responsable, en ella se informa a los empleados sobre los incidentes de seguridad de la información, indicando el portal para su gestión (el mencionado portal ISO).
+> - Cuarta circular del 1 de marzo de 2022. En esta circular se ejemplifican algunas conductas contrarias a la correcta gestión de la información confidencial.
+
+[page 10]
+
+> Por otra parte, la parte reclamada manifiesta que el empleado de recursos humanos en cuestión también recibió formación específica en materia de protección de datos vinculada a la gestión de personal. Se aportan los materiales de la formación impartida en fecha 25 de abril de 2022, dicha formación estuvo orientada a la protección de datos personales en los procesos de selección de personal.
+>
+> Adicionalmente, dentro de las actividades formativas la parte reclamada manifiesta que se realiza un recordatorio anual del mencionado Código de Conducta. Se acredita que el empleado involucrado completó una formación, a fecha del 28 de enero de 2022, aunque la información proporcionada en la evidencia es escueta y no se muestra el contenido de la misma.
+>
+> **6.- Exfiltración de los datos afectados.**
+>
+> No consta que se haya producido exfiltración de los datos afectados por la brecha. Se aporta declaración del Responsable de seguridad de la información a fecha 18 de mayo de 2023, en la que se detallada el análisis realizado y las conclusiones del mismo, en el que se confirma que no se han detectado filtraciones de información ni que los datos hubieran sido publicados en contra de la voluntad de los afectados.
+>
+> **QUINTO:** Según consta en diligencia de fecha 27 de mayo de 2024 obrante en el expediente, el volumen de negocio total anual del Grupo UNIQLO, cuya actividad económica es el comercio al por menor de prendas de vestir en establecimientos especializados, el ejercicio financiero 2023, fue de unos (...) millones de euros.
+
+[page 11]
+
+> ### FUNDAMENTOS DE DERECHO
+>
+> **I — Competencia**
+>
+> De acuerdo con los poderes que el artículo 58.2 del Reglamento (UE) 2016/679 (RGPD) otorga a cada autoridad de control y según lo establecido en los artículos 47, 48.1, 64.2 y 68.1 de la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD), es competente para iniciar y resolver este procedimiento la Directora de la Agencia Española de Protección de Datos.
+>
+> **II — Procedimiento**
+>
+> El artículo 63.2 de la LOPDGDD determina que: "Los procedimientos tramitados por la Agencia Española de Protección de Datos se regirán por lo dispuesto en el Reglamento (UE) 2016/679, en la presente ley orgánica, por las disposiciones reglamentarias dictadas en su desarrollo y, en cuanto no las contradigan, con carácter subsidiario, por las normas generales sobre los procedimientos administrativos".
+>
+> De acuerdo con el artículo 64 de la LOPDGDD, y teniendo en cuenta las características de las presuntas infracciones cometidas, se inicia un procedimiento sancionador.
+>
+> El procedimiento tendrá una duración máxima de doce meses a contar desde la fecha del acuerdo de inicio. Transcurrido ese plazo se producirá su caducidad y, en consecuencia, el archivo de actuaciones, de conformidad con lo establecido en el artículo 64 de la LOPDGDD.
+>
+> **III — Cuestiones previas**
+>
+> El artículo 4.2) del RGPD define «tratamiento». El artículo 4.7) del RGPD define al «responsable del tratamiento».
+>
+> UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA realiza esta actividad en su condición de responsable del tratamiento, dado que es quien determina los fines y medios de tal actividad, en virtud del artículo 4.7 del RGPD.
+
+[page 12]
+
+> **IV — Obligación incumplida. Principios relativos al tratamiento**
+>
+> La letra f) del artículo 5.1 del RGPD propugna:
+>
+> "1. Los datos personales serán: (…) f) tratados de tal manera que se garantice una seguridad adecuada de los datos personales, incluida la protección contra el tratamiento no autorizado o ilícito y contra su pérdida, destrucción o daño accidental, mediante la aplicación de medidas técnicas u organizativas apropiadas («integridad y confidencialidad»)."
+>
+> En el presente caso, con fecha 5 de agosto de 2022 la parte reclamante solicitó por correo electrónico al departamento de recursos humanos de UNIQLO que le enviasen la nómina del mes de julio (página 546 del expediente). Como respuesta, el 8 de agosto de 2022 desde UNIQLO se remitió a la parte reclamante, también por correo electrónico, un documento PDF con las nóminas de 447 de sus trabajadores.
+
+[page 13]
+
+> **V — Tipificación y calificación de la infracción a los efectos de la prescripción del artículo 5.1.f) del RGPD**
+>
+> El artículo 83.5 del RGPD tipifica como infracción administrativa la vulneración del artículo siguiente, que se sancionará, de acuerdo con el apartado 2, con multas administrativas de 20.000.000 EUR como máximo o, tratándose de una empresa, de una cuantía equivalente al 4 % como máximo del volumen de negocio total anual global del ejercicio financiero anterior, optándose por la de mayor cuantía: "a) los principios básicos para el tratamiento, incluidas las condiciones para el consentimiento a tenor de los artículos 5, 6, 7 y 9;"
+>
+> A los solos efectos del plazo de prescripción, el artículo 72.1 de la LOPDGDD establece: "En función de lo que establece el artículo 83.5 del Reglamento (UE) 2016/679 se consideran muy graves y prescribirán a los tres años las infracciones que supongan una vulneración sustancial de los artículos mencionados en aquel y, en particular, las siguientes: a) El tratamiento de datos personales vulnerando los principios y garantías establecidos en el artículo 5 del Reglamento (UE) 2016/679."
+>
+> **VI — Propuesta de sanción (por el artículo 5.1.f)**
+
+[page 14-16]
+
+> Se consideran las circunstancias del artículo 83.2 RGPD y del artículo 76.2 LOPDGDD:
+>
+> - **Naturaleza, gravedad y duración de la infracción (art. 83.2.a):** El número de interesados afectados por la brecha de datos personales es de 447.
+> - **Intencionalidad/Negligencia (art. 83.2.b):** No se aprecia dolo; se observa falta de diligencia. Se cita la SAN de 17/10/2007.
+> - **Categorías de los datos afectados (art. 83.2.g):** además de datos identificativos, se filtraron datos financieros (número de cuenta bancaria, ingresos mensuales). Referencia a las Directrices 04/2022 del CEPD, apartado 3.6.
+> - **Agravante — La vinculación de la actividad con tratamientos (art. 76.2.b LOPDGDD).**
+> - **Atenuante — art. 83.2.k RGPD:** El correo tenía un único destinatario, la parte reclamante.
+>
+> El balance permite fijar inicialmente una sanción de multa administrativa de **300.000 € (trescientos mil euros)**.
+
+[page 17]
+
+> **VII — Obligación incumplida. Seguridad del tratamiento**
+>
+> El artículo 32 del RGPD estipula:
+>
+> "1. Teniendo en cuenta el estado de la técnica, los costes de aplicación, y la naturaleza, el alcance, el contexto y los fines del tratamiento, así como riesgos de probabilidad y gravedad variables para los derechos y libertades de las personas físicas, el responsable y el encargado del tratamiento aplicarán medidas técnicas y organizativas apropiadas para garantizar un nivel de seguridad adecuado al riesgo, que en su caso incluya, entre otros:
+> a) la seudonimización y el cifrado de datos personales;
+> b) la capacidad de garantizar la confidencialidad, integridad, disponibilidad y resiliencia permanentes de los sistemas y servicios de tratamiento;
+> c) la capacidad de restaurar la disponibilidad y el acceso a los datos personales de forma rápida en caso de incidente físico o técnico;
+> d) un proceso de verificación, evaluación y valoración regulares de la eficacia de las medidas técnicas y organizativas para garantizar la seguridad del tratamiento."
+
+[page 18-19]
+
+> Se cita el considerando 83 y el considerando 39 del RGPD. La actuación negligente del empleado no exime de responsabilidad a UNIQLO. Se cita la Sentencia del Tribunal Supremo núm. 188/2022 (Sala de lo Contencioso, Sección 3ª), de 15 de febrero de 2022 (rec. 7359/2020), Fundamento de Derecho Cuarto, y la STS nº 196/2020, de 15 de febrero de 2021 (rec. 1916/2020).
+
+[page 20]
+
+> **VIII — Tipificación y calificación de la infracción a los efectos de la prescripción del artículo 32 del RGPD**
+>
+> El artículo 83.4 del RGPD sanciona con multas administrativas de 10.000.000 EUR como máximo o, tratándose de una empresa, de una cuantía equivalente al 2 % como máximo del volumen de negocio total anual global del ejercicio financiero anterior, optándose por la de mayor cuantía.
+>
+> A los solos efectos del plazo de prescripción, el artículo 73 de la LOPDGDD establece: "En función de lo que establece el artículo 83.4 del Reglamento (UE) 2016/679 se consideran graves y prescribirán a los dos años las infracciones que supongan una vulneración sustancial de los artículos mencionados en aquel y, en particular, las siguientes: f) La falta de adopción de aquellas medidas técnicas y organizativas que resulten apropiadas para garantizar un nivel de seguridad adecuado al riesgo del tratamiento, en los términos exigidos por el artículo 32.1 del Reglamento (UE) 2016/679."
+>
+> **IX — Propuesta de sanción (por el artículo 32)**
+>
+> El balance permite fijar inicialmente una sanción de multa administrativa de **150.000 € (ciento cincuenta mil euros)**.
+
+[page 21]
+
+> **X — Adopción de medidas**
+>
+> Se podrá requerir a UNIQLO para que en el plazo de 3 meses acredite a esta Agencia la adopción de las siguientes medidas:
+> - Adoptar las medidas técnicas y organizativas para garantizar la seguridad de los datos personales de sus trabajadores.
+>
+> **SE ACUERDA:**
+>
+> **PRIMERO:** INICIAR PROCEDIMIENTO SANCIONADOR a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA, con NIF W8266168G:
+> - Por la presunta infracción del Artículo 5.1.f) del RGPD, tipificada en el Artículo 83.5 del RGPD.
+> - Por la presunta infracción del Artículo 32 del RGPD, tipificada en el Artículo 83.4 del RGPD
+>
+> **SEGUNDO:** NOMBRAR como instructor a C.C.C. y, como secretario, a D.D.D.
+>
+> **CUARTO:** la sanción que pudiera corresponder, sin perjuicio de lo que resulte de la instrucción, sería de multa administrativa:
+> - Por la supuesta infracción del artículo 5.1.f) del RGPD: **300.000,00 euros**
+> - Por la supuesta infracción del artículo 32 del RGPD: **150.000,00 euros**
+>
+> **QUINTO:** NOTIFICAR el presente acuerdo a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA, otorgándole un plazo de audiencia de diez días hábiles.
+>
+> Conforme al artículo 85 de la LPACAP, podrá reconocer responsabilidad dentro del plazo, lo que llevará aparejada una reducción de un 20 % de la sanción. Con la aplicación de esta reducción, la sanción quedaría establecida en **360.000,00 euros**.
+>
+> Asimismo, podrá realizar pago voluntario antes de la resolución, lo que supondrá la reducción de un 20 %. Con la aplicación de esta reducción, la sanción quedaría establecida en **360.000,00 euros**.
+>
+> La acumulación de ambas reducciones: el importe de la sanción quedaría establecido en **270.000,00 euros**.
+>
+> **1479-180624** — Mar España Martí — Directora de la Agencia Española de Protección de Datos
+>
+> >>
+
+[page 24]
+
+**SEGUNDO:** En fecha 22 de julio de 2024, la parte reclamada ha procedido al pago de la sanción en la cuantía de **270.000 euros** haciendo uso de las dos reducciones previstas en el Acuerdo de inicio transcrito anteriormente, lo que implica el reconocimiento de la responsabilidad.
+
+**TERCERO:** El pago realizado, dentro del plazo concedido para formular alegaciones a la apertura del procedimiento, conlleva la renuncia a cualquier acción o recurso en vía administrativa contra la sanción y el reconocimiento de responsabilidad en relación con los hechos a los que se refiere el Acuerdo de Inicio.
+
+**CUARTO:** Habiéndose reconocido la responsabilidad de la infracción, procede la imposición de las medidas incluidas en el Acuerdo de inicio.
+
+## FUNDAMENTOS DE DERECHO
+
+**I — Competencia.** De acuerdo con los poderes que el artículo 58.2 del RGPD otorga a cada autoridad de control y los artículos 47, 48.1, 64.2 y 68.1 de la LOPDGDD, es competente la Directora de la AEPD.
+
+[page 25]
+
+**II — Terminación del procedimiento.** El artículo 85 de la LPACAP dispone:
+
+"1. Iniciado un procedimiento sancionador, si el infractor reconoce su responsabilidad, se podrá resolver el procedimiento con la imposición de la sanción que proceda.
+2. Cuando la sanción tenga únicamente carácter pecuniario o bien quepa imponer una sanción pecuniaria y otra de carácter no pecuniario pero se ha justificado la improcedencia de la segunda, el pago voluntario por el presunto responsable, en cualquier momento anterior a la resolución, implicará la terminación del procedimiento (...).
+3. En ambos casos, cuando la sanción tenga únicamente carácter pecuniario, el órgano competente para resolver el procedimiento aplicará reducciones de, al menos, el 20 % sobre el importe de la sanción propuesta, siendo éstos acumulables entre sí."
+
+[page 26]
+
+De acuerdo con lo señalado, **la Directora de la Agencia Española de Protección de Datos RESUELVE:**
+
+**PRIMERO:** DECLARAR la terminación del procedimiento EXP202304685, de conformidad con lo establecido en el artículo 85 de la LPACAP.
+
+**SEGUNDO:** ORDENAR a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA para que en el plazo de **3 meses** desde que la presente resolución sea firme y ejecutiva, notifique a la Agencia la adopción de las medidas que se describen en los fundamentos de derecho del Acuerdo de inicio transcrito en la presente resolución.
+
+**TERCERO:** NOTIFICAR la presente resolución a UNIQLO EUROPE, LTD, SUCURSAL EN ESPAÑA.
+
+De conformidad con lo establecido en el artículo 50 de la LOPDGDD, la presente Resolución se hará pública una vez haya sido notificada a los interesados.
+
+Contra esta resolución, que pone fin a la vía administrativa según lo preceptuado por el art. 114.1.c) de la LPACAP, los interesados podrán interponer recurso contencioso administrativo ante la Sala de lo Contencioso-administrativo de la Audiencia Nacional, con arreglo a lo dispuesto en el artículo 25 y en el apartado 5 de la disposición adicional cuarta de la Ley 29/1998, de 13 de julio, reguladora de la Jurisdicción Contencioso-Administrativa, en el plazo de **dos meses** a contar desde el día siguiente a la notificación de este acto.
+
+**1259-16012024** — Mar España Martí — Directora de la Agencia Española de Protección de Datos

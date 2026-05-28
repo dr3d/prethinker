@@ -1,4 +1,5 @@
 import io
+import json
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -20,6 +21,8 @@ from scripts.run_domain_bootstrap_qa import (
     _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
     _event_elapsed_duration_companion,
+    _evidence_bundle_same_variable_join_queries,
+    _failure_surface_payload,
     _filter_disabled_support_surfaces,
     _limit_helper_query_results,
     _location_floor_hint_queries,
@@ -27,13 +30,18 @@ from scripts.run_domain_bootstrap_qa import (
     _negative_reference_supported_by_results,
     _source_record_citation_text_companion,
     _source_record_contact_signatory_companion,
+    _source_record_count_breakdown_companion,
+    _current_adjudication_disposition_companion,
     _source_record_compile_surface_hint_queries,
     _source_record_date_pair_duration_companion,
     _source_record_elapsed_date_duration_companion,
     _source_record_date_range_duration_companion,
+    _source_record_alias_translation_companion,
     _source_record_definition_entry_companion,
     _source_record_exhibit_index_companion,
     _source_record_field_state_companion,
+    _source_record_semantic_target_display_companion,
+    _source_record_semantic_target_window_companion,
     _source_record_named_section_window_companion,
     _source_record_note_marker_companion,
     _source_record_ordered_labeled_entry_companion,
@@ -42,6 +50,7 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_same_day_event_time_companion,
     _source_record_scoped_numeric_frequency_companion,
     _source_record_section_list_detail_companion,
+    _source_record_label_value_pair_reference_supported_by_results,
     _source_record_numeric_count_supported_by_results,
     _source_record_reference_supported_by_results,
     _source_record_relative_next_day_companion,
@@ -52,6 +61,8 @@ from scripts.run_domain_bootstrap_qa import (
     _method_frame_purpose_companion,
     _method_actor_frame_source_companion,
     _placeholder_repaired_query,
+    _query_independent_source_record_support,
+    _reference_judge_payload,
     _relaxed_constant_query,
     _source_record_field_sibling_repaired_query,
     _source_record_messy_summary_companions,
@@ -72,6 +83,7 @@ from scripts.run_domain_bootstrap_qa import (
     compiled_kb_inventory,
     hash_text,
     is_cacheable_row,
+    load_oracle,
     parse_markdown_answer_key,
     parse_numbered_markdown_questions,
     read_cached_row,
@@ -167,10 +179,203 @@ def test_parse_markdown_answer_key_reads_answer_section_only() -> None:
     }
 
 
+def test_load_oracle_indexes_prefixed_and_original_question_ids(tmp_path: Path) -> None:
+    path = tmp_path / "oracle.jsonl"
+    rows = [
+        {"id": "document_a_q01", "original_id": "Q1", "reference_answer": "Alpha."},
+        {"id": "document_a_q25", "original_id": "25", "reference_answer": "Omega."},
+    ]
+    path.write_text("\n".join(json.dumps(row) for row in rows), encoding="utf-8")
+
+    oracle = load_oracle(path)
+
+    assert oracle["document_a_q01"]["reference_answer"] == "Alpha."
+    assert oracle["q001"]["reference_answer"] == "Alpha."
+    assert oracle["q025"]["reference_answer"] == "Omega."
+
+
+def test_reference_judge_payload_compacts_oversized_query_results() -> None:
+    row = {
+        "id": "q001",
+        "utterance": "Which row carries the requested value?",
+        "reference_answer": "The requested value.",
+        "queries": ["source_record_cell_item_pair(Line, Label, Value, Other, Parent)."],
+        "query_results": [
+            {
+                "query": "source_record_cell_item_pair(Line, Label, Value, Other, Parent).",
+                "result": {
+                    "predicate": "source_record_cell_item_pair",
+                    "prolog_query": "source_record_cell_item_pair(Line, Label, Value, Other, Parent).",
+                    "status": "success",
+                    "result_type": "table",
+                    "num_rows": 400,
+                    "rows": [
+                        {"Line": f"src_line_{index:04d}", "Value": "x" * 400}
+                        for index in range(400)
+                    ],
+                },
+            }
+        ],
+    }
+
+    payload = _reference_judge_payload(row, reference=row["reference_answer"])
+
+    result = payload["query_results"][0]["result"]
+    assert payload["query_result_compaction"]["reason"] == "payload_exceeded_soft_limit"
+    assert len(result["rows"]) == 48
+    assert result["rows_omitted"] == 352
+    assert result["rows"][0]["Value"].endswith("chars]")
+
+
+def test_reference_judge_payload_compaction_keeps_reference_term_excerpt() -> None:
+    long_source_text = (
+        "Opening legal article text that is useful context but not the answer. "
+        + "x" * 500
+        + " The authority must have information establishing fraudulent character "
+        "or undeniable lack of right before refusing the application. "
+        + "z" * 500
+    )
+    row = {
+        "id": "q001",
+        "utterance": "According to the named paragraph, when may the authority refuse?",
+        "reference_answer": "Fraudulent character or undeniable lack of right.",
+        "queries": ["source_record_text_display(Line, Text)."],
+        "query_results": [
+            {
+                "query": "source_record_text_display(Line, Text).",
+                "result": {
+                    "predicate": "source_record_text_display",
+                    "prolog_query": "source_record_text_display(Line, Text).",
+                    "status": "success",
+                    "result_type": "table",
+                    "num_rows": 400,
+                    "rows": [
+                        {"Line": "src_line_001", "Text": long_source_text},
+                        *[
+                            {"Line": f"src_line_{index:04d}", "Text": "x" * 500}
+                            for index in range(399)
+                        ],
+                    ],
+                },
+            }
+        ],
+    }
+
+    payload = _reference_judge_payload(row, reference=row["reference_answer"])
+
+    compact_text = payload["query_results"][0]["result"]["rows"][0]["Text"]
+    assert payload["query_result_compaction"]["focus_term_windowing"] is True
+    assert "excerpt around reference term" in compact_text
+    assert "fraudulent character" in compact_text
+    assert "undeniable lack of right" in compact_text
+
+
+def test_failure_surface_payload_compacts_oversized_query_results() -> None:
+    row = {
+        "id": "q001",
+        "utterance": "Which row carries the requested value?",
+        "reference_answer": "The requested value.",
+        "queries": ["source_record_cell_item_pair(Line, Label, Value, Other, Parent)."],
+        "query_results": [
+            {
+                "query": "source_record_cell_item_pair(Line, Label, Value, Other, Parent).",
+                "result": {
+                    "predicate": "source_record_cell_item_pair",
+                    "status": "success",
+                    "result_type": "table",
+                    "num_rows": 400,
+                    "rows": [
+                        {"Line": f"src_line_{index:04d}", "Value": "x" * 400}
+                        for index in range(400)
+                    ],
+                },
+            }
+        ],
+    }
+
+    payload = _failure_surface_payload(
+        row=row,
+        reference=row["reference_answer"],
+        judge={"verdict": "miss", "issues": []},
+        kb_inventory={"signatures": [], "counts": {}, "examples": {}},
+        facts=[f"p({index})." for index in range(500)],
+        rules=[f"r{index}(X) :- p(X)." for index in range(200)],
+    )
+
+    result = payload["query_results"][0]["result"]
+    assert payload["failure_surface_compaction"]["reason"] == "payload_exceeded_soft_limit"
+    assert len(result["rows"]) == 48
+    assert len(payload["relevant_clauses"]) == 300
+
+
 def test_reference_answers_are_not_structured_oracle_expectations() -> None:
     row = {"projected_decision": "answer", "queries": [], "query_results": []}
 
     assert score_oracle(row=row, oracle={"reference_answer": "Unknown."}) is None
+
+
+def test_query_independent_source_record_support_parse_fallback_has_empty_intents() -> None:
+    runtime = CorePrologRuntime()
+    assert runtime.assert_fact("source_record_row(src_line_001, heading, 1, no_section, no_label).").get("status") == "success"
+    assert runtime.assert_fact("source_record_text_display(src_line_001, 'Printed heading').").get("status") == "success"
+
+    results = _query_independent_source_record_support(runtime, utterance="Which printed heading applies?")
+
+    assert isinstance(results, list)
+
+
+def test_current_adjudication_disposition_companion_inventories_current_status_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "case_metadata(case_alpha, review_board, 2026_05_20, docket_alpha, appeal_review).",
+        "procedural_step(step_prior, review_board, 2025_01_01, decision, annulment_and_remand).",
+        "procedural_step(step_current, review_board, 2026_05_20, decision, final_disposition).",
+        "order_annulment(order_current, prior_order).",
+        "order_injunction(order_current, agency_director, reexamine_application).",
+        "cited_article(article_9, procedure_code).",
+        "article_applied_to(article_9, current_case, basis_for_finality).",
+        "source_record_text_atom(src_line_010, article_9_requires_final_disposition).",
+        "source_record_text_display(src_line_010, 'Article 9 requires final disposition.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _current_adjudication_disposition_companion(
+        runtime,
+        query_intents=_query_intents_for("status"),
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "current_adjudication_disposition_support"
+    rows = result["rows"]
+    assert rows[0]["SupportKind"] == "current_adjudication_disposition_summary"
+    assert rows[0]["LatestStepIds"] == "step_current"
+    assert rows[0]["LegalBasisApplications"] == "basis_for_finality"
+    step_rows = [row for row in rows if row.get("SupportKind") == "procedural_step"]
+    assert step_rows[0]["StepID"] == "step_current"
+    assert step_rows[0]["ChronologyRole"] == "latest_procedural_step"
+    article_rows = [row for row in rows if row.get("SourcePredicate") == "article_applied_to"]
+    assert article_rows[0]["ArticleSourceTextDisplay"] == "Article 9 requires final disposition."
+    cited_index = next(index for index, row in enumerate(rows) if row.get("SourcePredicate") == "cited_article")
+    applied_index = next(index for index, row in enumerate(rows) if row.get("SourcePredicate") == "article_applied_to")
+    assert applied_index < cited_index
+    assert _limit_helper_query_results([companion], 0, utterance="", queries=[]) == [companion]
+
+
+def test_current_adjudication_disposition_companion_requires_structured_status_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "procedural_step(step_current, review_board, 2026_05_20, decision, final_disposition).",
+        "article_applied_to(article_9, current_case, basis_for_finality).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _current_adjudication_disposition_companion(
+        runtime,
+        query_intents=_query_intents_for("source_location"),
+    )
+
+    assert companion is None
 
 
 def test_openrouter_transient_http_errors_retry_before_row_failure(monkeypatch) -> None:
@@ -234,6 +439,16 @@ def test_qa_cache_key_changes_when_question_changes() -> None:
     assert first != second
 
 
+def test_source_record_display_clause_signature_preserves_comma_cell_values() -> None:
+    clause = "source_record_cell_display(src_line_0020, 3, '5,772.50')."
+
+    assert clause_signature(clause) == "source_record_cell_display/3"
+    assert qa_module.parse_prolog_query(clause) == (
+        "source_record_cell_display",
+        ["src_line_0020", "3", "'5,772.50'"],
+    )
+
+
 def test_qa_cache_row_round_trips(tmp_path) -> None:
     row = {"id": "q001", "ok": True, "queries": ["p(X)."], "reference_judge": {"verdict": "exact"}}
 
@@ -272,7 +487,7 @@ def test_qa_response_envelope_marks_exact_reference_support_established() -> Non
     ]
 
 
-def test_qa_response_envelope_marks_clarification_pressure_before_verdict() -> None:
+def test_qa_response_envelope_marks_exact_support_before_stale_clarification_pressure() -> None:
     row = {
         "projected_decision": "clarify",
         "clarification_questions": ["Which notice are you asking about?"],
@@ -282,7 +497,7 @@ def test_qa_response_envelope_marks_clarification_pressure_before_verdict() -> N
 
     envelope = build_qa_response_envelope(row)
 
-    assert envelope["status"] == "clarification_required"
+    assert envelope["status"] == "established"
     assert envelope["clarification_questions"] == ["Which notice are you asking about?"]
     assert envelope["missing_slots"] == ["notice_id"]
 
@@ -515,6 +730,7 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("institution, ledger, record, or source questions" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-of-access questions" in item for item in strategy["arity_and_variable_policy"])
     assert any("access_source" in item and "authorized_party" in item for item in strategy["arity_and_variable_policy"])
+    assert any("same-variable conjunctive query" in item for item in strategy["arity_and_variable_policy"])
     assert any("who-reported or reporter questions" in item for item in strategy["arity_and_variable_policy"])
     assert any("longer normalized atom" in item for item in strategy["arity_and_variable_policy"])
     assert any("grievance(Grievance, Label)" in item for item in strategy["arity_and_variable_policy"])
@@ -724,6 +940,102 @@ def test_evidence_bundle_plan_accepts_conjunctive_source_record_queries() -> Non
     assert results[0]["result"]["status"] == "success"
     assert results[0]["result"]["reasoning_basis"]["validation"] == "predicate_and_arity_checked"
     assert results[0]["result"]["rows"][0]["Line"] == "src_1"
+
+
+def test_evidence_bundle_plan_synthesizes_same_variable_conjunction() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "record_changed_by(prior_order, review_decision).",
+        "record_changed_by(current_order, final_decision).",
+        "record_sent_to(prior_order, appeals_panel).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["record_changed_by/2", "record_sent_to/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "same_record_premise",
+                    "purpose": "Check whether the same record was changed and sent onward.",
+                    "query_templates": [
+                        "record_changed_by(Record, Decision).",
+                        "record_sent_to(Record, Destination).",
+                    ],
+                }
+            ]
+        },
+    )
+
+    joined = [
+        item
+        for item in results
+        if item["query"]
+        == "record_changed_by(Record, Decision), record_sent_to(Record, Destination)."
+    ]
+    assert joined
+    assert joined[0]["result"]["status"] == "success"
+    assert joined[0]["result"]["rows"] == [
+        {
+            "Decision": "review_decision",
+            "Destination": "appeals_panel",
+            "Record": "prior_order",
+        }
+    ]
+    assert joined[0]["result"]["reasoning_basis"]["repairs"] == [
+        {
+            "kind": "same_variable_conjunction",
+            "shared_variables": ["Record"],
+        }
+    ]
+
+
+def test_evidence_bundle_plan_synthesizes_no_result_same_variable_conjunction() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "record_changed_by(current_order, final_decision).",
+        "record_sent_to(prior_order, appeals_panel).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["record_changed_by/2", "record_sent_to/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "same_record_premise",
+                    "purpose": "Check whether the same record was changed and sent onward.",
+                    "query_templates": [
+                        "record_changed_by(Record, Decision).",
+                        "record_sent_to(Record, Destination).",
+                    ],
+                }
+            ]
+        },
+    )
+
+    joined = [
+        item
+        for item in results
+        if item["query"]
+        == "record_changed_by(Record, Decision), record_sent_to(Record, Destination)."
+    ][0]
+    assert joined["result"]["status"] == "no_results"
+    assert joined["result"]["reasoning_basis"]["original_queries"] == [
+        "record_changed_by(Record, Decision).",
+        "record_sent_to(Record, Destination).",
+    ]
+
+
+def test_evidence_bundle_join_probe_ignores_unshared_bundle_queries() -> None:
+    assert _evidence_bundle_same_variable_join_queries(
+        [
+            "record_changed_by(Record, Decision).",
+            "source_record_text_display(Line, Text).",
+        ]
+    ) == []
 
 
 def test_evidence_bundle_plan_normalizes_simple_equality_constraints() -> None:
@@ -1436,6 +1748,29 @@ def test_source_record_reference_supports_embedded_reference_answer() -> None:
     assert _source_record_reference_supported_by_results(row=row, reference="generator readiness") is False
 
 
+def test_source_record_reference_support_accepts_display_rows() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_display",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0012",
+                            "Text": "総資産 4,254,770 百万円、純資産 2,693,365 百万円、自己資本比率 62.3%",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="総資産 4,254,770 ; 純資産 2,693,365 ; 自己資本比率 62.3%",
+    )
+
+
 def test_source_record_reference_support_tokenizes_natural_phrases() -> None:
     row = {
         "query_results": [
@@ -1493,6 +1828,86 @@ def test_source_record_reference_support_handles_dates_and_connector_words() -> 
     )
 
 
+def test_source_record_reference_supports_initialism_shorthand_from_display_text() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_text_display",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0033",
+                            "Text": "Under the second paragraph of Article B. 12-4 of the Special Procedure Act, the tribunal must decide the matter finally.",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="Article B. 12-4 second paragraph SPA",
+    )
+    assert not _source_record_reference_supported_by_results(
+        row=row,
+        reference="Article B. 12-4 second paragraph SCM",
+    )
+
+
+def test_source_record_reference_supports_numeric_measures_in_semantic_display_rows() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_semantic_target_window_support",
+                    "rows": [
+                        {
+                            "TargetTerm": "per-share table",
+                            "WindowSourceRow": "src_line_0020",
+                            "WindowTextDisplay": "| Current period | 468.13 | 5,772.50 |",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="EPS 468.13 ; BPS 5,772.50",
+    )
+    assert not _source_record_reference_supported_by_results(
+        row=row,
+        reference="EPS 468.13 ; BPS 5,771.50",
+    )
+
+
+def test_source_record_reference_numeric_measure_support_requires_semantic_display() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_text_atom",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0020",
+                            "TextAtom": "current_period_468_13_book_value_5_772_50",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert not _source_record_reference_supported_by_results(
+        row=row,
+        reference="EPS 468.13 ; BPS 5,772.50",
+    )
+
+
 def test_source_record_numeric_count_supports_source_text_count_scope() -> None:
     row = {
         "utterance": "How many deficiencies did the inspection team issue for the device at that examination?",
@@ -1521,8 +1936,11 @@ def test_source_record_row_context_companion_follows_source_row_ids() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
         "source_record_text_atom(src_line_0157, solicitor_federal_register_liaison).",
+        "source_record_text_display(src_line_0157, 'Solicitor, Federal Register Liaison').",
         "source_record_label(src_line_0157, thomas_tso).",
+        "source_record_label_display(src_line_0157, 'Thomas Tso').",
         "source_record_section(src_line_0157, signature_block).",
+        "source_record_section_display(src_line_0157, 'Signature Block').",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
 
@@ -1540,6 +1958,9 @@ def test_source_record_row_context_companion_follows_source_row_ids() -> None:
     )
     rows = companion["result"]["rows"]
     assert any(row.get("SourceRecordLabel") == "thomas_tso" for row in rows)
+    assert any(row.get("SourceRecordTextDisplay") == "Solicitor, Federal Register Liaison" for row in rows)
+    assert any(row.get("SourceRecordLabelDisplay") == "Thomas Tso" for row in rows)
+    assert any(row.get("SourceRecordSectionDisplay") == "Signature Block" for row in rows)
 
 
 def test_source_record_citation_companion_scans_federal_register_citations() -> None:
@@ -2257,6 +2678,113 @@ def test_source_record_messy_summary_orders_document_events() -> None:
     ]
 
 
+def test_source_record_messy_summary_orders_non_english_document_chronology_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_metadata(doc_001, 2024_06_24, agency).",
+        (
+            "source_record_text_display(src_line_0011, '"
+            "\u672c\u5e74 6 \u6708 14 \u65e5\u3001"
+            "\u8a3c\u5238\u53d6\u5f15\u7b49\u76e3\u8996\u59d4\u54e1\u4f1a"
+            "\u304b\u3089\u52e7\u544a\u304c\u306a\u3055\u308c\u307e\u3057\u305f\u3002"
+            "')."
+        ),
+        "deadline_requirement(action_001, final_report, 2024_07_24).",
+        "deadline_requirement(action_001, quarterly_report, within_15_days_of_quarter_end).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=_query_intents_for("document_chronology"),
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_document_event_chronology_support"
+    )
+    sequence = companion["result"]["rows"][0]["Sequence"]
+    assert "2024-06-14: source_record_display_date_src_line_0011" in sequence
+    assert "2024-06-24: source_metadata_document_date" in sequence
+    assert "2024-07-24: final_report_deadline" in sequence
+    assert "within 15 days of quarter end: quarterly_report_deadline" in sequence
+
+
+def test_deadline_rule_examples_companion_expands_quarter_end_rule_after_anchor() -> None:
+    companion = qa_module._deadline_rule_examples_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "deadline_requirement",
+                    "rows": [
+                        {
+                            "Actionid": "action_001",
+                            "Reporttype": "final_report",
+                            "Deadlinevalue": "2024_07_24",
+                        },
+                        {
+                            "Actionid": "action_001",
+                            "Reporttype": "quarterly_report",
+                            "Deadlinevalue": "within_15_days_of_quarter_end",
+                        },
+                    ],
+                }
+            }
+        ]
+    )
+
+    assert companion is not None
+    summary = companion["result"]["rows"][0]
+    assert summary["ExamplesDisplay"] == "09/30 -> 10/15; 12/31 -> 01/15; 03/31 -> 04/15"
+    assert summary["FullAnswerDisplay"].startswith("within 15 days of quarter end")
+
+
+def test_source_record_era_date_conversion_companion_uses_calendar_authority() -> None:
+    companion = qa_module._source_record_era_date_conversion_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_text_display",
+                    "rows": [
+                        {
+                            "BoundArg1": "src_line_0038",
+                            "X": (
+                                "\u4ee4\u548c6\u5e747\u670824\u65e5"
+                                "\u307e\u3067\u306b\u66f8\u9762\u3067\u5831\u544a"
+                            ),
+                        }
+                    ],
+                }
+            }
+        ]
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][1]
+    assert row["GregorianDate"] == "2024_07_24"
+    assert row["GregorianDateDisplay"] == "2024-07-24"
+    assert row["EraStartDate"] == "2019_05_01"
+    assert row["SupportClass"] == "deterministic-calendar-authority"
+
+
+def test_source_record_era_date_conversion_companion_requires_era_display() -> None:
+    companion = qa_module._source_record_era_date_conversion_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_record_text_display",
+                    "rows": [{"BoundArg1": "src_line_0038", "X": "2024-07-24"}],
+                }
+            }
+        ]
+    )
+
+    assert companion is None
+
+
 def test_source_record_messy_summary_orders_role_transition_events_from_source_records() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -2603,6 +3131,46 @@ def test_source_record_elapsed_date_duration_companion_handles_named_date_differ
     assert rows[0]["ElapsedDays"] == "5"
 
 
+def test_source_record_elapsed_date_duration_companion_uses_structured_interval_target_terms() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_metadata(doc_001, 2024_06_24, agency).",
+        (
+            "source_record_text_display(src_line_0011, '"
+            "\u672c\u5e74 6 \u6708 14 \u65e5\u3001"
+            "\u8a3c\u5238\u53d6\u5f15\u7b49\u76e3\u8996\u59d4\u54e1\u4f1a"
+            "\u304b\u3089\u52e7\u544a\u304c\u306a\u3055\u308c\u307e\u3057\u305f\u3002"
+            "')."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "date",
+                "target_terms": ["date interval", "\u8a3c\u5238\u53d6\u5f15\u7b49\u76e3\u8996\u59d4\u54e1\u4f1a\u52e7\u544a"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert any(
+        row["SupportKind"] == "source_record_semantic_target_date_duration"
+        and row["StartDate"] == "2024_06_14"
+        and row["EndDate"] == "2024_06_24"
+        and row["ElapsedDays"] == "10"
+        for row in rows
+    )
+
+
 def test_source_record_preceding_heading_companion_finds_heading_before_target() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -2857,6 +3425,36 @@ def test_query_intents_from_note_marker_query_ignores_generic_placeholder_marker
     )
 
     assert not any(intent["intent_type"] == "note_marker" for intent in intents)
+
+
+def test_query_intents_from_evidence_plan_source_display_member_filter() -> None:
+    intents = qa_module._query_intents_from_structured_queries(
+        ["source_record_text_display(_Line, _Text), member('測定計画', _Text)."],
+        source="evidence_plan",
+    )
+
+    assert {
+        "intent_type": "source_location",
+        "target_terms": ["測定計画"],
+        "answer_constraints": ["source_display_filter"],
+        "uncertainty_policy": "answer",
+        "language": "",
+        "source": "evidence_plan",
+    } in intents
+
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("source_record_text_display(src_line_0008, '測定計画を四半期ごとに点検する。').").get(
+        "status"
+    ) == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=intents,
+    )
+
+    assert companion is not None
+    assert companion["result"]["rows"][0]["SourceRow"] == "src_line_0008"
 
 
 def test_source_record_named_section_window_companion_returns_bounded_section_rows() -> None:
@@ -3439,6 +4037,181 @@ def test_source_record_messy_summary_amount_inventory_ignores_bullet_list_compar
     assert not any(item["result"]["predicate"] == "source_record_amount_inventory_support" for item in companions)
 
 
+def test_source_record_table_delta_check_uses_structured_change_intent_only() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_table_delta_check_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "amount_inventory",
+                "target_terms": ["total debt"],
+                "answer_constraints": ["value", "change_amount"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = next(
+        row
+        for row in companion["result"]["rows"]
+        if row.get("SupportKind") == "source_record_table_delta_check"
+    )
+    assert row["PriorValue"] == "694,091"
+    assert row["CurrentValue"] == "913,806"
+    assert row["SourceStatedDelta"] == "+219,714"
+    assert row["DerivedDelta"] == "+219,715"
+    assert row["DeltaAgreement"] == "false"
+    assert row["DeltaDifference"] == "+1"
+    assert "31.6%" in row["DerivedPercentDisplay"]
+
+
+def test_source_record_table_delta_check_does_not_activate_from_raw_utterance() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |')."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="How much did total debt change?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_table_delta_check_support" for item in companions)
+
+
+def test_source_record_table_delta_check_accepts_structured_difference_constraint() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_table_delta_check_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "amount_inventory",
+                "target_terms": ["total debt"],
+                "answer_constraints": ["fy2024_value", "fy2023_value", "difference"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert any(
+        row.get("DerivedDelta") == "+219,715"
+        for row in companion["result"]["rows"]
+        if isinstance(row, dict)
+    )
+
+
+def test_source_record_table_delta_check_accepts_structured_comparison_constraint() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_table_delta_check_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "amount_inventory",
+                "target_terms": ["total debt"],
+                "answer_constraints": ["period: fy2024", "metric: total_debt", "comparison: fy2023"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert any(
+        row.get("DeltaDifference") == "+1"
+        for row in companion["result"]["rows"]
+        if isinstance(row, dict)
+    )
+
+
+def test_source_record_table_delta_check_skips_unrelated_three_number_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |').",
+        "source_record_text_display(src_line_0045, '| unrelated row | 186,593 | 67,891 | 1,409,631 |').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_table_delta_check_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "amount_inventory",
+                "target_terms": ["total debt"],
+                "answer_constraints": ["comparison: prior period"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    source_rows = {
+        row.get("SourceRow")
+        for row in companion["result"]["rows"]
+        if isinstance(row, dict) and row.get("SupportKind") == "source_record_table_delta_check"
+    }
+    assert source_rows == {"src_line_0044"}
+
+
+def test_source_record_table_delta_check_supports_derived_reference_with_discrepancy_visible() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0044, '| total debt | 694,091 | 913,806 | 219,714 |')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_table_delta_check_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "amount_inventory",
+                "target_terms": ["total debt"],
+                "answer_constraints": ["value", "change_amount"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert qa_module._source_record_table_delta_check_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="913,806 vs 694,091 ; +219,715 (+31.6%).",
+    )
+    joined = " ".join(
+        str(row.get("FullAnswerDisplay", ""))
+        for row in companion["result"]["rows"]
+        if isinstance(row, dict)
+    )
+    assert "source-stated change +219,714" in joined
+    assert "derived change +219,715" in joined
+
+
 def test_source_record_identifier_set_extracts_labeled_list_identifiers() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -3646,6 +4419,1051 @@ def test_source_record_definition_entry_companion_extracts_entry_label() -> None
     assert "master control order" in row["DefinitionDisplay"]
 
 
+def test_source_record_semantic_target_display_companion_matches_unicode_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0008, '測定計画の管理態勢を四半期ごとに点検する。')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["測定計画"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0008"
+    assert row["TargetTerm"] == "測定計画"
+    assert row["TargetKind"] == "unicode_literal"
+    assert "測定計画" in row["SourceTextDisplay"]
+
+
+def test_source_record_semantic_target_display_companion_accepts_short_unicode_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    target = "\u52e7\u544a"
+    source_text = "\u9023\u7d61\u4f1a\u304b\u3089\u52e7\u544a\u304c\u306a\u3055\u308c\u307e\u3057\u305f\u3002"
+    assert runtime.assert_fact(
+        f"source_record_text_display(src_line_0011, '{source_text}')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="raw utterance is not used for activation",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": [target],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0011"
+    assert row["TargetTerm"] == target
+    assert row["TargetKind"] == "unicode_literal"
+    assert row["MatchKind"] == "semantic_target_display_substring"
+
+
+def test_source_record_semantic_target_cell_value_companion_joins_header_to_cell() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_label_display(src_line_0020, 'Current period').",
+        "source_record_cell_header_display(src_line_0020, 3, 'Net assets per share').",
+        "source_record_cell_display(src_line_0020, 3, '5,772.50').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_semantic_target_cell_value_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["Net assets per share"],
+                "answer_constraints": ["table_value"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows[0]["SourceRow"] == "src_line_0020"
+    assert rows[0]["SourceCellIndex"] == "3"
+    assert rows[0]["HeaderDisplay"] == "Net assets per share"
+    assert rows[0]["CellDisplay"] == "5,772.50"
+    assert rows[0]["FullAnswerDisplay"] == "Current period - Net assets per share: 5,772.50"
+
+
+def test_source_record_obligation_bundle_uses_structured_intent_only() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "guarantee_percentage(contract_17, definitive, 5).",
+        "advertising_budget(contract_17, 9000).",
+        "milestone_requirement(contract_17, first_delivery, complete_one_unit).",
+        "source_record_text_display(src_line_0010, 'Maintenance service lasts 2 years after installation.').",
+        "source_record_text_display(src_line_0020, 'Maximum advertising budget: EUR 9,000 total.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_obligation_bundle_companion(
+        runtime,
+        utterance="this raw text should not control activation",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["award obligations"],
+                "answer_constraints": ["financial_terms", "contractual_obligations"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    joined = json.dumps(rows, ensure_ascii=False)
+    assert "advertising_budget" in joined
+    assert "guarantee_percentage" in joined
+    assert "milestone_requirement" in joined
+    assert "Maintenance service lasts 2 years" in joined
+    assert "EUR 9,000" in joined
+    assert companion["result"]["reasoning_basis"]["query_intent"]["intent_type"] == "list"
+
+
+def test_source_record_obligation_bundle_activates_from_returned_obligation_predicates() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "guarantee_percentage(contract_17, definitive, 5).",
+        "advertising_budget(contract_17, 9000).",
+        "milestone_requirement(contract_17, first_delivery, complete_one_unit).",
+        "source_record_text_display(src_line_0010, 'Maintenance service lasts 2 years after installation.').",
+        "source_record_text_display(src_line_0020, 'Maximum advertising budget: EUR 9,000 total.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_obligation_bundle_companion(
+        runtime,
+        utterance="",
+        query_intents=[],
+        query_results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "guarantee_percentage",
+                    "rows": [{"Contract": "contract_17", "Kind": "definitive", "Value": "5"}],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "milestone_requirement",
+                    "rows": [{"Contract": "contract_17", "Milestone": "first_delivery"}],
+                }
+            },
+        ],
+    )
+
+    assert companion is not None
+    joined = json.dumps(companion["result"]["rows"], ensure_ascii=False)
+    assert "advertising_budget" in joined
+    assert "guarantee_percentage" in joined
+    assert "milestone_requirement" in joined
+    assert "Maintenance service lasts 2 years" in joined
+    assert "EUR 9,000" in joined
+    assert companion["result"]["reasoning_basis"]["activation"] == "returned_obligation_predicates"
+
+
+def test_source_record_obligation_bundle_activates_from_semantic_section_anchor() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "guarantee_percentage(contract_17, definitive, 5).",
+        "advertising_budget(contract_17, 9000).",
+        "milestone_requirement(contract_17, first_delivery, complete_one_unit).",
+        "source_record_row(src_line_0010, labeled_line, 10, public_record, required_guarantees).",
+        "source_record_text_atom(src_line_0010, required_guarantees).",
+        "source_record_text_display(src_line_0010, 'Required guarantees').",
+        "source_record_row(src_line_0012, anchored_line, 12, required_guarantees, definitive).",
+        "source_record_text_atom(src_line_0012, definitive_guarantee_5_percent).",
+        "source_record_text_display(src_line_0012, 'Definitive guarantee: 5 percent of the base budget.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_obligation_bundle_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["required guarantees"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert companion["result"]["reasoning_basis"]["activation"] == "structured_query_intent"
+    joined = json.dumps(companion["result"]["rows"], ensure_ascii=False)
+    assert "advertising_budget" in joined
+    assert "milestone_requirement" in joined
+
+
+def test_source_record_obligation_bundle_does_not_activate_from_raw_utterance() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("advertising_budget(contract_17, 9000).").get("status") == "success"
+
+    companion = qa_module._source_record_obligation_bundle_companion(
+        runtime,
+        utterance="list the financial and contractual obligations",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["items"],
+                "answer_constraints": ["inventory"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_compiled_value_set_exclusion_uses_structured_intent_and_returned_rows() -> None:
+    companion = qa_module._compiled_value_set_exclusion_companion(
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["qualifying factor", "prior conduct", "repeat condition"],
+                "answer_constraints": ["source: resolution"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+        query_results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "aggravating_factor",
+                    "variables": ["X"],
+                    "rows": [
+                        {"BoundArg1": "case_1", "X": "link_to_notice"},
+                        {"BoundArg1": "case_1", "X": "sensitive_record"},
+                    ],
+                }
+            }
+        ],
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "compiled_value_set_exclusion_support"
+    row = result["rows"][0]
+    assert row["Predicate"] == "aggravating_factor"
+    assert "repeat" in row["RequestedTokens"]
+    assert "link to notice" in row["ReturnedValuesDisplay"]
+    assert "sensitive record" in row["ReturnedValuesDisplay"]
+
+
+def test_compiled_value_set_exclusion_does_not_fire_when_requested_value_returned() -> None:
+    companion = qa_module._compiled_value_set_exclusion_companion(
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["aggravating factor", "sensitive data"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+        query_results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "aggravating_factor",
+                    "variables": ["X"],
+                    "rows": [{"BoundArg1": "case_1", "X": "sensitive_data"}],
+                }
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_source_record_returned_action_section_follows_returned_basis_to_list_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0010, list_row, 10, alpha_51_2, no_label).",
+        "source_record_text_display(src_line_0010, 'Internal controls and customer information management').",
+        "source_record_section_display(src_line_0010, 'Alpha order (Act 51-2)').",
+        "source_record_row(src_line_0020, list_row, 20, beta_99_1, no_label).",
+        "source_record_text_display(src_line_0020, 'Unrelated reporting item').",
+        "source_record_section_display(src_line_0020, 'Beta order (Act 99-1)').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_returned_action_section_companion(
+        runtime,
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["violation categories"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+        query_results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "issued_sanction",
+                    "variables": ["Issuer", "Target", "Action", "Basis"],
+                    "rows": [
+                        {
+                            "Issuer": "regulator_alpha",
+                            "Target": "corp_alpha",
+                            "Action": "action_business_improvement_order",
+                            "Basis": "law_alpha_51_2",
+                        }
+                    ],
+                }
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert len(rows) == 1
+    assert rows[0]["SourceRow"] == "src_line_0010"
+    assert "customer information management" in rows[0]["SourceTextDisplay"]
+    assert "51" in rows[0]["MatchedReturnedTokens"]
+
+
+def test_source_record_returned_action_section_requires_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("source_record_row(src_line_0010, list_row, 10, alpha_51_2, no_label).").get(
+        "status"
+    ) == "success"
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'Internal controls and customer information management')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_returned_action_section_companion(
+        runtime,
+        query_intents=[],
+        query_results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "issued_sanction",
+                    "variables": ["Basis"],
+                    "rows": [{"Basis": "law_alpha_51_2"}],
+                }
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_source_record_status_inline_field_supports_structured_status_change_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_inline_field(src_line_0042, notes, deadline_extended_by_later_notice_ref_notice_2024_29851).",
+        "source_record_text_display(src_line_0042, 'Notes: deadline extended by later notice Ref. NOTICE-2024-29851.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_status_inline_field_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "status",
+                "target_terms": ["submission deadline", "later modification"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0042"
+    assert "NOTICE-2024-29851" in row["SourceTextDisplay"]
+    assert "later" in row["MatchedTargetTokens"]
+
+
+def test_source_record_status_inline_field_requires_structured_status_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_inline_field(src_line_0042, notes, deadline_extended_by_later_notice_ref_notice_2024_29851)."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_status_inline_field_companion(
+        runtime,
+        utterance="Was the deadline changed?",
+        query_intents=[],
+    )
+
+    assert companion is None
+
+
+def test_source_record_semantic_target_display_companion_expands_unicode_fragments() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_line_0008, '測定計画装置の管理態勢を四半期ごとに点検する。').",
+        "source_record_text_display(src_line_0009, '測定計画に関する内部統制を強化する。').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["測定計画装置"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert any(
+        row["SourceRow"] == "src_line_0008"
+        and row["MatchKind"] == "semantic_target_display_substring"
+        for row in rows
+    )
+    assert any(
+        row["SourceRow"] == "src_line_0009"
+        and row["MatchKind"] == "semantic_target_unicode_fragment"
+        for row in rows
+    )
+
+
+def test_source_record_semantic_target_window_companion_adds_same_section_neighbors() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_row(src_line_0010, list_row, 10, section_alpha, legal_basis_row).",
+        "source_record_text_display(src_line_0010, 'Article 12 requires separated handling for the program.').",
+        "source_record_row(src_line_0012, list_row, 12, section_alpha, target_row).",
+        "source_record_text_display(src_line_0012, '測定計画に関する内部統制を強化する。').",
+        "source_record_row(src_line_0020, list_row, 20, section_beta, distant_row).",
+        "source_record_text_display(src_line_0020, 'Unrelated section row.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_semantic_target_window_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["測定計画"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert any(row["WindowSourceRow"] == "src_line_0010" for row in rows)
+    assert any(row["WindowSourceRow"] == "src_line_0012" for row in rows)
+    assert not any(row["WindowSourceRow"] == "src_line_0020" for row in rows)
+
+
+def test_source_record_semantic_target_display_companion_matches_ascii_phrase_target() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0009, 'Sistema de Pagos appears in Annex B.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["Sistema de Pagos"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "es",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0009"
+    assert row["TargetKind"] == "phrase_literal"
+
+
+def test_source_record_semantic_target_display_companion_matches_hyphen_as_space() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0009, 'The appeal goes to the content administrative chamber.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["content-administrative chamber"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0009"
+    assert row["MatchedDisplayFragment"] == "content administrative chamber"
+
+
+def test_source_record_semantic_target_display_companion_matches_long_token_overlap() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0009, 'Parties may interpose appeal before the content administrative chamber within two months.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["interpose appeal content-administrative chamber"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0009"
+    assert row["MatchKind"] == "semantic_target_token_overlap"
+
+
+def test_source_record_semantic_target_display_companion_matches_unicode_phrase_word_fragment() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'The filing discusses la qualité du pétitionnaire in the refusal standard.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "unknown",
+                "target_terms": ["défaut de qualité du pétitionnaire"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "fr",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0010"
+    assert row["MatchKind"] == "semantic_target_unicode_fragment"
+    assert row["MatchedDisplayFragment"] in {"qualité", "pétitionnaire"}
+
+
+def test_source_record_semantic_target_window_companion_extends_following_list_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    facts = [
+        "source_record_row(src_line_0010, paragraph_line, 10, section_alpha, control_measures).",
+        "source_record_text_display(src_line_0010, 'Control measures:').",
+        "source_record_row(src_line_0011, list_row, 11, section_alpha, first_measure).",
+        "source_record_text_display(src_line_0011, '- First measure.').",
+        "source_record_row(src_line_0012, list_row, 12, section_alpha, second_measure).",
+        "source_record_text_display(src_line_0012, '- Second measure.').",
+        "source_record_row(src_line_0013, list_row, 13, section_alpha, third_measure).",
+        "source_record_text_display(src_line_0013, '- Third measure.').",
+        "source_record_row(src_line_0014, list_row, 14, section_alpha, fourth_measure).",
+        "source_record_text_display(src_line_0014, '- Fourth measure.').",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_semantic_target_window_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["Control measures"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    tail = [row for row in rows if row["WindowSourceRow"] == "src_line_0014"]
+    assert tail
+    assert tail[0]["WindowLineDistance"] == "4"
+    assert tail[0]["WindowDirection"] == "after"
+    assert tail[0]["WindowRowKind"] == "list_row"
+
+
+def test_source_record_semantic_target_display_companion_matches_long_phrase_token_variant() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'The following circulars were supplied as examples.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["four circulars or safety measures"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0010"
+    assert row["MatchedDisplayFragment"] == "circulars"
+
+
+def test_source_record_count_breakdown_companion_extracts_structured_count_split() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    facts = [
+        "source_record_text_display(src_line_0010, 'Total affected population: 447 persons.').",
+        "source_record_text_display(src_line_0011, 'Breakdown: 287 active staff and 160 former staff were notified in 2023.').",
+    ]
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_count_breakdown_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "count",
+                "target_terms": ["affected workers", "active staff", "former staff"],
+                "answer_constraints": ["total_affected_count", "active_vs_former_breakdown"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert companion["result"]["predicate"] == "source_record_count_breakdown_support"
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0011"
+    assert row["NumericValuesDisplay"] == "287, 160"
+    assert "active staff" in row["SourceTextDisplay"]
+
+
+def test_source_record_count_breakdown_companion_requires_structured_breakdown_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'Breakdown: 287 active staff and 160 former staff were notified.')."
+    ).get("status") == "success"
+
+    companion = _source_record_count_breakdown_companion(
+        runtime,
+        utterance="How many active and former staff were notified?",
+        query_intents=[
+            {
+                "intent_type": "count",
+                "target_terms": ["active staff", "former staff"],
+                "answer_constraints": ["total_affected_count"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_source_record_count_breakdown_companion_combines_split_count_and_list_intents() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'Breakdown: 287 active staff and 160 former staff were notified.')."
+    ).get("status") == "success"
+
+    companion = _source_record_count_breakdown_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "count",
+                "target_terms": ["workers", "affected"],
+                "answer_constraints": ["incident_fact(affected_count, Count)"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+            {
+                "intent_type": "list",
+                "target_terms": ["active staff", "former staff"],
+                "answer_constraints": ["notification_record(affected_individuals, Type)"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["SourceRow"] == "src_line_0010"
+    assert row["NumericValuesDisplay"] == "287, 160"
+
+
+def test_source_record_semantic_target_display_companion_skips_ascii_snake_case_canonical() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'The delivery state is described in the table.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["canonical_delivery_state"],
+                "answer_constraints": ["source_text"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_source_record_semantic_target_display_companion_does_not_activate_from_utterance_only() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0011, 'The Long Equipment Name appears in the appendix.')."
+    ).get("status") == "success"
+
+    companion = _source_record_semantic_target_display_companion(
+        runtime,
+        utterance="Where is the Long Equipment Name?",
+        query_intents=[],
+    )
+
+    assert companion is None
+
+
+def test_source_record_alias_translation_companion_extracts_source_stated_acronym() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, 'The Long Equipment Name (LEN) must be inspected.')."
+    ).get("status") == "success"
+
+    companion = _source_record_alias_translation_companion(
+        runtime,
+        utterance="What acronym is used?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["Long Equipment Name"],
+                "answer_constraints": ["acronym"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["PrimaryDisplay"] == "The Long Equipment Name"
+    assert row["AliasDisplay"] == "LEN"
+    assert row["AliasKind"] == "parenthetical_alias"
+
+
+def test_source_record_alias_translation_companion_extracts_source_stated_translation() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0011, 'Oficina técnica (Technical Office) recibirá el informe.')."
+    ).get("status") == "success"
+
+    companion = _source_record_alias_translation_companion(
+        runtime,
+        utterance="What English terminology is used?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["oficina técnica"],
+                "answer_constraints": ["english_terminology"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["PrimaryDisplay"] == "Oficina técnica"
+    assert row["AliasDisplay"] == "Technical Office"
+    assert row["AliasKind"] == "source_stated_translation"
+
+
+def test_source_record_alias_translation_companion_handles_ascii_bilingual_equivalence() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0012, 'Sistema de Pagos (Payment System) appears in the annex.')."
+    ).get("status") == "success"
+
+    companion = _source_record_alias_translation_companion(
+        runtime,
+        utterance="What English terminology is used?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["sistema de pagos"],
+                "answer_constraints": ["english_terminology"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = companion["result"]["rows"][0]
+    assert row["PrimaryDisplay"] == "Sistema de Pagos"
+    assert row["AliasDisplay"] == "Payment System"
+    assert row["AliasKind"] == "parenthetical_equivalence"
+
+
+def test_source_record_alias_translation_companion_does_not_invent_from_canonical_atom() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "compiled_type(action_001, canonical_delivery_state).",
+        "source_record_text_display(src_line_0013, 'The order was issued under the governing statute.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_alias_translation_companion(
+        runtime,
+        utterance="What English term is used?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["canonical delivery state"],
+                "answer_constraints": ["english_terminology"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is None
+
+
+def test_source_record_alias_translation_companion_requires_semantic_intent_activation() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0014, 'The Long Equipment Name (LEN) must be inspected.')."
+    ).get("status") == "success"
+
+    assert (
+        _source_record_alias_translation_companion(
+            runtime,
+            utterance="What acronym is used for the long equipment name?",
+            query_intents=[],
+        )
+        is None
+    )
+
+
+def test_source_record_alias_translation_support_can_satisfy_reference() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0015, 'The Long Equipment Name (LEN) must be inspected.')."
+    ).get("status") == "success"
+    companion = _source_record_alias_translation_companion(
+        runtime,
+        utterance="What acronym is used?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["Long Equipment Name"],
+                "answer_constraints": ["acronym"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert qa_module._source_record_summary_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="Long Equipment Name (LEN)",
+        predicates={"source_record_alias_translation_support"},
+    )
+
+
+def test_source_record_reference_support_matches_unicode_legal_fragments() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_semantic_target_display_support",
+                    "rows": [
+                        {
+                            "SourceTextDisplay": (
+                                "\u9280\u884c\u6cd5\u7b2c12\u6761\u306b\u898f\u5b9a\u3059\u308b"
+                                "\u4ed6\u696d\u7981\u6b62\u304a\u3088\u3073\u540c\u6cd5"
+                                "\u7b2c12\u6761\u306e2\u7b2c2\u9805\u306b\u898f\u5b9a\u3059\u308b"
+                                "\u9867\u5ba2\u60c5\u5831\u7ba1\u7406\u63aa\u7f6e"
+                            )
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference="\u9280\u884c\u6cd5 \u7b2c12\u6761 + \u7b2c12\u6761\u306e2 \u7b2c2\u9805",
+    )
+
+
+def test_source_record_reference_support_does_not_infer_missing_calendar_basis() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_semantic_target_display_support",
+                    "rows": [
+                        {
+                            "SourceTextDisplay": (
+                                "\u696d\u52d9\u6539\u5584\u8a08\u753b\u3092"
+                                "\u4ee4\u548c6\u5e747\u670824\u65e5\u307e\u3067\u306b"
+                                "\u66f8\u9762\u3067\u5831\u544a\u3059\u308b\u3053\u3068"
+                            )
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert not _source_record_reference_supported_by_results(
+        row=row,
+        reference="Reiwa 6-07-24 = 2024-07-24 ; Reiwa from 2019-05-01",
+    )
+
+
+def test_source_record_elapsed_date_duration_uses_semantic_target_source_date() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_metadata(doc_001, 2024_06_24, agency).",
+        (
+            "source_record_text_display(src_line_0011, '"
+            "\u672c\u5e74 6 \u6708 14 \u65e5\u3001"
+            "\u8a3c\u5238\u53d6\u5f15\u7b49\u76e3\u8996\u59d4\u54e1\u4f1a"
+            "\u304b\u3089\u52e7\u544a\u304c\u306a\u3055\u308c\u307e\u3057\u305f\u3002"
+            "')."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _source_record_elapsed_date_duration_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "date",
+                "target_terms": [
+                    "\u8a3c\u5238\u53d6\u5f15\u7b49\u76e3\u8996\u59d4\u54e1\u4f1a\u52e7\u544a"
+                ],
+                "answer_constraints": ["interval_duration"],
+                "uncertainty_policy": "answer",
+                "language": "ja",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert any(
+        row["StartDate"] == "2024_06_14"
+        and row["EndDate"] == "2024_06_24"
+        and row["ElapsedDays"] == "10"
+        for row in rows
+    )
+
+
 def test_source_record_messy_summary_extracts_adjacent_label_value_pair() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -3666,6 +5484,65 @@ def test_source_record_messy_summary_extracts_adjacent_label_value_pair() -> Non
     assert "manufactured in france" in joined
 
 
+def test_label_value_pair_reference_support_matches_field_value_in_prose() -> None:
+    row = {
+        "utterance": "In which field block is the component identified?",
+        "query_results": [
+            {
+                "query": "source_record_label_value_pair_support(FieldSourceRow, ValueSourceRow, Field, Value).",
+                "result": {
+                    "predicate": "source_record_label_value_pair_support",
+                    "status": "success",
+                    "num_rows": 1,
+                    "rows": [
+                        {
+                            "FieldDisplay": "components",
+                            "ValueDisplay": "fuel system gasoline delivery hoses lines piping and fittings",
+                            "SupportKind": "source_record_adjacent_label_value",
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert _source_record_label_value_pair_reference_supported_by_results(
+        row=row,
+        reference=(
+            "The component is identified in the Components field block. "
+            "The full component string reads FUEL SYSTEM, GASOLINE:DELIVERY:"
+            "HOSES, LINES/PIPING, AND FITTINGS."
+        ),
+    )
+
+
+def test_label_value_pair_reference_support_requires_matching_field() -> None:
+    row = {
+        "utterance": "Which consequence is stated?",
+        "query_results": [
+            {
+                "query": "source_record_label_value_pair_support(FieldSourceRow, ValueSourceRow, Field, Value).",
+                "result": {
+                    "predicate": "source_record_label_value_pair_support",
+                    "status": "success",
+                    "num_rows": 1,
+                    "rows": [
+                        {
+                            "FieldDisplay": "components",
+                            "ValueDisplay": "fuel system gasoline delivery hoses lines piping and fittings",
+                        }
+                    ],
+                },
+            }
+        ],
+    }
+
+    assert not _source_record_label_value_pair_reference_supported_by_results(
+        row=row,
+        reference="The consequence is a fuel leak increasing fire risk.",
+    )
+
+
 def test_source_record_messy_summary_extracts_postal_state_codes() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -3684,6 +5561,144 @@ def test_source_record_messy_summary_extracts_postal_state_codes() -> None:
     )
     summary = companion["result"]["rows"][0]
     assert summary["StateCodesDisplay"] == "ID, CO"
+
+
+def test_source_record_address_line_uses_structured_address_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0200, '"
+        "Tribunal Administrativo de Contratacion Publica de la Comunidad de Madrid. "
+        "Plaza de Chamberi, 8 5a planta, 28010 Madrid."
+        "')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_address_line_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["appellate body"],
+                "answer_constraints": ["recourse_authority", "entity_address"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    row = next(
+        row
+        for row in companion["result"]["rows"]
+        if row.get("SupportKind") == "source_record_address_line"
+    )
+    assert row["SourceRow"] == "src_line_0200"
+    assert row["PostalCodeCandidates"] == "28010"
+    assert "Plaza de Chamberi" in row["AddressDisplay"]
+
+
+def test_source_record_address_line_does_not_activate_from_raw_location_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0200, 'Office Alpha. 8 North Street, 28010 Madrid.')."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Where is the office located?",
+    )
+
+    assert not any(item["result"]["predicate"] == "source_record_address_line_support" for item in companions)
+
+
+def test_source_record_address_line_accepts_structured_location_target_term() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0200, 'Office Alpha. 8 North Street, 28010 Madrid.')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_address_line_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "unknown",
+                "target_terms": ["where is it located"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+
+
+def test_source_record_address_line_skips_page_and_reference_numbers() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_line_0001, 'Notice pages 45265 to 45269 with five printed pages.').",
+        "source_record_text_display(src_line_0002, 'Reference REF-X-2024-29851 extends a filing deadline.').",
+        "source_record_text_display(src_line_0003, 'Appeals Office. 8 North Street, 28010 Madrid.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = qa_module._source_record_address_line_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "unknown",
+                "target_terms": ["where is it located"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    rows = [
+        row
+        for row in companion["result"]["rows"]
+        if row.get("SupportKind") == "source_record_address_line"
+    ]
+    assert [row["SourceRow"] for row in rows] == ["src_line_0003"]
+    assert rows[0]["PostalCodeCandidates"] == "28010"
+
+
+def test_source_record_address_line_supports_reference_with_initialism() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0200, '"
+        "Tribunal Administrativo de Contratacion Publica de la Comunidad de Madrid. "
+        "Plaza de Chamberi, 8 5a planta, 28010 Madrid."
+        "')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_address_line_companion(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["appellate body"],
+                "answer_constraints": ["entity_address"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert companion is not None
+    assert _source_record_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="TACP Madrid ; Plaza de Chamberi 8, 5a, 28010 Madrid.",
+    )
 
 
 def test_source_record_messy_summary_extracts_address_block() -> None:
@@ -4276,6 +6291,170 @@ def test_source_record_messy_summary_dated_event_inventory_requires_inventory_qu
     )
 
 
+def test_source_record_dated_event_inventory_uses_structured_order_intent_on_display_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_line_0001, 'Reference REF-X-2024-29851 is not a date.').",
+        "source_record_text_display(src_line_0002, 'Notice sent: 02 of MonthA 2024.').",
+        "source_record_text_display(src_line_0003, 'Notice published: 13 of MonthA 2024.').",
+        "source_record_text_display(src_line_0004, 'Deadline: 05 of MonthB 2024.').",
+        "source_record_text_display(src_line_0005, 'Statutory cross-reference: section 3/2020.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "ordered_labeled_entry",
+                "target_terms": ["submission", "publication", "deadline"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    joined = " ".join(displays)
+    assert "02 of MonthA 2024" in joined
+    assert "13 of MonthA 2024" in joined
+    assert "05 of MonthB 2024" in joined
+    assert "29851" not in joined
+    assert "3/2020" not in joined
+
+
+def test_source_record_dated_event_inventory_uses_local_display_context() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, "
+        "'Acting under decision no. ABC-2023-001 of 20 March 2023, the authority opened a review; "
+        "under decision no. ABC-2023-002 of 26 June 2023, it opened an online review on 5 July 2023. "
+        "The party sent unrelated material on 30 November 2023.')."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "document_chronology",
+                "target_terms": ["decisions", "review"],
+                "answer_constraints": ["chronological_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    rows = companion["result"]["rows"]
+    first = next(row for row in rows if row.get("EventDateDisplay") == "20 March 2023")
+    second = next(row for row in rows if row.get("EventDateDisplay") == "26 June 2023")
+    assert "ABC-2023-001" in first["EventDisplay"]
+    assert "ABC-2023-002" in second["EventDisplay"]
+    assert "30 November 2023" not in first["EventDisplay"]
+
+
+def test_source_record_dated_event_inventory_reference_supports_dates_and_ids() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0010, "
+        "'Acting under decision no. ABC-2023-001 of 20 March 2023, the authority opened a review; "
+        "under decision no. ABC-2023-002 of 26 June 2023, it opened an online review on 5 July 2023. "
+        "On 30 April 2024, the chair designated Reviewer One as rapporteur.')."
+    ).get("status") == "success"
+    companion = next(
+        item
+        for item in _source_record_messy_summary_companions(
+            runtime,
+            utterance="",
+            query_intents=[
+                {
+                    "intent_type": "document_chronology",
+                    "target_terms": ["decisions", "review"],
+                    "answer_constraints": ["chronological_order"],
+                    "uncertainty_policy": "answer",
+                    "language": "en",
+                    "source": "semantic_ir",
+                }
+            ],
+        )
+        if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    row = {"query_results": [companion], "utterance": "List the chronology."}
+
+    assert qa_module._source_record_dated_event_inventory_reference_supported_by_results(
+        row=row,
+        reference=(
+            "20 March 2023 (decision ABC-2023-001); 26 June 2023 "
+            "(decision ABC-2023-002, review 5 July 2023); 30 April 2024 "
+            "(rapporteur designation)."
+        ),
+    )
+    assert not qa_module._source_record_dated_event_inventory_reference_supported_by_results(
+        row=row,
+        reference="20 March 2023 (decision ABC-2023-999); 26 June 2023; 30 April 2024.",
+    )
+    assert not qa_module._source_record_dated_event_inventory_reference_supported_by_results(
+        row=row,
+        reference=(
+            "26 June 2023 (decision ABC-2023-002); 20 March 2023 "
+            "(decision ABC-2023-001); 30 April 2024."
+        ),
+    )
+
+
+def test_source_record_dated_event_inventory_does_not_activate_from_raw_order_question() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0002, 'Notice sent: 02 of MonthA 2024.')."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Order the source dates chronologically.",
+    )
+
+    assert not any(
+        item["result"]["predicate"] == "source_record_dated_event_inventory_support" for item in companions
+    )
+
+
+def test_source_record_dated_event_inventory_accepts_structured_chronology_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0002, 'Notice sent: 02 of MonthA 2024.')."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "document_chronology",
+                "target_terms": ["notice", "deadline"],
+                "answer_constraints": ["chronological_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    assert any(
+        item["result"]["predicate"] == "source_record_dated_event_inventory_support" for item in companions
+    )
+
+
 def test_source_record_messy_summary_extracts_negative_assertions() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -4690,6 +6869,159 @@ def test_source_record_messy_summary_named_role_roster_requires_structured_inten
 
     assert not any(
         item["result"]["predicate"] == "source_record_named_role_roster_support" for item in companions
+    )
+
+
+def test_source_record_parenthetical_role_name_support_uses_admitted_display_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0011, '"
+        "\u682a\u5f0f\u4f1a\u793e\u4e09\u83f1 UFJ \u9280\u884c"
+        "\uff08\u53d6\u7de0\u5f79\u982d\u53d6\u57f7\u884c\u5f79\u54e1 "
+        "\u534a\u6ca2 \u6df3\u4e00\u3001\u4ee5\u4e0b \u4e09\u83f1 UFJ \u9280\u884c\uff09"
+        "\u304a\u3088\u3073\u4e09\u83f1 UFJ \u30e2\u30eb\u30ac\u30f3\u30fb"
+        "\u30b9\u30bf\u30f3\u30ec\u30fc\u8a3c\u5238\u682a\u5f0f\u4f1a\u793e"
+        "\uff08\u53d6\u7de0\u5f79\u793e\u9577 \u5c0f\u6797 \u771f\u3001"
+        "\u4ee5\u4e0b \u4e09\u83f1 UFJ \u30e2\u30eb\u30ac\u30f3\u30fb"
+        "\u30b9\u30bf\u30f3\u30ec\u30fc\u8a3c\u5238\uff09"
+        "')."
+    ).get("status") == "success"
+    query_results = [
+        {
+            "result": {
+                "status": "success",
+                "predicate": "person_role",
+                "variables": ["Person", "Role", "Relaxed3"],
+                "rows": [
+                    {
+                        "Person": "person_hanazawa",
+                        "Role": "president_and_representative_executive_officer",
+                        "Relaxed3": "corp_bank",
+                    },
+                    {
+                        "Person": "person_kobayashi",
+                        "Role": "president",
+                        "Relaxed3": "corp_sec",
+                    },
+                ],
+            }
+        }
+    ]
+
+    companion = qa_module._source_record_parenthetical_role_name_companion(
+        runtime,
+        query_results=query_results,
+    )
+
+    assert companion is not None
+    joined = " ".join(row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"])
+    assert "\u534a\u6ca2 \u6df3\u4e00" in joined
+    assert "\u5c0f\u6797 \u771f" in joined
+    assert "\u53d6\u7de0\u5f79\u793e\u9577" in joined
+    assert companion["result"]["reasoning_basis"]["person_role_row_count"] == 2
+
+
+def test_source_record_parenthetical_role_name_support_requires_person_role_results() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0012, 'Company Alpha (Chief Executive Officer Jane Doe).')."
+    ).get("status") == "success"
+
+    companion = qa_module._source_record_parenthetical_role_name_companion(
+        runtime,
+        query_results=[],
+    )
+
+    assert companion is None
+
+
+def test_source_record_parenthetical_role_name_support_skips_alias_only_parenthetical() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_display(src_line_0013, 'The Long Equipment Name (LEN) must be inspected.')."
+    ).get("status") == "success"
+    query_results = [
+        {
+            "result": {
+                "status": "success",
+                "predicate": "person_role",
+                "variables": ["Person", "Role", "Scope"],
+                "rows": [{"Person": "person_alpha", "Role": "reviewer", "Scope": "doc"}],
+            }
+        }
+    ]
+
+    companion = qa_module._source_record_parenthetical_role_name_companion(
+        runtime,
+        query_results=query_results,
+    )
+
+    assert companion is None
+
+
+def test_source_record_parenthetical_role_name_reference_support_allows_source_alias_surfaces() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_parenthetical_role_name_support",
+                    "rows": [
+                        {
+                            "SupportKind": "source_record_parenthetical_role_name_item",
+                            "EntityDisplay": (
+                                "\u682a\u5f0f\u4f1a\u793e\u4e09\u83f1 UFJ "
+                                "\u9280\u884c"
+                            ),
+                            "PersonDisplay": "\u534a\u6ca2 \u6df3\u4e00",
+                            "ParentheticalRemainderDisplay": (
+                                "\u4ee5\u4e0b \u4e09\u83f1 UFJ \u9280\u884c"
+                            ),
+                        },
+                        {
+                            "SupportKind": "source_record_parenthetical_role_name_item",
+                            "EntityDisplay": (
+                                "\u4e09\u83f1 UFJ \u30e2\u30eb\u30ac\u30f3\u30fb"
+                                "\u30b9\u30bf\u30f3\u30ec\u30fc"
+                                "\u8a3c\u5238\u682a\u5f0f\u4f1a\u793e"
+                            ),
+                            "PersonDisplay": "\u5c0f\u6797 \u771f",
+                            "ParentheticalRemainderDisplay": (
+                                "\u4ee5\u4e0b \u4e09\u83f1 UFJ "
+                                "\u30e2\u30eb\u30ac\u30f3\u30fb"
+                                "\u30b9\u30bf\u30f3\u30ec\u30fc\u8a3c\u5238"
+                            ),
+                        },
+                        {
+                            "SupportKind": "source_record_parenthetical_role_name_item",
+                            "EntityDisplay": (
+                                "\u682a\u5f0f\u4f1a\u793e\u4e09\u83f1 UFJ "
+                                "\u30d5\u30a3\u30ca\u30f3\u30b7\u30e3\u30eb\u30fb"
+                                "\u30b0\u30eb\u30fc\u30d7"
+                            ),
+                            "PersonDisplay": "\u4e80\u6fa4 \u5b8f\u898f",
+                            "ParentheticalRemainderDisplay": "\u4ee5\u4e0b MUFG",
+                        },
+                        {
+                            "SupportKind": "source_record_parenthetical_role_name_summary",
+                            "EntryCount": "3",
+                        },
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert qa_module._source_record_parenthetical_role_name_reference_supported_by_results(
+        row=row,
+        reference=(
+            "MUFG \u4e80\u6fa4\u5b8f\u898f ; "
+            "UFJ\u9280\u884c \u534a\u6ca2\u6df3\u4e00 ; "
+            "UFJ-MS\u8a3c\u5238 \u5c0f\u6797\u771f"
+        ),
+    )
+    assert not qa_module._source_record_parenthetical_role_name_reference_supported_by_results(
+        row=row,
+        reference="MUFG \u4e80\u6fa4\u5b8f\u898f ; UFJ\u9280\u884c \u5225\u4eba",
     )
 
 
@@ -6050,6 +8382,48 @@ def test_placeholder_repair_promotes_lowercase_title_slot() -> None:
     assert repaired["repairs"] == [{"index": 2, "from": "title", "to": "Title"}]
 
 
+def test_placeholder_repair_promotes_fused_event_description_slot() -> None:
+    repaired = _placeholder_repaired_query(
+        "post_balance_sheet_event(Eventid, Eventtype, 2025_05_30, eventdesc)."
+    )
+
+    assert repaired is not None
+    assert repaired["query"] == "post_balance_sheet_event(Eventid, Eventtype, 2025_05_30, Eventdesc)."
+    assert repaired["repairs"] == [{"index": 4, "from": "eventdesc", "to": "Eventdesc"}]
+
+
+def test_placeholder_repair_promotes_fused_action_and_legal_basis_slots() -> None:
+    repaired = _placeholder_repaired_query(
+        "administrative_action(actionmufjbank, corp_mufj_bank, business_improvement_order, legalbasemufjbank)."
+    )
+
+    assert repaired is not None
+    assert repaired["query"] == (
+        "administrative_action(Actionmufjbank, corp_mufj_bank, "
+        "business_improvement_order, Legalbasemufjbank)."
+    )
+    assert repaired["repairs"] == [
+        {"index": 1, "from": "actionmufjbank", "to": "Actionmufjbank"},
+        {"index": 4, "from": "legalbasemufjbank", "to": "Legalbasemufjbank"},
+    ]
+
+
+def test_placeholder_repair_promotes_fused_report_deadline_slots() -> None:
+    repaired = _placeholder_repaired_query(
+        "deadline_requirement(actionmufjbank, reporttypemufjbank, deadlinemufjbank)."
+    )
+
+    assert repaired is not None
+    assert repaired["query"] == (
+        "deadline_requirement(Actionmufjbank, Reporttypemufjbank, Deadlinemufjbank)."
+    )
+    assert repaired["repairs"] == [
+        {"index": 1, "from": "actionmufjbank", "to": "Actionmufjbank"},
+        {"index": 2, "from": "reporttypemufjbank", "to": "Reporttypemufjbank"},
+        {"index": 3, "from": "deadlinemufjbank", "to": "Deadlinemufjbank"},
+    ]
+
+
 def test_run_query_plan_preserves_literal_title_when_original_query_succeeds() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -6085,6 +8459,30 @@ def test_run_query_plan_repairs_title_only_after_original_query_misses() -> None
     ]
     assert repaired
     assert repaired[0]["result"]["rows"][0]["Title"] == "catalog_entry_alpha"
+
+
+def test_run_query_plan_repairs_fused_overbound_action_slots_after_literal_miss() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "administrative_action(action_bank_order, corp_bank, business_improvement_order, legal_basis_bank)."
+    ).get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        ["administrative_action(actionbank, corp_bank, business_improvement_order, legalbasisbank)."],
+    )
+
+    repaired = [
+        row
+        for row in rows
+        if row.get("query")
+        == "administrative_action(Actionbank, corp_bank, business_improvement_order, Legalbasisbank)."
+        and row.get("derived_from_queries")
+        == ["administrative_action(actionbank, corp_bank, business_improvement_order, legalbasisbank)."]
+    ]
+    assert repaired
+    assert repaired[0]["result"]["rows"][0]["Actionbank"] == "action_bank_order"
+    assert repaired[0]["result"]["rows"][0]["Legalbasisbank"] == "legal_basis_bank"
 
 
 def test_source_record_field_repair_joins_sibling_event_field() -> None:

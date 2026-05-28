@@ -418,6 +418,15 @@ INSURANCE_DISPUTE_SOURCE_COMPILER_CONTEXT_V1 = [
     "Insurance dispute multilingual rule: witness statements in non-English languages are source-owned statement records. Preserve speaker, language, topic/content, and source context when the profile supports witness_statement or statement_detail predicates.",
 ]
 
+FINANCIAL_REPORT_SOURCE_COMPILER_CONTEXT_V1 = [
+    "financial_report_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as earnings releases, financial statements, annual or quarterly reports, corporate disclosures, issuer reports, or financial-result packets.",
+    "Financial report rule: source-stated totals and named scope contributions are separate query surfaces. When the source states a total line and a named affiliate, associate, investee, subsidiary, segment, customer, vendor, or project contribution to the same metric, preserve both values as joinable rows with period, named scope/entity, metric, value, and unit when compatible predicates exist.",
+    "Financial report rule: do not treat narrative financial amounts as decorative commentary. An explanatory paragraph that states a metric value, named contributor, forecast assumption, or year-over-year driver is a source row with the same preservation priority as a table cell when later questions may ask for that amount or contribution.",
+    "Financial report rule: if the allowed profile has only a general carrier such as financial_result/5, metric_observation/4, source_detail/4, or a source-local amount predicate, use the best compatible carrier and keep the named scope/entity in a stable scope or metric/basis label consistently. Do not drop a named contribution merely because the profile lacks a perfect entity-specific financial predicate.",
+    "Financial report rule: profile_bootstrap_v1 candidate predicates have a five-slot maximum. Do not invent /6 financial predicates; if source/basis must be queryable, preserve it through a separate source-coordinate/provenance carrier or the source-record ledger.",
+    "Financial report rule: source-contained ratios should be recoverable from preserved operand rows. Preserve numerator and denominator values with compatible units and basis/scope; emit an explicit ratio or calculation row only when the source states it or when the allowed profile has a safe calculation predicate that keeps operands and basis visible.",
+]
+
 SOURCE_ENTITY_LEDGER_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -737,7 +746,10 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface preservation rule: invariant-specific rows are additive and must not replace already-needed concrete typed rows. When preserving a new surface, keep direct backbone rows for rules, events, votes/choices, measurements, source authority, participant statements, corrections, lifecycle/status, and domain-specific admissible predicates. A replay compile that gains one surface while dropping typed backbone predicate families is not acceptable.",
     "Compile surface invariant rule: if the source has sections, titles, headings, chronology labels, basis language, or explicit absence/negative-inference statements, preserve source addressability as queryable rows rather than only source_record text.",
     "Compile surface invariant rule: when a record, order, claim, exhibit, item, event, or document is listed in, filed under, reproduced in, referenced by, or contained by a section/source layer, preserve the relation between the subject id and the section/source coordinate directly when compatible predicates exist.",
+    "Compile surface invariant rule: when a legal, regulatory, enforcement, policy, or compliance citation includes an inline parenthetical, caption, heading, or short label naming the duty, prohibition, control area, or conduct category, preserve that label separately from the bare article/section identifier when compatible predicates exist. Legal article numbers are not substitutes for captioned duty/category labels when the label is answer-bearing.",
     "Compile surface invariant rule: when the source states who or what authorizes, governs, controls, overrides, records, reports, or serves as the authority for an access/action/status/finding, preserve the authority/source relation separately from the party receiving permission or the item being controlled.",
+    "Compile surface invariant rule: when one authority, source, reviewer, regulator, committee, board, court, investigator, or staff body recommends, requests, refers, advises, reports, submits, or directs that another authority/body take action, preserve the chain as source-stated slots when compatible predicates exist: recommending/source body, recipient/addressee body, governed subject or target, requested/recommended action, date when stated, and source row. Do not collapse the chain into only the final action/order row.",
+    "Compile surface invariant rule: regulatory, enforcement, disciplinary, audit, inspection, and compliance records need violation or deficiency categories as separate answer surfaces when the source states them. Preserve control area, breach category, failed requirement, statutory violation class, root-cause category, governed target, basis/source, and status/detail slots when compatible predicates exist. Do not answer category questions only with intervention/action type rows such as order, warning, citation, fine, or report demand, and do not treat legal_basis alone as the violation category. When one source clause lists several coordinated control areas, breach classes, failed duties, or violation categories, emit separate category rows for the stated items; an umbrella category such as general management, internal control, governance, or system deficiency is additive only and cannot replace the itemized categories.",
     "Compile surface invariant rule: when a source document, correspondence item, report, order, policy, catalog, or register section supports an answer-bearing claim/status/access/finding, preserve the source document id, source actor/author, source date when stated, governed subject, and authority/evidence role as direct rows when compatible predicates exist.",
     "Compile surface invariant rule: when a basis, rationale, corroboration, or evidence source is tied to a named section/source coordinate, preserve both the semantic fact and its source coordinate. A possession_basis, authority, finding, status, or access row without the section/source that states it is shallow for source-addressability questions.",
     "Compile surface invariant rule: answer-bearing details in source text are additive, not replacements for backbone rows. First preserve the source-stated identity, status, date/time, count, amount, role, and subject/object rows. Then, when a source also states a rationale, explanation, availability/scope boundary, separate arrangement, pending commitment, acknowledgment, promised future action, exclusion, or unresolved item, preserve a direct detail surface anchored to the governed subject/action/source when compatible predicates exist. A broad status, event, or source_record_text_atom row alone is shallow if it drops the stated detail that would answer why, what else, what exception, what remains pending, or what is outside the main scope.",
@@ -755,6 +767,8 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: if the source states rules, procedures, clauses, requirements, thresholds, exceptions, exclusions, or applicability limits, preserve those as direct rule/policy surfaces before summarizing outcomes.",
     "Compile surface invariant rule: if the source names objects, devices, systems, inventory ids, source-stated specification values, samples, or item labels, preserve identifiers and descriptive attributes separately from broad event rows.",
     "Compile surface invariant rule: if the source states events, raw/corrected times, superseded values, intervals, windows, deadlines, or transitions, preserve the temporal anchors and correction relation directly.",
+    "Compile surface invariant rule: when a source-stated later notice, correction, amendment, update, extension, supersession, or observations/footer note changes a deadline, status, scope, amount, or governed requirement, preserve the update relation directly when compatible predicates exist: original/source document id, update document id when stated, publication or issue date, governed subject, changed field, stated effect, and source row. Do not leave a source-stated update only as an intake-plan risk, source_record text, or unjoined original deadline/status row.",
+    "Compile surface invariant rule: reporting, filing, remediation, and compliance obligations often contain both a fixed one-time due date and a recurring cadence or offset. Preserve these as separate facts or separate requirement-type rows when compatible predicates exist: requirement type, fixed due date, recurrence anchor, offset amount/unit, reporting frequency/duration, governed target, and basis/source. Do not collapse an initial calendar deadline and a recurring period into two bare day counts or one generic deadline value.",
     "Compile surface invariant rule: chronological/event-list sources need complete event backbone units when compatible predicates exist. Preserve event id or entry label, date/time/order, actor/party/system, governed subject or object, and outcome/status/action as joinable rows. Do not leave a timeline answer split between source_record text, a vague event wrapper, and unrelated status/date rows.",
     "Compile surface invariant rule: repeated tables, logs, registers, and chronologies with row ids plus time/date and action/status/description columns need row-by-row direct preservation when compatible predicates exist. Do not compile only a representative prefix or the first N rows; later rows often close, reopen, supersede, authorize, complete, or otherwise determine the current state.",
     "Compile surface invariant rule: public notices, recalls, and registry pages often use a paragraph heading to scope the product/list rows that follow. If the source states Sold at [store] in [states] before a product list, treat that scope as applying to each governed product row until the next scope heading; emit direct store/state rows for each governed product or category when compatible predicates exist.",
@@ -764,6 +778,7 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: retailer-specific restrictions in distribution tables apply to the restricted products named in the parenthetical text, not to a single representative row item. If a cell says Shop N Save carried only cucumber, green bell pepper, and pickling cucumber, emit restriction/sold-at rows for those products or a governed restricted-product set; do not attach the restriction only to an unrelated pepper item.",
     "Compile surface invariant rule: multi-value summary fields such as Product Type, Subjects, Categories, Brand Names, or Affected Items are repeated values, not a single scalar. Preserve each listed value or a full field detail row; do not truncate the field to the first semicolon- or comma-separated value.",
     "Compile surface invariant rule: point-in-time status/state questions need direct status surfaces. When the source states a current/as-of/on-date status, condition, availability, approval/denial, pending resolution, active/closed state, or authoritative current value, preserve subject, state/status value, temporal or source scope, and reason/authority when stated as joinable direct rows. Do not leave the answer only in source_record text, a broad event wrapper, or split status/2 plus unjoined date rows.",
+    "Compile surface invariant rule: court, appeal, administrative-review, adjudication, and agency-order sources need current disposition surfaces separate from procedural history. When the source states that the present decision remands/transfers a matter, resolves it directly/on the merits, finally disposes of it, rejects/affirms/reverses a claim, or orders further action, preserve the current decision or case id, challenged act/claim when stated, disposition/effect, source/date anchor, and whether the effect belongs to the current decision rather than an older history item. If no stricter profile predicate can carry the disposition mode or effect and source_detail/4 is available, emit a source_detail row instead of leaving the disposition only in source text.",
     "Compile surface invariant rule: status transitions and scoped population states are additive surfaces. When a source states before/after state, reclassification, replacement, supersession, pending-to-decided movement, or only part of a population in a state, preserve both the governed subject or subset and the state transition with its effective date/source. Do not collapse a population state into one unscoped current-status atom.",
     "Compile surface invariant rule: operational record/status events should preserve the event or record id, governed subject/item/application, actor/body, timestamp/turn, status before and after when stated, authority/source, and reason/correction detail when stated. Received/filed/assigned/approved/denied/withdrawn/pending/corrected/superseded/reopened/closed/current-status/transition vocabulary should not be left only as record labels.",
     "Compile surface invariant rule: operational lifecycle compiles should prefer stable phase and event surfaces when compatible predicates exist: record_alias/2 for equivalent record ids; record_status_phase/4 for initial/current/final/prior status; record_status_at/3 for dated status; record_lifecycle_event/5 for event type, actor, object/subject, and date; and record_superseded_by/4 for superseding source/event/document separately from resulting status.",
@@ -774,6 +789,7 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "Compile surface invariant rule: numeric event changes stated as changed/reverted/increased/decreased from X to Y or with an X -> Y arrow need separate before and after value rows for each event when the profile offers event_measurement/4 or an equivalent carrier. Do not satisfy later reverted rows by only preserving the first changed row.",
     "Compile surface invariant rule: explicit duration totals such as line-stop duration 17 hours 45 minutes 52 seconds need a direct duration value row when the profile offers event_measurement/4, event_duration/3, or an equivalent duration carrier. Start/end timestamps or interval rows are temporal anchors, not replacements for the stated numeric duration total.",
     "Compile surface invariant rule: financial or numeric-state calculations need baseline preservation. When the source states an initial/current balance or value, adjustments/debits/credits/expenditures, actual versus hypothetical scenario assumptions, resulting value, and policy threshold, preserve those as separate joinable rows. Derivation rows need a scenario or basis slot so actual, hypothetical, before, and after states do not overwrite one another. Do not overwrite an initial baseline with a later actual value, and do not answer counterfactual calculations from only the actual-result row.",
+    "Compile surface invariant rule: financial reports often state a total metric and then a named contributor, affiliate, associate, investee, subsidiary, segment, project, customer, or vendor contribution to that metric. Preserve the total and named contribution as separate joinable financial rows with compatible period, scope/entity, metric, value, and unit slots when the profile supports them. If basis/source is query-bearing, preserve it in a separate provenance/source-coordinate row or source-record ledger row. A source-record line or narrative summary alone is not enough for amount-contribution questions.",
     "Compile surface invariant rule: if the source states custody, possession, access, location, ownership, title, recall, return, or control state, preserve each stated control surface separately. Do not collapse them into a generic status label.",
     "Candidate predicate names are not enough. When an invariant surface is present in the source and supported by the allowed profile, propose the concrete fact operations needed to make it queryable.",
 ]
@@ -810,7 +826,20 @@ from src.semantic_ir import (  # noqa: E402
     call_semantic_ir,
     semantic_ir_to_legacy_parse,
 )
+from src.model_path import (  # noqa: E402
+    apply_openrouter_provider_env,
+    local_lmstudio_model_metadata,
+    openrouter_api_key,
+    openrouter_generation_metadata,
+    openrouter_metadata_headers,
+    model_serving_path_metadata,
+    openrouter_provider_routing_from_env,
+    refresh_openrouter_generation_metadata_entries,
+)
 from src.semantic_struggle import assess_semantic_progress  # noqa: E402
+
+
+OPENROUTER_CALL_METADATA_LOG: list[dict[str, Any]] = []
 
 
 def parse_args() -> argparse.Namespace:
@@ -870,6 +899,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=20)
     parser.add_argument("--num-ctx", type=int, default=32768)
     parser.add_argument("--max-tokens", type=int, default=12000)
+    parser.add_argument(
+        "--openrouter-provider-order",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to try in order. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-provider-only",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to allow. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-provider-ignore",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to exclude. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-quantizations",
+        default="",
+        help="Comma-separated OpenRouter quantization filters, such as int4,int8,fp16.",
+    )
+    parser.add_argument(
+        "--openrouter-allow-fallbacks",
+        choices=["", "true", "false"],
+        default="",
+        help="OpenRouter provider.allow_fallbacks override. Empty preserves environment/default behavior.",
+    )
+    parser.add_argument(
+        "--openrouter-require-parameters",
+        choices=["", "true", "false"],
+        default="",
+        help="OpenRouter provider.require_parameters override. Empty preserves environment/default behavior.",
+    )
     parser.add_argument(
         "--skip-intake-plan",
         action="store_true",
@@ -981,9 +1042,18 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    OPENROUTER_CALL_METADATA_LOG.clear()
     args = parse_args()
     if str(args.api_key or "").strip():
         os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
+    apply_openrouter_provider_env(
+        order=getattr(args, "openrouter_provider_order", ""),
+        only=getattr(args, "openrouter_provider_only", ""),
+        ignore=getattr(args, "openrouter_provider_ignore", ""),
+        quantizations=getattr(args, "openrouter_quantizations", ""),
+        allow_fallbacks=getattr(args, "openrouter_allow_fallbacks", ""),
+        require_parameters=getattr(args, "openrouter_require_parameters", ""),
+    )
     _configure_openrouter_title(args.out_dir)
     text_path = args.text_file if args.text_file.is_absolute() else (REPO_ROOT / args.text_file).resolve()
     source_text = text_path.read_text(encoding="utf-8-sig")
@@ -1277,6 +1347,41 @@ def main() -> int:
             if isinstance(retry_parsed, dict):
                 parsed = retry_parsed
                 error = retry_error
+    profile_schema_contract_retry: dict[str, Any] | None = None
+    if isinstance(parsed, dict) and not bool(args.use_profile_registry_direct):
+        schema_score = profile_bootstrap_score(parsed)
+        if _profile_schema_contract_retry_needed(schema_score):
+            retry_sample = dict(sample)
+            retry_context = list(sample.get("context", [])) if isinstance(sample.get("context"), list) else []
+            retry_context.extend(_profile_schema_contract_retry_context(schema_score))
+            retry_sample["context"] = retry_context
+            retry_started = time.perf_counter()
+            retry_response = _call_lmstudio_json_schema(
+                base_url=str(args.base_url),
+                model=str(args.model),
+                messages=build_profile_bootstrap_messages(samples=[retry_sample], domain_hint=str(args.domain_hint or "")),
+                schema=PROFILE_BOOTSTRAP_JSON_SCHEMA,
+                schema_name="profile_bootstrap_v1",
+                timeout=int(args.timeout),
+                temperature=float(args.temperature),
+                top_p=float(args.top_p),
+                max_tokens=min(int(args.max_tokens), 9000),
+            )
+            retry_parsed, retry_error = parse_profile_bootstrap_json(str(retry_response.get("content", "")))
+            retry_score = profile_bootstrap_score(retry_parsed if isinstance(retry_parsed, dict) else None)
+            profile_schema_contract_retry = {
+                "latency_ms": int((time.perf_counter() - retry_started) * 1000),
+                "parsed_ok": isinstance(retry_parsed, dict),
+                "parse_error": retry_error,
+                "previous_score": schema_score,
+                "retry_score": retry_score,
+                "adopted": False,
+                "raw_content": str(retry_response.get("content", ""))[:12000],
+            }
+            if isinstance(retry_parsed, dict) and not _profile_schema_contract_retry_needed(retry_score):
+                parsed = retry_parsed
+                error = retry_error
+                profile_schema_contract_retry["adopted"] = True
     profile_extension_metadata: dict[str, Any] | None = None
     if isinstance(parsed, dict) and bool(args.compile_source) and bool(args.source_record_ledger):
         extension_rows = [
@@ -1304,6 +1409,28 @@ def main() -> int:
         "domain_hint": str(args.domain_hint or ""),
         "backend": str(args.backend),
         "model": str(args.model),
+        "model_serving_path": model_serving_path_metadata(
+            backend=str(args.backend),
+            base_url=str(args.base_url),
+            model=str(args.model),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            top_k=int(args.top_k),
+            context_length=int(args.num_ctx),
+            max_tokens=int(args.max_tokens),
+            timeout=int(args.timeout),
+            run_role="compile",
+            cache_enabled=None,
+            lanes=1,
+            fresh_compile=bool(args.compile_source),
+            provider_routing=openrouter_provider_routing_from_env(),
+            observed_runtime=local_lmstudio_model_metadata(
+                backend=str(args.backend),
+                base_url=str(args.base_url),
+                model=str(args.model),
+                timeout=min(int(args.timeout), 3),
+            ),
+        ),
         "profile_registry": str(args.profile_registry or ""),
         "profile_registry_direct": bool(args.use_profile_registry_direct),
         "profile_registry_palette_prior": bool(args.profile_registry_palette_prior),
@@ -1329,6 +1456,8 @@ def main() -> int:
         record["profile_review"] = profile_review
     if profile_review_retry is not None:
         record["profile_review_retry"] = profile_review_retry
+    if profile_schema_contract_retry is not None:
+        record["profile_schema_contract_retry"] = profile_schema_contract_retry
     if profile_extension_metadata is not None:
         record["profile_extension_metadata"] = profile_extension_metadata
     if not args.skip_intake_plan:
@@ -1466,6 +1595,12 @@ def main() -> int:
             parsed_profile=parsed if isinstance(parsed, dict) else {},
             source_compile=record.get("source_compile") if isinstance(record.get("source_compile"), dict) else {},
         )
+    if OPENROUTER_CALL_METADATA_LOG:
+        record["openrouter_generation_metadata"] = refresh_openrouter_generation_metadata_entries(
+            OPENROUTER_CALL_METADATA_LOG,
+            api_key=str(getattr(args, "api_key", "") or ""),
+            timeout=min(int(args.timeout), 30),
+        )
 
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1521,6 +1656,62 @@ def _invalid_profile_retry_context(*, parse_error: str, raw_content: str, max_pr
         )
     if str(parse_error or "").strip():
         context.append(f"Previous parse error: {str(parse_error).strip()[:240]}")
+    return context
+
+
+def _profile_schema_contract_retry_needed(score: dict[str, Any]) -> bool:
+    refs: list[Any] = []
+    if isinstance(score, dict):
+        for key in (
+            "candidate_signature_arg_mismatch_refs",
+            "repeated_structure_role_mismatch_refs",
+        ):
+            values = score.get(key, [])
+            if isinstance(values, list):
+                refs.extend(values)
+    return any(str(ref).strip() for ref in refs) if isinstance(refs, list) else False
+
+
+def _profile_schema_contract_retry_context(score: dict[str, Any]) -> list[str]:
+    signature_refs = [
+        str(ref).strip()
+        for ref in (score.get("candidate_signature_arg_mismatch_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    repeated_role_refs = [
+        str(ref).strip()
+        for ref in (score.get("repeated_structure_role_mismatch_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    context = [
+        (
+            "Profile schema contract retry: the previous profile violated at least one structural schema contract. "
+            "This may be a predicate signature whose /N arity does not equal the number of args, or a repeated "
+            "structure property predicate whose first argument role does not bind to the repeated record/subject. "
+            "Emit a complete replacement profile_bootstrap_v1 that preserves the same source-bound capabilities "
+            "while fixing the schema contract."
+        ),
+        (
+            "Arity limit: profile_bootstrap_v1 candidate predicates support /1 through /5 only. Do not propose /6 or "
+            "higher. If a relation needs more conceptual fields, keep the five most query-bearing schema roles in one "
+            "predicate and use a separate provenance/source-coordinate predicate or admission note for source/basis."
+        ),
+        (
+            "Arg-role guardrail: args are short structural role labels only. Do not put source values, copied spans, "
+            "comma-bearing examples, generated counters, or alternate value lists inside args."
+        ),
+        (
+            "Repeated-structure guardrail: if a predicate is listed as a repeated_structures[].property_predicates item, "
+            "its first argument role must be the repeated record id or governed subject named by that repeated structure. "
+            "For procedural outcome, remand, transfer, disposition, or review-effect surfaces, anchor the relation to "
+            "the decision/event/act that actually produced the effect; do not use the global case id as a substitute "
+            "for a historical act or current decision."
+        ),
+    ]
+    if signature_refs:
+        context.append(f"Previous signature/args mismatch refs: {', '.join(signature_refs[:12])}.")
+    if repeated_role_refs:
+        context.append(f"Previous repeated-structure role mismatch refs: {', '.join(repeated_role_refs[:12])}.")
     return context
 
 
@@ -2093,6 +2284,9 @@ def _compile_source_with_draft_profile(
         )
     except Exception as exc:
         return {"ok": False, "error": str(exc)}
+    semantic_ir_metadata = result.get("openrouter_generation_metadata") if isinstance(result, dict) else None
+    if isinstance(semantic_ir_metadata, dict):
+        OPENROUTER_CALL_METADATA_LOG.append(semantic_ir_metadata)
     ir = result.get("parsed") if isinstance(result, dict) else None
     if not isinstance(ir, dict):
         if compact_retry:
@@ -2117,6 +2311,7 @@ def _compile_source_with_draft_profile(
             )
         return {
             "ok": False,
+            "semantic_ir_openrouter_generation_metadata": semantic_ir_metadata if isinstance(semantic_ir_metadata, dict) else {},
             "error": str(result.get("parse_error", "semantic_ir_parse_failed")) if isinstance(result, dict) else "semantic_ir_failed",
             "raw_content": str((result or {}).get("content", ""))[:4000] if isinstance(result, dict) else "",
         }
@@ -2128,6 +2323,7 @@ def _compile_source_with_draft_profile(
     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
     return {
         "ok": True,
+        "semantic_ir_openrouter_generation_metadata": semantic_ir_metadata if isinstance(semantic_ir_metadata, dict) else {},
         "model_decision": ir.get("decision", ""),
         "projected_decision": diagnostics.get("projected_decision", ""),
         "admitted_count": int(diagnostics.get("admitted_count", 0) or 0),
@@ -3361,8 +3557,10 @@ ENTITY_LOCATION_TEXT_RE = re.compile(
 QUORUM_TEXT_RE = re.compile(r"\bquorum\b", re.IGNORECASE)
 
 APPEAL_FILING_TEXT_RE = re.compile(
-    r"\b(?:appeal|appealed)\b.{0,80}\b(?:filed|files|filing|lodged|notice|window|within)\b|"
-    r"\b(?:filed|files|filing|lodged|notice|window|within)\b.{0,80}\b(?:appeal|appealed)\b",
+    r"\b(?:appeal|appealed)\b.{0,80}\b(?:filed|files|filing|lodged)\b|"
+    r"\b(?:filed|files|filing|lodged)\b.{0,80}\b(?:appeal|appealed)\b|"
+    r"\bnotice\s+of\s+appeal\b.{0,80}\b(?:filed|lodged|docketed|submitted)\b|"
+    r"\b(?:filed|lodged|docketed|submitted)\b.{0,80}\bnotice\s+of\s+appeal\b",
     re.IGNORECASE,
 )
 
@@ -3763,7 +3961,7 @@ def _ensure_appeal_filing_predicate(parsed_profile: dict[str, Any], *, source_te
             "why": "Prevents appeal filing facts from being stranded inside source-attributed claims or post-hearing notes.",
             "admission_notes": [
                 "Vocabulary extension only; use only for explicit source-stated appeal filings.",
-                "Keep appellant, appealed target or subject, and filing date/status or window joinable.",
+                "Keep appellant, appealed target or subject, and filing date or status joinable.",
             ],
         }
     )
@@ -4903,15 +5101,35 @@ def _source_claim_key_is_delivered(required_key: str, delivered_key: str) -> boo
     required_source, required_subject, required_claim = required_parts
     delivered_source, delivered_subject, delivered_claim = delivered_parts
     if required_claim == "dispute" and delivered_subject == "dispute":
-        source_matches = required_source == delivered_source or "source" in {required_source, delivered_source}
+        source_matches = _source_claim_source_kind_matches(required_source, delivered_source)
         return source_matches
     if required_claim != delivered_claim:
         return False
-    source_matches = required_source == delivered_source or "source" in {required_source, delivered_source}
+    source_matches = _source_claim_source_kind_matches(required_source, delivered_source)
     if required_claim == "no_documentation":
         return source_matches and required_subject == delivered_subject
     subject_matches = required_subject == delivered_subject or "claim" in {required_subject, delivered_subject}
     return source_matches and subject_matches
+
+
+def _source_claim_source_kind_matches(required_source: str, delivered_source: str) -> bool:
+    if required_source == delivered_source:
+        return True
+    if "source" in {required_source, delivered_source}:
+        return True
+    speech_kinds = {
+        "assessment",
+        "comment",
+        "email",
+        "letter",
+        "memo",
+        "note",
+        "opinion",
+        "report",
+        "statement",
+        "testimony",
+    }
+    return required_source in speech_kinds and delivered_source in speech_kinds
 
 
 SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES = {
@@ -4927,6 +5145,7 @@ SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES = {
     "correction_event",
     "emergency_authorization",
     "event_authorizer",
+    "legal_basis",
     "ordinance_rule",
     "permit_authorization",
     "policy_compliance",
@@ -4941,7 +5160,9 @@ SOURCE_AUTHORITY_DELIVERY_PREDICATE_NAMES = {
 SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES = {
     "counsel_opinion",
     "knowledge_assertion",
+    "legal_position",
     "legal_opinion",
+    "party_position",
     "participant_statement",
     "public_comment",
     "reported_finding",
@@ -4969,6 +5190,7 @@ STATUS_STATE_DELIVERY_PREDICATE_NAMES = {
     "legal_opinion",
     "pending_determination",
     "permit_status",
+    "payment_reduction_rule",
     "policy_compliance",
     "reduction_rule",
     "scheduled_event",
@@ -5011,9 +5233,9 @@ SOURCE_CLAIM_BACKBONE_WRAPPER_PREDICATES = {
 
 SOURCE_CLAIM_BACKBONE_GROUPS: dict[str, dict[str, set[str]]] = {
     "vote": {
-        "source_any": {"vote", "voted", "votes", "tally", "ayes", "nays", "roll", "call"},
+        "source_any": {"voted", "votes", "voting", "tally", "ayes", "nays", "roll", "call"},
         "source_context": {"board", "commission", "committee", "council", "member", "members"},
-        "direct_any": {"vote", "voted", "votes", "tally", "ayes", "nays", "roll", "call"},
+        "direct_any": {"voted", "votes", "voting", "tally", "ayes", "nays", "roll", "call"},
     },
     "survey_measurement": {
         "source_any": {"survey", "setback", "measured", "measurement", "feet", "ft", "distance", "dimension"},
@@ -5028,9 +5250,9 @@ SOURCE_CLAIM_BACKBONE_GROUPS: dict[str, dict[str, set[str]]] = {
     },
     "appeal_filing": {
         "source_any": {"appeal", "appealed"},
-        "source_context": {"filed", "filing", "lodged", "notice", "challenge"},
+        "source_context": {"filed", "filing", "lodged", "challenge"},
         "direct_any": {"appeal", "appealed"},
-        "direct_context": {"filed", "filing", "lodged", "notice", "challenge", "status", "window"},
+        "direct_context": {"filed", "filing", "lodged", "challenge", "status"},
     },
     "board_finding": {
         "source_any": {"finding", "findings", "found", "concluded", "determined", "determination"},
@@ -5081,6 +5303,8 @@ def _candidate_can_carry_status_state_delivery_unit(candidate: dict[str, Any]) -
     args = _candidate_args(candidate)
     if len(args) < 2:
         return False
+    if name in {"payment_reduction_rule", "reduction_rule"}:
+        return len(args) >= 3
     if name in {"pending_determination", "permit_status", "tree_protection_status"}:
         return True
     arg_tokens = [_profile_admission_tokens(arg.lower()) for arg in args]
@@ -5126,6 +5350,8 @@ def _fact_row_tokens(predicate: str, args: list[str]) -> set[str]:
 
 def _fact_row_can_deliver_source_authority(predicate: str, args: list[str]) -> bool:
     name = str(predicate or "").casefold()
+    if name == "legal_basis":
+        return len(args) >= 2
     if name == "source_authority":
         return len(args) >= 3
     if name == "solicitation_authority":
@@ -5188,6 +5414,8 @@ def _fact_row_can_deliver_source_attributed_claim(predicate: str, args: list[str
         "statement_claim",
     }:
         return len(args) >= 3
+    if name in {"legal_position", "party_position"}:
+        return len(args) >= 3
     if name not in SOURCE_CLAIM_DELIVERY_PREDICATE_NAMES or len(args) < 3:
         return False
     name_tokens = set(name.split("_"))
@@ -5235,7 +5463,11 @@ def _fact_row_can_deliver_status_state(predicate: str, args: list[str]) -> bool:
     name = str(predicate or "").casefold()
     if name == "appeal_filed":
         return len(args) >= 3
-    if name in {"conditional_rule", "directive_with_scope", "reduction_rule", "vehicle_action"}:
+    if name == "mandate_staff":
+        return len(args) >= 3
+    if name == "payment_reduction_rule":
+        return len(args) >= 3
+    if name in {"conditional_rule", "directive_with_scope", "mandate_utility", "reduction_rule", "vehicle_action"}:
         return len(args) >= 4
     if name in {"asset_state", "vessel_state"}:
         return len(args) >= 3
@@ -5597,7 +5829,12 @@ def _profile_bootstrap_admission_context(
         token in label
         for token in (
             "calculation",
+            "contribution",
             "formula",
+            "financial",
+            "financial statement",
+            "income statement",
+            "investee",
             "measurement",
             "metric",
             "numeric",
@@ -5607,6 +5844,24 @@ def _profile_bootstrap_admission_context(
             "sensor",
             "threshold",
             "value",
+        )
+    )
+    has_financial_report_pressure = any(
+        token in label
+        for token in (
+            "affiliate contribution",
+            "annual report",
+            "associate",
+            "corporate disclosure",
+            "earnings",
+            "equity-method",
+            "financial result",
+            "financial statement",
+            "forecast",
+            "investee",
+            "issuer report",
+            "quarterly report",
+            "segment performance",
         )
     )
     has_scope_discrepancy_pressure = any(
@@ -5697,6 +5952,23 @@ def _profile_bootstrap_admission_context(
                     "Do not offer only event_description/2, note/2, summary/2, or other prose-wrapper surfaces for numeric "
                     "event details. A prose description is shallow when the source states query-bearing quantities, rates, "
                     "thresholds, offsets, durations, scores, or before/after values."
+                ),
+            ]
+        )
+    if has_financial_report_pressure:
+        context.extend(
+            [
+                (
+                    "Profile admission rule: when a financial report states totals plus named affiliate, associate, "
+                    "investee, subsidiary, segment, project, customer, or vendor contributions, the candidate predicate "
+                    "palette must include at least one amount/metric carrier that can keep period, named scope or entity, "
+                    "metric, value, and unit joinable inside the five-slot profile limit."
+                ),
+                (
+                    "Do not offer only source summary text, generic narrative rows, or period-only financial_result rows "
+                    "for contribution pressure. If the source names who or what contributed to a metric, the palette needs "
+                    "a joined scope/entity slot or a documented compatible basis/scope label. If source/basis must be "
+                    "queryable too, propose a separate provenance/source-coordinate carrier rather than /6."
                 ),
             ]
         )
@@ -6314,12 +6586,27 @@ def _source_attributed_claim_signal_key(text: str) -> str:
         claim_kind = "finding"
     elif tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS:
         content_terms = set(tokens & PROFILE_ADMISSION_SOURCE_CLAIM_CONTENT_TERMS)
+        if "available" in content_terms and _available_word_is_capacity_or_timing_phrase(lowered):
+            content_terms.discard("available")
         if len(content_terms) > 1:
             content_terms.discard("claim")
+        if not content_terms:
+            return ""
         claim_kind = sorted(content_terms)[0]
     if not claim_kind:
         return ""
     return f"{source_kind}:{subject_kind}:{claim_kind}"
+
+
+def _available_word_is_capacity_or_timing_phrase(lowered: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(?:amount|duration|period|time|window|days?|months?|years?)\s+available\b|"
+            r"\bavailable\s+to\b|"
+            r"\bavailable\s+(?:for|within)\s+(?:review|consideration|processing|decision|use)\b",
+            str(lowered or ""),
+        )
+    )
 
 
 def _source_claim_markers_match(tokens: set[str], markers: set[str]) -> bool:
@@ -6895,6 +7182,28 @@ def _source_compiler_context(*, intake_plan: dict[str, Any] | None, domain_hint:
     if any(
         token in label
         for token in [
+            "annual report",
+            "associate",
+            "corporate disclosure",
+            "dividend",
+            "earnings",
+            "equity-method",
+            "financial performance",
+            "financial result",
+            "financial statement",
+            "forecast",
+            "income statement",
+            "investee",
+            "issuer report",
+            "quarterly report",
+            "segment performance",
+            "statutory earnings",
+        ]
+    ):
+        contexts.extend(FINANCIAL_REPORT_SOURCE_COMPILER_CONTEXT_V1)
+    if any(
+        token in label
+        for token in [
             "enterprise",
             "guidance",
             "best practice",
@@ -7028,6 +7337,9 @@ def _call_lmstudio_json_schema(
     if _is_openrouter_base_url(base_url):
         payload["reasoning"] = {"effort": "none", "exclude": True}
         payload["include_reasoning"] = False
+        provider_routing = openrouter_provider_routing_from_env()
+        if provider_routing:
+            payload["provider"] = provider_routing
     started = time.perf_counter()
     max_attempts = max(1, int(empty_response_retries or 0) + 1)
     last_raw: dict[str, Any] = {}
@@ -7047,6 +7359,15 @@ def _call_lmstudio_json_schema(
         except urllib.error.URLError as exc:
             raise RuntimeError(str(exc)) from exc
         last_raw = raw if isinstance(raw, dict) else {}
+        openrouter_metadata = openrouter_generation_metadata(
+            raw_response=last_raw,
+            request_payload=payload,
+            base_url=base_url,
+            timeout=min(int(timeout), 30),
+            call_role=schema_name,
+        )
+        if openrouter_metadata:
+            OPENROUTER_CALL_METADATA_LOG.append(openrouter_metadata)
         choices = raw.get("choices", []) if isinstance(raw, dict) else []
         message = choices[0].get("message", {}) if choices and isinstance(choices[0], dict) else {}
         content = str(message.get("content", "") if isinstance(message, dict) else "").strip()
@@ -7056,6 +7377,7 @@ def _call_lmstudio_json_schema(
             return {
                 "latency_ms": int((time.perf_counter() - started) * 1000),
                 "raw": raw,
+                "openrouter_generation_metadata": openrouter_metadata,
                 "content": merged_content,
                 "attempts": attempt,
                 "empty_response_retries": attempt - 1,
@@ -7064,6 +7386,13 @@ def _call_lmstudio_json_schema(
     return {
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "raw": last_raw,
+        "openrouter_generation_metadata": openrouter_generation_metadata(
+            raw_response=last_raw,
+            request_payload=payload,
+            base_url=base_url,
+            timeout=min(int(timeout), 30),
+            call_role=schema_name,
+        ),
         "content": "",
         "attempts": max_attempts,
         "empty_response_retries": max_attempts - 1,
@@ -7073,15 +7402,14 @@ def _call_lmstudio_json_schema(
 def _chat_headers(api_key: str = "", *, base_url: str = "") -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
     openrouter_target = not str(base_url or "").strip() or _is_openrouter_base_url(base_url)
-    key = str(
-        api_key
-        or os.environ.get("PRETHINKER_API_KEY")
-        or (os.environ.get("OPENROUTER_API_KEY") if openrouter_target else "")
-        or ""
-    ).strip()
+    if openrouter_target:
+        key = openrouter_api_key(api_key)
+    else:
+        key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
     if openrouter_target:
+        headers.update(openrouter_metadata_headers(base_url))
         referer = _openrouter_referer()
         if referer:
             headers["HTTP-Referer"] = referer
@@ -7145,20 +7473,28 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
     parsed = record.get("parsed") if isinstance(record.get("parsed"), dict) else {}
     score = record.get("score") if isinstance(record.get("score"), dict) else {}
     compile_record = record.get("source_compile") if isinstance(record.get("source_compile"), dict) else {}
+    serving_path = record.get("model_serving_path") if isinstance(record.get("model_serving_path"), dict) else {}
     lines = [
         "# Domain Bootstrap File Run",
         "",
         f"- Source file: `{record.get('text_file', '')}`",
         f"- Backend/model: `{record.get('backend', '')}` / `{record.get('model', '')}`",
+        f"- Provider family: `{serving_path.get('provider_family', '')}`",
+        f"- Base URL: `{serving_path.get('base_url', '')}`",
+        f"- Provider routing: `{serving_path.get('provider_routing', {})}`",
         f"- Parsed: `{record.get('parsed_ok', False)}`",
         f"- Rough score: `{score.get('rough_score', 0.0)}`",
         f"- Entity types: `{score.get('entity_type_count', 0)}`",
         f"- Candidate predicates: `{score.get('predicate_count', 0)}`",
         f"- Generic predicates: `{score.get('generic_predicate_count', 0)}`",
+        f"- Candidate signature/args mismatches: `{score.get('candidate_signature_arg_mismatch_refs', [])}`",
+        f"- Recommendation-chain slot-loss refs: `{score.get('recommendation_chain_slot_loss_refs', [])}`",
+        f"- Violation-category slot-loss refs: `{score.get('violation_category_slot_loss_refs', [])}`",
         f"- Repeated structures: `{score.get('repeated_structure_count', 0)}`",
         f"- Repeated-structure unknown predicate refs: `{score.get('repeated_structure_unknown_predicate_refs', [])}`",
         f"- Repeated-structure id-only record refs: `{score.get('repeated_structure_id_only_record_refs', [])}`",
         f"- Repeated-structure role mismatch refs: `{score.get('repeated_structure_role_mismatch_refs', [])}`",
+        f"- Repeated-structure lookup property refs: `{score.get('repeated_structure_lookup_property_refs', [])}`",
         f"- Frontier unknown positive predicate refs: `{score.get('frontier_unknown_positive_predicate_refs', [])}`",
         "",
     ]
@@ -7210,6 +7546,19 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
                 "",
                 f"- Parsed: `{review_retry.get('parsed_ok', False)}`",
                 f"- Parse error: `{review_retry.get('parse_error', '')}`",
+                "",
+            ]
+        )
+    schema_retry = record.get("profile_schema_contract_retry") if isinstance(record.get("profile_schema_contract_retry"), dict) else {}
+    if schema_retry:
+        retry_score = schema_retry.get("retry_score") if isinstance(schema_retry.get("retry_score"), dict) else {}
+        lines.extend(
+            [
+                "## Profile Schema Contract Retry",
+                "",
+                f"- Parsed: `{schema_retry.get('parsed_ok', False)}`",
+                f"- Adopted: `{schema_retry.get('adopted', False)}`",
+                f"- Candidate signature/args mismatches after retry: `{retry_score.get('candidate_signature_arg_mismatch_refs', [])}`",
                 "",
             ]
         )

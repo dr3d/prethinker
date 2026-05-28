@@ -1,0 +1,74 @@
+# Publicités insérées entre les courriels : sanction de 50 millions d'euros à l'encontre de la société ORANGE
+
+**Source :** CNIL — Commission nationale de l'informatique et des libertés
+**Date de publication :** 10 décembre 2024
+**Délibération de référence :** Délibération de la formation restreinte n° SAN-2024-019 du 14 novembre 2024 concernant la société ORANGE SA
+
+---
+
+Le 14 novembre 2024, la CNIL a sanctionné la société ORANGE d'une amende de 50 millions d'euros, notamment pour avoir affiché des publicités entre les courriels des utilisateurs de son service de messagerie électronique, sans leur consentement.
+
+## Le contexte
+
+ORANGE met à disposition de ses clients un service de messagerie électronique (« Mail Orange »). À la suite de plusieurs contrôles, la CNIL a constaté que la société affichait, entre les courriels présents au sein des boîtes de réception des utilisateurs, des annonces publicitaires prenant la forme de courriels.
+
+Sur la base de ces constatations, la formation restreinte – organe de la CNIL chargé de prononcer les sanctions – a considéré que l'affichage de telles publicités nécessitait le recueil du consentement des utilisateurs de la messagerie ORANGE, en application de l'article L. 34-5 du code des postes et des communications électroniques (CPCE).
+
+Par ailleurs, les contrôles réalisés par la CNIL ont également permis de constater que, lorsque les utilisateurs du site orange.fr retiraient leur consentement au dépôt et à la lecture de cookies sur leur terminal, les cookies précédemment déposés continuaient à être lus, en violation de l'article 82 de la loi Informatique et Libertés.
+
+**Pour ces deux manquements, la formation restreinte a prononcé à l'encontre de la société ORANGE :**
+
+- **une amende de 50 millions d'euros, rendue publique.**
+- une injonction de cesser les opérations de lecture des cookies après retrait du consentement de la personne concernée dans un délai de trois mois, assortie d'une astreinte **de 100 000 euros par jour de retard.**
+
+Le montant de cette amende tient notamment compte du nombre très élevé de personnes concernées (plus de 7,8 millions de personnes ayant vu s'afficher les publicités en cause dans leur boîte de réception) ainsi que de la position de la société sur le marché, qui est le premier opérateur de télécommunications en France. La formation restreinte a également tenu compte de l'avantage financier tiré du manquement relatif aux publicités insérées entre les courriels.
+
+## Les manquements sanctionnés
+
+### Un manquement à l'obligation de recueillir le consentement des personnes à recevoir de la prospection commerciale par voie électronique (article L.34-5 du CPCE)
+
+Les contrôles réalisés par la CNIL ont permis de constater que les utilisateurs des comptes de messagerie électronique ORANGE voyaient s'afficher au sein de leur boîte de réception, entre les courriels reçus et sans qu'ils n'y aient consenti, des messages publicitaires prenant la forme de courriers électroniques.
+
+La CNIL, s'appuyant sur un arrêt de la Cour de justice de l'Union européenne (CJUE) du 25 novembre 2021, a considéré que ces messages faisant la promotion de services ou de biens et qui ne sont pas envoyés par un utilisateur à un autre utilisateur, mais affichés dans **un espace normalement réservé aux courriels privés** en prenant l'apparence de véritables courriels, constituent de la prospection directe par courrier électronique. En conséquence, il est nécessaire **de recueillir le consentement des personnes concernées** en application de l'article L. 34-5 du CPCE.
+
+Pour retenir la responsabilité de la société ORANGE, fournisseur de messagerie, la CNIL a relevé que c'était elle qui avait la maîtrise des publicités en cause, en procédant à leur affichage et en commercialisant auprès des annonceurs ces espaces dédiés. Elle a ainsi distingué ces publicités des courriels adressés par un annonceur à un prospect en utilisant son adresse de courrier électronique, sur lesquels le fournisseur de messagerie n'a aucun contrôle et qu'il se contente d'acheminer.
+
+La CNIL a néanmoins tenu compte du fait que la société avait cessé de procéder à ce type d'affichage depuis le mois de novembre 2023 et que le nouveau format de publicité mis en œuvre permet désormais de distinguer clairement les annonces des véritables courriels.
+
+### Un manquement à l'article 82 de la loi Informatique et Libertés : des cookies lus malgré le retrait du consentement de l'internaute
+
+La CNIL a constaté que lorsqu'un utilisateur du site web orange.fr acceptait le dépôt et la lecture de cookies sur son terminal, puis retirait son consentement, les cookies précédemment déposés continuaient à être lus par la société ORANGE et par ses partenaires.
+
+La CNIL a rappelé qu'**une telle opération de lecture**, qui consiste à accéder aux informations stockées dans le terminal de l'utilisateur, était explicitement **interdite** par l'article 82 de la loi Informatique et Libertés, **même si ces informations ne sont pas exploitées par la suite.**
+
+Elle a également précisé que, pour garantir le retrait effectif du consentement, la société devait mettre en œuvre des solutions techniques empêchant la lecture des cookies dont elle a la maîtrise. Pour les cookies déposés par ses partenaires, elle devait s'assurer auprès de ces derniers de la mise en place de solutions similaires.
+
+## La délibération
+
+- Délibération de la formation restreinte n° SAN-2024-019 du 14 novembre 2024 concernant la société ORANGE SA — Légifrance
+
+## Textes de référence
+
+- Article L. 34-5 du code des postes et des communications électroniques (prospection commerciale) — Légifrance
+- Article 82 de la loi Informatique et Libertés (règles pour les cookies et autres traceurs)
+- Arrêt de la CJUE *StWL Städtische Werke Lauf a.d. Pegnitz GmbH v eprimo GmbH* du 25 novembre 2021 sur l'utilisation de courrier électronique pour de la prospection directe — EUR-Lex
+
+## Pour approfondir
+
+- La procédure de sanction
+- La prospection commerciale par courrier électronique
+- Lignes directrices et recommandations — Cookies
+
+## Mots-clés
+
+#Sanction  #Prospection  #Cookies et traceurs
+
+---
+
+**Note de procédure connexe (extrait du dossier public CNIL) :**
+
+Une délégation de la Commission a procédé, sur le fondement de la décision n° 2023-093C du 20 mars 2023 de la présidente de la CNIL, à un contrôle ; puis, en application de la décision n° 2023-123C du 26 juin 2023, à une mission de contrôle en ligne le 5 juillet 2023 des traitements mis en œuvre par la société ORANGE et le GIE ORANGE PORTAILS à partir du site orange.fr. Le 4 août 2023, la société ORANGE a adressé à la délégation des éléments complémentaires. Le 3 novembre 2023, sur le fondement de la même décision, un nouveau contrôle en ligne a été réalisé. La société ORANGE a transmis des éléments complémentaires le 30 novembre 2023. Le 30 avril 2024, la présidente de la Commission a désigné Mme Anne DEBET en qualité de rapporteure sur le fondement de l'article 22 de la loi du 6 janvier 1978 modifiée.
+
+La formation restreinte de la CNIL ayant rendu la délibération SAN-2024-019 était composée de M. Philippe-Pierre CABOURDIN, président.
+
+Au 31 décembre 2022, le groupe ORANGE comptait 287 millions de clients, dont 242 millions de clients mobile (parmi lesquels 18,2 % en France, incluant les entreprises) et 24 millions de clients haut débit fixe (dont 52,1 % en France, incluant les entreprises).

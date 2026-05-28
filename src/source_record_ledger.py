@@ -217,7 +217,7 @@ def source_record_ledger_context(ledger: dict[str, object] | None) -> list[str]:
         "source_record_ledger_v1 is deterministic source-structure context, not truth and not a gold fact set.",
         "It records exact line-numbered headings, table rows, bullet rows, numbered rows, labeled lines, and plain paragraph lines so compiler passes can preserve document addressability.",
         "For markdown tables and literal key-value source lines, it preserves deterministic headers/keys alongside values so source-record fields can be queried without semantic interpretation. It also exposes printed table-cell list items, cross-cell item pairs, and parenthetical qualifiers as source_record_cell_item/source_record_cell_item_pair/source_record_cell_item_qualifier rows.",
-        "For exact printed names, identifiers, and casing/spelling variants, source_record_surface_mention/3 preserves the normalized lookup atom and the verbatim printed surface; it does not canonicalize variants or decide that two surfaces are the same entity.",
+        "For exact printed names, identifiers, casing/spelling variants, and non-ASCII source rows, source_record_surface_mention/3 and source_record_*_display predicates preserve verbatim printed surfaces; they do not canonicalize variants or decide that two surfaces are the same entity.",
         "For printed dates, source_record_date_occurrence/4 and source_record_first_date_occurrence/4 preserve source-row occurrence coordinates without interpreting deadlines or effective dates.",
         "For explicit membership tables with both a grouping column and a member column, it also emits explicit_table_membership/4 as structural table membership; legacy roster_table_member/4 aliases are emitted only for school-roster compatibility. It does not infer membership from nearby prose.",
         "For heading/scope/list blocks, source_record_section_list_count/* counts contiguous printed source-list rows only. It is a source structure count, not a semantic claim that all listed items share any fact beyond the printed heading/scope text.",
@@ -282,8 +282,14 @@ def source_record_ledger_facts(
         )
         if label:
             facts.append(f"source_record_label({row_id}, {label}).")
+        label_display = _quoted_atom(str(raw.get("label", "")))
+        if label_display:
+            facts.append(f"source_record_label_display({row_id}, {label_display}).")
         if section_text:
             facts.append(f"source_record_section({row_id}, {section_text}).")
+        section_display = _quoted_atom(str(raw.get("section", "")))
+        if section_display:
+            facts.append(f"source_record_section_display({row_id}, {section_display}).")
         if exact:
             facts.append(f"source_record_text_atom({row_id}, {exact}).")
             facts.append(f"source_record_row_context({row_id}, {label_atom}, {exact}, {section}).")
@@ -291,6 +297,9 @@ def source_record_ledger_facts(
             facts.extend(_note_marker_facts(str(raw.get("exact", "")), row_id=row_id))
             for surface_atom, surface_text in _surface_mentions(str(raw.get("exact", ""))):
                 facts.append(f"source_record_surface_mention({row_id}, {surface_atom}, {surface_text}).")
+        exact_display = _quoted_atom(str(raw.get("exact", "")))
+        if exact_display:
+            facts.append(f"source_record_text_display({row_id}, {exact_display}).")
         if exact_key:
             facts.append(f"source_record_text_key({row_id}, {exact_key}).")
         facts.extend(_citation_facts(str(raw.get("exact", "")), row_id=row_id))
@@ -313,6 +322,13 @@ def source_record_ledger_facts(
             for index, cell_raw in enumerate(cells, start=1):
                 cell = _atom(str(cell_raw))
                 header_atom = header_atoms[index - 1] if index <= len(header_atoms) else ""
+                cell_display = _quoted_atom(str(cell_raw))
+                if cell_display:
+                    facts.append(f"source_record_cell_display({row_id}, {index}, {cell_display}).")
+                if isinstance(headers, list) and index <= len(headers):
+                    header_display = _quoted_atom(str(headers[index - 1]))
+                    if header_display:
+                        facts.append(f"source_record_cell_header_display({row_id}, {index}, {header_display}).")
                 if not cell and header_atom:
                     cell = "blank"
                 if not cell:

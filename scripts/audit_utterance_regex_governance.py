@@ -276,6 +276,14 @@ def _classify(
     joined = " ".join([pattern, subject, function, call_name, file]).casefold()
     if FORBIDDEN_PATTERN_HINT_RE.search(pattern):
         return "forbidden_or_needs_review", "pattern contains fixture/batch/probe vocabulary"
+    source_alias_functions = {
+        "_looks_like_source_alias_span",
+        "_looks_like_source_ascii_translation_span",
+    }
+    if (
+        function.startswith("_source_record_alias_") or function in source_alias_functions
+    ) and "utterance" not in subject.casefold() and "question" not in subject.casefold():
+        return "allowed_structural", "source-record alias/translation extractor inspects admitted display text, not raw utterances"
     if any(hint in joined for hint in ALLOWED_SYNTAX_HINTS):
         return "allowed_syntax", "appears to validate syntax, identifiers, schema, predicates, or clauses"
     if _looks_like_structural_pattern(pattern):

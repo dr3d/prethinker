@@ -150,6 +150,38 @@ def test_source_record_ledger_facts_are_queryable_source_address_only() -> None:
     assert {"Row": "src_line_0004", "Header": "time", "Cell": "v_22_12"} in field_result.get("rows", [])
 
 
+def test_source_record_ledger_preserves_non_ascii_display_text() -> None:
+    ledger = extract_source_record_ledger(
+        "\n".join(
+            [
+                "名前： 山田 太郎",
+                "| 項目 | 値 |",
+                "| --- | --- |",
+                "| 資産 | 123 |",
+            ]
+        )
+    )
+
+    facts = source_record_ledger_facts(ledger)
+
+    assert "source_record_text_display(src_line_0001, '名前： 山田 太郎')." in facts
+    assert "source_record_label_display(src_line_0001, '名前： 山田 太郎')." in facts
+    assert "source_record_cell_display(src_line_0004, 1, '資産')." in facts
+    assert "source_record_cell_header_display(src_line_0004, 1, '項目')." in facts
+
+    runtime = CorePrologRuntime()
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    text_result = runtime.query_rows("source_record_text_display(Row, Text).")
+    assert text_result.get("status") == "success"
+    assert {"Row": "src_line_0001", "Text": "名前： 山田 太郎"} in text_result.get("rows", [])
+
+    cell_result = runtime.query_rows("source_record_cell_display(Row, Index, Text).")
+    assert cell_result.get("status") == "success"
+    assert {"Row": "src_line_0004", "Index": "1", "Text": "資産"} in cell_result.get("rows", [])
+
+
 def test_source_record_ledger_preserves_exact_surface_spelling_variants() -> None:
     ledger = extract_source_record_ledger(
         "\n".join(

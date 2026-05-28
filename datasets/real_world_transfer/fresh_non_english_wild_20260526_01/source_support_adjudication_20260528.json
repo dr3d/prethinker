@@ -1,0 +1,261 @@
+{
+  "schema_version": "source_support_adjudication_v1",
+  "batch_id": "fresh_non_english_wild_20260526_01",
+  "created_utc": "2026-05-28",
+  "policy": [
+    "This ledger is for research scoring discipline only.",
+    "It is not read by the compiler, query planner, or runtime instrument.",
+    "Rows excluded from the source-contained view remain visible in raw QA scores.",
+    "Do not treat exclusions as wins; use them to repair or narrow the oracle/source package."
+  ],
+  "rows": [
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q005",
+      "decision": "oracle_overreach",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "revise_oracle_or_add_source",
+      "rationale": "The reference cites a legal basis absent from the source package. The compiled artifact preserves the source-stated distinction between the business-improvement order basis and the report-demand basis."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q010",
+      "decision": "ambiguous_requires_review",
+      "score_policy": "review_before_scoring",
+      "recommended_action": "revise_oracle_to_source_stated_categories_or_find_fresh_source_contained_case",
+      "rationale": "The source contains management, compliance, and customer-information language, but the reference asks for sharper category labels that are not all explicit at that granularity."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q012",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_translation_source_or_rewrite_to_source_contained_pain_point",
+      "rationale": "The source supports the regulatory pain point, but the literal English meaning and English phrasing require translation or external terminology not present in the source package."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q013",
+      "decision": "suspect_exact_external_source",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_english_source_package_or_rewrite_reference",
+      "rationale": "The current QA verdict is exact, but the reference asks for English-site terminology and translation status absent from the source package."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q021",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_english_source_package_or_rewrite_reference",
+      "rationale": "The standard English abbreviations and translation-status answer are not present in the source package."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q022",
+      "decision": "ambiguous_requires_review",
+      "score_policy": "review_before_scoring",
+      "recommended_action": "rewrite_reference_to_source_stated_recommendation_chain_or_add_supporting_source",
+      "rationale": "The source supports the recommendation chain and later regulatory actions, but the reference's expansion framing is interpretive and not stated directly."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q004",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_short_unicode_source_location_regression_guard",
+      "rationale": "The source states the recommending body in Japanese. The English acronym is not source-stated, but the source-contained question is answerable from the visible Japanese body name."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q011",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_initial_deadline_and_continuing_reporting_guard",
+      "rationale": "The source states both the initial Reiwa deadline and the continuing quarter-end-plus-15-day reporting duty."
+    },
+    {
+      "fixture": "ja_regulator_001",
+      "row_id": "q016",
+      "decision": "source_contained_computed",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_deadline_rule_example_guard",
+      "rationale": "The source states the quarter-end-plus-15-day rule; the concrete examples are deterministic calendar expansions from that admitted rule."
+    },
+    {
+      "fixture": "de_corporate_001",
+      "row_id": "q005",
+      "decision": "source_package_gap",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_footer_or_rewrite_reference",
+      "rationale": "The reference relies on Art. 17 MAR / ad-hoc publication basis, but the retained source package does not contain that footer/legal-basis text."
+    },
+    {
+      "fixture": "de_corporate_001",
+      "row_id": "q006",
+      "decision": "source_package_gap",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_footer_or_rewrite_reference",
+      "rationale": "The requested ISIN is absent from the retained source text and appears only in fixture-side context."
+    },
+    {
+      "fixture": "de_corporate_001",
+      "row_id": "q010",
+      "decision": "oracle_overreach",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "rewrite_reference_to_source_stated_absolute_value",
+      "rationale": "The source states the old margin range and replaces the new margin with an absolute operating-result value; the requested 5.6 percent value is derived, not source-stated as the new assumption."
+    },
+    {
+      "fixture": "de_corporate_001",
+      "row_id": "q018",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_legal_basis_source_or_rewrite_reference",
+      "rationale": "The reference asks for a legal disclosure duty under Art. 17 MAR, but the retained source text does not state the Art. 17 MAR obligation."
+    },
+    {
+      "fixture": "de_regulator_001",
+      "row_id": "q019",
+      "decision": "declared_source_limit",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "rewrite_reference_to_source_stated_section_only_or_add_practice_source",
+      "rationale": "The oracle declares incomplete source pressure. The source mentions settlement and Section 53(5) GWB but not the detailed practice conditions and discount mechanics in the reference."
+    },
+    {
+      "fixture": "de_regulator_001",
+      "row_id": "q012",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "rewrite_reference_to_source_stated_finality_term_or_add_legal_gloss_source",
+      "rationale": "The retained source states that the notices are rechtskräftig. The no-further-appeal and administratively-closed implications are legal-concept glosses not independently stated in the source package."
+    },
+    {
+      "fixture": "de_regulator_001",
+      "row_id": "q020",
+      "decision": "oracle_contradicts_source",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "revise_oracle_to_source_stated_avm_only_fine_or_replace_source",
+      "rationale": "The retained source explicitly says no Bußgeldbescheide were issued against the involved dealers, while the reference says AVM and six dealers received notices."
+    },
+    {
+      "fixture": "es_public_procurement_001",
+      "row_id": "q005",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_eu_publication_date_abbreviation_guard",
+      "rationale": "The source states the sending date to the Diario Oficial de la Unión Europea. The DOUE abbreviation is not printed, but the source-contained date and publication body are present."
+    },
+    {
+      "fixture": "es_public_procurement_001",
+      "row_id": "q013",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_doue_english_notice_or_rewrite_reference",
+      "rationale": "The BOE source names the object but does not provide PED/PSD English terminology or a DOUE English translation."
+    },
+    {
+      "fixture": "es_public_procurement_001",
+      "row_id": "q019",
+      "decision": "ambiguous_requires_review",
+      "score_policy": "review_before_scoring",
+      "recommended_action": "rewrite_reference_to_source_stated_appeal_body_or_add_deadline_source",
+      "rationale": "The source states the appeal body and statutory pointer but not the reference's 15-business-day deadline directly."
+    },
+    {
+      "fixture": "es_public_procurement_001",
+      "row_id": "q024",
+      "decision": "declared_source_limit",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_pcap_lcsp_source_or_rewrite_reference",
+      "rationale": "The oracle declares incomplete source pressure. The reference depends on LCSP/PCAP modification details not fully contained in the BOE notice."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q011",
+      "decision": "source_package_gap",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "rewrite_reference_to_redacted_source_or_add_unredacted_source",
+      "rationale": "The source contains redacted or elided measures and a limited set of circular examples; the four specific measures in the reference are not all source-stated."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q019",
+      "decision": "ambiguous_requires_review",
+      "score_policy": "review_before_scoring",
+      "recommended_action": "rewrite_reference_to_source_stated_article_32_rationale_or_add_supporting_source",
+      "rationale": "The source supports Article 32 and insufficient technical/organizational measures, but the reference names specific control examples that are only partly present."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q021",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_translation_procedure_source_or_rewrite_reference",
+      "rationale": "The source supports recognition of responsibility under administrative procedure, but the civil-procedure contrast and standard English translation are external to the retained source."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q015",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_chronology_join_guard",
+      "rationale": "The retained source states the requested incident, claim, notification, communication, initiation, and payment dates; the remaining issue is chronology retrieval and selection."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q016",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "keep_as_dual_deadline_guard",
+      "rationale": "The retained source states both the three-month corrective-measures deadline and the two-month appeal deadline before the Audiencia Nacional."
+    },
+    {
+      "fixture": "es_regulator_001",
+      "row_id": "q024",
+      "decision": "ambiguous_requires_review",
+      "score_policy": "review_before_scoring",
+      "recommended_action": "rewrite_reference_to_source_stated_83_2_factors_or_add_explicit_prior-conduct_source",
+      "rationale": "The source states Article 83.2 factors such as affected count and affected data categories, and does not cite recidivism. The reference's sensitivity/window phrasing is partly interpretive and should be reviewed before scoring."
+    },
+    {
+      "fixture": "fr_eu_official_001",
+      "row_id": "q025",
+      "decision": "source_contained",
+      "score_policy": "keep_scored",
+      "recommended_action": "investigate_current_decision_vs_prior_remand_join",
+      "rationale": "The source contains the second-pourvoi rule and current dispositive outcome. The remaining miss is a real source-selection/join problem around prior remand versus current no-remand disposition."
+    },
+    {
+      "fixture": "ja_corporate_001",
+      "row_id": "q012",
+      "decision": "source_contained_computed",
+      "score_policy": "keep_scored",
+      "recommended_action": "investigate_financial_quantity_join_and_ratio_rendering",
+      "rationale": "The source contains ONE contribution and total equity-method investment income; the requested ratio is derived from source-contained operands."
+    },
+    {
+      "fixture": "ja_corporate_001",
+      "row_id": "q013",
+      "decision": "source_package_gap",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_ownership_english_source_or_rewrite_reference",
+      "rationale": "The retained source does not contain the parent ownership percentages or a source-stated English-version availability answer."
+    },
+    {
+      "fixture": "ja_corporate_001",
+      "row_id": "q021",
+      "decision": "external_knowledge_required",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "add_english_version_or_accounting_standard_gloss_source_or_rewrite_reference",
+      "rationale": "The retained source states the Japanese accounting basis, but does not state the IFRS contrast, English-version status, or sameness of translated values."
+    },
+    {
+      "fixture": "ja_corporate_001",
+      "row_id": "q023",
+      "decision": "oracle_overreach",
+      "score_policy": "exclude_from_source_contained_score",
+      "recommended_action": "rewrite_reference_to_source_stated_segment_methodology_change",
+      "rationale": "The source states a segment calculation-method change; the reference's segment-level restatement / consolidated-totals-unchanged framing is not source-stated."
+    }
+  ]
+}

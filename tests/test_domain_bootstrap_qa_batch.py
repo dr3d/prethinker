@@ -83,6 +83,44 @@ def test_qa_batch_stamp_command_can_run_with_compatibility_adapters_off(tmp_path
     assert "--no-cache" in command
 
 
+def test_qa_batch_command_forwards_openrouter_provider_controls(tmp_path: Path) -> None:
+    dataset_root = tmp_path / "datasets"
+    compile_root = tmp_path / "compiles"
+    out_root = tmp_path / "qa"
+    fixture = "provider_fixture"
+    fixture_dir = dataset_root / fixture
+    compile_dir = compile_root / fixture
+    fixture_dir.mkdir(parents=True)
+    compile_dir.mkdir(parents=True)
+    (fixture_dir / "qa.md").write_text("1. What happened?\n\n## Answers\n\n1. It happened.\n", encoding="utf-8")
+    (compile_dir / "domain_bootstrap_file_20260512T000000Z_source_model.json").write_text("{}", encoding="utf-8")
+
+    job = _build_job(fixture, dataset_root=dataset_root, compile_root=compile_root, out_root=out_root)
+    command = _build_command(
+        job,
+        model="test-model",
+        base_url="https://openrouter.ai/api/v1",
+        limit=3,
+        timeout=10,
+        evidence_bundle=False,
+        classify_failure_surfaces=True,
+        cache=False,
+        openrouter_provider_order="provider-a,provider-b",
+        openrouter_provider_only="provider-a",
+        openrouter_provider_ignore="provider-c",
+        openrouter_quantizations="fp16",
+        openrouter_allow_fallbacks="false",
+        openrouter_require_parameters="true",
+    )
+
+    assert command[command.index("--openrouter-provider-order") + 1] == "provider-a,provider-b"
+    assert command[command.index("--openrouter-provider-only") + 1] == "provider-a"
+    assert command[command.index("--openrouter-provider-ignore") + 1] == "provider-c"
+    assert command[command.index("--openrouter-quantizations") + 1] == "fp16"
+    assert command[command.index("--openrouter-allow-fallbacks") + 1] == "false"
+    assert command[command.index("--openrouter-require-parameters") + 1] == "true"
+
+
 def test_qa_batch_summary_rolls_up_compatibility_pressure() -> None:
     summary = _summarize(
         [

@@ -56,6 +56,54 @@ def test_build_command_forwards_profile_delivery_repair_pass() -> None:
     assert "--profile-delivery-repair-pass" in command
 
 
+def test_compile_batch_command_forwards_openrouter_provider_controls() -> None:
+    args = SimpleNamespace(
+        domain_hint="",
+        profile_registry=None,
+        use_profile_registry_direct=False,
+        profile_registry_palette_prior=False,
+        allow_global_first_profile_registry_palette_prior=False,
+        compile_source=True,
+        compile_plan_passes=False,
+        compile_flat_plus_plan_passes=False,
+        focused_pass_ops_schema=False,
+        source_entity_ledger=False,
+        archival_identifier_ledger=False,
+        source_record_ledger=False,
+        source_record_ledger_facts=False,
+        profile_delivery_repair_pass=False,
+        intake_registry_context=False,
+        review_profile=False,
+        profile_review_retry=False,
+        max_plan_passes=6,
+        extra_compile_context_line=[],
+        openrouter_provider_order="provider-a,provider-b",
+        openrouter_provider_only="provider-a",
+        openrouter_provider_ignore="provider-c",
+        openrouter_quantizations="fp16",
+        openrouter_allow_fallbacks="false",
+        openrouter_require_parameters="true",
+    )
+    command = _build_command(
+        CompileJob(
+            fixture="fixture_a",
+            text_file=Path("datasets/fixture_a/source.md"),
+            out_dir=Path("tmp/out/fixture_a"),
+        ),
+        args=args,
+        model="model-a",
+        base_url="https://openrouter.ai/api/v1",
+        timeout=1200,
+    )
+
+    assert command[command.index("--openrouter-provider-order") + 1] == "provider-a,provider-b"
+    assert command[command.index("--openrouter-provider-only") + 1] == "provider-a"
+    assert command[command.index("--openrouter-provider-ignore") + 1] == "provider-c"
+    assert command[command.index("--openrouter-quantizations") + 1] == "fp16"
+    assert command[command.index("--openrouter-allow-fallbacks") + 1] == "false"
+    assert command[command.index("--openrouter-require-parameters") + 1] == "true"
+
+
 def test_compile_batch_summary_extracts_quality_gate_signals() -> None:
     summary = _extract_compile_summary(
         {
@@ -65,6 +113,8 @@ def test_compile_batch_summary_extracts_quality_gate_signals() -> None:
             "score": {
                 "rough_score": 0.861,
                 "risk_count": 3,
+                "candidate_signature_arg_mismatch_count": 1,
+                "candidate_signature_arg_mismatch_refs": ["record_status/3:args=2"],
                 "repeated_structure_count": 1,
                 "repeated_structure_id_only_record_refs": ["record_id/1"],
                 "repeated_structure_role_mismatch_refs": ["record_status/2"],
@@ -77,9 +127,96 @@ def test_compile_batch_summary_extracts_quality_gate_signals() -> None:
 
     assert summary["rough_score"] == 0.861
     assert summary["risk_count"] == 3
+    assert summary["candidate_signature_arg_mismatch_refs"] == ["record_status/3:args=2"]
+    assert summary["profile_schema_contract_flags"] == [
+        "candidate_signature_arg_mismatch:record_status/3:args=2",
+        "repeated_structure_id_only_record:record_id/1",
+        "repeated_structure_role_mismatch:record_status/2",
+    ]
     assert summary["repeated_structure_id_only_record_refs"] == ["record_id/1"]
     assert summary["frontier_unknown_positive_predicate_count"] == 0
     assert summary["detail_wrapper_drift_flags"] == []
+
+
+def test_compile_batch_summary_refreshes_profile_bootstrap_score() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {
+                "schema_version": "profile_bootstrap_v1",
+                "candidate_predicates": [
+                    {
+                        "signature": "case_location/2",
+                        "args": ["case_id", "location"],
+                        "description": "Case location.",
+                        "why": "Location is stated.",
+                        "admission_notes": [],
+                    }
+                ],
+                "starter_frontier_cases": [
+                    {
+                        "expected_boundary": "case_location('case_001', 'River City, AA').",
+                        "must_not_write": [],
+                    }
+                ],
+                "entity_types": [{"name": "case"}],
+                "admission_risks": ["risk"],
+                "repeated_structures": [],
+            },
+            "source_compile": {"admitted_count": 1, "skipped_count": 0},
+            "score": {
+                "rough_score": 0.1,
+                "risk_count": 0,
+                "frontier_unknown_positive_predicate_count": 1,
+                "frontier_unknown_positive_predicate_refs": ["case_location/3"],
+            },
+        }
+    )
+
+    assert summary["rough_score"] > 0.1
+    assert summary["frontier_unknown_positive_predicate_count"] == 0
+    assert summary["frontier_unknown_positive_predicate_refs"] == []
+
+
+def test_compile_batch_summary_flags_regulatory_violation_category_loss() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {
+                "schema_version": "profile_bootstrap_v1",
+                "domain_guess": "regulatory_enforcement",
+                "domain_scope": "Compliance enforcement records with violations and failures.",
+                "candidate_predicates": [
+                    {
+                        "signature": "regulatory_order/4",
+                        "args": ["order_id", "target_entity", "order_type", "legal_basis"],
+                        "description": "Intervention row.",
+                        "why": "Source states the order.",
+                        "admission_notes": [],
+                    },
+                    {
+                        "signature": "admitted_failure/2",
+                        "args": ["entity", "failure_description"],
+                        "description": "Failure row.",
+                        "why": "Source states a failure.",
+                        "admission_notes": [],
+                    },
+                ],
+                "starter_frontier_cases": [],
+                "entity_types": [{"name": "action"}],
+                "admission_risks": ["violation category collapse"],
+                "repeated_structures": [],
+            },
+            "source_compile": {"admitted_count": 1, "skipped_count": 0},
+            "score": {"rough_score": 0.1, "risk_count": 0},
+        }
+    )
+
+    assert "admitted_failure/2" in summary["violation_category_slot_loss_refs"]
+    assert any(
+        flag.startswith("violation_category_slot_loss:")
+        for flag in summary["profile_schema_contract_flags"]
+    )
 
 
 def test_compile_batch_summary_separates_rejected_flat_pass_diagnostic_skips() -> None:
@@ -1496,6 +1633,75 @@ def test_compile_quality_gate_holds_profile_delivery_flag() -> None:
     assert gate["reasons"] == [
         "profile_delivery:status_state_carrier_offered_but_undelivered:source=2:offered=status_state_at/4"
     ]
+
+
+def test_compile_quality_gate_holds_profile_schema_contract_flag() -> None:
+    result = {
+        "fixture": "fixture_profile_schema",
+        "returncode": 0,
+        "compile_json": "compile.json",
+        "summary": {
+            "parsed_ok": True,
+            "rough_score": 0.9,
+            "risk_count": 2,
+            "candidate_predicates": 12,
+            "compile_admitted": 30,
+            "compile_skipped": 0,
+            "profile_schema_contract_flags": [
+                "candidate_signature_arg_mismatch:record_action/4:args=3"
+            ],
+        },
+    }
+
+    gate = _quality_gate_result(result, min_rough_score=0.775, max_risk_count=5)
+
+    assert gate["passed"] is False
+    assert gate["decision"] == "hold"
+    assert gate["reasons"] == [
+        "profile_schema_contract:candidate_signature_arg_mismatch:record_action/4:args=3"
+    ]
+
+
+def test_quality_retry_context_includes_profile_signature_arity_mismatch() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "profile_schema_contract:candidate_signature_arg_mismatch:record_action/4:args=3"
+            ]
+        }
+    )
+
+    assert any("signature's arity equal its short schema role list" in line for line in lines)
+
+
+def test_quality_retry_context_includes_repeated_structure_profile_defects() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "profile_schema_contract:repeated_structure_id_only_record:record/1",
+                "profile_schema_contract:repeated_structure_role_mismatch:record_status/2",
+                "profile_schema_contract:frontier_unknown_positive_predicate:record_status/3",
+            ]
+        }
+    )
+
+    assert any("id-only repeated-structure record predicate" in line for line in lines)
+    assert any("first argument was not a record id" in line for line in lines)
+    assert any("global lookup predicates" in line for line in lines)
+    assert any("expected_boundary used a positive" in line for line in lines)
+
+
+def test_quality_retry_context_includes_violation_category_slot_loss() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "profile_schema_contract:violation_category_slot_loss:admitted_failure/2",
+            ]
+        }
+    )
+
+    assert any("category-capable carrier" in line for line in lines)
+    assert any("legal-basis rows, obligation rows, and violation/deficiency/finding" in line for line in lines)
 
 
 def test_compile_quality_gate_holds_zero_yield_compile_health() -> None:

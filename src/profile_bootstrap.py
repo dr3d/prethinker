@@ -278,6 +278,25 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "incident events. A profile that can only say a policy exists is too weak for later queries; it should expose "
     "thresholds, deadlines, intervals, scope/exclusions, required actors, observations/measurements, notifications, "
     "authorization prerequisites, corrected records, and review claims when the source and registry support them.\n"
+    "- For legal, regulatory, enforcement, policy, or compliance sources, preserve captioned duty names and inline "
+    "section labels separately from bare article/section identifiers. If a citation includes a parenthetical, caption, "
+    "heading, or short label naming the regulated duty or prohibited conduct, the profile should allow that label to "
+    "remain queryable as a legal-basis label, duty category, finding category, or source detail instead of only an "
+    "article number.\n"
+    "- For regulatory, enforcement, disciplinary, audit, inspection, or compliance sources, keep violation or "
+    "deficiency categories separate from action type and legal basis. A business-improvement order, warning letter, "
+    "citation, fine, or report demand is the intervention; it is not the violation type. If the source lists control "
+    "areas, breach categories, failed requirements, statutory violation classes, or root-cause categories, propose a "
+    "queryable category/detail carrier such as violation_category/4, deficiency_category/4, finding_category/4, or a "
+    "close domain-owned equivalent with governed target, category, basis/source, and status/detail slots. When a "
+    "source states several coordinated control areas or failure classes, the profile should allow separate category "
+    "rows for each stated area instead of forcing them into one umbrella management/system label.\n"
+    "- For regulatory, legal, investigative, board, committee, or review sources that state one body recommends, "
+    "requests, refers, advises, reports, submits, or directs another body to act, preserve the chain slots in the "
+    "profile: source/recommending body, recipient/addressee body when stated, governed subject or target, requested "
+    "or recommended action, date/source anchor when stated, and any status/scope distinction. A recommended_action/3 "
+    "surface is too weak when the source states the recipient/addressee; prefer an arity-4-or-greater carrier or a "
+    "close domain-owned equivalent that keeps the recipient joinable.\n"
     "- For charters, bylaws, ordinances, standing-rule documents, or operational rulebooks, keep the profile compact "
     "but executable-rule-aware. Do not enumerate one predicate for every surface rule. Prefer reusable families for "
     "source identity, source_rule/rule_text records, roles/authorities, time anchors/windows, events/statuses, "
@@ -309,6 +328,12 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "should let later queries recover gross claimed amount, adjusted amount, deductible, net amount, share percentage, "
     "share amount, attachment point, limit, difference, and basis/source when those values are in the source. Do not "
     "hide net/difference calculations inside one prose atom if later questions may ask how the number was derived.\n"
+    "- For corporate disclosures, earnings releases, financial statements, or annual/quarterly reports, preserve totals "
+    "and named-scope contributions as separate query surfaces. profile_bootstrap_v1 supports at most five argument "
+    "roles per candidate predicate, so use a financial metric carrier that can keep period, named scope or entity, "
+    "metric, value, and unit joinable. If basis/source must also be queryable, propose a separate source-coordinate "
+    "or provenance predicate and mark the metric carrier provenance-sensitive. Do not use /6 or higher in this schema. "
+    "A period-only result predicate is shallow when later questions may ask which named entity contributed the amount.\n"
     "- For equipment, device, instrument, product, inventory, or asset profiles, source-stated specifications are "
     "query-bearing identity surfaces. If the source gives descriptive, identifying, versioning, capacity, location, "
     "qualification, or scope attributes, propose compact reusable attribute predicates such as equipment_attribute/3, "
@@ -333,6 +358,16 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "'three years before', 'ten days after', or equivalent, the profile should include a duration/proximity predicate "
     "with a distance/value slot, not only a boolean before/after predicate. Endpoint dates, ordering, and printed "
     "distance are separate capabilities.\n"
+    "- For reporting, filing, remediation, or compliance obligations, keep one-time fixed deadlines and recurring "
+    "reporting cadence as separate temporal surfaces. A useful profile can distinguish requirement type, fixed due "
+    "date, recurrence anchor, offset amount/unit, and frequency/duration. Do not compress a fixed date and a recurring "
+    "offset into bare day counts or a single undifferentiated deadline field.\n"
+    "- For public notices, filings, registers, contract packets, or regulatory pages that state a later notice, "
+    "correction, amendment, update, extension, supersession, or published observation changes a deadline, status, "
+    "scope, amount, or governed requirement, include a direct document-update surface. Useful shapes preserve the "
+    "source document or notice id, the update/correction document id when stated, publication or issue date, governed "
+    "subject, changed field, stated effect, and source anchor. A profile that only keeps the original deadline/status "
+    "and leaves the later update inside source text is shallow for current-state and modification-history questions.\n"
     "- For competing expert or survey accounts, source identity is part of the fact identity. Prefer source-attributed "
     "shapes such as survey_finding/4-or-more, measurement_claim/5-or-more, cost_claim/5, disputed_position/5, or close "
     "domain equivalents over unscoped finding predicates that would make the mapper choose one account as truth.\n"
@@ -343,6 +378,11 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "clarification/3, advisory_opinion/4, advisory_status/2, unresolved_question/2, federal_notification/3, "
     "grant/equipment/subgrant predicates, and before/2 when the source supports those jobs. Do not collapse this into "
     "only a generic case_event/3 or source_claim/3 surface.\n"
+    "- For court, appeal, administrative-review, adjudication, or agency-order sources, preserve the current decision's "
+    "disposition separately from procedural history. Useful profile surfaces distinguish the challenged act/decision, "
+    "the deciding body, the disposition or effect, whether the matter is remanded/transferred or finally/directly "
+    "resolved, and the source/date anchor. Do not make later QA infer current disposition from an annulment row plus "
+    "absence of a remand row.\n"
     "- Use a document-to-logic compiler strategy, not a pure noun/verb extraction strategy. "
     "Extract terms only when they help preserve who said what, what role it has, whether it is durable, "
     "and whether it can support later reasoning.\n"
@@ -399,6 +439,10 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "- Property predicates inside repeated_structures should use argument roles that match record-property use. "
     "For example, if denies_right/2 is listed as a grievance property, its first argument role should be grievance_id, "
     "not denier. If you need both shapes, propose distinct predicates such as denies_right/2 and grievance_denies_right/2.\n"
+    "- Do not list global lookup predicates as repeated-structure property predicates when their first role is a "
+    "law, source, instrument, authority, entity class, or definition key rather than the repeated record id or subject. "
+    "For a finding-to-law relation, either add a record-keyed link predicate such as finding_legal_obligation/2 or "
+    "finding_legal_basis/2, or omit the global lookup predicate from repeated_structures[].property_predicates.\n"
     "- Avoid unary predicates for relation-like details unless they are true entity-class markers. Predicates such as "
     "recall_item/1, identity_ambiguous/1, pledge_resource/1, or rule_origin_mark/1 are often too weak for later questions "
     "because they hide the source, record id, candidate, status, or owner. Prefer recall_action/2 plus recall_item/2, "
@@ -526,6 +570,10 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "- candidate_predicates[].args must be short schema role labels only. Never put source examples, entity ids, "
     "entity_type_N counters, generated sequences, copied text spans, or alternative value lists in args. If a role is "
     "unclear, use a compact fallback such as arg_1 or arg_2 rather than a long descriptive string.\n"
+    "- candidate_predicates[].signature arity must equal the number of argument role labels in args. profile_bootstrap_v1 "
+    "supports /1 through /5 only; do not propose /6 or higher. If you simplify a predicate to three core roles, the "
+    "signature must be /3; if the signature is /5, provide exactly five short role labels. Do not leave stale /N arities "
+    "after revising the argument list.\n"
     "- Prefer small, typed predicates over vague catch-all predicates.\n"
     "- Prefer admission-ready predicates that name the domain relation directly. For example, "
     "submitted_by/2, approved_by/2, sent_on/2, obligation/3, conditional_right/3, "
@@ -567,6 +615,9 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "such as source=... to a /2 predicate call; either propose a provenance-aware arity or explain "
     "provenance in prose. If you want to show a predicate that must be rejected, put it after "
     "'Do not write' or inside must_not_write.\n"
+    "- Starter frontier predicate calls must be syntactically unambiguous. Quote values containing spaces, commas, "
+    "parentheses, punctuation, or human-readable names, or replace them with normalized atoms. Unquoted commas inside "
+    "example values are read as argument separators and create false arity drift.\n"
     "- Treat action and condition arguments as atomic normalized labels unless you explicitly propose "
     "the nested predicate. Prefer borrower_default, sponsored_by_manager, no_unpaid_invoice, and "
     "witnessed_by_two_non_beneficiaries over default(borrower), sponsored_by(...), not(...), or "
@@ -617,6 +668,16 @@ PROFILE_BOOTSTRAP_REVIEW_GUIDANCE = (
     "- Flag reporter loss: if the raw source text contains reported, complained, witnessed, certified, or observed "
     "language and the proposed profile cannot query the reporting actor separately from the affected target, recommend "
     "a reporter/2, complainant/2, witness/2, certifier/2, or reported_observation/2 style capability.\n"
+    "- Flag violation-category loss: if a regulatory, enforcement, disciplinary, audit, inspection, or compliance "
+    "source lists control areas, breach categories, failed requirements, statutory violation classes, or root-cause "
+    "categories, and the proposed profile can only query the intervention/action type or legal basis, recommend a "
+    "violation_category/4, deficiency_category/4, finding_category/4, or close domain-owned carrier with governed "
+    "target, category, basis/source, and status/detail slots.\n"
+    "- Flag recommendation-chain slot loss: if the raw source states that one authority, reviewer, regulator, "
+    "committee, board, court, investigator, or staff body recommended, requested, referred, advised, reported, "
+    "submitted, or directed action to another body, and the proposed profile cannot query the source body, "
+    "recipient/addressee body, governed target, and recommended/requested action separately, recommend a richer "
+    "arity-4-or-greater carrier rather than a target-only recommended_action/3 shape.\n"
     "- Flag conditional-rule loss: if the raw source text contains a rule with a condition or completion requirement "
     "and the proposed profile only has a unary rule predicate, recommend an arity-2-or-greater predicate that preserves "
     "the condition as a queryable slot.\n"
@@ -632,6 +693,11 @@ PROFILE_BOOTSTRAP_REVIEW_GUIDANCE = (
     "- Flag financial-chain loss: if the source contains gross/net amounts, deductibles, shares, limits, attachment "
     "points, or differences and the profile cannot preserve both values and derivation basis, recommend calculation "
     "or amount predicates with source/basis arguments.\n"
+    "- Flag financial contribution loss: if the source contains corporate or financial-report totals plus named "
+    "affiliate, associate, investee, subsidiary, segment, project, customer, or vendor contributions, and the proposed "
+    "profile cannot query the named scope/entity, metric, value, and unit together, recommend a scoped financial metric "
+    "or contribution carrier rather than period-only totals. If source/basis also needs queryability, recommend a "
+    "separate provenance/source-coordinate carrier rather than a /6 predicate.\n"
     "- Flag equipment-specification loss: if the source contains device, instrument, product, equipment, inventory, "
     "or asset rows with explicit descriptive, identifying, versioning, capacity, location, qualification, or scope "
     "attributes, and the proposed profile only has id/status/certification predicates that cannot recover those "
@@ -856,10 +922,17 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             "frontier_case_count": 0,
             "frontier_unknown_positive_predicate_count": 0,
             "frontier_unknown_positive_predicate_refs": [],
+            "recommendation_chain_slot_loss_count": 0,
+            "recommendation_chain_slot_loss_refs": [],
+            "violation_category_slot_loss_count": 0,
+            "violation_category_slot_loss_refs": [],
             "repeated_structure_count": 0,
             "repeated_structure_unknown_predicate_refs": [],
             "repeated_structure_id_only_record_refs": [],
             "repeated_structure_role_mismatch_refs": [],
+            "repeated_structure_lookup_property_refs": [],
+            "candidate_signature_arg_mismatch_count": 0,
+            "candidate_signature_arg_mismatch_refs": [],
             "rough_score": 0.0,
         }
     schema_ok = parsed.get("schema_version") == "profile_bootstrap_v1"
@@ -869,6 +942,12 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
     generic_names = {"event_occurred", "policy_constraint", "candidate_relation", "related_to", "has_relation"}
     generic_predicate_count = 0
     predicate_args_by_signature: dict[str, list[str]] = {}
+    candidate_signature_arg_mismatch_refs: list[str] = []
+    recommendation_chain_candidate_refs: list[str] = []
+    violation_category_candidate_refs: list[str] = []
+    violation_category_fallback_refs: list[str] = []
+    has_recommendation_chain_recipient_slot = False
+    has_violation_category_carrier = False
     for item in predicates:
         signature = str(item.get("signature", ""))
         name = signature.split("/", 1)[0].strip().casefold()
@@ -876,11 +955,25 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             generic_predicate_count += 1
         signature_key = _signature_key(signature)
         if signature_key:
-            predicate_args_by_signature[signature_key] = [
+            args = [
                 str(arg).strip().casefold()
                 for arg in item.get("args", [])
                 if isinstance(item.get("args"), list) and str(arg).strip()
             ]
+            predicate_args_by_signature[signature_key] = args
+            declared_arity = _signature_arity(signature_key)
+            if declared_arity is not None and declared_arity != len(args):
+                candidate_signature_arg_mismatch_refs.append(f"{signature_key}:args={len(args)}")
+            if _has_recommendation_chain_recipient_role(args):
+                has_recommendation_chain_recipient_slot = True
+            if _is_recommendation_chain_candidate(name=name, args=args):
+                recommendation_chain_candidate_refs.append(signature_key)
+            if _is_violation_category_carrier(name=name, args=args):
+                has_violation_category_carrier = True
+            if _is_violation_category_candidate(name=name, args=args):
+                violation_category_candidate_refs.append(signature_key)
+            elif _is_violation_category_context_candidate(name=name, args=args):
+                violation_category_fallback_refs.append(signature_key)
     proposed_signatures = {_signature_key(str(item.get("signature", ""))) for item in predicates}
     proposed_signatures.discard("")
     risk_count = len([item for item in parsed.get("admission_risks", []) if str(item).strip()])
@@ -897,6 +990,7 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
     repeated_unknown_refs: list[str] = []
     repeated_id_only_record_refs: list[str] = []
     repeated_role_mismatch_refs: list[str] = []
+    repeated_lookup_property_refs: list[str] = []
     for item in repeated_structures:
         property_predicates = item.get("property_predicates", [])
         if not isinstance(property_predicates, list):
@@ -911,15 +1005,34 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             if signature and signature in proposed_signatures and signature != record_signature:
                 args = predicate_args_by_signature.get(signature, [])
                 first_arg = args[0] if args else ""
-                if first_arg and "id" not in first_arg and "record" not in first_arg:
+                first_arg_is_record_key = _repeated_structure_first_arg_is_record_key(
+                    record_signature=record_signature,
+                    first_arg=first_arg,
+                )
+                if first_arg_is_record_key:
+                    continue
+                if first_arg and _repeated_structure_lookup_property(signature=signature, first_arg=first_arg):
+                    repeated_lookup_property_refs.append(signature)
+                elif first_arg:
                     repeated_role_mismatch_refs.append(signature)
     repeated_unknown_refs = sorted(set(repeated_unknown_refs))
     repeated_id_only_record_refs = sorted(set(repeated_id_only_record_refs))
     repeated_role_mismatch_refs = sorted(set(repeated_role_mismatch_refs))
+    repeated_lookup_property_refs = sorted(set(repeated_lookup_property_refs))
+    candidate_signature_arg_mismatch_refs = sorted(set(candidate_signature_arg_mismatch_refs))
+    recommendation_chain_slot_loss_refs = sorted(set(recommendation_chain_candidate_refs))
+    if has_recommendation_chain_recipient_slot:
+        recommendation_chain_slot_loss_refs = []
+    violation_category_slot_loss_refs: list[str] = []
+    if _is_regulatory_violation_profile(parsed) and not has_violation_category_carrier:
+        violation_category_slot_loss_refs = sorted(set(violation_category_candidate_refs))
+        if not violation_category_slot_loss_refs:
+            violation_category_slot_loss_refs = sorted(set(violation_category_fallback_refs))
     specificity_score = 1.0 - min(generic_predicate_count, max(1, predicate_count)) / max(1, predicate_count)
     frontier_consistency = 1.0 if not unknown_frontier_refs else 0.0
     repeated_structure_score = min(len(repeated_structures), 2) / 2
     repeated_consistency = 1.0 if not (repeated_unknown_refs or repeated_id_only_record_refs or repeated_role_mismatch_refs) else 0.0
+    candidate_schema_consistency = 1.0 if not candidate_signature_arg_mismatch_refs else 0.0
     rough_score = (
         (1 if schema_ok else 0)
         + min(entity_count, 4) / 4
@@ -930,7 +1043,8 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         + frontier_consistency
         + repeated_structure_score
         + repeated_consistency
-    ) / 9
+        + candidate_schema_consistency
+    ) / 10
     return {
         "schema_ok": schema_ok,
         "entity_type_count": entity_count,
@@ -938,10 +1052,17 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "generic_predicate_count": generic_predicate_count,
         "frontier_unknown_positive_predicate_count": len(unknown_frontier_refs),
         "frontier_unknown_positive_predicate_refs": unknown_frontier_refs,
+        "recommendation_chain_slot_loss_count": len(recommendation_chain_slot_loss_refs),
+        "recommendation_chain_slot_loss_refs": recommendation_chain_slot_loss_refs,
+        "violation_category_slot_loss_count": len(violation_category_slot_loss_refs),
+        "violation_category_slot_loss_refs": violation_category_slot_loss_refs,
         "repeated_structure_count": len(repeated_structures),
         "repeated_structure_unknown_predicate_refs": repeated_unknown_refs,
         "repeated_structure_id_only_record_refs": repeated_id_only_record_refs,
         "repeated_structure_role_mismatch_refs": repeated_role_mismatch_refs,
+        "repeated_structure_lookup_property_refs": repeated_lookup_property_refs,
+        "candidate_signature_arg_mismatch_count": len(candidate_signature_arg_mismatch_refs),
+        "candidate_signature_arg_mismatch_refs": candidate_signature_arg_mismatch_refs,
         "risk_count": risk_count,
         "frontier_case_count": frontier_count,
         "rough_score": round(float(rough_score), 3),
@@ -1081,6 +1202,238 @@ def _signature_key(signature: str) -> str:
     return f"{match.group(1).casefold()}/{match.group(2)}"
 
 
+def _signature_arity(signature: str) -> int | None:
+    match = re.fullmatch(r"\s*[a-zA-Z_][a-zA-Z0-9_]*\s*/\s*(\d+)\s*", signature)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _repeated_structure_lookup_property(*, signature: str, first_arg: str) -> bool:
+    name = str(signature or "").split("/", 1)[0].casefold()
+    first_role = str(first_arg or "").casefold()
+    if name.startswith(("source_", "provenance_")):
+        return True
+    lookup_role_tokens = (
+        "authority",
+        "citation",
+        "definition",
+        "document",
+        "instrument",
+        "predicate",
+        "provenance",
+        "reference",
+        "source",
+    )
+    return any(token in first_role for token in lookup_role_tokens)
+
+
+def _repeated_structure_first_arg_is_record_key(*, record_signature: str, first_arg: str) -> bool:
+    first_role = str(first_arg or "").casefold()
+    if not first_role:
+        return False
+    if any(marker in first_role for marker in ("id", "record", "subject")):
+        return True
+    record_name = str(record_signature or "").split("/", 1)[0].casefold()
+    record_tokens = {
+        token
+        for token in re.split(r"[^a-z0-9]+", record_name)
+        if len(token) >= 4 and token not in {"record", "entry", "item", "row", "unit"}
+    }
+    if not record_tokens:
+        return False
+    return any(token in first_role for token in record_tokens)
+
+
+def _has_recommendation_chain_recipient_role(args: list[str]) -> bool:
+    recipient_markers = (
+        "addressee",
+        "recipient",
+        "receiver",
+        "receiving_body",
+        "receiving_authority",
+        "to_body",
+        "to_authority",
+    )
+    return any(any(marker in str(arg or "").casefold() for marker in recipient_markers) for arg in args)
+
+
+def _is_recommendation_chain_candidate(*, name: str, args: list[str]) -> bool:
+    surface = " ".join([str(name or "").casefold(), *(str(arg or "").casefold() for arg in args)])
+    if not any(marker in surface for marker in ("recommend", "refer", "advis")):
+        return False
+    has_source_body = ("_by" in name or name.endswith("by")) or any(
+        any(marker in arg for marker in (
+            "source",
+            "recommending",
+            "recommender",
+            "requesting",
+            "requester",
+            "referring",
+            "referrer",
+            "advising",
+            "advisor",
+            "submitting",
+            "submitter",
+            "authority",
+            "body",
+            "board",
+            "committee",
+            "court",
+            "regulator",
+            "reviewer",
+            "staff",
+        ))
+        for arg in args
+    )
+    has_action_or_target = any(
+        any(marker in arg for marker in (
+            "action",
+            "request",
+            "recommendation",
+            "referral",
+            "advice",
+            "submission",
+            "directive",
+            "order",
+            "sanction",
+            "target",
+            "subject",
+            "governed",
+        ))
+        for arg in args
+    )
+    return has_source_body and has_action_or_target
+
+
+def _is_regulatory_violation_profile(parsed: dict[str, Any]) -> bool:
+    surface = _profile_bootstrap_text_surface(parsed)
+    regulatory_markers = (
+        "administrative action",
+        "audit",
+        "citation",
+        "compliance",
+        "disciplinary",
+        "enforcement",
+        "inspection",
+        "penalty",
+        "regulatory",
+        "sanction",
+        "warning",
+    )
+    violation_markers = (
+        "breach",
+        "deficiency",
+        "failure",
+        "fault",
+        "finding",
+        "misconduct",
+        "non-compliance",
+        "noncompliance",
+        "violation",
+    )
+    return any(marker in surface for marker in regulatory_markers) and any(
+        marker in surface for marker in violation_markers
+    )
+
+
+def _profile_bootstrap_text_surface(parsed: dict[str, Any]) -> str:
+    parts: list[str] = []
+
+    def visit(value: Any) -> None:
+        if isinstance(value, str):
+            parts.append(value.casefold())
+        elif isinstance(value, dict):
+            for child in value.values():
+                visit(child)
+        elif isinstance(value, list):
+            for child in value:
+                visit(child)
+
+    for key in (
+        "domain_guess",
+        "domain_scope",
+        "source_summary",
+        "candidate_predicates",
+        "repeated_structures",
+        "admission_risks",
+        "clarification_policy",
+        "starter_frontier_cases",
+        "unsafe_transformations",
+        "self_check",
+    ):
+        visit(parsed.get(key))
+    return " ".join(parts)
+
+
+def _is_violation_category_carrier(*, name: str, args: list[str]) -> bool:
+    name_text = str(name or "").casefold()
+    args_text = " ".join(str(arg or "").casefold() for arg in args)
+    violation_markers = (
+        "breach",
+        "deficien",
+        "failure",
+        "fault",
+        "finding",
+        "misconduct",
+        "noncompliance",
+        "non_compliance",
+        "violation",
+    )
+    category_markers = (
+        "area",
+        "basis",
+        "business_context",
+        "category",
+        "class",
+        "control",
+        "context",
+        "failed_requirement",
+        "kind",
+        "requirement",
+        "root_cause",
+        "rule",
+        "statutory",
+        "type",
+    )
+    has_violation_surface = any(marker in name_text for marker in violation_markers)
+    has_category_surface = any(marker in name_text or marker in args_text for marker in category_markers)
+    return has_violation_surface and has_category_surface
+
+
+def _is_violation_category_candidate(*, name: str, args: list[str]) -> bool:
+    surface = " ".join([str(name or "").casefold(), *(str(arg or "").casefold() for arg in args)])
+    close_markers = (
+        "breach",
+        "deficien",
+        "failure",
+        "fault",
+        "finding",
+        "misconduct",
+        "noncompliance",
+        "non_compliance",
+        "violation",
+    )
+    return any(marker in surface for marker in close_markers)
+
+
+def _is_violation_category_context_candidate(*, name: str, args: list[str]) -> bool:
+    surface = " ".join([str(name or "").casefold(), *(str(arg or "").casefold() for arg in args)])
+    action_markers = (
+        "administrative_action",
+        "citation",
+        "legal_basis",
+        "obligation",
+        "order",
+        "penalty",
+        "regulatory_action",
+        "request",
+        "sanction",
+        "warning",
+    )
+    return any(marker in surface for marker in action_markers)
+
+
 def _predicate_refs(text: str) -> set[str]:
     refs: set[str] = set()
     for match in re.finditer(r"\b([a-zA-Z_][a-zA-Z0-9_]*)/(\d+)\b", str(text or "")):
@@ -1093,6 +1446,8 @@ def _predicate_call_refs(text: str) -> set[str]:
     refs: set[str] = set()
     raw = str(text or "")
     for match in re.finditer(r"\b([a-z][a-z0-9_]*)\s*\(", raw):
+        if _inside_quoted_span(raw, match.start()):
+            continue
         name = match.group(1).casefold()
         close_index = _matching_paren(raw, match.end() - 1)
         if close_index is None:
@@ -1104,8 +1459,23 @@ def _predicate_call_refs(text: str) -> set[str]:
 
 def _matching_paren(text: str, open_index: int) -> int | None:
     depth = 0
+    quote: str | None = None
+    escaped = False
     for index in range(open_index, len(text)):
         char = text[index]
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if quote:
+            if char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            continue
         if char == "(":
             depth += 1
         elif char == ")":
@@ -1121,7 +1491,22 @@ def _arity(args_text: str) -> int:
         return 0
     depth = 0
     count = 1
+    quote: str | None = None
+    escaped = False
     for char in text:
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if quote:
+            if char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            continue
         if char == "(":
             depth += 1
         elif char == ")":
@@ -1129,6 +1514,25 @@ def _arity(args_text: str) -> int:
         elif char == "," and depth == 0:
             count += 1
     return count
+
+
+def _inside_quoted_span(text: str, index: int) -> bool:
+    quote: str | None = None
+    escaped = False
+    for char in str(text or "")[:index]:
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if quote:
+            if char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+    return quote is not None
 
 
 def _positive_boundary_text(text: str) -> str:

@@ -1,0 +1,120 @@
+{
+  "batch_id": "fresh_non_english_wild_20260526_01",
+  "batch_description": "Wild non-English language-transfer batch for Prethinker. Eight fixtures spanning four source languages (French, German, Spanish, Japanese) drawn from real public-record documents in the original languages. Each fixture carries 25 author-validated QA pairs (200 total) covering direct facts, source coordinates, list/table/identifier extraction, dates/deadlines/sequences, obligations/violations/conditions, cross-section/exception/negation reasoning, and a premise-check. Question languages per fixture split 15 source-language / 8 English / 2 mixed-or-translation-status. No LLM-authored source text; no translated-source primary copies; questions are not tuned to known failure modes.",
+  "collected_utc": "2026-05-26T13:30:00Z",
+  "total_fixtures": 8,
+  "total_question_count": 200,
+  "language_breakdown": {
+    "fr": 2,
+    "de": 2,
+    "es": 2,
+    "ja": 2
+  },
+  "fixtures": [
+    {
+      "document_id": "fr_regulator_001",
+      "source_language": "fr",
+      "country_or_jurisdiction": "France",
+      "document_type": "CNIL sanction press release (ORANGE SA, SAN-2024-019, €50M fine)",
+      "source_url": "https://www.cnil.fr/fr/publicites-inserees-entre-les-courriels-sanction-de-50-millions-deuros-orange",
+      "publication_date": "2024-11-14",
+      "question_count": 25,
+      "pressures_for_language_transfer": "French legal-citation style with hard-spaced article numbers; thousand-period European number format on a nine-digit euro amount; defined-term hierarchy (« ORANGE », « la société ») across paragraphs; SAN delibération numbering (SAN-2024-019); président/rapporteur role disambiguation in French administrative procedure."
+    },
+    {
+      "document_id": "fr_eu_official_001",
+      "source_language": "fr",
+      "country_or_jurisdiction": "France — Conseil d'État",
+      "document_type": "Conseil d'État cassation decision n° 463970 (AC Promotions vs commune de Cuttoli-Corticchiato, 22 mars 2024)",
+      "source_url": "https://www.conseil-etat.fr/fr/arianeweb/CE/decision/2024-03-22/463970",
+      "publication_date": "2024-03-22",
+      "question_count": 25,
+      "pressures_for_language_transfer": "Twelve-plus code/article citations with L./R. distinction; ECLI identifier with mixed colon/period separators; five-decision litigation-chain compression; stylized « D E C I D E » dispositif with single-letter spacing; juridical-form prefixes (« SCP », « SARL »); compound officer names (« Le Coq », « Jacques-Henri Stahl »); légalité externe / interne technical doctrine without inline definition."
+    },
+    {
+      "document_id": "de_regulator_001",
+      "source_language": "de",
+      "country_or_jurisdiction": "Germany — Bundeskartellamt",
+      "document_type": "Bundeskartellamt press release on AVM/Fritz! resale-price maintenance (~€16M, B10-21/23)",
+      "source_url": "https://www.bundeskartellamt.de/SharedDocs/Meldung/DE/Pressemitteilungen/2024/02_07_2024_AVM.html",
+      "publication_date": "2024-07-02",
+      "question_count": 25,
+      "pressures_for_language_transfer": "German section-sign § with NBSP; eszett (ß) and umlauts in legal terms; compound nouns (Preisbeobachtungssoftware, Elektronikfachhändler, Bußgeldbescheid); DD.MM.YYYY date format (10.06.2024 vs 02.07.2024); German-style low-9/high-6 quotes; brand identity with terminal exclamation (FRITZ!); approximate date « Mitte 2019 »; Settlement loanword in German prose."
+    },
+    {
+      "document_id": "de_corporate_001",
+      "source_language": "de",
+      "country_or_jurisdiction": "Germany — DAX issuer, EU MAR regime",
+      "document_type": "Porsche SE Ad-hoc-Mitteilung — forecast adjustment for FY 2024 (Article 17 MAR)",
+      "source_url": "https://www.porsche-se.com/medien/pressemitteilungen/detail/anpassung-der-prognose-fuer-das-konzernergebnis-nach-steuern-2024",
+      "publication_date": "2024-09-27",
+      "question_count": 25,
+      "pressures_for_language_transfer": "German decimal-comma collision with English thousand-comma; Mrd. (Milliarden) abbreviation distinct from Mio. and English Bn.; bis-ranges and en-dash equivalents; equity-method causal chain from VW (31,9 %) to Porsche SE; bestätigt-vs-angepasst confirmation tagging on table rows; Porsche SE vs Porsche AG entity disambiguation; juridical full title with academic prefixes (Dr. Ing. h.c. F.); Vorzugsaktie vs Stammaktie ISIN distinction."
+    },
+    {
+      "document_id": "es_regulator_001",
+      "source_language": "es",
+      "country_or_jurisdiction": "Spain — Agencia Española de Protección de Datos",
+      "document_type": "AEPD sanctioning resolution PS/00238/2024 vs UNIQLO EUROPE LTD SUCURSAL EN ESPAÑA (450k€ → 270k€)",
+      "source_url": "https://www.casanovasassessors.com/wp-content/uploads/2024/09/Resolucio-AEPD.pdf",
+      "publication_date": "2024-07-22",
+      "question_count": 25,
+      "pressures_for_language_transfer": "Spanish thousand-period and decimal-comma; dual case ID (EXP202304685 / PS/00238/2024); NIF prefix-letter encoding entity type (W for foreign-branch); stacked-reductions arithmetic that does NOT match strict 0,8×0,8 compounding (450k → 360k → 270k applied); RGPD over LOPDGDD over LPAC three-layer regime; Spanish jurisprudential citation style (STS 188/2022); ñ in Mar España Martí; SUCURSAL EN ESPAÑA juridical form without separate legal personality."
+    },
+    {
+      "document_id": "es_public_procurement_001",
+      "source_language": "es",
+      "country_or_jurisdiction": "Spain — public procurement (LCSP / EU 2014/25)",
+      "document_type": "BOE-B-2024-29300 tender notice (Metro de Madrid, platform-edge doors line 6, ~121M€ inc. VAT)",
+      "source_url": "https://www.boe.es/diario_boe/txt.php?id=BOE-B-2024-29300",
+      "publication_date": "2024-08-13",
+      "question_count": 25,
+      "pressures_for_language_transfer": "Three coexisting price fields (VE / PBL / IVA) with non-exact 21 % ratio; eight-digit thousand-period figures (100.724.911,52); three CPV codes with principal-vs-complementary roles; three layered deadlines with different anchors (5 years from formalization, 31/12/2026 absolute, 2 years post-installation); two-document tender lifecycle (original + modifying notice); 5ª planta gendered ordinal indicator; LCSP arts. 203–207 modifications regime; ratio expression « 60 de 70 andenes »."
+    },
+    {
+      "document_id": "ja_corporate_001",
+      "source_language": "ja",
+      "country_or_jurisdiction": "Japan — TSE-listed issuer, J-GAAP",
+      "document_type": "NYK 9101 — FY2024 (March 2024) consolidated kessan-tanshin (full-year results)",
+      "source_url": "https://www.nyk.com/ir/library/highlights/2023/__icsFiles/afieldfile/2024/05/07/240508_tanshin_jp.pdf",
+      "publication_date": "2024-05-08",
+      "question_count": 25,
+      "pressures_for_language_transfer": "Mixed Japanese counters 百万円 / 億円 with 100× conversion; triangle-minus (△) for negative figures; fullwidth/halfwidth digit mixing; Japanese fiscal year designation (2024年3月期 = April 2023–March 2024); equity-method consolidation through ONE社 (31 %); two-currency commodity quote (US$/MT inside JPY tanshin); treasury-stock acquired-vs-cancelled discrepancy (49,096,700 vs 49,165,294); two post-balance-sheet bond issuances with distinct maturities and use-of-proceeds; 〔日本基準〕 J-GAAP marker."
+    },
+    {
+      "document_id": "ja_regulator_001",
+      "source_language": "ja",
+      "country_or_jurisdiction": "Japan — Financial Services Agency",
+      "document_type": "FSA business-improvement order (2024-06-24) — MUFG / 三菱UFJ銀行 / 三菱UFJモルガン・スタンレー証券",
+      "source_url": "https://www.mufg.jp/dam/pressrelease/2024/pdf/news-20240624-001_ja.pdf",
+      "publication_date": "2024-06-24",
+      "question_count": 25,
+      "pressures_for_language_transfer": "Reiwa-era dates (令和6年7月24日) interleaved with Gregorian; two distinct administrative measures (業務改善命令 vs 報告徴求) with different legal weight; three-tier corporate structure with one holdco + two operating subs receiving DIFFERENT measures; article numbering with branch points (第12条の2 第2項); mixed-script entity names (kanji + Latin UFJ + katakana モルガン・スタンレー); interpunct (・) as name-internal separator; 銀行法 vs 金融商品取引法 simultaneous invocation; banking-specific 頭取 title vs corporate 社長; SESC勧告 → FSA命令 asymmetric authority pipeline."
+    }
+  ],
+  "qa_construction_principles": [
+    "Author-validated answers only — no LLM-authored or model-generated answers in the oracle.",
+    "Source text is verbatim transcription of the live public document; no LLM authoring or rewriting of source content.",
+    "Question categories balanced across the seven types: direct_fact (4), source_coordinate (4), list_table_identifier (5), dates_deadlines_sequence (4), obligation_violation_condition (4), cross_section_exception_negation (3), premise_check (1).",
+    "Language split per fixture: 15 questions in source language, 8 in English, 2 mixed-language / translation-status.",
+    "Pressure tags annotate the specific linguistic, numeric, juridical, or structural challenge each item poses to a language-transfer pipeline.",
+    "Questions are NOT tuned to known Prethinker failure modes; they probe properties of the real source document.",
+    "shape_dependent: true marks items whose answer requires preserving the original document's structural form (tables, ordered lists, disposititfs)."
+  ],
+  "fixture_files_per_folder": [
+    "source.md — verbatim source text in markdown form, with page markers and structural tags",
+    "source_url.txt — canonical public URL of the live source document",
+    "source_original.txt — verbatim text capture with provenance header (HTTP/PDF originals at source_url)",
+    "metadata.json — fixture-level metadata (batch, language, jurisdiction, document type, counts, pressure tags)",
+    "fixture_notes.md — narrative description of REAL document features that pressure language transfer",
+    "qa.md — 25 questions only (no answers), suitable for blind evaluation",
+    "qa_authored_with_answers.md — 25 questions with author-validated answers and source coordinates",
+    "oracle.jsonl — one JSON record per question with id, original_id, question, answer, reference_answer, category, source_language, query_language, answer_language, source_coords, pressure_tags, qualified, shape_dependent"
+  ],
+  "discipline_notes": [
+    "No Prethinker internals (predicates, helpers, carriers, compile-surface gaps) referenced anywhere in the batch.",
+    "fixture_notes.md describes properties of the source documents only.",
+    "No prior fixture names referenced in this batch's notes.",
+    "All eight sources are real public-record documents; URLs preserved in source_url.txt."
+  ]
+}

@@ -16,13 +16,14 @@ import os
 import re
 import sys
 import time
+import unicodedata
 import urllib.error
 import urllib.request
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from itertools import combinations
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -43,6 +44,19 @@ from src.semantic_ir import (  # noqa: E402
     call_semantic_ir,
     semantic_ir_to_legacy_parse,
 )
+from src.model_path import (  # noqa: E402
+    apply_openrouter_provider_env,
+    local_lmstudio_model_metadata,
+    model_serving_path_metadata,
+    openrouter_api_key,
+    openrouter_generation_metadata,
+    openrouter_metadata_headers,
+    openrouter_provider_routing_from_env,
+    refresh_openrouter_generation_metadata_entries,
+)
+
+
+OPENROUTER_CALL_METADATA_LOG: list[dict[str, Any]] = []
 
 GENERIC_QUERY_PLACEHOLDERS = {
     "actor",
@@ -237,6 +251,17 @@ QA_JUDGE_SCHEMA: dict[str, Any] = {
     },
 }
 
+REFERENCE_JUDGE_PAYLOAD_SOFT_LIMIT_CHARS = 160_000
+REFERENCE_JUDGE_ROW_SAMPLE_LIMIT = 48
+REFERENCE_JUDGE_VALUE_CHAR_LIMIT = 260
+REFERENCE_JUDGE_FOCUS_TERM_MIN_CHARS = 5
+REFERENCE_JUDGE_FOCUS_TERM_LIMIT = 32
+REFERENCE_JUDGE_FOCUS_WINDOW_BEFORE_CHARS = 160
+REFERENCE_JUDGE_FOCUS_WINDOW_AFTER_CHARS = 360
+FAILURE_SURFACE_PAYLOAD_SOFT_LIMIT_CHARS = 160_000
+FAILURE_SURFACE_COMPACT_FACT_LIMIT = 220
+FAILURE_SURFACE_COMPACT_RULE_LIMIT = 80
+
 EVIDENCE_BUNDLE_PLAN_SCHEMA: dict[str, Any] = {
     "type": "object",
     "additionalProperties": False,
@@ -321,6 +346,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For where/location questions, prefer location predicates when they exist; otherwise retrieve method/explanation rows that may contain location-bearing labels instead of querying only object targets.",
         "For institution, ledger, record, or source questions, retrieve both the event text and the container/source slot with a shared record variable: for example grievance_method(Grievance, Method), grievance_explanation(Grievance, Explanation), and grievance_target(Grievance, Institution).",
         "For who/what-authorized, authority, governing-source, controlled-by, or source-of-access questions, distinguish the recipient/authorized-party surface from the authority/source surface. If compiled_surface_alias_inventory or compiled_predicate_inventory contains predicates such as access_source, access_authority_source, authority_source, governed_by, court_order, policy_source, or source_authority, query those with the same item/action/recipient variables before answering from authorized_party or access_authorized_to rows.",
+        "For yes/no or premise-check questions whose premise says the same act, decision, record, event, or source subject has multiple properties or outcomes, require a same-variable conjunctive query before treating the premise as established. Independent positive rows over different subjects are only context.",
         "For locker, bay, shelf, floor, or storage-location questions, query both located_at(Item, Location) and location metadata such as locker_floor(Location, Floor) when those predicates exist. If the question compares similar location codes, do not stop after located_at/2.",
         "For who-reported or reporter questions, query reporter predicates and the content predicates that describe what was reported, such as grievance_reporter(Grievance, Reporter) with grievance_explanation(Grievance, Explanation) or grievance_method(Grievance, Method). Do not rely only on target predicates.",
         "For who-is or what-is identity questions about a named official, officer, warden, inspector, director, authority, or role-holder, retrieve both identity rows and authority/action rows when they exist. Name plus role is often only partial support; include predicates such as ruling_by/3, permission_granted/2, certification_status/3, disqualification_reason/2, director_recommendation/2, official_action/3, or equivalent inventory predicates that expose what the role-holder inspects, certifies, authorizes, recommends, or decides.",
@@ -380,6 +406,7 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For confirmation questions such as who confirmed a facility was back online or running again, query reported_event(Reporter, facility_restoration, Time, Source) and witness_statement/4 before boil_water_notice_lifted/2. The person lifting a notice is not necessarily the person confirming restoration.",
         "For comprehensive or multi-violation questions, plan one small support bundle per alleged violation: governing policy row, observed event row, and any timing/correction/source row needed to show why it is a violation. Prefer concrete event predicates such as inspection, notice/lift, notification, reading, authorization, and zone-scope predicates before broad before/after scans. If one violation is an omission, include the paired set-difference query pattern from this strategy: scope predicate with shared variable, then absent-side event predicate with polarity='negative'.",
         "For insurance or coverage-dispute financial questions, query numeric rows before legal-position rows. Use claim_amount/5 for gross or adjusted amounts, calculation_step/5 for net/share/difference values, cost_claim/5 for surveyor estimates, cost_agreement/4 for accepted items, cost_disagreement/5 for disputed deltas, deductible/3 for deductible values, underwriter_line/4 for share percentages, and attachment_comparison/5 for threshold comparisons when those predicates exist.",
+        "For financial-obligation list questions, do not stop after one guarantee or amount predicate. Query the bundle of existing compiled predicates whose names or examples expose guarantees, budgets, costs, expenses, fees, payments, milestones, remedies, obligations, contract duration, service duration, or maintenance duration, using the same subject id where possible.",
         "For insurance or coverage-dispute net-difference questions, retrieve both claimant and insurer net rows from calculation_step/5 or claim_amount/5 before asking legal_position/5. A legal position row usually explains the dispute, but it does not carry the arithmetic answer unless the numeric value appears in its returned atom.",
         "For insurance or coverage-dispute questions asking whether an insurer accepted the full claimed amount, query both sides of the amount surface: claim_amount/5 for claimant and insurer/adjusted positions, calculation_step/5 for net positions, and cost_disagreement/5 for disputed items. Do not query only one amount type such as gross_claim against the insurer if the compiled KB uses adjusted_claim or adjusted_total.",
         "For insurance or coverage-dispute hypothetical attachment questions such as 'even if the full claimant figure were accepted', retrieve the claimant net calculation_step/5, the lead underwriter share from underwriter_line/4, and attachment_comparison/5 or reinsurance_layer/5. Do not rely only on the actual adjusted-claim attachment row when the question asks about a different stated scenario.",
@@ -488,6 +515,38 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top-k", type=int, default=20)
     parser.add_argument("--num-ctx", type=int, default=32768)
     parser.add_argument("--max-tokens", type=int, default=6000)
+    parser.add_argument(
+        "--openrouter-provider-order",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to try in order. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-provider-only",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to allow. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-provider-ignore",
+        default="",
+        help="Comma-separated OpenRouter provider slugs to exclude. Recorded in model_serving_path.",
+    )
+    parser.add_argument(
+        "--openrouter-quantizations",
+        default="",
+        help="Comma-separated OpenRouter quantization filters, such as int4,int8,fp16.",
+    )
+    parser.add_argument(
+        "--openrouter-allow-fallbacks",
+        choices=["", "true", "false"],
+        default="",
+        help="OpenRouter provider.allow_fallbacks override. Empty preserves environment/default behavior.",
+    )
+    parser.add_argument(
+        "--openrouter-require-parameters",
+        choices=["", "true", "false"],
+        default="",
+        help="OpenRouter provider.require_parameters override. Empty preserves environment/default behavior.",
+    )
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--only-ids", default="", help="Comma-separated QA ids to run, e.g. q006,q039.")
     parser.add_argument("--cache-dir", type=Path, default=DEFAULT_CACHE_DIR, help="Per-question exact-input cache.")
@@ -579,9 +638,18 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    OPENROUTER_CALL_METADATA_LOG.clear()
     args = parse_args()
     if str(args.api_key or "").strip():
         os.environ["PRETHINKER_API_KEY"] = str(args.api_key).strip()
+    apply_openrouter_provider_env(
+        order=getattr(args, "openrouter_provider_order", ""),
+        only=getattr(args, "openrouter_provider_only", ""),
+        ignore=getattr(args, "openrouter_provider_ignore", ""),
+        quantizations=getattr(args, "openrouter_quantizations", ""),
+        allow_fallbacks=getattr(args, "openrouter_allow_fallbacks", ""),
+        require_parameters=getattr(args, "openrouter_require_parameters", ""),
+    )
     _configure_openrouter_title(args.out_dir)
     run_path = args.run_json if args.run_json.is_absolute() else (REPO_ROOT / args.run_json).resolve()
     qa_path = args.qa_file if args.qa_file.is_absolute() else (REPO_ROOT / args.qa_file).resolve()
@@ -772,6 +840,28 @@ def main() -> int:
         "run_json": str(run_path),
         "qa_file": str(qa_path),
         "model": str(args.model),
+        "model_serving_path": model_serving_path_metadata(
+            backend=str(args.backend),
+            base_url=str(args.base_url),
+            model=str(args.model),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            top_k=int(args.top_k),
+            context_length=int(args.num_ctx),
+            max_tokens=int(args.max_tokens),
+            timeout=int(args.timeout),
+            run_role="qa",
+            cache_enabled=cache_enabled,
+            lanes=1,
+            fresh_compile=False,
+            provider_routing=openrouter_provider_routing_from_env(),
+            observed_runtime=local_lmstudio_model_metadata(
+                backend=str(args.backend),
+                base_url=str(args.base_url),
+                model=str(args.model),
+                timeout=min(int(args.timeout), 3),
+            ),
+        ),
         "source_fact_count": len(facts),
         "source_rule_count": len(rules),
         "runtime_load_errors": load_errors,
@@ -786,6 +876,12 @@ def main() -> int:
         "summary": summary,
         "rows": rows,
     }
+    if OPENROUTER_CALL_METADATA_LOG:
+        record["openrouter_generation_metadata"] = refresh_openrouter_generation_metadata_entries(
+            OPENROUTER_CALL_METADATA_LOG,
+            api_key=str(getattr(args, "api_key", "") or ""),
+            timeout=min(int(args.timeout), 30),
+        )
     out_dir = args.out_dir if args.out_dir.is_absolute() else (REPO_ROOT / args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     slug = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}_{_slug(qa_path.stem)}_{_slug(str(args.model))}"
@@ -1280,8 +1376,12 @@ def clause_signature(clause: str) -> str:
     match = re.match(r"^([A-Za-z_][A-Za-z0-9_]*)\s*\((.*)\)\s*\.?$", text)
     if not match:
         return ""
-    args = split_top_level_args(match.group(2).strip())
-    return f"{match.group(1)}/{len(args)}"
+    predicate = match.group(1)
+    args = _repair_source_record_display_args(
+        predicate,
+        split_top_level_args(match.group(2).strip()),
+    )
+    return f"{predicate}/{len(args)}"
 
 
 def split_top_level_args(text: str) -> list[str]:
@@ -1290,7 +1390,23 @@ def split_top_level_args(text: str) -> list[str]:
     parts: list[str] = []
     current: list[str] = []
     depth = 0
+    quote_char = ""
+    escaped = False
     for char in str(text):
+        if quote_char:
+            current.append(char)
+            if char == "\\" and not escaped:
+                escaped = True
+                continue
+            if char == quote_char and not escaped:
+                quote_char = ""
+            escaped = False
+            continue
+        if char in {"'", '"'}:
+            quote_char = char
+            current.append(char)
+            escaped = False
+            continue
         if char in "([":
             depth += 1
         elif char in ")]" and depth > 0:
@@ -1315,9 +1431,23 @@ def parse_prolog_query(query: str) -> tuple[str, list[str]] | None:
         return None
     predicate, args_text = match.groups()
     args = split_top_level_args(args_text)
+    args = _repair_source_record_display_args(predicate, args)
     if not args:
         return None
     return predicate, args
+
+
+def _repair_source_record_display_args(predicate: str, args: list[str]) -> list[str]:
+    expected_arity = {
+        "source_record_text_display": 2,
+        "source_record_label_display": 2,
+        "source_record_section_display": 2,
+        "source_record_cell_display": 3,
+        "source_record_cell_header_display": 3,
+    }.get(str(predicate or "").strip())
+    if expected_arity is None or len(args) <= expected_arity:
+        return args
+    return [*args[: expected_arity - 1], ",".join(args[expected_arity - 1 :]).strip()]
 
 
 def parse_prolog_query_goals(query: str) -> list[tuple[str, list[str]]] | None:
@@ -1394,8 +1524,10 @@ def _looks_like_temporal_slot_placeholder(value: str) -> bool:
 _COMPACT_SLOT_LABEL_SUFFIXES = (
     "amount",
     "balance",
+    "basis",
     "count",
     "date",
+    "desc",
     "duration",
     "expiry",
     "expiration",
@@ -1407,6 +1539,17 @@ _COMPACT_SLOT_LABEL_SUFFIXES = (
     "time",
     "total",
     "value",
+)
+
+_COMPACT_SLOT_LABEL_PREFIXES = (
+    "action",
+    "actionid",
+    "deadline",
+    "event",
+    "eventid",
+    "legalbase",
+    "legalbasis",
+    "reporttype",
 )
 
 
@@ -1421,7 +1564,14 @@ def _looks_like_compact_slot_label_placeholder(value: str) -> bool:
     tokens = [token for token in item.split("_") if token]
     if len(tokens) > 1 and all(token in GENERIC_QUERY_PLACEHOLDERS for token in tokens):
         return True
-    return any(item == suffix or item.endswith(suffix) for suffix in _COMPACT_SLOT_LABEL_SUFFIXES)
+    if any(item == suffix or item.endswith(suffix) for suffix in _COMPACT_SLOT_LABEL_SUFFIXES):
+        return True
+    if "_" not in item and any(
+        item.startswith(prefix) and len(item) > len(prefix) + 2
+        for prefix in _COMPACT_SLOT_LABEL_PREFIXES
+    ):
+        return True
+    return False
 
 
 def _placeholder_repaired_query(query: str) -> dict[str, Any] | None:
@@ -1595,8 +1745,11 @@ def _source_record_row_context_companion(
         companion_queries.extend(
             [
                 f"source_record_label({row_id}, SourceRecordLabel).",
+                f"source_record_label_display({row_id}, SourceRecordLabelDisplay).",
                 f"source_record_text_atom({row_id}, SourceRecordTextAtom).",
+                f"source_record_text_display({row_id}, SourceRecordTextDisplay).",
                 f"source_record_section({row_id}, SourceRecordSection).",
+                f"source_record_section_display({row_id}, SourceRecordSectionDisplay).",
             ]
         )
     out_rows: list[dict[str, Any]] = []
@@ -1627,13 +1780,21 @@ def _source_record_row_context_companion(
             "result_type": "table",
             "status": "success",
             "num_rows": len(out_rows),
-            "variables": ["SourceRow", "SourceRecordLabel", "SourceRecordTextAtom", "SourceRecordSection"],
+            "variables": [
+                "SourceRow",
+                "SourceRecordLabel",
+                "SourceRecordLabelDisplay",
+                "SourceRecordTextAtom",
+                "SourceRecordTextDisplay",
+                "SourceRecordSection",
+                "SourceRecordSectionDisplay",
+            ],
             "rows": out_rows,
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
                     "source-record row context companion followed returned source-row ids "
-                    "to same-row label/text/section evidence"
+                    "to same-row label/text/section atom and display evidence"
                 ),
                 "original_query": query,
                 "source_rows": source_rows,
@@ -1668,6 +1829,41 @@ def _source_record_numeric_token_repaired_query(query: str) -> dict[str, Any] | 
     return {"query": repaired_query, "repairs": repairs}
 
 
+def _normalized_oracle_question_id(value: Any) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    match = re.fullmatch(r"q\s*0*([1-9][0-9]{0,3})", raw, flags=re.IGNORECASE)
+    if match is None:
+        match = re.fullmatch(r"0*([1-9][0-9]{0,3})", raw)
+    if match is None:
+        match = re.search(r"(?:^|[_-])q0*([1-9][0-9]{0,3})$", raw, flags=re.IGNORECASE)
+    if match is None:
+        return ""
+    return f"q{int(match.group(1)):03d}"
+
+
+def _oracle_row_keys(item: dict[str, Any]) -> list[str]:
+    keys: list[str] = []
+    for field in ("id", "original_id"):
+        raw = str(item.get(field, "")).strip()
+        if not raw:
+            continue
+        keys.append(raw)
+        keys.append(raw.lower())
+        normalized = _normalized_oracle_question_id(raw)
+        if normalized:
+            keys.append(normalized)
+    deduped: list[str] = []
+    seen: set[str] = set()
+    for key in keys:
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(key)
+    return deduped
+
+
 def load_oracle(path: Path | None) -> dict[str, dict[str, Any]]:
     if path is None:
         return {}
@@ -1679,7 +1875,8 @@ def load_oracle(path: Path | None) -> dict[str, dict[str, Any]]:
             continue
         item = json.loads(line)
         if isinstance(item, dict) and str(item.get("id", "")).strip():
-            out[str(item["id"]).strip()] = item
+            for key in _oracle_row_keys(item):
+                out.setdefault(key, item)
     return out
 
 
@@ -1725,14 +1922,17 @@ def build_evidence_bundle_plan(
         "relevant_clauses": [*facts[:600], *rules[:160]],
         "planning_policy": [
             "A support bundle is a small group of primitive Prolog queries that, together, can support an answer.",
-            "Prefer multiple primitive queries over an invented composite query.",
-            "Use compiled_surface_alias_inventory only as a map of sibling/decomposed predicate surfaces that are already present.",
-            "Use uppercase variables for unknown answer slots.",
-            "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
-            "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
-            "For policy or guidance questions, separate requirement, observed fact, preference, avoid-pattern, and rationale rows.",
-            "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, include a query for the named baseline relation only as context; the answer query should target sibling predicates over the same subject that expose the additional relation or property.",
-        ],
+        "Prefer multiple primitive queries over an invented composite query.",
+        "Use compiled_surface_alias_inventory only as a map of sibling/decomposed predicate surfaces that are already present.",
+        "Use uppercase variables for unknown answer slots.",
+        "Remember the Prolog surface: uppercase terms are variables, not constants. Constants must be copied exactly from relevant_clauses or quoted display values; do not invent document-id-like uppercase constants.",
+        "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
+        "For compound premises that require the same source subject, act, record, event, or decision to satisfy multiple predicates, use a single conjunctive query with a shared variable. Independent positive rows over different subjects do not establish the compound premise.",
+        "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
+        "For policy or guidance questions, separate requirement, observed fact, preference, avoid-pattern, and rationale rows.",
+        "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, include a query for the named baseline relation only as context; the answer query should target sibling predicates over the same subject that expose the additional relation or property.",
+        "When source_record_text_display/source_record_label_display/source_record_cell_display signatures are present, use them for exact printed source text. These display predicates are source addressability rows and can preserve rows or cells whose normalized source_record_text_atom/source_record_cell atom is empty or lossy.",
+    ],
     }
     messages = [
         {
@@ -1866,6 +2066,9 @@ def _query_intents_from_structured_queries(
         goals = parse_prolog_query_goals(query)
         if not goals:
             continue
+        source_display_filter_intent = _query_intent_from_source_display_filter_goals(goals, source=source)
+        if source_display_filter_intent is not None:
+            intents.append(source_display_filter_intent)
         for predicate, args in goals:
             if predicate in {
                 "source_record_note_definition",
@@ -2064,6 +2267,73 @@ def _query_intents_from_structured_queries(
                     }
                 )
     return intents
+
+
+def _query_intent_from_source_display_filter_goals(
+    goals: list[tuple[str, list[str]]],
+    *,
+    source: str,
+) -> dict[str, Any] | None:
+    display_vars: set[str] = set()
+    for predicate, args in goals:
+        if predicate not in {
+            "source_record_text_display",
+            "source_record_label_display",
+            "source_record_section_display",
+            "source_record_cell_display",
+            "source_record_cell_header_display",
+        }:
+            continue
+        for arg in args[1:]:
+            value = str(arg or "").strip()
+            if _is_prolog_variable(value) or value.startswith("_"):
+                display_vars.add(value)
+    if not display_vars:
+        return None
+    target_terms: list[str] = []
+    seen: set[str] = set()
+    for predicate, args in goals:
+        if predicate not in {"member", "memberchk"} or len(args) != 2:
+            continue
+        left = str(args[0] or "").strip()
+        right = str(args[1] or "").strip()
+        if left in display_vars:
+            literal = _structured_query_literal_filter_value(right)
+        elif right in display_vars:
+            literal = _structured_query_literal_filter_value(left)
+        else:
+            literal = ""
+        if not literal:
+            continue
+        key = literal.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        target_terms.append(literal)
+        if len(target_terms) >= 12:
+            break
+    if not target_terms:
+        return None
+    return {
+        "intent_type": "source_location",
+        "target_terms": target_terms,
+        "answer_constraints": ["source_display_filter"],
+        "uncertainty_policy": "answer",
+        "language": "",
+        "source": source,
+    }
+
+
+def _structured_query_literal_filter_value(value: str) -> str:
+    text = str(value or "").strip()
+    if not text or _is_prolog_variable(text) or text.startswith("_"):
+        return ""
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+        text = text[1:-1]
+    text = text.strip()
+    if len(text) < 2:
+        return ""
+    return text[:240]
 
 
 def _query_intents_from_semantic_ir(
@@ -2290,6 +2560,11 @@ def run_one_question(
         "parse_error": str(result.get("parse_error", "")) if isinstance(result, dict) else "",
         "model_decision": ir.get("decision", "") if isinstance(ir, dict) else "",
     }
+    if isinstance(result, dict) and result.get("openrouter_generation_metadata"):
+        semantic_ir_metadata = result.get("openrouter_generation_metadata")
+        row["semantic_ir_openrouter_generation_metadata"] = semantic_ir_metadata
+        if isinstance(semantic_ir_metadata, dict):
+            OPENROUTER_CALL_METADATA_LOG.append(semantic_ir_metadata)
     if include_model_input and isinstance(result, dict):
         row["model_input"] = result.get("model_input", {})
     if not isinstance(ir, dict):
@@ -2462,6 +2737,40 @@ def run_one_question(
     event_elapsed_duration = _event_elapsed_duration_companion(query_results, utterance=utterance)
     if event_elapsed_duration:
         query_results.append(event_elapsed_duration)
+    deadline_rule_examples = _deadline_rule_examples_companion(query_results)
+    if deadline_rule_examples:
+        query_results.append(deadline_rule_examples)
+    era_date_conversion = _source_record_era_date_conversion_companion(query_results)
+    if era_date_conversion:
+        query_results.append(era_date_conversion)
+    parenthetical_role_names = _source_record_parenthetical_role_name_companion(
+        runtime,
+        query_results=query_results,
+    )
+    if parenthetical_role_names:
+        query_results.append(parenthetical_role_names)
+    if not _source_record_obligation_bundle_intent(query_intents, runtime=runtime):
+        result_triggered_obligation_bundle = _source_record_obligation_bundle_companion(
+            runtime,
+            utterance=utterance,
+            query_intents=query_intents,
+            query_results=query_results,
+        )
+        if result_triggered_obligation_bundle:
+            query_results.append(result_triggered_obligation_bundle)
+    value_set_exclusion = _compiled_value_set_exclusion_companion(
+        query_intents=query_intents,
+        query_results=query_results,
+    )
+    if value_set_exclusion:
+        query_results.append(value_set_exclusion)
+    returned_action_sections = _source_record_returned_action_section_companion(
+        runtime,
+        query_intents=query_intents,
+        query_results=query_results,
+    )
+    if returned_action_sections:
+        query_results.append(returned_action_sections)
     for source_record_summary in _source_record_messy_summary_companions(
         runtime,
         utterance=utterance,
@@ -2522,15 +2831,15 @@ def build_qa_response_envelope(row: dict[str, Any]) -> dict[str, Any]:
     missing_slots = _qa_row_missing_slots(row)
     failure_surface = str(failure.get("surface", "")).strip()
 
-    if projected == "clarify" or clarification_questions or missing_slots:
+    if verdict == "exact":
+        status = "established"
+        basis = "The governed QA judge marked the admitted evidence as an exact match for the reference answer."
+    elif projected == "clarify" or clarification_questions or missing_slots:
         status = "clarification_required"
         basis = "The parsed question or self-check retained unresolved clarification pressure."
     elif failure_surface == "compile_surface_gap":
         status = "coverage_gap"
         basis = "The admitted compile artifact did not preserve enough support for the reference answer."
-    elif verdict == "exact":
-        status = "established"
-        basis = "The governed QA judge marked the admitted evidence as an exact match for the reference answer."
     elif verdict == "partial":
         status = "partially_established"
         basis = "The admitted evidence supports part of the reference answer or supports it with material qualification."
@@ -7036,6 +7345,1308 @@ def _source_record_definition_entry_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+_ALIAS_TRANSLATION_QUERY_TOKENS = {
+    "abbreviation",
+    "abbreviations",
+    "acronym",
+    "acronyms",
+    "alias",
+    "aliases",
+    "called",
+    "english",
+    "meaning",
+    "means",
+    "name",
+    "terminology",
+    "term",
+    "terms",
+    "translation",
+    "translations",
+    "translated",
+}
+
+
+def _source_record_alias_translation_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    if not _source_record_alias_translation_query_active(query_intents):
+        return None
+    target_tokens = _query_intents_target_tokens(query_intents)
+    raw_targets = _query_intents_raw_target_terms(query_intents)
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        for pair in _source_record_alias_translation_pairs_from_display(display):
+            key = (source_row, pair["PrimaryDisplay"], pair["AliasDisplay"], pair["AliasKind"])
+            if key in seen:
+                continue
+            seen.add(key)
+            match_score = _source_record_alias_translation_match_score(
+                pair=pair,
+                source_display=display,
+                target_tokens=target_tokens,
+                raw_targets=raw_targets,
+            )
+            rows.append(
+                {
+                    "SupportKind": "source_record_alias_translation",
+                    "SupportClass": "deterministic-source-record-summary",
+                    "SourceRow": source_row,
+                    "SourceSurfaceKind": surface_kind,
+                    "SourceCellIndex": cell_index,
+                    "SourceTextDisplay": display,
+                    "MatchedTargetTokenCount": str(match_score),
+                    **pair,
+                }
+            )
+    if not rows:
+        return None
+    positive_rows = [row for row in rows if int(row.get("MatchedTargetTokenCount", "0") or "0") > 0]
+    if positive_rows:
+        rows = positive_rows
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("MatchedTargetTokenCount", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SourceSurfaceKind", ""),
+            row.get("PrimaryDisplay", ""),
+            row.get("AliasDisplay", ""),
+        )
+    )
+    return {
+        "query": "source_record_alias_translation_support(SourceRow, PrimaryDisplay, AliasDisplay, AliasKind).",
+        "result": {
+            "predicate": "source_record_alias_translation_support",
+            "prolog_query": (
+                "source_record_alias_translation_support"
+                "(SourceRow, PrimaryDisplay, AliasDisplay, AliasKind)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only alias/translation support extracted only source-stated parenthetical "
+                    "surfaces from admitted source_record_*_display rows after structured query-intent "
+                    "activation; normalized predicate names were not treated as source-stated translations"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_label_display(SourceRow, Text).",
+            "source_record_section_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+            "source_record_cell_header_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_semantic_target_display_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    rows = _source_record_semantic_target_display_rows(runtime, query_intents=query_intents)
+    if not rows:
+        return None
+    rows = rows[:24]
+    return {
+        "query": "source_record_semantic_target_display_support(SourceRow, TargetTerm, SourceTextDisplay).",
+        "result": {
+            "predicate": "source_record_semantic_target_display_support",
+            "prolog_query": (
+                "source_record_semantic_target_display_support"
+                "(SourceRow, TargetTerm, SourceTextDisplay)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only semantic-target display support matched structured query-intent "
+                    "target terms against admitted source_record_*_display rows using Unicode "
+                    "literal matching; raw utterance text and normalized predicate atoms were not used"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_label_display(SourceRow, Text).",
+            "source_record_section_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+            "source_record_cell_header_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_semantic_target_cell_value_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    hit_rows = _source_record_semantic_target_display_rows(runtime, query_intents=query_intents)
+    if not hit_rows:
+        return None
+    cell_display_by_key: dict[tuple[str, str], str] = {}
+    row_display_by_row: dict[str, str] = {}
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        if surface_kind == "source_record_cell_display" and cell_index:
+            cell_display_by_key.setdefault((source_row, cell_index), display)
+        elif surface_kind == "source_record_label_display":
+            row_display_by_row.setdefault(source_row, display)
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for hit in hit_rows:
+        if str(hit.get("SourceSurfaceKind", "")).strip() != "source_record_cell_header_display":
+            continue
+        if str(hit.get("MatchKind", "")).strip() != "semantic_target_display_substring":
+            continue
+        source_row = str(hit.get("SourceRow", "")).strip()
+        cell_index = str(hit.get("SourceCellIndex", "")).strip()
+        if not source_row or not cell_index:
+            continue
+        cell_display = cell_display_by_key.get((source_row, cell_index), "")
+        if not cell_display:
+            continue
+        key = (source_row, cell_index, str(hit.get("TargetTerm", "")))
+        if key in seen:
+            continue
+        seen.add(key)
+        row_label = row_display_by_row.get(source_row, "")
+        target = str(hit.get("TargetTerm", ""))
+        full_answer = f"{target}: {cell_display}"
+        if row_label:
+            full_answer = f"{row_label} - {full_answer}"
+        rows.append(
+            {
+                "SupportKind": "source_record_semantic_target_cell_value",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": source_row,
+                "SourceCellIndex": cell_index,
+                "TargetTerm": target,
+                "HeaderDisplay": str(hit.get("SourceTextDisplay", "")),
+                "RowLabelDisplay": row_label,
+                "CellDisplay": cell_display,
+                "FullAnswerDisplay": full_answer,
+                "TargetMatchKind": str(hit.get("MatchKind", "")),
+                "MatchedDisplayFragment": str(hit.get("MatchedDisplayFragment", "")),
+                "Score": str(hit.get("Score", "0") or "0"),
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("Score", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            _safe_int(row.get("SourceCellIndex")) or 9999,
+            row.get("TargetTerm", ""),
+        )
+    )
+    rows = rows[:40]
+    return {
+        "query": "source_record_semantic_target_cell_value_support(SourceRow, CellIndex, TargetTerm, CellDisplay).",
+        "result": {
+            "predicate": "source_record_semantic_target_cell_value_support",
+            "prolog_query": (
+                "source_record_semantic_target_cell_value_support"
+                "(SourceRow, CellIndex, TargetTerm, CellDisplay)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only semantic-target cell-value support joined admitted table header "
+                    "display rows to same-row same-column cell display rows after structured "
+                    "query-intent target activation; no durable fact was written"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_cell_header_display(SourceRow, CellIndex, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_status_inline_field_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    if not _source_record_status_inline_field_active(query_intents):
+        return None
+    target_tokens = _source_record_status_inline_field_target_tokens(query_intents)
+    display_by_row = _source_record_text_display_by_row(runtime)
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for result_row in _runtime_rows(runtime, "source_record_inline_field(SourceRow, Field, Value)."):
+        source_row = str(result_row.get("SourceRow", "")).strip()
+        field = str(result_row.get("Field", "")).strip()
+        value = str(result_row.get("Value", "")).strip()
+        if not source_row or not value:
+            continue
+        display = display_by_row.get(source_row, "") or _display_source_phrase(value)
+        value_tokens = _source_record_unicode_word_tokens(f"{field} {value} {display}")
+        matched_tokens = sorted(target_tokens & value_tokens)
+        has_status_payload = _source_record_status_inline_field_has_status_payload(value, display)
+        has_identifier_or_date = _source_record_inline_field_has_identifier_or_date(value, display)
+        if not matched_tokens and not has_status_payload:
+            continue
+        if not (has_status_payload or has_identifier_or_date):
+            continue
+        score = len(matched_tokens) * 18
+        if has_status_payload:
+            score += 24
+        if has_identifier_or_date:
+            score += 20
+        key = (source_row, field, value)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "SupportKind": "source_record_status_inline_field",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": source_row,
+                "Field": field,
+                "FieldDisplay": _display_source_phrase(field),
+                "Value": value,
+                "ValueDisplay": _display_source_phrase(value),
+                "SourceTextDisplay": display,
+                "MatchedTargetTokens": ", ".join(matched_tokens),
+                "FullAnswerDisplay": display,
+                "Score": str(score),
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("Score", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("Field", ""),
+        )
+    )
+    rows = rows[:24]
+    return {
+        "query": "source_record_status_inline_field_support(SourceRow, Field, Value, SourceTextDisplay).",
+        "result": {
+            "predicate": "source_record_status_inline_field_support",
+            "prolog_query": (
+                "source_record_status_inline_field_support"
+                "(SourceRow, Field, Value, SourceTextDisplay)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only status inline-field support exposed admitted source_record_inline_field "
+                    "rows for structured status questions; no raw utterance parsing or durable fact write was used"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_inline_field(SourceRow, Field, Value).",
+            "source_record_text_display(SourceRow, Text).",
+        ],
+    }
+
+
+def _source_record_status_inline_field_active(query_intents: list[dict[str, Any]] | None) -> bool:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        if str(intent.get("intent_type", "")).strip() in {"status", "source_location"}:
+            return True
+    return False
+
+
+def _source_record_status_inline_field_target_tokens(query_intents: list[dict[str, Any]] | None) -> set[str]:
+    tokens: set[str] = set()
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        if str(intent.get("intent_type", "")).strip() not in {"status", "source_location"}:
+            continue
+        for term in intent.get("target_terms", []) or []:
+            for token in _source_record_unicode_word_tokens(str(term)):
+                if len(token) < 4:
+                    continue
+                if token in _SEMANTIC_DISPLAY_TARGET_STOP_TERMS or token in GENERIC_QUERY_PLACEHOLDERS:
+                    continue
+                tokens.add(_source_record_count_breakdown_token_concept(token))
+    return tokens
+
+
+def _source_record_status_inline_field_has_status_payload(*values: str) -> bool:
+    joined = " ".join(_source_record_unicode_word_tokens(" ".join(str(value or "") for value in values)))
+    concepts = {_source_record_count_breakdown_token_concept(token) for token in joined.split() if token}
+    status_concepts = {
+        "changed",
+        "change",
+        "extended",
+        "extension",
+        "later",
+        "notice",
+        "ref",
+        "reference",
+        "revised",
+        "revision",
+        "updated",
+        "update",
+    }
+    return bool(concepts & status_concepts)
+
+
+def _source_record_inline_field_has_identifier_or_date(*values: str) -> bool:
+    text = unicodedata.normalize("NFKC", " ".join(str(value or "") for value in values))
+    if re.search(r"\b(?:19|20)\d{2}[-_/]\d{1,2}[-_/]\d{1,2}\b", text):
+        return True
+    if re.search(r"\b(?:19|20)\d{2}[-_/][A-Za-z0-9]+", text):
+        return True
+    if re.search(r"\b[A-Z]{2,}[-_/][A-Z0-9]+[-_/]\d{2,}\b", text):
+        return True
+    if re.search(r"\bv_(?:19|20)\d{2}(?:_\d{1,2}){0,2}\b", text.casefold()):
+        return True
+    return False
+
+
+def _source_record_semantic_target_window_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    hit_rows = _source_record_semantic_target_display_rows(runtime, query_intents=query_intents)
+    if not hit_rows:
+        return None
+    metadata = _source_record_row_metadata(runtime)
+    text_display_by_row = _source_record_text_display_by_row(runtime)
+    if not metadata or not text_display_by_row:
+        return None
+    window_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for hit in hit_rows[:12]:
+        hit_source_row = str(hit.get("SourceRow", "")).strip()
+        hit_meta = metadata.get(hit_source_row, {})
+        hit_line = _safe_int(hit_meta.get("Line"))
+        hit_section = str(hit_meta.get("SectionAtom", "")).strip()
+        if hit_line is None or not hit_section:
+            continue
+        for source_row, meta in metadata.items():
+            line = _safe_int(meta.get("Line"))
+            if line is None:
+                continue
+            if str(meta.get("SectionAtom", "")).strip() != hit_section:
+                continue
+            line_delta = line - hit_line
+            distance = abs(line_delta)
+            follower_kind = str(meta.get("Kind", "")).strip()
+            max_distance = 2
+            if line_delta > 0 and follower_kind in {"list_row", "continuation_line", "table_row"}:
+                max_distance = 6
+            if distance > max_distance:
+                continue
+            display = text_display_by_row.get(source_row, "")
+            if not display:
+                continue
+            key = (hit_source_row, source_row, hit.get("TargetTerm", ""))
+            if key in seen:
+                continue
+            seen.add(key)
+            base_score = int(hit.get("Score", "0") or "0")
+            score = max(0, base_score - distance * 6)
+            if line_delta > 0 and follower_kind in {"list_row", "continuation_line", "table_row"}:
+                score = max(score, base_score + 8 - distance * 2)
+            window_rows.append(
+                {
+                    "SupportKind": "source_record_semantic_target_window",
+                    "SupportClass": "deterministic-source-record-summary",
+                    "TargetTerm": str(hit.get("TargetTerm", "")),
+                    "TargetSourceRow": hit_source_row,
+                    "WindowSourceRow": source_row,
+                    "WindowLineDistance": str(distance),
+                    "WindowDirection": "after" if line_delta > 0 else "before" if line_delta < 0 else "same",
+                    "WindowRowKind": follower_kind,
+                    "Section": hit_section,
+                    "TargetMatchKind": str(hit.get("MatchKind", "")),
+                    "MatchedDisplayFragment": str(hit.get("MatchedDisplayFragment", "")),
+                    "WindowTextDisplay": display,
+                    "Score": str(score),
+                }
+            )
+    if not window_rows:
+        return None
+    window_rows.sort(
+        key=lambda row: (
+            -int(row.get("Score", "0") or "0"),
+            int(row.get("WindowLineDistance", "0") or "0"),
+            _source_row_sort_key(row.get("WindowSourceRow", "")),
+            row.get("TargetTerm", ""),
+        )
+    )
+    window_rows = window_rows[:24]
+    return {
+        "query": "source_record_semantic_target_window_support(TargetTerm, TargetSourceRow, WindowSourceRow, WindowTextDisplay).",
+        "result": {
+            "predicate": "source_record_semantic_target_window_support",
+            "prolog_query": (
+                "source_record_semantic_target_window_support"
+                "(TargetTerm, TargetSourceRow, WindowSourceRow, WindowTextDisplay)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(window_rows),
+            "variables": _row_variable_names(window_rows),
+            "rows": window_rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only semantic-target window support expanded source-display target hits "
+                    "to bounded same-section neighboring rows; no raw source files or durable facts were used"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_semantic_target_display_support(SourceRow, TargetTerm, SourceTextDisplay).",
+        ],
+    }
+
+
+_COUNT_BREAKDOWN_CONSTRAINT_TOKENS = {
+    "breakdown",
+    "component",
+    "components",
+    "distribution",
+    "split",
+    "subgroup",
+    "subgroups",
+    "versus",
+    "vs",
+}
+
+
+def _source_record_count_breakdown_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    active_intents = _source_record_count_breakdown_intents(query_intents)
+    if not active_intents:
+        return None
+    target_groups = _source_record_count_breakdown_target_groups(active_intents)
+    if not target_groups:
+        return None
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        if surface_kind not in {"source_record_text_display", "source_record_cell_display"}:
+            continue
+        numbers = _source_record_count_breakdown_numbers(display)
+        if len(numbers) < 2:
+            continue
+        display_tokens = _source_record_unicode_word_tokens(display)
+        match = _source_record_count_breakdown_group_match(
+            target_groups=target_groups,
+            display_tokens=display_tokens,
+        )
+        matched_tokens = match["tokens"]
+        if len(matched_tokens) < 2:
+            continue
+        if int(match["group_count"]) < 2 or int(match["strong_group_count"]) < 1:
+            continue
+        key = (source_row, surface_kind, cell_index)
+        if key in seen:
+            continue
+        seen.add(key)
+        score = len(matched_tokens) * 20 + min(len(numbers), 3) * 4 - max(0, len(numbers) - 3) * 6
+        if surface_kind == "source_record_text_display":
+            score += 4
+        rows.append(
+            {
+                "SupportKind": "source_record_count_breakdown",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": source_row,
+                "SourceSurfaceKind": surface_kind,
+                "SourceCellIndex": cell_index,
+                "SourceTextDisplay": display,
+                "NumericValuesDisplay": ", ".join(numbers),
+                "MatchedTargetTokens": ", ".join(matched_tokens),
+                "FullAnswerDisplay": f"{display} [count breakdown values: {', '.join(numbers)}]",
+                "Score": str(score),
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("Score", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SourceSurfaceKind", ""),
+            row.get("SourceCellIndex", ""),
+        )
+    )
+    rows = rows[:24]
+    return {
+        "query": "source_record_count_breakdown_support(SourceRow, NumericValuesDisplay, SourceTextDisplay).",
+        "result": {
+            "predicate": "source_record_count_breakdown_support",
+            "prolog_query": (
+                "source_record_count_breakdown_support"
+                "(SourceRow, NumericValuesDisplay, SourceTextDisplay)."
+            ),
+            "result_type": "table",
+            "status": "success",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only count-breakdown support matched structured count/breakdown "
+                    "query-intent targets against admitted source display rows with multiple "
+                    "source-stated numbers; no durable fact or raw utterance parsing was used"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_count_breakdown_intents(
+    query_intents: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    candidates: list[dict[str, Any]] = []
+    saw_count_intent = False
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        if intent_type not in {"count", "amount_inventory", "list"}:
+            continue
+        candidates.append(intent)
+        if intent_type == "count":
+            saw_count_intent = True
+        constraint_tokens = _query_intent_constraint_tokens(intent)
+        raw_constraints = " ".join(str(item or "") for item in intent.get("answer_constraints", []) or [])
+        raw_constraint_tokens = set(re.split(r"[^a-z0-9]+", raw_constraints.casefold()))
+        if (
+            constraint_tokens & _COUNT_BREAKDOWN_CONSTRAINT_TOKENS
+            or raw_constraint_tokens & _COUNT_BREAKDOWN_CONSTRAINT_TOKENS
+            or "_vs_" in raw_constraints.casefold()
+        ):
+            out.append(intent)
+    if out:
+        return out
+    if saw_count_intent and len(_source_record_count_breakdown_target_groups(candidates)) >= 3:
+        return candidates
+    return []
+
+
+def _source_record_count_breakdown_target_groups(intents: list[dict[str, Any]]) -> list[set[str]]:
+    groups: list[set[str]] = []
+    seen: set[tuple[str, ...]] = set()
+    for intent in intents:
+        for term in intent.get("target_terms", []) or []:
+            group: set[str] = set()
+            for token in _source_record_unicode_word_tokens(str(term)):
+                if len(token) < 3:
+                    continue
+                if token in _SEMANTIC_DISPLAY_TARGET_STOP_TERMS or token in GENERIC_QUERY_PLACEHOLDERS:
+                    continue
+                group.add(token)
+            if not group:
+                continue
+            key = tuple(sorted(_source_record_count_breakdown_token_concept(token) for token in group))
+            if key in seen:
+                continue
+            seen.add(key)
+            groups.append(group)
+    return groups[:12]
+
+
+def _source_record_unicode_word_tokens(value: str) -> set[str]:
+    normalized = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    tokens: set[str] = set()
+    current: list[str] = []
+    for char in normalized:
+        if char.isalnum():
+            current.append(char)
+            continue
+        if current:
+            token = "".join(current).strip()
+            if token:
+                tokens.add(token)
+            current = []
+    if current:
+        token = "".join(current).strip()
+        if token:
+            tokens.add(token)
+    return tokens
+
+
+def _source_record_count_breakdown_group_match(
+    *,
+    target_groups: list[set[str]],
+    display_tokens: set[str],
+) -> dict[str, Any]:
+    out: list[str] = []
+    seen_concepts: set[str] = set()
+    display_concepts = {_source_record_count_breakdown_token_concept(token) for token in display_tokens}
+    group_count = 0
+    strong_group_count = 0
+    for group in target_groups:
+        group_matched = 0
+        group_concepts = {_source_record_count_breakdown_token_concept(token) for token in group}
+        for token in sorted(group):
+            concept = _source_record_count_breakdown_token_concept(token)
+            if not _source_record_count_breakdown_token_matches(
+                token=token,
+                concept=concept,
+                display_tokens=display_tokens,
+                display_concepts=display_concepts,
+            ):
+                continue
+            group_matched += 1
+            if concept in seen_concepts:
+                continue
+            seen_concepts.add(concept)
+            out.append(token)
+        if group_matched:
+            group_count += 1
+        if len(group_concepts) >= 2 and group_matched >= min(2, len(group_concepts)):
+            strong_group_count += 1
+    return {
+        "tokens": out,
+        "group_count": group_count,
+        "strong_group_count": strong_group_count,
+    }
+
+
+def _source_record_count_breakdown_token_matches(
+    *,
+    token: str,
+    concept: str,
+    display_tokens: set[str],
+    display_concepts: set[str],
+) -> bool:
+    if token in display_tokens or concept in display_concepts:
+        return True
+    if len(concept) < 6:
+        return False
+    return any(
+        len(display_concept) >= 6 and (concept in display_concept or display_concept in concept)
+        for display_concept in display_concepts
+    )
+
+
+def _source_record_count_breakdown_token_concept(value: str) -> str:
+    token = str(value or "").strip()
+    if len(token) > 4 and token.endswith("s"):
+        return token[:-1]
+    return token
+
+
+def _source_record_count_breakdown_numbers(value: str) -> list[str]:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    out: list[str] = []
+    for match in re.finditer(r"(?<!\d)[+-]?\d[\d,]*(?:\.\d+)?(?!\d)", text):
+        raw = match.group(0).strip()
+        normalized = raw.replace(",", "")
+        if not normalized or normalized in {"+", "-"}:
+            continue
+        out.append(raw)
+    non_years: list[str] = []
+    for raw in out:
+        normalized = raw.replace(",", "")
+        try:
+            number = int(float(normalized))
+        except ValueError:
+            non_years.append(raw)
+            continue
+        if 1900 <= number <= 2099 and re.fullmatch(r"\d{4}", normalized):
+            continue
+        non_years.append(raw)
+    if len(non_years) >= 2:
+        return non_years
+    if len(non_years) != len(out):
+        return non_years
+    return out
+
+
+def _source_record_semantic_target_display_rows(
+    runtime: CorePrologRuntime,
+    *,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> list[dict[str, str]]:
+    targets = _source_record_semantic_display_targets(query_intents)
+    if not targets:
+        return []
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        display_norm = _source_display_match_norm(display)
+        if not display_norm:
+            continue
+        for target in targets:
+            matched_variant = ""
+            match_kind = ""
+            for variant in target["variants"]:
+                if variant and variant in display_norm:
+                    matched_variant = variant
+                    match_kind = (
+                        "semantic_target_display_substring"
+                        if matched_variant == target["variants"][0]
+                        else "semantic_target_unicode_fragment"
+                    )
+                    break
+            if not matched_variant:
+                matched_variant = _source_record_semantic_target_token_overlap_fragment(
+                    display,
+                    target=target,
+                )
+                if matched_variant:
+                    match_kind = "semantic_target_token_overlap"
+                else:
+                    for variant in target.get("token_variants", []):
+                        if variant and variant in display_norm:
+                            matched_variant = variant
+                            match_kind = "semantic_target_long_token_fragment"
+                            break
+                    if not matched_variant:
+                        continue
+            key = (source_row, surface_kind, cell_index, target["target"])
+            if key in seen:
+                continue
+            seen.add(key)
+            exact_variant = target["variants"][0] if target.get("variants") else matched_variant
+            score = 40 + min(len(matched_variant), 40)
+            if target["kind"] == "unicode_literal":
+                score += 12
+            if match_kind == "semantic_target_unicode_fragment":
+                score -= 16
+            elif match_kind == "semantic_target_token_overlap":
+                score -= 12
+            elif target["kind"] == "identifier_like":
+                score += 8
+            rows.append(
+                {
+                    "SupportKind": "source_record_semantic_target_display",
+                    "SupportClass": "deterministic-source-record-summary",
+                    "SourceRow": source_row,
+                    "SourceSurfaceKind": surface_kind,
+                    "SourceCellIndex": cell_index,
+                    "TargetTerm": target["target"],
+                    "TargetKind": target["kind"],
+                    "MatchKind": match_kind,
+                    "MatchedDisplayFragment": matched_variant,
+                    "SourceTextDisplay": display,
+                    "Score": str(score),
+                }
+            )
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("Score", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("TargetTerm", ""),
+            row.get("SourceSurfaceKind", ""),
+        )
+    )
+    return rows
+
+
+_SEMANTIC_DISPLAY_TARGET_STOP_TERMS = {
+    "answer",
+    "article",
+    "citation",
+    "date",
+    "deadline",
+    "document",
+    "entity",
+    "event",
+    "item",
+    "legal",
+    "line",
+    "list",
+    "name",
+    "number",
+    "record",
+    "reference",
+    "report",
+    "row",
+    "section",
+    "source",
+    "status",
+    "term",
+    "text",
+    "type",
+    "value",
+}
+
+
+def _source_record_semantic_display_targets(
+    query_intents: list[dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in _query_intents_raw_target_terms(query_intents):
+        target = _clean_source_record_semantic_target(raw)
+        if not target:
+            continue
+        kind = _source_record_semantic_target_kind(target)
+        if not kind:
+            continue
+        variants = _source_record_semantic_target_variants(target, kind=kind)
+        if not variants:
+            continue
+        key = _source_display_match_norm(target)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(
+            {
+                "target": target,
+                "kind": kind,
+                "variants": variants,
+                "token_variants": _source_record_semantic_target_long_token_variants(target, kind=kind),
+            }
+        )
+    return out[:16]
+
+
+def _source_record_semantic_target_token_overlap_fragment(
+    display: str,
+    *,
+    target: dict[str, Any],
+) -> str:
+    if str(target.get("kind", "")) != "phrase_literal":
+        return ""
+    target_tokens = [token for token in _source_display_ascii_tokens(str(target.get("target", ""))) if len(token) >= 3]
+    if len(target_tokens) < 4:
+        return ""
+    display_tokens = set(_source_display_ascii_tokens(display))
+    hits = [token for token in target_tokens if token in display_tokens]
+    threshold = max(4, int((len(target_tokens) * 2 + 2) // 3))
+    if len(hits) < threshold:
+        return ""
+    return " ".join(hits)
+
+
+def _clean_source_record_semantic_target(value: str) -> str:
+    text = str(value or "").strip()
+    text = text.strip(" \t\r\n\"'`“”‘’")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def _source_record_semantic_target_kind(value: str) -> str:
+    text = str(value or "").strip()
+    if _contains_non_ascii_letter(text):
+        if len(text) < 2:
+            return ""
+        return "unicode_literal"
+    if len(text) < 3:
+        return ""
+    if _looks_like_ascii_snake_case_canonical(text):
+        return ""
+    norm = _source_display_match_norm(text)
+    if not norm or norm in _SEMANTIC_DISPLAY_TARGET_STOP_TERMS:
+        return ""
+    tokens = _source_display_ascii_tokens(text)
+    if not tokens:
+        return ""
+    if all(token in _SEMANTIC_DISPLAY_TARGET_STOP_TERMS or token in GENERIC_QUERY_PLACEHOLDERS for token in tokens):
+        return ""
+    if len(tokens) >= 2 and sum(len(token) for token in tokens) >= 8:
+        return "phrase_literal"
+    if re.search(r"\d", text) and len(norm) >= 4:
+        return "identifier_like"
+    if re.search(r"[-/#.]", text) and len(norm) >= 5:
+        return "identifier_like"
+    return ""
+
+
+def _source_record_semantic_target_variants(value: str, *, kind: str) -> list[str]:
+    norm = _source_display_match_norm(value)
+    variants = [norm] if norm else []
+    if kind == "unicode_literal":
+        for fragment in _source_record_unicode_target_fragments(value):
+            fragment_norm = _source_display_match_norm(fragment)
+            if fragment_norm and fragment_norm not in variants:
+                variants.append(fragment_norm)
+    else:
+        spaced = _source_display_match_norm(str(value or "").replace("_", " "))
+        if spaced and spaced not in variants:
+            variants.append(spaced)
+        token_spaced = " ".join(_source_display_ascii_tokens(value))
+        if token_spaced and token_spaced not in variants:
+            variants.append(token_spaced)
+    return variants
+
+
+def _source_record_semantic_target_long_token_variants(value: str, *, kind: str) -> list[str]:
+    if kind != "phrase_literal":
+        return []
+    tokens = _source_display_ascii_tokens(value)
+    if len(tokens) < 4:
+        return []
+    out: list[str] = []
+    for token in tokens:
+        if len(token) < 8:
+            continue
+        if token in _SEMANTIC_DISPLAY_TARGET_STOP_TERMS or token in GENERIC_QUERY_PLACEHOLDERS:
+            continue
+        if token not in out:
+            out.append(token)
+    return out[:6]
+
+
+def _source_record_unicode_target_fragments(value: str) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    normalized = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    words: list[str] = []
+    current: list[str] = []
+    for char in normalized:
+        if char.isalpha():
+            current.append(char)
+            continue
+        if current:
+            words.append("".join(current))
+            current = []
+    if current:
+        words.append("".join(current))
+    for word in words:
+        if len(word) < 5 or word in seen or not any(not char.isascii() for char in word):
+            continue
+        seen.add(word)
+        out.append(word)
+        if len(out) >= 8:
+            return out
+
+    text = "".join(char for char in normalized if char.isalpha() and not char.isascii())
+    if len(text) < 6:
+        return out
+    max_fragment_len = min(len(text) - 1, 8)
+    for length in range(4, max_fragment_len + 1):
+        for fragment in (text[:length], text[-length:]):
+            if fragment == text or fragment in seen:
+                continue
+            seen.add(fragment)
+            out.append(fragment)
+            if len(out) >= 8:
+                return out
+    return out
+
+
+def _source_display_match_norm(value: str) -> str:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    text = text.casefold()
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def _source_display_ascii_tokens(value: str) -> list[str]:
+    return [token for token in re.split(r"[^a-z0-9]+", _source_display_match_norm(value)) if token]
+
+
+def _looks_like_ascii_snake_case_canonical(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text or _contains_non_ascii_letter(text):
+        return False
+    return bool(re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+", text))
+
+
+def _source_record_alias_translation_query_active(
+    query_intents: list[dict[str, Any]] | None,
+) -> bool:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        tokens = set(_query_intent_constraint_tokens(intent))
+        for term in intent.get("target_terms", []) or []:
+            tokens.update(_query_atom_tokens(str(term)))
+        if tokens & _ALIAS_TRANSLATION_QUERY_TOKENS:
+            return True
+    return False
+
+
+def _query_intents_raw_target_terms(query_intents: list[dict[str, Any]] | None) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        for term in intent.get("target_terms", []) or []:
+            text = str(term or "").strip()
+            if len(text) < 2:
+                continue
+            key = text.casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(text)
+    return out
+
+
+def _source_record_display_surfaces(runtime: CorePrologRuntime) -> list[tuple[str, str, str, str]]:
+    out: list[tuple[str, str, str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    display_queries = (
+        ("source_record_text_display", "source_record_text_display(SourceRow, Text).", "Text"),
+        ("source_record_label_display", "source_record_label_display(SourceRow, Text).", "Text"),
+        ("source_record_section_display", "source_record_section_display(SourceRow, Text).", "Text"),
+    )
+    for predicate, query, text_key in display_queries:
+        for row in _runtime_rows(runtime, query):
+            source_row = str(row.get("SourceRow", "")).strip()
+            cell_index = ""
+            display = str(row.get(text_key, "")).strip()
+            if not source_row or not display:
+                continue
+            key = (source_row, predicate, cell_index, display)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(key)
+    cell_queries = (
+        ("source_record_cell_display", "source_record_cell_display(SourceRow, CellIndex, Text).", "Text"),
+        (
+            "source_record_cell_header_display",
+            "source_record_cell_header_display(SourceRow, CellIndex, Text).",
+            "Text",
+        ),
+    )
+    for predicate, query, text_key in cell_queries:
+        for row in _runtime_rows(runtime, query):
+            source_row = str(row.get("SourceRow", "")).strip()
+            cell_index = str(row.get("CellIndex", "")).strip()
+            display = str(row.get(text_key, "")).strip()
+            if not source_row or not display:
+                continue
+            key = (source_row, predicate, cell_index, display)
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append(key)
+    return out
+
+
+def _source_record_text_display_by_row(runtime: CorePrologRuntime) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for source_row, surface_kind, _cell_index, display in _source_record_display_surfaces(runtime):
+        if surface_kind != "source_record_text_display" or source_row in out:
+            continue
+        out[source_row] = display
+    return out
+
+
+def _source_record_alias_translation_pairs_from_display(display: str) -> list[dict[str, str]]:
+    text = _clean_source_record_alias_display_text(display)
+    if len(text) < 5:
+        return []
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for match in re.finditer(r"(?P<left>[^()\[\]（）［］]{1,180})[\(（\[](?P<inside>[^()\[\]（）［］]{1,90})[\)）\]]", text):
+        left = _source_record_alias_left_span(match.group("left"))
+        inside = _clean_source_record_alias_span(match.group("inside"))
+        pair = _source_record_alias_translation_pair(left=left, inside=inside)
+        if not pair:
+            continue
+        key = (pair["PrimaryDisplay"], pair["AliasDisplay"], pair["AliasKind"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(pair)
+    return rows
+
+
+def _clean_source_record_alias_display_text(value: str) -> str:
+    text = str(value or "").strip()
+    text = re.sub(r"^\s{0,3}(?:#{1,6}\s*|[-*]\s+|[0-9ivxlcdmIVXLCDM]+[.)]\s+)", "", text)
+    text = text.replace("**", "").replace("__", "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _source_record_alias_left_span(value: str) -> str:
+    text = _clean_source_record_alias_span(value)
+    parts = [part.strip() for part in re.split(r"[\n\r.;:!?。！？、，；：]\s*", text) if part.strip()]
+    if parts:
+        text = parts[-1]
+    words = text.split()
+    if len(words) > 12:
+        text = " ".join(words[-12:])
+    return _clean_source_record_alias_span(text)
+
+
+def _clean_source_record_alias_span(value: str) -> str:
+    text = str(value or "").strip()
+    text = text.strip(" \t\r\n-–—:：;；,，.。*#\"'`")
+    text = re.sub(r"\s+", " ", text)
+    return text.strip()
+
+
+def _source_record_alias_translation_pair(*, left: str, inside: str) -> dict[str, str] | None:
+    if not _source_record_alias_span_meaningful(left) or not _source_record_alias_span_meaningful(inside):
+        return None
+    if _source_record_alias_span_too_noisy(left) or _source_record_alias_span_too_noisy(inside):
+        return None
+    left_alias = _looks_like_source_alias_span(left)
+    inside_alias = _looks_like_source_alias_span(inside)
+    left_ascii_translation = _looks_like_source_ascii_translation_span(left)
+    inside_ascii_translation = _looks_like_source_ascii_translation_span(inside)
+    left_non_ascii = _contains_non_ascii_letter(left)
+    inside_non_ascii = _contains_non_ascii_letter(inside)
+    if inside_alias and not left_alias:
+        return {
+            "PrimaryDisplay": left,
+            "AliasDisplay": inside,
+            "AliasKind": "parenthetical_alias",
+        }
+    if left_alias and not inside_alias:
+        return {
+            "PrimaryDisplay": inside,
+            "AliasDisplay": left,
+            "AliasKind": "parenthetical_alias",
+        }
+    if inside_ascii_translation and left_non_ascii:
+        return {
+            "PrimaryDisplay": left,
+            "AliasDisplay": inside,
+            "AliasKind": "source_stated_translation",
+        }
+    if left_ascii_translation and inside_non_ascii:
+        return {
+            "PrimaryDisplay": inside,
+            "AliasDisplay": left,
+            "AliasKind": "source_stated_translation",
+        }
+    if left_ascii_translation and inside_ascii_translation and not left_alias and not inside_alias:
+        return {
+            "PrimaryDisplay": left,
+            "AliasDisplay": inside,
+            "AliasKind": "parenthetical_equivalence",
+        }
+    return None
+
+
+def _source_record_alias_span_meaningful(value: str) -> bool:
+    text = str(value or "").strip()
+    if len(text) < 2 or len(text) > 140:
+        return False
+    return bool(re.search(r"[^\W_]", text, flags=re.UNICODE))
+
+
+def _source_record_alias_span_too_noisy(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return True
+    if text.count(",") + text.count("、") + text.count(";") + text.count("；") > 1:
+        return True
+    return bool(re.fullmatch(r"[\d\s./:-]+", text))
+
+
+def _looks_like_source_alias_span(value: str) -> bool:
+    text = str(value or "").strip()
+    if not 2 <= len(text) <= 24:
+        return False
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 .&/+_-]*", text):
+        return False
+    letters = re.findall(r"[A-Za-z]", text)
+    if not letters:
+        return False
+    compact = re.sub(r"[^A-Za-z0-9]", "", text)
+    if len(compact) <= 8 and sum(1 for char in letters if char.isupper()) >= 2:
+        return True
+    if re.fullmatch(r"[A-Z][A-Za-z]?[0-9][A-Za-z0-9-]*", compact):
+        return True
+    return False
+
+
+def _looks_like_source_ascii_translation_span(value: str) -> bool:
+    text = str(value or "").strip()
+    if not 3 <= len(text) <= 90:
+        return False
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9 ,.'&/+_-]*", text):
+        return False
+    tokens = re.findall(r"[A-Za-z][A-Za-z0-9-]*", text)
+    if not tokens:
+        return False
+    if len(tokens) == 1 and _looks_like_source_alias_span(text):
+        return False
+    return True
+
+
+def _contains_non_ascii_letter(value: str) -> bool:
+    return any(char.isalpha() and not char.isascii() for char in str(value or ""))
+
+
+def _source_record_alias_translation_match_score(
+    *,
+    pair: dict[str, str],
+    source_display: str,
+    target_tokens: set[str],
+    raw_targets: list[str],
+) -> int:
+    value = " ".join(
+        [
+            pair.get("PrimaryDisplay", ""),
+            pair.get("AliasDisplay", ""),
+            source_display,
+        ]
+    )
+    value_tokens = _loose_atom_token_set(value)
+    score = len(target_tokens & value_tokens)
+    display_fold = value.casefold()
+    for target in raw_targets:
+        target_fold = target.casefold()
+        if target_fold and target_fold in display_fold:
+            score += max(1, len(_query_atom_tokens(target)))
+    return score
 
 
 def _source_record_definition_entry_from_text_atom(
@@ -16816,6 +18427,242 @@ def _event_elapsed_duration_companion(
     }
 
 
+def _deadline_rule_examples_companion(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    quarterly_rule_rows: list[dict[str, str]] = []
+    final_report_dates: list[str] = []
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        if str(result.get("predicate", "")).strip() != "deadline_requirement":
+            continue
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            row_values = {str(key): str(value).strip() for key, value in row.items()}
+            values = set(row_values.values())
+            if "within_15_days_of_quarter_end" in values:
+                quarterly_rule_rows.append(row_values)
+            if "final_report" in values:
+                for value in row_values.values():
+                    if _canonical_admitted_date_atom(value):
+                        final_report_dates.append(_canonical_admitted_date_atom(value))
+    if not quarterly_rule_rows:
+        return None
+
+    anchor_date = _deadline_rule_example_anchor_date(final_report_dates)
+    examples = _quarter_end_plus_days_examples(anchor_date=anchor_date, days_after=15, count=3)
+    if not examples:
+        return None
+    support_rows: list[dict[str, str]] = []
+    for index, (quarter_end, due_date) in enumerate(examples, start=1):
+        support_rows.append(
+            {
+                "SupportKind": "deadline_rule_example",
+                "SupportClass": "deterministic-query-summary",
+                "RuleAtom": "within_15_days_of_quarter_end",
+                "RuleDisplay": "within 15 days of quarter end",
+                "AnchorDate": anchor_date.strftime("%Y-%m-%d") if anchor_date else "",
+                "SequenceIndex": str(index),
+                "PeriodEnd": quarter_end.strftime("%Y_%m_%d"),
+                "PeriodEndDisplay": quarter_end.strftime("%m/%d"),
+                "DueDate": due_date.strftime("%Y_%m_%d"),
+                "DueDateDisplay": due_date.strftime("%m/%d"),
+                "ExampleDisplay": f"{quarter_end.strftime('%m/%d')} -> {due_date.strftime('%m/%d')}",
+            }
+        )
+    summary = {
+        "SupportKind": "deadline_rule_examples_summary",
+        "SupportClass": "deterministic-query-summary",
+        "RuleAtom": "within_15_days_of_quarter_end",
+        "RuleDisplay": "within 15 days of quarter end",
+        "ExampleCount": str(len(support_rows)),
+        "ExamplesDisplay": "; ".join(row["ExampleDisplay"] for row in support_rows),
+        "FullAnswerDisplay": (
+            "within 15 days of quarter end; "
+            + "; ".join(row["ExampleDisplay"] for row in support_rows)
+        ),
+    }
+    rows = [summary, *support_rows]
+    return {
+        "query": "deadline_rule_examples_support(RuleAtom, PeriodEnd, DueDate).",
+        "result": {
+            "status": "success",
+            "predicate": "deadline_rule_examples_support",
+            "prolog_query": "deadline_rule_examples_support(RuleAtom, PeriodEnd, DueDate).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only deadline rule example support expanded admitted symbolic "
+                    "quarter-end deadline rows into deterministic calendar examples; no durable fact was written"
+                ),
+                "quarterly_rule_row_count": len(quarterly_rule_rows),
+            },
+        },
+        "derived_from_queries": ["deadline_requirement(Action, ReportType, Deadline)."],
+    }
+
+
+def _deadline_rule_example_anchor_date(final_report_dates: list[str]) -> datetime | None:
+    dated: list[datetime] = []
+    for date_atom in final_report_dates:
+        sort_key = _date_atom_sort_key(date_atom)
+        if sort_key is None:
+            continue
+        year, month, day = sort_key
+        dated.append(datetime(year, month, day))
+    return min(dated) if dated else None
+
+
+def _quarter_end_plus_days_examples(
+    *,
+    anchor_date: datetime | None,
+    days_after: int,
+    count: int,
+) -> list[tuple[datetime, datetime]]:
+    start_year = anchor_date.year if anchor_date is not None else 2000
+    quarter_month_days = [(3, 31), (6, 30), (9, 30), (12, 31)]
+    examples: list[tuple[datetime, datetime]] = []
+    for year in range(start_year, start_year + 3):
+        for month, day in quarter_month_days:
+            quarter_end = datetime(year, month, day)
+            if anchor_date is not None and quarter_end <= anchor_date:
+                continue
+            examples.append((quarter_end, quarter_end + timedelta(days=days_after)))
+            if len(examples) >= count:
+                return examples
+    return examples
+
+
+def _source_record_era_date_conversion_companion(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        rows = result.get("rows")
+        if not isinstance(rows, list):
+            continue
+        for result_row in rows:
+            if not isinstance(result_row, dict):
+                continue
+            source_row = _source_row_from_display_result_row(result_row)
+            for value in _iter_scalar_values(result_row):
+                for conversion in _era_date_conversions_from_display(value):
+                    key = (source_row, conversion["EraDateDisplay"], conversion["GregorianDate"])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    support_rows.append(
+                        {
+                            "SupportKind": "source_record_era_date_conversion",
+                            "SupportClass": "deterministic-calendar-authority",
+                            "SourceRow": source_row,
+                            "SourceTextDisplay": _display_source_phrase(value),
+                            **conversion,
+                            "FullAnswerDisplay": (
+                                f"{conversion['EraDateDisplay']} = "
+                                f"{conversion['GregorianDateDisplay']}; "
+                                f"{conversion['EraDisplay']} from {conversion['EraStartDateDisplay']}"
+                            ),
+                        }
+                    )
+    if not support_rows:
+        return None
+    support_rows.sort(
+        key=lambda row: (
+            _date_atom_sort_key(row.get("GregorianDate", "")) or (9999, 99, 99),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("EraDateDisplay", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_era_date_conversion_summary",
+        "SupportClass": "deterministic-calendar-authority",
+        "ConversionCount": str(len(support_rows)),
+        "FullAnswerDisplay": "; ".join(row["FullAnswerDisplay"] for row in support_rows),
+    }
+    rows = [summary, *support_rows[:24]]
+    return {
+        "query": "source_record_era_date_conversion_support(EraDateDisplay, GregorianDate, EraStartDate).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_era_date_conversion_support",
+            "prolog_query": (
+                "source_record_era_date_conversion_support"
+                "(EraDateDisplay, GregorianDate, EraStartDate)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows,
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only era date conversion support used a deterministic calendar authority "
+                    "after an admitted source-display row exposed an era date; it is not source-stated evidence"
+                ),
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_semantic_target_display_support(SourceRow, TargetTerm, SourceTextDisplay).",
+        ],
+    }
+
+
+def _source_row_from_display_result_row(row: dict[str, Any]) -> str:
+    for key in (
+        "SourceRow",
+        "WindowSourceRow",
+        "TargetSourceRow",
+        "BoundArg1",
+        "Line",
+    ):
+        value = str(row.get(key, "")).strip()
+        if value:
+            return value
+    source_query = str(row.get("source_query", ""))
+    match = re.search(r"\bsource_record_[a-z_]+\(([^,\s]+),", source_query)
+    return match.group(1) if match else ""
+
+
+def _era_date_conversions_from_display(value: Any) -> list[dict[str, str]]:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    out: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for match in re.finditer(
+        r"\u4EE4\u548C\s*(?P<year>\d{1,2})\s*\u5E74\s*"
+        r"(?P<month>\d{1,2})\s*\u6708\s*(?P<day>\d{1,2})\s*\u65E5",
+        text,
+    ):
+        era_year = int(match.group("year"))
+        gregorian_year = 2018 + era_year
+        date_atom = f"{gregorian_year:04d}_{int(match.group('month')):02d}_{int(match.group('day')):02d}"
+        if _date_atom_sort_key(date_atom) is None or date_atom in seen:
+            continue
+        seen.add(date_atom)
+        out.append(
+            {
+                "EraName": "reiwa",
+                "EraDisplay": "Reiwa",
+                "EraYear": str(era_year),
+                "EraStartDate": "2019_05_01",
+                "EraStartDateDisplay": "2019-05-01",
+                "EraDateDisplay": match.group(0),
+                "GregorianDate": date_atom,
+                "GregorianDateDisplay": _display_source_date_atom(date_atom),
+                "CalendarAuthority": "japanese_era_calendar",
+            }
+        )
+    return out
+
+
 def _display_elapsed_duration_days(total_minutes: int) -> str:
     days, remainder = divmod(int(total_minutes), 24 * 60)
     hours, minutes = divmod(remainder, 60)
@@ -16872,25 +18719,39 @@ def _source_record_messy_summary_companions(
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
         _source_record_biography_history_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_obligation_bundle_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_amount_inventory_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_table_delta_check_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_ratio_calculation_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_duration_quantity_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_restrictive_covenant_companion(runtime, utterance=utterance),
         _source_record_defined_term_contrast_companion(runtime, utterance=utterance),
+        _source_record_semantic_target_display_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_semantic_target_cell_value_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_status_inline_field_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_semantic_target_window_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_count_breakdown_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_alias_translation_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_signature_mismatch_companion(runtime, utterance=utterance),
-        _source_record_dated_event_inventory_companion(runtime, utterance=utterance),
+        _source_record_dated_event_inventory_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_negative_assertion_companion(runtime, utterance=utterance),
+        _current_adjudication_disposition_companion(runtime, query_intents=query_intents),
         _source_record_role_transition_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_board_nominee_path_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_named_role_roster_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_label_value_pair_companion(runtime, utterance=utterance),
         _source_record_postal_state_code_companion(runtime, utterance=utterance),
+        _source_record_address_line_companion(runtime, utterance=utterance, query_intents=query_intents),
         _source_record_address_block_companion(runtime, utterance=utterance),
         _source_record_link_attachment_companion(runtime, utterance=utterance),
         _source_record_incident_statistic_companion(runtime, utterance=utterance),
         _source_record_enforcement_action_inventory_companion(runtime, utterance=utterance),
         _source_record_generic_designation_companion(runtime, utterance=utterance),
-        _source_record_elapsed_date_duration_companion(runtime, utterance=utterance),
+        _source_record_elapsed_date_duration_companion(
+            runtime,
+            utterance=utterance,
+            query_intents=query_intents,
+        ),
         _source_record_date_pair_duration_companion(runtime, utterance=utterance),
         _source_record_field_state_companion(runtime, utterance=utterance),
         _source_record_earliest_date_field_pair_companion(runtime, utterance=utterance),
@@ -16900,7 +18761,11 @@ def _source_record_messy_summary_companions(
         _source_record_speed_change_companion(runtime, utterance=utterance),
         _source_record_weather_observation_companion(runtime, utterance=utterance),
         _source_record_issued_product_chronology_companion(runtime, utterance=utterance),
-        _source_record_document_event_chronology_companion(runtime, utterance=utterance),
+        _source_record_document_event_chronology_companion(
+            runtime,
+            utterance=utterance,
+            query_intents=query_intents,
+        ),
         _source_record_group_formation_exception_companion(runtime, utterance=utterance),
         _source_record_destination_companion(runtime, utterance=utterance),
         _source_record_signatory_responsibility_companion(runtime, utterance=utterance),
@@ -16918,6 +18783,7 @@ def _query_independent_source_record_support(
     utterance: str,
 ) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
+    query_intents: list[dict[str, Any]] = []
     for companion in (
         _source_record_citation_text_companion(runtime, utterance=utterance),
         _source_record_section_list_count_companion(runtime, utterance=utterance),
@@ -16972,11 +18838,13 @@ def _source_record_elapsed_date_duration_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:elapsed|how many days|duration|between)\b", text):
+    intent_active = _source_record_elapsed_date_duration_intent_active(query_intents)
+    if not intent_active and not re.search(r"\b(?:elapsed|how many days|duration|between)\b", text):
         return None
-    if not re.search(r"\b(?:date|day|days|deadline|issuance|issued|opened|closed|published|report)\b", text):
+    if not intent_active and not re.search(r"\b(?:date|day|days|deadline|issuance|issued|opened|closed|published|report)\b", text):
         return None
 
     spans = _date_duration_question_spans(utterance)
@@ -17071,6 +18939,23 @@ def _source_record_elapsed_date_duration_companion(
                     support_kind="source_record_context_date_duration",
                 )
 
+    if intent_active:
+        for support_row in _source_record_elapsed_date_duration_rows_from_intents(
+            runtime=runtime,
+            candidates=candidates,
+            query_intents=query_intents,
+        ):
+            key = (
+                support_row["StartDate"],
+                support_row["EndDate"],
+                support_row.get("StartSourceRow", ""),
+                support_row.get("EndSourceField", ""),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(support_row)
+
     if not support_rows:
         return None
     support_rows.sort(
@@ -17099,6 +18984,7 @@ def _source_record_elapsed_date_duration_companion(
                     "duration fact was written"
                 ),
                 "utterance": utterance,
+                "query_intents": query_intents or [],
             },
         },
         "derived_from_queries": [
@@ -17109,6 +18995,126 @@ def _source_record_elapsed_date_duration_companion(
             "direct admitted predicates with date-valued arguments",
         ],
     }
+
+
+def _source_record_elapsed_date_duration_intent_active(
+    query_intents: list[dict[str, Any]] | None,
+) -> bool:
+    duration_markers = {
+        "calendar",
+        "day",
+        "days",
+        "duration",
+        "elapsed",
+        "interval",
+        "period",
+    }
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        target_tokens = {
+            token
+            for value in [
+                *(intent.get("target_terms", []) or []),
+                *(intent.get("answer_constraints", []) or []),
+            ]
+            for token in _query_atom_tokens(str(value))
+        }
+        if intent_type not in {"date", "duration", "document_chronology", "unknown"}:
+            continue
+        if _query_intent_has_constraint(
+            intent,
+            "interval_duration",
+            "elapsed_days",
+            "days",
+            "duration",
+        ):
+            return True
+        if intent_type in {"date", "duration", "document_chronology"} and target_tokens & duration_markers:
+            return True
+        if intent_type == "unknown" and (
+            {"date", "interval"} <= target_tokens
+            or {"elapsed", "days"} <= target_tokens
+            or "duration" in target_tokens
+        ):
+            return True
+    return False
+
+
+def _source_record_elapsed_date_duration_rows_from_intents(
+    *,
+    runtime: CorePrologRuntime,
+    candidates: list[dict[str, str]],
+    query_intents: list[dict[str, Any]] | None,
+) -> list[dict[str, str]]:
+    target_rows = _source_record_semantic_target_display_rows(runtime, query_intents=query_intents)
+    if not target_rows:
+        return []
+    target_source_rows = {
+        str(row.get("SourceRow", "")).strip()
+        for row in target_rows
+        if str(row.get("SourceRow", "")).strip()
+    }
+    if not target_source_rows:
+        return []
+    source_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate.get("SourceRow", "") in target_source_rows
+    ]
+    admitted_candidates = [
+        candidate
+        for candidate in candidates
+        if not candidate.get("SourceRow", "")
+    ]
+    if not source_candidates or not admitted_candidates:
+        return []
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for start in sorted(
+        source_candidates,
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRow", "")),
+            _date_atom_sort_key(row.get("Date", "")) or (9999, 99, 99),
+        ),
+    ):
+        for end in sorted(
+            admitted_candidates,
+            key=lambda row: _date_atom_sort_key(row.get("Date", "")) or (9999, 99, 99),
+        ):
+            elapsed_days = _elapsed_days_between_date_atoms(start.get("Date", ""), end.get("Date", ""))
+            if elapsed_days is None or elapsed_days <= 0:
+                continue
+            key = (start["Date"], end["Date"], start.get("SourceRow", ""), end.get("Field", ""))
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append(
+                {
+                    "SupportKind": "source_record_semantic_target_date_duration",
+                    "StartRole": "semantic_target_source_date",
+                    "StartRoleDisplay": "semantic target source date",
+                    "StartDate": start["Date"],
+                    "StartDateDisplay": _display_source_date_atom(start["Date"]),
+                    "StartSourceRow": start.get("SourceRow", ""),
+                    "StartSourceField": start.get("Field", ""),
+                    "StartSourceDisplay": start.get("Display", ""),
+                    "EndRole": "admitted_document_date",
+                    "EndRoleDisplay": "admitted document date",
+                    "EndDate": end["Date"],
+                    "EndDateDisplay": _display_source_date_atom(end["Date"]),
+                    "EndSourceRow": end.get("SourceRow", ""),
+                    "EndSourceField": end.get("Field", ""),
+                    "EndSourceDisplay": end.get("Display", ""),
+                    "ElapsedDays": str(elapsed_days),
+                    "Duration": f"{elapsed_days} day{'s' if elapsed_days != 1 else ''}",
+                    "MatchScore": "80",
+                    "SupportClass": "deterministic-source-record-summary",
+                }
+            )
+            break
+    return rows
 
 
 def _date_duration_question_spans(utterance: str) -> tuple[str, str]:
@@ -17231,7 +19237,74 @@ def _source_record_date_duration_candidates(runtime: CorePrologRuntime) -> list[
     for source_row, text_atom in text_by_row.items():
         for date_value in _date_atoms_from_free_text(text_atom):
             add(source_row=source_row, date_value=date_value, text_atom=text_atom)
+    default_year = _source_record_runtime_default_year(runtime)
+    for source_row, display in _source_record_text_display_by_row(runtime).items():
+        for date_value in _date_atoms_from_source_display(display, default_year=default_year):
+            add(
+                source_row=source_row,
+                field="source_record_text_display",
+                date_value=date_value,
+                text_atom=display,
+            )
     return candidates
+
+
+def _source_record_runtime_default_year(runtime: CorePrologRuntime) -> str:
+    years: list[str] = []
+    for fact in _runtime_fact_rows(runtime):
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if predicate.startswith("source_record_"):
+            continue
+        for arg in args:
+            match = re.search(r"(?:^|_)((?:19|20)\d{2})(?:_|$)", arg)
+            if match:
+                years.append(match.group(1))
+    for display in _source_record_text_display_by_row(runtime).values():
+        for match in re.finditer(r"(?:19|20)\d{2}", unicodedata.normalize("NFKC", str(display or ""))):
+            years.append(match.group(0))
+    if not years:
+        return ""
+    return Counter(years).most_common(1)[0][0]
+
+
+def _date_atoms_from_source_display(value: str, *, default_year: str = "") -> list[str]:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    matches: list[tuple[int, str]] = []
+
+    def add(start: int, year: int, month: str, day: str) -> None:
+        if not str(month).isdigit() or not str(day).isdigit():
+            return
+        date_atom = f"{int(year):04d}_{int(month):02d}_{int(day):02d}"
+        if _date_atom_sort_key(date_atom) is None:
+            return
+        matches.append((start, date_atom))
+
+    for match in re.finditer(
+        r"(?P<year>(?:19|20)\d{2})\s*\u5E74\s*(?P<month>\d{1,2})\s*"
+        r"\u6708\s*(?P<day>\d{1,2})\s*\u65E5",
+        text,
+    ):
+        add(match.start(), int(match.group("year")), match.group("month"), match.group("day"))
+    for match in re.finditer(
+        r"\u4EE4\u548C\s*(?P<year>\d{1,2})\s*\u5E74\s*(?P<month>\d{1,2})\s*"
+        r"\u6708\s*(?P<day>\d{1,2})\s*\u65E5",
+        text,
+    ):
+        add(match.start(), 2018 + int(match.group("year")), match.group("month"), match.group("day"))
+    if default_year and default_year.isdigit():
+        for match in re.finditer(
+            r"(?<!\d)(?P<month>\d{1,2})\s*\u6708\s*(?P<day>\d{1,2})\s*\u65E5",
+            text,
+        ):
+            add(match.start(), int(default_year), match.group("month"), match.group("day"))
+
+    out: list[str] = []
+    for _, date_atom in sorted(matches, key=lambda item: item[0]):
+        if date_atom in out:
+            continue
+        out.append(date_atom)
+    return out
 
 
 def _canonical_admitted_date_atom(value: str) -> str:
@@ -18643,6 +20716,626 @@ def _source_record_biography_date_sort_key(value: str) -> tuple[int, int, int]:
     return (9999, 99, 99)
 
 
+_OBLIGATION_BUNDLE_INTENT_TOKENS = {
+    "contract",
+    "contractual",
+    "finance",
+    "financial",
+    "monetary",
+    "obligation",
+    "obligations",
+    "payment",
+    "payments",
+    "term",
+    "terms",
+}
+
+_OBLIGATION_BUNDLE_FACT_TOKENS = {
+    "amount",
+    "award",
+    "budget",
+    "condition",
+    "cost",
+    "deadline",
+    "duration",
+    "expense",
+    "fee",
+    "fees",
+    "financial",
+    "guarantee",
+    "milestone",
+    "obligation",
+    "payment",
+    "percentage",
+    "premium",
+    "price",
+    "rate",
+    "requirement",
+    "total",
+    "value",
+}
+
+
+def _source_record_obligation_bundle_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+    query_results: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    intent = _source_record_obligation_bundle_intent(query_intents, runtime=runtime)
+    result_trigger = _source_record_obligation_bundle_result_trigger(query_results)
+    if not intent and not result_trigger:
+        return None
+    facts = _runtime_fact_rows(runtime)
+    fact_rows = _source_record_obligation_bundle_fact_rows(facts)
+    display_rows = _source_record_obligation_bundle_display_rows(runtime)
+    rows = [*fact_rows[:36], *display_rows[:48]]
+    if not rows:
+        return None
+    summary_parts = [
+        str(row.get("FullAnswerDisplay", "")).strip()
+        for row in rows
+        if str(row.get("FullAnswerDisplay", "")).strip()
+    ][:16]
+    summary = {
+        "SupportKind": "source_record_obligation_bundle_summary",
+        "SupportClass": "deterministic-source-record-summary",
+        "SourceRow": "source_record_obligation_bundle",
+        "FactSupportCount": str(len(fact_rows)),
+        "DisplaySupportCount": str(len(display_rows)),
+        "ObligationsDisplay": "; ".join(summary_parts),
+    }
+    return {
+        "query": "source_record_obligation_bundle_support(SourceRow, SupportKind, Predicate, FullAnswerDisplay).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_obligation_bundle_support",
+            "prolog_query": (
+                "source_record_obligation_bundle_support"
+                "(SourceRow, SupportKind, Predicate, FullAnswerDisplay)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows) + 1,
+            "variables": _row_variable_names([summary, *rows]),
+            "rows": [summary, *rows],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "activation": "structured_query_intent" if intent else "returned_obligation_predicates",
+                "note": (
+                    "query-only obligation-bundle support activated from structured query_intents; "
+                    "or from already-returned obligation/financial predicates; it collected admitted compiled fact predicates whose names expose obligation, "
+                    "financial, milestone, deadline, duration, or amount surfaces, plus admitted "
+                    "source-record display rows with visible numeric/currency/quantity surfaces; "
+                    "no raw utterance keyword gate or durable fact write was used"
+                ),
+                "query_intent": intent,
+                "result_trigger": result_trigger,
+            },
+        },
+        "derived_from_queries": [
+            "admitted compiled fact inventory",
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_obligation_bundle_intent(
+    query_intents: list[dict[str, Any]] | None,
+    *,
+    runtime: CorePrologRuntime | None = None,
+) -> dict[str, Any] | None:
+    list_intents: list[dict[str, Any]] = []
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        constraint_tokens = _query_intent_constraint_tokens(intent)
+        if intent_type in {"amount_inventory", "duration_quantity"}:
+            return intent
+        if intent_type != "list":
+            continue
+        list_intents.append(intent)
+        if len(constraint_tokens & _OBLIGATION_BUNDLE_INTENT_TOKENS) >= 2:
+            return intent
+    if runtime is not None:
+        for intent in list_intents:
+            if _source_record_obligation_bundle_semantic_anchor(runtime, intent=intent):
+                return intent
+    return None
+
+
+def _source_record_obligation_bundle_semantic_anchor(
+    runtime: CorePrologRuntime,
+    *,
+    intent: dict[str, Any],
+) -> bool:
+    fact_rows = _source_record_obligation_bundle_fact_rows(_runtime_fact_rows(runtime))
+    if len(fact_rows) < 3:
+        return False
+    section_window = _source_record_named_section_window_companion(
+        runtime,
+        utterance="",
+        query_intents=[intent],
+    )
+    if not section_window:
+        return False
+    display_by_row = _source_record_text_display_by_row(runtime)
+    rows = section_window.get("result", {}).get("rows") or []
+    numeric_quantity_rows = 0
+    for row in rows:
+        source_row = str(row.get("SourceRow", "")).strip()
+        display = display_by_row.get(source_row, "") or str(row.get("DisplayText", "") or row.get("TextAtom", ""))
+        score, _kind = _source_record_obligation_display_score(display)
+        if score > 0:
+            numeric_quantity_rows += 1
+    return numeric_quantity_rows >= 1
+
+
+def _source_record_obligation_bundle_result_trigger(
+    query_results: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    predicates: list[str] = []
+    seen: set[str] = set()
+    for query_result in query_results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if not predicate or predicate.startswith("source_record_"):
+            continue
+        predicate_tokens = set(_query_atom_tokens(predicate))
+        if not (predicate_tokens & _OBLIGATION_BUNDLE_FACT_TOKENS):
+            continue
+        if int(result.get("num_rows") or len(result.get("rows") or [])) <= 0:
+            continue
+        if predicate not in seen:
+            seen.add(predicate)
+            predicates.append(predicate)
+    if len(predicates) < 2:
+        return None
+    return {
+        "predicate_count": len(predicates),
+        "predicates": predicates[:12],
+    }
+
+
+_VALUE_SET_EXCLUSION_GENERIC_TARGET_TOKENS = {
+    "about",
+    "any",
+    "answer",
+    "based",
+    "basis",
+    "category",
+    "categories",
+    "class",
+    "classes",
+    "conduct",
+    "factor",
+    "factors",
+    "find",
+    "found",
+    "item",
+    "items",
+    "kind",
+    "kinds",
+    "list",
+    "listed",
+    "prior",
+    "record",
+    "records",
+    "source",
+    "status",
+    "statuses",
+    "subject",
+    "type",
+    "types",
+    "value",
+    "values",
+    "whether",
+}
+
+
+def _compiled_value_set_exclusion_companion(
+    *,
+    query_intents: list[dict[str, Any]] | None,
+    query_results: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    target_tokens = _compiled_value_set_target_tokens(query_intents)
+    if not target_tokens:
+        return None
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str]] = set()
+    for query_result in query_results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if not predicate or predicate.startswith("source_record_"):
+            continue
+        predicate_tokens = set(_query_atom_tokens(predicate))
+        if not predicate_tokens or not (predicate_tokens & target_tokens):
+            continue
+        values = _compiled_value_set_result_values(result)
+        if not values:
+            continue
+        value_tokens = set().union(*(set(_query_atom_tokens(value)) for value in values))
+        requested_tokens = sorted(
+            token
+            for token in target_tokens - predicate_tokens - _VALUE_SET_EXCLUSION_GENERIC_TARGET_TOKENS
+            if len(token) >= 3
+        )
+        if not requested_tokens:
+            continue
+        matched_tokens = sorted(set(requested_tokens) & value_tokens)
+        if matched_tokens:
+            continue
+        key = (predicate, ",".join(requested_tokens))
+        if key in seen:
+            continue
+        seen.add(key)
+        returned_values_display = "; ".join(_display_source_phrase(value) for value in values[:24])
+        requested_display = ", ".join(requested_tokens)
+        rows.append(
+            {
+                "SupportKind": "compiled_value_set_exclusion",
+                "SupportClass": "deterministic-compiled-value-set",
+                "Predicate": predicate,
+                "PredicateDisplay": _display_source_phrase(predicate),
+                "RequestedTokens": requested_display,
+                "ReturnedValues": ", ".join(values[:24]),
+                "ReturnedValuesDisplay": returned_values_display,
+                "FullAnswerDisplay": (
+                    f"{_display_source_phrase(predicate)} returned values: {returned_values_display}. "
+                    f"No returned value matched requested target tokens: {requested_display}."
+                ),
+            }
+        )
+    if not rows:
+        return None
+    return {
+        "query": "compiled_value_set_exclusion_support(Predicate, RequestedTokens, ReturnedValues).",
+        "result": {
+            "status": "success",
+            "predicate": "compiled_value_set_exclusion_support",
+            "prolog_query": (
+                "compiled_value_set_exclusion_support"
+                "(Predicate, RequestedTokens, ReturnedValues)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:24],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only value-set exclusion support compared structured query-intent "
+                    "target tokens with already-returned compiled predicate values; it does "
+                    "not inspect raw utterance text, parse source prose, or write durable facts"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": ["already-returned compiled predicate query results"],
+    }
+
+
+def _compiled_value_set_target_tokens(
+    query_intents: list[dict[str, Any]] | None,
+) -> set[str]:
+    tokens: set[str] = set()
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        if intent_type not in {"list", "premise_check", "verification", "verify", "scope_question"}:
+            continue
+        tokens.update(_query_intent_target_tokens(intent))
+    return {token for token in tokens if len(token) >= 3}
+
+
+def _compiled_value_set_result_values(result: dict[str, Any]) -> list[str]:
+    rows = result.get("rows") or []
+    variables = [
+        str(variable).strip()
+        for variable in result.get("variables", [])
+        if str(variable).strip() and not str(variable).strip().startswith("BoundArg")
+    ]
+    if len(variables) != 1:
+        return []
+    variable = variables[0]
+    values: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        value = str(row.get(variable, "")).strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        values.append(value)
+    return values
+
+
+_RETURNED_ACTION_SECTION_TRIGGER_TOKENS = {
+    "action",
+    "actions",
+    "basis",
+    "legal",
+    "order",
+    "orders",
+    "regulatory",
+    "requirement",
+    "requirements",
+    "sanction",
+    "sanctions",
+}
+
+def _source_record_returned_action_section_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query_intents: list[dict[str, Any]] | None,
+    query_results: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    if not _source_record_returned_action_section_active(query_intents):
+        return None
+    trigger = _source_record_returned_action_section_trigger(query_results)
+    if not trigger:
+        return None
+    row_meta = _source_record_row_metadata(runtime)
+    display_by_row = _source_record_text_display_by_row(runtime)
+    section_display_by_row = _source_record_section_display_by_row(runtime)
+    if not row_meta or not display_by_row:
+        return None
+    basis_tokens = set(trigger.get("basis_tokens") or [])
+    rows: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for source_row, meta in row_meta.items():
+        kind = str(meta.get("Kind", "")).strip()
+        if kind not in {"list_row", "anchored_line"}:
+            continue
+        section_atom = str(meta.get("SectionAtom", "")).strip()
+        section_tokens = set(_query_atom_tokens(section_atom))
+        matched_tokens = sorted(section_tokens & basis_tokens)
+        if not matched_tokens:
+            continue
+        display = display_by_row.get(source_row, "")
+        if not display or source_row in seen:
+            continue
+        seen.add(source_row)
+        rows.append(
+            {
+                "SupportKind": "source_record_returned_action_section",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": source_row,
+                "RowKind": kind,
+                "SectionAtom": section_atom,
+                "SectionDisplay": section_display_by_row.get(source_row, ""),
+                "MatchedReturnedTokens": ", ".join(matched_tokens),
+                "SourceTextDisplay": display,
+                "FullAnswerDisplay": _source_record_returned_action_section_full_display(
+                    section_display_by_row.get(source_row, ""),
+                    display,
+                ),
+            }
+        )
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SectionAtom", ""),
+        )
+    )
+    return {
+        "query": "source_record_returned_action_section_support(SectionAtom, SourceRow, SourceTextDisplay).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_returned_action_section_support",
+            "prolog_query": (
+                "source_record_returned_action_section_support"
+                "(SectionAtom, SourceRow, SourceTextDisplay)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:48],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only returned-action section support followed already-returned "
+                    "regulatory/action/legal-basis predicate values into source_record sections "
+                    "with matching normalized section tokens, then exposed admitted list rows; "
+                    "no raw utterance parsing, source-prose parsing, or durable fact write was used"
+                ),
+                "query_intents": query_intents or [],
+                "trigger": trigger,
+            },
+        },
+        "derived_from_queries": [
+            "already-returned compiled action/legal-basis predicate query results",
+            "source_record_row(SourceRow, Kind, Line, SectionAtom, Label).",
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_section_display(SourceRow, Text).",
+        ],
+    }
+
+
+def _source_record_returned_action_section_active(
+    query_intents: list[dict[str, Any]] | None,
+) -> bool:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        if str(intent.get("intent_type", "")).strip() in {"list", "comparison", "scope_question"}:
+            return True
+    return False
+
+
+def _source_record_returned_action_section_trigger(
+    query_results: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    basis_tokens: set[str] = set()
+    predicates: list[str] = []
+    for query_result in query_results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if not predicate or predicate.startswith("source_record_"):
+            continue
+        predicate_tokens = set(_query_atom_tokens(predicate))
+        if not (predicate_tokens & _RETURNED_ACTION_SECTION_TRIGGER_TOKENS):
+            continue
+        row_tokens: set[str] = set()
+        for result_row in result.get("rows") or []:
+            if not isinstance(result_row, dict):
+                continue
+            for value in _iter_scalar_values(result_row):
+                row_tokens.update(_query_atom_tokens(str(value)))
+        filtered_tokens = {token for token in row_tokens if token.isdigit() and len(token) >= 2}
+        if not filtered_tokens:
+            continue
+        predicates.append(predicate)
+        basis_tokens.update(filtered_tokens)
+    if not basis_tokens:
+        return None
+    return {
+        "predicates": sorted(set(predicates))[:12],
+        "basis_tokens": sorted(basis_tokens)[:80],
+    }
+
+
+def _source_record_section_display_by_row(runtime: CorePrologRuntime) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for row in _runtime_rows(runtime, "source_record_section_display(SourceRow, Text)."):
+        source_row = str(row.get("SourceRow", "")).strip()
+        display = str(row.get("Text", "")).strip()
+        if source_row and display and source_row not in out:
+            out[source_row] = display
+    return out
+
+
+def _source_record_returned_action_section_full_display(section_display: str, display: str) -> str:
+    section_display = str(section_display or "").strip()
+    display = str(display or "").strip()
+    if section_display and display:
+        return f"{section_display} - {display}"
+    return display or section_display
+
+
+def _source_record_obligation_bundle_fact_rows(
+    facts: list[dict[str, Any]],
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, tuple[str, ...]]] = set()
+    for fact in facts:
+        predicate = str(fact.get("predicate", "")).strip()
+        args = [str(item).strip() for item in fact.get("args", [])]
+        if not predicate or not args:
+            continue
+        if predicate.startswith("source_record_") or predicate.startswith("world_"):
+            continue
+        predicate_tokens = set(_query_atom_tokens(predicate))
+        if not predicate_tokens & _OBLIGATION_BUNDLE_FACT_TOKENS:
+            continue
+        if len(args) > 6:
+            continue
+        key = (predicate, tuple(args))
+        if key in seen:
+            continue
+        seen.add(key)
+        subject = args[0] if args else ""
+        argument_display = "; ".join(_display_source_phrase(arg) for arg in args)
+        predicate_display = _display_source_phrase(predicate)
+        rows.append(
+            {
+                "SupportKind": "compiled_obligation_fact",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": "",
+                "Predicate": predicate,
+                "PredicateDisplay": predicate_display,
+                "SubjectAtom": subject,
+                "SubjectDisplay": _display_source_phrase(subject),
+                "ArgumentsAtom": ", ".join(args),
+                "ArgumentsDisplay": argument_display,
+                "FullAnswerDisplay": f"{predicate_display}: {argument_display}",
+                "SupportScore": str(20 + len(predicate_tokens & _OBLIGATION_BUNDLE_FACT_TOKENS)),
+            }
+        )
+    rows.sort(
+        key=lambda row: (
+            row.get("SubjectAtom", ""),
+            row.get("Predicate", ""),
+            row.get("ArgumentsAtom", ""),
+        )
+    )
+    return rows
+
+
+def _source_record_obligation_bundle_display_rows(
+    runtime: CorePrologRuntime,
+) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        if surface_kind not in {"source_record_text_display", "source_record_cell_display"}:
+            continue
+        score, quantity_kind = _source_record_obligation_display_score(display)
+        if score <= 0:
+            continue
+        key = (source_row, cell_index, display)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "SupportKind": "source_record_obligation_quantity_display",
+                "SupportClass": "deterministic-source-record-summary",
+                "SourceRow": source_row,
+                "SourceSurfaceKind": surface_kind,
+                "SourceCellIndex": cell_index,
+                "Predicate": "source_record_display",
+                "QuantityKind": quantity_kind,
+                "SourceTextDisplay": display,
+                "FullAnswerDisplay": display,
+                "SupportScore": str(score),
+            }
+        )
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("SupportScore", "0") or "0"),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            _safe_int(row.get("SourceCellIndex")) or 9999,
+        )
+    )
+    return rows
+
+
+def _source_record_obligation_display_score(display: str) -> tuple[int, str]:
+    text = unicodedata.normalize("NFKC", str(display or ""))
+    if not re.search(r"\d", text):
+        return 0, ""
+    score = 0
+    kinds: list[str] = []
+    if re.search(r"[%€$£¥]", text):
+        score += 32
+        kinds.append("currency_or_percent")
+    if re.search(r"(?<!\d)\d{1,3}(?:[.,]\d{3})+(?:[.,]\d+)?(?!\d)", text):
+        score += 24
+        kinds.append("grouped_numeric")
+    if re.search(r"(?<!\d)\d+(?:[.,]\d+)?\s*[^\W\d_]{2,}", text, flags=re.UNICODE):
+        score += 16
+        kinds.append("unit_quantity")
+    if len(text) <= 320:
+        score += 4
+    if not kinds:
+        return 0, ""
+    return score, "+".join(kinds)
+
+
 def _source_record_amount_inventory_companion(
     runtime: CorePrologRuntime,
     *,
@@ -18721,6 +21414,226 @@ def _source_record_amount_inventory_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_table_delta_check_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    intent = _source_record_table_delta_check_intent(query_intents)
+    if not intent:
+        return None
+
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        candidate = _source_record_table_delta_check_row(
+            source_row=source_row,
+            surface_kind=surface_kind,
+            cell_index=cell_index,
+            display=display,
+        )
+        if candidate is None:
+            continue
+        key = (
+            candidate["SourceRow"],
+            candidate["SourceSurfaceKind"],
+            candidate["SourceTextDisplay"],
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(candidate)
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            0 if row.get("DeltaAgreement") == "false" else 1,
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SourceSurfaceKind", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_table_delta_check_summary",
+        "SourceRow": "source_record_table_delta_check",
+        "DeltaRowCount": str(len(rows)),
+        "DiscrepancyCount": str(sum(1 for row in rows if row.get("DeltaAgreement") == "false")),
+        "DeltaChecksDisplay": "; ".join(row.get("FullAnswerDisplay", "") for row in rows[:8]),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    return {
+        "query": "source_record_table_delta_check_support(SourceRow, PriorValue, CurrentValue, DerivedDelta).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_table_delta_check_support",
+            "prolog_query": (
+                "source_record_table_delta_check_support"
+                "(SourceRow, PriorValue, CurrentValue, DerivedDelta)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows) + 1,
+            "variables": _row_variable_names([summary, *rows]),
+            "rows": [summary, *rows[:80]],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only table delta support compared three numeric cells in admitted "
+                    "source-record display rows after structured change-amount intent activation; "
+                    "derived deltas are labeled calculations and no durable arithmetic fact was written"
+                ),
+                "query_intent": intent,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_table_delta_check_intent(
+    query_intents: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        if intent_type not in {"amount_inventory", "ratio_calculation"}:
+            continue
+        constraints = {
+            token
+            for value in intent.get("answer_constraints", []) or []
+            for token in _query_atom_tokens(str(value))
+        }
+        if constraints & {
+            "change",
+            "compare",
+            "comparison",
+            "delta",
+            "difference",
+            "increase",
+            "decrease",
+            "variance",
+            "yoy",
+        }:
+            return intent
+    return None
+
+
+def _source_record_table_delta_check_row(
+    *,
+    source_row: str,
+    surface_kind: str,
+    cell_index: str,
+    display: str,
+) -> dict[str, str] | None:
+    text = unicodedata.normalize("NFKC", str(display or "")).strip()
+    if "|" not in text:
+        return None
+    cells = [_clean_source_record_table_delta_cell(cell) for cell in text.strip().strip("|").split("|")]
+    numeric_cells: list[tuple[int, str, float]] = []
+    for index, cell in enumerate(cells):
+        parsed = _source_record_table_delta_cell_number(cell)
+        if parsed is None:
+            continue
+        numeric_cells.append((index, cell, parsed))
+    if len(numeric_cells) != 3:
+        return None
+    prior_index, prior_cell, prior_value = numeric_cells[0]
+    current_index, current_cell, current_value = numeric_cells[1]
+    stated_index, stated_cell, stated_delta = numeric_cells[2]
+    if prior_index >= current_index or current_index >= stated_index:
+        return None
+    derived_delta = current_value - prior_value
+    difference = derived_delta - stated_delta
+    tolerance = max(1.0, abs(derived_delta) * 0.02)
+    if abs(difference) > tolerance:
+        return None
+    percent = (derived_delta / prior_value * 100.0) if prior_value else None
+    row_label = " ".join(cell for index, cell in enumerate(cells) if index < prior_index).strip()
+    derived_display = _source_record_table_delta_number_display(derived_delta, signed=True)
+    stated_display = _source_record_table_delta_number_display(stated_delta, signed=True)
+    percent_display = ""
+    if percent is not None:
+        rounded_percent = round(percent, 1)
+        truncated_percent = int(percent * 10) / 10
+        percent_display = (
+            f"{percent:.4f}%"
+            f" (1dp rounded {_source_record_table_delta_percent_display(rounded_percent)}, "
+            f"1dp truncated {_source_record_table_delta_percent_display(truncated_percent)})"
+        )
+    agreement = abs(difference) < 0.0001
+    full_answer = (
+        f"{row_label + '; ' if row_label else ''}"
+        f"prior {_source_record_table_delta_number_display(prior_value)}; "
+        f"current {_source_record_table_delta_number_display(current_value)}; "
+        f"source-stated change {stated_display}; "
+        f"derived change {derived_display}"
+    )
+    if percent_display:
+        full_answer = f"{full_answer}; derived percent {percent_display}"
+    if not agreement:
+        full_answer = (
+            f"{full_answer}; source-stated/derived delta difference "
+            f"{_source_record_table_delta_number_display(difference, signed=True)}"
+        )
+    return {
+        "SupportKind": "source_record_table_delta_check",
+        "SourceRow": source_row,
+        "SourceSurfaceKind": surface_kind,
+        "SourceCellIndex": cell_index,
+        "SourceTextDisplay": text,
+        "RowLabelDisplay": row_label,
+        "PriorValue": _source_record_table_delta_number_display(prior_value),
+        "CurrentValue": _source_record_table_delta_number_display(current_value),
+        "SourceStatedDelta": stated_display,
+        "DerivedDelta": derived_display,
+        "DeltaAgreement": str(agreement).lower(),
+        "DeltaDifference": _source_record_table_delta_number_display(difference, signed=True),
+        "DerivedPercentDisplay": percent_display,
+        "FullAnswerDisplay": full_answer,
+        "SupportClass": "deterministic-source-record-summary",
+    }
+
+
+def _clean_source_record_table_delta_cell(value: str) -> str:
+    text = unicodedata.normalize("NFKC", str(value or "")).strip()
+    text = re.sub(r"[*_`]+", "", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _source_record_table_delta_cell_number(value: str) -> float | None:
+    text = _clean_source_record_table_delta_cell(value)
+    if not text or text in {"-", "－", "—", "–"}:
+        return None
+    negative = "△" in text or text.startswith("(")
+    match = re.search(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d+)?|[-+]?\d+(?:\.\d+)?", text)
+    if match is None:
+        return None
+    raw = match.group(0).replace(",", "")
+    try:
+        value = float(raw)
+    except ValueError:
+        return None
+    if negative and value > 0:
+        value = -value
+    return value
+
+
+def _source_record_table_delta_number_display(value: float, *, signed: bool = False) -> str:
+    sign = ""
+    if signed and value > 0:
+        sign = "+"
+    if abs(value - round(value)) < 0.0001:
+        return f"{sign}{int(round(value)):,}"
+    return f"{sign}{value:,.4f}".rstrip("0").rstrip(".")
+
+
+def _source_record_table_delta_percent_display(value: float) -> str:
+    return f"{value:.1f}%"
 
 
 def _source_record_ratio_calculation_companion(
@@ -19823,15 +22736,18 @@ def _source_record_dated_event_inventory_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:list|every|all|inventory)\b", text):
-        return None
-    if not re.search(
-        r"\b(?:dated event|dated events|event date|event dates|dates? in .*order|order .*dates?|"
-        r"dates? explicitly mentioned|explicitly mentioned dates?|all dates?)\b",
-        text,
-    ):
+    raw_inventory_trigger = bool(re.search(r"\b(?:list|every|all|inventory)\b", text)) and bool(
+        re.search(
+            r"\b(?:dated event|dated events|event date|event dates|dates? in .*order|order .*dates?|"
+            r"dates? explicitly mentioned|explicitly mentioned dates?|all dates?)\b",
+            text,
+        )
+    )
+    structured_intent = _source_record_dated_event_inventory_intent(query_intents)
+    if not raw_inventory_trigger and structured_intent is None:
         return None
 
     kind_by_row = {
@@ -19842,12 +22758,35 @@ def _source_record_dated_event_inventory_companion(
     support_rows: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
     sequence = 1
-    for source_row, text_atom in sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0])):
-        atom = _normalize_text_filter_atom(text_atom)
-        if _source_record_dated_event_skip_row(source_row=source_row, atom=atom, kind=kind_by_row.get(source_row, "")):
-            continue
-        for mention in _source_record_dated_event_mentions(atom):
-            key = (source_row, mention["DateDisplay"], mention["EventAtom"])
+    if raw_inventory_trigger:
+        for source_row, text_atom in sorted(_source_record_text_atoms(runtime), key=lambda item: _source_row_sort_key(item[0])):
+            atom = _normalize_text_filter_atom(text_atom)
+            if _source_record_dated_event_skip_row(source_row=source_row, atom=atom, kind=kind_by_row.get(source_row, "")):
+                continue
+            for mention in _source_record_dated_event_mentions(atom):
+                key = (source_row, mention["DateDisplay"], mention["EventAtom"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(
+                    {
+                        "SupportKind": "source_record_dated_event_inventory_item",
+                        "SequenceIndex": str(sequence),
+                        "EventDate": mention["DateAtom"],
+                        "EventDateDisplay": mention["DateDisplay"],
+                        "EventAtom": mention["EventAtom"],
+                        "EventDisplay": mention["EventDisplay"],
+                        "SourceRow": source_row,
+                        "SourceTextAtom": text_atom,
+                        "SourceTextDisplay": _display_source_phrase(text_atom),
+                        "FullAnswerDisplay": f"{sequence}. {mention['DateDisplay']}: {mention['EventDisplay']}",
+                        "SupportClass": "deterministic-source-record-summary",
+                    }
+                )
+                sequence += 1
+    if structured_intent is not None:
+        for mention in _source_record_display_date_inventory_mentions(runtime):
+            key = (mention["SourceRow"], mention["DateDisplay"], mention["EventAtom"])
             if key in seen:
                 continue
             seen.add(key)
@@ -19859,9 +22798,11 @@ def _source_record_dated_event_inventory_companion(
                     "EventDateDisplay": mention["DateDisplay"],
                     "EventAtom": mention["EventAtom"],
                     "EventDisplay": mention["EventDisplay"],
-                    "SourceRow": source_row,
-                    "SourceTextAtom": text_atom,
-                    "SourceTextDisplay": _display_source_phrase(text_atom),
+                    "SourceRow": mention["SourceRow"],
+                    "SourceSurfaceKind": mention["SourceSurfaceKind"],
+                    "SourceCellIndex": mention["SourceCellIndex"],
+                    "SourceTextAtom": "",
+                    "SourceTextDisplay": mention["SourceTextDisplay"],
                     "FullAnswerDisplay": f"{sequence}. {mention['DateDisplay']}: {mention['EventDisplay']}",
                     "SupportClass": "deterministic-source-record-summary",
                 }
@@ -19869,6 +22810,18 @@ def _source_record_dated_event_inventory_companion(
             sequence += 1
     if not support_rows:
         return None
+    reasoning_basis = {
+        "kind": "core-local",
+        "note": (
+            "query-only dated-event inventory support listed date mentions in admitted source-record "
+            "row order; no durable event fact was written"
+        ),
+        "activation": "structured_query_intent" if structured_intent is not None else "raw_inventory_question",
+    }
+    if raw_inventory_trigger:
+        reasoning_basis["utterance"] = utterance
+    if structured_intent is not None:
+        reasoning_basis["query_intent"] = structured_intent
     summary = {
         "SupportKind": "source_record_dated_event_inventory_summary",
         "SourceRow": "source_record_dated_event_inventory",
@@ -19887,17 +22840,144 @@ def _source_record_dated_event_inventory_companion(
             "num_rows": len(rows),
             "variables": _row_variable_names(rows),
             "rows": rows[:120],
-            "reasoning_basis": {
-                "kind": "core-local",
-                "note": (
-                    "query-only dated-event inventory support listed date mentions in admitted source-record "
-                    "row order; no durable event fact was written"
-                ),
-                "utterance": utterance,
-            },
+            "reasoning_basis": reasoning_basis,
         },
-        "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
+        "derived_from_queries": [
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
     }
+
+
+def _source_record_dated_event_inventory_intent(
+    query_intents: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip()
+        constraints = {
+            token
+            for value in intent.get("answer_constraints", []) or []
+            for token in _query_atom_tokens(str(value))
+        }
+        if intent_type != "ordered_labeled_entry" and not (
+            "chronology" in intent_type or "chronological" in constraints
+        ):
+            continue
+        targets = [str(item or "").strip() for item in intent.get("target_terms", []) or [] if str(item or "").strip()]
+        if len(targets) >= 2:
+            return intent
+    return None
+
+
+def _source_record_display_date_inventory_mentions(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in sorted(
+        _source_record_display_surfaces(runtime),
+        key=lambda item: (_source_row_sort_key(item[0]), item[1], item[2]),
+    ):
+        if surface_kind not in {"source_record_text_display", "source_record_cell_display"}:
+            continue
+        text = unicodedata.normalize("NFKC", str(display or "")).strip()
+        if not text or len(text) > 1200:
+            continue
+        for mention in _source_record_display_date_mentions(text):
+            key = (source_row, surface_kind, mention["DateDisplay"])
+            if key in seen:
+                continue
+            seen.add(key)
+            event_display = str(mention.get("EventDisplay") or text).strip() or text
+            out.append(
+                {
+                    "SourceRow": source_row,
+                    "SourceSurfaceKind": surface_kind,
+                    "SourceCellIndex": cell_index,
+                    "DateAtom": mention["DateAtom"],
+                    "DateDisplay": mention["DateDisplay"],
+                    "EventAtom": _normalize_text_filter_atom(event_display)[:160],
+                    "EventDisplay": event_display,
+                    "SourceTextDisplay": text,
+                }
+            )
+    return out
+
+
+def _source_record_display_date_mentions(text: str) -> list[dict[str, str]]:
+    mentions: list[dict[str, str]] = []
+    seen: set[tuple[int, str]] = set()
+    for match in re.finditer(r"(?<!\d)(?P<year>(?:19|20)\d{2})[-_/](?P<month>\d{1,2})[-_/](?P<day>\d{1,2})(?!\d)", text):
+        year = match.group("year")
+        month = match.group("month").lstrip("0") or "0"
+        day = match.group("day").lstrip("0") or "0"
+        key = (match.start(), f"{year}_{month}_{day}")
+        if key in seen:
+            continue
+        seen.add(key)
+        mentions.append(
+            {
+                "DateAtom": f"{year}_{month.zfill(2)}_{day.zfill(2)}",
+                "DateDisplay": match.group(0),
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+            }
+        )
+    text_date_pattern = re.compile(
+        r"(?<![A-Za-z0-9])(?P<day>[0-3]?\d)(?![A-Za-z0-9])"
+        r"(?P<middle>[^\d]{1,48}?)"
+        r"(?P<year>(?:19|20)\d{2})(?!\d)",
+        flags=re.UNICODE,
+    )
+    for match in text_date_pattern.finditer(text):
+        day = int(match.group("day"))
+        if day < 1 or day > 31:
+            continue
+        middle = match.group("middle")
+        if not re.search(r"[^\W\d_]", middle, flags=re.UNICODE):
+            continue
+        if re.search(r"[-_/]{2,}", middle):
+            continue
+        snippet = re.sub(r"\s+", " ", match.group(0)).strip(" ,.;:")
+        key = (match.start(), snippet.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        mentions.append(
+            {
+                "DateAtom": f"{match.group('year')}_day_{day:02d}",
+                "DateDisplay": snippet,
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+            }
+        )
+    return mentions
+
+
+def _source_record_display_date_context(text: str, start: int, end: int, *, max_chars: int = 420) -> str:
+    value = unicodedata.normalize("NFKC", str(text or ""))
+    if not value:
+        return ""
+    start = max(0, min(start, len(value)))
+    end = max(start, min(end, len(value)))
+    left_candidates = [value.rfind(mark, 0, start) for mark in ("\n", ";", ".")]
+    left = max(left_candidates)
+    right_candidates = [pos for mark in ("\n", ";", ".") if (pos := value.find(mark, end)) >= 0]
+    right = min(right_candidates) + 1 if right_candidates else len(value)
+    context = re.sub(r"\s+", " ", value[left + 1 : right]).strip(" -\t\r\n")
+    if len(context) <= max_chars:
+        return context
+
+    left_window = value[max(0, start - max_chars // 2) : start]
+    right_window = value[end : min(len(value), end + max_chars // 2)]
+    context = f"{left_window}{value[start:end]}{right_window}"
+    context = re.sub(r"\s+", " ", context).strip(" -\t\r\n")
+    if len(context) <= max_chars:
+        return context
+    overflow = len(context) - max_chars
+    trim_left = overflow // 2
+    trim_right = overflow - trim_left
+    context = context[trim_left : len(context) - trim_right].strip(" -\t\r\n")
+    return context
 
 
 def _source_record_dated_event_skip_row(*, source_row: str, atom: str, kind: str) -> bool:
@@ -20071,6 +23151,319 @@ def _source_record_negative_assertion_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+_CURRENT_ADJUDICATION_INTENT_TYPES = {
+    "status",
+    "premise_check",
+    "verification",
+    "verify",
+    "decision",
+    "classification",
+}
+
+_CURRENT_ADJUDICATION_PREDICATES = {
+    "case_metadata",
+    "procedural_step",
+    "order_annulment",
+    "order_injunction",
+    "cited_article",
+    "article_applied_to",
+}
+
+
+def _current_adjudication_disposition_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    if not _current_adjudication_intent_active(query_intents):
+        return None
+    predicate_names = {str(fact.get("predicate", "")).strip() for fact in _runtime_fact_rows(runtime)}
+    if "procedural_step" not in predicate_names:
+        return None
+    if not (predicate_names & (_CURRENT_ADJUDICATION_PREDICATES - {"case_metadata", "procedural_step"})):
+        return None
+
+    case_rows = _current_adjudication_case_rows(runtime)
+    step_rows = _current_adjudication_step_rows(runtime)
+    order_rows = _current_adjudication_order_rows(runtime)
+    article_rows = _current_adjudication_article_rows(runtime)
+    if not any((case_rows, step_rows, order_rows, article_rows)):
+        return None
+
+    latest_case_date = _latest_date_atom(row.get("CaseDate", "") for row in case_rows)
+    latest_step_date = _latest_date_atom(row.get("StepDate", "") for row in step_rows)
+    latest_steps = [row for row in step_rows if row.get("StepDate") == latest_step_date] if latest_step_date else []
+    for row in step_rows:
+        row["ChronologyRole"] = "latest_procedural_step" if row.get("StepDate") == latest_step_date else "prior_procedural_step"
+        if latest_case_date and row.get("StepDate") == latest_case_date:
+            row["CaseDateRole"] = "matches_case_metadata_date"
+
+    summary = {
+        "SupportKind": "current_adjudication_disposition_summary",
+        "SupportClass": "deterministic-adjudication-summary",
+        "CaseDates": ",".join(_ordered_atom_unique([row.get("CaseDate", "") for row in case_rows if row.get("CaseDate")])),
+        "LatestCaseDate": latest_case_date,
+        "LatestCaseDateDisplay": _display_source_date_atom(latest_case_date) if latest_case_date else "",
+        "LatestStepDate": latest_step_date,
+        "LatestStepDateDisplay": _display_source_date_atom(latest_step_date) if latest_step_date else "",
+        "LatestStepIds": ",".join(row.get("StepID", "") for row in latest_steps if row.get("StepID")),
+        "LatestStepOutcomes": ",".join(_ordered_atom_unique([row.get("Outcome", "") for row in latest_steps if row.get("Outcome")])),
+        "OrderPredicates": ",".join(_ordered_atom_unique([row.get("SourcePredicate", "") for row in order_rows if row.get("SourcePredicate")])),
+        "LegalBasisArticles": ",".join(_ordered_atom_unique([row.get("Article", "") for row in article_rows if row.get("Article")])),
+        "LegalBasisApplications": ",".join(_ordered_atom_unique([row.get("Application", "") for row in article_rows if row.get("Application")])),
+    }
+    sorted_steps = sorted(
+        step_rows,
+        key=lambda row: (_reverse_date_sort_key(row.get("StepDate", "")), row.get("StepID", "")),
+    )[:14]
+    sorted_articles = sorted(article_rows, key=_current_adjudication_article_sort_key)[:40]
+    rows = [
+        summary,
+        *sorted(case_rows, key=lambda row: _reverse_date_sort_key(row.get("CaseDate", ""))),
+        *sorted_steps,
+        *order_rows,
+        *sorted_articles,
+    ]
+    return {
+        "query": "current_adjudication_disposition_support(SupportKind, SourcePredicate, Subject, Value).",
+        "result": {
+            "status": "success",
+            "predicate": "current_adjudication_disposition_support",
+            "prolog_query": "current_adjudication_disposition_support(SupportKind, SourcePredicate, Subject, Value).",
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:96],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only current-adjudication disposition support inventoried admitted "
+                    "case metadata, procedural steps, order rows, cited articles, and article "
+                    "applications for status/premise questions; no durable fact was written"
+                ),
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "case_metadata(Case, Court, Date, Identifier, Type).",
+            "procedural_step(Step, Court, Date, Type, Outcome).",
+            "order_annulment(Order, Act).",
+            "order_injunction(Order, Recipient, Obligation).",
+            "cited_article(Article, Code).",
+            "article_applied_to(Article, Subject, Application).",
+            "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_text_display(SourceRow, TextDisplay).",
+        ],
+    }
+
+
+def _current_adjudication_intent_active(query_intents: list[dict[str, Any]] | None) -> bool:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        intent_type = str(intent.get("intent_type", "")).strip().casefold()
+        if intent_type in _CURRENT_ADJUDICATION_INTENT_TYPES:
+            return True
+    return False
+
+
+def _current_adjudication_case_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "case_metadata(Case, Court, Date, Identifier, Type)."):
+        out.append(
+            {
+                "SupportKind": "case_metadata",
+                "SupportClass": "deterministic-adjudication-summary",
+                "SourcePredicate": "case_metadata",
+                "CaseID": str(row.get("Case", "")),
+                "Court": str(row.get("Court", "")),
+                "CourtDisplay": _display_source_phrase(row.get("Court", "")),
+                "CaseDate": str(row.get("Date", "")),
+                "CaseDateDisplay": _display_source_date_atom(str(row.get("Date", ""))),
+                "Identifier": str(row.get("Identifier", "")),
+                "MatterType": str(row.get("Type", "")),
+                "MatterTypeDisplay": _display_source_phrase(row.get("Type", "")),
+            }
+        )
+    return _dedupe_current_adjudication_rows(out)
+
+
+def _current_adjudication_step_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "procedural_step(Step, Court, Date, Type, Outcome)."):
+        out.append(
+            {
+                "SupportKind": "procedural_step",
+                "SupportClass": "deterministic-adjudication-summary",
+                "SourcePredicate": "procedural_step",
+                "StepID": str(row.get("Step", "")),
+                "Court": str(row.get("Court", "")),
+                "CourtDisplay": _display_source_phrase(row.get("Court", "")),
+                "StepDate": str(row.get("Date", "")),
+                "StepDateDisplay": _display_source_date_atom(str(row.get("Date", ""))),
+                "StepType": str(row.get("Type", "")),
+                "StepTypeDisplay": _display_source_phrase(row.get("Type", "")),
+                "Outcome": str(row.get("Outcome", "")),
+                "OutcomeDisplay": _display_source_phrase(row.get("Outcome", "")),
+            }
+        )
+    return _dedupe_current_adjudication_rows(out)
+
+
+def _current_adjudication_order_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "order_annulment(Order, Act)."):
+        out.append(
+            {
+                "SupportKind": "order_annulment",
+                "SupportClass": "deterministic-adjudication-summary",
+                "SourcePredicate": "order_annulment",
+                "OrderID": str(row.get("Order", "")),
+                "Subject": str(row.get("Act", "")),
+                "SubjectDisplay": _display_source_phrase(row.get("Act", "")),
+            }
+        )
+    for row in _runtime_rows(runtime, "order_injunction(Order, Recipient, Obligation)."):
+        out.append(
+            {
+                "SupportKind": "order_injunction",
+                "SupportClass": "deterministic-adjudication-summary",
+                "SourcePredicate": "order_injunction",
+                "OrderID": str(row.get("Order", "")),
+                "Recipient": str(row.get("Recipient", "")),
+                "RecipientDisplay": _display_source_phrase(row.get("Recipient", "")),
+                "Obligation": str(row.get("Obligation", "")),
+                "ObligationDisplay": _display_source_phrase(row.get("Obligation", "")),
+            }
+        )
+    return _dedupe_current_adjudication_rows(out)
+
+
+def _current_adjudication_article_rows(runtime: CorePrologRuntime) -> list[dict[str, str]]:
+    source_rows_by_article = _source_record_rows_by_article_atom(runtime)
+    out: list[dict[str, str]] = []
+    for row in _runtime_rows(runtime, "cited_article(Article, Code)."):
+        article = str(row.get("Article", ""))
+        source_rows = source_rows_by_article.get(article, [])
+        entry = {
+            "SupportKind": "cited_article",
+            "SupportClass": "deterministic-adjudication-summary",
+            "SourcePredicate": "cited_article",
+            "Article": article,
+            "ArticleDisplay": _display_source_phrase(article),
+            "Code": str(row.get("Code", "")),
+            "CodeDisplay": _display_source_phrase(row.get("Code", "")),
+        }
+        entry.update(_current_adjudication_article_source_fields(source_rows))
+        out.append(entry)
+    for row in _runtime_rows(runtime, "article_applied_to(Article, Subject, Application)."):
+        article = str(row.get("Article", ""))
+        source_rows = source_rows_by_article.get(article, [])
+        entry = {
+            "SupportKind": "article_applied_to",
+            "SupportClass": "deterministic-adjudication-summary",
+            "SourcePredicate": "article_applied_to",
+            "Article": article,
+            "ArticleDisplay": _display_source_phrase(article),
+            "Subject": str(row.get("Subject", "")),
+            "SubjectDisplay": _display_source_phrase(row.get("Subject", "")),
+            "Application": str(row.get("Application", "")),
+            "ApplicationDisplay": _display_source_phrase(row.get("Application", "")),
+        }
+        entry.update(_current_adjudication_article_source_fields(source_rows))
+        out.append(entry)
+    return sorted(_dedupe_current_adjudication_rows(out), key=_current_adjudication_article_sort_key)
+
+
+def _current_adjudication_article_sort_key(row: dict[str, str]) -> tuple[int, int, tuple[int, ...], str, str]:
+    predicate = str(row.get("SourcePredicate", ""))
+    application = str(row.get("Application", "")).strip()
+    if predicate == "article_applied_to":
+        predicate_rank = 0
+    elif predicate == "cited_article":
+        predicate_rank = 1
+    else:
+        predicate_rank = 2
+    if application and application != "definition":
+        application_rank = 0
+    elif application:
+        application_rank = 1
+    else:
+        application_rank = 2
+    source_row = str(row.get("ArticleSourceRows", "")).split(",", 1)[0]
+    return (
+        predicate_rank,
+        application_rank,
+        _source_row_sort_key(source_row),
+        str(row.get("Article", "")),
+        str(row.get("Subject", "")),
+    )
+
+
+def _source_record_rows_by_article_atom(runtime: CorePrologRuntime) -> dict[str, list[dict[str, str]]]:
+    displays = _source_record_text_display_by_row(runtime)
+    out: dict[str, list[dict[str, str]]] = {}
+    article_atoms = {
+        str(row.get("Article", "")).strip()
+        for query in ("cited_article(Article, Code).", "article_applied_to(Article, Subject, Application).")
+        for row in _runtime_rows(runtime, query)
+        if str(row.get("Article", "")).strip()
+    }
+    if not article_atoms:
+        return out
+    for source_row, text_atom in _source_record_text_atoms(runtime):
+        normalized = str(text_atom or "").casefold()
+        for article in article_atoms:
+            if str(article).casefold() not in normalized:
+                continue
+            out.setdefault(article, []).append(
+                {
+                    "SourceRow": source_row,
+                    "SourceTextAtom": text_atom,
+                    "SourceTextDisplay": displays.get(source_row, _display_source_phrase(text_atom)),
+                }
+            )
+    for article, rows in list(out.items()):
+        rows.sort(key=lambda row: _source_row_sort_key(row.get("SourceRow", "")))
+        out[article] = rows[:3]
+    return out
+
+
+def _current_adjudication_article_source_fields(source_rows: list[dict[str, str]]) -> dict[str, str]:
+    if not source_rows:
+        return {}
+    return {
+        "ArticleSourceRows": ",".join(row.get("SourceRow", "") for row in source_rows if row.get("SourceRow")),
+        "ArticleSourceTextDisplay": " | ".join(
+            row.get("SourceTextDisplay", "") for row in source_rows if row.get("SourceTextDisplay")
+        ),
+    }
+
+
+def _latest_date_atom(values: Iterable[Any]) -> str:
+    dates = [str(value or "").strip() for value in values if _date_atom_sort_key(str(value or "").strip()) is not None]
+    if not dates:
+        return ""
+    return max(dates, key=lambda value: _date_atom_sort_key(value) or (0, 0, 0))
+
+
+def _reverse_date_sort_key(value: Any) -> tuple[int, int, int]:
+    sort_key = _date_atom_sort_key(str(value or "").strip()) or (0, 0, 0)
+    return tuple(-int(part) for part in sort_key)
+
+
+def _dedupe_current_adjudication_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    seen: set[tuple[tuple[str, str], ...]] = set()
+    for row in rows:
+        key = tuple(sorted((str(k), str(v)) for k, v in row.items()))
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(row)
+    return out
 
 
 def _source_record_negative_assertion_question(text: str) -> bool:
@@ -20770,6 +24163,239 @@ def _source_record_named_role_roster_text_entries(text: str) -> list[dict[str, s
             }
         )
     return out
+
+
+def _source_record_parenthetical_role_name_companion(
+    runtime: CorePrologRuntime,
+    *,
+    query_results: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    role_rows = _person_role_rows_from_query_results(query_results)
+    if not role_rows:
+        return None
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for source_row, display in sorted(
+        _source_record_text_display_by_row(runtime).items(),
+        key=lambda item: _source_row_sort_key(item[0]),
+    ):
+        for entry in _source_record_parenthetical_role_name_entries(display):
+            key = (
+                source_row,
+                entry["EntityDisplay"],
+                entry["RoleDisplay"],
+                entry["PersonDisplay"],
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            support_rows.append(
+                {
+                    "SupportKind": "source_record_parenthetical_role_name_item",
+                    "SupportClass": "deterministic-source-record-summary",
+                    "SourceRow": source_row,
+                    "EntityDisplay": entry["EntityDisplay"],
+                    "RoleDisplay": entry["RoleDisplay"],
+                    "PersonDisplay": entry["PersonDisplay"],
+                    "ParentheticalRemainderDisplay": entry.get("ParentheticalRemainderDisplay", ""),
+                    "EntityPersonDisplay": _source_record_parenthetical_entity_person_display(entry),
+                    "RemainderPersonDisplay": _source_record_parenthetical_remainder_person_display(entry),
+                    "SourceTextDisplay": display,
+                    "FullAnswerDisplay": _source_record_parenthetical_role_name_full_display(entry),
+                }
+            )
+    if not support_rows:
+        return None
+
+    role_atoms = sorted(
+        {
+            str(row.get("Role", "")).strip()
+            for row in role_rows
+            if str(row.get("Role", "")).strip()
+        }
+    )
+    scope_atoms = sorted(
+        {
+            str(row.get("Scope", "")).strip()
+            for row in role_rows
+            if str(row.get("Scope", "")).strip()
+        }
+    )
+    summary_display = "; ".join(row["FullAnswerDisplay"] for row in support_rows)
+    rows = [
+        *support_rows,
+        {
+            "SupportKind": "source_record_parenthetical_role_name_summary",
+            "SupportClass": "deterministic-source-record-summary",
+            "SourceRow": "source_record_parenthetical_role_name",
+            "EntryCount": str(len(support_rows)),
+            "RoleAtomHints": ",".join(role_atoms),
+            "ScopeAtomHints": ",".join(scope_atoms),
+            "RosterDisplay": summary_display,
+            "FullAnswerDisplay": summary_display,
+        },
+    ]
+    return {
+        "query": "source_record_parenthetical_role_name_support(SourceRow, EntityDisplay, RoleDisplay, PersonDisplay).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_parenthetical_role_name_support",
+            "prolog_query": (
+                "source_record_parenthetical_role_name_support"
+                "(SourceRow, EntityDisplay, RoleDisplay, PersonDisplay)."
+            ),
+            "result_type": "table",
+            "num_rows": len(rows),
+            "variables": _row_variable_names(rows),
+            "rows": rows[:80],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only parenthetical role/name support activated only after admitted "
+                    "person_role query results; it parsed names and roles from admitted "
+                    "source_record_text_display rows and did not write durable identity facts"
+                ),
+                "person_role_row_count": len(role_rows),
+            },
+        },
+        "derived_from_queries": [
+            "person_role(Person, Role, Scope).",
+            "source_record_text_display(SourceRow, Text).",
+        ],
+    }
+
+
+def _person_role_rows_from_query_results(query_results: list[dict[str, Any]]) -> list[dict[str, str]]:
+    rows_out: list[dict[str, str]] = []
+    for item in query_results or []:
+        result = item.get("result") if isinstance(item, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        if str(result.get("predicate", "")).strip() != "person_role":
+            continue
+        variables = [str(value) for value in result.get("variables", []) or []]
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            person = str(row.get("Person", "") or row.get("X", "") or row.get("Arg1", "")).strip()
+            role = str(row.get("Role", "") or row.get("Y", "") or row.get("Arg2", "")).strip()
+            scope = (
+                str(row.get("Scope", "") or row.get("Context", "") or row.get("Relaxed3", "") or row.get("Z", "")).strip()
+            )
+            if not scope and len(variables) >= 3:
+                scope = str(row.get(variables[2], "")).strip()
+            if not person or not role:
+                continue
+            rows_out.append({"Person": person, "Role": role, "Scope": scope})
+    return rows_out
+
+
+def _source_record_parenthetical_role_name_entries(display: str) -> list[dict[str, str]]:
+    text = _clean_source_record_alias_display_text(display)
+    if len(text) < 8:
+        return []
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for match in re.finditer(
+        r"(?P<left>[^()\[\]\uFF08\uFF09\uFF3B\uFF3D]{1,260})"
+        r"[\(\uFF08\[](?P<inside>[^()\[\]\uFF08\uFF09\uFF3B\uFF3D]{3,180})[\)\uFF09\]]",
+        text,
+    ):
+        entity = _source_record_parenthetical_subject_span(match.group("left"))
+        parsed = _source_record_parenthetical_role_name_from_inside(match.group("inside"))
+        if not entity or parsed is None:
+            continue
+        key = (entity, parsed["RoleDisplay"], parsed["PersonDisplay"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(
+            {
+                "EntityDisplay": entity,
+                "RoleDisplay": parsed["RoleDisplay"],
+                "PersonDisplay": parsed["PersonDisplay"],
+                "ParentheticalRemainderDisplay": parsed.get("ParentheticalRemainderDisplay", ""),
+            }
+        )
+    return rows
+
+
+def _source_record_parenthetical_subject_span(value: str) -> str:
+    text = _clean_source_record_alias_span(value)
+    parts = [
+        part.strip()
+        for part in re.split(r"[\n\r.;:!?\u3002\uFF01\uFF1F\u3001\uFF0C\uFF1B\uFF1A]\s*", text)
+        if part.strip()
+    ]
+    if parts:
+        text = parts[-1]
+    text = _clean_source_record_alias_span(text)
+    words = text.split()
+    if len(words) > 14:
+        text = " ".join(words[-14:])
+    compact = _compact_unicode_reference_text(text)
+    if len(compact) < 2:
+        return ""
+    return text
+
+
+def _source_record_parenthetical_role_name_from_inside(value: str) -> dict[str, str] | None:
+    text = _clean_source_record_alias_span(value)
+    if not text:
+        return None
+    parts = [
+        part.strip()
+        for part in re.split(r"[,;\u3001\uFF0C\uFF1B]", text, maxsplit=1)
+        if part.strip()
+    ]
+    main = parts[0] if parts else text
+    remainder = parts[1] if len(parts) > 1 else ""
+    tokens = main.split()
+    if len(tokens) < 2:
+        return None
+    has_non_ascii_name_token = any(_contains_non_ascii_letter(token) for token in tokens[-2:])
+    if len(tokens) < 4 and not has_non_ascii_name_token:
+        return None
+    person_tokens = tokens[-2:] if len(tokens) >= 3 else tokens[-1:]
+    role_tokens = tokens[:-len(person_tokens)]
+    if not role_tokens:
+        return None
+    role = _clean_source_record_alias_span(" ".join(role_tokens))
+    person = _clean_source_record_alias_span(" ".join(person_tokens))
+    if not role or not person:
+        return None
+    return {
+        "RoleDisplay": role,
+        "PersonDisplay": person,
+        "ParentheticalRemainderDisplay": _clean_source_record_alias_span(remainder),
+    }
+
+
+def _source_record_parenthetical_role_name_full_display(entry: dict[str, str]) -> str:
+    parts = [
+        entry.get("EntityDisplay", ""),
+        entry.get("PersonDisplay", ""),
+        entry.get("RoleDisplay", ""),
+        entry.get("ParentheticalRemainderDisplay", ""),
+    ]
+    return " / ".join(part for part in parts if part)
+
+
+def _source_record_parenthetical_entity_person_display(entry: dict[str, str]) -> str:
+    return " ".join(
+        part
+        for part in [entry.get("EntityDisplay", ""), entry.get("PersonDisplay", "")]
+        if part
+    )
+
+
+def _source_record_parenthetical_remainder_person_display(entry: dict[str, str]) -> str:
+    return " ".join(
+        part
+        for part in [entry.get("ParentheticalRemainderDisplay", ""), entry.get("PersonDisplay", "")]
+        if part
+    )
 
 
 def _first_identifier_number(value: str) -> str:
@@ -21613,6 +25239,171 @@ def _source_record_postal_state_mentions(value: str) -> list[dict[str, str]]:
             continue
         city = tokens[index - 1] if index > 0 else ""
         out.append({"StateCode": token, "PostalCode": postal_code, "CityAtom": city})
+    return out
+
+
+def _source_record_address_line_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    del utterance
+    intent = _source_record_address_line_intent(query_intents)
+    if not intent:
+        return None
+    rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for source_row, surface_kind, cell_index, display in _source_record_display_surfaces(runtime):
+        if surface_kind not in {"source_record_text_display", "source_record_cell_display"}:
+            continue
+        candidate = _source_record_address_line_candidate(
+            source_row=source_row,
+            surface_kind=surface_kind,
+            cell_index=cell_index,
+            display=display,
+        )
+        if candidate is None:
+            continue
+        key = (candidate["SourceRow"], candidate["SourceSurfaceKind"], candidate["AddressDisplay"])
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append(candidate)
+    if not rows:
+        return None
+    rows.sort(
+        key=lambda row: (
+            -int(row.get("AddressScore", "0")),
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("SourceSurfaceKind", ""),
+        )
+    )
+    summary = {
+        "SupportKind": "source_record_address_line_summary",
+        "SourceRow": "source_record_address_line",
+        "AddressLineCount": str(len(rows)),
+        "AddressesDisplay": "; ".join(row.get("FullAnswerDisplay", "") for row in rows[:12]),
+        "SupportClass": "deterministic-source-record-summary",
+    }
+    return {
+        "query": "source_record_address_line_support(SourceRow, AddressDisplay, PostalCodeCandidates).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_address_line_support",
+            "prolog_query": "source_record_address_line_support(SourceRow, AddressDisplay, PostalCodeCandidates).",
+            "result_type": "table",
+            "num_rows": len(rows) + 1,
+            "variables": _row_variable_names([summary, *rows]),
+            "rows": [summary, *rows[:40]],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only address-line support collected international postal-address-like "
+                    "admitted source display rows after structured address intent activation; "
+                    "no durable address fact was written"
+                ),
+                "query_intent": intent,
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_cell_display(SourceRow, CellIndex, Text).",
+        ],
+    }
+
+
+def _source_record_address_line_intent(
+    query_intents: list[dict[str, Any]] | None,
+) -> dict[str, Any] | None:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        constraints = {
+            token
+            for value in intent.get("answer_constraints", []) or []
+            for token in _query_atom_tokens(str(value))
+        }
+        if constraints & {"address", "location", "located"}:
+            return intent
+        target_tokens = _query_intent_target_tokens(intent)
+        if target_tokens & {"address", "location", "located"}:
+            return intent
+    return None
+
+
+def _source_record_address_line_candidate(
+    *,
+    source_row: str,
+    surface_kind: str,
+    cell_index: str,
+    display: str,
+) -> dict[str, str] | None:
+    text = unicodedata.normalize("NFKC", str(display or "")).strip()
+    if not text or "|" in text or len(text) > 1000:
+        return None
+    postal_codes = _source_record_structured_address_postal_candidates(text)
+    if not postal_codes:
+        return None
+    short_numbers = [
+        match.group(0)
+        for match in re.finditer(r"(?<!\d)\d{1,3}(?:[A-Za-zªº])?(?!\d)", text)
+    ]
+    alpha_words = [
+        match.group(0)
+        for match in re.finditer(r"[^\W\d_]{3,}", text, flags=re.UNICODE)
+    ]
+    if not short_numbers or len(alpha_words) < 4:
+        return None
+    score = 20 + (8 * len(postal_codes)) + min(12, len(alpha_words))
+    if re.search(r"[,.;:]", text):
+        score += 4
+    return {
+        "SupportKind": "source_record_address_line",
+        "SourceRow": source_row,
+        "SourceSurfaceKind": surface_kind,
+        "SourceCellIndex": cell_index,
+        "AddressDisplay": text,
+        "PostalCodeCandidates": ",".join(postal_codes),
+        "NumberCandidates": ",".join(short_numbers[:8]),
+        "AddressScore": str(score),
+        "FullAnswerDisplay": text,
+        "SupportClass": "deterministic-source-record-summary",
+    }
+
+
+def _source_record_international_postal_candidates(value: str) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"(?<!\d)\d{4,6}(?!\d)", unicodedata.normalize("NFKC", str(value or ""))):
+        candidate = match.group(0)
+        if re.fullmatch(r"(?:19|20)\d{2}", candidate):
+            continue
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        out.append(candidate)
+    return out
+
+
+def _source_record_structured_address_postal_candidates(value: str) -> list[str]:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    out: list[str] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"(?<!\d)\d{4,6}(?!\d)", text):
+        candidate = match.group(0)
+        if re.fullmatch(r"(?:19|20)\d{2}", candidate):
+            continue
+        before = text[max(0, match.start() - 90) : match.start()]
+        after = text[match.end() : match.end() + 50]
+        if not re.search(r"\d{1,4}[A-Za-zªº]?(?:\s+(?:[^\W\d_]{2,}|\d{1,3}[A-Za-zªº]?)){0,5}\s*[,;]?\s*$", before, flags=re.UNICODE):
+            continue
+        if not re.match(r"\s*[,;]?\s*[^\W\d_]{2,}", after, flags=re.UNICODE):
+            continue
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        out.append(candidate)
     return out
 
 
@@ -23544,15 +27335,21 @@ def _source_record_document_event_chronology_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
     text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:order|sequence|chronological|earliest|latest)\b", text):
+    chronology_intent = _first_query_intent(query_intents, "document_chronology") is not None
+    if not chronology_intent and not re.search(r"\b(?:order|sequence|chronological|earliest|latest)\b", text):
         return None
-    if not re.search(r"\b(?:event|events|execution|executed|signing|signed|filing|filed|agreement|amendment)\b", text):
+    if not chronology_intent and not re.search(
+        r"\b(?:event|events|execution|executed|signing|signed|filing|filed|agreement|amendment)\b",
+        text,
+    ):
         return None
 
     facts = _runtime_fact_rows(runtime)
     source_text_atoms = _source_record_text_atoms(runtime)
+    text_display_by_row = _source_record_text_display_by_row(runtime)
     support_rows: list[dict[str, str]] = []
     structured_role_event_keys: set[tuple[str, str, str, str]] = set()
 
@@ -23583,8 +27380,37 @@ def _source_record_document_event_chronology_companion(
             }
         )
 
+    def add_symbolic_row(
+        *,
+        event_kind: str,
+        event_display: str,
+        event_value: str,
+        source_predicate: str,
+        source_entity: str = "",
+        source_row: str = "",
+        source_text_atom: str = "",
+    ) -> None:
+        value = str(event_value or "").strip()
+        if not value:
+            return
+        support_rows.append(
+            {
+                "SupportKind": "document_event_chronology_item",
+                "EventKind": event_kind,
+                "EventDisplay": event_display,
+                "EventDate": value,
+                "EventDateDisplay": _display_source_phrase(value),
+                "SourcePredicate": source_predicate,
+                "SourceEntity": source_entity,
+                "SourceRow": source_row,
+                "SourceTextAtom": source_text_atom,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+
     filing_dates_by_doc: dict[str, str] = {}
     signed_docs: set[str] = set()
+    default_year = _source_record_runtime_default_year(runtime)
     for fact in facts:
         predicate = str(fact.get("predicate", "")).strip()
         args = [str(item).strip() for item in fact.get("args", [])]
@@ -23592,6 +27418,53 @@ def _source_record_document_event_chronology_companion(
             filing_dates_by_doc[args[0]] = args[1]
         elif predicate == "signed_by" and len(args) >= 2:
             signed_docs.add(args[0])
+        elif chronology_intent and predicate == "source_metadata" and len(args) >= 2:
+            date_value = _canonical_admitted_date_atom(args[1])
+            if date_value:
+                issuer = args[2] if len(args) >= 3 else ""
+                display = "document date"
+                if issuer:
+                    display = f"{_display_source_phrase(issuer)} document date"
+                add_row(
+                    event_kind="source_metadata_document_date",
+                    event_display=display,
+                    event_date=date_value,
+                    source_predicate=predicate,
+                    source_entity=args[0],
+                )
+        elif chronology_intent and predicate == "deadline_requirement" and len(args) >= 3:
+            action, report_type, deadline = args[:3]
+            date_value = _canonical_admitted_date_atom(deadline)
+            event_kind = f"{_normalize_text_filter_atom(report_type)}_deadline"
+            event_display = f"{_display_source_phrase(report_type)} deadline"
+            if date_value:
+                add_row(
+                    event_kind=event_kind,
+                    event_display=event_display,
+                    event_date=date_value,
+                    source_predicate=predicate,
+                    source_entity=action,
+                )
+            else:
+                add_symbolic_row(
+                    event_kind=event_kind,
+                    event_display=event_display,
+                    event_value=deadline,
+                    source_predicate=predicate,
+                    source_entity=action,
+                )
+
+    if chronology_intent:
+        for source_row, display in sorted(text_display_by_row.items(), key=lambda item: _source_row_sort_key(item[0])):
+            for date_value in _date_atoms_from_source_display(display, default_year=default_year):
+                add_row(
+                    event_kind=f"source_record_display_date_{source_row}",
+                    event_display=_source_record_chronology_display_excerpt(display),
+                    event_date=date_value,
+                    source_predicate="source_record_text_display",
+                    source_row=source_row,
+                    source_text_atom=display,
+                )
 
     for fact in facts:
         predicate = str(fact.get("predicate", "")).strip()
@@ -23800,10 +27673,20 @@ def _source_record_document_event_chronology_companion(
             "event_date(Event, Date).",
             "filing_date(Document, Date).",
             "signed_by(Document, Signatory, Role).",
+            "source_metadata(Document, Date, Issuer).",
+            "deadline_requirement(Action, ReportType, Deadline).",
+            "source_record_text_display(SourceRow, Text).",
             "source_record_text_atom(SourceRow, TextAtom).",
             "source_record_role_transition_support(TransitionKind, Actor, Role, StartDate, EndDate, SourceRows).",
         ],
     }
+
+
+def _source_record_chronology_display_excerpt(display: str) -> str:
+    text = re.sub(r"\s+", " ", str(display or "")).strip()
+    if len(text) <= 180:
+        return text
+    return text[:177].rstrip() + "..."
 
 
 def _source_record_chronology_role_event_question(text: str) -> bool:
@@ -27405,6 +31288,7 @@ def run_evidence_bundle_plan_queries(
             continue
         bundle_id = str(bundle.get("bundle_id", "")).strip()
         purpose = str(bundle.get("purpose", "")).strip()
+        bundle_plan_queries: list[str] = []
         for template in bundle.get("query_templates", []):
             query = str(template or "").strip()
             if not query or query in seen:
@@ -27484,6 +31368,7 @@ def run_evidence_bundle_plan_queries(
                 )
                 continue
             plan_queries.append(normalized_query)
+            bundle_plan_queries.append(normalized_query)
             query_basis[normalized_query] = {
                 "bundle_id": bundle_id,
                 "purpose": purpose,
@@ -27495,6 +31380,23 @@ def run_evidence_bundle_plan_queries(
                     if normalized_query != query
                     else {}
                 ),
+            }
+        for joined in _evidence_bundle_same_variable_join_queries(bundle_plan_queries):
+            joined_query = str(joined.get("query", "")).strip()
+            if not joined_query or joined_query in seen:
+                continue
+            seen.add(joined_query)
+            plan_queries.append(joined_query)
+            query_basis[joined_query] = {
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "original_queries": joined.get("source_queries", []),
+                "repairs": [
+                    {
+                        "kind": "same_variable_conjunction",
+                        "shared_variables": joined.get("shared_variables", []),
+                    }
+                ],
             }
     if not plan_queries:
         return results
@@ -27541,6 +31443,103 @@ def run_evidence_bundle_plan_queries(
         item["derived_from_queries"] = derived_from
         results.append(item)
     return results
+
+
+def _evidence_bundle_same_variable_join_queries(queries: list[str]) -> list[dict[str, Any]]:
+    """Add same-variable conjunction probes for evidence-bundle templates.
+
+    Evidence plans are LLM-authored query guidance. A bundle sometimes proposes
+    separate primitive queries with a shared variable name, even though the
+    support question needs a single subject, act, record, event, or decision to
+    satisfy all predicates. This planner-side probe surfaces that exact join
+    without adding facts or changing the durable KB.
+    """
+
+    goal_items: list[dict[str, Any]] = []
+    for query in queries:
+        normalized = str(query or "").strip()
+        parsed_goals = parse_prolog_query_goals(normalized)
+        if not parsed_goals:
+            continue
+        if len(parsed_goals) > 4:
+            continue
+        for goal_index, (predicate, args) in enumerate(parsed_goals):
+            variables = {
+                str(arg).strip()
+                for arg in args
+                if _is_prolog_variable(str(arg).strip())
+            }
+            if not variables:
+                continue
+            goal_items.append(
+                {
+                    "goal": (predicate, args),
+                    "query": normalized,
+                    "index": len(goal_items),
+                    "variables": variables,
+                    "goal_index": goal_index,
+                }
+            )
+    if len(goal_items) < 2 or len(goal_items) > 8:
+        return []
+
+    neighbors: dict[int, set[int]] = {int(item["index"]): set() for item in goal_items}
+    for left_index, left in enumerate(goal_items):
+        for right in goal_items[left_index + 1 :]:
+            shared = set(left["variables"]) & set(right["variables"])
+            if not shared:
+                continue
+            neighbors[int(left["index"])].add(int(right["index"]))
+            neighbors[int(right["index"])].add(int(left["index"]))
+
+    components: list[list[int]] = []
+    seen_indexes: set[int] = set()
+    for item in goal_items:
+        start = int(item["index"])
+        if start in seen_indexes:
+            continue
+        stack = [start]
+        component: list[int] = []
+        seen_indexes.add(start)
+        while stack:
+            current = stack.pop()
+            component.append(current)
+            for neighbor in sorted(neighbors.get(current, set())):
+                if neighbor in seen_indexes:
+                    continue
+                seen_indexes.add(neighbor)
+                stack.append(neighbor)
+        if len(component) >= 2:
+            components.append(sorted(component))
+
+    existing_queries = {str(query or "").strip() for query in queries if str(query or "").strip()}
+    out: list[dict[str, Any]] = []
+    emitted: set[str] = set()
+    for component in components:
+        goals = [goal_items[index]["goal"] for index in component]
+        if len(goals) < 2 or len(goals) > 5:
+            continue
+        shared_variables = sorted(
+            variable
+            for variable in set().union(*(set(goal_items[index]["variables"]) for index in component))
+            if sum(1 for index in component if variable in goal_items[index]["variables"]) >= 2
+        )
+        if not shared_variables:
+            continue
+        query = format_prolog_query_goals(goals)
+        if query in existing_queries or query in emitted:
+            continue
+        emitted.add(query)
+        out.append(
+            {
+                "query": query,
+                "source_queries": _ordered_query_unique(
+                    [str(goal_items[index]["query"]) for index in component]
+                ),
+                "shared_variables": shared_variables,
+            }
+        )
+    return out
 
 
 def _normalize_evidence_bundle_query_constraints(query: str) -> dict[str, Any]:
@@ -28794,6 +32793,283 @@ def score_oracle(*, row: dict[str, Any], oracle: dict[str, Any]) -> bool | None:
     return True
 
 
+def _reference_judge_focus_terms(*values: Any) -> list[str]:
+    terms: list[str] = []
+    seen: set[str] = set()
+
+    def flush(buffer: list[str]) -> None:
+        if len(buffer) < REFERENCE_JUDGE_FOCUS_TERM_MIN_CHARS:
+            return
+        term = "".join(buffer)
+        if term in seen:
+            return
+        seen.add(term)
+        terms.append(term)
+
+    for value in values:
+        buffer: list[str] = []
+        for char in str(value or "").casefold():
+            if char.isalnum():
+                buffer.append(char)
+            else:
+                flush(buffer)
+                buffer = []
+            if len(terms) >= REFERENCE_JUDGE_FOCUS_TERM_LIMIT:
+                return terms
+        flush(buffer)
+        if len(terms) >= REFERENCE_JUDGE_FOCUS_TERM_LIMIT:
+            return terms
+    return terms
+
+
+def _compact_reference_judge_text(text: str, *, focus_terms: Sequence[str] = ()) -> str:
+    if len(text) <= REFERENCE_JUDGE_VALUE_CHAR_LIMIT:
+        return text
+    prefix = text[:REFERENCE_JUDGE_VALUE_CHAR_LIMIT]
+    text_casefold = text.casefold()
+    for term in focus_terms:
+        if len(term) < REFERENCE_JUDGE_FOCUS_TERM_MIN_CHARS:
+            continue
+        index = text_casefold.find(term)
+        if index < REFERENCE_JUDGE_VALUE_CHAR_LIMIT:
+            continue
+        start = max(0, index - REFERENCE_JUDGE_FOCUS_WINDOW_BEFORE_CHARS)
+        end = min(len(text), index + max(len(term), 1) + REFERENCE_JUDGE_FOCUS_WINDOW_AFTER_CHARS)
+        excerpt = text[start:end]
+        return (
+            f"{prefix}...[excerpt around reference term chars {start}-{end}]..."
+            f"{excerpt}...[truncated {len(text) - end} chars]"
+        )
+    return prefix + f"...[truncated {len(text) - REFERENCE_JUDGE_VALUE_CHAR_LIMIT} chars]"
+
+
+def _compact_reference_judge_value(value: Any, *, focus_terms: Sequence[str] = ()) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _compact_reference_judge_value(inner, focus_terms=focus_terms)
+            for key, inner in value.items()
+        }
+    if isinstance(value, list):
+        return [
+            _compact_reference_judge_value(item, focus_terms=focus_terms)
+            for item in value[:REFERENCE_JUDGE_ROW_SAMPLE_LIMIT]
+        ]
+    if value is None or isinstance(value, (bool, int, float)):
+        return value
+    text = str(value)
+    return _compact_reference_judge_text(text, focus_terms=focus_terms)
+
+
+def _compact_reference_judge_reasoning_basis(
+    value: Any,
+    *,
+    focus_terms: Sequence[str] = (),
+) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        return {}
+    compact: dict[str, Any] = {}
+    for key in (
+        "kind",
+        "bundle_id",
+        "purpose",
+        "validation",
+        "note",
+        "original_query",
+        "filtered_num_rows",
+        "unfiltered_num_rows",
+        "token_subset_filter",
+    ):
+        if key in value:
+            compact[key] = _compact_reference_judge_value(value.get(key), focus_terms=focus_terms)
+    inner = value.get("inner_basis")
+    if isinstance(inner, dict):
+        inner_compact = {
+            key: _compact_reference_judge_value(inner.get(key), focus_terms=focus_terms)
+            for key in (
+                "kind",
+                "note",
+                "original_query",
+                "filtered_num_rows",
+                "unfiltered_num_rows",
+                "token_subset_filter",
+            )
+            if key in inner
+        }
+        if inner_compact:
+            compact["inner_basis"] = inner_compact
+    return compact
+
+
+def _compact_query_results_for_reference_judge(
+    query_results: Any,
+    *,
+    focus_terms: Sequence[str] = (),
+) -> list[dict[str, Any]]:
+    compact_results: list[dict[str, Any]] = []
+    if not isinstance(query_results, list):
+        return compact_results
+    for item in query_results:
+        if not isinstance(item, dict):
+            continue
+        compact_item: dict[str, Any] = {
+            "query": str(item.get("query", "")),
+        }
+        derived = item.get("derived_from_queries")
+        if isinstance(derived, list):
+            compact_item["derived_from_queries"] = [str(value) for value in derived[:8]]
+            if len(derived) > 8:
+                compact_item["derived_from_queries_omitted"] = len(derived) - 8
+        result = item.get("result")
+        if isinstance(result, dict):
+            compact_result: dict[str, Any] = {}
+            for key in (
+                "predicate",
+                "prolog_query",
+                "result_type",
+                "status",
+                "num_rows",
+                "variables",
+                "bound_query_constants",
+            ):
+                if key in result:
+                    compact_result[key] = _compact_reference_judge_value(
+                        result.get(key),
+                        focus_terms=focus_terms,
+                    )
+            reasoning_basis = _compact_reference_judge_reasoning_basis(
+                result.get("reasoning_basis"),
+                focus_terms=focus_terms,
+            )
+            if reasoning_basis:
+                compact_result["reasoning_basis"] = reasoning_basis
+            rows = result.get("rows")
+            if isinstance(rows, list):
+                compact_result["rows"] = [
+                    _compact_reference_judge_value(row, focus_terms=focus_terms)
+                    for row in rows[:REFERENCE_JUDGE_ROW_SAMPLE_LIMIT]
+                ]
+                if len(rows) > REFERENCE_JUDGE_ROW_SAMPLE_LIMIT:
+                    compact_result["rows_omitted"] = len(rows) - REFERENCE_JUDGE_ROW_SAMPLE_LIMIT
+            compact_item["result"] = compact_result
+        compact_results.append(compact_item)
+    return compact_results
+
+
+def _reference_judge_payload(row: dict[str, Any], *, reference: str) -> dict[str, Any]:
+    focus_terms = _reference_judge_focus_terms(reference)
+    payload = {
+        "task": "Compare deterministic Prolog query results with a human reference answer.",
+        "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
+        "question_id": row.get("id", ""),
+        "question": row.get("utterance", ""),
+        "reference_answer": reference,
+        "model_decision": row.get("model_decision", ""),
+        "projected_decision": row.get("projected_decision", ""),
+        "queries": row.get("queries", []),
+        "query_results": row.get("query_results", []),
+        "proposed_write_counts": {
+            "facts": len(row.get("proposed_facts", []) or []),
+            "rules": len(row.get("proposed_rules", []) or []),
+        },
+    }
+    raw_len = len(json.dumps(payload, ensure_ascii=False))
+    if raw_len <= REFERENCE_JUDGE_PAYLOAD_SOFT_LIMIT_CHARS:
+        return payload
+    payload["query_results"] = _compact_query_results_for_reference_judge(
+        row.get("query_results", []),
+        focus_terms=focus_terms,
+    )
+    payload["query_result_compaction"] = {
+        "reason": "payload_exceeded_soft_limit",
+        "raw_payload_chars": raw_len,
+        "soft_limit_chars": REFERENCE_JUDGE_PAYLOAD_SOFT_LIMIT_CHARS,
+        "row_sample_limit_per_result": REFERENCE_JUDGE_ROW_SAMPLE_LIMIT,
+        "value_char_limit": REFERENCE_JUDGE_VALUE_CHAR_LIMIT,
+        "focus_term_windowing": bool(focus_terms),
+    }
+    return payload
+
+
+def _failure_surface_payload(
+    *,
+    row: dict[str, Any],
+    reference: str,
+    judge: dict[str, Any],
+    kb_inventory: dict[str, Any],
+    facts: list[str],
+    rules: list[str],
+) -> dict[str, Any]:
+    focus_terms = _reference_judge_focus_terms(reference)
+    payload = {
+        "task": "Classify the remaining failure surface for a post-ingestion symbolic QA row.",
+        "authority": [
+            "You are a scorer and diagnostician only.",
+            "Do not answer the user.",
+            "Do not propose facts, rules, corrections, or writes.",
+            "Do not use the original source document; it is not available here.",
+            "Use only the compiled KB inventory, admitted clauses, query plan, query results, and reference answer.",
+        ],
+        "surface_definitions": {
+            "compile_surface_gap": "The query plan is reasonable, but the compiled KB appears to lack the facts/rules/relations needed to support the reference answer.",
+            "query_surface_gap": "The compiled KB appears to contain useful support, but the emitted query plan did not retrieve it or used neighboring/wrong predicates or overbound constants.",
+            "hybrid_join_gap": "Relevant rows were retrieved or appear available, but answering requires a multi-hop join, temporal virtual predicate, set difference, aggregation, arithmetic, or evidence bundle that the current query/runtime did not assemble.",
+            "answer_surface_gap": "The query results contain enough support, but the final judge/answer rendering did not recognize or express it cleanly.",
+            "judge_uncertain": "There is not enough information in this row to separate the failure surfaces confidently.",
+        },
+        "question_id": row.get("id", ""),
+        "question": row.get("utterance", ""),
+        "reference_answer": reference,
+        "reference_judge": judge,
+        "queries": row.get("queries", []),
+        "query_results": row.get("query_results", []),
+        "evidence_bundle_plan": row.get("evidence_bundle_plan", {}),
+        "compiled_predicate_inventory": {
+            "signatures": kb_inventory.get("signatures", [])[:120],
+            "counts": kb_inventory.get("counts", {}),
+            "examples": kb_inventory.get("examples", {}),
+        },
+        "relevant_clauses": [*facts[:600], *rules[:160]],
+        "classification_policy": [
+            "Choose compile_surface_gap only when the admitted KB rows shown here do not appear to contain the reference answer support.",
+            "Treat source_record_text_display, source_record_label_display, source_record_section_display, source_record_cell_display, and source_record_cell_header_display as admitted KB rows; if they plainly contain the support but the judge missed it, prefer answer_surface_gap.",
+            "Treat source_record_semantic_target_display_support as admitted source-display evidence retrieved through semantic query-intent targets, not as a new durable fact.",
+            "Treat source_record_semantic_target_cell_value_support as admitted source-display table evidence: it joins a query-intent-matched table header to the same-row same-column cell display without writing a durable fact.",
+            "Treat source_record_semantic_target_window_support as admitted same-section source-display evidence around semantic target hits, not as a new durable fact.",
+            "Treat source_record_alias_translation_support as admitted only when the alias, acronym, or translation is visibly paired in source display rows; model-normalized predicate names are not source-stated translations.",
+            "Treat source_record_obligation_bundle_support as admitted query-only support when it returns existing compiled obligation/financial/duration facts or source-record numeric/currency/quantity display rows; it does not create a new durable obligation fact.",
+            "Treat compiled_value_set_exclusion_support as query-only evidence about already-returned compiled predicate values. It can support a narrow no/absence answer only for that returned value set; it is not a durable source fact and does not prove the source lacks a fact the compiler failed to admit.",
+            "Treat source_record_returned_action_section_support as admitted source-display evidence when it follows already-returned regulatory/action/legal-basis predicate values into matching source_record sections and exposes admitted list rows; it does not create a durable legal or violation fact.",
+            "Treat source_record_table_delta_check_support as admitted query-only arithmetic support when it labels current-minus-prior calculations from three numeric cells in an admitted source display row, including any source-stated/derived delta discrepancy; it does not create a new durable arithmetic fact.",
+            "Treat source_record_address_line_support as admitted query-only address support when it returns a postal-address-like admitted source display row after structured address/location intent activation; it does not create a new durable address fact.",
+            "Choose query_surface_gap when relevant support appears in admitted clauses or inventory examples but the emitted query set did not retrieve it.",
+            "Choose hybrid_join_gap when rows are present or retrieved but require joining, comparing, counting, set subtraction, temporal arithmetic, or aggregation.",
+            "Choose answer_surface_gap only when returned rows are plainly sufficient and the remaining problem is interpretation or wording.",
+            "If uncertain, use judge_uncertain with low confidence.",
+        ],
+    }
+    raw_len = len(json.dumps(payload, ensure_ascii=False))
+    if raw_len <= FAILURE_SURFACE_PAYLOAD_SOFT_LIMIT_CHARS:
+        return payload
+    payload["query_results"] = _compact_query_results_for_reference_judge(
+        row.get("query_results", []),
+        focus_terms=focus_terms,
+    )
+    payload["relevant_clauses"] = [
+        *facts[:FAILURE_SURFACE_COMPACT_FACT_LIMIT],
+        *rules[:FAILURE_SURFACE_COMPACT_RULE_LIMIT],
+    ]
+    payload["failure_surface_compaction"] = {
+        "reason": "payload_exceeded_soft_limit",
+        "raw_payload_chars": raw_len,
+        "soft_limit_chars": FAILURE_SURFACE_PAYLOAD_SOFT_LIMIT_CHARS,
+        "row_sample_limit_per_result": REFERENCE_JUDGE_ROW_SAMPLE_LIMIT,
+        "fact_limit": FAILURE_SURFACE_COMPACT_FACT_LIMIT,
+        "rule_limit": FAILURE_SURFACE_COMPACT_RULE_LIMIT,
+        "focus_term_windowing": bool(focus_terms),
+    }
+    return payload
+
+
 def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig) -> dict[str, Any]:
     reference = str(row.get("reference_answer", "")).strip()
     if not reference:
@@ -28836,6 +33112,17 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic source-record ratio calculation support matching the reference answer.",
             "issues": [],
         }
+    if _source_record_table_delta_check_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": (
+                "Query results contain deterministic source-record table delta support matching the "
+                "reference answer, with source-stated and derived deltas labeled."
+            ),
+            "issues": [],
+        }
     if _source_record_numeric_count_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
@@ -28850,6 +33137,25 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "verdict": "exact",
             "answer_supported": True,
             "concise_answer": "Query results contain source-record text that clearly embeds the reference answer.",
+            "issues": [],
+        }
+    if _source_record_parenthetical_role_name_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": (
+                "Query results contain source-record parenthetical role/name support matching "
+                "each referenced entity/person pair."
+            ),
+            "issues": [],
+        }
+    if _source_record_label_value_pair_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": "Query results contain deterministic source-record label/value support matching the referenced field value.",
             "issues": [],
         }
     if _agreement_counterparty_reference_supported_by_results(row=row, reference=reference):
@@ -28868,6 +33174,17 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic event date-range support matching the reference answer.",
             "issues": [],
         }
+    if _source_record_dated_event_inventory_reference_supported_by_results(row=row, reference=reference):
+        return {
+            "schema_version": "qa_judge_v1",
+            "verdict": "exact",
+            "answer_supported": True,
+            "concise_answer": (
+                "Query results contain deterministic source-record dated-event inventory support matching "
+                "the referenced dates and identifiers."
+            ),
+            "issues": [],
+        }
     if _source_record_summary_reference_supported_by_results(
         row=row,
         reference=reference,
@@ -28882,19 +33199,30 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_identifier_set_support",
             "source_record_citation_list_support",
             "source_record_exhibit_index_support",
+            "source_record_obligation_bundle_support",
+            "source_record_table_delta_check_support",
             "source_record_employment_history_support",
             "source_record_amount_inventory_support",
             "source_record_duration_quantity_support",
             "source_record_restrictive_covenant_support",
             "source_record_defined_term_contrast_support",
+            "source_record_semantic_target_display_support",
+            "source_record_semantic_target_cell_value_support",
+            "source_record_status_inline_field_support",
+            "source_record_semantic_target_window_support",
+            "compiled_value_set_exclusion_support",
+            "source_record_returned_action_section_support",
+            "source_record_alias_translation_support",
             "source_record_signature_mismatch_support",
             "source_record_dated_event_inventory_support",
             "source_record_negative_assertion_support",
             "source_record_role_transition_support",
             "source_record_board_nominee_path_support",
             "source_record_named_role_roster_support",
+            "source_record_parenthetical_role_name_support",
             "source_record_label_value_pair_support",
             "source_record_postal_state_code_support",
+            "source_record_address_line_support",
             "source_record_address_block_support",
             "source_record_link_attachment_support",
             "source_record_incident_statistic_support",
@@ -28910,9 +33238,12 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_quote_heading_locator_support",
             "source_record_section_list_detail_support",
             "source_record_date_range_duration_support",
+            "deadline_rule_examples_support",
+            "source_record_era_date_conversion_support",
             "source_record_same_day_event_time_support",
             "source_record_field_state_support",
             "event_elapsed_duration_support",
+            "current_adjudication_disposition_support",
         },
     ):
         return {
@@ -28923,29 +33254,31 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "issues": [],
         }
     payload = {
-        "task": "Compare deterministic Prolog query results with a human reference answer.",
-        "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
-        "question_id": row.get("id", ""),
-        "question": row.get("utterance", ""),
-        "reference_answer": reference,
-        "model_decision": row.get("model_decision", ""),
-        "projected_decision": row.get("projected_decision", ""),
-        "queries": row.get("queries", []),
-        "query_results": row.get("query_results", []),
-        "proposed_write_counts": {
-            "facts": len(row.get("proposed_facts", []) or []),
-            "rules": len(row.get("proposed_rules", []) or []),
-        },
+        **_reference_judge_payload(row, reference=reference),
         "verdict_policy": [
             "exact: query results clearly support the reference answer, allowing harmless extra rows when the answer set still contains the reference.",
             "partial: query results contain some relevant support but miss important reference content or include unresolved noise.",
             "miss: query results do not support the reference answer, use wrong predicates, return no relevant rows, or propose writes for an ordinary question.",
             "not_judged: malformed/no reference or no meaningful query result to compare.",
+            "Multi-part answer policy: when the query results clearly support at least one substantive requested answer part but miss another substantive requested part, use partial rather than miss. Reserve miss for rows where no substantive reference part is supported or the support points to a wrong answer.",
             "Identity policy: candidate_identity or ambiguous_identity rows are possible identities, not proof of identity. Multiple candidates support answers such as 'unknown', 'ambiguous', 'not definitively identified', or 'do not assign automatically'.",
             "Automatic-identity policy: candidate_identity(k_lume, kira_lume) does not authorize assigning k_lume to kira_lume. Unless query results include a resolved_identity/same_person/identified_as fact or a rule explicitly permitting assignment, candidate rows support 'No' for automatic assignment questions.",
             "Source-scope policy: if the reference answer says the event is not applicable to this source/document and all relevant queries return no matching rows while the source KB clearly concerns a different document/domain, this supports the reference. Use exact when this is the central answer.",
             "Normalized-atom policy: snake_case atoms are the KB's canonical surface. If a returned atom embeds the reference answer as a clear normalized phrase, such as entered_zone_a_before_inspection supporting 'Zone A', that can be exact support even when the value appears inside a method or explanation predicate.",
+            "Source-display evidence policy: source_record_text_display, source_record_label_display, source_record_section_display, source_record_cell_display, and source_record_cell_header_display are admitted source-addressability rows. They can fully support a reference answer when the returned display text directly contains or clearly expresses the requested source-stated values, labels, units, names, or citations, even if a narrower semantic predicate is absent.",
+            "Source-record query-only support policy: query-only source_record_*_support rows are non-mutating evidence surfaces, not lower-trust guesses. When a primitive semantic predicate conflicts with an admitted source-record display/support row, prefer the source-record display/support row for source-stated text, dates, labels, and quoted values.",
+            "Semantic-target display policy: source_record_semantic_target_display_support rows are answer-bearing source-display rows retrieved by structured query-intent target terms. They support source-row location and source-stated content when the display row itself contains the answer; they do not make normalized predicate atoms or model translations source-stated.",
+            "Semantic-target cell-value policy: source_record_semantic_target_cell_value_support rows are answer-bearing table-display rows when a structured query-intent target matched an admitted cell header and the support row carries the same-row same-column CellDisplay value.",
+            "Status inline-field policy: source_record_status_inline_field_support rows are answer-bearing source-display rows for structured status questions when an admitted inline field carries a status/change/update note, date, or identifier. Treat SourceTextDisplay as source-stated content; do not treat it as a durable fact.",
+            "Semantic-target window policy: source_record_semantic_target_window_support rows are bounded same-section source-display neighbors around semantic target hits. They can support explanations split across adjacent list rows when WindowTextDisplay contains the source-stated answer material.",
+            "Count-breakdown support policy: source_record_count_breakdown_support rows are answer-bearing source-display rows for structured count questions that ask for a split, subgroup, component, category, or versus breakdown. NumericValuesDisplay and SourceTextDisplay can support source-stated component counts when the row derives only from admitted source_record_*_display rows.",
+            "Source-stated alias/translation policy: source_record_alias_translation_support rows are answer-bearing only for aliases, acronyms, or translations visibly paired in admitted source_record_*_display rows. Do not treat normalized predicate names, profile prose, or model-supplied translations as source-stated translations.",
+            "Obligation-bundle policy: source_record_obligation_bundle_support rows are query-only support rows activated by structured query_intents. They may combine admitted compiled obligation/financial/duration predicate facts with admitted numeric/currency/quantity source-display rows; treat their returned facts and display rows as evidence, not as new durable truth.",
+            "Compiled value-set exclusion policy: compiled_value_set_exclusion_support rows are query-only support rows activated by structured query_intents and already-returned compiled predicate rows. They support only the narrow claim that the returned compiled value set did not contain the requested target tokens; they do not create a durable absence fact or prove the source itself lacks an uncompiled value.",
+            "Returned-action section policy: source_record_returned_action_section_support rows are query-only source-display support rows activated by structured query_intents and already-returned action/legal-basis predicate rows. They can support list/detail answers when SourceTextDisplay contains the source-stated detail under a matching source_record section, but they do not create a durable violation/category fact.",
+            "Table-delta check policy: source_record_table_delta_check_support rows are query-only arithmetic support rows activated by structured change-amount query_intents. They may support derived current-minus-prior deltas and derived percentages only when the prior/current values come from admitted source display rows; when a source-stated delta differs, the discrepancy field is part of the answer-bearing evidence, not something to hide.",
             "Predicate-relation policy: a returned row's predicate name is part of the answer-bearing surface. For example, has_knowledge_of(Entity, mislabeled_folders) can support 'knowledge of mislabeled folders' even when the returned value atom is only mislabeled_folders; do not require the relation words to be duplicated inside the value atom.",
+            "Compound-premise policy: when a question or reference turns on whether the same act, decision, record, event, source row, or subject satisfies multiple predicates, independent rows over different subjects do not establish the premise. Same-variable conjunction results from evidence-bundle plans are the relevant support surface; a no-results same-variable conjunction can support rejecting the exact compound premise when the surrounding returned rows identify the involved subjects.",
             "Complementary-relation policy: for questions using have, carry, or similar possession verbs with besides, along with, apart from, or in addition to, the named possession/baseline predicate is context. A sibling row over the same subject can provide the abstract complement; do not mark it miss solely because the complement is not also returned by the baseline possession predicate.",
             "Anchor-answer policy: for questions asking which event anchored, triggered, came before, or preceded a move, appointment, assignment, enrollment, or attachment, event_anchor(Anchor, ActionEvent) or triggered_by(ActionEvent, Anchor) can directly support Anchor as the answer. Do not require a separate event_before(Anchor, ActionEvent) row when an anchor/trigger row already binds the asked action to the preceding/anchoring event.",
             "Causal-chain policy: for questions asking what caused, triggered, led to, or brought about an ending, a chain such as led_to(Cause, EndingEvent) plus ended(EndingEvent, EndedState), caused_by(EndingEvent, Cause) plus ended(EndingEvent, EndedState), or triggered(Cause, EndingEvent) plus ended(EndingEvent, EndedState) can directly support Cause as the answer. Do not downgrade solely because ended/2 returns the immediate ending event when the question asks for the upstream cause.",
@@ -28954,7 +33287,9 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Calendar-authority policy: source_record_era_date_conversion_support rows are not source-stated facts; they are deterministic calendar conversions triggered by admitted source-display era dates and must be treated as external calendar authority support.",
+            "Parenthetical role/name support policy: source_record_parenthetical_role_name_support rows are display evidence only. They can support source-stated entity/person/role rosters when activated by admitted person_role query results, but they do not create durable identity or alias facts.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
             "Amount-inventory support policy: source_record_amount_inventory_support rows are deterministic structured support rows for questions asking to list all dollar amounts, percentages, or amount/value inventories. They can fully support amount-to-referent pairs even when primitive money/amount predicates are absent; do not downgrade solely because source_record_numeric_token rows by themselves are context-free.",
             "Ratio-calculation support policy: source_record_ratio_calculation_support rows are deterministic structured support for per-unit questions that ask to divide a source-stated money amount by a source-stated count. QuotientDisplay and RoundedQuotient can fully support approximate per-unit answers when the numerator and denominator source rows are admitted.",
@@ -28969,6 +33304,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Named-role roster support policy: source_record_named_role_roster_support rows are deterministic structured support rows for questions asking to list every named individual and stated roles. They can combine admitted role predicates with source-record transition, nominee, and signature-block rows to support the roster without requiring a single durable roster predicate.",
             "Source-record value support policy: source_record_label_value_pair_support rows are deterministic structured support for printed field/value surfaces, including adjacent source rows where a label line is followed by its value. FieldDisplay plus ValueDisplay can support questions asking which field is populated with a given value.",
             "Postal-state support policy: source_record_postal_state_code_support rows are deterministic structured support for two-letter state codes only when the code is source-adjacent to a postal code in an admitted address-like row. StateCodesDisplay can support distinct state-code inventory questions.",
+            "Address-line support policy: source_record_address_line_support rows are deterministic structured support for single-line international postal-address-like source display rows activated by structured address/location query_intents. AddressDisplay can support address and location answers, including acronym references when the acronym is supported by initials in the displayed organization name.",
             "Address-block support policy: source_record_address_block_support rows are deterministic structured support for adjacent multi-line source addresses. AddressDisplay can support postal or mailing-address questions when it contains the requested office, building/room, street, city/state, and postal-code lines.",
             "Link attachment support policy: source_record_link_attachment_support rows are deterministic structured support for PDF or hyperlink attachment inventories extracted from admitted source-record text. LinkLabelDisplay plus FileDisplay can support attachment-list questions.",
             "Incident-statistic support policy: source_record_incident_statistic_support rows are deterministic structured support for source-stated incident categories, report counts, and injury counts extracted from admitted source-record text. FullAnswerDisplay can support category/count inventory questions.",
@@ -28976,6 +33312,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Generic-designation support policy: source_record_generic_designation_support rows are deterministic structured support for questions asking whether a party/entity is identified by name. NamedStatus=generic_designation_not_proper_name plus DesignationsDisplay can support answers that the source uses generic designations rather than a proper name.",
             "Signatory-responsibility support policy: source_record_signatory_responsibility_support rows are deterministic structured support for questions that ask which signatory or signed official is responsible for which source-stated issue/section based on the offices they direct. FullAnswerDisplay can support the person-to-issue mapping when both the signatory roles and the issue labels/text derive from admitted source-record rows.",
             "Contact/signatory support policy: source_record_contact_signatory_support rows with SupportKind source_record_signatory are answer-bearing for named-individual, title, and role-roster questions. PersonDisplay plus RoleDisplay supports the person-role entry, and SignatoryDisplay supports signatory status; do not downgrade solely because the row is query-only source-record support.",
+            "Current-adjudication disposition policy: current_adjudication_disposition_support rows are query-only inventory rows for status or premise questions over adjudicative KBs. Treat latest procedural steps, current order rows, cited articles, article applications, and source-display rows attached to those articles as evidence for the current disposition; distinguish those rows from older procedural history over prior dates.",
             "Event-duration policy: event_elapsed_duration_support is answer-bearing when it derives elapsed time only from admitted event_occurred timestamp rows. Do not downgrade solely because a narrower elapsed_days/3 query missed.",
             "Normalized legal/status atom policy: phrases such as does_not_intend_to_raise_the_defense, reserves_all_defenses, not_a_defense_to_assured, remedied_before_loss, no_contribution_to_loss, statement_not_finding, or accepted_without_prejudice are answer-bearing content when they appear in any returned row. Do not discard them merely because they appear in a Detail, Source, or evidence slot.",
             "Purpose/action atom policy: normalized action-purpose atoms such as fetching_fog_leaves, gathered_fog_leaves, or submitted_revised_budget are answer-bearing. If adjacent returned rows establish the affected object or problem context, do not downgrade solely because the reference answer phrases the same purpose in natural language.",
@@ -29152,6 +33489,62 @@ def _source_record_ratio_calculation_reference_supported_by_results(
     return False
 
 
+def _source_record_table_delta_check_reference_supported_by_results(
+    *,
+    row: dict[str, Any],
+    reference: str,
+) -> bool:
+    reference_numbers = {
+        _source_record_table_delta_numeric_key(number)
+        for number in _numeric_measure_surfaces(reference)
+    }
+    reference_numbers.discard("")
+    if len(reference_numbers) < 3:
+        return False
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("predicate", "")).strip() != "source_record_table_delta_check_support":
+            continue
+        rows = result.get("rows") if isinstance(result, dict) else None
+        for result_row in rows or []:
+            if str(result_row.get("SupportKind", "")) != "source_record_table_delta_check":
+                continue
+            row_numbers: set[str] = set()
+            for field in (
+                "PriorValue",
+                "CurrentValue",
+                "SourceStatedDelta",
+                "DerivedDelta",
+                "DeltaDifference",
+                "DerivedPercentDisplay",
+                "FullAnswerDisplay",
+            ):
+                for number in _numeric_measure_surfaces(str(result_row.get(field, ""))):
+                    key = _source_record_table_delta_numeric_key(number)
+                    if key:
+                        row_numbers.add(key)
+            if reference_numbers <= row_numbers:
+                return True
+    return False
+
+
+def _source_record_table_delta_numeric_key(value: str) -> str:
+    text = str(value or "").strip().replace(",", "")
+    if text.startswith("+"):
+        text = text[1:]
+    if not text:
+        return ""
+    try:
+        number = float(text)
+    except ValueError:
+        return ""
+    if abs(number - round(number)) < 0.0001:
+        return str(int(round(number)))
+    return f"{number:.4f}".rstrip("0").rstrip(".")
+
+
 _COUNT_REFERENCE_CANONICALS = {
     "0": {"0", "zero"},
     "1": {"1", "one"},
@@ -29274,12 +33667,257 @@ def _event_date_range_reference_supported_by_results(*, row: dict[str, Any], ref
     return False
 
 
+def _source_record_dated_event_inventory_reference_supported_by_results(
+    *,
+    row: dict[str, Any],
+    reference: str,
+) -> bool:
+    reference_text = unicodedata.normalize("NFKC", str(reference or "")).strip()
+    reference_dates = _source_record_display_date_mentions(reference_text)
+    if len(reference_dates) < 2:
+        return False
+    display_values: list[str] = []
+    sequence_values: list[str] = []
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("predicate", "")).strip() != "source_record_dated_event_inventory_support":
+            continue
+        for result_row in result.get("rows") or []:
+            if not isinstance(result_row, dict):
+                continue
+            if str(result_row.get("SupportKind", "")) == "source_record_dated_event_inventory_item":
+                sequence_display = _display_source_phrase(
+                    result_row.get("FullAnswerDisplay") or result_row.get("EventDisplay") or ""
+                )
+                if sequence_display:
+                    sequence_values.append(sequence_display)
+            for value in _iter_scalar_values(result_row):
+                displayed = _display_source_phrase(value)
+                if displayed:
+                    display_values.append(displayed)
+    if not display_values:
+        return False
+    value_text = " ".join(display_values)
+    value_tokens = _loose_atom_token_set(value_text)
+    sequence_text = " ".join(sequence_values or display_values)
+    if not _dated_event_reference_date_sequence_supported(value_text=sequence_text, reference_dates=reference_dates):
+        return False
+    for mention in reference_dates:
+        date_tokens = _without_source_reference_stop_tokens(_loose_atom_token_set(mention["DateDisplay"]))
+        if not date_tokens:
+            continue
+        if not _date_reference_supported(reference_tokens=date_tokens, value_tokens=value_tokens):
+            return False
+    reference_identifiers = _dated_event_reference_identifiers(reference_text)
+    if reference_identifiers and not reference_identifiers.issubset(_dated_event_reference_identifiers(value_text)):
+        return False
+    reference_tokens = _without_source_reference_stop_tokens(_loose_atom_token_set(reference_text))
+    if len(reference_tokens) < 6:
+        return False
+    covered = len(reference_tokens & value_tokens)
+    return covered / len(reference_tokens) >= 0.85
+
+
+def _dated_event_reference_date_sequence_supported(
+    *,
+    value_text: str,
+    reference_dates: list[dict[str, str]],
+) -> bool:
+    haystack = unicodedata.normalize("NFKC", str(value_text or "")).casefold()
+    cursor = 0
+    for mention in reference_dates:
+        needle = unicodedata.normalize("NFKC", str(mention.get("DateDisplay", "") or "")).casefold()
+        if not needle:
+            continue
+        index = haystack.find(needle, cursor)
+        if index < 0:
+            return False
+        cursor = index + len(needle)
+    return True
+
+
+def _dated_event_reference_identifiers(value: str) -> set[str]:
+    return {
+        re.sub(r"[^a-z0-9]+", "", match.group(0).casefold())
+        for match in re.finditer(
+            r"\b(?=[A-Za-z0-9._/-]*[A-Za-z])(?=[A-Za-z0-9._/-]*\d)[A-Za-z0-9]+(?:[-_/][A-Za-z0-9]+)+\b",
+            str(value or ""),
+        )
+    }
+
+
+def _source_record_parenthetical_role_name_reference_supported_by_results(
+    *,
+    row: dict[str, Any],
+    reference: str,
+) -> bool:
+    chunks = _parenthetical_role_name_reference_chunks(reference)
+    if not chunks:
+        return False
+    entries: list[dict[str, str]] = []
+    entry_count = 0
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("predicate", "")).strip() != "source_record_parenthetical_role_name_support":
+            continue
+        for result_row in result.get("rows") or []:
+            if not isinstance(result_row, dict):
+                continue
+            if str(result_row.get("SupportKind", "")) == "source_record_parenthetical_role_name_summary":
+                entry_count = max(entry_count, _safe_int(result_row.get("EntryCount")) or 0)
+                continue
+            person = str(result_row.get("PersonDisplay", "")).strip()
+            entity = str(result_row.get("EntityDisplay", "")).strip()
+            if not person or not entity:
+                continue
+            entries.append(
+                {
+                    "PersonDisplay": person,
+                    "EntityDisplay": entity,
+                    "ParentheticalRemainderDisplay": str(
+                        result_row.get("ParentheticalRemainderDisplay", "")
+                    ).strip(),
+                }
+            )
+    if not entries:
+        return False
+    if len(chunks) > len(entries):
+        return False
+    if len(chunks) < 2 and (entry_count or len(entries)) > 1:
+        return False
+    matched_entry_indexes: set[int] = set()
+    for chunk in chunks:
+        matched_index = None
+        for index, entry in enumerate(entries):
+            if index in matched_entry_indexes:
+                continue
+            if _parenthetical_role_name_reference_chunk_matches_entry(chunk, entry):
+                matched_index = index
+                break
+        if matched_index is None:
+            return False
+        matched_entry_indexes.add(matched_index)
+    return True
+
+
+def _parenthetical_role_name_reference_chunks(reference: str) -> list[dict[str, Any]]:
+    chunks = re.split(r"[;\n\r]+", str(reference or ""))
+    out: list[dict[str, Any]] = []
+    for chunk in chunks:
+        display = _display_source_phrase(chunk).strip(" .")
+        compact = _compact_unicode_reference_text(display)
+        if len(compact) < 3:
+            continue
+        if not any(char.isalpha() and not char.isascii() for char in compact):
+            continue
+        out.append(
+            {
+                "display": display,
+                "compact": compact,
+                "ascii_tokens": {
+                    token.casefold()
+                    for token in re.findall(r"[A-Za-z0-9]{2,}", display)
+                    if token.casefold() not in {"and", "the"}
+                },
+                "non_ascii_chars": {
+                    char for char in compact if char.isalpha() and not char.isascii()
+                },
+            }
+        )
+    return out
+
+
+def _parenthetical_role_name_reference_chunk_matches_entry(
+    chunk: dict[str, Any],
+    entry: dict[str, str],
+) -> bool:
+    chunk_compact = str(chunk.get("compact", ""))
+    person_compact = _compact_unicode_reference_text(entry.get("PersonDisplay", ""))
+    if len(person_compact) < 2 or person_compact not in chunk_compact:
+        return False
+    entity_compact = _compact_unicode_reference_text(
+        " ".join(
+            part
+            for part in [
+                entry.get("EntityDisplay", ""),
+                entry.get("ParentheticalRemainderDisplay", ""),
+            ]
+            if part
+        )
+    )
+    entity_reference_compact = chunk_compact.replace(person_compact, "")
+    if len(entity_reference_compact) < 2:
+        return True
+    if entity_reference_compact in entity_compact or entity_compact in entity_reference_compact:
+        return True
+    ascii_tokens = set(chunk.get("ascii_tokens") or set())
+    ascii_ok = not ascii_tokens or any(token in entity_compact for token in ascii_tokens)
+    non_ascii_entity_chars = {
+        char for char in entity_reference_compact if char.isalpha() and not char.isascii()
+    }
+    non_ascii_ok = not non_ascii_entity_chars or len(non_ascii_entity_chars & set(entity_compact)) >= min(
+        2,
+        len(non_ascii_entity_chars),
+    )
+    return ascii_ok and non_ascii_ok
+
+
+def _source_record_label_value_pair_reference_supported_by_results(
+    *,
+    row: dict[str, Any],
+    reference: str,
+) -> bool:
+    reference_tokens = _loose_atom_token_set(_display_source_phrase(reference))
+    utterance_tokens = _loose_atom_token_set(_display_source_phrase(row.get("utterance", "")))
+    if not reference_tokens:
+        return False
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict):
+            continue
+        if str(result.get("predicate", "")).strip() != "source_record_label_value_pair_support":
+            continue
+        for result_row in result.get("rows") or []:
+            if not isinstance(result_row, dict):
+                continue
+            field_tokens = _loose_atom_token_set(
+                _display_source_phrase(
+                    result_row.get("FieldDisplay")
+                    or result_row.get("Field")
+                    or ""
+                )
+            )
+            value_tokens = _without_source_reference_stop_tokens(
+                _loose_atom_token_set(
+                    _display_source_phrase(
+                        result_row.get("ValueDisplay")
+                        or result_row.get("Value")
+                        or ""
+                    )
+                )
+            )
+            value_tokens = {token for token in value_tokens if len(token) >= 3}
+            if len(value_tokens) < 4:
+                continue
+            if field_tokens and not (field_tokens & (reference_tokens | utterance_tokens)):
+                continue
+            matched = value_tokens & reference_tokens
+            if len(matched) >= max(4, math.ceil(len(value_tokens) * 0.8)):
+                return True
+    return False
+
+
 def _source_record_summary_reference_supported_by_results(
     *,
     row: dict[str, Any],
     reference: str,
     predicates: set[str],
 ) -> bool:
+    reference_display = _display_source_phrase(str(reference or "").strip())
     reference_tokens = _without_source_reference_stop_tokens(_loose_atom_token_set(reference))
     reference_tokens = {
         token
@@ -29317,9 +33955,17 @@ def _source_record_summary_reference_supported_by_results(
             continue
         rows = result.get("rows") if isinstance(result, dict) else None
         row_tokens: set[str] = set()
+        row_values: list[str] = []
         for result_row in rows or []:
             for value in _iter_scalar_values(result_row):
-                row_tokens.update(_loose_atom_token_set(_display_source_phrase(value)))
+                displayed = _display_source_phrase(value)
+                row_values.append(displayed)
+                row_tokens.update(_loose_atom_token_set(displayed))
+        if _unicode_reference_fragments_supported(
+            value=" ".join(row_values),
+            reference_display=reference_display,
+        ):
+            return True
         if reference_tokens.issubset(row_tokens):
             return True
     return False
@@ -29389,7 +34035,22 @@ def _source_record_reference_supported_by_results(*, row: dict[str, Any], refere
         if not isinstance(result, dict):
             continue
         predicate = str(result.get("predicate", "")).strip()
-        if predicate not in {"source_record_text_atom", "source_record_label", "method_actor_frame_source_support"}:
+        if predicate not in {
+            "source_record_text_atom",
+            "source_record_label",
+            "source_record_text_display",
+            "source_record_label_display",
+            "source_record_section_display",
+            "source_record_cell_display",
+            "source_record_cell_header_display",
+            "source_record_semantic_target_display_support",
+            "source_record_semantic_target_cell_value_support",
+            "source_record_status_inline_field_support",
+            "source_record_semantic_target_window_support",
+            "source_record_count_breakdown_support",
+            "source_record_address_line_support",
+            "method_actor_frame_source_support",
+        }:
             continue
         rows = result.get("rows") if isinstance(result, dict) else None
         for result_row in rows or []:
@@ -29400,6 +34061,11 @@ def _source_record_reference_supported_by_results(*, row: dict[str, Any], refere
                     reference_tokens=reference_tokens,
                 ):
                     return True
+    if _numeric_measure_reference_supported_by_display_results(
+        row=row,
+        reference_display=reference_display,
+    ):
+        return True
     return False
 
 
@@ -29414,12 +34080,113 @@ def _display_phrase_contains_reference(
         return False
     if reference_display and reference_display in displayed:
         return True
+    if _unicode_reference_fragments_supported(value=displayed, reference_display=reference_display):
+        return True
     value_tokens = _loose_atom_token_set(displayed)
     if _abbreviated_reference_supported(reference_tokens=reference_tokens, value_tokens=value_tokens):
         return True
     if _date_reference_supported(reference_tokens=reference_tokens, value_tokens=value_tokens):
         return True
+    if _initialism_reference_supported(
+        reference_tokens=reference_tokens,
+        value_tokens=value_tokens,
+        displayed=displayed,
+    ):
+        return True
     return bool(reference_tokens and reference_tokens.issubset(value_tokens))
+
+
+def _numeric_measure_reference_supported_by_display_results(
+    *,
+    row: dict[str, Any],
+    reference_display: str,
+) -> bool:
+    reference_numbers = _numeric_measure_surfaces(reference_display)
+    if len(reference_numbers) < 2:
+        return False
+    display_values: list[str] = []
+    for query_result in row.get("query_results", []) or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {
+            "source_record_semantic_target_display_support",
+            "source_record_semantic_target_cell_value_support",
+            "source_record_status_inline_field_support",
+            "source_record_semantic_target_window_support",
+            "source_record_count_breakdown_support",
+        }:
+            continue
+        for result_row in result.get("rows") or []:
+            if not isinstance(result_row, dict):
+                continue
+            for value in _iter_scalar_values(result_row):
+                displayed = _display_source_phrase(value)
+                if displayed:
+                    display_values.append(displayed)
+    if not display_values:
+        return False
+    display_numbers: set[str] = set()
+    for value in display_values:
+        display_numbers.update(_numeric_measure_surfaces(value))
+    return bool(display_numbers) and reference_numbers <= display_numbers
+
+
+def _numeric_measure_surfaces(value: str) -> set[str]:
+    text = unicodedata.normalize("NFKC", str(value or ""))
+    out: set[str] = set()
+    for match in re.finditer(r"(?<!\d)[+-]?\d[\d,]*(?:\.\d+)?(?!\d)", text):
+        raw = match.group(0)
+        if "," not in raw and "." not in raw:
+            continue
+        normalized = raw.replace(",", "")
+        try:
+            if "." in normalized:
+                normalized = normalized.rstrip("0").rstrip(".")
+            if normalized in {"", "+", "-"}:
+                continue
+        except ValueError:
+            continue
+        out.add(normalized)
+    return out
+
+
+def _unicode_reference_fragments_supported(*, value: Any, reference_display: str) -> bool:
+    reference_text = str(reference_display or "")
+    if not _contains_non_ascii_letter(reference_text):
+        return False
+    value_compact = _compact_unicode_reference_text(str(value or ""))
+    if not value_compact:
+        return False
+    fragments = _compact_unicode_reference_fragments(reference_text)
+    if not fragments:
+        return False
+    return all(fragment in value_compact for fragment in fragments)
+
+
+def _compact_unicode_reference_fragments(value: str) -> list[str]:
+    chunks = re.split(r"(?:[+;,/]|->|→|=|\(|\)|\[|\]|\{|\}|:)", str(value or ""))
+    out: list[str] = []
+    seen: set[str] = set()
+    for chunk in chunks:
+        compact = _compact_unicode_reference_text(chunk)
+        if len(compact) < 2:
+            continue
+        has_non_ascii = any(char.isalpha() and not char.isascii() for char in compact)
+        has_digit = any(char.isdigit() for char in compact)
+        if not has_non_ascii and not has_digit:
+            continue
+        if compact in seen:
+            continue
+        seen.add(compact)
+        out.append(compact)
+    return out
+
+
+def _compact_unicode_reference_text(value: str) -> str:
+    text = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    return "".join(char for char in text if char.isalnum())
 
 
 def _iter_scalar_values(value: Any) -> list[str]:
@@ -29442,6 +34209,35 @@ def _abbreviated_reference_supported(*, reference_tokens: set[str], value_tokens
     if {"central", "time", "ct"} <= reference_tokens and "ct" in value_tokens:
         return True
     return False
+
+
+def _initialism_reference_supported(
+    *,
+    reference_tokens: set[str],
+    value_tokens: set[str],
+    displayed: str,
+) -> bool:
+    missing_tokens = {token for token in reference_tokens if token not in value_tokens}
+    if not missing_tokens or len(missing_tokens) > 2:
+        return False
+    if not (reference_tokens - missing_tokens).issubset(value_tokens):
+        return False
+    for token in missing_tokens:
+        if not re.fullmatch(r"[a-z]{2,6}", token):
+            return False
+        if not _display_text_supports_initialism(displayed=displayed, initialism=token):
+            return False
+    return True
+
+
+def _display_text_supports_initialism(*, displayed: str, initialism: str) -> bool:
+    folded = unicodedata.normalize("NFKD", str(displayed or "").casefold())
+    folded = "".join(char for char in folded if not unicodedata.combining(char))
+    words = [word for word in re.findall(r"[a-z0-9]+", folded) if len(word) > 2]
+    if not words:
+        return False
+    initials = "".join(word[0] for word in words if word)
+    return str(initialism or "").casefold() in initials
 
 
 _SOURCE_REFERENCE_STOP_TOKENS = {
@@ -29598,12 +34394,21 @@ def classify_failure_surface(
         "relevant_clauses": [*facts[:600], *rules[:160]],
         "classification_policy": [
             "Choose compile_surface_gap only when the admitted KB rows shown here do not appear to contain the reference answer support.",
+            "Treat source_record_text_display, source_record_label_display, source_record_section_display, source_record_cell_display, and source_record_cell_header_display as admitted KB rows; if they plainly contain the support but the judge missed it, prefer answer_surface_gap.",
             "Choose query_surface_gap when relevant support appears in admitted clauses or inventory examples but the emitted query set did not retrieve it.",
             "Choose hybrid_join_gap when rows are present or retrieved but require joining, comparing, counting, set subtraction, temporal arithmetic, or aggregation.",
             "Choose answer_surface_gap only when returned rows are plainly sufficient and the remaining problem is interpretation or wording.",
             "If uncertain, use judge_uncertain with low confidence.",
         ],
     }
+    payload = _failure_surface_payload(
+        row=row,
+        reference=reference,
+        judge=judge,
+        kb_inventory=kb_inventory,
+        facts=facts,
+        rules=rules,
+    )
     messages = [
         {
             "role": "system",
@@ -29672,6 +34477,9 @@ def call_lmstudio_json_schema(
     if _is_openrouter_base_url(config.base_url) and not bool(config.think_enabled):
         payload["reasoning"] = {"effort": "none", "exclude": True}
         payload["include_reasoning"] = False
+        provider_routing = openrouter_provider_routing_from_env()
+        if provider_routing:
+            payload["provider"] = provider_routing
     req = urllib.request.Request(
         endpoint,
         data=json.dumps(payload).encode("utf-8"),
@@ -29683,6 +34491,16 @@ def call_lmstudio_json_schema(
         timeout=int(config.timeout),
         retry_transient=_is_openrouter_base_url(config.base_url),
     )
+    openrouter_metadata = openrouter_generation_metadata(
+        raw_response=raw,
+        request_payload=payload,
+        api_key=config.api_key,
+        base_url=config.base_url,
+        timeout=min(int(config.timeout), 30),
+        call_role=schema_name,
+    )
+    if openrouter_metadata:
+        OPENROUTER_CALL_METADATA_LOG.append(openrouter_metadata)
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     first = choices[0] if choices and isinstance(choices[0], dict) else {}
     message = first.get("message", {}) if isinstance(first, dict) else {}
@@ -29728,15 +34546,14 @@ def _urlopen_json_with_transient_retries(
 def _chat_headers(api_key: str = "", *, base_url: str = "") -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
     openrouter_target = not str(base_url or "").strip() or _is_openrouter_base_url(base_url)
-    key = str(
-        api_key
-        or os.environ.get("PRETHINKER_API_KEY")
-        or (os.environ.get("OPENROUTER_API_KEY") if openrouter_target else "")
-        or ""
-    ).strip()
+    if openrouter_target:
+        key = openrouter_api_key(api_key)
+    else:
+        key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
     if openrouter_target:
+        headers.update(openrouter_metadata_headers(base_url))
         referer = _openrouter_referer()
         if referer:
             headers["HTTP-Referer"] = referer
@@ -29880,12 +34697,16 @@ def _public_compatibility_row_class(row_class: str) -> str:
 def write_summary(record: dict[str, Any], path: Path) -> None:
     summary = record.get("summary", {})
     compatibility_summary = summary.get("compatibility_row_summary", {})
+    serving_path = record.get("model_serving_path") if isinstance(record.get("model_serving_path"), dict) else {}
     lines = [
         "# Domain Bootstrap QA Run",
         "",
         f"- Run JSON: `{record.get('run_json', '')}`",
         f"- QA file: `{record.get('qa_file', '')}`",
         f"- Model: `{record.get('model', '')}`",
+        f"- Provider family: `{serving_path.get('provider_family', '')}`",
+        f"- Base URL: `{serving_path.get('base_url', '')}`",
+        f"- Provider routing: `{serving_path.get('provider_routing', {})}`",
         f"- Source facts/rules: `{record.get('source_fact_count', 0)}` / `{record.get('source_rule_count', 0)}`",
         f"- Questions: `{summary.get('question_count', 0)}`",
         f"- Parsed OK: `{summary.get('parsed_ok', 0)}`",

@@ -67,6 +67,24 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("Flag source-coordinate provenance loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("governed semantic subject/assertion and the source coordinate", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("source-stated values", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("named-scope contributions", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("profile_bootstrap_v1 supports at most five argument", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Do not use /6 or higher", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Flag financial contribution loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("separate provenance/source-coordinate carrier", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("Do not list global lookup predicates", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("record-keyed link predicate", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("recipient/addressee body when stated", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("captioned duty names and inline", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("one-time fixed deadlines and recurring", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("later notice, correction, amendment, update, extension", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("direct document-update surface", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("current decision's disposition separately from procedural history", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("whether the matter is remanded/transferred or finally/directly resolved", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Flag recommendation-chain slot loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("violation or deficiency categories separate from action type", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("separate category rows for each stated area", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Flag violation-category loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
 
     def test_document_intake_registries_are_narrow_and_fact_free(self) -> None:
         fixture_dir = Path("datasets/profile_bootstrap/samples/document_intake")
@@ -193,6 +211,7 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertTrue(score["schema_ok"])
         self.assertEqual(score["predicate_count"], 1)
         self.assertEqual(score["generic_predicate_count"], 0)
+        self.assertEqual(score["candidate_signature_arg_mismatch_refs"], [])
         self.assertEqual(score["frontier_unknown_positive_predicate_refs"], [])
         self.assertGreater(score["rough_score"], 0.4)
 
@@ -351,6 +370,256 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(score["generic_predicate_count"], 1)
         self.assertLess(score["rough_score"], 0.8)
 
+    def test_score_catches_candidate_signature_arg_role_mismatch(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "operations_record",
+            "domain_scope": "Operational source records with repeated actions.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "action", "description": "Action record.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "record_action/4",
+                    "args": ["record_id", "actor", "action"],
+                    "description": "Action record with role labels.",
+                    "why": "The source records repeated actions.",
+                    "admission_notes": ["Keep roles as schema slots."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["record_action/4"],
+            "admission_risks": ["action/status collapse"],
+            "clarification_policy": ["clarify actor"],
+            "unsafe_transformations": ["do not infer completion"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "A record stated an action.",
+                    "expected_boundary": "record_action(r1, actor_a, action_a, src_1).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["candidate_signature_arg_mismatch_count"], 1)
+        self.assertEqual(score["candidate_signature_arg_mismatch_refs"], ["record_action/4:args=3"])
+        self.assertLess(score["rough_score"], 0.8)
+
+    def test_score_surfaces_recommendation_chain_without_recipient_slot(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_record",
+            "domain_scope": "Regulatory source records with authority referrals.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "action", "description": "Regulatory action.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "recommended_action/3",
+                    "args": ["recommending_body", "target_entity", "action_type"],
+                    "description": "Records a recommended action.",
+                    "why": "One body recommended action against a target.",
+                    "admission_notes": ["Must preserve the full chain."],
+                },
+                {
+                    "signature": "regulatory_action/5",
+                    "args": ["action_id", "action_type", "target_entity", "issuing_body", "legal_basis"],
+                    "description": "Records the action later taken.",
+                    "why": "The issuing body and action are source-stated.",
+                    "admission_notes": ["Issuer is not automatically the recommendation recipient."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["recommended_action/3"],
+            "admission_risks": ["recommendation/action collapse"],
+            "clarification_policy": ["clarify recipient when source omits it"],
+            "unsafe_transformations": ["do not infer recipient from issuer"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The review body recommended administrative action.",
+                    "expected_boundary": "recommended_action(r1, target_a, action_a).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["recommendation_chain_slot_loss_count"], 1)
+        self.assertEqual(score["recommendation_chain_slot_loss_refs"], ["recommended_action/3"])
+
+    def test_score_accepts_recommendation_chain_with_explicit_recipient_slot(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_record",
+            "domain_scope": "Regulatory source records with authority referrals.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "action", "description": "Regulatory action.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "authority_recommendation/5",
+                    "args": ["source_body", "recipient_body", "target_entity", "action_type", "source_ref"],
+                    "description": "Records a recommendation chain.",
+                    "why": "The source states who recommended action to whom.",
+                    "admission_notes": ["Recipient remains separately queryable."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["authority_recommendation/5"],
+            "admission_risks": ["recommendation/action collapse"],
+            "clarification_policy": ["clarify missing recipient"],
+            "unsafe_transformations": ["do not infer final action scope"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The review body recommended action to the regulator.",
+                    "expected_boundary": "authority_recommendation(body_a, regulator_b, target_c, action_d, src_1).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["recommendation_chain_slot_loss_count"], 0)
+        self.assertEqual(score["recommendation_chain_slot_loss_refs"], [])
+
+    def test_score_does_not_treat_direct_report_request_as_recommendation_chain(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_record",
+            "domain_scope": "Regulatory source records with direct report requests.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "action", "description": "Regulatory action.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "requests_report/3",
+                    "args": ["regulator", "target_entity", "request_type"],
+                    "description": "Captures a direct request for a report.",
+                    "why": "The source states a regulator requested a report from the target.",
+                    "admission_notes": ["Direct request action, not a recommendation chain."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["requests_report/3"],
+            "admission_risks": ["request/action collapse"],
+            "clarification_policy": ["clarify target when omitted"],
+            "unsafe_transformations": ["do not infer a recommendation"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The regulator requested a report from the target.",
+                    "expected_boundary": "requests_report(regulator_a, target_b, report_type_c).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["recommendation_chain_slot_loss_count"], 0)
+        self.assertEqual(score["recommendation_chain_slot_loss_refs"], [])
+
+    def test_score_surfaces_regulatory_violation_without_category_carrier(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_enforcement",
+            "domain_scope": "Regulatory enforcement records with compliance violations and failures.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "action", "description": "Regulatory action.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "regulatory_order/4",
+                    "args": ["order_id", "target_entity", "order_type", "legal_basis"],
+                    "description": "Records an intervention.",
+                    "why": "The source states the order.",
+                    "admission_notes": ["Order type is not violation type."],
+                },
+                {
+                    "signature": "admitted_failure/2",
+                    "args": ["entity", "failure_description"],
+                    "description": "Records a failure description.",
+                    "why": "The source states failures.",
+                    "admission_notes": ["Description alone leaves categories hard to query."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["admitted_failure/2"],
+            "admission_risks": ["violation category/action collapse"],
+            "clarification_policy": ["clarify category when source omits it"],
+            "unsafe_transformations": ["do not infer legal guilt"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The record listed violation categories.",
+                    "expected_boundary": "admitted_failure(entity_a, failure_a).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertGreaterEqual(score["violation_category_slot_loss_count"], 1)
+        self.assertIn("admitted_failure/2", score["violation_category_slot_loss_refs"])
+
+    def test_score_accepts_regulatory_violation_category_carrier(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_enforcement",
+            "domain_scope": "Regulatory enforcement records with compliance violations and deficiencies.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "finding", "description": "Regulatory finding.", "examples": ["f1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "deficiency_identification/3",
+                    "args": ["entity", "business_context", "deficiency_description"],
+                    "description": "Records a deficiency with context and detail.",
+                    "why": "The source states deficiency categories.",
+                    "admission_notes": ["Business context remains queryable."],
+                },
+                {
+                    "signature": "legal_basis/2",
+                    "args": ["finding_id", "statute_reference"],
+                    "description": "Records cited law.",
+                    "why": "The source states statutes.",
+                    "admission_notes": ["Legal basis is separate from deficiency category."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["deficiency_identification/3"],
+            "admission_risks": ["legal basis/category collapse"],
+            "clarification_policy": ["clarify category when source omits it"],
+            "unsafe_transformations": ["do not infer legal guilt"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The record listed deficiency categories.",
+                    "expected_boundary": "deficiency_identification(entity_a, control_area_a, detail_a).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["violation_category_slot_loss_count"], 0)
+        self.assertEqual(score["violation_category_slot_loss_refs"], [])
+
     def test_score_catches_frontier_cases_using_unproposed_positive_predicates(self) -> None:
         parsed = {
             "schema_version": "profile_bootstrap_v1",
@@ -432,6 +701,61 @@ class ProfileBootstrapTests(unittest.TestCase):
             ["approved_by/3", "policy_constraint/2"],
         )
 
+    def test_score_ignores_commas_and_parentheses_inside_quoted_values(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "legal_case_summary",
+            "domain_scope": "Board and court decision summaries.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "case", "description": "Case record.", "examples": ["case_001"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "case_location/2",
+                    "args": ["case_id", "location"],
+                    "description": "Case location.",
+                    "why": "Location is stated in the source.",
+                    "admission_notes": ["Keep the source location as a value."],
+                },
+                {
+                    "signature": "party_role/3",
+                    "args": ["case_id", "party_id", "role"],
+                    "description": "Party role in the case.",
+                    "why": "Parties and roles are queryable.",
+                    "admission_notes": ["Party names may contain punctuation."],
+                },
+                {
+                    "signature": "legal_finding/4",
+                    "args": ["case_id", "section", "actor", "stance"],
+                    "description": "Legal finding.",
+                    "why": "Findings need actor and stance.",
+                    "admission_notes": ["Legal sections may contain parenthesized citations."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["legal_finding/4"],
+            "admission_risks": ["case/finding collapse"],
+            "clarification_policy": ["clarify actor"],
+            "unsafe_transformations": ["do not infer findings"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The board issued a finding in River City, AA.",
+                    "expected_boundary": (
+                        "case_location('case_001', 'River City, AA'). "
+                        "party_role('case_001', 'Sample Industries, Inc.', 'Respondent'). "
+                        "legal_finding('case_001', 'Section 8(a)(5) and (1)', 'Board', 'held')."
+                    ),
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["frontier_unknown_positive_predicate_refs"], [])
+
     def test_score_catches_repeated_structure_refs_outside_palette(self) -> None:
         parsed = {
             "schema_version": "profile_bootstrap_v1",
@@ -475,6 +799,187 @@ class ProfileBootstrapTests(unittest.TestCase):
 
         self.assertEqual(score["repeated_structure_count"], 1)
         self.assertEqual(score["repeated_structure_unknown_predicate_refs"], ["grievance_actor/2"])
+
+    def test_score_treats_repeated_structure_lookup_properties_as_diagnostic_only(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "public_record",
+            "domain_scope": "Source records with repeated findings and provenance links.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "finding", "description": "Repeated source finding.", "examples": ["f1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "finding/2",
+                    "args": ["finding_id", "label"],
+                    "description": "A repeated source finding.",
+                    "why": "The source has multiple findings.",
+                    "admission_notes": ["Keep finding id stable."],
+                },
+                {
+                    "signature": "source_supports/4",
+                    "args": ["predicate_name", "subject_key", "source_ref", "support_type"],
+                    "description": "Provenance support for a proposed predicate.",
+                    "why": "Source references support semantic rows.",
+                    "admission_notes": ["This is provenance, not a per-finding property."],
+                },
+                {
+                    "signature": "instrument_obligation/3",
+                    "args": ["instrument_name", "obligation_type", "description"],
+                    "description": "Lookup row for obligations defined by a source instrument.",
+                    "why": "Some obligations attach to source instruments.",
+                    "admission_notes": ["Do not treat as a repeated finding property."],
+                },
+                {
+                    "signature": "instrument_amount/2",
+                    "args": ["instrument_id", "amount"],
+                    "description": "Record-keyed property for a specific instrument row.",
+                    "why": "The first role is already a stable id.",
+                    "admission_notes": ["This should not be reported as a lookup-property ref."],
+                },
+            ],
+            "repeated_structures": [
+                {
+                    "name": "finding list",
+                    "why": "Findings need stable ids.",
+                    "id_strategy": "f1, f2, ...",
+                    "record_predicate": "finding/2",
+                    "property_predicates": ["source_supports/4", "instrument_obligation/3", "instrument_amount/2"],
+                    "example_records": ["finding(f1, missing_notice)."],
+                    "admission_notes": ["Global lookup rows are diagnostic only for this gate."],
+                }
+            ],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["finding/2", "source_supports/4"],
+            "admission_risks": ["Finding/support collapse"],
+            "clarification_policy": ["Clarify source support"],
+            "unsafe_transformations": ["Do not assert support rows as objective findings"],
+            "starter_frontier_cases": [
+                {"utterance": "Which finding is supported?", "expected_boundary": "finding(f1, missing_notice)", "must_not_write": []}
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(
+            score["repeated_structure_lookup_property_refs"],
+            ["instrument_obligation/3", "source_supports/4"],
+        )
+        self.assertEqual(score["repeated_structure_role_mismatch_refs"], [])
+
+    def test_score_still_flags_repeated_structure_property_role_mismatch(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "public_record",
+            "domain_scope": "Source records with repeated findings.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "finding", "description": "Repeated source finding.", "examples": ["f1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "finding/2",
+                    "args": ["finding_id", "label"],
+                    "description": "A repeated source finding.",
+                    "why": "The source has multiple findings.",
+                    "admission_notes": ["Keep finding id stable."],
+                },
+                {
+                    "signature": "status_bucket/2",
+                    "args": ["status", "value"],
+                    "description": "A status/value property.",
+                    "why": "Status values appear in the source.",
+                    "admission_notes": ["Must be keyed before it can describe a repeated finding."],
+                },
+            ],
+            "repeated_structures": [
+                {
+                    "name": "finding list",
+                    "why": "Findings need stable ids.",
+                    "id_strategy": "f1, f2, ...",
+                    "record_predicate": "finding/2",
+                    "property_predicates": ["status_bucket/2"],
+                    "example_records": ["finding(f1, missing_notice)."],
+                    "admission_notes": ["Property rows need a record id or subject first."],
+                }
+            ],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["finding/2"],
+            "admission_risks": ["Finding/status collapse"],
+            "clarification_policy": ["Clarify status holder"],
+            "unsafe_transformations": ["Do not detach status from its finding"],
+            "starter_frontier_cases": [
+                {"utterance": "Which finding has a status?", "expected_boundary": "finding(f1, missing_notice)", "must_not_write": []}
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["repeated_structure_lookup_property_refs"], [])
+        self.assertEqual(score["repeated_structure_role_mismatch_refs"], ["status_bucket/2"])
+
+    def test_score_accepts_record_noun_as_repeated_structure_property_key(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "regulatory_sanctions",
+            "domain_scope": "Repeated sanction records with typed properties.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "sanction", "description": "Repeated sanction.", "examples": ["s1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "sanction_record/2",
+                    "args": ["sanction", "label"],
+                    "description": "Repeated sanction record.",
+                    "why": "The source lists sanctions.",
+                    "admission_notes": ["The first arg is the sanction key."],
+                },
+                {
+                    "signature": "sanction_type/2",
+                    "args": ["sanction", "type"],
+                    "description": "Type for a sanction.",
+                    "why": "The source states sanction types.",
+                    "admission_notes": ["First arg uses the record noun, not the word id."],
+                },
+                {
+                    "signature": "observed_conduct/3",
+                    "args": ["entity", "conduct", "service"],
+                    "description": "Observed conduct.",
+                    "why": "The source states conduct.",
+                    "admission_notes": ["Entity is not the sanction record key."],
+                },
+            ],
+            "repeated_structures": [
+                {
+                    "name": "sanction list",
+                    "why": "Sanctions have properties.",
+                    "id_strategy": "s1, s2",
+                    "record_predicate": "sanction_record/2",
+                    "property_predicates": ["sanction_type/2", "observed_conduct/3"],
+                    "example_records": ["sanction_record(s1, fine)."],
+                    "admission_notes": ["Properties should be keyed by sanction."],
+                }
+            ],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["sanction_record/2"],
+            "admission_risks": ["sanction/property collapse"],
+            "clarification_policy": ["clarify sanction holder"],
+            "unsafe_transformations": ["do not detach properties"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The sanction was a fine.",
+                    "expected_boundary": "sanction_record(s1, fine). sanction_type(s1, fine).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["repeated_structure_lookup_property_refs"], [])
+        self.assertEqual(score["repeated_structure_role_mismatch_refs"], ["observed_conduct/3"])
 
     def test_load_jsonl_accepts_harness_rows_as_samples(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -873,3 +873,467 @@ Next blockers:
 3. Keep the repair pass off any public score claim until it is tested on a
    fresh ugly batch, because the first evidence is one-fixture mechanism
    evidence plus refreshed accounting.
+
+## Repair Cycle 2026-05-26 - Affected-Set Blocker Adjudication
+
+Intent:
+
+Work the five named blockers before the next fresh ugly batch: state AG
+status-state pressure, affected-set repair-pass transfer, court legal-finding
+zero-yield, PUC mixed carrier/backbone pressure, and NLRB rough-score hold.
+
+Affected-set recompile:
+
+```text
+artifact:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_affected_profile_repair_20260526
+
+fixtures:
+court_ugly_001
+procurement_ugly_001
+puc_ugly_001
+state_ag_ugly_001
+nlrb_ugly_001
+
+compile flags:
+--compile-source
+--compile-flat-plus-plan-passes
+--focused-pass-ops-schema
+--source-entity-ledger
+--archival-identifier-ledger
+--source-record-ledger
+--source-record-ledger-facts
+--profile-delivery-repair-pass
+--intake-registry-context
+--review-profile
+--profile-review-retry
+--quality-gate
+--quality-retry-on-hold
+--quality-retry-max-attempts 1
+```
+
+Current refreshed affected-set summary after diagnostic scoring fixes:
+
+```text
+artifact:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_affected_profile_repair_20260526\compile_summary_current.md
+
+quality gate: 2 pass / 3 hold
+
+pass:
+- court_ugly_001
+- nlrb_ugly_001
+
+hold:
+- procurement_ugly_001: rough_score<0.775
+- puc_ugly_001: source-claim carrier pressure plus stale appeal_filed/3 offer
+- state_ag_ugly_001: compile_health poor; zero_yield=2
+```
+
+Reads:
+
+- `state_ag_ugly_001`: the remaining status-state pressure is real, not just
+  government-State detector noise. The source has settlement/vehicle status
+  surfaces such as approved emissions modification receipt, vehicle removal
+  from commerce, and vehicle purchase/reduction triggers. The compile has
+  adjacent rows such as `reduction_rule/4` and vehicle-class rows, but no direct
+  `vehicle_action/4` or equivalent delivery.
+- `court_ugly_001`: the previous legal-finding zero-yield appears to be
+  run/pass-plan variance, not a missing architecture lane. The affected
+  recompile passes and emits direct legal surfaces such as `court_finding/2`
+  plus source-attributed legal fact/claim rows.
+- `puc_ugly_001`: mixed result. The source-claim side still looks real for
+  party/position claims and unresolved/objection statements. The
+  `appeal_filed/3` status-state pressure is detector overreach on generic
+  appeal-window language, because the source states how a party may appeal, not
+  that an appeal was filed.
+- `nlrb_ugly_001`: the rough-score hold was diagnostic noise. The scorer was
+  counting commas inside quoted values as arity drift and seeing parenthesized
+  legal citations inside quoted values as fake predicate calls. With the
+  scorer fixed, the same artifact reads `0.833` and passes quality gate. The
+  remaining `case_id/1` id-only repeated-record warning is quality texture, not
+  a gate blocker.
+- `procurement_ugly_001`: the affected-set run surfaced a real profile-quality
+  inconsistency, not a scorer bug. The profile declares `contract_award/8` while
+  listing five argument roles, repeated-structure repair adds
+  `contract_award/5`, and starter cases contain unquoted comma-bearing values.
+  This should stay a hold instead of being papered over by permissive scoring.
+
+Changes applied:
+
+- Tightened the existing appeal-filing detector so generic appeal windows or
+  appeal-notice instructions no longer add `appeal_filed/3`.
+- Narrowed the appeal-filing source-claim backbone group so `notice`/`window`
+  language alone does not create an appeal-filing backbone signal.
+- Made profile-bootstrap scorer quote-aware for starter-case predicate calls
+  and arity counting, so punctuation inside quoted values does not create false
+  unknown predicate refs.
+- Made batch `--summarize-existing` refresh profile-bootstrap scores from the
+  parsed profile under the current scorer, matching the way profile-delivery
+  diagnostics are refreshed for current-instrument reads.
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_file.py -q -k "appeal_filing_profile_extension"
+3 passed
+
+python -m pytest tests\test_profile_bootstrap.py -q -k "quoted_values or unproposed_positive_predicate_calls or frontier_cases_using"
+3 passed
+
+python -m pytest tests\test_domain_bootstrap_file_batch.py -q -k "refreshes_profile_bootstrap_score or extracts_quality_gate_signals"
+2 passed
+
+python -m pytest tests\test_profile_bootstrap.py tests\test_domain_bootstrap_file_batch.py tests\test_domain_bootstrap_file.py -q
+238 passed
+
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_file_batch.py src\profile_bootstrap.py
+pass
+
+python scripts\audit_active_instrument_leakage.py --out-json C:\prethinker_tmp_archive\active_instrument_leakage_after_affected_blockers_20260526.json --out-md C:\prethinker_tmp_archive\active_instrument_leakage_after_affected_blockers_20260526.md
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Next blockers:
+
+1. Recompile `puc_ugly_001` once under the narrowed appeal detector. Expected:
+   appeal-filed status pressure should disappear; source-claim pressure should
+   remain if the missing party-position rows are real.
+2. Work `state_ag_ugly_001` as the next real compile blocker: vehicle/status
+   actions are being implied by settlement/reduction rows but not delivered as
+   direct action/status units.
+3. Treat `procurement_ugly_001` as profile-proposal quality work, not a carrier
+   delivery repair. The profile needs arity/schema discipline before any compile
+   gate claim.
+
+## Repair Cycle 2026-05-26 - PUC and State AG Targeted Follow-Through
+
+Intent:
+
+Finish the two substantive affected-set holds without turning fixture language
+into the instrument. The rule was accounting/contract cleanup only: count rows
+already emitted by the compiler when their predicate shape genuinely satisfies
+the carrier contract; remove detector false positives when the source signal was
+not the event the detector claimed.
+
+PUC targeted recompile:
+
+```text
+artifact:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_puc_after_appeal_tighten_20260526
+
+current summary:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_puc_after_appeal_tighten_20260526\compile_summary_current3.md
+
+quality gate: pass
+rough: 0.972
+admitted / skipped: 149 / 6
+profile_delivery_flags: []
+compile_health_flags: []
+```
+
+PUC reads:
+
+- Tightening the appeal detector worked. Generic "party may appeal within N
+  days" language no longer creates `appeal_filed/3` pressure.
+- The compile had already emitted party-position rows for opposition/support
+  statements; those rows are legitimate source-owned claim/position delivery.
+- "Vote Solar" was an organization name, not a vote/tally surface. Removing
+  singular `vote` from the source-claim backbone trigger cleared that false
+  backbone hold while preserving `voted`/`votes`/`voting`/`tally` signals.
+- "Time available to the commission" was timing/capacity language, not a claim
+  that a source was available. The source-claim key now ignores that shape.
+
+State AG targeted recompile:
+
+```text
+artifact:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_state_ag_scope_status_repair_20260526
+
+current summary:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_state_ag_scope_status_repair_20260526\compile_summary_current2.md
+
+quality gate: pass
+rough: 1.0
+admitted / skipped: 222 / 2
+profile_delivery_flags: []
+compile_surface_contract_flags: []
+compile_health_flags: []
+```
+
+State AG reads:
+
+- The earlier zero-yield/skip-heavy profile was run-variant poor compile
+  quality. A fresh targeted compile produced a much healthier artifact.
+- The remaining source-authority pressure was accounting: `legal_basis/2` rows
+  directly carry governed claim/conduct plus legal authority and should satisfy
+  the source-authority surface contract.
+- The remaining status-state pressure was accounting: `payment_reduction_rule/3`
+  rows carry the payment subject, reduction amount, and vehicle/action trigger.
+  They satisfy the settlement vehicle-action/status surface better than forcing
+  a generic `status_state_at/4` row.
+- The mapper contract for `scope_or_date` was internally inconsistent. A role
+  named `scope_or_date` must allow a non-temporal source scope; exact date roles
+  remain strict.
+
+Changes applied:
+
+- Count `legal_basis/2` as source-authority delivery and in the source-authority
+  compile-surface contract.
+- Count `payment_reduction_rule/3` as status-state delivery when it carries
+  payment subject, amount, and trigger event.
+- Recognize `payment_reduction_rule/3`/`reduction_rule/*` as offered
+  status-state carriers when their profile shape is the reduction-trigger
+  carrier.
+- Allow `scope_or_date` contract roles to accept non-temporal scope atoms while
+  keeping exact `date`/`*_date` roles temporal.
+- Count `party_position/*` and `legal_position/*` as source-owned claim/position
+  delivery.
+- Treat statement/comment/testimony/memo/report/email/note source kinds as
+  equivalent for source-claim key matching when the claim kind matches.
+- Ignore `available` as a source-claim key when it is timing/capacity language
+  such as "time available" or "available to".
+- Remove singular `vote` from source-claim backbone voting triggers; keep
+  `voted`, `votes`, `voting`, `tally`, `ayes`, `nays`, `roll`, and `call`.
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_file.py -q -k "status_state_delivery_accepts_conditional_rule_rows"
+1 passed
+
+python -m pytest tests\test_domain_bootstrap_file.py -q -k "source_claim_backbone_ignores_vote or source_claim_key_ignores_available or party_position_as_statement_claim or status_state_delivery_accepts_conditional_rule_rows"
+4 passed
+
+python -m pytest tests\test_semantic_ir_runtime.py -q -k "scope_or_date or clear_contract_role_mismatch or interval_label"
+3 passed
+
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_file_batch.py scripts\audit_compile_surface_stability.py src\profile_bootstrap.py src\semantic_ir.py
+pass
+```
+
+Current affected-set read:
+
+```text
+Not a single fresh 5-fixture rerun.
+
+Pass on current targeted reads:
+- court_ugly_001
+- nlrb_ugly_001
+- puc_ugly_001
+- state_ag_ugly_001
+
+Remaining hold:
+- procurement_ugly_001: profile-proposal quality/arity inconsistency
+```
+
+Next blocker:
+
+`procurement_ugly_001` should stay classified as profile-quality, not carrier
+delivery. The observed issue is a profile that declares `contract_award/8` while
+listing five argument roles, then uses unquoted comma-bearing starter values.
+Do not relax the scorer to pass that; fix the profile proposal discipline or
+test it on a fresh procurement-style document.
+
+## Repair Cycle 2026-05-26 - Profile Schema Contract Discipline
+
+Intent:
+
+Make profile-proposal defects visible as profile-schema contract defects instead
+of letting them hide inside a low rough score or downstream frontier drift. This
+is deliberately not a carrier repair and not a fixture-language repair: the
+instrument now checks a generic invariant that every proposed predicate
+signature's `/N` arity must match the number of short schema role labels in
+`candidate_predicates[].args`.
+
+Change applied:
+
+- Added `candidate_signature_arg_mismatch_count` and
+  `candidate_signature_arg_mismatch_refs` to `profile_bootstrap_score`.
+- Added `profile_schema_contract_flags` to compile-batch summaries and quality
+  gate reasons.
+- Added generic retry guidance for profile arity/args mismatch: lower the `/N`
+  when a predicate has fewer core roles, or add missing role labels when the
+  higher arity is genuinely required. Do not repair by putting source values or
+  copied examples into args.
+- Tightened profile-bootstrap guidance so starter frontier predicate calls must
+  quote comma/space/punctuation-bearing values or use normalized atoms.
+
+Procurement current read:
+
+```text
+artifact summarized:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_affected_profile_repair_20260526\compile\procurement_ugly_001\domain_bootstrap_file_20260526T140545031873Z_source_qwen-qwen3-6-35b-a3b.json
+
+current summary:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_affected_profile_repair_20260526\procurement_current_after_profile_schema_contract.md
+
+quality gate: hold
+rough: 0.617
+admitted / skipped: 245 / 7
+profile_schema_contract_flags:
+- candidate_signature_arg_mismatch:contract_award/8:args=5
+frontier_unknown_positive_predicate_refs:
+- contract_award/7
+- contracting_activity/4
+- contractor_location/3
+- funds/1
+- performance_location/3
+```
+
+Read:
+
+- The procurement hold is now sharper: the first-class defect is an internally
+  inconsistent profile proposal, not a missing delivery carrier.
+- The profile declares one predicate as `/8` while giving five role labels. The
+  downstream frontier examples then show arity drift where comma-bearing
+  human-readable values were not quoted or atomized.
+- This is a useful hold. It prevents a bad profile shape from being counted as
+  compile-surface failure and protects the instrument from overfitting the
+  compiler around one malformed profile proposal.
+
+Validation:
+
+```text
+python -m pytest tests\test_profile_bootstrap.py tests\test_domain_bootstrap_file_batch.py -q -k "signature_arg_role_mismatch or profile_schema_contract or quality_gate_signals or refreshes_profile_bootstrap_score"
+4 passed
+
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_file_batch.py tests\test_profile_bootstrap.py tests\test_semantic_ir_runtime.py -q
+335 passed, 2 subtests passed
+
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_file_batch.py scripts\run_profile_bootstrap.py src\profile_bootstrap.py src\semantic_ir.py
+pass
+
+python scripts\audit_active_instrument_leakage.py --out-json C:\prethinker_tmp_archive\active_instrument_leakage_after_profile_schema_contract_20260526.json --out-md C:\prethinker_tmp_archive\active_instrument_leakage_after_profile_schema_contract_20260526.md
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Next blocker:
+
+Run a bounded quality retry or fresh procurement-like transfer fixture only
+after deciding whether the profile generator should fix this in one retry pass
+or whether the current artifact should remain a declared profile-quality hold.
+
+## Repair Cycle 2026-05-26 - Procurement Profile-Contract Retry
+
+Intent:
+
+Test whether the profile generator can repair procurement-style profile
+schema defects when the quality gate names the actual contract class. This was
+still one-fixture mechanism evidence, not a benchmark run.
+
+Harness change:
+
+- Promoted repeated-structure defects into `profile_schema_contract_flags`:
+  unknown repeated predicates, id-only record predicates, property predicates
+  whose first role is not record/record-id-like, and positive starter-frontier
+  predicates not present in candidate vocabulary.
+- Added generic retry guidance for those profile-contract classes.
+- This matters because the prior retry only saw the source-authority delivery
+  symptom. The real source of rough-score pressure was repeated-record shape.
+
+Observed sequence:
+
+```text
+profile-schema-contract summary:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_affected_profile_repair_20260526\procurement_current_after_profile_schema_contract.md
+
+quality gate: hold
+rough: 0.617
+reason:
+- profile_schema_contract:candidate_signature_arg_mismatch:contract_award/8:args=5
+```
+
+```text
+bounded retry 1:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_procurement_profile_schema_retry_20260526\compile_summary.md
+
+selected attempt: hold
+rough: 0.75
+reason:
+- profile_delivery:source_authority_carrier_offered_but_undelivered
+lesson:
+- arity/args mismatch disappeared, but the source-authority carrier was still
+  offered without delivered rows.
+```
+
+```text
+bounded retry 2:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_procurement_profile_contract_retry2_20260526\compile_summary.md
+
+selected attempt: hold
+rough: 0.717
+reason:
+- profile_schema_contract:candidate_signature_arg_mismatch:contract_award/6:args=5
+- profile_schema_contract:frontier_unknown_positive_predicate:contract_award/5
+lesson:
+- repeated-structure role mismatches and source-authority delivery cleared.
+  The new residual was stale arity/frontier mismatch.
+```
+
+```text
+bounded retry 3:
+C:\prethinker_tmp_archive\fresh_ugly_public_20260526_01_procurement_profile_contract_retry3_20260526\compile_summary.md
+
+quality gate: pass
+rough: 1.0
+admitted / skipped: 135 / 3
+profile_schema_contract_flags: []
+profile_delivery_flags: []
+compile_health_flags: []
+candidate_signature_arg_mismatch_refs: []
+frontier_unknown_positive_predicate_refs: []
+repeated_structure_role_mismatch_refs: []
+```
+
+Read:
+
+- Procurement was not a missing compile-surface carrier after the harness
+  could name profile-contract defects. It was a profile proposal quality issue:
+  record predicates and property predicates needed stable joinable record shape,
+  and starter examples needed matching arity.
+- The clean retry is good mechanism evidence: generic profile-contract flags
+  plus bounded retry can move an ugly procurement fixture from hold to pass
+  without adding fixture language to the instrument.
+- Do not publish this as a corpus score. It is a targeted repair/read of one
+  known fixture. The right confirmation is a fresh ugly procurement-like or
+  official-contract document that was not used to shape the repair.
+
+Current affected-set read:
+
+```text
+Not a single fresh five-fixture rerun.
+
+Pass on current targeted reads:
+- court_ugly_001
+- nlrb_ugly_001
+- puc_ugly_001
+- state_ag_ugly_001
+- procurement_ugly_001
+```
+
+Validation:
+
+```text
+python -m pytest tests\test_domain_bootstrap_file.py tests\test_domain_bootstrap_file_batch.py tests\test_profile_bootstrap.py tests\test_semantic_ir_runtime.py -q
+336 passed, 2 subtests passed
+
+python -m py_compile scripts\run_domain_bootstrap_file.py scripts\run_domain_bootstrap_file_batch.py scripts\run_profile_bootstrap.py src\profile_bootstrap.py src\semantic_ir.py
+pass
+
+python scripts\audit_active_instrument_leakage.py --out-json C:\prethinker_tmp_archive\active_instrument_leakage_after_procurement_profile_contract_retry_20260526.json --out-md C:\prethinker_tmp_archive\active_instrument_leakage_after_procurement_profile_contract_retry_20260526.md
+status: pass
+forbidden hits: 0
+warning hits: 10 existing agency/domain warnings
+```
+
+Next blocker:
+
+Run the next fresh ugly batch as a thermometer before doing more mechanism work
+on these same fixtures. The affected-set blockers now all have current targeted
+passes; continuing to polish this set risks learning the fixture instead of the
+instrument.

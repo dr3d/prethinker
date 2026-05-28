@@ -10,6 +10,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from src.model_path import (
+    openrouter_api_key,
+    openrouter_generation_metadata,
+    openrouter_metadata_headers,
+    openrouter_provider_routing_from_env,
+)
+
 
 TRANSIENT_HTTP_STATUS_CODES = {408, 409, 425, 429, 500, 502, 503, 504}
 
@@ -763,16 +770,21 @@ DOCUMENT_TO_LOGIC_COMPILER_STRATEGY: dict[str, Any] = {
         "temporal_graph_v1 is proposal-only diagnostic structure. It does not create durable facts unless matching candidate_operations are separately emitted and admitted by the mapper.",
         "Preserve source_status and support_ref for temporal nodes and edges so claims, observations, direct assertions, and inferred ordering remain distinguishable.",
     ],
-    "query_strategy": [
-        "For questions, query the actual predicate surface available in allowed_predicates, predicate_contracts, and kb_context_pack examples.",
-        "Use full predicate arity with uppercase variables for unknown slots.",
-        "For multi-hop questions, emit several precise query operations rather than inventing a composite predicate.",
-        "A query is not a durable truth claim; do not write the answer as a fact.",
-    ],
-    "self_check_questions": [
-        "Can this be queried later?",
-        "Does this preserve who said it?",
-        "Am I treating a claim as a fact?",
+        "query_strategy": [
+            "For questions, query the actual predicate surface available in allowed_predicates, predicate_contracts, and kb_context_pack examples.",
+            "Use full predicate arity with uppercase variables for unknown slots.",
+            "For multi-hop questions, emit several precise query operations rather than inventing a composite predicate.",
+            "A query is not a durable truth claim; do not write the answer as a fact.",
+        ],
+        "query_intent_surface_policy": [
+            "For query_intents[].target_terms, preserve exact user/source-local surface terms, including quoted spans and non-English terms.",
+            "If a normalized atom is useful for candidate query operations, include it in candidate_operations or as an additional target term, never as the only replacement for the visible source term.",
+            "Do not translate or snake_case a source-local target term away. intent_type and answer_constraints carry normalized answer shape; target_terms carry what the user/source actually named.",
+        ],
+        "self_check_questions": [
+            "Can this be queried later?",
+            "Does this preserve who said it?",
+            "Am I treating a claim as a fact?",
         "Am I inventing a predicate or alias from model prior knowledge?",
         "Should this be a source-attributed record, a rule, a correction, a query, or a parked unsafe implication?",
     ],
@@ -1032,11 +1044,24 @@ def call_semantic_ir(
         result = _call_ollama_semantic_ir(config=config, messages=messages)
     else:
         raise RuntimeError(f"semantic_ir_v1 backend not supported: {backend}")
+    retry_messages: list[dict[str, str]] | None = None
+    if _semantic_ir_needs_surface_preservation_retry(utterance=utterance, result=result):
+        retry_messages = _surface_preservation_retry_messages(messages)
+        if backend == "lmstudio":
+            retry_result = _call_lmstudio_semantic_ir(config=config, messages=retry_messages)
+        else:
+            retry_result = _call_ollama_semantic_ir(config=config, messages=retry_messages)
+        retry_result["surface_preservation_retry"] = {
+            "reason": "non_ascii_query_target_terms_were_all_ascii_or_canonical",
+            "original_latency_ms": result.get("latency_ms"),
+            "original_parsed": result.get("parsed"),
+        }
+        result = retry_result
     if include_model_input:
         result["model_input"] = {
             "backend": backend,
             "model": config.model,
-            "messages": messages,
+            "messages": retry_messages or messages,
             "input_payload": input_payload,
             "options": {
                 "temperature": float(config.temperature),
@@ -1049,6 +1074,71 @@ def call_semantic_ir(
             },
         }
     return result
+
+
+def _semantic_ir_needs_surface_preservation_retry(*, utterance: str, result: dict[str, Any]) -> bool:
+    parsed = result.get("parsed") if isinstance(result, dict) else None
+    if not isinstance(parsed, dict):
+        return False
+    if not _text_contains_non_ascii_letter(utterance):
+        return False
+    intents = parsed.get("query_intents")
+    if not isinstance(intents, list) or not intents:
+        return False
+    target_terms: list[str] = []
+    for intent in intents:
+        if not isinstance(intent, dict):
+            continue
+        for term in intent.get("target_terms", []) or []:
+            text = str(term or "").strip()
+            if text:
+                target_terms.append(text)
+    if not target_terms:
+        return False
+    if any(_text_contains_non_ascii_letter(term) for term in target_terms):
+        return False
+    # Uppercase acronyms are not snake_case canonical atoms, but they still mean
+    # the source-local non-English term was dropped from the query-intent
+    # surface. Retry whenever every target term is ASCII-only.
+    return all(_text_is_ascii_only(term) for term in target_terms)
+
+
+def _surface_preservation_retry_messages(messages: list[dict[str, str]]) -> list[dict[str, str]]:
+    retry_messages = [dict(message) for message in messages]
+    retry_instruction = (
+        "\n\nSURFACE_PRESERVATION_RETRY:\n"
+        "Your previous semantic_ir lost a non-English/source-local query target by replacing it with "
+        "an English or snake_case canonical label. Re-emit the full semantic_ir_v1 object. For every "
+        "query_intents[] row, target_terms MUST include the exact visible source-local term from the "
+        "utterance when one is present. You may include a normalized atom as an additional target term "
+        "or query candidate, but never as the only replacement for the visible source term."
+    )
+    for message in retry_messages:
+        if message.get("role") == "user":
+            message["content"] = str(message.get("content", "")) + retry_instruction
+            break
+    return retry_messages
+
+
+def _text_contains_non_ascii_letter(value: str) -> bool:
+    return any(char.isalpha() and not char.isascii() for char in str(value or ""))
+
+
+def _text_is_ascii_only(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(text) and all(ord(char) < 128 for char in text)
+
+
+def _looks_like_ascii_canonical_query_target(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text or _text_contains_non_ascii_letter(text):
+        return False
+    if re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+", text):
+        return True
+    tokens = [token for token in re.split(r"[^A-Za-z0-9]+", text) if token]
+    if len(tokens) >= 2 and all(token[:1].islower() for token in tokens):
+        return True
+    return False
 
 
 def _call_ollama_semantic_ir(*, config: SemanticIRCallConfig, messages: list[dict[str, str]]) -> dict[str, Any]:
@@ -1120,6 +1210,9 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
     if _is_openrouter_base_url(config.base_url) and not bool(config.think_enabled):
         payload["reasoning"] = {"effort": "none", "exclude": True}
         payload["include_reasoning"] = False
+        provider_routing = openrouter_provider_routing_from_env()
+        if provider_routing:
+            payload["provider"] = provider_routing
     base_url = config.base_url.rstrip("/")
     endpoint = f"{base_url}/chat/completions" if base_url.endswith("/v1") else f"{base_url}/v1/chat/completions"
     req = urllib.request.Request(
@@ -1134,6 +1227,14 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
         timeout=int(config.timeout),
         retry_transient=_is_openrouter_base_url(config.base_url),
     )
+    openrouter_metadata = openrouter_generation_metadata(
+        raw_response=raw,
+        request_payload=payload,
+        api_key=config.api_key,
+        base_url=config.base_url,
+        timeout=min(int(config.timeout), 30),
+        call_role="semantic_ir",
+    )
 
     choices = raw.get("choices", []) if isinstance(raw, dict) else []
     first = choices[0] if choices and isinstance(choices[0], dict) else {}
@@ -1145,6 +1246,7 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
     return {
         "latency_ms": int((time.perf_counter() - started) * 1000),
         "raw": raw,
+        "openrouter_generation_metadata": openrouter_metadata,
         "content": content,
         "parsed": parsed,
     }
@@ -1153,15 +1255,14 @@ def _call_lmstudio_semantic_ir(*, config: SemanticIRCallConfig, messages: list[d
 def _chat_headers(api_key: str = "", *, base_url: str = "") -> dict[str, str]:
     headers = {"Content-Type": "application/json"}
     openrouter_target = not str(base_url or "").strip() or _is_openrouter_base_url(base_url)
-    key = str(
-        api_key
-        or os.environ.get("PRETHINKER_API_KEY")
-        or (os.environ.get("OPENROUTER_API_KEY") if openrouter_target else "")
-        or ""
-    ).strip()
+    if openrouter_target:
+        key = openrouter_api_key(api_key)
+    else:
+        key = str(api_key or os.environ.get("PRETHINKER_API_KEY") or "").strip()
     if key:
         headers["Authorization"] = f"Bearer {key}"
     if openrouter_target:
+        headers.update(openrouter_metadata_headers(base_url))
         referer = _openrouter_referer()
         if referer:
             headers["HTTP-Referer"] = referer
@@ -3156,6 +3257,8 @@ def _contract_role_kind(role: str) -> str:
         return "person_or_document"
     if "interval" in value:
         return "interval"
+    if "scope" in value and ("date" in value or "time" in value or "source" in value or "basis" in value):
+        return ""
     if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:
         return "date"
     if value in {"timestamp", "datetime"}:

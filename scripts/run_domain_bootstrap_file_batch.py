@@ -28,6 +28,13 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from src.semantic_ir import bootstrap_env_local  # noqa: E402
+from src.model_path import (  # noqa: E402
+    apply_openrouter_provider_env,
+    local_lmstudio_model_metadata,
+    model_serving_path_metadata,
+    openrouter_provider_routing_from_env,
+)
+from src.profile_bootstrap import profile_bootstrap_score  # noqa: E402
 from scripts.audit_compile_surface_stability import (  # noqa: E402
     _contract_reports as _surface_contract_reports,
     _fact_rows as _surface_fact_rows,
@@ -252,6 +259,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--fixture", action="append", default=[], help="Fixture name. Repeat to include multiple.")
     parser.add_argument("--model", default=os.environ.get("PRETHINKER_MODEL", "qwen/qwen3.6-35b-a3b"))
     parser.add_argument("--base-url", default=os.environ.get("PRETHINKER_BASE_URL", "http://127.0.0.1:1234"))
+    parser.add_argument("--openrouter-provider-order", default="", help="Comma-separated OpenRouter provider slugs to try in order.")
+    parser.add_argument("--openrouter-provider-only", default="", help="Comma-separated OpenRouter provider slugs to allow.")
+    parser.add_argument("--openrouter-provider-ignore", default="", help="Comma-separated OpenRouter provider slugs to exclude.")
+    parser.add_argument("--openrouter-quantizations", default="", help="Comma-separated OpenRouter quantization filters.")
+    parser.add_argument("--openrouter-allow-fallbacks", choices=["", "true", "false"], default="")
+    parser.add_argument("--openrouter-require-parameters", choices=["", "true", "false"], default="")
     parser.add_argument("--timeout", type=int, default=900, help="Base per-call LM timeout passed to compile runner.")
     parser.add_argument("--lanes", type=int, default=1, help="Concurrent compile runner processes.")
     parser.add_argument(
@@ -314,6 +327,14 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
+    apply_openrouter_provider_env(
+        order=getattr(args, "openrouter_provider_order", ""),
+        only=getattr(args, "openrouter_provider_only", ""),
+        ignore=getattr(args, "openrouter_provider_ignore", ""),
+        quantizations=getattr(args, "openrouter_quantizations", ""),
+        allow_fallbacks=getattr(args, "openrouter_allow_fallbacks", ""),
+        require_parameters=getattr(args, "openrouter_require_parameters", ""),
+    )
     lanes = max(1, int(args.lanes))
     timeout_scale = float(args.timeout_scale) if float(args.timeout_scale) > 0 else float(lanes)
     effective_timeout = max(1, int(round(int(args.timeout) * timeout_scale)))
@@ -368,6 +389,8 @@ def main() -> int:
         lanes=lanes,
         base_timeout=int(args.timeout),
         effective_timeout=effective_timeout,
+        model=str(args.model),
+        base_url=str(args.base_url),
         quality_gate=bool(args.quality_gate),
         quality_min_rough_score=float(args.quality_min_rough_score),
         quality_max_risk_count=int(args.quality_max_risk_count),
@@ -455,6 +478,17 @@ def _build_command(
             command.append("--" + flag.replace("_", "-"))
     if int(args.max_plan_passes) > 0:
         command.extend(["--max-plan-passes", str(int(args.max_plan_passes))])
+    for attr, option in (
+        ("openrouter_provider_order", "--openrouter-provider-order"),
+        ("openrouter_provider_only", "--openrouter-provider-only"),
+        ("openrouter_provider_ignore", "--openrouter-provider-ignore"),
+        ("openrouter_quantizations", "--openrouter-quantizations"),
+        ("openrouter_allow_fallbacks", "--openrouter-allow-fallbacks"),
+        ("openrouter_require_parameters", "--openrouter-require-parameters"),
+    ):
+        value = str(getattr(args, attr, "") or "").strip()
+        if value:
+            command.extend([option, value])
     for line in (str(item).strip() for item in getattr(args, "extra_compile_context_line", []) or []):
         if line:
             command.extend(["--extra-compile-context-line", line])
@@ -535,7 +569,7 @@ def _select_existing_compile_json(
         return None
     if not quality_select:
         return paths[-1]
-    ranked: list[tuple[tuple[int, int, int, int, int, float, float], Path]] = []
+    ranked: list[tuple[tuple[int, int, int, int, int, int, int, int, int, int, float, float], Path]] = []
     for path in paths:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
@@ -605,9 +639,12 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
     if effective_skipped is None:
         effective_skipped = max(0, compile_skipped - diagnostic_rejected_skipped)
     score = payload.get("score", {}) if isinstance(payload.get("score"), dict) else {}
+    parsed = payload.get("parsed")
+    if isinstance(parsed, dict) and parsed.get("schema_version") == "profile_bootstrap_v1":
+        score = profile_bootstrap_score(parsed)
     predicates = payload.get("candidate_predicates")
-    if predicates is None and isinstance(payload.get("parsed"), dict):
-        predicates = payload.get("parsed", {}).get("candidate_predicates")
+    if predicates is None and isinstance(parsed, dict):
+        predicates = parsed.get("candidate_predicates")
     return {
         "parsed_ok": bool(payload.get("parsed_ok", False)),
         "candidate_predicates": len(predicates or []),
@@ -618,12 +655,18 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "compile_diagnostic_rejected_skipped": diagnostic_rejected_skipped,
         "rough_score": score.get("rough_score"),
         "risk_count": score.get("risk_count"),
+        "candidate_signature_arg_mismatch_count": score.get("candidate_signature_arg_mismatch_count"),
+        "candidate_signature_arg_mismatch_refs": score.get("candidate_signature_arg_mismatch_refs", []),
+        "violation_category_slot_loss_count": score.get("violation_category_slot_loss_count"),
+        "violation_category_slot_loss_refs": score.get("violation_category_slot_loss_refs", []),
         "repeated_structure_count": score.get("repeated_structure_count"),
         "repeated_structure_id_only_record_refs": score.get("repeated_structure_id_only_record_refs", []),
         "repeated_structure_role_mismatch_refs": score.get("repeated_structure_role_mismatch_refs", []),
+        "repeated_structure_lookup_property_refs": score.get("repeated_structure_lookup_property_refs", []),
         "frontier_unknown_positive_predicate_count": score.get("frontier_unknown_positive_predicate_count"),
         "frontier_unknown_positive_predicate_refs": score.get("frontier_unknown_positive_predicate_refs", []),
         "generic_predicate_count": score.get("generic_predicate_count"),
+        "profile_schema_contract_flags": _profile_schema_contract_flags(score),
         "detail_wrapper_drift_flags": _detail_wrapper_drift_flags(payload),
         "compile_surface_contract_flags": _compile_surface_contract_flags(payload),
         "profile_delivery_flags": _profile_delivery_flags(payload),
@@ -654,6 +697,47 @@ def _refresh_profile_delivery_reports(payload: dict[str, Any]) -> None:
         source_text=source_text,
         parsed_profile=parsed_profile,
     )
+
+
+def _profile_schema_contract_flags(score: dict[str, Any]) -> list[str]:
+    flags: list[str] = []
+    candidate_mismatch_refs = [
+        str(ref).strip()
+        for ref in score.get("candidate_signature_arg_mismatch_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("candidate_signature_arg_mismatch_refs"), list) else []
+    flags.extend(f"candidate_signature_arg_mismatch:{ref}" for ref in candidate_mismatch_refs)
+    repeated_unknown_refs = [
+        str(ref).strip()
+        for ref in score.get("repeated_structure_unknown_predicate_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("repeated_structure_unknown_predicate_refs"), list) else []
+    flags.extend(f"repeated_structure_unknown_predicate:{ref}" for ref in repeated_unknown_refs)
+    id_only_refs = [
+        str(ref).strip()
+        for ref in score.get("repeated_structure_id_only_record_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("repeated_structure_id_only_record_refs"), list) else []
+    flags.extend(f"repeated_structure_id_only_record:{ref}" for ref in id_only_refs)
+    role_mismatch_refs = [
+        str(ref).strip()
+        for ref in score.get("repeated_structure_role_mismatch_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("repeated_structure_role_mismatch_refs"), list) else []
+    flags.extend(f"repeated_structure_role_mismatch:{ref}" for ref in role_mismatch_refs)
+    frontier_unknown_refs = [
+        str(ref).strip()
+        for ref in score.get("frontier_unknown_positive_predicate_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("frontier_unknown_positive_predicate_refs"), list) else []
+    flags.extend(f"frontier_unknown_positive_predicate:{ref}" for ref in frontier_unknown_refs)
+    violation_category_refs = [
+        str(ref).strip()
+        for ref in score.get("violation_category_slot_loss_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("violation_category_slot_loss_refs"), list) else []
+    flags.extend(f"violation_category_slot_loss:{ref}" for ref in violation_category_refs)
+    return flags
 
 
 def _compile_health_flags(payload: dict[str, Any]) -> list[str]:
@@ -794,10 +878,13 @@ def _run_job_with_optional_quality_retry(
     return selected
 
 
-def _quality_gate_rank_tuple(gate: dict[str, Any]) -> tuple[int, int, int, int, int, int, int, int, int, float, float]:
+def _quality_gate_rank_tuple(
+    gate: dict[str, Any],
+) -> tuple[int, int, int, int, int, int, int, int, int, int, float, float]:
     reasons = [str(item) for item in gate.get("reasons", []) if str(item).strip()]
     detail_count = sum(1 for reason in reasons if reason.startswith("detail_wrapper_drift:"))
     contract_count = sum(1 for reason in reasons if reason.startswith("compile_surface_contract:"))
+    profile_schema_count = sum(1 for reason in reasons if reason.startswith("profile_schema_contract:"))
     profile_count = sum(1 for reason in reasons if reason.startswith("profile_delivery:"))
     public_recall_count = sum(1 for reason in reasons if reason.startswith("public_recall_surface:"))
     table_count = sum(1 for reason in reasons if reason.startswith("table_list_surface:"))
@@ -812,6 +899,7 @@ def _quality_gate_rank_tuple(gate: dict[str, Any]) -> tuple[int, int, int, int, 
         len(reasons),
         detail_count,
         contract_count,
+        profile_schema_count,
         profile_count,
         public_recall_count,
         table_count,
@@ -952,6 +1040,59 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "direct authority row for every distinct stated authority coordinate, not only a representative "
                 "example. A rule description, note, docket text, or source_record row is additive only and must not "
                 "be the only carrier for an explicit authority constraint."
+            )
+        if reason.startswith("profile_schema_contract:candidate_signature_arg_mismatch:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile declared at least one predicate signature whose /N arity "
+                "did not match the number of candidate_predicates[].args role labels. In this retry, make every "
+                "signature's arity equal its short schema role list: lower the /N if the predicate now has fewer "
+                "core roles, or add missing role labels if the higher arity is still required. Do not repair this "
+                "by putting source values, copied spans, or comma-bearing examples into args; args are schema roles only."
+            )
+        if reason.startswith("profile_schema_contract:repeated_structure_unknown_predicate:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile used a repeated_structures predicate that was absent from "
+                "candidate_predicates. In this retry, make repeated_structures a view of the same proposed vocabulary: "
+                "add the missing signature with short role labels or replace the repeated-structure reference with an "
+                "already proposed predicate of the same name and arity."
+            )
+        if reason.startswith("profile_schema_contract:repeated_structure_id_only_record:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile used an id-only repeated-structure record predicate. In this "
+                "retry, make each repeated record predicate carry at least a stable record id plus a normalized label, "
+                "source coordinate, subject, or other joinable record descriptor. A unary record id alone is too shallow "
+                "for later property joins and source-grounded QA."
+            )
+        if reason.startswith("profile_schema_contract:repeated_structure_role_mismatch:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile listed repeated-structure property predicates whose first "
+                "argument was not a record id or record subject. In this retry, property predicates inside "
+                "repeated_structures should take the repeated record id or record subject as their first role, then "
+                "the property value or measurement. Avoid unary global properties for attributes that belong to each "
+                "repeated record. Do not list global lookup predicates whose first role is a law, source, instrument, "
+                "authority, entity class, or definition key; add a record-keyed link predicate or omit the lookup from "
+                "repeated_structures[].property_predicates."
+            )
+        if reason.startswith("profile_schema_contract:frontier_unknown_positive_predicate:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile's starter_frontier_cases.expected_boundary used a positive "
+                "predicate name or arity not present in candidate_predicates. In this retry, either add that predicate "
+                "with matching short args, revise the expected call to an existing signature, or move unsafe examples "
+                "after 'Do not write' or into must_not_write. Quote comma-bearing human-readable values so examples do "
+                "not create false arity drift."
+            )
+        if reason.startswith("profile_schema_contract:violation_category_slot_loss:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile described a regulatory, enforcement, disciplinary, audit, "
+                "inspection, or compliance source with violations, deficiencies, findings, breaches, failures, or "
+                "faults, but its proposed palette lacked a direct category-capable carrier. In this retry, keep "
+                "intervention/action rows, legal-basis rows, obligation rows, and violation/deficiency/finding "
+                "category rows separate. If the source states control areas, breach categories, failed requirements, "
+                "statutory violation classes, root-cause categories, or compliance areas, propose an allowed profile "
+                "predicate such as violation_category/4, deficiency_category/4, finding_category/4, or a close "
+                "domain-owned carrier with governed target, category/type/class/context, basis/source, and detail/status "
+                "slots. Do not treat order/request/citation/fine/warning type or legal_basis alone as the violation "
+                "category."
             )
         if "table_list_surface:distribution_state_table_underpreserved:" in reason:
             missing_states = _table_missing_states_from_reason(reason)
@@ -2073,6 +2214,13 @@ def _quality_gate_result(
     ] if isinstance(item.get("compile_surface_contract_flags"), list) else []
     if contract_flags:
         reasons.extend(f"compile_surface_contract:{flag}" for flag in contract_flags)
+    profile_schema_contract_flags = [
+        str(flag)
+        for flag in item.get("profile_schema_contract_flags", [])
+        if str(flag).strip()
+    ] if isinstance(item.get("profile_schema_contract_flags"), list) else []
+    if profile_schema_contract_flags:
+        reasons.extend(f"profile_schema_contract:{flag}" for flag in profile_schema_contract_flags)
     profile_delivery_flags = [
         str(flag)
         for flag in item.get("profile_delivery_flags", [])
@@ -2142,6 +2290,7 @@ def _quality_gate_result(
         "compile_json": str(result.get("compile_json", "")),
         "detail_wrapper_drift_flags": detail_wrapper_flags,
         "compile_surface_contract_flags": contract_flags,
+        "profile_schema_contract_flags": profile_schema_contract_flags,
         "profile_delivery_flags": profile_delivery_flags,
         "public_recall_surface_flags": public_recall_flags,
         "table_list_surface_coverage_flags": table_list_coverage_flags,
@@ -2157,6 +2306,8 @@ def _summarize(
     lanes: int,
     base_timeout: int,
     effective_timeout: int,
+    model: str = "",
+    base_url: str = "",
     quality_gate: bool = False,
     quality_min_rough_score: float = 0.775,
     quality_max_risk_count: int = 5,
@@ -2182,6 +2333,28 @@ def _summarize(
         "lanes": lanes,
         "base_timeout": base_timeout,
         "effective_timeout": effective_timeout,
+        "model_serving_path": model_serving_path_metadata(
+            backend="lmstudio",
+            base_url=str(base_url or ""),
+            model=str(model or ""),
+            temperature=0.0,
+            top_p=0.82,
+            top_k=None,
+            context_length=None,
+            max_tokens=None,
+            timeout=effective_timeout,
+            run_role="compile_batch",
+            cache_enabled=None,
+            lanes=lanes,
+            fresh_compile=True,
+            provider_routing=openrouter_provider_routing_from_env(),
+            observed_runtime=local_lmstudio_model_metadata(
+                backend="lmstudio",
+                base_url=str(base_url or ""),
+                model=str(model or ""),
+                timeout=min(int(effective_timeout), 3),
+            ),
+        ),
         "fixture_count": len(results),
         "parsed_ok_count": parsed_ok_count,
         "totals": totals,
@@ -2210,11 +2383,16 @@ def _summarize(
 
 def _render_md(summary: dict[str, Any]) -> str:
     totals = summary.get("totals", {})
+    serving_path = summary.get("model_serving_path") if isinstance(summary.get("model_serving_path"), dict) else {}
     lines = [
         "# Domain Bootstrap Compile Batch Summary",
         "",
         f"Generated: {summary.get('generated')}",
         "",
+        f"- Provider family: `{serving_path.get('provider_family', '')}`",
+        f"- Model: `{serving_path.get('model', '')}`",
+        f"- Base URL: `{serving_path.get('base_url', '')}`",
+        f"- Provider routing: `{serving_path.get('provider_routing', {})}`",
         f"- Lanes: `{summary.get('lanes')}`",
         f"- Base timeout: `{summary.get('base_timeout')}`",
         f"- Effective per-call timeout: `{summary.get('effective_timeout')}`",

@@ -32,6 +32,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.run_domain_bootstrap_qa import (  # noqa: E402
+    OPENROUTER_CALL_METADATA_LOG,
     QA_JUDGE_SCHEMA,
     SemanticIRCallConfig,
     _configure_openrouter_title,
@@ -39,6 +40,12 @@ from scripts.run_domain_bootstrap_qa import (  # noqa: E402
     hash_text,
     load_oracle,
     parse_numbered_markdown_questions,
+)
+from src.model_path import (  # noqa: E402
+    local_lmstudio_model_metadata,
+    model_serving_path_metadata,
+    openrouter_provider_routing_from_env,
+    refresh_openrouter_generation_metadata_entries,
 )
 
 
@@ -407,6 +414,7 @@ def _slug(value: str) -> str:
 
 
 def main() -> int:
+    OPENROUTER_CALL_METADATA_LOG.clear()
     args = parse_args()
     load_env_local()
     if str(args.api_key or "").strip():
@@ -469,6 +477,28 @@ def main() -> int:
         "fixtures_root": str((args.fixtures_root if args.fixtures_root.is_absolute() else (REPO_ROOT / args.fixtures_root).resolve())),
         "model": str(args.model),
         "base_url": str(args.base_url),
+        "model_serving_path": model_serving_path_metadata(
+            backend=str(args.backend),
+            base_url=str(args.base_url),
+            model=str(args.model),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            top_k=int(args.top_k),
+            context_length=int(args.num_ctx),
+            max_tokens=max(int(args.max_answer_tokens), int(args.max_judge_tokens)),
+            timeout=int(args.timeout),
+            run_role="direct_source_qa_baseline",
+            cache_enabled=cache_enabled,
+            lanes=int(args.lanes),
+            fresh_compile=False,
+            provider_routing=openrouter_provider_routing_from_env(),
+            observed_runtime=local_lmstudio_model_metadata(
+                backend=str(args.backend),
+                base_url=str(args.base_url),
+                model=str(args.model),
+                timeout=min(int(args.timeout), 3),
+            ),
+        ),
         "lanes": int(args.lanes),
         "answer_prompt_version": answer_prompt_version,
         "judge_prompt_version": judge_prompt_version,
@@ -482,6 +512,12 @@ def main() -> int:
         "summary": summary,
         "rows": rows,
     }
+    if OPENROUTER_CALL_METADATA_LOG:
+        record["openrouter_generation_metadata"] = refresh_openrouter_generation_metadata_entries(
+            OPENROUTER_CALL_METADATA_LOG,
+            api_key=str(getattr(args, "api_key", "") or ""),
+            timeout=min(int(args.timeout), 30),
+        )
     slug = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}_{_slug(str(args.model))}"
     json_path = out_dir / f"direct_source_qa_baseline_{slug}.json"
     md_path = json_path.with_suffix(".md")

@@ -1,6 +1,7 @@
 from scripts.run_domain_bootstrap_file import (
     COMPETITION_ROLE_ALIAS_CONTEXT_V1,
     COMPILE_SURFACE_INVARIANT_CONTEXT_V1,
+    FINANCIAL_REPORT_SOURCE_COMPILER_CONTEXT_V1,
     FICTION_REFERENCE_CONTAINMENT_CONTEXT_V1,
     NARRATIVE_SOURCE_COMPILER_CONTEXT_V1,
     OPERATIONAL_RECORD_STATUS_CONTEXT_V1,
@@ -37,6 +38,8 @@ from scripts.run_domain_bootstrap_file import (
     _chat_headers,
     _default_openrouter_title,
     _invalid_profile_retry_context,
+    _profile_schema_contract_retry_context,
+    _profile_schema_contract_retry_needed,
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
@@ -65,6 +68,18 @@ def test_narrative_context_guards_attributes_and_official_duties() -> None:
     assert "choice-by-contrast" in context
     assert "comic-consequence" in context
     assert "explicit-moral" in context
+
+
+def test_financial_report_context_preserves_named_contributions() -> None:
+    context = "\n".join(FINANCIAL_REPORT_SOURCE_COMPILER_CONTEXT_V1)
+
+    assert "financial_report_source_compiler_strategy_v1" in context
+    assert "named affiliate, associate, investee, subsidiary, segment" in context
+    assert "metric, value, and unit" in context
+    assert "financial_result/5" in context
+    assert "five-slot maximum" in context
+    assert "Do not invent /6 financial predicates" in context
+    assert "source-contained ratios" in context
 
 
 def test_source_detail_profile_extension_is_additive_fallback_only() -> None:
@@ -274,6 +289,32 @@ def test_appeal_filing_profile_extension_adds_direct_carrier_for_appeals() -> No
     assert metadata["signature"] == "appeal_filed/3"
     assert any(item["signature"] == "appeal_filed/3" for item in profile["candidate_predicates"])
     assert "appeal_filed/3" in profile["provenance_sensitive_predicates"]
+
+
+def test_appeal_filing_profile_extension_ignores_appeal_window_notice() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "post_hearing_note/2", "args": ["note_id", "text"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_appeal_filing_predicate(
+        profile,
+        source_text=(
+            "Any party desiring to appeal this order must do so in the appropriate court "
+            "within 30 days after issuance and notify the commission."
+        ),
+    )
+
+    assert metadata == {
+        "schema_version": "profile_appeal_filing_extension_v1",
+        "added": False,
+        "reason": "no_explicit_appeal_filing_signal",
+    }
+    assert not any(item["signature"] == "appeal_filed/3" for item in profile["candidate_predicates"])
+    assert "appeal_filed/3" not in profile["provenance_sensitive_predicates"]
 
 
 def test_appeal_filing_profile_extension_respects_existing_carrier() -> None:
@@ -691,6 +732,15 @@ def test_operational_record_context_guards_status_corrections_and_unresolved_ite
     assert "requested action/content/line item or descriptive target" in context
 
 
+def test_compile_surface_invariants_preserve_source_stated_update_notices() -> None:
+    context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+
+    assert "later notice, correction, amendment, update, extension" in context
+    assert "original/source document id" in context
+    assert "changed field, stated effect, and source row" in context
+    assert "Do not leave a source-stated update only as an intake-plan risk" in context
+
+
 def test_source_compiler_context_selects_operational_record_lens_from_domain_hint() -> None:
     context = "\n".join(
         _source_compiler_context(
@@ -703,6 +753,30 @@ def test_source_compiler_context_selects_operational_record_lens_from_domain_hin
     assert "Operational join-readiness rule" in context
     assert "permit/license lifecycle" in context
     assert "quarantine/lot-status" in context
+
+
+def test_source_compiler_context_selects_financial_report_lens_from_intake_plan() -> None:
+    context = "\n".join(
+        _source_compiler_context(
+            domain_hint="",
+            intake_plan={
+                "source_boundary": {
+                    "source_type": "Corporate earnings release",
+                    "epistemic_stance": "Formal corporate disclosure with financial statements.",
+                },
+                "pass_plan": [
+                    {
+                        "purpose": "Capture financial performance.",
+                        "focus": "Financial result totals, investee contribution, and segment performance.",
+                    }
+                ],
+            },
+        )
+    )
+
+    assert "financial_report_source_compiler_strategy_v1" in context
+    assert "source-stated totals and named scope contributions" in context
+    assert "period, named scope/entity, metric, value, and unit" in context
 
 
 def test_greenhouse_and_school_records_get_scoped_contexts() -> None:
@@ -811,16 +885,40 @@ def test_compile_surface_invariants_keep_authority_custody_ladder_slots() -> Non
     assert "same-anchor content/effect/scope/condition/decision/governed-subject/reason rows" in context
 
 
+def test_compile_surface_invariants_keep_current_adjudication_disposition_separate_from_history() -> None:
+    context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+
+    assert "current disposition surfaces separate from procedural history" in context
+    assert "current decision or case id" in context
+    assert "remands/transfers" in context
+    assert "resolves it directly/on the merits" in context
+    assert "If no stricter profile predicate can carry the disposition mode or effect" in context
+    assert "source_detail/4" in context
+
+
+def test_compile_surface_invariants_keep_violation_categories_separate_from_actions() -> None:
+    context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
+
+    assert "captioned duty/category labels" in context
+    assert "violation or deficiency categories as separate answer surfaces" in context
+    assert "intervention/action type rows" in context
+    assert "legal_basis alone" in context
+    assert "emit separate category rows for the stated items" in context
+
+
 def test_compile_surface_invariants_keep_operational_record_slots() -> None:
     context = "\n".join(COMPILE_SURFACE_INVARIANT_CONTEXT_V1)
 
     assert "chronological/event-list sources need complete event backbone units" in context
+    assert "fixed one-time due date and a recurring cadence" in context
+    assert "two bare day counts" in context
     assert "Compile surface preservation rule" in context
     assert "must not replace already-needed concrete typed rows" in context
     assert "dropping typed backbone predicate families is not acceptable" in context
     assert "event id or entry label, date/time/order, actor/party/system" in context
     assert "vague event wrapper" in context
     assert "financial or numeric-state calculations need baseline preservation" in context
+    assert "financial reports often state a total metric and then a named contributor" in context
     assert "actual versus hypothetical scenario assumptions" in context
     assert "Derivation rows need a scenario or basis slot" in context
     assert "Do not overwrite an initial baseline with a later actual value" in context
@@ -2732,6 +2830,17 @@ def test_profile_delivery_flags_source_claim_backbone_coexistence_missing() -> N
     assert source_compile["compile_health"]["flag_counts"]["source_claim_backbone_coexistence_missing"] == 1
 
 
+def test_source_claim_backbone_ignores_vote_as_organization_name() -> None:
+    groups = domain_bootstrap_file._source_claim_backbone_source_groups(
+        "The Clean Energy Organizations and Vote Solar filed comments before the Commission."
+    )
+
+    assert "vote" not in groups
+    assert "vote" in domain_bootstrap_file._source_claim_backbone_source_groups(
+        "The Board voted 3-2 to deny the variance."
+    )
+
+
 def test_profile_delivery_accepts_source_claim_with_preserved_backbone_rows() -> None:
     source_compile = {
         "unique_fact_count": 7,
@@ -3496,6 +3605,15 @@ def test_source_claim_mentions_ignore_document_availability_link() -> None:
     ) == []
 
 
+def test_source_claim_key_ignores_available_as_timing_capacity() -> None:
+    assert (
+        domain_bootstrap_file._source_attributed_claim_signal_key(
+            "The statute states the amount of time available to the commission for review."
+        )
+        == ""
+    )
+
+
 def test_source_claim_mentions_ignore_certification_condition_without_claim_frame() -> None:
     mentions = domain_bootstrap_file._source_attributed_claim_mentions(
         "Within sixty days of receipt of a signed certification on letterhead, the payment obligation begins."
@@ -3566,6 +3684,13 @@ def test_profile_delivery_accepts_solicitation_authority_rows() -> None:
     assert source_compile["profile_delivery"]["delivered_carriers"]["source_authority"] == [
         "solicitation_authority"
     ]
+
+
+def test_source_authority_delivery_accepts_legal_basis_rows() -> None:
+    assert domain_bootstrap_file._fact_row_can_deliver_source_authority(
+        "legal_basis",
+        ["claim_a", "statute_1"],
+    )
 
 
 def test_status_state_mentions_ignore_state_as_government_party() -> None:
@@ -3670,6 +3795,20 @@ def test_source_claim_delivery_accepts_dispute_subject_for_dispute_claim() -> No
     assert domain_bootstrap_file._source_claim_key_is_delivered(
         "statement:claim:dispute",
         "statement:dispute:not_flagged",
+    )
+
+
+def test_source_claim_delivery_accepts_party_position_as_statement_claim() -> None:
+    assert domain_bootstrap_file._fact_row_can_deliver_source_attributed_claim(
+        "party_position",
+        ["party_a", "settlement_schedule", "opposed_mandated_process", "initial_comment"],
+    )
+    assert domain_bootstrap_file._source_claim_key_is_delivered(
+        "statement:claim:objection",
+        domain_bootstrap_file._source_attributed_claim_fact_key(
+            "party_position",
+            ["party_a", "settlement_schedule", "opposed_mandated_process", "initial_comment"],
+        ),
     )
 
 
@@ -3812,6 +3951,12 @@ def test_status_state_delivery_accepts_direct_appeal_filing_rows() -> None:
 
 
 def test_status_state_delivery_accepts_conditional_rule_rows() -> None:
+    assert domain_bootstrap_file._candidate_can_carry_status_state_delivery_unit(
+        {
+            "signature": "payment_reduction_rule/3",
+            "args": ["obligation_id", "reduction_amount", "trigger_event"],
+        }
+    )
     assert domain_bootstrap_file._fact_row_can_deliver_status_state(
         "conditional_rule",
         ["rule_a", "condition_met", "payment_not_owed", "source_row_17"],
@@ -3823,6 +3968,14 @@ def test_status_state_delivery_accepts_conditional_rule_rows() -> None:
     assert domain_bootstrap_file._fact_row_can_deliver_status_state(
         "vehicle_action",
         ["item_a", "removed_from_commerce", "2026_01_01", "source_row_19"],
+    )
+    assert domain_bootstrap_file._fact_row_can_deliver_status_state(
+        "mandate_utility",
+        ["utility_a", "issue_notice", "2026_03_01", "rate_cases_filed_on_or_after_date"],
+    )
+    assert domain_bootstrap_file._fact_row_can_deliver_status_state(
+        "payment_reduction_rule",
+        ["suspended_payment", "750", "vehicle_receives_modification"],
     )
 
 
@@ -4273,6 +4426,34 @@ def test_invalid_profile_retry_context_blocks_arg_role_runaway() -> None:
     assert "entity_type_N counters" in joined
 
 
+def test_profile_schema_contract_retry_context_blocks_six_slot_drift() -> None:
+    score = {
+        "candidate_signature_arg_mismatch_refs": ["financial_result/6:args=5"],
+    }
+    context = _profile_schema_contract_retry_context(score)
+
+    joined = "\n".join(context)
+    assert _profile_schema_contract_retry_needed(score) is True
+    assert "support /1 through /5 only" in joined
+    assert "Do not propose /6 or higher" in joined
+    assert "separate provenance/source-coordinate predicate" in joined
+    assert "financial_result/6:args=5" in joined
+
+
+def test_profile_schema_contract_retry_context_blocks_repeated_role_mismatch() -> None:
+    score = {
+        "repeated_structure_role_mismatch_refs": ["remand_to/2"],
+    }
+    context = _profile_schema_contract_retry_context(score)
+
+    joined = "\n".join(context)
+    assert _profile_schema_contract_retry_needed(score) is True
+    assert "Repeated-structure guardrail" in joined
+    assert "first argument role must be the repeated record id or governed subject" in joined
+    assert "do not use the global case id as a substitute" in joined
+    assert "remand_to/2" in joined
+
+
 def test_profile_from_signature_roster_uses_generic_args() -> None:
     profile = _profile_from_signature_roster(
         {
@@ -4478,6 +4659,50 @@ def test_lmstudio_json_schema_retries_empty_content(monkeypatch) -> None:
     assert result["content"] == '{"ok": true}'
     assert result["attempts"] == 2
     assert result["empty_response_retries"] == 1
+
+
+def test_lmstudio_json_schema_adds_openrouter_provider_routing(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return b'{"choices":[{"message":{"content":"{\\"ok\\":true}"}}]}'
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        captured["headers"] = dict(request.headers)
+        return FakeResponse()
+
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_PROVIDER_ORDER", "provider-a")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_ALLOW_FALLBACKS", "false")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_REQUIRE_PARAMETERS", "true")
+    monkeypatch.setattr(domain_bootstrap_file.urllib.request, "urlopen", fake_urlopen)
+
+    result = _call_lmstudio_json_schema(
+        base_url="https://openrouter.ai/api/v1",
+        model="model",
+        messages=[{"role": "user", "content": "hello"}],
+        schema={"type": "object"},
+        schema_name="test_schema",
+        timeout=5,
+        temperature=0,
+        top_p=1,
+        max_tokens=100,
+    )
+
+    assert result["content"] == '{"ok":true}'
+    assert captured["payload"]["provider"] == {
+        "allow_fallbacks": False,
+        "order": ["provider-a"],
+        "require_parameters": True,
+    }
+    assert captured["headers"]["X-openrouter-experimental-metadata"] == "enabled"
 
 
 def test_lmstudio_chat_url_accepts_root_or_v1_base_url() -> None:

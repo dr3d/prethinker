@@ -949,6 +949,7 @@ def _source_authority_direct_units(direct_rows: list[dict[str, Any]]) -> tuple[s
         "publication_authority",
         "legal_title",
         "legal_title_holder",
+        "legal_basis",
         "physical_custody",
         "physical_custodian",
         "negative_authority",

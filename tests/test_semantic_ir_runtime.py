@@ -1,8 +1,10 @@
-import unittest
+﻿import unittest
 
 from kb_pipeline import _validate_parsed
 from src.mcp_server import PrologMCPServer
 from src.semantic_ir import (
+    _semantic_ir_needs_surface_preservation_retry,
+    _surface_preservation_retry_messages,
     build_semantic_ir_input_payload,
     semantic_ir_admission_diagnostics,
     semantic_ir_to_legacy_parse,
@@ -64,12 +66,105 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertTrue(any("familiar name" in item for item in fidelity["normalization_scope"]))
         strategy = payload["compiler_strategy"]
         self.assertEqual(strategy["name"], "document_to_logic_compiler_strategy_v1")
+        surface_policy = strategy["query_intent_surface_policy"]
+        self.assertTrue(any("exact user/source-local surface terms" in item for item in surface_policy))
+        self.assertTrue(any("never as the only replacement" in item for item in surface_policy))
         self.assertIn("predicate_selection", strategy)
         self.assertTrue(any("querying" in item for item in strategy["predicate_selection"]))
         self.assertTrue(any("source_bound_accusation" in item for item in strategy["assertion_status"]))
         self.assertTrue(any("stale date anchor" in item for item in strategy["truth_maintenance_strategy"]))
         self.assertIn("temporal_graph_strategy", strategy)
         self.assertTrue(any("proposal-only" in item for item in strategy["temporal_graph_strategy"]))
+
+    def test_surface_preservation_retry_detects_lost_non_ascii_query_target(self) -> None:
+        result = {
+            "parsed": _ir(
+                decision="answer",
+                turn_type="query",
+                query_intents=[
+                    {
+                        "intent_type": "source_location",
+                        "target_terms": ["measurement_plan"],
+                        "answer_constraints": ["source_text"],
+                        "uncertainty_policy": "answer",
+                        "language": "ja",
+                        "source": "semantic_ir",
+                    }
+                ],
+                candidate_operations=[],
+            )
+        }
+
+        self.assertTrue(
+            _semantic_ir_needs_surface_preservation_retry(
+                utterance='Where is "測定計画" discussed?',
+                result=result,
+            )
+        )
+
+    def test_surface_preservation_retry_detects_acronym_only_targets(self) -> None:
+        result = {
+            "parsed": _ir(
+                decision="answer",
+                turn_type="query",
+                query_intents=[
+                    {
+                        "intent_type": "date",
+                        "target_terms": ["ABC", "DEF", "order"],
+                        "answer_constraints": ["interval_duration"],
+                        "uncertainty_policy": "answer",
+                        "language": "ja",
+                        "source": "semantic_ir",
+                    }
+                ],
+                candidate_operations=[],
+            )
+        }
+
+        self.assertTrue(
+            _semantic_ir_needs_surface_preservation_retry(
+                utterance="When was the ABC recommendation (測定計画) issued?",
+                result=result,
+            )
+        )
+
+    def test_surface_preservation_retry_does_not_fire_when_target_preserves_surface(self) -> None:
+        result = {
+            "parsed": _ir(
+                decision="answer",
+                turn_type="query",
+                query_intents=[
+                    {
+                        "intent_type": "source_location",
+                        "target_terms": ["測定計画"],
+                        "answer_constraints": ["source_text"],
+                        "uncertainty_policy": "answer",
+                        "language": "ja",
+                        "source": "semantic_ir",
+                    }
+                ],
+                candidate_operations=[],
+            )
+        }
+
+        self.assertFalse(
+            _semantic_ir_needs_surface_preservation_retry(
+                utterance='Where is "測定計画" discussed?',
+                result=result,
+            )
+        )
+
+    def test_surface_preservation_retry_message_adds_instruction(self) -> None:
+        messages = [
+            {"role": "system", "content": "system"},
+            {"role": "user", "content": "INPUT_JSON:\n{}"},
+        ]
+
+        retry = _surface_preservation_retry_messages(messages)
+
+        self.assertIn("SURFACE_PRESERVATION_RETRY", retry[1]["content"])
+        self.assertIn("exact visible source-local term", retry[1]["content"])
+        self.assertEqual(messages[1]["content"], "INPUT_JSON:\n{}")
 
     def test_mapper_emits_valid_legacy_parse_for_safe_assert(self) -> None:
         parsed, warnings = semantic_ir_to_legacy_parse(_ir())
@@ -928,6 +1023,37 @@ class SemanticIRRuntimeTests(unittest.TestCase):
             if not row["admitted"]
         ]
         self.assertEqual(skipped[0]["skip_reason"], "predicate_contract_role_mismatch")
+
+    def test_mapper_allows_scope_or_date_as_non_temporal_scope(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "status_state_at",
+                    "args": ["record_1", "pending_review", "paragraph_11", "source_order"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["status_state_at/4"],
+            predicate_contracts=[
+                {
+                    "signature": "status_state_at/4",
+                    "arguments": ["subject_id", "state_value", "scope_or_date", "source_or_basis"],
+                },
+            ],
+        )
+
+        self.assertEqual(
+            parsed["facts"],
+            ["status_state_at(record_1, pending_review, paragraph_11, source_order)."],
+        )
+        self.assertFalse(any("non-temporal atom" in warning for warning in warnings))
+        self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
     def test_mapper_allows_interval_label_as_label_not_temporal_span(self) -> None:
         ir = _ir(
