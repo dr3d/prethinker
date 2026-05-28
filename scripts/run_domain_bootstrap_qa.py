@@ -19870,7 +19870,7 @@ def _source_record_identifier_display(*, label: str, value: str, text_atom: str 
         return ""
     if label == "marcs_cms":
         number = _first_identifier_number(normalized) or _first_identifier_number(raw_text)
-        return f"MARCS-CMS {number}" if number else _display_source_phrase(raw_text or raw_value)
+        return f"{_source_record_identifier_label_display(label)} {number}" if number else _display_source_phrase(raw_text or raw_value)
     if label == "warning_letter":
         number = _joined_identifier_number(normalized) or _joined_identifier_number(raw_text)
         return f"Warning Letter {number}" if number else _display_source_phrase(raw_text or raw_value)
@@ -19890,8 +19890,17 @@ def _source_record_identifier_display(*, label: str, value: str, text_atom: str 
         return f"Activity Nr {number}" if number else _display_source_phrase(raw_value)
     if label == "fei":
         number = _first_identifier_number(normalized)
-        return f"FEI {number}" if number else _display_source_phrase(raw_value)
+        return f"{_source_record_identifier_label_display(label)} {number}" if number else _display_source_phrase(raw_value)
     return _display_source_phrase(raw_value)
+
+
+def _source_record_identifier_label_display(label: str) -> str:
+    parts = [part for part in _normalize_text_filter_atom(label).split("_") if part]
+    if not parts:
+        return ""
+    if all(1 < len(part) <= 5 for part in parts):
+        return "-".join(part.upper() for part in parts)
+    return _display_source_phrase("_".join(parts))
 
 
 def _compiled_case_identifier_location_roster_companion(
@@ -20207,7 +20216,7 @@ def _source_record_citation_list_companion(
             "reasoning_basis": {
                 "kind": "core-local",
                 "note": (
-                    "query-only citation-list support collected ordered CFR citations from admitted "
+                    "query-only citation-list support collected ordered code citations from admitted "
                     "source_record_text_atom rows; no durable citation fact was written"
                 ),
                 "utterance": utterance,
@@ -20233,15 +20242,15 @@ def _source_record_cfr_citations_from_atom(text_atom: str) -> list[dict[str, str
         letter = match.group("letter")
         if part and subpart:
             value = f"{title}_cfr_part_{part}_subpart_{subpart}"
-            display = f"{title} CFR Part {part}, Subpart {subpart.upper()}"
+            display = f"{title} {_source_record_code_label_display('cfr')} Part {part}, Subpart {subpart.upper()}"
         elif section:
             section_display = section.replace("_", ".")
             suffix = f"({letter})" if letter else ""
             value = f"{title}_cfr_{section}{'_' + letter if letter else ''}"
-            display = f"{title} CFR {section_display}{suffix}"
+            display = f"{title} {_source_record_code_label_display('cfr')} {section_display}{suffix}"
         elif part:
             value = f"{title}_cfr_part_{part}"
-            display = f"{title} CFR Part {part}"
+            display = f"{title} {_source_record_code_label_display('cfr')} Part {part}"
         else:
             continue
         if value in seen:
@@ -28867,10 +28876,14 @@ def _source_record_contact_identifier_displays(atom: str) -> list[str]:
     text = _normalize_text_filter_atom(atom)
     out: list[str] = []
     for match in re.finditer(r"(?:^|_)fei_(\d+(?:_\d+)*)(?:_|$)", text):
-        out.append(f"FEI {match.group(1).replace('_', '')}")
+        out.append(f"{_source_record_identifier_label_display('fei')} {match.group(1).replace('_', '')}")
     for match in re.finditer(r"(?:^|_)cms_(\d+(?:_\d+)*)(?:_|$)", text):
-        out.append(f"CMS {match.group(1).replace('_', '')}")
+        out.append(f"{_source_record_identifier_label_display('cms')} {match.group(1).replace('_', '')}")
     return _dedupe_str(out)
+
+
+def _source_record_code_label_display(label: str) -> str:
+    return _normalize_text_filter_atom(label).upper()
 
 
 def _source_record_contact_display(*, emails: list[str], attention: str, identifiers: list[str]) -> str:
