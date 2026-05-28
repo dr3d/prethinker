@@ -22,12 +22,13 @@ Use this short path if you are new:
 8. [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
 9. [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - doctrine for designing fixtures as boundary probes rather than random ingestion.
 10. [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - current lens vocabulary and transfer discipline.
-11. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
-12. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - current doctrine for safe multi-pass accumulation.
-13. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
-14. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
-15. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
-16. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
+11. [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future review lenses read evidence without mutating the KB.
+12. [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
+13. [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - current doctrine for safe multi-pass accumulation.
+14. [Project State](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact current architecture, status, and verification snapshot.
+15. [Public Docs Guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - the full reading map.
+16. [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the plain-language project story.
+17. [Current Utterance Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - how a turn moves through router, context, Semantic IR, mapper, query, clarification, or mutation.
 
 Then go deeper:
 
@@ -49,6 +50,7 @@ Then go deeper:
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
 - [QA Instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md)
 - [Semantic Instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md)
+- [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - deeper lab calibration roster.
 - [Domain Profile Catalog](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md)
 - [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)

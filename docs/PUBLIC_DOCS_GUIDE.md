@@ -24,6 +24,7 @@ dated run reports, and retired product lanes.
 - [Current Utterance And Document Pipeline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md)
 - [Semantic IR Mapper Specification](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md)
 - [Multi-Pass Semantic Compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md)
+- [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
 
 ## Research Method
 
@@ -36,6 +37,7 @@ dated run reports, and retired product lanes.
 ## Lens And Product Story
 
 - [Semantic Lens Roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md)
+- [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
 - [Explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md)
 - [Prethinker Design Overview](https://github.com/dr3d/prethinker/blob/main/docs/PRETHINKER.md)
 
