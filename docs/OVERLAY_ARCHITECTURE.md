@@ -47,7 +47,7 @@ overlays read evidence and emit reports;
 they do not silently change the world model
 ```
 
-## Current ACH Overlay
+## Current Overlays
 
 ACH is the first serious overlay pattern.
 
@@ -73,6 +73,28 @@ Current read:
 - high/medium sensitivity remains immature;
 - evidence-role diagnostics are useful but remain optional because they can
   compete with dependency capture.
+
+The timeline overlay is the second, deliberately cheaper pattern check.
+
+Current shape:
+
+```text
+timeline payload
+  -> explicit event rows with source coordinates and dates
+  -> deterministic chronology ordering
+  -> report names undated events, invalid dates, same-date groups, and gaps
+```
+
+The first timeline probe is intentionally model-free. It validates that a
+second overlay can follow the same boundary: explicit evidence rows in,
+deterministic report out, no KB mutation and no QA score movement.
+
+Current read:
+
+- useful as a low-cost product lens for official documents with deadlines,
+  notices, effective dates, response windows, and status changes;
+- not yet integrated with compiled date/event predicates;
+- no claim yet that Prethinker automatically builds timeline payloads.
 
 ## Why This Pattern Matters
 

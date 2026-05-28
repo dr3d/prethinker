@@ -1,0 +1,42 @@
+{
+  "id": "regulatory_sequence_v1",
+  "name": "Regulatory Sequence Example",
+  "events": [
+    {
+      "id": "e_observation",
+      "label": "Inspection observation recorded",
+      "date": "2026-01-15",
+      "event_type": "finding",
+      "source_coords": "[source:1]",
+      "text_anchor": "Inspection observation recorded on January 15, 2026.",
+      "confidence": "source_stated"
+    },
+    {
+      "id": "e_response_due",
+      "label": "Response deadline",
+      "date": "2026-02-14",
+      "event_type": "deadline",
+      "source_coords": "[source:2]",
+      "text_anchor": "A written response was due within 30 days.",
+      "confidence": "derived_from_source_date"
+    },
+    {
+      "id": "e_followup",
+      "label": "Follow-up review",
+      "date": "2026-04",
+      "event_type": "review",
+      "source_coords": "[source:3]",
+      "text_anchor": "Follow-up review occurred in April 2026.",
+      "confidence": "month_precision"
+    },
+    {
+      "id": "e_undated_commitment",
+      "label": "Corrective action commitment",
+      "date": "",
+      "event_type": "commitment",
+      "source_coords": "[source:4]",
+      "text_anchor": "The firm committed to corrective action without a stated completion date.",
+      "confidence": "date_missing"
+    }
+  ]
+}
