@@ -1,0 +1,87 @@
+{
+  "fixture_id": "enforcement_single_document_hook_001",
+  "ach_question": "Where does the order primarily locate the violation theory — i.e., what makes Keurig's recyclability statements a securities-law violation?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Material omission / half-truth in the 10-Ks",
+      "claim": "The violation is that the affirmative 'effectively recycled' statements in the FY2019 and FY2020 Forms 10-K were rendered incomplete and inaccurate by omitting the two large recyclers' negative feedback that they did not intend to accept the pods."
+    },
+    {
+      "id": "h2",
+      "label": "Outright falsity of the recyclability claim",
+      "claim": "The violation is that Keurig's recyclability claim was simply false — the pods could not in fact be recycled and the testing did not support recyclability."
+    },
+    {
+      "id": "h3",
+      "label": "Sustainability-goal / PP5 commitment framing",
+      "claim": "The matter is fundamentally about Keurig's 2014 goal to make pods 100% recyclable, its PP5 conversion, and its $10 million Polypropylene Recycling Coalition commitment."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Omitted negative feedback from two large recyclers",
+      "source_coords": "[FACTS]",
+      "text_anchor": "two recycling companies involved in the testing nonetheless conveyed significant negative feedback to Keurig regarding the commercial feasibility of curbside recycling of pods",
+      "expected_relevance": "PIVOTAL. The omitted recycler feedback (including the quoted letter and the recyclers' statement that they did not presently intend to accept pods) is the sole thing that turns an accurate test description into an incomplete and inaccurate statement. It is the anchor of the half-truth theory (h1)."
+    },
+    {
+      "id": "e2",
+      "label": "The 10-K statement at issue",
+      "source_coords": "[FACTS]",
+      "text_anchor": "we have conducted extensive testing with municipal recycling facilities to validate that [pods] can be effectively recycled",
+      "expected_relevance": "Identifies the precise statement found misleading. Relevant to all hypotheses; on its own it is accurate, which is why the omission (e1) is what creates the violation."
+    },
+    {
+      "id": "e3",
+      "label": "Order's incompleteness conclusion",
+      "source_coords": "[FACTS]; [SUMMARY]",
+      "text_anchor": "were incomplete and therefore inaccurate",
+      "expected_relevance": "Directly states the theory: incompleteness/omission, not falsity. Primary support for h1 and against h2."
+    },
+    {
+      "id": "e4",
+      "label": "Positive sorting test results",
+      "source_coords": "[FACTS]",
+      "text_anchor": "These tests reflected that pods typically could be successfully sorted from other materials",
+      "expected_relevance": "Knocks down h2: the recyclability/testing claim was not false; the tests were genuinely positive on sorting. The violation cannot be outright falsity."
+    },
+    {
+      "id": "e5",
+      "label": "Weight of the omitted source (largest recyclers)",
+      "source_coords": "[FACTS]",
+      "text_anchor": "among the nation's largest recycling companies, operating more than one-third of recycling facilities in the United States",
+      "expected_relevance": "Strengthens h1 by showing the omitted feedback was significant, not trivial. Bears on why omitting it made the statement misleading."
+    },
+    {
+      "id": "e6",
+      "label": "Sustainability goal, PP5 conversion, $10M coalition commitment",
+      "source_coords": "[FACTS]",
+      "text_anchor": "to make 100% of pods that it manufactured recyclable by 2020",
+      "expected_relevance": "OFF-AXIS TRUE. The 2014 goal, the PP5 conversion, and the $10 million Polypropylene Recycling Coalition commitment are real background, but the order does not locate the violation in them. Supports h3, which is true-but-not-the-answer."
+    },
+    {
+      "id": "e7",
+      "label": "Charged provision: complete and accurate annual reports",
+      "source_coords": "[VIOLATIONS]",
+      "text_anchor": "require every issuer of a security registered pursuant to Section 12 of the Exchange Act to file with the Commission complete and accurate annual reports",
+      "expected_relevance": "Frames the violation as a reporting-completeness matter under Section 13(a)/Rule 13a-1, consistent with h1 (omission) rather than h2 (falsity) or h3 (sustainability policy)."
+    },
+    {
+      "id": "e8",
+      "label": "Materiality context: environmental factor and pod sales",
+      "source_coords": "[FACTS]",
+      "text_anchor": "environmental concerns were a significant factor, among others, considered when deciding whether to purchase a Keurig brewing system",
+      "expected_relevance": "Context supporting why the omission mattered to investors/consumers (supports h1). Double-edged: a reader could treat the consumer-purchasing context as the point (drifting toward h3), but the order uses it only to show significance of the omitted information."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The order locates the violation in a material omission / half-truth: the FY2019 and FY2020 10-K statements that testing 'validate[d]' the pods 'can be effectively recycled' (e2) were 'incomplete and therefore inaccurate' (e3) because they omitted the negative feedback from two of the nation's largest recyclers, who said they did not intend to accept the pods (e1, e5). The charged provision is the completeness/accuracy requirement for annual reports (e7). h2 (outright falsity) is foreclosed because the tests were genuinely positive on sorting (e4). h3 is off-axis: the sustainability goal and PP5/coalition commitment (e6) are true background but not the violation theory.",
+    "sensitivity_expectation": "high",
+    "pivotal_evidence": "e1",
+    "flip_note": "Remove e1 (the omitted negative recycler feedback) and the half-truth theory has no anchor: the 10-K statement would read as an accurate account of positive sorting tests (e4), so h1 collapses and no violation theory stands on the remaining rows. h2 is already foreclosed by e4 and h3 is off-axis, so the central support for the expected read is gone. A correct high-sensitivity read reports e1 as the single pivotal row."
+  }
+}

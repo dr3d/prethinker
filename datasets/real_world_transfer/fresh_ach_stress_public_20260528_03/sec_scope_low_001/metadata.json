@@ -1,0 +1,15 @@
+{
+  "fixture_id": "sec_scope_low_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "sec",
+  "source_title": "Aurora Acquisition Corp. Form 8-K/A (Amendment No. 1), restating audited balance sheet as of March 8, 2021",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1835856/000119312522034677/d316053d8ka.htm",
+  "source_date": "2022-02-10",
+  "collected_at": "2026-05-28",
+  "document_type": "Form 8-K/A amending and restating a previously filed audited balance sheet (non-reliance/restatement disclosure)",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "low",
+  "primary_pressure": "Distinguish the cause of the restatement (multiple accounting-classification errors) from its scope/consequence (no impact on cash). Includes an off-axis true 'no cash impact' hypothesis.",
+  "notes": "Causal driver is over-determined: three independent classification errors plus an audit-committee non-reliance conclusion and an SEC-staff-guidance trigger. No single-row removal changes the read."
+}

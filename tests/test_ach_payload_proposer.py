@@ -42,7 +42,9 @@ def test_evidence_role_diagnostics_are_optional() -> None:
     diagnostic_schema = proposer_schema(evidence_role_diagnostics=True)
 
     assert "evidence_roles" not in default_schema["required"]
+    assert "evidence_roles" not in default_schema["properties"]
     assert "evidence_roles" in diagnostic_schema["required"]
+    assert "evidence_roles" in diagnostic_schema["properties"]
     assert "occurrence_anchor" not in "\n".join(
         message["content"]
         for message in build_messages(

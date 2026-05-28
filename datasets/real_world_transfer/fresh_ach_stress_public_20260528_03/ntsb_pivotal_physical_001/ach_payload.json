@@ -1,0 +1,92 @@
+{
+  "fixture_id": "ntsb_pivotal_physical_001",
+  "ach_question": "What is the best-supported cause, on the evidence in this report, of the partial loss of engine power during the initial climb?",
+  "balanced_fixture": true,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Stuck carburetor float (improper maintenance)",
+      "claim": "The partial power loss was caused by a stuck carburetor float resulting from improper carburetor maintenance, producing an excessively rich mixture."
+    },
+    {
+      "id": "h2",
+      "label": "Carburetor icing",
+      "claim": "The partial power loss was caused by carburetor icing forming in conditions conducive to serious icing at cruise power."
+    },
+    {
+      "id": "h3",
+      "label": "Fuel contamination or starvation",
+      "claim": "The partial power loss was caused by contaminated fuel (e.g., water) or fuel starvation."
+    },
+    {
+      "id": "h4",
+      "label": "Other engine/airframe mechanical failure",
+      "claim": "The partial power loss was caused by some other mechanical malfunction of the engine, magnetos, or airframe."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Rich-mixture in-flight signature",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "A witness reported visible exhaust emissions coming from the engine during flight, and the spark plugs were coated in black soot. Both observations were indicative of an excessively rich fuel-to-air mixture, consistent with a stuck carburetor float",
+      "expected_relevance": "PIVOTAL. This is the only evidence tying the carburetor's maintenance condition to what actually happened in flight: a rich-running engine signature (witness exhaust + carbon-fouled plugs) that matches a stuck float. It converts h1 from 'could have happened' to 'likely happened.'"
+    },
+    {
+      "id": "e2",
+      "label": "Float touching bowl wall / out-of-tolerance clearance",
+      "source_coords": "[MAGNETO AND CARBURETOR EXAMINATION]",
+      "text_anchor": "The float-to-bowl clearance was measured in accordance with the service manual and found to be out of tolerance. Rub marks were present in multiple locations on the inner surface of the bowl walls, indicative of float contact",
+      "expected_relevance": "Physical condition evidence that the float COULD stick (supports the capability of h1) but does not by itself show it stuck during this flight. Direct support for h1's mechanism."
+    },
+    {
+      "id": "e3",
+      "label": "Carburetor maintenance/service-bulletin non-compliance",
+      "source_coords": "[MAGNETO AND CARBURETOR EXAMINATION]",
+      "text_anchor": "No logbook entry was found indicating this bulletin had been complied with",
+      "expected_relevance": "Supports the 'improper maintenance' element of h1 (SB-4 float clearance, SB-10 unauthorized thread sealant, MSA-3 10-year overhaul all unmet). Establishes a maintenance-causation pathway but, like e2, speaks to capability rather than to this flight."
+    },
+    {
+      "id": "e4",
+      "label": "Conditions conducive to serious icing at cruise power",
+      "source_coords": "[METEOROLOGICAL INFORMATION]",
+      "text_anchor": "indicates a probability of serious icing at cruise power for the reported temperature and dew point",
+      "expected_relevance": "Affirmative support for h2 (carburetor icing). With e1 removed, this becomes the leading affirmative explanation."
+    },
+    {
+      "id": "e5",
+      "label": "Carb heat applied at runup just before takeoff",
+      "source_coords": "[ANALYSIS]",
+      "text_anchor": "the airplane began the takeoff ground roll almost immediately after the pilot performed the engine runup, which included the application of carburetor heat, and it is unlikely that the loss of engine power was the result of carburetor icing",
+      "expected_relevance": "The single fact the report uses to down-weight h2: carb heat was applied ~30 seconds before takeoff, so ice was unlikely to have formed and persisted. Double-edged with e4 — it is the only thing keeping h2 from leading."
+    },
+    {
+      "id": "e6",
+      "label": "Fuel clean and uncontaminated; supply ruled out",
+      "source_coords": "[EXAMINATION AND ENGINE TEST RUN]",
+      "text_anchor": "The fuel from the bowl was tested with water detecting paste, and no water was found",
+      "expected_relevance": "Knocks down h3. Reinforced by fueling to capacity ~30 min prior, negative sump checks, clean bright fuel in the bowl, and the FBO finding no water and no issues from other aircraft fueled afterward."
+    },
+    {
+      "id": "e7",
+      "label": "No airframe/engine anomalies; engine test-ran normally",
+      "source_coords": "[EXAMINATION AND ENGINE TEST RUN]",
+      "text_anchor": "The engine operated smoothly throughout; each magneto indicated a 100 rpm drop when tested at 1,500 rpm",
+      "expected_relevance": "Knocks down h4 (no other mechanical fault; magnetos good; smooth test run). Mildly double-edged for h1: a smooth post-accident run shows the float was not stuck at test time, but the rich-mixture in-flight signature (e1) is what implicates an intermittent stick during the flight."
+    },
+    {
+      "id": "e8",
+      "label": "Black soot cleared after the test run",
+      "source_coords": "[EXAMINATION AND ENGINE TEST RUN]",
+      "text_anchor": "the black soot was gone, replaced with dark grey coloration",
+      "expected_relevance": "Corroborates e1: the fouling that signified rich running was burned off during a normal-mixture test run, consistent with an in-flight rich-mixture event rather than a persistent mechanical defect. Supports h1, weakly against h4."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "h1 (stuck carburetor float) is best supported because the in-flight rich-mixture signature (e1: witness-observed exhaust plus carbon-fouled plugs) ties the carburetor's documented maintenance defects (e2, e3) to the actual power loss, and the report concludes the loss was 'likely the result of a stuck carburetor float.' h2 (icing) has genuine affirmative support (e4) but is down-weighted by the carb-heat-at-runup fact (e5). h3 is foreclosed by fuel testing (e6) and h4 by the clean exam and normal test run (e7).",
+    "sensitivity_expectation": "high",
+    "pivotal_evidence": "e1",
+    "flip_note": "Remove e1 and h1 loses its central support: the carburetor evidence (e2, e3) then shows only that a stuck float COULD have occurred, not that it DID, while h2 retains affirmative support from e4 and is held back only by the single fact in e5. With e1 gone the read should collapse toward 'undetermined,' with h2 (icing) at least co-leading — i.e., the best hypothesis becomes much weaker. A correct high-sensitivity read reports e1 as the pivotal row."
+  }
+}

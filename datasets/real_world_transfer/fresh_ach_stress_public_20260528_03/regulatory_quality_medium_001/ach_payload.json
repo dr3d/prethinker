@@ -1,0 +1,92 @@
+{
+  "fixture_id": "regulatory_quality_medium_001",
+  "ach_question": "Which hypothesis best explains the agency's theory of responsibility for the adulteration of the firm's drug products?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Systemic quality-system / process failure",
+      "claim": "The firm's own quality system is broadly inadequate — across incoming-component testing, production/process control, and quality-unit oversight — so responsibility for the adulteration rests on systemic CGMP failures at the firm."
+    },
+    {
+      "id": "h2",
+      "label": "Vendor/supplier fault",
+      "claim": "The real source of risk is upstream: contaminated or substandard raw materials (methanol in ethanol, DEG/EG in glycerin) come from suppliers, so responsibility lies with the component suppliers rather than the firm."
+    },
+    {
+      "id": "h3",
+      "label": "Specific bad decision (the unvalidated water system)",
+      "claim": "The problem is one discrete decision — using an unvalidated '(b)(4) water' system — rather than a firm-wide quality failure."
+    },
+    {
+      "id": "h4",
+      "label": "Regulatory-status problem (unapproved/misbranded/unlisted)",
+      "claim": "The firm's core problem is regulatory status: marketing an unapproved new drug, misbranding, and failing to keep its drug listings current."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Identity-testing failure on incoming components",
+      "source_coords": "[CGMP VIOLATION 1 — IDENTITY TESTING / SUPPLIER RELIANCE]",
+      "text_anchor": "You failed to adequately perform identity testing on each shipment of each lot of incoming components (e.g., ethanol, glycerin)",
+      "expected_relevance": "Pillar 1 of systemic quality (h1). Also the locus of the vendor tension (h2), since the components come from suppliers."
+    },
+    {
+      "id": "e2",
+      "label": "Firm is responsible despite supplier COAs",
+      "source_coords": "[CGMP VIOLATION 1 — IDENTITY TESTING / SUPPLIER RELIANCE]",
+      "text_anchor": "You are responsible for sampling, testing, and examining drug components before use in production to ensure acceptable quality parameters are met",
+      "expected_relevance": "CAUSAL BRIDGE. Keeps responsibility with the firm rather than the supplier: reliance on supplier COAs without establishing their reliability is the firm's failure. Most directly defeats h2."
+    },
+    {
+      "id": "e3",
+      "label": "Process-control / water-system failure",
+      "source_coords": "[CGMP VIOLATION 2 — PROCESS CONTROL / WATER SYSTEM]",
+      "text_anchor": "You lacked water system validation and failed to conduct total organic carbon (TOC) testing",
+      "expected_relevance": "Pillar 2 of systemic quality (h1). Independent of the component-testing pillar. Also the row a reader could over-read as a single specific decision (h3)."
+    },
+    {
+      "id": "e4",
+      "label": "Quality-unit oversight failure",
+      "source_coords": "[CGMP VIOLATION 3 — QUALITY CONTROL UNIT]",
+      "text_anchor": "Your quality unit (QU) failed to perform adequate oversight for the manufacture and testing of your OTC topical drug products",
+      "expected_relevance": "Pillar 3 of systemic quality (h1): the QU itself — the function responsible for catching all of the above — failed, including batch-record and lab-record review. Strongest support that the failure is systemic, not a one-off."
+    },
+    {
+      "id": "e5",
+      "label": "Upstream contamination hazard (DEG/EG, methanol)",
+      "source_coords": "[CGMP VIOLATION 1 — IDENTITY TESTING / SUPPLIER RELIANCE]",
+      "text_anchor": "incoming components at high risk of diethylene glycol (DEG) or ethylene glycol (EG) contamination",
+      "expected_relevance": "Supports h2 on its face — the hazardous impurities originate in raw materials. Double-edged: the order uses the hazard to explain why the firm must test, reinforcing h1."
+    },
+    {
+      "id": "e6",
+      "label": "Secure-supply-chain CAPA request",
+      "source_coords": "[CGMP VIOLATION 1 — IDENTITY TESTING / SUPPLIER RELIANCE]",
+      "text_anchor": "ensuring that all incoming raw material lots are from fully qualified manufacturers and free from unsafe impurities",
+      "expected_relevance": "Double-edged. Acknowledges the supply-chain dimension (h2) but frames qualifying suppliers as the firm's own CAPA duty (h1)."
+    },
+    {
+      "id": "e7",
+      "label": "Unapproved new drug / misbranding / listing inactivation",
+      "source_coords": "[UNAPPROVED NEW DRUG AND MISBRANDED DRUG VIOLATIONS]; [DRUG LISTING VIOLATIONS]",
+      "text_anchor": "an unapproved new drug marketed in violation of sections 505(a) and 301(d)",
+      "expected_relevance": "OFF-AXIS. True and serious, but these are regulatory-status violations (approval, labeling, listing), not the CGMP-adulteration responsibility theory the ACH question asks about. Supports h4, which is off-axis."
+    },
+    {
+      "id": "e8",
+      "label": "Executive management responsible for systemic flaws",
+      "source_coords": "[CGMP CONSULTANT RECOMMENDED]",
+      "text_anchor": "executive management remains responsible for resolving all deficiencies and systemic flaws",
+      "expected_relevance": "Supports h1: the FDA frames the matter as firm-wide systemic flaws (a six-system audit is recommended), not a single decision (h3) or a supplier problem (h2)."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The order locates responsibility in a systemic quality-system failure: three independent CGMP pillars are cited — incoming-component identity testing (e1), production/process control of the water system (e3), and quality-unit oversight including batch- and lab-record review (e4) — and the FDA frames the matter as firm-wide systemic flaws requiring a six-system audit (e8). The vendor reading (h2) is tempting because the DEG/EG and methanol hazards originate upstream (e5), but the order expressly keeps responsibility with the firm: it must sample and test incoming components and establish the reliability of supplier COAs (e2). The single-decision reading (h3) captures only one pillar (e3). The unapproved-drug, misbranding, and listing violations (e7) are off-axis: real, but a regulatory-status theory, not the adulteration/CGMP responsibility theory.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": "e2",
+    "flip_note": "The winner survives any single-row removal because it rests on three independent pillars (e1, e3, e4). But it weakens meaningfully on the supplier axis if e2 (the firm-is-responsible-despite-COAs bridge) is removed: the identity-testing findings (e1) plus the upstream-hazard row (e5) then read more naturally as vendor fault (h2). Removing e2 alone does not flip the read — the process-control (e3) and quality-unit (e4) pillars still anchor h1 — but removing both e2 and e4 would create serious uncertainty between systemic-quality and vendor-fault. The off-axis h4 never wins on the adulteration question regardless of which rows are present."
+  }
+}

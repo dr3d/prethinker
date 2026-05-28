@@ -1,0 +1,15 @@
+{
+  "fixture_id": "legal_controls_medium_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "osha",
+  "source_title": "OSHRC Decision and Order, Secretary of Labor v. RK Hydro-Vac, Inc., Docket No. 03-1583",
+  "source_url": "https://www.oshrc.gov/wp-content/uploads/03-1583.pdf",
+  "source_date": "2003-12-15",
+  "collected_at": "2026-05-28",
+  "document_type": "OSHRC administrative law judge Decision and Order (adjudicatory finding) affirming a serious citation",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "medium",
+  "primary_pressure": "Institutional/control failure (employer's inadequate remote-site supervision and absent enforcement policy = constructive knowledge) versus individual/operator fault (employee forgot to re-tie off; unpreventable employee misconduct).",
+  "notes": "Winner (employer responsibility) rests on two causal-bridge findings (supervision gap and enforcement gap). Single-row removal weakens but does not flip; two-row removal would flip to the misconduct reading. Includes an off-axis penalty-mitigation row."
+}

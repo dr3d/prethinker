@@ -1,0 +1,15 @@
+{
+  "fixture_id": "regulatory_quality_medium_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "fda",
+  "source_title": "FDA Warning Letter 320-25-91 to Medical Chemical Corporation (MARCS-CMS 706007)",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-chemical-corporation-706007-07092025",
+  "source_date": "2025-07-09",
+  "collected_at": "2026-05-28",
+  "document_type": "FDA CGMP warning letter to an OTC drug manufacturer citing multiple violations (component identity testing, process control, quality-unit oversight) plus unapproved-drug and listing violations",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "medium",
+  "primary_pressure": "Systemic quality-system failure vs vendor/supplier fault vs a single bad decision, with off-axis regulatory-status violations. Three independent CGMP pillars support the systemic reading.",
+  "notes": "Winner (systemic quality) survives single-row removal but weakens on the supplier axis if the 'firm is responsible despite supplier COAs' bridge is removed. Fresh letter, not the AACE letter used in the prior batch."
+}

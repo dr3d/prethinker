@@ -1,0 +1,94 @@
+{
+  "fixture_id": "public_order_low_001",
+  "ach_question": "What best explains where the complaint locates responsibility for the data breaches and the resulting remedy?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Respondents' own unreasonable data-security practices",
+      "claim": "Responsibility is located in Marriott's and Starwood's failure to implement reasonable, appropriate security — a set of independent, enumerated security failures across passwords, patching, monitoring/logging, access controls, firewalls, network segmentation, and multifactor authentication."
+    },
+    {
+      "id": "h2",
+      "label": "Sophisticated external attackers",
+      "claim": "The breaches are best explained by malicious external actors who exploited vulnerabilities, harvested credentials, and exfiltrated data; the intruders, not the company, are where responsibility lies."
+    },
+    {
+      "id": "h3",
+      "label": "Inherited Starwood legacy problem",
+      "claim": "Responsibility lies with Starwood's pre-acquisition legacy security, not Marriott — the failures originated in Starwood's systems before Marriott took over."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Umbrella finding: failure to provide reasonable security",
+      "source_coords": "[INFORMATION SECURITY PRACTICES]",
+      "text_anchor": "Respondents failed to provide reasonable or appropriate security for the personal information that they collected and maintained about consumers",
+      "expected_relevance": "The complaint's core responsibility allocation, and the umbrella under which the seven independent failures sit. Direct support for h1."
+    },
+    {
+      "id": "e2",
+      "label": "Failed password controls",
+      "source_coords": "[INFORMATION SECURITY PRACTICES]",
+      "text_anchor": "Failed to implement appropriate password controls",
+      "expected_relevance": "One independent security-failure pillar supporting h1. Sufficient on its own; redundant with the others."
+    },
+    {
+      "id": "e3",
+      "label": "Failed to patch outdated/unsupported software",
+      "source_coords": "[INFORMATION SECURITY PRACTICES]",
+      "text_anchor": "Failed to patch outdated software and systems in a timely manner",
+      "expected_relevance": "Independent security-failure pillar for h1, corroborated by the First Breach forensic finding of unsupported operating systems."
+    },
+    {
+      "id": "e4",
+      "label": "Failed to monitor and log; intruders undetected for years",
+      "source_coords": "[INFORMATION SECURITY PRACTICES]",
+      "text_anchor": "Failed to adequately monitor and log network environments",
+      "expected_relevance": "Independent pillar for h1; directly explains why the Second Breach went undetected, undercutting any 'undetectable sophisticated attacker' excuse (h2)."
+    },
+    {
+      "id": "e5",
+      "label": "Failed multifactor authentication despite obligations",
+      "source_coords": "[INFORMATION SECURITY PRACTICES]",
+      "text_anchor": "Failed to apply adequate multifactor authentication to protect sensitive information",
+      "expected_relevance": "Independent pillar for h1; aggravated because Starwood failed to comply with its own contractual obligations and internal policies requiring MFA."
+    },
+    {
+      "id": "e6",
+      "label": "Marriott responsible for security after the acquisition",
+      "source_coords": "[RELEVANT BUSINESS PRACTICES]",
+      "text_anchor": "Marriott took control of Starwood's computer network and has been responsible for establishing, reviewing, and implementing the information security practices for both itself and Starwood",
+      "expected_relevance": "Allocates responsibility to Marriott post-acquisition. Directly defeats h3 (the inherited-legacy reading)."
+    },
+    {
+      "id": "e7",
+      "label": "Third Breach on Marriott's own network",
+      "source_coords": "[THIRD BREACH (MARRIOTT)]",
+      "text_anchor": "malicious actors had compromised the credentials of employees at a Marriott-franchised property to gain access to Marriott's own network",
+      "expected_relevance": "Shows the failures were not confined to legacy Starwood systems; a breach occurred on Marriott's own network. Further defeats h3."
+    },
+    {
+      "id": "e8",
+      "label": "Malicious actors exploited vulnerabilities",
+      "source_coords": "[FIRST BREACH (STARWOOD)]; [SECOND BREACH (STARWOOD)]",
+      "text_anchor": "a malicious actor exploited security vulnerabilities to gain remote access to Starwood's network",
+      "expected_relevance": "OFF-AXIS. True — external attackers carried out the intrusions — but the complaint locates responsibility in the firm's failure to secure, not in the existence of attackers. Supports h2, which answers a different question."
+    },
+    {
+      "id": "e9",
+      "label": "Deceptive privacy-policy security promises",
+      "source_coords": "[DECEPTIVE SECURITY STATEMENTS]; [VIOLATIONS — COUNT I: DECEPTIVE SECURITY STATEMENTS]",
+      "text_anchor": "Respondents did not use appropriate safeguards to protect consumers' personal information",
+      "expected_relevance": "Independent basis (Count I) tying responsibility to the firm: it promised appropriate safeguards it did not provide. Reinforces h1 from the deception angle."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The complaint locates responsibility in Respondents' own unreasonable security. The umbrella finding (e1) is supported by multiple independent, separately sufficient failures — passwords (e2), patching (e3), monitoring/logging (e4), and multifactor authentication (e5), among the seven enumerated in Paragraph 27 — and is independently reinforced by the deception count (e9). Responsibility is squarely allocated to Marriott post-acquisition (e6), and the Third Breach on Marriott's own network (e7) shows the failures were not confined to legacy Starwood systems. h2 (external attackers) is off-axis: the intrusions were carried out by malicious actors (e8), but the complaint locates responsibility in the failure to defend against them, not in their existence. h3 (inherited Starwood legacy) is foreclosed by e6 and e7.",
+    "sensitivity_expectation": "low",
+    "pivotal_evidence": null,
+    "flip_note": "The responsibility allocation is over-determined: it rests on at least seven independent enumerated security failures plus the deception basis (e1-e5, e9) and the post-acquisition responsibility and Third-Breach rows (e6, e7). Removing any single failure leaves the umbrella finding fully intact, so no single-row removal changes the read — there are no sensitivity rows. The off-axis attacker row (e8) never becomes the locus of responsibility, and the legacy reading (h3) cannot win while e6 and e7 stand."
+  }
+}

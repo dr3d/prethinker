@@ -354,15 +354,6 @@ def _sensitivity_judgment(
                 "weight": effect["weight"],
                 "rationale": effect.get("rationale", ""),
             }
-    if any(
-        effect["omitted_evidence_id"] == omitted_evidence_id and effect["evidence_id"] == evidence_id
-        for effect in omission_effects
-    ):
-        return {
-            "assessment": "neutral",
-            "weight": 1,
-            "rationale": "neutralized by row-level omission dependency",
-        }
     return matrix[evidence_id][hypothesis_id]
 
 

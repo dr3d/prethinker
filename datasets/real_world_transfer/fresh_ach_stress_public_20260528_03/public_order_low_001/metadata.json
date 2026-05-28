@@ -1,0 +1,15 @@
+{
+  "fixture_id": "public_order_low_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "other",
+  "source_title": "FTC Complaint, In the Matter of Marriott International, Inc. and Starwood Hotels & Resorts Worldwide, LLC (Docket No. C-4807)",
+  "source_url": "https://www.ftc.gov/system/files/ftc_gov/pdf/1923022marriottcomplaint_0.pdf",
+  "source_date": "2024-12-20",
+  "collected_at": "2026-05-28",
+  "document_type": "FTC administrative complaint (agency order; Part 2 consent, Decision and Order finalized) alleging unfair and deceptive data-security practices under Section 5(a)",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "low",
+  "primary_pressure": "Responsibility allocation over-determined by several independent enumerated security failures; off-axis 'external attacker' and foreclosed 'Starwood legacy' readings.",
+  "notes": "Seven independent Paragraph-27 failures plus a deception count and post-acquisition responsibility/Third-Breach rows. No single-row removal changes the read. FTC agency order; diversifies the batch beyond NTSB/SEC/OSHA/FDA."
+}

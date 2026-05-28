@@ -645,6 +645,93 @@ Read:
 - Keep evidence roles as an overlay diagnostic mode until a fresh ACH batch
   shows they can coexist with dependency capture without sensitivity churn.
 
+## Fresh ACH Stress Batch 03
+
+Dataset:
+
+```text
+datasets\real_world_transfer\fresh_ach_stress_public_20260528_03
+```
+
+Intake:
+
+- Six fixtures present with the expected ACH package files.
+- Fixture IDs intentionally reuse the batch02 names, but the source documents
+  and payload hashes differ.
+- `batch_manifest.json` arrived with `batch_id:
+  fresh_ach_stress_public_20260528_02`; corrected to
+  `fresh_ach_stress_public_20260528_03`.
+- Erroneous untracked duplicate batch01 fixture directories had been placed
+  under batch02. They were byte-identical to the tracked batch01 fixtures and
+  were removed from the batch02 tree.
+
+R1 caveat:
+
+The first batch03 run exposed a harness issue: `evidence_roles` was optional in
+the prompt but still present in the normal JSON schema, so the model filled it
+anyway. That contaminated the normal run with diagnostic role work. The schema
+is now caged: `evidence_roles` is removed from the normal schema and appears
+only when `--evidence-role-diagnostics` is explicitly enabled.
+
+R2 normal run:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_03_r2_schema_caged_20260528\ach_locked_r2
+```
+
+Initial R2 showed perfect ranking and contract hygiene but false sensitivity
+on both low controls. Inspection found a deterministic scorer bug: when one
+omission effect touched an evidence row for one hypothesis, the scorer
+neutralized that whole evidence row for every hypothesis. This inflated support
+drop and created false positives.
+
+Fix:
+
+- omission effects are now per-cell only;
+- an effect for `(omitted_evidence_id, evidence_id, hypothesis_id)` changes
+  only that judgment cell;
+- unrelated cells retain their baseline judgment.
+
+R2 rescored without another LLM call:
+
+```text
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_03_r2_schema_caged_20260528\ach_locked_r2_rescored_cell_effects
+C:\prethinker_tmp_archive\fresh_ach_stress_public_20260528_03_r2_schema_caged_20260528\ach_locked_r2_rescored_cell_effects_summary.md
+```
+
+Rescored aggregate:
+
+```text
+ranking correct: 6 / 6
+matrix complete: 6 / 6
+warnings: 0
+contract residual fixtures: 0
+high pivotal detected: 2 / 2
+medium detected: 1 / 2
+low clean: 2 / 2
+```
+
+Per-fixture rescored read:
+
+```text
+enforcement_single_document_hook_001: high, pivotal e1 detected
+ntsb_pivotal_physical_001: high, pivotal e1 detected
+legal_controls_medium_001: medium detected, e1/e4 surfaced
+regulatory_quality_medium_001: medium missed
+public_order_low_001: low clean
+sec_scope_low_001: low clean
+```
+
+Read:
+
+- ACH ranking generalized cleanly again.
+- The dependency-audit prompt plus per-cell omission effects now separates
+  high and low sensitivity on this fresh batch.
+- Medium sensitivity is still immature, but no longer uniformly dead: one of
+  two medium fixtures surfaced sensitivity rows.
+- The next ACH blocker is medium sensitivity: multi-row weakening and
+  family-level dependence, not high/low discrimination.
+
 ## Leakage Hygiene
 
 During the ACH plumbing search, old narrative source-flavored examples were
@@ -687,13 +774,13 @@ python -m py_compile src\semantic_ir.py scripts\run_domain_bootstrap_file.py scr
 
 ## Next
 
-1. Keep the 96.67% QA result as a strong but narrow ACH-stress QA signal.
-2. Do not spend repair energy on NTSB q012 as ordinary QA; it belongs to the
-   ACH sensitivity lane.
-3. Improve ACH sensitivity before using ACH as product evidence:
-   - represent double-edged evidence explicitly, or
-   - allow per-judgment support and disconfirmation weights, or
-   - split double-edged evidence rows into distinct pro/con rows before scoring.
-4. Re-run the ACH payload proposer after the sensitivity model changes.
-5. Treat the SEC q003 partial as a small query/rendering precision issue, not a
-   compile blocker.
+1. Treat ACH ranking as product-plausible but still overlay-only.
+2. Treat high/low sensitivity discrimination as promising after batch03
+   rescoring, not fully solved until another heldout confirms it.
+3. Work the remaining medium-sensitivity blocker:
+   - multi-row weakening;
+   - family-level dependence;
+   - "single row creates uncertainty but does not flip" reporting.
+4. Keep `--evidence-role-diagnostics` optional until it proves it can coexist
+   with dependency capture.
+5. Do not let ACH reports mutate compile, QA, or KB truth.

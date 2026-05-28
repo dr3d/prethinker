@@ -1,0 +1,189 @@
+Page 1 of 9
+Aviation Investigation Final Report
+Location: Mukilteo, Washington Accident Number: WPR17LA096
+Date & Time: May 2, 2017, 15:28 Local Registration: N3457W
+Aircraft: Piper PA 32-260 Aircraft Damage: Substantial
+Defining Event: Loss of engine power (partial) Injuries: 1 Minor, 1 None
+Flight Conducted Under: Part 91: General aviation - Personal
+Analysis
+The private pilot reported that, during the initial climb shortly after takeoff, the airplane lost partial
+engine power. He tried a series of troubleshooting steps, but with limited time available, he then
+performed a forced landing onto a street just beyond the runway. The airplane impacted power
+transmission cables and traffic lights during the descent, rupturing both wingtip fuel tanks and spraying
+ignited fuel onto cars at the intersection below. The airplane sustained substantial damage when it
+collided with the ground and came to rest on the street.
+The airplane had been fueled almost to capacity just before takeoff and postaccident examination did not
+reveal any anomalies with the airframe or engine that would have precluded normal operation.
+Examination of the carburetor revealed multiple maintenance-related discrepancies, all of which could
+have resulted in a loss of engine power. One of the discrepancies was related to the float, which
+appeared to have been touching the wall of the carburetor bowl. A witness reported visible exhaust
+emissions coming from the engine during flight, and the spark plugs were coated in black soot. Both
+observations were indicative of an excessively rich fuel-to-air mixture, consistent with a stuck carburetor
+float. As such, the loss of engine power was likely the result of a stuck carburetor float.
+Based on atmospheric conditions, carburetor icing could not be ruled out; however, the airplane began
+the takeoff ground roll almost immediately after the pilot performed the engine runup, which included
+the application of carburetor heat, and it is unlikely that the loss of engine power was the result of
+carburetor icing.
+The pilot accepted an intersection takeoff due to a passenger jet performing taxi tests at the approach
+end of the runway. Had he chosen to use the full runway length, he likely would have had enough
+runway available to safely land the airplane following the loss of power.
+Page 2 of 9 WPR17LA096
+Probable Cause and Findings
+The National Transportation Safety Board determines the probable cause(s) of this accident to be:
+The improper maintenance of the carburetor, which resulted in a stuck float and a partial loss of engine
+power during takeoff.
+Findings
+Aircraft Fuel control/carburetor - Incorrect service/maintenance
+Personnel issues Scheduled/routine maintenance - Maintenance personnel
+Environmental issues Wire - Contributed to outcome
+Personnel issues Decision making/judgment - Pilot
+Environmental issues Runway/landing area length - Decision related to condition
+Page 3 of 9 WPR17LA096
+Factual Information
+History of Flight
+Initial climb Loss of engine power (partial) (Defining event)
+Emergency descent Collision with terr/obj (non-CFIT)
+On May 2, 2017, at 1528 Pacific daylight time, a Piper PA-32-260 airplane, N3457W, struck power
+transmission cables and traffic lights and collided with the ground in Mukilteo, Washington, after a
+partial loss of engine power during the initial climb from Snohomish County Airport (Paine Field),
+Everett, Washington. The private pilot was not injured, the passenger received minor injuries. The
+airplane sustained substantial damage. The airplane was registered to Klamath Aviation LLC., and
+operated by the pilot as a personal cross-country flight under the provisions of Title 14 Code of Federal
+Regulations Part 91. Visual meteorological conditions prevailed, and no flight plan had been filed. The
+flight was originating at the time and destined for Crater Lake-Klamath Regional Airport, Klamath Falls,
+Oregon.
+The pilot stated that he had just serviced the airplane with aviation gasoline prior to takeoff and filled the
+main tanks to the "tabs", and both tip tanks to capacity. He performed a preflight airplane walk around
+and checked the fuel for contamination at the sump drains. No anomalies were noted, and he boarded the
+airplane, sitting in the left seat. Due to a Boeing 787 airplane performing tests at the arrival end of
+runway 16R, the pilot accepted an intersection departure from runway 16R, at taxiway A4 (with about
+5,600 ft of runway remaining). He taxied to the runup area adjacent to the intersection, and performed
+pre-takeoff checks, and an engine runup. He stated that all systems were normal, including both the
+magneto and carburetor heat checks, and after turning on the auxiliary fuel pump and confirming the
+fuel selector valve was set to the right tip tank, he taxied onto the runway and began the departure roll.
+Surveillance video from the air traffic control tower revealed that the airplane was in the runup area for
+about 3 minutes and began the takeoff roll about 30 seconds later.
+The pilot stated that the airplane accelerated appropriately, and he initiated a rotation at 80 mph. The
+airplane lifted off and continued to accelerate to 90 mph during the initial climb. The air traffic
+controller requested that the pilot perform a right turn when able, due to departing traffic behind, and as
+soon as the pilot began to initiate the turn, the engine lost power.
+The pilot estimated that the power loss occurred at an altitude of about 400 ft agl, and the airplane was
+not able to maintain altitude. He declared an emergency and checked both the fuel selector valve and
+fuel mixture positions and confirmed the engine primer was in and locked. With limited time to
+troubleshoot, he turned his attention to performing a forced landing. During the descent he noticed the
+engine appeared to be producing partial power, and the propeller continued to turn at 400 to 500 rpm.
+He observed an area of swamps and tall trees directly ahead, and to his right a busy six-lane road,
+running north-south. He could see to the right an east-west oriented road, which was free of traffic in the
+westbound lane. He maneuvered the airplane for landing in this lane, and as he approached, the right
+wing stuck a power transmission cable. Both wingtips then struck separate traffic lights, rupturing the tip
+tanks, and spraying ignited fuel over cars waiting at the intersection below. The airplane then collided
+with the ground and came to rest on the street.
+A witness, who was positioned in his automobile at an intersection adjoining the runway, reported that
+his attention was drawn to the airplane during takeoff, because it was emitting bursts of visible
+"exhaust". He stated that he was familiar with aircraft traffic and was drawn to look at the airplane
+because the exhaust trail was not a normal occurrence.
+[Pilot Information]
+Certificate: Private; Age: 30, Male; Airplane Rating(s): Single-engine land; Instrument Rating(s): None;
+Medical Certification: Class 3 With waivers/limitations; Last FAA Medical Exam: November 17, 2014;
+Last Flight Review: February 20, 2017; Flight Time: 169 hours total, 46 hours this make and model.
+[Aircraft Information]
+Aircraft Make/Model: Piper PA 32-260; Year of Manufacture: 1966; Serial Number: 32-326; Certified Max
+Gross Wt.: 3400 lbs; Date/Type of Last Inspection: September 21, 2016 Annual; Time Since Last Inspection: 45
+Hrs; Airframe Total Time: 5766.32 Hrs as of last inspection; Engine Manufacturer: LYCOMING; Engine
+Model/Series: O-540-E4B5; Rated Power: 260 Horsepower; Registered Owner: On file. The airplane was
+manufactured in 1966 and purchased by the pilot and passenger (who were the sole members of Klamath
+Aviation LLC.) on November 15, 2016. The most recent maintenance event was for an annual inspection,
+completed on September 21, 2016, at a total airframe time of 5,766.32 flight hours. At the time of inspection,
+the engine had accrued 567.42 flight hours since overhaul in September 1997.
+[Meteorological Information and Flight Plan]
+Conditions at Accident Site: Visual (VMC); Condition of Light: Day; Observation Facility, Elevation: KPAE,
+606 ft msl; Observation Time: 22:49Z; Wind: 210° at 3 knots; Temperature/Dew Point: 15°C / 9°C;
+Precipitation and Obscuration: No Obscuration; No Precipitation. A special aviation routine weather report for
+Paine Field was issued at 1549. It included wind from 210° at 3 knots, with a temperature of 15° C, and a dew
+point of 9° C. The carburetor icing probability chart from the FAA Special Airworthiness Information Bulletin
+CE-09-35 "Carburetor Icing Prevention", indicates a probability of serious icing at cruise power for the
+reported temperature and dew point.
+[Airport Information]
+Airport: SNOHOMISH COUNTY (PAINE FLD) PAE; Airport Elevation: 607 ft msl; Runway Used: 16R;
+Runway Length/Width: 9010 ft / 150 ft; Runway Surface: Asphalt, Dry. Runway 16R is 9,010 ft long and 150
+ft wide, composed of grooved asphalt and concrete, and is at an elevation of 608 ft mean sea level.
+[Wreckage and Impact Information]
+The airplane came to rest on a west heading on the street about 2,200 ft beyond the end of runway 16R, and 10°
+right of the runway centerline. The main cabin and left wing were largely intact. The horizontal stabilizer had
+detached, leaving the vertical stabilizer partially attached to the tailcone. The right wing had folded up about
+45° at the root, and its main fuel tank had been breached.
+An FAA inspector who responded to the accident site stated that shortly after his arrival he checked the left
+main fuel tank, which was the only unbreeched tank, and found that it contained fuel. He then removed the
+carburetor bowl drain plug, and fuel drained from the bowl.
+The airplane was recovered from the accident site and examined by the NTSB investigator-in-charge,
+inspectors from the FAA, and technical representatives from Lycoming Engines and Piper Aircraft. Complete
+examination reports are contained within the public docket, the following is a summary of the findings.
+[Examination and Engine Test Run]
+All fuel lines and fittings were intact from the fuel tanks through to the carburetor, and there were no
+indications of a fuel leak. The fuel selector bowl contained about 1/4 cup of clean, bright, light-blue colored
+fuel. The fuel selector valve moved freely through its range, and the detents were positive. The fuel from the
+bowl was tested with water detecting paste, and no water was found.
+The engine sustained minimal damage and remained partially attached to the firewall, with the upper left
+engine mount broken. The propeller was still attached to the crankshaft, and both blades exhibited about 360°
+of tip curl, with chordwise scratches present on the curled sections. One blade tip had detached, leaving a
+jagged separation surface. The dipstick indicated the engine contained 6 quarts of oil.
+The top and bottom spark plugs were all Champion REM 38E types, which were appropriate for the engine
+application. The plugs exhibited normal wear signatures consistent with short service life when compared to the
+Champion AV-27 check-a-plug chart. The electrodes of the top plugs for cylinders 1 through 4 were dark grey
+in color. All remaining plug electrodes were coated in dark grey/black soot corresponding to "carbon fouled"
+as denoted on the Champion chart.
+The engine was readied for a test-run by removal of the airbox (which was crushed on impact) and replacement
+of the propeller. Fuel recovered from the airplanes left wing main tank was used for the test and fed from a
+cannister connected to the right tip tank fuel line at the wing root. (Both wings were removed during aircraft
+recovery). After two cranking attempts, the engine started, and was operated for about 4 minutes at speeds
+varying from 700 to 2,500 rpm. The engine operated smoothly throughout; each magneto indicated a 100 rpm
+drop when tested at 1,500 rpm, and the engine speed responded to adjustments of the propeller and throttle
+controls. Following the run, the top spark plugs were removed. The black soot was gone, replaced with dark
+grey coloration.
+[Magneto and Carburetor Examination]
+The carburetor and both magnetos were removed and examined at an overhaul facility. Both magnetos were
+tested in a magneto test stand and produced sparks in firing order throughout their operating speed range.
+Maintenance records indicated that the carburetor was installed in 1997, coincident to the engine overhaul. No
+other carburetor-related maintenance entry was found beyond the replacement of the sump plug in 2006, and
+the repair and removal of the carburetor inlet air box.
+The carburetor appeared undamaged, and all fittings were intact. The fuel inlet screen was clear, and the
+throttle and mixture control arms could be moved freely. All carburetor bowl screws were secure and tight, and
+remained affixed with a lock-tab washer. There was no evidence of fuel leak or discoloration at the interface
+between the body and bowl. The carburetor bowl was separated to facilitate internal examination, revealing a
+brass float. The float assembly was intact, and the clearance from the throttle body to bowl gasket and float
+was measured and fell within the tolerance described in the service manual.
+The float-to-bowl clearance was then measured in accordance with the service manual and found to be out of
+tolerance. Rub marks were present in multiple locations on the inner surface of the bowl walls, indicative of
+float contact. Removal of the float revealed that it was slightly twisted, with one side resting 1/16th inch above
+the other at its tip. The float was then tested for leaks, and none were found.
+Service Bulletin SB-4 Rev. B, published by Volare Carburetors, LLC, on September 2, 2009, documented
+reports of stuck, leaking, and/or worn floats when the float-to-bowl clearance value was not correct. The
+bulletin encompassed MA series carburetors manufactured by Volare, Precision Airmotive, and Marvel-
+Schebler, and recommended either measuring the clearance immediately should symptoms exist, or within 100
+flight hours or 90 days (which ever came first). The bulletin required the replacement of the floats if the
+tolerance was not met, then stamping of "FC" on the mounting flange adjacent to the throttle shaft. No logbook
+entry was found indicating this bulletin had been complied with, nor was there any evidence of "FC" being
+stamped on the flange.
+White thread sealant compound was found on multiple fittings and bolt threads throughout the carburetor,
+including the inlet filter screen. Service Bulletin: SB-10 Rev B, published August 12, 2010, by Marvel-
+Schebler, describes the unauthorized use of such sealant. The service bulletin states that thread sealant should
+not be used on any carburetor component, as it has been found to break away and clog internal fuel passages.
+The service bulletin calls for immediate overhaul if any traces of sealant are observed.
+Service Bulletin MSA-3, revision 1, published by Precision Airmotive on November 18, 1991 describes the
+overhaul periods for MA series float-type carburetors. The bulletin recommended replacement of all
+carburetors within 10 years of their placement into service.
+[Additional Information]
+A fuel receipt provided by a fixed based operator at Paine Field revealed that the airplane was serviced with the
+addition of 41.2 gallons of 100 octane low-lead aviation gasoline about 30 minutes before the accident. The
+manager of the facility stated that two other aircraft purchased fuel immediately after the accident airplane, and
+neither reported issues. He also checked the fuel storage and delivery system for water contamination and
+found none.
+Page 9 of 9 WPR17LA096
+Administrative Information
+Investigator In Charge (IIC): Simpson, Eliott
+Additional Participating Persons: John Osborne (FAA FSDO, Renton, WA); Charles Little (Piper Aircraft,
+Vero Beach, FL); Troy Helgeson (Lycoming Engines, Williamsport, PA)
+Original Publish Date: November 15, 2018
+Investigation Class: Class 3
+Note: The NTSB traveled to the scene of this accident.
+Investigation Docket: https://data.ntsb.gov/Docket?ProjectID=95094

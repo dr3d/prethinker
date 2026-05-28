@@ -1,0 +1,92 @@
+{
+  "fixture_id": "sec_scope_low_001",
+  "ach_question": "What best explains why the company amended and restated its previously issued financial statements?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Accounting-classification errors requiring correction",
+      "claim": "The company restated because it had misclassified multiple financial instruments — warrants (recorded in equity instead of as a liability), Class A redeemable shares (not at full redemption value), and the underwriters' over-allotment option (not classified as a liability) — and had to correct them under applicable GAAP and SEC staff guidance."
+    },
+    {
+      "id": "h2",
+      "label": "No impact on cash / non-cash scope",
+      "claim": "The restatement is explained by the fact that it is non-cash and has no impact on the company's cash position or the cash held in trust."
+    },
+    {
+      "id": "h3",
+      "label": "Fraud or SEC enforcement action",
+      "claim": "The company restated because of fraud or because the SEC brought an enforcement action against it."
+    },
+    {
+      "id": "h4",
+      "label": "Discovery of a material weakness drove the restatement",
+      "claim": "The company restated because it first discovered a material weakness in internal control over financial reporting, which then required the restatement."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Warrants misclassified as equity",
+      "source_coords": "[BACKGROUND OF RESTATEMENT]",
+      "text_anchor": "errors relating to the accounting for warrants which were initially presented as components of equity and has been determined that they should have been classified as a liability",
+      "expected_relevance": "Causal driver 1 for h1. Independent of the other two classification errors."
+    },
+    {
+      "id": "e2",
+      "label": "Class A shares restated to full redemption value (ASC 480-10-S99)",
+      "source_coords": "[BACKGROUND OF RESTATEMENT]",
+      "text_anchor": "management, in accordance with ASC 480-10-S99, has restated its financial statements to classify the Class A shares subject to redemption to full redemption value",
+      "expected_relevance": "Causal driver 2 for h1, independent of e1 and e3."
+    },
+    {
+      "id": "e3",
+      "label": "Over-allotment option should have been a liability (ASC 480)",
+      "source_coords": "[BACKGROUND OF RESTATEMENT]",
+      "text_anchor": "the underwriters' over-allotment option to purchase up to 3,300,000 additional Units should have been classified as a liability pursuant to ASC 480",
+      "expected_relevance": "Causal driver 3 for h1, independent of e1 and e2."
+    },
+    {
+      "id": "e4",
+      "label": "Audit Committee non-reliance conclusion",
+      "source_coords": "[BACKGROUND OF RESTATEMENT]",
+      "text_anchor": "concluded that the Company's financial statement and related footnote disclosures as of March 8, 2021 filed in the Original Form 8-K contained errors",
+      "expected_relevance": "The formal driver: the board's audit committee concluded the prior statements contained errors and it was appropriate to restate. Anchors h1 and the non-reliance basis."
+    },
+    {
+      "id": "e5",
+      "label": "Restatement prompted by SEC Staff communications (guidance, not enforcement)",
+      "source_coords": "[BACKGROUND OF RESTATEMENT]",
+      "text_anchor": "In light of subsequent SEC Staff communications",
+      "expected_relevance": "Supports h1 (an industry-wide accounting-guidance trigger) and cuts against h3: the trigger was SEC staff guidance, not an enforcement action or fraud."
+    },
+    {
+      "id": "e6",
+      "label": "No impact on cash position or trust",
+      "source_coords": "[EFFECTS OF RESTATEMENT]",
+      "text_anchor": "The Company does not expect these changes will have any impact on its cash position and cash held in the trust account",
+      "expected_relevance": "OFF-AXIS. True scope/consequence of the restatement, but not the reason the company restated. Supports h2, which answers a different question."
+    },
+    {
+      "id": "e7",
+      "label": "Material weakness concluded in light of the errors",
+      "source_coords": "[INTERNAL CONTROL CONSIDERATIONS]",
+      "text_anchor": "in light of the errors described above, a material weakness exists in the Company's internal control over financial reporting",
+      "expected_relevance": "Establishes the causal order against h4: the errors led to the material-weakness conclusion, not the reverse. Consistent with h1."
+    },
+    {
+      "id": "e8",
+      "label": "Amendment limited to the restated balance sheet",
+      "source_coords": "[INTERNAL CONTROL CONSIDERATIONS]",
+      "text_anchor": "this Amendment does not amend, update or change any other disclosures in the Original Form 8-K",
+      "expected_relevance": "Scope/limitation row. Reinforces the off-axis h2 (the change is narrow) but does not explain why the company restated."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "The company restated to correct accounting-classification errors. Three independent classification errors are described — warrants recorded in equity rather than as a liability (e1), Class A redeemable shares not stated at full redemption value (e2), and the underwriters' over-allotment option not classified as a liability (e3) — and the audit committee formally concluded the prior statements contained errors warranting restatement (e4), prompted by SEC staff accounting guidance (e5). h2 (no cash impact) is true but off-axis: it describes the consequence/scope, not the cause. h3 (fraud/enforcement) is unsupported — the trigger was staff guidance, not enforcement. h4 reverses the stated causal order: the material weakness was concluded in light of the errors (e7), not the other way around.",
+    "sensitivity_expectation": "low",
+    "pivotal_evidence": null,
+    "flip_note": "The causal read rests on several independent rows (e1, e2, e3, e4, e5). Removing any single classification-error driver leaves the others, and the audit-committee conclusion (e4) and staff-guidance trigger (e5) still stand, so no single-row removal changes the read — there are no sensitivity rows. The off-axis scope rows (e6, e8) never become the answer to why the company restated, and removing them does not strengthen h1's competitors."
+  }
+}

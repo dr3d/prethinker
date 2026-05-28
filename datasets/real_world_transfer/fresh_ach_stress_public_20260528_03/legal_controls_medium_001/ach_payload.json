@@ -1,0 +1,94 @@
+{
+  "fixture_id": "legal_controls_medium_001",
+  "ach_question": "Where does the decision primarily locate responsibility for the fall-protection violation?",
+  "balanced_fixture": false,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "label": "Employer responsibility via failure of reasonable diligence (constructive knowledge)",
+      "claim": "Responsibility lies with the employer: it could have known of the violation with reasonable diligence because it failed to adequately supervise its remote worksites and failed to enforce its safety rules, establishing constructive knowledge."
+    },
+    {
+      "id": "h2",
+      "label": "Unpreventable employee misconduct (individual operator fault)",
+      "claim": "Responsibility lies with the employee: a well-trained worker with adequate rules simply forgot to re-tie off after lunch, an isolated act of unpreventable employee misconduct that should excuse the employer."
+    },
+    {
+      "id": "h3",
+      "label": "Employer responsibility via actual (supervisor) knowledge",
+      "claim": "Responsibility lies with the employer because a supervisor on site (Petrey) knew of the unprotected work, and that knowledge is imputed to the employer."
+    }
+  ],
+  "evidence_rows": [
+    {
+      "id": "e1",
+      "label": "Violation elements undisputed except knowledge",
+      "source_coords": "[THE CITATION — ELEMENTS]",
+      "text_anchor": "The only element of the Secretary's case at issue is whether RKH had actual or constructive knowledge of the violation",
+      "expected_relevance": "Frames the contest: applicability, noncompliance, and exposure are conceded, so responsibility turns entirely on the knowledge element. Narrows the ACH to h1 vs h2 vs h3."
+    },
+    {
+      "id": "e2",
+      "label": "Adequate written work rules",
+      "source_coords": "[CONSTRUCTIVE KNOWLEDGE — WORK RULES]",
+      "text_anchor": "The work rules are determined to be adequate",
+      "expected_relevance": "Supports h2 (UEM element 1 satisfied) and cuts against h1. Establishes the employer did one thing right."
+    },
+    {
+      "id": "e3",
+      "label": "Exemplary training program",
+      "source_coords": "[CONSTRUCTIVE KNOWLEDGE — TRAINING]",
+      "text_anchor": "RKH's safety training program is determined to be more than adequate",
+      "expected_relevance": "Supports h2 (UEM element 2 satisfied) and cuts against h1. The strongest affirmative support for the employee-misconduct reading."
+    },
+    {
+      "id": "e4",
+      "label": "Inadequate supervision of remote (Alabama) worksites",
+      "source_coords": "[CONSTRUCTIVE KNOWLEDGE — SUPERVISION]",
+      "text_anchor": "No one from RKH or its insurance carrier had been to Alabama in the past year",
+      "expected_relevance": "CAUSAL BRIDGE row 1. Establishes failure to discover violations (defeats UEM element 3) and is one of the two pillars of constructive knowledge supporting h1."
+    },
+    {
+      "id": "e5",
+      "label": "No enforcement / disciplinary policy",
+      "source_coords": "[CONSTRUCTIVE KNOWLEDGE — ENFORCEMENT POLICY]",
+      "text_anchor": "Girouard testified that RKH does not have a graduated disciplinary scale and that enforcement is not part of the safety program",
+      "expected_relevance": "CAUSAL BRIDGE row 2. Establishes failure to enforce (defeats UEM element 4) and is the second pillar of constructive knowledge supporting h1."
+    },
+    {
+      "id": "e6",
+      "label": "Actual-knowledge (supervisor) theory rejected",
+      "source_coords": "[ACTUAL KNOWLEDGE]",
+      "text_anchor": "The record does not establish that RKH had actual knowledge of Acateca's failure to tie off",
+      "expected_relevance": "Knocks down h3: the Secretary's supervisor-knowledge theory was undercut by testimony of equal two-man crews and abandoned in the post-hearing brief."
+    },
+    {
+      "id": "e7",
+      "label": "Employee's own lapse (forgot to re-tie off)",
+      "source_coords": "[BACKGROUND]",
+      "text_anchor": "he forgot to put [his safety harness] back on when he went up to the roof after lunch",
+      "expected_relevance": "Supports h2 on its face: the immediate cause was the employee's individual lapse, and a harness was available on site. Double-edged — the lapse occurring in Petrey's presence also feeds the diligence analysis under h1."
+    },
+    {
+      "id": "e8",
+      "label": "UEM fails for the same reasons constructive knowledge was found",
+      "source_coords": "[UNPREVENTABLE EMPLOYEE MISCONDUCT DEFENSE]",
+      "text_anchor": "RKH's employee misconduct defense fails for the same reasons that constructive knowledge was held to be established",
+      "expected_relevance": "Ties the analysis together against h2: the misconduct defense requires all four elements, and RKH failed elements 3 (discover) and 4 (enforce). Confirms h1 over h2."
+    },
+    {
+      "id": "e9",
+      "label": "Penalty reduced for good faith / strong program / clean history",
+      "source_coords": "[PENALTY DETERMINATION]",
+      "text_anchor": "a significant reduction is warranted due to RKH's history and good faith",
+      "expected_relevance": "OFF-AXIS. True and important, but it bears on penalty amount, not on where responsibility for the violation is located. A reader could mistake the good-faith mitigation for an exoneration of the employer; it is not."
+    }
+  ],
+  "expected_read": {
+    "best_hypothesis": "h1",
+    "rationale": "Responsibility is located with the employer via constructive knowledge: the decision finds RKH could have known of the violation with reasonable diligence because it failed to supervise its remote Alabama worksites (e4) and failed to enforce its safety rules (e5). Although RKH had adequate work rules (e2) and exemplary training (e3) — genuine support for the employee-misconduct reading (h2) — the unpreventable-employee-misconduct defense requires all four elements and fails on the discover and enforce elements (e8). The actual-knowledge theory (h3) was rejected (e6). The penalty reduction (e9) is off-axis: it lowers the fine but does not move responsibility off the employer.",
+    "sensitivity_expectation": "medium",
+    "pivotal_evidence": null,
+    "flip_note": "The winner (h1) rests on two independent causal-bridge findings, e4 (supervision) and e5 (enforcement). Removing either one alone materially weakens h1 and strengthens h2 — because UEM is already satisfied on elements 1 and 2 (e2, e3) — but does not flip the read, since the remaining pillar still defeats one UEM element and supplies constructive knowledge. Removing BOTH e4 and e5 would flip the read to h2 (the employer would have satisfied all four UEM elements). This is the medium pattern: a two-row removal flips it, a single-row removal only creates serious uncertainty. e9 is off-axis and should not be treated as a sensitivity row."
+  }
+}

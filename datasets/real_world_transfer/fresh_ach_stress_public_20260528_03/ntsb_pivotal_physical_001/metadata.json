@@ -1,0 +1,15 @@
+{
+  "fixture_id": "ntsb_pivotal_physical_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "ntsb",
+  "source_title": "NTSB Aviation Investigation Final Report WPR17LA096 (Piper PA-32-260, Mukilteo, WA)",
+  "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/95094/pdf",
+  "source_date": "2018-11-15",
+  "collected_at": "2026-05-28",
+  "document_type": "NTSB general-aviation accident final report with probable-cause determination",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "high",
+  "primary_pressure": "One in-flight physical finding (rich-mixture signature) anchors the stuck-float probable cause; carburetor icing is a genuinely supported alternative held back by a single fact.",
+  "notes": "Stuck-float cause rests on the rich-mixture in-flight signature (witness exhaust + carbon-fouled plugs). Remove that row and the carburetor defects only show capability, not causation, while conducive icing conditions remain supported."
+}

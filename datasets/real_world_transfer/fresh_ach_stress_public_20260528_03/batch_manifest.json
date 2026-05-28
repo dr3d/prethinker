@@ -1,0 +1,55 @@
+{
+  "batch_id": "fresh_ach_stress_public_20260528_03",
+  "created_at": "2026-05-28",
+  "purpose": "Fresh unseen ACH stress batch for ranking and sensitivity generalization.",
+  "fixtures": [
+    {
+      "fixture_id": "ntsb_pivotal_physical_001",
+      "domain": "ntsb",
+      "sensitivity_target": "high",
+      "source_url": "https://data.ntsb.gov/carol-repgen/api/Aviation/ReportMain/GenerateNewestReport/95094/pdf",
+      "document_type": "NTSB general-aviation accident final report with probable-cause determination"
+    },
+    {
+      "fixture_id": "enforcement_single_document_hook_001",
+      "domain": "sec",
+      "sensitivity_target": "high",
+      "source_url": "https://www.sec.gov/files/litigation/admin/2024/34-100983.pdf",
+      "document_type": "SEC settled administrative cease-and-desist order making findings (disclosure half-truth)"
+    },
+    {
+      "fixture_id": "legal_controls_medium_001",
+      "domain": "osha",
+      "sensitivity_target": "medium",
+      "source_url": "https://www.oshrc.gov/wp-content/uploads/03-1583.pdf",
+      "document_type": "OSHRC administrative law judge Decision and Order affirming a serious citation"
+    },
+    {
+      "fixture_id": "regulatory_quality_medium_001",
+      "domain": "fda",
+      "sensitivity_target": "medium",
+      "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-chemical-corporation-706007-07092025",
+      "document_type": "FDA CGMP warning letter citing multiple violations plus unapproved-drug and listing violations"
+    },
+    {
+      "fixture_id": "sec_scope_low_001",
+      "domain": "sec",
+      "sensitivity_target": "low",
+      "source_url": "https://www.sec.gov/Archives/edgar/data/1835856/000119312522034677/d316053d8ka.htm",
+      "document_type": "Form 8-K/A amending and restating a previously filed audited balance sheet (non-reliance/restatement)"
+    },
+    {
+      "fixture_id": "public_order_low_001",
+      "domain": "other",
+      "sensitivity_target": "low",
+      "source_url": "https://www.ftc.gov/system/files/ftc_gov/pdf/1923022marriottcomplaint_0.pdf",
+      "document_type": "FTC administrative complaint (agency order) alleging unfair and deceptive data-security practices under Section 5(a)"
+    }
+  ],
+  "expected_distribution": {
+    "high": 2,
+    "medium": 2,
+    "low": 2
+  },
+  "notes": "Do not tune to Prethinker. This is an unseen transfer batch."
+}

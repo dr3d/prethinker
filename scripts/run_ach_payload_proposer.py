@@ -178,6 +178,7 @@ def proposer_schema(*, evidence_role_diagnostics: bool = False) -> dict[str, Any
         if item != "evidence_roles"
     ]
     schema["required"] = required
+    schema.get("properties", {}).pop("evidence_roles", None)
     return schema
 
 
@@ -599,7 +600,7 @@ def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> d
         if isinstance(item, dict)
     }
     evidence_role_by_id = {
-        str(item.get("evidence_id") or "").strip(): str(item.get("role") or "other").strip().casefold()
+        str(item.get("evidence_id") or "").strip(): str(item.get("role") or "").strip().casefold()
         for item in proposal.get("evidence_roles", [])
         if isinstance(item, dict)
     }
@@ -611,19 +612,17 @@ def build_scorer_payload(payload: dict[str, Any], proposal: dict[str, Any]) -> d
         diagnosticity = diagnosticity_by_id.get(evidence_id, "medium")
         if diagnosticity not in VALID_DIAGNOSTICITY:
             diagnosticity = "medium"
-        evidence_role = evidence_role_by_id.get(evidence_id, "other")
-        if evidence_role not in VALID_EVIDENCE_ROLES:
-            evidence_role = "other"
-        evidence.append(
-            {
-                "id": evidence_id,
-                "label": str(item.get("label") or evidence_id),
-                "role": evidence_role,
-                "diagnosticity": diagnosticity,
-                "source_coords": str(item.get("source_coords") or ""),
-                "text_anchor": str(item.get("text_anchor") or ""),
-            }
-        )
+        evidence_item = {
+            "id": evidence_id,
+            "label": str(item.get("label") or evidence_id),
+            "diagnosticity": diagnosticity,
+            "source_coords": str(item.get("source_coords") or ""),
+            "text_anchor": str(item.get("text_anchor") or ""),
+        }
+        evidence_role = evidence_role_by_id.get(evidence_id, "")
+        if evidence_role in VALID_EVIDENCE_ROLES:
+            evidence_item["role"] = evidence_role
+        evidence.append(evidence_item)
     hypothesis_ids = {str(item.get("id") or "").strip() for item in payload.get("hypotheses", []) if isinstance(item, dict)}
     evidence_ids = {item["id"] for item in evidence}
     judgments = []
@@ -742,7 +741,7 @@ def build_report(
     evidence_roles = {
         str(item.get("id") or ""): str(item.get("role") or "other")
         for item in scorer_payload.get("evidence", []) or []
-        if isinstance(item, dict)
+        if isinstance(item, dict) and str(item.get("role") or "")
     }
     evidence_role_counts: dict[str, int] = {}
     for role in evidence_roles.values():

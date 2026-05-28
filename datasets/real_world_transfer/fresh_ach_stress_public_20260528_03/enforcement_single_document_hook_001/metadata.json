@@ -1,0 +1,15 @@
+{
+  "fixture_id": "enforcement_single_document_hook_001",
+  "batch_id": "fresh_ach_stress_public_20260528_02",
+  "domain": "sec",
+  "source_title": "SEC Order Instituting Cease-and-Desist Proceedings, In the Matter of Keurig Dr Pepper Inc. (Exchange Act Release No. 100983)",
+  "source_url": "https://www.sec.gov/files/litigation/admin/2024/34-100983.pdf",
+  "source_date": "2024-09-10",
+  "collected_at": "2026-05-28",
+  "document_type": "SEC settled administrative cease-and-desist order making findings (disclosure half-truth under Section 13(a)/Rule 13a-1)",
+  "public_source": true,
+  "language": "en",
+  "sensitivity_target": "high",
+  "primary_pressure": "A single omitted finding (two large recyclers' negative feedback) anchors the half-truth violation theory; without it the affirmative recyclability statement reads as an accurate account of positive sorting tests.",
+  "notes": "Clean single-document hook. Tests whether the ACH locates the violation in the omission (correct) rather than in outright falsity (foreclosed by positive tests) or in the off-axis sustainability-goal background."
+}

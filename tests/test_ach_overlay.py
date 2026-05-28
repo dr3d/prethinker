@@ -183,8 +183,8 @@ def test_ach_sensitivity_surfaces_top_support_drop_from_row_dependency() -> None
             "top_without_evidence": ["h1"],
             "reason": "top_hypothesis_support_drops_after_evidence_omission_effects",
             "applied_omission_effect_count": 1,
-            "support_drop": 10,
-            "support_drop_ratio": 0.9091,
+            "support_drop": 5,
+            "support_drop_ratio": 0.4545,
         }
     ]
 
