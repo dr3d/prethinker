@@ -75,10 +75,12 @@ fixture-level `160 / 0 / 0`, and a sealed unseen authored batch reached `152 /
 `0` runtime load errors, and `0` QA write proposals.
 
 The caveats are part of the claim: the native compile gate grew noisier
-(`26 / 30 -> 9 / 47` pass/hold), the native corpus is same named fixtures rather
-than proven byte-identical to the prior stamp, and query-surface gaps rose even
-as compile-surface, hybrid-join, answer-surface, and judge-uncertain gaps
-improved.
+(`26 / 30 -> 9 / 47` pass/hold under the old overloaded gate), the native corpus
+is same named fixtures rather than proven byte-identical to the prior stamp, and
+query-surface gaps rose even as compile-surface, hybrid-join, answer-surface,
+and judge-uncertain gaps improved. Current tooling also reports
+blocking/diagnostic/advisory gate tiers so future claims can distinguish
+release blockers from diagnostic noise.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)

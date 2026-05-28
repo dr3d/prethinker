@@ -51,6 +51,11 @@ not use them as day-one guidance unless the user names a specific artifact.
   propose query plans or judge rows, while deterministic code controls admitted
   evidence, query execution, adapter policy, write blocking, and row accounting.
   Retired compatibility adapters are not day-one architecture.
+- Compile batch summaries now separate old pass/hold continuity from
+  `blocking`, `diagnostic`, and `advisory` reason tiers. Blocking holds are
+  release blockers; diagnostic holds are instrument signals. Do not silently
+  relax the old headline, and do not treat every diagnostic hold as a release
+  failure.
 - Current public measurement anchor: native restamp `1997 / 46 / 120` over
   `2163` rows (`92.33%` exact), fresh ugly public Batch 03 latest guarded
   slices `75 / 0 / 0` SEC plus `216 / 6 / 3` non-SEC (`291 / 6 / 3` over
@@ -66,6 +71,13 @@ Current repo orientation should come from the documents above, not from dated
 worksheets or old commit narratives. If a stale public surface, fixture-shaped
 vocabulary leak, or active prompt/config drift appears, clean it up or record
 the current lesson in a compact active doc.
+
+The current fresh package request lives at
+`docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. Validate the priority fresh
+ugly package with `--package-profile extended`; validate the heldout ACH stress
+package with `--package-profile ach`.
+ACH remains overlay-only: it may propose and score evidence matrices, but it
+must not mutate KB facts, QA verdicts, or compile artifacts.
 
 Do not set cadence timers unless the user explicitly asks. The user prefers
 continuous autonomous progress within the current session and will interrupt

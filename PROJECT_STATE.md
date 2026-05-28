@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-05-26
+Last updated: 2026-05-28
 
 ## One-Sentence Shape
 
@@ -53,6 +53,14 @@ The matching compile stamp is:
 compile quality gate: 9 passed / 47 held
 ```
 
+That compile-gate line is the historical overloaded pass/hold headline from
+the native stamp. Current tooling also reports reason tiers. A 2026-05-28
+rescore of the saved May 22 native compile artifacts reads `2 pass / 54 hold`
+under the old headline, with `11` blocking-tier holds, `53` diagnostic-tier
+holds, and `0` advisory holds. Treat the old pass/hold as a continuity metric;
+future release claims should state whether blocking, diagnostic, and advisory
+tiers are clean.
+
 The latest native QA failure distribution is:
 
 ```text
@@ -80,6 +88,11 @@ The Batch 03 line is a slice-combined current view, not one single fresh
 300-row rerun. The SEC subset is now clean under current code; the non-SEC
 guard predates the later one-row ratio-calculation targeted replay. Treat
 Batch 03 as current transfer/regression evidence, not as a benchmark claim.
+
+Fresh fixture intake has a current cut-and-paste specification at
+`docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
+`fresh_ugly_public_20260528_01`; the second package is
+`fresh_ach_stress_public_20260528_04`.
 
 Durable real-world fixture inputs live under `datasets/real_world_transfer/`.
 They are transfer evidence, not part of the native `datasets/story_worlds`
@@ -136,6 +149,10 @@ The current center is not guard compression. It is post-claim discipline:
   cross-document, and authority-normalization mechanisms.
 - Keep the May 22 native restamp as the current internal non-regression anchor
   until a new full native stamp is worth the cost.
+- Use the tiered compile gate for new compile stamps: blocking reasons are
+  release blockers, diagnostic reasons are instrument signals, and advisory
+  reasons are low-risk notes. Preserve the old pass/hold headline for
+  continuity, but do not collapse every diagnostic hold into release failure.
 - Keep source-fidelity surfaces clean: authority, status, temporal interval,
   provenance, lifecycle, assignment, rule, and epistemic distinctions should
   survive as typed rows.
@@ -176,6 +193,10 @@ the current public claim.
 - Model-path metadata matters: provider/backend, quantization, loaded context,
   routing, and prompt packing are measurement conditions. See
   `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md`.
+- Fresh package validation profiles live in
+  `scripts/validate_fresh_ugly_batch.py`: use `--package-profile extended` for
+  the next fresh ugly public package and `--package-profile ach` for the ACH
+  stress package.
 - Use OpenAI-compatible structured output where possible.
 - Keep run titles granular enough to distinguish compile versus QA and corpus
   or fixture group.
@@ -195,18 +216,19 @@ agent docs, public docs, and active scripts for retired document names.
 ## Next Decision
 
 The public claim should be preserved with caveats intact. The next engineering
-decision is whether the remaining Batch 03 residue points to new generic
-mechanisms or to declared source/oracle limits. Treat that separately from
-native QA accuracy: the native QA stamp remains `92.33%`, while fresh ugly
-guarded slices currently sit at a slice-combined `291 / 6 / 3` over `300`
-rows.
+decision is whether the next fresh ugly package confirms the current transfer
+trajectory under the repaired instrument. Treat that separately from native QA
+accuracy: the native QA stamp remains `92.33%`, while fresh ugly guarded slices
+currently sit at a slice-combined `291 / 6 / 3` over `300` rows.
 
 Next energy:
 
-1. classify the remaining Batch 03 non-exacts into repairable mechanisms versus
-   external-evidence limits;
-2. run fresh ugly documents when a mechanism batch needs an unseen thermometer;
-3. keep native restamp preparation warm, but do not spend it until the next
+1. validate and run `fresh_ugly_public_20260528_01` when it lands;
+2. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
+   needs a heldout sensitivity read;
+3. use the tiered compile gate in future compile stamps and report old
+   pass/hold separately from blocking/diagnostic/advisory tiers;
+4. keep native restamp preparation warm, but do not spend it until the next
    change set is stable;
-4. keep fixture language, row IDs, answer strings, and local source names out
+5. keep fixture language, row IDs, answer strings, and local source names out
    of active prompts, code, and public doctrine.

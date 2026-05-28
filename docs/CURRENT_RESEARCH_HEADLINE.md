@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-25
+Last updated: 2026-05-28
 
 ## Current Measurement Position
 
@@ -72,9 +72,12 @@ The current measurement stack is:
   2026-05-20 baseline and a clean git dataset tree, but no prior per-file hash
   manifest was found. The comparability claim is same named corpus, not proven
   byte-identical corpus.
-- Compile quality gate noise increased from `26 / 30` pass/hold to `9 / 47`.
-  QA improved anyway, so this is a gate-calibration and diagnostic issue, not a
-  reason to suppress the measurement.
+- Compile quality gate noise increased from `26 / 30` pass/hold to `9 / 47`
+  under the old overloaded gate. Current tooling now also reports reason tiers:
+  a 2026-05-28 rescore of saved May 22 native compile artifacts reads `2 / 54`
+  old-style pass/hold, with `11` blocking-tier holds, `53` diagnostic-tier
+  holds, and `0` advisory holds. QA improved anyway, so this is a gate
+  calibration and diagnostic issue, not a reason to suppress the measurement.
 - Failure surfaces improved overall except query-surface gaps:
   `compile_surface_gap 116 -> 96`, `hybrid_join_gap 47 -> 39`,
   `query_surface_gap 20 -> 29`, `answer_surface_gap 5 -> 1`,
@@ -113,10 +116,18 @@ The highest-value next work is fresh-transfer discipline:
    source/oracle limits.
 2. Use fresh ugly documents for the next honest generalization read before
    polishing Batch 03 further.
-3. Keep the native restamp warm as a non-regression corroboration, not as the
+3. Validate the next incoming packages with the profile-aware validator:
+   `fresh_ugly_public_20260528_01` uses `--package-profile extended`; the ACH
+   stress package uses `--package-profile ach`.
+4. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
-4. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+5. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
+
+ACH remains an overlay, not a mutation path. Ranking is product-plausible, high
+and low sensitivity are promising, and medium family-level sensitivity has only
+same-batch rescore evidence so far. It needs a fresh heldout ACH stress package
+before becoming a product claim.
 
 ## Read Next
 
@@ -126,3 +137,5 @@ The highest-value next work is fresh-transfer discipline:
 - [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 - [Boundary Probe Research Method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md)
 - [Product And Palette Governance](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md)
+- [Next Fresh Fixture Requests](https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md)
+- [Overlay Architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md)
