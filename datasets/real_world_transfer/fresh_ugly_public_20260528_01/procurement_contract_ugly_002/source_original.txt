@@ -1,0 +1,53 @@
+441 G St. N.W.
+Washington, DC 20548
+Comptroller General of the United States
+
+Decision
+
+Matter of: Castro & Company, LLC
+File: B-423689
+Date: November 13, 2025
+
+Gabriel Fry, Castro & Company, LLC, for the protester.
+Amber N. Smith, Esq., Steve N. Hajjar, Esq., Jean Mauss, Esq., and Raeed N. Tayeh, Esq., Federal Election Commission, for the agency.
+Uri R. Yoo, Esq., and Alexander O. Levine, Esq., Office of the General Counsel, GAO, participated in the preparation of the decision.
+
+DIGEST
+1. Protest alleging that agency failed to consider unmitigable organizational conflict of interest (OCI) is sustained where the agency failed to document its consideration of an apparent OCI arising from the awardee's role providing a contract specialist in the agency's procurement office.
+2. Protest challenging reasonableness of agency's technical evaluation is sustained where the evaluation of the protester's quotation under the technical approach factor was unsupported by the record and inadequately documented.
+3. Protest challenging agency's best-value tradeoff decision is sustained where the agency's tradeoff analysis did not include any documented rationale for not considering the protester's lowest-priced quotation.
+
+DECISION
+Castro & Company, LLC, a small business of Alexandria, Virginia, protests the establishment of a blanket purchase agreement (BPA) with Contracts Management Enterprises, LLC (CME), a small business of Leesburg, Virginia, under request for quotations (RFQ) No. 9531BP25Q0010, issued by the Federal Election Commission (FEC) for financial management and accounting support services. The protester alleges that the awardee has an unmitigable organizational conflict of interest (OCI) that precludes it from award. The protester also challenges the agency's evaluation of the protester's technical quotation and the best-value tradeoff decision. We sustain the protest.
+
+BACKGROUND
+The FEC is charged with preventing corruption in the federal election campaign process by administering, enforcing, and formulating policy with respect to the Federal Election Campaign Act of 1971. Contracting Officer's Statement (COS) at 1. In support of this statutory mandate, the finance division of the agency's Office of the Chief Financial Officer (OCFO) provides budgetary, accounting, and financial reporting support. Id. To accomplish its mission, the OCFO requires financial management and accounting support services, which were previously provided under a predecessor BPA that expired in June 2025. Id.
+The agency issued the solicitation on April 25, 2025, by providing the RFQ via email to seven potential vendors.[1] Id. The solicitation was issued as a total set-aside for small businesses and anticipated the establishment of a single award BPA for a 1-year base period with four 1-year option periods. Agency Report (AR), Exh. 3, RFQ at 7, 15.[2] The solicitation provided for award on a best-value tradeoff basis considering three factors: (1) technical approach; (2) price; and (3) past performance. Id. at 33. For tradeoff purposes, technical approach would be significantly more important than price, and price would be more important than past performance. Id. The solicitation informed vendors that the agency may "accept other than the lowest priced or highest technically rated offer and may reasonably determine that the [o]fferor with the highest rated in non-price factors is the best value." Id. at 36.
+Under the technical approach factor, vendors were required to submit a quotation that addresses section 3 of the statement of work (SOW) and "effectively demonstrates the [o]fferor's clear understanding of all the tasks and how the approach is likely to yield the required results." Id. at 32. ... vendors were required to "address all aspects of the technical requirements" and to "provide sufficient detail to enable the Government to thoroughly evaluate the [o]fferor's ability to satisfy the requirement specified" in the SOW. Id. at 31. The solicitation advised that "[s]imple statements of compliance (i.e. 'understood,' 'will comply') without a detailed description of how compliance will be achieved will not be considered sufficient evidence that the proposed services can technically meet the requirements." Id.
+The agency received seven timely quotations, including those from Castro and CME. COS at 3. The agency evaluated the quotations of Castro and CME as follows:
+                          Castro                 CME
+Technical Approach        Marginal               Outstanding
+Past Performance          Moderate Confidence    High Confidence
+Price                     $1,793,354             $1,831,111
+AR, Exh. 9, Summary of Award at 3-4.
+Castro's rating of marginal under the technical approach factor reflected the technical evaluation team's (TET) assessment of one strength, one weakness, and two deficiencies.[3] ... The TET also assessed one weakness for "fail[ing] to provide the specific details and timeline details as required by the SOW," and one of two deficiencies for "lack[ing] a structured response that aligns with the task outlined in the [SOW] . . . which made it difficult to verify full compliance." Id. at 1-2. A second deficiency was assessed based on a finding that Castro's "key personnel experiences lack audit PBC management, and some main financial management tasks." Id. at 2-3.
+The contracting officer performed a tradeoff analysis among "all offerors considered for award," ... and concluded that CME's "highest rated . . . but . . . not the lowest priced" quotation represented the best value to the government for this requirement. AR, Exh. 9, Summary of Award at 5. As relevant here, the documented tradeoff analysis did not include any discussion of Castro's quotation. Id.
+On June 17, the agency notified Castro of the selection decision. COS at 4. After requesting and receiving a debriefing, Castro filed this protest with our Office.
+
+DISCUSSION
+[Impaired Objectivity OCI] ... in July 2023, the agency issued an order to CME, under the firm's Federal Supply Schedule contract, to provide acquisition support services for OCFO's procurement division. ... a CME contract specialist provides direct support to the contracting officer who in turn was the source selection authority for the instant procurement. ... The contracting officer ... attests that she "considered whether prior contracts with CME created a conflict of interest" prior to initiating the instant procurement. ... determined that CME's acquisition support work "may create a conflict of interest or the appearance of a conflict of interest" and, "in an abundance of caution," decided to take steps to safeguard the solicitation process. These steps included: (1) creating a "firewall" ...; (2) directing all quotation materials to be sent and secured only in the contracting officer's own email account to create a "data silo"; and (3) ensuring that no solicitation materials were uploaded to any shared drives before award. ... we conclude that the agency's actions here were not reasonable and sustain this protest ground.
+[Technical Approach Evaluation] ... the SOW did not include any requirement for timelines. See RFQ at 8-12. ... we have no basis to conclude that the agency's evaluation was reasonable and sustain the protest on that basis.
+[Best-Value Tradeoff Analysis] ... the documented tradeoff did not discuss the four quotations (including the protester's) rated marginal under the technical approach factor. ... the protester's quotation offered the lowest price of all seven quotations. ... we find the agency's tradeoff decision to be unreasonable and inadequately documented.
+
+CONCLUSION
+For the reasons discussed above, we conclude that the agency's OCI determination of CME's quotation was unreasonable and inadequately documented. ... Castro has established the requisite competitive prejudice as the vendor with a substantial chance of receiving the award in the event CME is disqualified due to an unmitigated OCI.
+
+RECOMMENDATION
+We recommend that the FEC ... meaningfully investigate, consider, and document whether CME has an OCI ... We also recommend that the agency reevaluate Castro's quotation ... In addition, we recommend that the protester be reimbursed for its costs of filing and pursuing the protest. 4 C.F.R. § 21.8(d). The protester's certified claims for such costs ... must be submitted directly to the agency within 60 days after receipt of this decision. 4 C.F.R. § 21.8(f). The protest is sustained.
+Edda Emmanuelli Perez, General Counsel
+
+Footnotes:
+[1] While the solicitation's standard form 1449 marked the solicitation type as an RFQ, all other parts of the solicitation refer to it as a "Request for Proposal (RFP)..." For consistency, and noting that FAR part 15 does not provide for the establishment of BPAs, we refer to the solicitation here as an RFQ.
+[2] The solicitation was amended once.
+[3] Adjectival ratings: outstanding, good, marginal, or unacceptable. "Marginal": "[Quotation] does not clearly meet requirements and has not demonstrated an adequate approach and understanding of the requirements. The [quotation] has one or more weaknesses that are not offset by strengths. Risk of unsuccessful contract performance is high."
+[4]-[9] (citation/clarification footnotes; see source.md [FOOTNOTES]).

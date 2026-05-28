@@ -1,0 +1,65 @@
+United States of America
+OCCUPATIONAL SAFETY AND HEALTH REVIEW COMMISSION
+1924 Building - Room 2R90, 100 Alabama Street, S.W., Atlanta, Georgia 30303-3104
+
+Secretary of Labor, Complainant
+v.  OSHRC Docket No. 23-0121
+Precision Refractory Services, Respondent.
+
+Representatives:
+Nicole A. Spain, Esq., Madison J. Monzon, Esq. and Rachel Graeber, Esq., U.S. Department of Labor, Office of the Solicitor, Atlanta, GA, for Complainant
+Steven O. Grubbs, Esq. and Travis Livermore, Esq., Pappas Grubbs Price PC for Respondent
+JUDGE: Administrative Law Judge Heather A. Joys
+
+DECISION AND ORDER
+During the early morning hours of November 12, 2022, a Precision Refractory Services, LLC, (PRS) employee was seriously injured when a scaffold component rolled off the upper level of the scaffold under which he had been working and struck his arm. The blow fractured his wrist. PRS reported the injury to OSHA and the Mobile, Alabama, Area Office dispatched a CSHO to the worksite to investigate the accident.
+As a result of that investigation, the Secretary of Labor issued PRS a citation alleging two serious violations of regulations promulgated under § 5(a)(2) of the Act, 29 U.S.C. §§ 651-678 (2014). The Secretary alleged PRS violated 29 C.F.R. §§ 1926.451(f)(7) (Item 1a) and 1926.451(h)(2)(i)[1] (Item 1b), both of which address scaffold safety. The Secretary proposes a total penalty of $8702 for the violations. PRS timely contested the citation pursuant to § 10(c) of the Act.
+The undersigned held a hearing on January 6, 2025, in Mobile, Alabama. The parties filed post-hearing briefs on March 7, 2025.[2]
+For the reasons discussed below, Item 1a alleging a violation of § 1926.451(f)(7) is vacated, and Item 1b alleging a violation of § 1926.451(h)(2)(i) is affirmed with a penalty of $7000.
+
+JURISDICTION AND COVERAGE
+The parties stipulated jurisdiction is conferred upon the Commission pursuant to § 10(c) of the Act and that PRS was an employer engaged in a business affecting interstate commerce within the meaning of § 3(5) of the Act.
+
+BACKGROUND - Stipulated Facts
+1. Jurisdiction of this action is conferred upon the [C]ommission by § 10(c) of the Act.
+2. Precision Refractory Services, LLC is an employer engaged in a business affecting commerce within the meaning of § 3(5) of the Act, 29 U.S.C. § 625(5).
+3. Respondent's business involves refractory work.
+4. Part 1926 applies to employers who are engaged in construction work.
+5. 29 C.F.R. § 1926 is applicable to this action.
+6. Complainant timely served Respondent with the Citation and Notification of Penalty.
+7. Complainant does not contest whether the Notice of Contest was timely filed.
+8. The inspection site for the Citation is located at 3000 Old Chemstrand Road, Cantonment, FL 32533 ("worksite").
+9. CSHO Kitchen is employed as a CSHO with the Mobile, Alabama Area Office.
+10. CSHO Kitchen conducted the subject OSHA inspection at the worksite on November 15 and November 17, 2022.
+11. CSHO Kitchen has personal knowledge of the facts and circumstances associated with the subject OSHA inspection of the worksite.
+12. On November 12, 2022, [the injured employee][3] was employed by Respondent.
+13. [The injured employee] was injured and hospitalized following an accident at the worksite on November 12, 2022 (the "incident").
+14. OSHA opened an investigation of the worksite on November 15, 2022.
+15. Jose Bustos was employed by Respondent in a supervisory or managerial capacity on November 12, 2022, and at the time of the OSHA investigation.
+16. The second deck scaffold platform was a minimum of 10 feet above the ground.
+17. Dominga Rocha was working on the scaffold at a higher elevation than the level at which [the injured employee] was working at the time of the accident.
+18. Employees of Coastal Industrial Services, Inc. served as the "competent person(s)" with respect to OSHA scaffolding standards.
+19. On and up to six (6) months prior to the issuance of the Citation, Respondent employed between 25 and 100 individuals.
+
+Findings of Fact
+PRS performs refractory and fireproofing work. PRS has been in business since 2021 and employs approximately 100 individuals. In 2022, PRS had a contract to perform refractory work inside a furnace on the property of Ascend Performance Materials (Ascend) in Cantonment, Florida. The general contractor was Koch.[4] Koch contracted with Coastal Industrial Services, Inc. (Coastal) to erect, maintain, and dismantle the scaffold. The scaffolds were eight decks high with six feet between each deck. On the day of the accident, Domingo Rocha, a PRS foreman, and Jones Smith, a PRS laborer, were stacking brick at a height of approximately 12 to 14 feet above ground level. Jose Bustos, an onsite supervisor, had assigned the injured employee to work on the ground level below the scaffold. A scaffold component, described as a three-inch diameter pipe, fell off the scaffold and struck the injured employee. Andrew Castillo, the job superintendent, later transported the injured employee to a hospital where he was treated for an open fracture and laceration to his hand.
+The Mobile Area Office assigned CSHO William Kitchen to inspect the worksite and investigate the accident.
+
+DISCUSSION
+To prove a violation the Secretary must show (1) the cited standard applies; (2) the employer failed to comply; (3) employees had access to the violative condition; and (4) the employer knew or could have known with reasonable diligence of the condition. JPC Grp., Inc., No. 05-1907, 2009 WL 2567337, at *2 (OSHRC Aug. 11, 2009).
+Item 1a, Citation 1 (§ 1926.451(f)(7)): PRS conceded it did not have a competent person on site. The Secretary relied on hearsay statements from Koch and Coastal employees which the court excluded under Fed. R. Evid. 802/807. See Rivers v. United States, 777 F.3d 1306, 1312 (11th Cir. 2015). The Secretary failed to meet her burden. Item 1a is vacated.
+Item 1b, Citation 1 (§ 1926.451(h)(2)(i)): The standard provides alternative means of protecting employees from falling objects. PRS did not barricade the area below and allowed employees to enter it. The court rejected PRS's argument that only the toeboard subpart applied. Supervisor Bustos and Foreman Rocha knew an employee worked below and that objects could fall; Bustos had identified a falling-object hazard in his November 11th and 12th JSAs and knew the scaffolds lacked toeboards. Item 1b is affirmed.
+
+Characterization: A violation is serious under 29 U.S.C. § 666(k). The wrist fracture evinces the serious nature of the hazard. The violation is serious.
+
+Penalty: The Secretary grouped the two violations and proposed a penalty of $8706. Because Item 1a is vacated, the court assesses a gravity-based penalty for Item 1b. The gravity is high. PRS is a small employer with no significant history but no documentary evidence of training. The court finds a penalty of $7000, approximately half the maximum penalty for a serious violation,[11] appropriate.
+
+ORDER
+Item 1a, Citation 1, is vacated; Item 1b, Citation 1, is affirmed as a serious violation with a penalty of $7000 assessed. SO ORDERED.
+/s/ Heather A. Joys, Administrative Law Judge, OSHRC. Dated: April 15, 2025, Atlanta, GA.
+
+[1] On September 20, 2023, the court granted the Secretary's motion to amend the original citation which had alleged a violation of 29 C.F.R. § 1926.451(f)(13).
+[2] PRS waived the affirmative defense of unpreventable employee misconduct by not addressing it in its post-hearing brief. See Georgia-Pacific Corp., No. 89-2713, 1991 WL 132732, at *3 (OSHRC June 28, 1991).
+[3] The injured employee's name has been redacted to protect privacy.
+[4] The general contractor is identified in the record only as "Koch."
+[11] For calendar year 2022, the maximum civil penalty for a violation of the Act was $14,502.

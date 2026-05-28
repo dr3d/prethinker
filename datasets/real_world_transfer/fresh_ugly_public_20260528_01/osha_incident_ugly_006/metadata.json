@@ -1,0 +1,16 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260528_01",
+  "fixture_id": "osha_incident_ugly_006",
+  "source_family": "osha",
+  "source_title": "Secretary of Labor v. Precision Refractory Services, OSHRC Docket No. 23-0121 (Decision and Order)",
+  "source_url": "https://www.oshrc.gov/wp-content/uploads/23-0121-Decision-and-Order-dated.pdf",
+  "source_date": "2025-04-15",
+  "collected_at": "2026-05-28",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": ["identifiers","dates","source_coordinates","tables","cross_section"]
+}

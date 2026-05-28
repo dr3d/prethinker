@@ -1,0 +1,8 @@
+# Provenance — fda_warning_ugly_006
+
+- Source URL: https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026
+- Document: U.S. Food and Drug Administration Warning Letter to Medical Products Laboratories, Inc., MARCS-CMS 721916; Warning Letter number 320-26-61; dated April 9, 2026; issued by the Center for Drug Evaluation and Research (CDER), Office of Compliance.
+- Official-source status: Public U.S. Government work, published on fda.gov. Public domain.
+- Collection date: 2026-05-28.
+- Extraction method: Retrieved the official FDA warning-letter web page and extracted its readable text. source.md preserves the header definition list (delivery/product/recipient/issuing office), the warning-letter number and date, the four numbered CGMP violations with their CFR citations and sub-headings, the unapproved-new-drug product/labeling list, the "(b)(4)" redaction markers exactly as published, the contractor/quality-systems/consultant sections, the signature block (two officials), footnote 1, and the "Content current as of" date. source_original.txt is a near-raw text extraction; a few long enumerated remediation request-lists are condensed with "..." while preserving all identifiers, citations, dates, and the operative findings.
+- Extraction caveats: The published page redacts confidential commercial information with the marker "(b)(4)"; these markers are preserved verbatim and are not reconstructions. The "≤" symbol in the TYMC specification and the "§" symbol in the 21 U.S.C. § 356c(a) citation are preserved. No content was summarized or rewritten beyond the marked elisions in source_original.txt.

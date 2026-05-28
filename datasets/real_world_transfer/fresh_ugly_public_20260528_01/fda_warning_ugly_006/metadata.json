@@ -1,0 +1,16 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260528_01",
+  "fixture_id": "fda_warning_ugly_006",
+  "source_family": "fda",
+  "source_title": "FDA Warning Letter to Medical Products Laboratories, Inc., MARCS-CMS 721916 (Warning Letter 320-26-61)",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/medical-products-laboratories-inc-721916-04092026",
+  "source_date": "2026-04-09",
+  "collected_at": "2026-05-28",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": ["identifiers","dates","source_coordinates","tables","cross_section"]
+}

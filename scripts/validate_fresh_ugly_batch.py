@@ -265,7 +265,7 @@ def _validate_metadata(
 def _numbered_questions(text: str) -> list[str]:
     out: list[str] = []
     for line in text.splitlines():
-        match = re.match(r"^\s*(\d{1,3})\.\s+(.+?)\s*$", line)
+        match = re.match(r"^\s*(?:q)?(\d{1,3})\.\s+(.+?)\s*$", line, flags=re.IGNORECASE)
         if match:
             out.append(match.group(2))
             continue

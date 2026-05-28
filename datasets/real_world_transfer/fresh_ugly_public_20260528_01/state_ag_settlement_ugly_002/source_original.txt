@@ -1,0 +1,54 @@
+ATTORNEY GENERAL OF THE STATE OF NEW YORK
+BUREAU OF INTERNET AND TECHNOLOGY
+
+In the Matter of Investigation by LETITIA JAMES, Attorney General of the State of New York, of EQUINOX GROUP, LLC, EQUINOX HOLDINGS, INC., EQUINOX MEDIA, LLC, AND SOULCYCLE LLC, Respondents.
+Assurance No. 24-099
+ASSURANCE OF DISCONTINUANCE
+
+The OAG commenced an investigation pursuant to Executive Law § 63(12), General Business Law §§ 349, 350, and 527-a, and the Restore Online Shoppers' Confidence Act, 15 U.S.C. § 8403(3), into the enrollment and cancellation policies and practices of Equinox Group, LLC at the fitness centers and related services offered under the brand names Equinox, Equinox Media, SoulCycle.
+
+OAG'S FINDINGS — Legal Framework
+1. Automatic renewals are known as "negative options."
+2. GBL Article 29-BB requires a business that makes an automatic renewal offer to present the offer terms in a clear and conspicuous manner before the agreement is fulfilled and in visual proximity to the request for consent. GBL § 527-a(1)(a).
+3. The automatic renewal offer terms include: (a) continuation until cancellation; (b) cancellation policy; (c) recurring charges; (d) length of term; (e) minimum purchase obligation. GBL § 527(2).
+4. "Clear and conspicuous" means in larger type than the surrounding text, or in contrasting type/font/color, or set off by symbols or marks, in a manner that clearly calls attention to the language. GBL § 527(3).
+5. The business must obtain the consumer's affirmative consent before charging. GBL § 527-a(1)(b).
+6. The business must provide a cost-effective, timely, and easy-to-use mechanism for cancellation. GBL § 527-a(2)-(3).
+7. The business must provide a retainable acknowledgment. GBL § 527-a(1)(c), (2).
+8. ROSCA, 15 U.S.C. § 8403, contains similar provisions.
+9-12. The FTC's 2021 Enforcement Policy Statement Regarding Negative Option Marketing sets out the material terms and the "at least as easy to cancel as to enroll" standard.
+
+Background
+13. Equinox Group is a Delaware corporation with its principal place of business at 31 Hudson Yards, New York, NY 10001.
+14. Equinox Group operates Equinox, Equinox Media, and SoulCycle.
+15. The Equinox Group subsidiary Blink Fitness filed for bankruptcy on August 12, 2024 and its assets have been sold.
+16. Since at least February 9, 2021 and until at least July 28, 2024, Respondents offered automatically renewing memberships through Equinox and Equinox Media that violated the laws. SoulCycle began offering similar memberships in September 2021.
+
+I. Equinox Enrollment
+17. Equinox memberships start at approximately $200 per month. There are currently 43 Equinox gyms in New York state, more than in any other state.
+18. Equinox violated Executive Law § 63(12), GBL §§ 349, 350, 527-a, and ROSCA; it did not (i) present material terms clearly and conspicuously; (ii) obtain affirmative consent; (iii) provide a cost-effective, timely, easy-to-use cancellation mechanism.
+19. Three tiers: "Select" (single gym); "All-Access" (all U.S. locations); "Destination" (worldwide).
+20. All plans included a one-year minimum commitment period (Obligation Period).
+22. Material terms included: $200/month; charged on the 23rd day of each month; initiation fee of $300 or more; one-year Obligation Period converting to month-to-month; at least 45 days of notice to cancel; cancellation without penalty for (i) physical disability for 6+ months, (ii) moving more than 25 miles, (iii) Equinox no longer able to provide services, (iv) death; GBL § 624(2) three-day cancellation; cancellation by certified mail, in person, email, online chat.
+23-29. Online enrollment: "12-mo commitment" in fine print one third the size of marketing text; initiation fee (up to $300) disclosed for the first time on the payment page after navigating three pages; no express affirmative consent to the negative option obtained.
+30. Confirmation email did not include material terms (other than price), cancellation policy, or how to cancel.
+31. Numerous consumer complaints about the one-year commitment.
+
+Equinox Cancellation
+32. Cancel by certified mail, front desk, cancellations@equinox.com, or webchat. No pre-formatted email.
+38. Front desk associate instructed not to process cancellations; manager directed to "TRY TO SAVE THE MEMBER" and instructed not to actively inform Members they might be able to cancel without further charge.
+39-45. Webchat cancellation available Mon-Fri 8 AM-8 PM Eastern, not publicized; required 1-4 prompts, a wait, and at least one "save" attempt — significantly more burdensome than the three-page enrollment flow. Equinox stopped using webchat cancellation in March 2023.
+
+Equinox App PT/Pilates
+47-54. PT and Pilates auto-renew memberships; price/cancellation not disclosed; no express affirmative consent. Beginning July 28, 2024, Equinox established an online cancellation option for all New York members.
+
+II. SoulCycle
+55. Individual classes cost as much as $40 in New York.
+57-58. Soul Renew began September 2021; classes expire after 30 days, non-transferable; cancel at least 24 hours prior to next billing; cancel by emailing yoursoulmatters@soul-cycle.com; HQ 609 Greenwich Street, New York, New York, 10014.
+68. January 2023 promotion: 20% off with code SOULRENEW20; discount applied only to the initial purchase; subsequent packages renewed at the higher standard price — not disclosed anywhere.
+
+III. Equinox+ App
+77-80. Equinox+ operated by Equinox Media; Bike purchasers had a 12-month commitment; price around $40/month; cancel via App, website, hello@equinoxplus.com or hello@equinoxmedia.com.
+81-87. Continuous 7-day free trial; disclosures ~33% the size of marketing text; no express affirmative consent obtained.
+
+[The Assurance continues with relief, monetary, release, and reporting provisions not reproduced here.]

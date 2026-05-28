@@ -47,6 +47,22 @@ def _write_fixture(root: Path, name: str, *, question_count: int = 25, answer_co
     )
 
 
+def test_extended_profile_accepts_plain_qid_question_lines(tmp_path: Path) -> None:
+    batch = tmp_path / "fresh_ugly_public_20260528_01"
+    _write_fixture(batch, "court_order_ugly_002")
+    _write_extended_files(batch, "court_order_ugly_002")
+    qa_path = batch / "court_order_ugly_002" / "qa.md"
+    qa_path.write_text(
+        "# QA\n\n" + "\n\n".join(f"q{index:03d}. Question {index}?" for index in range(1, 26)),
+        encoding="utf-8",
+    )
+
+    report = validate_batch(batch, expected_documents=1, expected_questions=25, package_profile="extended")
+
+    assert report["summary"]["status"] == "pass"
+    assert report["fixtures"][0]["question_count"] == 25
+
+
 def _write_extended_files(root: Path, name: str, *, question_count: int = 25) -> None:
     fixture = root / name
     (fixture / "source_original.txt").write_text("Raw official source text.\n", encoding="utf-8")

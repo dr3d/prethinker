@@ -1,0 +1,16 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260528_01",
+  "fixture_id": "court_order_ugly_002",
+  "source_family": "court",
+  "source_title": "Hornberger v. Merit Systems Protection Board, No. 2025-1156 (U.S. Court of Appeals for the Federal Circuit, nonprecedential)",
+  "source_url": "https://www.cafc.uscourts.gov/opinions-orders/25-1156.OPINION.12-2-2025_2612135.pdf",
+  "source_date": "2025-12-02",
+  "collected_at": "2026-05-28",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": ["identifiers","dates","source_coordinates","tables","cross_section"]
+}

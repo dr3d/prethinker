@@ -1,0 +1,66 @@
+WARNING LETTER
+Medical Products Laboratories, Inc. MARCS-CMS 721916 — April 09, 2026
+
+Delivery Method: VIA UPS
+Product: Drugs
+Recipient: Mr. Elliot Stone, President/CEO, Medical Products Laboratories, Inc., 9990 Global Road, Philadelphia, PA 19115, United States
+Issuing Office: Center for Drug Evaluation and Research (CDER), United States
+
+Warning Letter 320-26-61
+April 9, 2026
+
+Dear Mr. Stone:
+The United States Food and Drug Administration (FDA) inspected your drug manufacturing facility, Medical Products Laboratories, Inc., FEI 2513595, at 9990 Global Road, Philadelphia, from September 29 to October 16, 2025.
+This warning letter summarizes significant violations of Current Good Manufacturing Practice (CGMP) regulations for finished pharmaceuticals. See Title 21 Code of Federal Regulations (CFR), parts 210 and 211 (21 CFR parts 210 and 211).
+Because your methods, facilities, or controls for manufacturing, processing, packing, or holding do not conform to CGMP, your drug products are adulterated within the meaning of section 501(a)(2)(B) of the Federal Food, Drug, and Cosmetic Act (FD&C Act), 21 U.S.C. 351(a)(2)(B).
+Your firm manufactures and is responsible for introducing or delivering for introduction into interstate commerce in the United States products that are unapproved new drugs in violation of sections 301(d) and 505(a) of the FD&C Act, 21 U.S.C. Sections 331(d) and 355(a), including but not limited to: Hydro-Q 4% Gel (hydroquinone 4%); Sodium Sulfacetamide 8% and Sulfur 4% Topical Suspension; Sodium Sulfacetamide 9% and Sulfur 4% Wash; Sodium Sulfacetamide 9.8% Shampoo; Sodium Sulfacetamide 9.8% and Sulfur 4.8% Cleanser; Sodium Sulfacetamide 9.8% and Sulfur 4.8% Lotion; Sodium Sulfacetamide 9.8% and Sulfur 4.8% Cream; Sodium Sulfacetamide 10% and Sulfur 5% Cleanser; Sodium Sulfacetamide 10% Wash; Salicylic Acid 28.5% Solution; Plexion Shampoo (sodium sulfacetamide 9.8%); Plexion Lotion (sodium sulfacetamide 9.8% and sulfur 4.8%), Plexion Cream (sodium sulfacetamide 9.8% and sulfur 4.8%) as prescription drug products.
+We reviewed your November 6, 2025 response to our Form FDA 483 in detail and acknowledge receipt of your subsequent correspondence.
+
+CGMP Violations
+1. Your firm failed to establish and follow appropriate written procedures, designed to prevent objectionable microorganisms in drug products not required to be sterile (21 CFR 211.113(a)).
+You used an unvalidated (b)(4) treatment protocol on filled drug product batches. Your laboratory reported gross microbiological contamination on plates for both total aerobic microbiological count (TAMC) and total yeast and mold count (TYMC) tests:
+- (b)(4) lot (b)(4) (TAMC: too numerous to count (TNTC) and TYMC: TNTC)
+- (b)(4) lot (b)(4) (TAMC: TNTC and TYMC: TNTC)
+- (b)(4) lot (b)(4) (TAMC: TNTC and TYMC: (b)(4) colony forming units (CFU) per gram)
+We note that on (b)(4), you issued a voluntary recall of (b)(4), lots (b)(4), due to microbiological contamination.
+Your response is inadequate in that your risk assessment does not extend to all drug products where (b)(4) treatment was attempted ... does not address whether additional bacterial species were present, nor did you provide evidence supporting your claims that growth on total yeast and mold plates was solely bacterial.
+
+2. Your firm failed to establish adequate written procedures for production and process control (21 CFR 211.100(a)).
+You used a process qualification study performed at a different facility to manufacture and release (b)(4). ... At the direction of your customer, you discontinued your efforts to complete process validation for this product, yet you continued manufacturing batches for commercial distribution.
+
+3. Your firm failed to thoroughly investigate any unexplained discrepancy or failure of a batch (21 CFR 211.192).
+Finished Drug Product Microbiological Testing: your (b)(4) lot (b)(4) obtained a failing result of (b)(4) CFU/g for TYMC (specification ≤(b)(4) CFU/g). You concluded, without evidence, that contamination occurred "during handling, transportation and/or testing." You invalidated this failing result based on resampling and released the lot.
+Stability Assay: in two separate incidents, you invalidated OOS stability results for subpotent assay without adequate scientific justification.
+Complaint Investigations: upon receiving complaints of product crystallization in (b)(4), you concluded that this crystallization was due to "transportation and/or storage" during winter months.
+
+4. Your firm failed to establish and follow an adequate written testing program for stability (21 CFR 211.166(a)).
+Your stability study for (b)(4) concluded that a (b)(4) expiration is supported at a temperature of (b)(4) to (b)(4) degrees Celsius ((b)(4) to (b)(4) degrees Fahrenheit). However, your firm labeled much wider storage conditions as (b)(4) to (b)(4) degrees Fahrenheit at the instruction of your customer, without adequate data. You also state that you "can no longer rely on written justifications from product owners to deviate from the general [C]GMP requirements."
+
+Unapproved New Drug Violations
+Your firm's products are drugs as defined by section 201(g)(1) of the FD&C Act, 21 U.S.C. Section 321(g)(1). Examples from your product labeling (intended use as defined in 21 CFR 201.128):
+Hydro-Q Gel (hydroquinone 4%): Indicated for the gradual bleaching of hyperpigmented skin conditions such as chloasma, melasma, freckles, senile lentigines and areas of melanin hyperpigmentation.
+Salicylic Acid 28.5% Solution: Indicated for the topical treatment and removal of common warts and plantar warts.
+[Plexion and Sodium Sulfacetamide products: scaling dermatoses / acne vulgaris, acne rosacea and seborrheic dermatitis — see source.md.]
+Your products are "new drugs" under section 201(p). With certain exceptions not applicable here, a new drug may not be introduced into interstate commerce without an approved application. Accordingly, these products are unapproved new drugs, in violation of sections 301(d) and 505(a) of the FD&C Act, 21 U.S.C. 331(d) and 355(a).
+
+Responsibilities as a Contractor
+FDA regards contractors as extensions of the manufacturer. You and your customer (b)(4), have a quality agreement regarding the manufacture of (b)(4). You are responsible for the quality of drugs you produce as a contract facility regardless of agreements in place with product owners.
+
+Quality Systems
+Your firm's quality systems are inadequate. See FDA's guidances: Q8(R2) Pharmaceutical Development, Q9(R1) Quality Risk Management, Q10 Pharmaceutical Quality System.
+
+Consultant Recommended
+You should engage a consultant qualified as set forth in 21 CFR 211.34. The qualified consultant should also perform a comprehensive six-system audit of your entire operation for CGMP compliance.
+
+Conclusion
+The violations cited in this letter are not intended to be an all-inclusive list of violations that exist at your facility.
+After you receive this letter, respond to this office in writing within 15 working days[1].
+Send your electronic reply to CDER-OC-OMQ-Communications@fda.hhs.gov. Identify your response with FEI 2513595 and ATTN: Andrew Haack.
+
+Sincerely,
+/S/ Francis Godwin, Director, Office of Manufacturing Quality, Office of Compliance, CDER
+/S/ Tina Smith, Captain, U.S. Public Health Service, Director, Office of Unapproved Drugs & Labeling Compliance, Office of Compliance, CDER
+
+[1] Under program enhancements for the Generic Drug User Fee Amendments (GDUFA) reauthorization for FYs 2023-2027 (GDUFA III Commitment Letter), your facility may be eligible for a Post-Warning Letter Meeting.
+
+Content current as of: 04/14/2026
