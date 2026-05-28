@@ -70,7 +70,10 @@ Current read:
 
 - ranking is product-plausible on the recent ACH stress batches;
 - low-sensitivity controls are behaving;
-- high/medium sensitivity remains immature;
+- high-sensitivity pivotal evidence is promising on the current stress sets;
+- medium sensitivity now has a deterministic family-level mechanism, but that
+  success is still same-batch rescore evidence and needs a fresh heldout before
+  it becomes a product claim;
 - evidence-role diagnostics are useful but remain optional because they can
   compete with dependency capture.
 

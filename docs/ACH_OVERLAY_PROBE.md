@@ -404,3 +404,28 @@ therefore useful as a patch-location lens, but the next blocker is not just
 more support breadth. It is dense-document stability over SEC-style biography,
 exhibit, dollar/percentage, covenant, signature-block, and conditional-term
 rows.
+
+## 2026-05-28 Stress-Batch Read
+
+The newer ACH stress worksheet is now the live place for sensitivity work:
+
+```text
+docs\ACH_STRESS_PUBLIC_20260528_WORKSHEET.md
+```
+
+Current read:
+
+- ACH ranking is product-plausible across recent stress batches.
+- High/low sensitivity discrimination is promising under the locked scorer.
+- Medium sensitivity required a deterministic family-level pass. That pass
+  recovered the previously missed medium case on the same batch without
+  reintroducing low-control false positives.
+- This is still not a solved-product claim. The family threshold and locked
+  scorer need a fresh heldout ACH batch before we say Prethinker can reliably
+  identify pivotal evidence.
+
+The fixture request for that heldout is:
+
+```text
+docs\NEXT_FRESH_FIXTURE_REQUESTS_20260528.md
+```
