@@ -325,3 +325,71 @@ Read:
 - This is not a score-improvement intervention; it is a governance correction.
 - The repaired paths still work when the LLM-produced semantic query layer supplies structured intent.
 - Python remains allowed to parse source-contained structure and syntax, but these two support surfaces no longer use raw English question regex as their activation mechanism.
+
+## R9 Post-Sign-Clean English Regression
+
+Purpose:
+
+- Measure the English ugly corpus after the sign-clean recovery commit, without repairing during the run.
+- Reuse the existing R1 compile artifacts to isolate QA/query-path impact from compile variance.
+- Run no-cache against OpenRouter Qwen3.6 35B A3B, `6` lanes, `temperature=0`, `top_p=0.82`.
+
+Precondition:
+
+- Sign-clean audit passed immediately before the replay.
+- Audit artifacts:
+  - `C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\sign_clean_audit.json`
+  - `C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\sign_clean_audit.md`
+
+Command:
+
+```powershell
+python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\real_world_transfer\fresh_ugly_public_20260529_01 --compile-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\compile_r1 --out-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\qa_full_clean --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --timeout-scale 6 --no-cache --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\qa_full_clean_summary.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\qa_full_clean_summary.md
+```
+
+Result:
+
+- QA: `161 / 22 / 17` over `200`
+- Exact rate: `80.5%`
+- Hygiene: `0` compatibility rows, `0` runtime load errors, `0` write proposals
+- Runtime: about `38.9` minutes wall-clock
+
+Per fixture:
+
+- `court_order_ugly_003`: `17 / 4 / 4`
+- `fda_warning_ugly_007`: `22 / 1 / 2`
+- `labor_board_ugly_003`: `20 / 3 / 2`
+- `osha_incident_ugly_007`: `19 / 1 / 5`
+- `procurement_contract_ugly_003`: `20 / 3 / 2`
+- `puc_order_ugly_003`: `21 / 3 / 1`
+- `sec_material_event_ugly_007`: `20 / 4 / 1`
+- `state_ag_settlement_ugly_003`: `22 / 3 / 0`
+
+Diff against R5 clean full replay:
+
+- R5: `197 / 1 / 2 = 98.5%`
+- R9: `161 / 22 / 17 = 80.5%`
+- Changed rows: `41`
+- Transitions:
+  - `exact -> partial`: `22`
+  - `exact -> miss`: `16`
+  - `partial -> miss`: `1`
+  - `miss -> exact`: `2`
+- New failure surfaces among changed rows:
+  - `compile_surface_gap`: `23`
+  - `query_surface_gap`: `9`
+  - `hybrid_join_gap`: `4`
+  - `answer_surface_gap`: `3`
+  - `not_applicable`: `2`
+
+Read:
+
+- The prior `98.5%` English claim does not survive the sign-clean correction.
+- The drop is too large to treat as ordinary provider variance.
+- The removed raw-English semantic routing was carrying a meaningful amount of answer delivery on this corpus.
+- The cleaned instrument still has good hygiene, but its current English ugly score is `80.5%` until proper semantic query support is rebuilt without Python-side utterance handling.
+- This is the right failure: no compatibility rows, no write proposals, and no runtime leakage were used to inflate the score.
+
+Immediate blocker:
+
+- Rebuild the lost delivery capacity through sign-clean mechanisms only: LLM-produced query semantics, source-contained compile artifacts, deterministic joins over admitted facts, and no Python regex over raw user utterances.

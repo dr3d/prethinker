@@ -17,9 +17,10 @@ source document
 
 The current research question is no longer whether query-time compatibility
 bridges can rescue old rows. They are retired from the forward path. The
-question is whether the compiler can emit recurring answer-bearing distinctions
-as direct admitted surfaces without leaking fixture vocabulary, and whether
-those surfaces transfer to fresh ugly public documents.
+current blocker is stricter: after removing Python-side semantic routing over
+raw English questions, rebuild answer delivery through sign-clean mechanisms
+only: LLM-produced query semantics, source-contained compile artifacts, and
+deterministic joins over admitted facts.
 
 ## Current Empirical Anchor
 
@@ -34,33 +35,27 @@ The 2026-05-22 native restamp remains the internal non-regression anchor:
 0 write proposal rows
 ```
 
-The newest public-document pressure is fresh ugly public 2026-05-28:
+The newest public-document pressure is the post-sign-clean English regression
+on fresh ugly public 2026-05-29:
 
 ```text
-Fresh ugly 2026-05-28 R6 full current-code replay:
-199 exact / 1 partial / 0 miss over 200 rows = 99.5%
+Fresh ugly 2026-05-29 R9 post-sign-clean QA replay:
+161 exact / 22 partial / 17 miss over 200 rows = 80.5%
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
-compile gate old pass/hold: 2 / 6
-compile gate blocking / diagnostic / advisory holds: 4 / 6 / 0
-row churn versus R2: 2 improved, 1 regressed
-regression guard: fail
+sign-clean audit: pass
+compile artifacts: reused/frozen from R1 to isolate query-path impact
 ```
 
-A targeted replay of the two affected R1 fixtures after a generic
-evidence-bundle query-template normalization repair moved `47 / 3 / 0` to
-`50 / 0 / 0`, with `3` improved rows, `0` regressions, and clean hygiene. That
-is mechanism evidence; the full R2 replay is the current corpus measurement.
+Diff against the prior May 29 clean replay was `197 / 1 / 2` to `161 / 22 /
+17`. The drop is too large to treat as hosted-provider variance. It means the
+retired raw-utterance routing was carrying meaningful delivery capacity. The
+good news is that the cleaned instrument failed honestly: no compatibility
+rows, no runtime leakage, and no write proposals inflated the score.
 
-The R6 full QA replay over all eight May 28 fixtures measured `199 / 1 / 0`
-(`99.5%`) with clean hygiene, but it is not a clean promotion because one
-baseline-exact row became partial. A later R8 targeted replay recovered that
-residue by making query-overlap source-record evidence visible to the judge.
-The attempted R9 full replay produced complete per-fixture artifacts at
-`198 / 1 / 1` with clean hygiene, but two full-run regressions recovered in R10
-isolated reruns. Treat this as 99% band transfer evidence plus hosted-path /
-query-plan variance, not as a clean `200 / 0 / 0` corpus claim.
+The high May 28/early May 29 ugly-public measurements are now historical
+pre-reset evidence, not current headline claims for the sign-clean instrument.
 
 The prior fresh ugly public Batch 03 guarded slices remain useful regression
 evidence:
@@ -83,20 +78,15 @@ The current measurement stack is:
 
 - Native restamp: `1997 / 46 / 120` on `2163` rows (`92.33%` exact), with
   `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
-- Fresh ugly public 2026-05-28 R2 targeted replay: affected two-fixture slice
-  `47 / 3 / 0` -> `50 / 0 / 0`, `0` regressions, hygiene still `0 / 0 / 0`;
-  mechanism evidence only.
-- Fresh ugly public 2026-05-28 R6 full replay: `199 / 1 / 0` over `200` rows
-  (`99.5%` exact), hygiene `0 / 0 / 0`, but with regression guard failed
-  because one baseline-exact row became partial.
-- Fresh ugly public 2026-05-28 R8/R9/R10 question-overlap visibility check:
-  targeted R8 recovered the R6 residue, while R9 full replay landed
-  `198 / 1 / 1`; the two R9 regressions both recovered on R10 isolated rerun,
-  so do not treat R9 as a stable code regression or a promotable score.
+- Fresh ugly public 2026-05-29 post-sign-clean replay: `161 / 22 / 17` over
+  `200` rows (`80.5%` exact), hygiene `0 / 0 / 0`, sign-clean audit passed.
+- Fresh ugly public 2026-05-28 and early 2026-05-29 high-score replays:
+  historical pre-reset evidence only; do not use as current product or
+  architecture claims until the sign-clean delivery path recovers.
 - Fresh ugly public Batch 03: latest guarded slices `75 / 0 / 0` SEC and
   `216 / 6 / 3` non-SEC, slice-combined `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
-  `0` write proposals.
+  `0` write proposals; historical pre-reset regression evidence.
 - Real-world external spotcheck: four externally sourced fixtures at latest
   fixture-level `160 / 0 / 0`, with `4 / 4` compile gates clean.
 - Sealed unseen authored transfer: `152 / 1 / 6` on `160` rows (`95.0%`
@@ -124,9 +114,10 @@ The current measurement stack is:
   public doctrine and should not become architecture.
 - The diagnostic rejected flat-pass skip count changed from `128 -> 0`, which
   is useful but should be read together with the gate-calibration shift.
-- Batch 03 is not a sealed benchmark anymore. It has become a working
-  regression surface after mechanism repair, so the next generalization check
-  needs fresh ugly documents.
+- Batch 03 and the high-score May 28/early May 29 runs are not sealed
+  benchmarks anymore. They are working regression surfaces after mechanism
+  repair, and the post-sign-clean score reset must travel with any mention of
+  them.
 - The May 28 fresh ugly run is fresh transfer evidence, but OpenRouter routing
   was not provider-pinned; artifact metadata shows mixed backend providers.
   Treat it as current hosted-path evidence, not a single-provider variance
@@ -152,19 +143,20 @@ surface discipline:
 
 ## Active Pressure
 
-The highest-value next work is fresh-transfer discipline:
+The highest-value next work is sign-clean delivery recovery:
 
-1. Use the next fresh ugly package as the transfer confirmation rather than
-   polishing the May 28 batch into a fragile headline.
-2. Decide whether stamp claims should pin OpenRouter provider/quantization or
+1. Rebuild query delivery without Python-side raw-utterance routing.
+2. Identify which of the `38` R5-exact rows that became non-exact need compile
+   surfaces versus semantic query-intent coverage.
+3. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
-3. Keep Batch 03 as regression evidence instead of polishing it for another
+4. Keep Batch 03 as regression evidence instead of polishing it for another
    headline.
-4. Validate the ACH stress package with the profile-aware validator using
+5. Validate the ACH stress package with the profile-aware validator using
    `--package-profile ach`.
-5. Keep the native restamp warm as a non-regression corroboration, not as the
+6. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
-6. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+7. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
 
 ACH remains an overlay, not a mutation path. Ranking is product-plausible, high

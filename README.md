@@ -61,18 +61,20 @@ scored encounter where a question tests whether that state is present,
 retrievable, and safe to answer from. The selector is the steering wheel; guards
 are the rumble strips that stop tempting but wrong surfaces from winning.
 
-The current public claim is measurement-backed across several evidence classes.
-The 2026-05-22 native restamp remains the non-regression anchor at `1997 exact /
-46 partial / 120 miss` over `2163` rows (`92.33%` exact). The freshest ugly
-public-document transfer run, 2026-05-28 R2, reached `198 / 2 / 0` over `200`
-rows (`99.0%` exact), but with a row-churn caveat: one previously exact row
-became partial. The prior fresh ugly public Batch 03 guarded slices remain
-useful regression evidence at `291 / 6 / 3` over `300` rows (`97.0%`) as a
-slice-combined current view, not a single fresh rerun. A four-fixture
-externally sourced spotcheck remains clean at latest fixture-level `160 / 0 /
-0`, and a sealed unseen authored batch reached `152 / 1 / 6` over `160` rows
-(`95.0%` exact). These runs held `0` compatibility rows, `0` runtime load
-errors, and `0` QA write proposals.
+The current public measurement claim is under sign-clean reset. A 2026-05-29
+governance audit removed Python-side semantic routing over raw English
+questions. The first post-correction English ugly regression, run no-cache over
+the May 29 public-document corpus using frozen compile artifacts, measured
+`161 / 22 / 17` over `200` rows (`80.5%` exact), with `0` compatibility rows,
+`0` runtime load errors, and `0` QA write proposals. That score supersedes the
+prior 98-99% ugly-public figures for the current sign-clean instrument.
+
+Earlier measurements remain useful as historical evidence, not current
+headline claims. The 2026-05-22 native restamp remains an internal anchor at
+`1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact). The
+May 28 and earlier ugly-public runs showed high QA under the pre-reset query
+surface, but the May 29 regression proved that some of that delivery was being
+carried by now-retired raw-utterance routing.
 
 The caveats are part of the claim: the native compile gate grew noisier
 (`26 / 30 -> 9 / 47` pass/hold under the old overloaded gate), the native corpus
