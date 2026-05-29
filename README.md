@@ -61,13 +61,19 @@ scored encounter where a question tests whether that state is present,
 retrievable, and safe to answer from. The selector is the steering wheel; guards
 are the rumble strips that stop tempting but wrong surfaces from winning.
 
-The current public measurement claim is under sign-clean reset. A 2026-05-29
-governance audit removed Python-side semantic routing over raw English
-questions. The first post-correction English ugly regression, run no-cache over
-the May 29 public-document corpus using frozen compile artifacts, measured
-`161 / 22 / 17` over `200` rows (`80.5%` exact), with `0` compatibility rows,
-`0` runtime load errors, and `0` QA write proposals. That score supersedes the
-prior 98-99% ugly-public figures for the current sign-clean instrument.
+The current public measurement claim is blocked under sign-clean reset. A
+2026-05-29 governance audit first removed Python-side semantic routing over raw
+English questions. The first post-correction English ugly regression, run
+no-cache over the May 29 public-document corpus using frozen compile artifacts,
+measured `161 / 22 / 17` over `200` rows (`80.5%` exact), with `0`
+compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+
+A sharper follow-up audit then found the deeper problem: Python still performs
+semantic routing over free-text source/display fields. That means even the
+80.5% result is a provisional research signal, not a sign-clean public claim.
+The score supersedes the prior 98-99% ugly-public figures for current
+engineering triage, but sign-clean claims remain blocked until free-text source
+ledger routing is removed or proven structural.
 
 Earlier measurements remain useful as historical evidence, not current
 headline claims. The 2026-05-22 native restamp remains an internal anchor at

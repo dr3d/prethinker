@@ -18,9 +18,11 @@ source document
 The current research question is no longer whether query-time compatibility
 bridges can rescue old rows. They are retired from the forward path. The
 current blocker is stricter: after removing Python-side semantic routing over
-raw English questions, rebuild answer delivery through sign-clean mechanisms
-only: LLM-produced query semantics, source-contained compile artifacts, and
-deterministic joins over admitted facts.
+raw English questions, a follow-up audit found Python-side semantic routing over
+free-text source/display fields. Claims are blocked until answer delivery is
+rebuilt through sign-clean mechanisms only: LLM-produced query semantics,
+typed/source-contained compile artifacts, and deterministic joins over admitted
+facts.
 
 ## Current Empirical Anchor
 
@@ -35,24 +37,27 @@ The 2026-05-22 native restamp remains the internal non-regression anchor:
 0 write proposal rows
 ```
 
-The newest public-document pressure is the post-sign-clean English regression
-on fresh ugly public 2026-05-29:
+The newest public-document pressure is the post-raw-utterance-cut English
+regression on fresh ugly public 2026-05-29:
 
 ```text
-Fresh ugly 2026-05-29 R9 post-sign-clean QA replay:
+Fresh ugly 2026-05-29 R9 post-raw-utterance-cut QA replay:
 161 exact / 22 partial / 17 miss over 200 rows = 80.5%
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
-sign-clean audit: pass
+raw-utterance audit: pass
+free-text semantic-routing audit: fail
+claim status: blocked
 compile artifacts: reused/frozen from R1 to isolate query-path impact
 ```
 
 Diff against the prior May 29 clean replay was `197 / 1 / 2` to `161 / 22 /
 17`. The drop is too large to treat as hosted-provider variance. It means the
 retired raw-utterance routing was carrying meaningful delivery capacity. The
-good news is that the cleaned instrument failed honestly: no compatibility
-rows, no runtime leakage, and no write proposals inflated the score.
+good news is that the cleaned instrument failed honestly on compatibility,
+runtime, and write-proposal hygiene. The bad news is that source-ledger
+free-text routing remains in active code, so the score is still provisional.
 
 The high May 28/early May 29 ugly-public measurements are now historical
 pre-reset evidence, not current headline claims for the sign-clean instrument.
@@ -78,8 +83,9 @@ The current measurement stack is:
 
 - Native restamp: `1997 / 46 / 120` on `2163` rows (`92.33%` exact), with
   `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
-- Fresh ugly public 2026-05-29 post-sign-clean replay: `161 / 22 / 17` over
-  `200` rows (`80.5%` exact), hygiene `0 / 0 / 0`, sign-clean audit passed.
+- Fresh ugly public 2026-05-29 post-raw-utterance-cut replay: `161 / 22 / 17`
+  over `200` rows (`80.5%` exact), hygiene `0 / 0 / 0`, but sign-clean claim
+  status blocked by the free-text semantic-routing audit.
 - Fresh ugly public 2026-05-28 and early 2026-05-29 high-score replays:
   historical pre-reset evidence only; do not use as current product or
   architecture claims until the sign-clean delivery path recovers.
@@ -145,18 +151,19 @@ surface discipline:
 
 The highest-value next work is sign-clean delivery recovery:
 
-1. Rebuild query delivery without Python-side raw-utterance routing.
-2. Identify which of the `38` R5-exact rows that became non-exact need compile
+1. Remove or quarantine Python semantic routing over free-text source/display fields.
+2. Rebuild query delivery without Python-side raw-utterance routing.
+3. Identify which of the `38` R5-exact rows that became non-exact need compile
    surfaces versus semantic query-intent coverage.
-3. Decide whether stamp claims should pin OpenRouter provider/quantization or
+4. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
-4. Keep Batch 03 as regression evidence instead of polishing it for another
+5. Keep Batch 03 as regression evidence instead of polishing it for another
    headline.
-5. Validate the ACH stress package with the profile-aware validator using
+6. Validate the ACH stress package with the profile-aware validator using
    `--package-profile ach`.
-6. Keep the native restamp warm as a non-regression corroboration, not as the
+7. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
-7. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+8. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
 
 ACH remains an overlay, not a mutation path. Ranking is product-plausible, high

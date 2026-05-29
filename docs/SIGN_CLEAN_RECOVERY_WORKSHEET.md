@@ -4,9 +4,9 @@
 
 Initial status: blocked.
 
-Current status after the 2026-05-29 recovery cuts: sign-clean audit passes for the audited leakage classes.
+Current status after the free-text semantic-routing audit update: blocked again.
 
-Prethinker was not sign-clean at the start of this worksheet. Public accuracy, product-readiness, and benchmark claims were blocked until `scripts/audit_sign_clean.py` passed.
+Prethinker was not sign-clean at the start of this worksheet. A narrower version of `scripts/audit_sign_clean.py` passed after raw-utterance routing was cut, but that audit drew the boundary at the wrong field name. The stricter free-text semantic-routing audit now blocks claims again.
 
 This is not a score regression note. It is an instrument-governance correction. The active repo still contains two classes of leakage that can shape measurements:
 
@@ -87,6 +87,53 @@ This restores the sign-clean gate for the audited classes. It does not prove sco
 No Python-side semantic interpretation of human utterances. Query language understanding belongs to the query compiler. Python may validate syntax, execute admitted queries, score deterministic evidence, and render audited outputs.
 
 No research fixture shape in the active instrument. If a mechanism is real, it must be renamed, generalized, tested on unlike documents, and promoted through a sign-clean audit.
+
+## 2026-05-29 Free-Text Routing Audit Correction
+
+Claude's critique exposed a sharper boundary problem:
+
+- The first sign-clean audit blocked Python semantic routing over raw `utterance` and `question`.
+- It did not block the same operation when performed over source-ledger prose fields such as `SourceTextDisplay`, `WindowTextDisplay`, `source_record_text_atom`, or normalized source labels.
+- That was a definitional leak: the audit tested field names rather than the operation.
+
+New audit:
+
+```powershell
+python scripts\audit_free_text_semantic_routing.py --out-json C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.json --out-md C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.md --exit-zero
+python scripts\audit_sign_clean.py --out-json C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.json --out-md C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.md --exit-zero
+```
+
+Observed:
+
+- `free_text_semantic_routing` blocker count: `458`
+- `raw_utterance_semantic_regex_count`: `0`
+- `high_risk_active_vocabulary_count`: `0`
+- `claim_status`: `blocked`
+
+Source-ledger dependency audit:
+
+```powershell
+python scripts\audit_source_ledger_dependency.py C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r5_full_clean --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\source_ledger_dependency_r5_preclean.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\source_ledger_dependency_r5_preclean.md
+python scripts\audit_source_ledger_dependency.py C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\qa_full_clean --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\source_ledger_dependency_r9.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\source_ledger_dependency_r9.md
+```
+
+Dependency findings:
+
+- Pre-clean R5 exact rows: `197`
+  - direct-only exact: `0`
+  - mixed source-ledger/direct exact: `166`
+  - source-ledger-only exact: `31`
+- Post-clean R9 exact rows: `161`
+  - direct-only exact: `47`
+  - mixed source-ledger/direct exact: `83`
+  - source-ledger-only exact: `31`
+
+Read:
+
+- Source ledgers are not automatically invalid. They are valid as provenance and citation surfaces.
+- Source ledgers are unsafe as query-time semantic retrieval substrates when Python tokenizes, regexes, or substring-matches their free-text display values.
+- The 98.5% score was more source-ledger-dependent than the prior notes made clear.
+- The sign-clean standard is now: Python may use typed source-record slots and source-row IDs, but may not derive answer-bearing semantics by reparsing free-text source displays.
 
 ## 2026-05-29 Incident Review: Why English Fell From 98.5% To 80.5%
 

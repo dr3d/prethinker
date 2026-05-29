@@ -6,6 +6,7 @@ means no known fixture names or answer phrases leaked into active runtime code.
 Sign-clean additionally requires:
 
 - no raw utterance/question regex semantic routing;
+- no Python semantic routing over free-text source/display fields;
 - no high-risk fixture/corpus-shaped vocabulary in active code;
 - no active fixture-name leaks;
 - no narrow active leakage forbidden hits.
@@ -28,6 +29,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import scripts.audit_active_instrument_leakage as audit_active_instrument_leakage
+from scripts.audit_free_text_semantic_routing import build_report as build_free_text_report
 from scripts.audit_fixture_vocabulary_leaks import TERM_POLICIES, scan_fixture_name_leaks, scan_term, summarize_hits
 from scripts.audit_utterance_regex_governance import build_report as build_regex_report
 
@@ -69,9 +71,11 @@ def main() -> int:
 def build_report(*, max_regex_rows: int = 120) -> dict[str, Any]:
     active_report = audit_active_instrument_leakage.build_report(audit_active_instrument_leakage.DEFAULT_PATHS)
     regex_report = build_regex_report(DEFAULT_REGEX_PATHS, max_rows=max_regex_rows)
+    free_text_report = build_free_text_report(DEFAULT_REGEX_PATHS, max_rows=max_regex_rows)
     regex_counts = regex_report.get("summary", {}).get("category_counts", {})
     semantic_trigger_count = int(regex_counts.get("semantic_trigger", 0) or 0)
     forbidden_regex_count = int(regex_counts.get("forbidden_or_needs_review", 0) or 0)
+    free_text_semantic_count = int(free_text_report.get("summary", {}).get("hit_count", 0) or 0)
 
     vocab_rows = _fixture_vocabulary_rows()
     high_risk_active = [
@@ -115,6 +119,14 @@ def build_report(*, max_regex_rows: int = 120) -> dict[str, Any]:
                 "why": "Python regex still routes on raw utterance/question semantics.",
             }
         )
+    if free_text_semantic_count:
+        blockers.append(
+            {
+                "class": "free_text_semantic_routing",
+                "count": free_text_semantic_count,
+                "why": "Python still pattern-matches or tokenizes prose-like source/display fields.",
+            }
+        )
     if forbidden_regex_count:
         blockers.append(
             {
@@ -135,14 +147,17 @@ def build_report(*, max_regex_rows: int = 120) -> dict[str, Any]:
             "fixture_name_leak_count": len(fixture_name_leaks),
             "high_risk_active_vocabulary_count": len(high_risk_active),
             "raw_utterance_semantic_regex_count": semantic_trigger_count,
+            "free_text_semantic_routing_count": free_text_semantic_count,
             "forbidden_or_needs_review_regex_count": forbidden_regex_count,
         },
         "blockers": blockers,
         "active_leakage": active_report.get("summary", {}),
         "regex_governance": regex_report.get("summary", {}),
+        "free_text_semantic_routing": free_text_report.get("summary", {}),
         "high_risk_active_vocabulary": high_risk_active,
         "fixture_name_leaks": fixture_name_leaks,
         "regex_rows": regex_report.get("rows", []),
+        "free_text_semantic_rows": free_text_report.get("rows", []),
     }
 
 
@@ -177,6 +192,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Fixture-name leaks: `{summary.get('fixture_name_leak_count')}`",
         f"- High-risk active vocabulary terms: `{summary.get('high_risk_active_vocabulary_count')}`",
         f"- Raw utterance semantic regex hits: `{summary.get('raw_utterance_semantic_regex_count')}`",
+        f"- Free-text semantic routing hits: `{summary.get('free_text_semantic_routing_count')}`",
         f"- Forbidden/needs-review regex hits: `{summary.get('forbidden_or_needs_review_regex_count')}`",
         "",
         "## Meaning",
@@ -217,6 +233,19 @@ def render_markdown(report: dict[str, Any]) -> str:
                     row.get("line", ""),
                     row.get("function", ""),
                     _md_cell(str(row.get("pattern", ""))[:100]),
+                )
+            )
+    free_text_rows = report.get("free_text_semantic_rows", [])
+    if free_text_rows:
+        lines.extend(["", "## Sample Free-Text Semantic Routing Rows", "", "| File | Line | Function | Category | Subject |", "| --- | ---: | --- | --- | --- |"])
+        for row in free_text_rows[:30]:
+            lines.append(
+                "| `{}` | {} | `{}` | `{}` | `{}` |".format(
+                    row.get("file", ""),
+                    row.get("line", ""),
+                    row.get("function", ""),
+                    row.get("category", ""),
+                    _md_cell(str(row.get("subject", ""))[:120]),
                 )
             )
     return "\n".join(lines).rstrip() + "\n"
