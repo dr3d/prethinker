@@ -79,6 +79,13 @@ prior 98-99% ugly-public figures for current engineering triage, but sign-clean
 claims remain blocked until free-text source-ledger routing is removed or
 proven structural.
 
+The newest ceiling proxy is harsher and more useful: on the same 200-row May
+29 public-document corpus, ignoring `source_record_*` predicates leaves only
+`62 / 200` rows (`31.0%`) likely available in permissive non-source-record
+typed artifacts, and only `33 / 200` rows (`16.5%`) likely available in strict
+typed artifacts after excluding prose-like/display atoms. That is not a QA
+score. It is the current compile-recall wall.
+
 Earlier measurements remain useful as historical evidence, not current
 headline claims. The 2026-05-22 native restamp remains an internal anchor at
 `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact). The
@@ -186,8 +193,9 @@ Current high-signal evidence:
 
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
-- Fresh ugly public 2026-05-28 R2: `198 / 2 / 0` over `200` rows (`99.0%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals; row churn was `2` improved and `1` regressed, so treat it as improved measurement with caveat rather than a clean promotion. Compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
-- Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined current view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and should be treated as transfer/regression evidence, not a leaderboard claim.
+- Fresh ugly public 2026-05-29 typed-artifact recall proxy: permissive non-source-record likely availability `62 / 200` (`31.0%`), strict typed likely availability `33 / 200` (`16.5%`). This is the current compile-recall wall, not a QA score.
+- Fresh ugly public 2026-05-28 R2: historical pre-reset evidence only, `198 / 2 / 0` over `200` rows (`99.0%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals. It is not a current sign-clean claim after the May 29 reset. Compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
+- Fresh ugly public Batch 03, latest guarded slices: historical pre-reset regression evidence only. SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and is not a current sign-clean claim.
 - Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Earlier cold transfer baseline: six fresh transfer fixtures scored `177 / 10 / 53` over `240` rows (`73.75%` exact) before the current direct-surface work.

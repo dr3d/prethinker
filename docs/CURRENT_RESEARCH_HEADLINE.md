@@ -61,6 +61,17 @@ partly. In the R9 run, direct-only exact rows were `47 / 200` (`23.5%`). That
 makes `80.5%` an upper bound on the still-contaminated post-cut path, not a
 typed-thesis floor.
 
+A typed-artifact recall ceiling proxy now names the next blocker. Over the same
+`200` oracle rows, using the frozen R1 compile artifacts and ignoring
+`source_record_*` predicates, only `62 / 200` rows (`31.0%`) were likely
+available in the permissive non-source-record view. In the stricter view that
+also excludes prose-like atoms and display/text/label predicates, only
+`33 / 200` rows (`16.5%`) were likely available. Partial-or-likely coverage was
+`67.0%` permissive and `55.5%` strict. This is a deterministic recall proxy, not
+a QA score, but it shows the current wall: the source documents usually contain
+the information, yet the compiler is not admitting enough answer-bearing typed
+structure for sign-clean query/join work to reach `95%` from these artifacts.
+
 The good news is that the cleaned instrument failed honestly on compatibility,
 runtime, and write-proposal hygiene. The bad news is that source-ledger
 free-text routing remains in active code, so all current scores are provisional
@@ -95,6 +106,10 @@ The current measurement stack is:
   status blocked by the free-text semantic-routing audit. Direct-only exact
   rows in that run were `47 / 200`; treat `80.5%` as an upper bound until
   free-text source routing is actually disabled.
+- Typed-artifact recall proxy on the same `200` rows: permissive
+  non-source-record likely availability `62 / 200` (`31.0%`); strict typed
+  likely availability `33 / 200` (`16.5%`). Treat this as the current compile
+  recall wall, not a QA score.
 - Fresh ugly public 2026-05-28 and early 2026-05-29 high-score replays:
   historical pre-reset evidence only; do not use as current product or
   architecture claims until the sign-clean delivery path recovers.
@@ -161,19 +176,21 @@ surface discipline:
 The highest-value next work is sign-clean delivery recovery:
 
 1. Remove or quarantine Python semantic routing over free-text source/display fields.
-2. Rebuild query delivery without Python-side raw-utterance routing.
-3. Identify which of the `38` R5-exact rows that became non-exact need typed
+2. Raise typed compile recall: promote recurring answer-bearing facts into
+   typed/source-contained structure rather than source-window prose.
+3. Rebuild query delivery without Python-side raw-utterance routing.
+4. Identify which of the `38` R5-exact rows that became non-exact need typed
    compile surfaces versus semantic query-intent coverage; do not rebuild
    selected source-window delivery as a substitute.
-4. Decide whether stamp claims should pin OpenRouter provider/quantization or
+5. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
-5. Keep Batch 03 as regression evidence instead of polishing it for another
+6. Keep Batch 03 as regression evidence instead of polishing it for another
    headline.
-6. Validate the ACH stress package with the profile-aware validator using
+7. Validate the ACH stress package with the profile-aware validator using
    `--package-profile ach`.
-7. Keep the native restamp warm as a non-regression corroboration, not as the
+8. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
-8. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+9. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
 
 ACH remains an overlay, not a mutation path. Ranking is product-plausible, high

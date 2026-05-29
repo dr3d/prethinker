@@ -141,6 +141,56 @@ Read:
 - The R9 score is not the typed-thesis floor. It is an upper bound on the still-contaminated post-raw-utterance-cut path. R9 direct-only exact was `47 / 200 = 23.5%`; the real post-enforcement score is somewhere below `80.5%` until the free-text path is actually disabled and rerun.
 - The sign-clean standard is now: Python may use typed source-record slots and source-row IDs, but may not derive answer-bearing semantics by reparsing free-text source displays.
 
+## 2026-05-29 Typed-Artifact Recall Ceiling Proxy
+
+Question:
+
+- Could sign-clean Prethinker reach `95%` on this bounded regulatory/public-document distribution by query/join work alone?
+- Or is the compile pass currently failing to put enough answer-bearing material into typed artifacts?
+
+Diagnostic:
+
+```powershell
+python scripts\audit_typed_artifact_recall.py --dataset-root datasets\real_world_transfer\fresh_ugly_public_20260529_01 --compile-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\compile_r1 --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\typed_artifact_recall_20260529.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\typed_artifact_recall_20260529.md
+```
+
+Method:
+
+- Compare each of the `200` oracle/reference answers against compile artifacts only.
+- Ignore all `source_record_*` predicates.
+- Report two deterministic recall proxies:
+  - `typed_any`: all non-`source_record_*` compile facts, including possible prose-like normalized atoms.
+  - `typed_strict`: non-`source_record_*` facts after excluding prose-like atoms and display/text/label predicates.
+- Predicate names do not count as answer tokens; only typed argument values contribute coverage.
+- This is not proof that a query layer can derive an answer. It is a ceiling/de-risking proxy for whether answer material exists in typed artifacts at all.
+
+Findings:
+
+- `typed_any`: `62` likely available, `72` partial, `66` not available over `200`.
+  - likely rate: `31.0%`
+  - partial-or-likely rate: `67.0%`
+  - average token coverage: `0.622`
+  - full numeric coverage: `88 / 153` rows with numbers
+- `typed_strict`: `33` likely available, `78` partial, `89` not available over `200`.
+  - likely rate: `16.5%`
+  - partial-or-likely rate: `55.5%`
+  - average token coverage: `0.486`
+  - full numeric coverage: `78 / 153` rows with numbers
+
+Read:
+
+- The present typed compile artifacts do not support a plausible `95%` sign-clean QA score by query/join work alone.
+- The information is usually present in the source text, but it is not yet being admitted into typed slots at the needed recall.
+- The binding blocker is compile recall into typed/source-contained structure, not merely query routing.
+- Useful query/join work still matters, but only after the compiler emits enough answer-bearing typed facts for deterministic joins to operate on.
+
+Updated 95% condition:
+
+- A real `95%` claim on this bounded regulatory/public-document distribution remains theoretically possible because source coverage is high.
+- It is not reachable from the current typed artifact inventory.
+- The next phase must raise typed compile recall first, then rebuild query intent and deterministic joins over those typed surfaces.
+- No source-window or question-genre surface counts unless it survives unlike-document validation and does not require Python to parse source prose.
+
 ## 2026-05-29 Surface-Coverage Diagnostic
 
 Question:
