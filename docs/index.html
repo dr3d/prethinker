@@ -335,8 +335,8 @@
         </article>
         <article class="metric">
           <span>Fresh Ugly May 28</span>
-          <strong>98.5%</strong>
-          <small>197 exact / 3 partial / 0 miss over 200 fresh rows</small>
+          <strong>99.0%</strong>
+          <small>198 exact / 2 partial / 0 miss over 200 fresh rows, with row-churn caveat</small>
         </article>
         <article class="metric">
           <span>Sealed Unseen</span>
@@ -458,9 +458,11 @@
         </div>
         <div class="callout">
           <strong>Caveat kept visible:</strong> the May 28 fresh ugly QA result
-          is the current transfer thermometer, but its compile gate still held
-          under both old pass/hold and tiered gate accounting. Batch 03 remains
-          regression evidence, not one single fresh 300-row rerun.
+          is the current transfer thermometer, but R2 was not a clean promotion:
+          row churn included one previously exact row becoming partial, and the
+          compile gate still held under both old pass/hold and tiered gate
+          accounting. Batch 03 remains regression evidence, not one single fresh
+          300-row rerun.
         </div>
       </section>
 
@@ -488,7 +490,7 @@
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_20260528_WORKSHEET.md">Fresh Ugly May 28 Worksheet</a></h3>
             <p>The fresh eight-fixture public-document transfer run at
-              197 / 3 / 0 and its compile-gate caveats.</p>
+              198 / 2 / 0 and its row-churn and compile-gate caveats.</p>
           </article>
           <article class="panel">
             <h3><a href="https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md">Next Fixture Requests</a></h3>

@@ -64,8 +64,9 @@ are the rumble strips that stop tempting but wrong surfaces from winning.
 The current public claim is measurement-backed across several evidence classes.
 The 2026-05-22 native restamp remains the non-regression anchor at `1997 exact /
 46 partial / 120 miss` over `2163` rows (`92.33%` exact). The freshest ugly
-public-document transfer run, 2026-05-28 R1, reached `197 / 3 / 0` over `200`
-rows (`98.5%` exact). The prior fresh ugly public Batch 03 guarded slices remain
+public-document transfer run, 2026-05-28 R2, reached `198 / 2 / 0` over `200`
+rows (`99.0%` exact), but with a row-churn caveat: one previously exact row
+became partial. The prior fresh ugly public Batch 03 guarded slices remain
 useful regression evidence at `291 / 6 / 3` over `300` rows (`97.0%`) as a
 slice-combined current view, not a single fresh rerun. A four-fixture
 externally sourced spotcheck remains clean at latest fixture-level `160 / 0 /
@@ -79,8 +80,8 @@ is same named fixtures rather than proven byte-identical to the prior stamp, and
 query-surface gaps rose even as compile-surface, hybrid-join, answer-surface,
 and judge-uncertain gaps improved. Current tooling also reports
 blocking/diagnostic/advisory gate tiers so future claims can distinguish
-release blockers from diagnostic noise. The May 28 fresh ugly run also had a
-noisy compile gate (`2 / 6` old pass/hold; `4 / 6 / 0`
+release blockers from diagnostic noise. The May 28 fresh ugly compile also had a
+noisy gate (`2 / 6` old pass/hold; `4 / 6 / 0`
 blocking/diagnostic/advisory holds), so the high QA score should be read beside
 that compiler-coverage pressure.
 
@@ -173,7 +174,7 @@ Current high-signal evidence:
 
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
-- Fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals; compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
+- Fresh ugly public 2026-05-28 R2: `198 / 2 / 0` over `200` rows (`99.0%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals; row churn was `2` improved and `1` regressed, so treat it as improved measurement with caveat rather than a clean promotion. Compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
 - Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined current view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and should be treated as transfer/regression evidence, not a leaderboard claim.
 - Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.

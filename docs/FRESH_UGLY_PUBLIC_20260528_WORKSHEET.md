@@ -318,3 +318,96 @@ promotable on the affected 50-row slice because it recovered all known residue
 with no exact-row churn. The next honest confirmation is either a full May 28
 R2 QA replay across all eight fixtures, or leaving this as locked mechanism
 evidence and waiting for the next fresh ugly batch to test transfer.
+
+## R2 Full QA Replay And R3 Variance Probe
+
+Full R2 QA replay:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r2_full_display_filter_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_vs_r2_full_display_filter_diff.md
+```
+
+Result:
+
+```text
+questions: 200
+exact / partial / miss: 198 / 2 / 0
+exact rate: 99.0%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Row churn versus R1:
+
+```text
+changed rows: 3
+improved rows: 2
+regressed rows: 1
+baseline exact -> non-exact: 1
+exact -> miss: 0
+regression guard: fail
+```
+
+Changed rows:
+
+| Fixture | Row | Movement | Read |
+| --- | --- | --- | --- |
+| `court_order_ugly_002` | `q010` | partial -> exact | chronology support recovered |
+| `sec_material_event_ugly_006` | `q006` | partial -> exact | display-filter query normalization recovered age support |
+| `labor_board_ugly_002` | `q022` | exact -> partial | judge/classifier uncertainty; no added support surface caused it |
+
+R2 residue:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r2_full_display_filter_residue_adjudication.md
+```
+
+```text
+residue rows: 2
+classifications:
+  judge_uncertain: 1
+  repairable_compile_gap: 1
+surfaces:
+  judge_uncertain: 1
+  compile_surface_gap: 1
+```
+
+R3 targeted variance probe:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r3_targeted_variance_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_vs_r3_targeted_variance_diff.md
+```
+
+Scope:
+
+- `labor_board_ugly_002`
+- `sec_material_event_ugly_006`
+
+Result:
+
+```text
+targeted slice: 49 / 1 / 0 over 50 rows
+changed rows versus R1: 1
+improved rows: 1
+regressed rows: 0
+regression guard: pass
+```
+
+Read:
+
+- The `labor_board_ugly_002 q022` R2 partial did not reproduce in R3. Treat it
+  as hosted-path/judge variance unless it recurs.
+- The `sec_material_event_ugly_006 q006` recovery reproduced. Treat the
+  display-filter query-template repair as real.
+- The `sec_material_event_ugly_006 q015` row was exact in the first targeted
+  R2 slice when semantic IR routed through `SiliconFlow`, but partial in the
+  full R2 and R3 targeted runs when semantic IR routed through `Parasail`.
+  Treat it as an unresolved role-tenure/source-display support gap with a
+  provider-variance component, not as solved.
+- Full R2 is a better aggregate score (`198 / 2 / 0`) but not a clean promotion
+  because the regression guard failed. The disciplined claim is: one generic
+  query-template normalization repair promoted; one role-tenure support row
+  remains open; hosted-path variance is still material.

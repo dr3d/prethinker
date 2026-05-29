@@ -80,6 +80,13 @@ fresh ugly public 2026-05-28 R1:
 fresh ugly public 2026-05-28 R2 targeted query-template replay:
   affected two-fixture slice moved 47 / 3 / 0 -> 50 / 0 / 0
   changed rows 3, improved 3, regressed 0, compatibility/runtime/write 0/0/0
+fresh ugly public 2026-05-28 R2 full QA replay:
+  198 / 2 / 0 over 200 rows, 99.0% exact
+  changed rows 3, improved 2, regressed 1, regression guard failed
+  compatibility/runtime/write 0/0/0
+fresh ugly public 2026-05-28 R3 targeted variance probe:
+  labor+SEC slice 49 / 1 / 0 over 50 rows
+  changed rows 1, improved 1, regressed 0, regression guard passed
 fresh ugly public Batch 03 latest guarded slices:
   75 / 0 / 0 SEC
   216 / 6 / 3 non-SEC
@@ -100,9 +107,11 @@ landed public English official-document fixtures. Treat it as the strongest
 current fresh-transfer thermometer. Its QA hygiene is clean, but its compile
 gate is not release-clean.
 
-The R2 targeted replay is mechanism evidence only. It tested the two affected
-fixtures after a generic evidence-bundle query-template normalization repair;
-it is not a replacement for a full 200-row R2 corpus claim.
+The R2 targeted replay is mechanism evidence. The full R2 replay improved the
+aggregate but was not a clean promotion because one previously exact row became
+partial. The R3 targeted variance probe indicates that labor-board regression
+was transient judge/classifier variance, while the SEC role-tenure row remains
+an unresolved support gap with a provider-variance component.
 
 Fresh fixture intake has a current cut-and-paste specification at
 `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
@@ -157,11 +166,11 @@ The current center is not guard compression. It is post-claim discipline:
 
 - Preserve direct compile surfaces so answer-bearing distinctions remain
   queryable coordinates.
-- Treat fresh ugly 2026-05-28 R1 as the current product thermometer and Batch
-  03 as a regression guard.
-- Work remaining fresh ugly residue as generic chronology-join, query-planning,
-  officer-tenure/role-duration, source-record, and authority-normalization
-  mechanisms.
+- Treat fresh ugly 2026-05-28 R2 as the current product thermometer, with the
+  row-churn caveat visible, and Batch 03 as a regression guard.
+- Work remaining fresh ugly residue as generic role-tenure/source-display
+  support, provider-variance, compile-gate, source-record, and
+  authority-normalization mechanisms.
 - Keep the May 22 native restamp as the current internal non-regression anchor
   until a new full native stamp is worth the cost.
 - Use the tiered compile gate for new compile stamps: blocking reasons are
@@ -231,22 +240,24 @@ agent docs, public docs, and active scripts for retired document names.
 ## Next Decision
 
 The public claim should be preserved with caveats intact. The three May 28 R1
-partials have now produced one generic, query-only normalization repair that
-was promotable on a 50-row targeted replay. Treat that separately from native
-QA accuracy: the native QA stamp remains `92.33%`, while the newest fresh ugly
-thermometer remains the full R1 `197 / 3 / 0` over `200` rows (`98.5%` exact).
+partials produced one generic, query-only normalization repair. A full R2 replay
+now reads `198 / 2 / 0` over `200` rows (`99.0%` exact), but because the
+regression guard failed it should be described as improved measurement with
+row-churn caveat, not as a clean promotion. Native QA remains `92.33%`.
 
 Next energy:
 
-1. decide whether to spend a full May 28 R2 QA replay across all eight fixtures
-   or hold the targeted repair until the next fresh ugly batch tests transfer;
-2. keep inspecting compile-gate holds separately from QA exactness, especially
+1. inspect the remaining SEC role-tenure/source-display support row without
+   teaching fixture words to the instrument;
+2. decide whether future OpenRouter measurement should pin provider/quantization
+   for stamp claims or explicitly report hosted-path variance bands;
+3. keep inspecting compile-gate holds separately from QA exactness, especially
    blocking-tier holds that QA can still answer around;
-3. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
+4. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
    needs a heldout sensitivity read;
-4. use the tiered compile gate in future compile stamps and report old
+5. use the tiered compile gate in future compile stamps and report old
    pass/hold separately from blocking/diagnostic/advisory tiers;
-5. keep native restamp preparation warm, but do not spend it until the next
+6. keep native restamp preparation warm, but do not spend it until the next
    change set is stable;
-6. keep fixture language, row IDs, answer strings, and local source names out
+7. keep fixture language, row IDs, answer strings, and local source names out
    of active prompts, code, and public doctrine.

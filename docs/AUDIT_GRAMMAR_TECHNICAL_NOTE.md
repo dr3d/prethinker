@@ -18,6 +18,7 @@ As of May 28, 2026, Prethinker measures as follows:
 | Evidence class | Corpus | Result | Cleanliness counters |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained fixtures, 2163 judged rows | `1997 exact / 46 partial / 120 miss`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
+| Fresh ugly public 2026-05-28 R2 | 8 newly landed public-document fixtures, 200 rows | `198 exact / 2 partial / 0 miss`, `99.0%` exact | full replay after query-template normalization; row churn `2` improved / `1` regressed, so not a clean promotion; compile gate `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Fresh ugly public 2026-05-28 R1 | 8 newly landed public-document fixtures, 200 rows | `197 exact / 3 partial / 0 miss`, `98.5%` exact | fresh R1; compile gate `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Fresh ugly public Batch 03 | 12 externally sourced public-document fixtures, latest guarded slices | SEC `75 / 0 / 0`, non-SEC `216 / 6 / 3`; slice-combined current view `291 / 6 / 3` over `300`, `97.0%` exact | not a single fresh 300-row rerun; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Real-world external spotcheck | 4 externally sourced fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
@@ -195,10 +196,11 @@ but not enough for generalization.
 The current public claim therefore names five evidence classes:
 
 - Native restamp: shows current behavior on the maintained 56-fixture corpus.
-- Fresh ugly public 2026-05-28 R1: tests a newly landed ugly public English
-  official-document batch after the Batch 03 repairs. It is the current
-  fresh-transfer thermometer, with the important caveat that OpenRouter routing
-  was not provider-pinned.
+- Fresh ugly public 2026-05-28 R2: tests a newly landed ugly public English
+  official-document batch after the Batch 03 repairs and the display-filter
+  query-template normalization repair. It is the current fresh-transfer
+  thermometer, with the important caveats that row churn was not clean and
+  OpenRouter routing was not provider-pinned.
 - Fresh ugly public Batch 03: tests ugly public documents with tables, official
   formats, identifiers, attachments, redactions, and regulatory/incident
   structure. It is now partly tuned evidence and should be read as a product
@@ -244,7 +246,7 @@ These measurements do not claim:
 - proof that LLM-authored fixtures represent messy real-world documents;
 - proof that Batch 03 is an untouched benchmark after the May 25 mechanism
   work;
-- proof that May 28 R1 is single-provider stable;
+- proof that May 28 R2 is single-provider stable;
 - proof that the compile gate is calibrated correctly at every tier;
 - proof that `91.12%` and `92.33%` are strictly comparable under identical gate
   behavior;
@@ -278,8 +280,9 @@ The best reading is balanced:
 - The fresh ugly public Batch 03 slice view remains useful regression evidence,
   but it is not a single fresh 300-row rerun and is no longer untouched after
   mechanism repair.
-- The fresh ugly public May 28 R1 run is now the strongest fresh real-document
-  transfer signal at `98.5%`, with clean hygiene and a still-noisy compile gate.
+- The fresh ugly public May 28 R2 run is now the strongest fresh real-document
+  transfer signal at `99.0%`, with clean hygiene, one row-churn regression, and
+  a still-noisy compile gate.
 - The real-world four-fixture spotcheck is clean and remains useful context.
 - The native restamp improved from `91.12%` to `92.33%` exact under the current
   measurement, but the two runs carried different gate calibration behavior.

@@ -34,21 +34,30 @@ The 2026-05-22 native restamp remains the internal non-regression anchor:
 0 write proposal rows
 ```
 
-The newest public-document pressure is fresh ugly public 2026-05-28 R1:
+The newest public-document pressure is fresh ugly public 2026-05-28 R2:
 
 ```text
-Fresh ugly 2026-05-28 R1: 197 exact / 3 partial / 0 miss over 200 rows = 98.5%
+Fresh ugly 2026-05-28 R2: 198 exact / 2 partial / 0 miss over 200 rows = 99.0%
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
 compile gate old pass/hold: 2 / 6
 compile gate blocking / diagnostic / advisory holds: 4 / 6 / 0
+row churn versus R1: 2 improved, 1 regressed
+regression guard: fail
 ```
 
-A targeted R2 replay of the two affected R1 fixtures after a generic
+A targeted replay of the two affected R1 fixtures after a generic
 evidence-bundle query-template normalization repair moved `47 / 3 / 0` to
 `50 / 0 / 0`, with `3` improved rows, `0` regressions, and clean hygiene. That
-is mechanism evidence, not a replacement for the full 200-row R1 claim.
+is mechanism evidence; the full R2 replay is the current corpus measurement.
+
+The full R2 QA replay over all eight May 28 fixtures measured `198 / 2 / 0`
+(`99.0%`) with clean hygiene, but it is not a clean promotion: row churn was
+`2` improved and `1` regressed, so the regression guard failed. A follow-up R3
+targeted variance probe suggests the labor-board regression was transient
+judge/classifier variance, while the remaining SEC role-tenure support row is
+still open.
 
 The prior fresh ugly public Batch 03 guarded slices remain useful regression
 evidence:
@@ -71,13 +80,12 @@ The current measurement stack is:
 
 - Native restamp: `1997 / 46 / 120` on `2163` rows (`92.33%` exact), with
   `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
-- Fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
-  exact), with `0` compatibility rows, `0` runtime load errors, `0` write
-  proposals, old compile gate `2 / 6`, and tiered gate holds `4 / 6 / 0`
-  blocking/diagnostic/advisory.
 - Fresh ugly public 2026-05-28 R2 targeted replay: affected two-fixture slice
   `47 / 3 / 0` -> `50 / 0 / 0`, `0` regressions, hygiene still `0 / 0 / 0`;
   mechanism evidence only.
+- Fresh ugly public 2026-05-28 R2 full replay: `198 / 2 / 0` over `200` rows
+  (`99.0%` exact), hygiene `0 / 0 / 0`, but with regression guard failed
+  because one baseline-exact row became partial.
 - Fresh ugly public Batch 03: latest guarded slices `75 / 0 / 0` SEC and
   `216 / 6 / 3` non-SEC, slice-combined `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
@@ -139,15 +147,17 @@ surface discipline:
 
 The highest-value next work is fresh-transfer discipline:
 
-1. Adjudicate the three May 28 R1 partials as generic mechanisms or declared
-   source/oracle limits.
-2. Keep Batch 03 as regression evidence instead of polishing it for another
+1. Inspect the remaining SEC role-tenure/source-display support row without
+   teaching fixture words to the instrument.
+2. Decide whether stamp claims should pin OpenRouter provider/quantization or
+   report hosted-path variance bands explicitly.
+3. Keep Batch 03 as regression evidence instead of polishing it for another
    headline.
-3. Validate the ACH stress package with the profile-aware validator using
+4. Validate the ACH stress package with the profile-aware validator using
    `--package-profile ach`.
-4. Keep the native restamp warm as a non-regression corroboration, not as the
+5. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
-5. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
+6. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the
    harness.
 
 ACH remains an overlay, not a mutation path. Ranking is product-plausible, high

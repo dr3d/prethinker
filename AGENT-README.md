@@ -57,8 +57,9 @@ not use them as day-one guidance unless the user names a specific artifact.
   relax the old headline, and do not treat every diagnostic hold as a release
   failure.
 - Current public measurement anchor: native restamp `1997 / 46 / 120` over
-  `2163` rows (`92.33%` exact), fresh ugly public 2026-05-28 R1 `197 / 3 / 0`
-  over `200` rows (`98.5%` exact), fresh ugly public Batch 03 latest guarded
+  `2163` rows (`92.33%` exact), fresh ugly public 2026-05-28 R2 `198 / 2 / 0`
+  over `200` rows (`99.0%` exact, with row-churn caveat), fresh ugly public
+  Batch 03 latest guarded
   slices `291 / 6 / 3` over `300` rows as a slice-combined regression view,
   real-world four-fixture spotcheck `160 / 0 / 0`, and sealed unseen authored
   transfer `152 / 1 / 6`. Treat Batch 03 as transfer/regression evidence, not a
