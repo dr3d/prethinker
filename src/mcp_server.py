@@ -2777,14 +2777,7 @@ class PrologMCPServer:
         if not surfaces:
             return {}
         surface = surfaces[0]
-        patient = ""
-        patient_match = re.search(
-            rf"\b([A-Z][A-Za-z0-9_-]*)'?s\s+{re.escape(surface)}\b",
-            str(utterance or ""),
-        )
-        if patient_match:
-            patient = patient_match.group(1)
-        patient_phrase = f" for {patient}" if patient else ""
+        patient_phrase = ""
         if surface == "pressure":
             question = (
                 f"Which medical meaning of 'pressure' is bad{patient_phrase}: "

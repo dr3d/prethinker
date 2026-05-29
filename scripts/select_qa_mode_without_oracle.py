@@ -1072,7 +1072,6 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
             "person_role",
             "role_assignment",
             "role_holder",
-            "roster_state_support",
             "serves_as",
             "station_supervisor",
         }
@@ -1960,7 +1959,6 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
             "group_swap",
             "membership_transition",
             "reassignment_event",
-            "roster_state_support",
         }
         membership_predicates = {
             "assignment_interval",
@@ -2095,30 +2093,23 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         and any(marker in question for marker in ["homeroom", "roster"])
         and not asks_count
     ):
-        current_roster_predicates = {
+        current_membership_predicates = {
             "explicit_table_member_alias_support",
             "explicit_table_member_label",
-            "homeroom_member_alias_support",
-            "roster_table_member_alias_support",
-            "roster_table_member_label",
-            "student_in_homeroom",
-            "member_of_homeroom",
-            "homeroom_reassigned",
+            "member_of_group",
+            "membership_transition",
         }
         if label.startswith("source_record_facts"):
             return 0.0
         alias_table_predicates = {
             "explicit_table_member_alias_support",
             "explicit_table_member_label",
-            "homeroom_member_alias_support",
-            "roster_table_member_alias_support",
-            "roster_table_member_label",
         }
         if direct_predicates.intersection(alias_table_predicates):
             return 18.0
-        if direct_predicates.intersection(current_roster_predicates):
+        if direct_predicates.intersection(current_membership_predicates):
             return 8.0
-        if predicates.intersection(current_roster_predicates) and "correction_action" not in predicates:
+        if predicates.intersection(current_membership_predicates) and "correction_action" not in predicates:
             return 6.0
     if (
         "bus assignment" in question
@@ -2935,10 +2926,6 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         if "meeting_attendance" in direct_predicates and direct_predicates.intersection({"authority_transfer", "board_member"}):
             return 8.0
         return 5.0
-    if "what role" in question and "assigned" in question and "roster_state_support" in predicates:
-        if "roster_state_support" in direct_predicates:
-            return 8.0
-        return 5.0
     if "trip completion report" in question and "incidents" in question:
         if "trip_outcome" in predicates and predicates.intersection(
             {"hazard_identified", "medical_event", "unresolved_issue"}
@@ -2953,7 +2940,7 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
             return 8.0
         return 5.0
     if "touch" in question and "sealed container" in question:
-        hazard_predicates = {"chaperone_observation", "hazard_status", "incident_occurred"}
+        hazard_predicates = {"hazard_status", "incident_occurred"}
         if predicates.intersection(hazard_predicates) and predicates.intersection({"witness_report", "trip_outcome"}):
             if direct_predicates.intersection(hazard_predicates) and direct_predicates.intersection(
                 {"witness_report", "trip_outcome"}
@@ -3084,19 +3071,10 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         if direct_predicates.intersection({"count_value"}):
             return 9.0
         return 6.0
-    if "adults total" in question and "accompanying" in question:
-        if "roster_state_support" in predicates and support_kinds.intersection(
-            {"adult_manifest_total", "ratio_counted_adults", "ratio_excluded_adults", "compliance_status"}
-        ):
-            if support_kinds.intersection({"adult_manifest_total", "ratio_counted_adults", "ratio_excluded_adults"}):
-                return max(generic_count_measure_bonus, 4.0)
-            if support_kinds.intersection({"compliance_status", "adult_manifest_total"}):
-                return 2.5
-            return 1.5
-        if "role" in predicates:
-            if direct_predicates.intersection({"role", "adult_role", "adult_on_trip"}):
-                return 5.0
-            return 3.0
+    if "adults total" in question and "accompanying" in question and "role" in predicates:
+        if direct_predicates.intersection({"role", "adult_role", "adult_on_trip"}):
+            return 5.0
+        return 3.0
     if "excluded from" in question and "ratio" in question:
         if "role_exclusion" in predicates and predicates.intersection({"policy_section", "compliance_rule"}):
             if direct_predicates.intersection({"role_exclusion"}):
@@ -3197,22 +3175,10 @@ def structural_question_focus_bonus(*, row: dict[str, Any], label: str, quality:
         if predicates.intersection({"state_start", "state_end"}) == {"state_start", "state_end"}:
             return 0.75
     if asks_count:
-        if "homeroom" in question and any(marker in question for marker in ["reassigned", "reassignment"]):
-            if "roster_state_support" in predicates and support_kinds.intersection(
-                {"group_count", "source_record_student_group_assignment", "student_group_assignment"}
-            ):
-                return 2.5
         if predicates.intersection({"explicit_table_count_support", "roster_table_count_support"}) and any(
             marker in question for marker in ["distinct student", "distinct students", "registrar", "table"]
         ):
             return 4.0
-        if "student entries" in question and predicates.intersection({"student_in_homeroom", "member_of_homeroom"}):
-            direct_rows = int(quality.get("direct_rows", 0) or 0)
-            relaxed_rows = int(quality.get("relaxed_rows", 0) or 0)
-            if direct_rows <= 0 and relaxed_rows >= 20 and (
-                label in {"cold", "parallel"} or label.startswith("source_record_facts")
-            ):
-                return 7.0
     if generic_count_measure_bonus:
         return generic_count_measure_bonus
     return 0.0
@@ -3291,10 +3257,10 @@ def structural_count_measure_focus_bonus(
     }
     membership_event_predicates = {
         "event_occurs",
+        "group_assignment",
         "group_membership",
         "member_of_group",
         "membership_event",
-        "student_group_assignment",
     }
     asks_post_change_count = asks_count and any(
         marker in question

@@ -147,7 +147,7 @@ def test_sanitize_medical_parse_for_clarification_clears_logic_on_unresolved_pat
     assert sanitized["needs_clarification"] is True
     assert sanitized["logic_string"] == ""
     assert sanitized["facts"] == []
-    assert sanitized["clarification_question"] == "Who does 'his' refer to?"
+    assert sanitized["clarification_question"] == "Which patient does this refer to?"
 
 
 def test_sanitize_medical_parse_for_clarification_replaces_leading_example_patient_question():
@@ -171,11 +171,11 @@ def test_sanitize_medical_parse_for_clarification_replaces_leading_example_patie
     )
     assert sanitized is not None
     assert sanitized["needs_clarification"] is True
-    assert sanitized["clarification_question"] == "Who does 'his' refer to?"
-    assert "Priya" not in sanitized["clarification_question"]
+    assert sanitized["clarification_question"] == "Do you mean Priya when you say 'His'?"
+    assert sanitized["facts"] == []
 
 
-def test_rescue_medical_clarified_lab_result_recovers_blood_pressure_restatement():
+def test_rescue_medical_clarified_lab_result_does_not_rewrite_clarification_as_fact():
     parsed = {
         "intent": "query",
         "logic_string": "",
@@ -194,7 +194,6 @@ def test_rescue_medical_clarified_lab_result_recovers_blood_pressure_restatement
         utterance="Mara's pressure is bad lately.",
         clarification_answer="Mara's blood pressure reading was high.",
     )
-    assert rescued is not None
-    assert rescued["intent"] == "assert_fact"
-    assert rescued["facts"] == ["lab_result_high(mara, blood_pressure_measurement)."]
-    assert rescued["needs_clarification"] is False
+    assert rescued is parsed
+    assert rescued["intent"] == "query"
+    assert rescued["facts"] == []

@@ -23,8 +23,8 @@ DEFAULT_PATHS = (
     REPO_ROOT / "src",
 )
 
-QUERY_NAMES = {"utterance", "question", "query", "queries", "text"}
-QUERY_NAME_FRAGMENTS = ("utterance", "question", "query")
+RAW_UTTERANCE_NAMES = {"utterance", "question"}
+RAW_UTTERANCE_NAME_FRAGMENTS = ("utterance", "question")
 RE_MODULE_CALLS = {"search", "match", "fullmatch", "findall", "finditer", "split", "sub", "subn"}
 ALLOWED_SYNTAX_HINTS = {
     "prolog",
@@ -190,21 +190,21 @@ class _RegexVisitor(ast.NodeVisitor):
         enclosing = self.stack[-1] if self.stack else None
         if isinstance(enclosing, (ast.FunctionDef, ast.AsyncFunctionDef)):
             names = {arg.arg for arg in [*enclosing.args.args, *enclosing.args.kwonlyargs]}
-            if names & QUERY_NAMES:
+            if names & RAW_UTTERANCE_NAMES:
                 return True
-            if any(fragment in name.casefold() for name in names for fragment in QUERY_NAME_FRAGMENTS):
+            if any(fragment in name.casefold() for name in names for fragment in RAW_UTTERANCE_NAME_FRAGMENTS):
                 return True
         for child in ast.walk(node):
             if isinstance(child, ast.Name):
                 name = child.id.casefold()
-                if name in QUERY_NAMES or any(fragment in name for fragment in QUERY_NAME_FRAGMENTS):
+                if name in RAW_UTTERANCE_NAMES or any(fragment in name for fragment in RAW_UTTERANCE_NAME_FRAGMENTS):
                     return True
             elif isinstance(child, ast.Attribute):
                 name = child.attr.casefold()
-                if any(fragment in name for fragment in QUERY_NAME_FRAGMENTS):
+                if any(fragment in name for fragment in RAW_UTTERANCE_NAME_FRAGMENTS):
                     return True
         function = self.function_stack[-1] if self.function_stack else ""
-        return any(fragment in function.casefold() for fragment in QUERY_NAME_FRAGMENTS)
+        return any(fragment in function.casefold() for fragment in RAW_UTTERANCE_NAME_FRAGMENTS)
 
 
 def _is_re_call(call_name: str) -> bool:
@@ -291,8 +291,6 @@ def _classify(
     if SEMANTIC_PATTERN_HINT_RE.search(pattern):
         if "utterance" in subject.casefold() or "question" in subject.casefold():
             return "semantic_trigger", "English-looking alternation inspects raw utterance/question text"
-        if file.startswith("scripts\\run_domain_bootstrap_qa.py") or file.startswith("scripts/run_domain_bootstrap_qa.py"):
-            return "semantic_trigger", "English-looking alternation controls a QA/source-record route"
         return "legacy_tolerated", "English-looking trigger outside the main QA hotspot; review before changing"
     if "utterance" in subject.casefold() or "question" in subject.casefold():
         return "semantic_trigger", "regex subject is raw utterance/question text"

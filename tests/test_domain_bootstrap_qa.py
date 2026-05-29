@@ -4,22 +4,21 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+import pytest
+
 import scripts.run_domain_bootstrap_qa as qa_module
 from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
-    _anchor_relation_hint_queries,
     _award_cap_quantity_hint_queries,
     _authority_instrument_metadata_hint_queries,
     _counsel_opinion_hint_queries,
     _classification_deferral_effect_companion,
-    _complementary_relation_hint_queries,
     _compiled_case_identifier_location_roster_companion,
     _conversion_assessment_delta_companion,
     _clinic_device_recall_companion,
     _dedupe_helper_query_results,
-    _industrial_sensor_companion,
     _fallback_queries_from_semantic_ir,
     _event_elapsed_duration_companion,
     _evidence_bundle_same_variable_join_queries,
@@ -785,6 +784,7 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("prior_complaint/4" in item for item in strategy["epistemic_policy"])
 
 
+@pytest.mark.skip(reason="retired raw-utterance hint path removed by sign-clean recovery")
 def test_complementary_relation_hints_query_sibling_subject_surfaces() -> None:
     kb_inventory = {
         "examples": {
@@ -805,6 +805,7 @@ def test_complementary_relation_hints_query_sibling_subject_surfaces() -> None:
     assert hints == ["has_experience_with(field_team, Complement)."]
 
 
+@pytest.mark.skip(reason="retired raw-utterance hint path removed by sign-clean recovery")
 def test_anchor_relation_hints_query_direct_trigger_surfaces() -> None:
     kb_inventory = {
         "examples": {
@@ -8358,6 +8359,7 @@ def test_hoa_assessment_revenue_companion_uses_current_counts_and_rates() -> Non
     assert any(row.get("RowKind") == "total" and row.get("TotalRevenue") == "545400" for row in rows)
 
 
+@pytest.mark.skip(reason="retired native compatibility adapter removed from active runtime")
 def test_industrial_sensor_companion_derives_event_and_sensor_support() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     facts = [
@@ -9804,7 +9806,7 @@ def test_run_query_plan_suppresses_legacy_native_helpers_after_generic_companion
         }
 
     monkeypatch.setattr(qa_module, "_status_timeline_summary_companion", fake_generic_companion)
-    monkeypatch.setattr(qa_module, "_roster_state_companion", fake_roster_companion)
+    monkeypatch.setattr(qa_module, "_roster_state_companion", fake_roster_companion, raising=False)
 
     rows = run_query_plan(
         runtime,
