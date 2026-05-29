@@ -79,10 +79,11 @@ The project has a publishable measurement snapshot, but not a permanent
 instrument freeze. The 2026-05-22 native restamp measured the internal corpus
 at `1997 / 46 / 120` over `2163` judged rows, exact rate `92.33%`, with zero
 compatibility rows, runtime load errors, or write proposals. Fresh ugly public
-Batch 03 latest guarded slices read as SEC `75 / 0 / 0` and non-SEC
-`216 / 6 / 3`, or slice-combined `291 / 6 / 3` over `300` rows (`97.0%` exact),
-also with zero compatibility rows, runtime load errors, or write proposals.
-This is not a single fresh 300-row rerun. The same public claim also includes a
+2026-05-28 R1 measured `197 / 3 / 0` over `200` rows (`98.5%` exact), also with
+zero compatibility rows, runtime load errors, or write proposals, while the
+compile gate still held. Batch 03 latest guarded slices remain regression
+evidence at `291 / 6 / 3` over `300` rows (`97.0%` exact) as a slice-combined
+view, not a single fresh 300-row rerun. The same public claim also includes a
 clean four-fixture real-world spotcheck (`160 / 0 / 0`, `4 / 4` compile gates)
 and sealed unseen authored transfer at `152 / 1 / 6` over `160` rows (`95.0%`
 exact).
@@ -97,8 +98,8 @@ Before the next full stamp:
 
 Current follow-up blockers:
 
-- run the next fresh ugly batch as the unseen thermometer for the latest
-  official-record roster and profile-contract repairs;
+- adjudicate the three fresh ugly May 28 R1 partials before deciding on another
+  repair pass or QA N=2;
 - run a fresh ACH stress batch with family sensitivity locked before claiming
   ACH sensitivity is solved;
 - split native compile-gate output into blocking, diagnostic, and advisory

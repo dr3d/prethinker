@@ -34,8 +34,19 @@ The 2026-05-22 native restamp remains the internal non-regression anchor:
 0 write proposal rows
 ```
 
-The newest public-document pressure is fresh ugly public Batch 03. The latest
-guarded slices are:
+The newest public-document pressure is fresh ugly public 2026-05-28 R1:
+
+```text
+Fresh ugly 2026-05-28 R1: 197 exact / 3 partial / 0 miss over 200 rows = 98.5%
+0 compatibility rows
+0 runtime load errors
+0 write proposal rows
+compile gate old pass/hold: 2 / 6
+compile gate blocking / diagnostic / advisory holds: 4 / 6 / 0
+```
+
+The prior fresh ugly public Batch 03 guarded slices remain useful regression
+evidence:
 
 ```text
 SEC subset:      75 exact / 0 partial / 0 miss over 75 rows
@@ -48,13 +59,17 @@ Slice-combined: 291 exact / 6 partial / 3 miss over 300 rows = 97.0%
 
 That slice-combined Batch 03 view is not a single fresh 300-row rerun. It is a
 current guarded view assembled from the latest SEC and non-SEC slices, and some
-mechanisms were learned from Batch 03 itself. Read it as product-thermometer
-and regression evidence, not as a leaderboard claim.
+mechanisms were learned from Batch 03 itself. Read it as regression evidence,
+not as a leaderboard claim.
 
 The current measurement stack is:
 
 - Native restamp: `1997 / 46 / 120` on `2163` rows (`92.33%` exact), with
   `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
+- Fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
+  exact), with `0` compatibility rows, `0` runtime load errors, `0` write
+  proposals, old compile gate `2 / 6`, and tiered gate holds `4 / 6 / 0`
+  blocking/diagnostic/advisory.
 - Fresh ugly public Batch 03: latest guarded slices `75 / 0 / 0` SEC and
   `216 / 6 / 3` non-SEC, slice-combined `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
@@ -89,6 +104,10 @@ The current measurement stack is:
 - Batch 03 is not a sealed benchmark anymore. It has become a working
   regression surface after mechanism repair, so the next generalization check
   needs fresh ugly documents.
+- The May 28 fresh ugly run is fresh transfer evidence, but OpenRouter routing
+  was not provider-pinned; artifact metadata shows mixed backend providers.
+  Treat it as current hosted-path evidence, not a single-provider variance
+  study.
 
 ## What Changed
 
@@ -112,13 +131,12 @@ surface discipline:
 
 The highest-value next work is fresh-transfer discipline:
 
-1. Classify the remaining Batch 03 non-exacts as generic mechanisms or declared
+1. Adjudicate the three May 28 R1 partials as generic mechanisms or declared
    source/oracle limits.
-2. Use fresh ugly documents for the next honest generalization read before
-   polishing Batch 03 further.
-3. Validate the next incoming packages with the profile-aware validator:
-   `fresh_ugly_public_20260528_01` uses `--package-profile extended`; the ACH
-   stress package uses `--package-profile ach`.
+2. Keep Batch 03 as regression evidence instead of polishing it for another
+   headline.
+3. Validate the ACH stress package with the profile-aware validator using
+   `--package-profile ach`.
 4. Keep the native restamp warm as a non-regression corroboration, not as the
    only proof of progress.
 5. Keep fixture nouns, row IDs, answer strings, and dataset labels out of the

@@ -246,11 +246,12 @@ Transfer work supports the current direction:
 - Earlier cold transfer on OpenRouter scored `177 / 10 / 53` over 240 rows,
   or 73.75% exact, before the current direct-surface work.
 - The public measurement anchor is stronger: the native restamp is
-  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), fresh ugly public Batch
-  03 latest guarded slices read as `291 / 6 / 3` over `300` rows (`97.0%`) when
-  SEC and non-SEC slices are combined, the sealed unseen authored transfer is
-  `152 / 1 / 6` over `160` rows (`95.0%` exact), and the four-fixture
-  real-world spotcheck is `160 / 0 / 0`.
+  `1997 / 46 / 120` over `2163` rows (`92.33%` exact), fresh ugly public
+  2026-05-28 R1 is `197 / 3 / 0` over `200` rows (`98.5%`), fresh ugly public
+  Batch 03 remains regression evidence at `291 / 6 / 3` over `300` rows
+  (`97.0%`) when SEC and non-SEC slices are combined, the sealed unseen authored
+  transfer is `152 / 1 / 6` over `160` rows (`95.0%` exact), and the
+  four-fixture real-world spotcheck is `160 / 0 / 0`.
 - A roster-reconciliation fixture exposed why compatibility evidence had to
   become compile-surface work: the high-water was reachable, but the forward
   repair is direct assignment/table surfaces.

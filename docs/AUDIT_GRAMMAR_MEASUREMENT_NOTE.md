@@ -26,6 +26,7 @@ proposals across several distinct measurement classes.
 | Measurement class | Corpus | Result | Discipline metrics |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained native corpus members, 2163 rows | `1997 / 46 / 120`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
+| Fresh ugly public 2026-05-28 R1 | 8 newly landed public-document fixtures, 200 rows | `197 / 3 / 0`, `98.5%` exact | fresh R1; compile gate `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds; `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Fresh ugly public Batch 03 | 12 externally sourced public-document fixtures, latest guarded slices | SEC `75 / 0 / 0`, non-SEC `216 / 6 / 3`; slice-combined current view `291 / 6 / 3` over `300`, `97.0%` exact | not a single fresh 300-row rerun; `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Real-world external spotcheck | 4 externally sourced real-world fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates pass, `0` compatibility rows, `0` runtime load errors, `0` write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` write proposals |
@@ -76,6 +77,10 @@ runtime writes rescue weak compiles.
 - Fresh ugly public Batch 03 is now partly tuned evidence: it is valuable as a
   product thermometer and regression guard, but the next generalization claim
   requires fresh ugly documents that did not shape the mechanisms.
+- Fresh ugly public 2026-05-28 R1 supplies that fresh ugly check, but it was
+  not provider-pinned inside OpenRouter; artifact metadata records mixed
+  backend providers. Treat it as current hosted-path transfer evidence, not a
+  single-provider variance study.
 
 ## Artifact Pointers
 
@@ -86,6 +91,8 @@ runtime writes rescue weak compiles.
   `datasets/real_world_transfer/fresh_ugly_public_20260524_03`
 - Fresh ugly public transfer worksheet:
   `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
+- Fresh ugly public 2026-05-28 worksheet:
+  `docs/FRESH_UGLY_PUBLIC_20260528_WORKSHEET.md`
 - Sealed unseen fixture inputs:
   `datasets/sealed_unseen/20260521`
 - Native compile summary:
@@ -101,12 +108,11 @@ runtime writes rescue weak compiles.
 
 ## Public Summary Draft
 
-Prethinker now has a 92.33% native restamp and a fresh ugly public Batch 03
-slice-combined guarded view of 291/6/3 over 300 rows, both with zero
-compatibility rows, zero runtime load errors, and zero QA write proposals. The
-sealed-unseen authored result remains 95.0%, and the older four-fixture
-real-world spotcheck remains clean at latest fixture-level 160/0/0. The caveat
-is open: Batch 03 is not a single fresh rerun and has become partly tuned
-evidence, so the next product-useful check is another fresh ugly document set.
-Current active-instrument leakage audit is clean at `0` forbidden hits and `0`
-warning hits.
+Prethinker now has a 92.33% native restamp and a fresh ugly public May 28 R1
+transfer run at 197/3/0 over 200 rows, both with zero compatibility rows, zero
+runtime load errors, and zero QA write proposals. The sealed-unseen authored
+result remains 95.0%, and the older four-fixture real-world spotcheck remains
+clean at latest fixture-level 160/0/0. The caveat is open: the May 28 compile
+gate still held, so the product answer path is stronger than the release-grade
+compile coverage signal. Current active-instrument leakage audit is clean at
+`0` forbidden hits and `0` warning hits.

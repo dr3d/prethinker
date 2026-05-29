@@ -63,16 +63,15 @@ are the rumble strips that stop tempting but wrong surfaces from winning.
 
 The current public claim is measurement-backed across several evidence classes.
 The 2026-05-22 native restamp remains the non-regression anchor at `1997 exact /
-46 partial / 120 miss` over `2163` rows (`92.33%` exact). The newer fresh ugly
-public Batch 03 work now gives the strongest real-document pressure signal:
-latest guarded slices reached `75 / 0 / 0` on the SEC subset and `216 / 6 / 3`
-on the non-SEC subset, or `291 / 6 / 3` over `300` rows (`97.0%`) if read as a
-slice-combined current view. That is not a single fresh 300-row rerun, and the
-batch is now partly a regression guard because some mechanisms were learned
-from it. A four-fixture externally sourced spotcheck remains clean at latest
-fixture-level `160 / 0 / 0`, and a sealed unseen authored batch reached `152 /
-1 / 6` over `160` rows (`95.0%` exact). These runs held `0` compatibility rows,
-`0` runtime load errors, and `0` QA write proposals.
+46 partial / 120 miss` over `2163` rows (`92.33%` exact). The freshest ugly
+public-document transfer run, 2026-05-28 R1, reached `197 / 3 / 0` over `200`
+rows (`98.5%` exact). The prior fresh ugly public Batch 03 guarded slices remain
+useful regression evidence at `291 / 6 / 3` over `300` rows (`97.0%`) as a
+slice-combined current view, not a single fresh rerun. A four-fixture
+externally sourced spotcheck remains clean at latest fixture-level `160 / 0 /
+0`, and a sealed unseen authored batch reached `152 / 1 / 6` over `160` rows
+(`95.0%` exact). These runs held `0` compatibility rows, `0` runtime load
+errors, and `0` QA write proposals.
 
 The caveats are part of the claim: the native compile gate grew noisier
 (`26 / 30 -> 9 / 47` pass/hold under the old overloaded gate), the native corpus
@@ -80,7 +79,10 @@ is same named fixtures rather than proven byte-identical to the prior stamp, and
 query-surface gaps rose even as compile-surface, hybrid-join, answer-surface,
 and judge-uncertain gaps improved. Current tooling also reports
 blocking/diagnostic/advisory gate tiers so future claims can distinguish
-release blockers from diagnostic noise.
+release blockers from diagnostic noise. The May 28 fresh ugly run also had a
+noisy compile gate (`2 / 6` old pass/hold; `4 / 6 / 0`
+blocking/diagnostic/advisory holds), so the high QA score should be read beside
+that compiler-coverage pressure.
 
 For the freshest orientation, read the
 [current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
@@ -171,7 +173,8 @@ Current high-signal evidence:
 
 - Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
 - Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
-- Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined current view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and should be treated as current transfer/regression evidence, not a leaderboard claim.
+- Fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals; compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
+- Fresh ugly public Batch 03, latest guarded slices: SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined current view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and should be treated as transfer/regression evidence, not a leaderboard claim.
 - Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Earlier cold transfer baseline: six fresh transfer fixtures scored `177 / 10 / 53` over `240` rows (`73.75%` exact) before the current direct-surface work.

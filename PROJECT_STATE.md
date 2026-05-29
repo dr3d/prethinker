@@ -74,6 +74,9 @@ judge-uncertain: 1
 Current transfer anchors:
 
 ```text
+fresh ugly public 2026-05-28 R1:
+  197 / 3 / 0 over 200 rows, 98.5% exact
+  compile gate old pass/hold 2 / 6; blocking / diagnostic / advisory holds 4 / 6 / 0
 fresh ugly public Batch 03 latest guarded slices:
   75 / 0 / 0 SEC
   216 / 6 / 3 non-SEC
@@ -89,10 +92,14 @@ The Batch 03 line is a slice-combined current view, not one single fresh
 guard predates the later one-row ratio-calculation targeted replay. Treat
 Batch 03 as current transfer/regression evidence, not as a benchmark claim.
 
+The May 28 fresh ugly line is a single fresh R1 compile+QA run over newly
+landed public English official-document fixtures. Treat it as the strongest
+current fresh-transfer thermometer. Its QA hygiene is clean, but its compile
+gate is not release-clean.
+
 Fresh fixture intake has a current cut-and-paste specification at
 `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
-`fresh_ugly_public_20260528_01`; the second package is
-`fresh_ach_stress_public_20260528_04`.
+now measured as above; the second package is `fresh_ach_stress_public_20260528_04`.
 
 Durable real-world fixture inputs live under `datasets/real_world_transfer/`.
 They are transfer evidence, not part of the native `datasets/story_worlds`
@@ -143,10 +150,11 @@ The current center is not guard compression. It is post-claim discipline:
 
 - Preserve direct compile surfaces so answer-bearing distinctions remain
   queryable coordinates.
-- Treat fresh ugly Batch 03 as a product thermometer and regression guard while
-  asking new unseen documents to answer the generalization question.
-- Work remaining Batch 03 blockers as generic source-record, query-surface,
-  cross-document, and authority-normalization mechanisms.
+- Treat fresh ugly 2026-05-28 R1 as the current product thermometer and Batch
+  03 as a regression guard.
+- Work remaining fresh ugly residue as generic chronology-join, query-planning,
+  officer-tenure/role-duration, source-record, and authority-normalization
+  mechanisms.
 - Keep the May 22 native restamp as the current internal non-regression anchor
   until a new full native stamp is worth the cost.
 - Use the tiered compile gate for new compile stamps: blocking reasons are
@@ -216,19 +224,22 @@ agent docs, public docs, and active scripts for retired document names.
 ## Next Decision
 
 The public claim should be preserved with caveats intact. The next engineering
-decision is whether the next fresh ugly package confirms the current transfer
-trajectory under the repaired instrument. Treat that separately from native QA
-accuracy: the native QA stamp remains `92.33%`, while fresh ugly guarded slices
-currently sit at a slice-combined `291 / 6 / 3` over `300` rows.
+decision is whether the three May 28 R1 partials indicate generic mechanisms
+worth repairing before any broader stamp. Treat that separately from native QA
+accuracy: the native QA stamp remains `92.33%`, while the newest fresh ugly
+thermometer is `197 / 3 / 0` over `200` rows (`98.5%` exact).
 
 Next energy:
 
-1. validate and run `fresh_ugly_public_20260528_01` when it lands;
-2. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
+1. adjudicate the three `fresh_ugly_public_20260528_01` R1 partials without
+   teaching fixture words to the instrument;
+2. decide whether a cheap QA N=2 or targeted non-mutating replay is needed to
+   separate row variance from real mechanism pressure;
+3. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
    needs a heldout sensitivity read;
-3. use the tiered compile gate in future compile stamps and report old
+4. use the tiered compile gate in future compile stamps and report old
    pass/hold separately from blocking/diagnostic/advisory tiers;
-4. keep native restamp preparation warm, but do not spend it until the next
+5. keep native restamp preparation warm, but do not spend it until the next
    change set is stable;
-5. keep fixture language, row IDs, answer strings, and local source names out
+6. keep fixture language, row IDs, answer strings, and local source names out
    of active prompts, code, and public doctrine.

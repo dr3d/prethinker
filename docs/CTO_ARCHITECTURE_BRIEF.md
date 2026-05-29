@@ -158,6 +158,10 @@ Current native fixed-compile direct-surface anchor:
 
 Current transfer anchors:
 
+- fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
+  exact), with `0` compatibility rows, `0` runtime load errors, and `0` write
+  proposal rows; compile gate still held at `2 / 6` old pass/hold and
+  `4 / 6 / 0` blocking/diagnostic/advisory holds;
 - fresh ugly public Batch 03 latest guarded slices: SEC `75 / 0 / 0`, non-SEC
   `216 / 6 / 3`, slice-combined current view `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
@@ -180,8 +184,8 @@ Continue only if you find one of these:
 3. fresh stamp artifacts that still expose retired compatibility-adapter terms;
 4. active code paths that would re-enable compatibility adapters by default.
 
-The next-cycle investigation is fresh-transfer confirmation, source-record/query
-surface boundaries, and native compile-gate tiering. The old native gate
+The next-cycle investigation is May 28 R1 residue, source-record/query surface
+boundaries, and native compile-gate tiering. The old native gate
 headline shifted `26 / 30 -> 9 / 47` pass/hold; current tooling also separates
 blocking, diagnostic, and advisory reasons. Do not hide those caveats; they are
 part of the audit discipline that makes the measurement credible.

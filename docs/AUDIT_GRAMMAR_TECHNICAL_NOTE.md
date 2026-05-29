@@ -18,6 +18,7 @@ As of May 28, 2026, Prethinker measures as follows:
 | Evidence class | Corpus | Result | Cleanliness counters |
 | --- | --- | ---: | --- |
 | Native restamp | 56 maintained fixtures, 2163 judged rows | `1997 exact / 46 partial / 120 miss`, `92.33%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
+| Fresh ugly public 2026-05-28 R1 | 8 newly landed public-document fixtures, 200 rows | `197 exact / 3 partial / 0 miss`, `98.5%` exact | fresh R1; compile gate `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Fresh ugly public Batch 03 | 12 externally sourced public-document fixtures, latest guarded slices | SEC `75 / 0 / 0`, non-SEC `216 / 6 / 3`; slice-combined current view `291 / 6 / 3` over `300`, `97.0%` exact | not a single fresh 300-row rerun; `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Real-world external spotcheck | 4 externally sourced fixtures, 160 rows | `160 / 0 / 0` latest fixture-level QA, not a single fresh 160-row rerun | `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
 | Sealed unseen authored transfer | 4 sealed fixtures, 160 rows | `152 / 1 / 6`, `95.0%` exact | `0` compatibility rows, `0` runtime load errors, `0` QA write proposals |
@@ -194,6 +195,10 @@ but not enough for generalization.
 The current public claim therefore names five evidence classes:
 
 - Native restamp: shows current behavior on the maintained 56-fixture corpus.
+- Fresh ugly public 2026-05-28 R1: tests a newly landed ugly public English
+  official-document batch after the Batch 03 repairs. It is the current
+  fresh-transfer thermometer, with the important caveat that OpenRouter routing
+  was not provider-pinned.
 - Fresh ugly public Batch 03: tests ugly public documents with tables, official
   formats, identifiers, attachments, redactions, and regulatory/incident
   structure. It is now partly tuned evidence and should be read as a product
@@ -239,6 +244,7 @@ These measurements do not claim:
 - proof that LLM-authored fixtures represent messy real-world documents;
 - proof that Batch 03 is an untouched benchmark after the May 25 mechanism
   work;
+- proof that May 28 R1 is single-provider stable;
 - proof that the compile gate is calibrated correctly at every tier;
 - proof that `91.12%` and `92.33%` are strictly comparable under identical gate
   behavior;
@@ -269,9 +275,11 @@ policy, runtime execution, and explicit failure accounting.
 The best reading is balanced:
 
 - The architecture is stronger than the earlier cold-transfer baseline.
-- The fresh ugly public Batch 03 slice view is the strongest current
-  real-document pressure signal, but it is not a single fresh 300-row rerun and
-  is no longer untouched after mechanism repair.
+- The fresh ugly public Batch 03 slice view remains useful regression evidence,
+  but it is not a single fresh 300-row rerun and is no longer untouched after
+  mechanism repair.
+- The fresh ugly public May 28 R1 run is now the strongest fresh real-document
+  transfer signal at `98.5%`, with clean hygiene and a still-noisy compile gate.
 - The real-world four-fixture spotcheck is clean and remains useful context.
 - The native restamp improved from `91.12%` to `92.33%` exact under the current
   measurement, but the two runs carried different gate calibration behavior.
@@ -294,6 +302,8 @@ caveats.
   [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
 - Fresh ugly transfer worksheet:
   [Fresh Ugly Public Batch 04 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md)
+- Fresh ugly May 28 worksheet:
+  [Fresh Ugly Public 20260528 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_20260528_WORKSHEET.md)
 - Current fresh fixture request spec:
   [Next Fresh Fixture Requests](https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md)
 - QA boundary:

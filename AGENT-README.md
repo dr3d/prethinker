@@ -57,13 +57,16 @@ not use them as day-one guidance unless the user names a specific artifact.
   relax the old headline, and do not treat every diagnostic hold as a release
   failure.
 - Current public measurement anchor: native restamp `1997 / 46 / 120` over
-  `2163` rows (`92.33%` exact), fresh ugly public Batch 03 latest guarded
-  slices `75 / 0 / 0` SEC plus `216 / 6 / 3` non-SEC (`291 / 6 / 3` over
-  `300` rows as a slice-combined current view), real-world four-fixture
-  spotcheck `160 / 0 / 0`, and sealed unseen authored transfer `152 / 1 / 6`.
-  Treat Batch 03 as transfer/regression evidence, not a single fresh 300-row
-  benchmark. All current guarded measurements held `0` compatibility rows,
-  runtime load errors, and QA write proposals.
+  `2163` rows (`92.33%` exact), fresh ugly public 2026-05-28 R1 `197 / 3 / 0`
+  over `200` rows (`98.5%` exact), fresh ugly public Batch 03 latest guarded
+  slices `291 / 6 / 3` over `300` rows as a slice-combined regression view,
+  real-world four-fixture spotcheck `160 / 0 / 0`, and sealed unseen authored
+  transfer `152 / 1 / 6`. Treat Batch 03 as transfer/regression evidence, not a
+  single fresh 300-row benchmark. All current guarded QA measurements held `0`
+  compatibility rows, runtime load errors, and QA write proposals. The May 28
+  compile gate still held `2 / 6` old-style pass/hold with `4 / 6 / 0`
+  blocking/diagnostic/advisory holds, so do not confuse the QA score with a
+  clean compile gate.
 
 ## Fresh Context Handoff
 

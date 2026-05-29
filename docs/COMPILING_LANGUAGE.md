@@ -88,6 +88,8 @@ The current public measurement anchor is:
 
 - native restamp: `1997 exact / 46 partial / 120 miss` over `2163` rows
   (`92.33%` exact);
+- fresh ugly public 2026-05-28 R1: `197 / 3 / 0` over `200` rows (`98.5%`
+  exact), with the caveat that compile gate tiering still held;
 - fresh ugly public Batch 03: latest guarded SEC and non-SEC slices read as
   `291 / 6 / 3` over `300` rows (`97.0%` exact), with the caveat that this is
   not one single fresh 300-row rerun and the batch is now partly a regression

@@ -157,6 +157,8 @@ As of May 28, 2026:
 - domain profiles are context and validation packages, not domain-product claims
 - post-ingestion document QA is now a first-class research surface: compiled KBs are queried from admitted predicates, deterministic ledgers, selectors, and guards
 - the native direct-surface restamp is `1997 / 46 / 120` over `2163` judged rows (`92.33%` exact), with zero compatibility rows and zero write proposals
+- fresh ugly public 2026-05-28 R1 is `197 / 3 / 0` over `200` rows (`98.5%`
+  exact), with clean QA hygiene and a still-noisy compile gate
 - fresh ugly public Batch 03 latest guarded slices are SEC `75 / 0 / 0` and
   non-SEC `216 / 6 / 3`, or `291 / 6 / 3` over `300` rows (`97.0%` exact) as
   a slice-combined current view, with zero compatibility rows, runtime load

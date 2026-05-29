@@ -245,12 +245,13 @@ Palette and delivery stability remain live governance concerns, but they are no
 longer the release-blocking proof question by themselves. The 2026-05-22 native
 restamp reached `1997 exact / 46 partial / 120 miss` over `2163` rows
 (`92.33%` exact), while the four-fixture real-world spotcheck reached `160 / 0 /
-0` with `4 / 4` compile gates clean. Fresh ugly public Batch 03 latest guarded
-slices now read as SEC `75 / 0 / 0` and non-SEC `216 / 6 / 3`, or `291 / 6 / 3`
-over `300` rows (`97.0%` exact) as a slice-combined current view. That says the
-current instrument can generalize despite known palette variance, with the
-explicit caveat that Batch 03 is no longer untouched after mechanism repair and
-is not one single fresh 300-row rerun.
+0` with `4 / 4` compile gates clean. Fresh ugly public 2026-05-28 R1 reached
+`197 / 3 / 0` over `200` rows (`98.5%` exact), while Batch 03 latest guarded
+slices remain regression evidence at `291 / 6 / 3` over `300` rows (`97.0%`
+exact) as a slice-combined current view. That says the current instrument can
+generalize despite known palette variance, with the explicit caveat that May 28
+still had compile-gate holds and Batch 03 is no longer untouched after mechanism
+repair.
 
 The unresolved pressure is more specific: the native compile gate shifted from
 `26 / 30` pass/hold in the prior baseline to `9 / 47` under the old overloaded

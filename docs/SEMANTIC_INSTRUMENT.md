@@ -195,15 +195,16 @@ The live evidence anchor is the native direct-surface fixed-compile QA restamp:
 0 write proposal rows
 ```
 
-The current measurement note adds transfer context: fresh ugly public Batch 03
-latest guarded slices at SEC `75 / 0 / 0` and non-SEC `216 / 6 / 3`
-(`291 / 6 / 3` over `300` rows as a slice-combined current view), a
-four-fixture real-world spotcheck at `160 / 0 / 0`, sealed unseen authored
-transfer at `152 / 1 / 6`, and an earlier cold-transfer baseline at
-`177 / 10 / 53`. The Batch 03 view is not one single fresh 300-row rerun and is
-now partly regression evidence. Detailed score history belongs in Git history,
-local cold archive, or the current stamp worksheet. This document keeps the
-instrument vocabulary, not a rolling results ledger.
+The current measurement note adds transfer context: fresh ugly public
+2026-05-28 R1 at `197 / 3 / 0` over `200` rows (`98.5%` exact), fresh ugly
+public Batch 03 latest guarded slices at `291 / 6 / 3` over `300` rows as a
+slice-combined regression view, a four-fixture real-world spotcheck at
+`160 / 0 / 0`, sealed unseen authored transfer at `152 / 1 / 6`, and an earlier
+cold-transfer baseline at `177 / 10 / 53`. The May 28 QA result has a still
+noisy compile gate, and the Batch 03 view is not one single fresh 300-row rerun.
+Detailed score history belongs in Git history, local cold archive, or the
+current stamp worksheet. This document keeps the instrument vocabulary, not a
+rolling results ledger.
 
 Current lessons:
 

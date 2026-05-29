@@ -87,3 +87,159 @@ warning hits: 0
 
 Compile and QA should use the normal OpenRouter measured lane, six lanes, and
 the current fresh ugly Batch 04 protocol. Do not repair during R1.
+
+## R1 Compile - 2026-05-28
+
+Command:
+
+```text
+python scripts\run_domain_bootstrap_file_batch.py ... --lanes 6 --quality-gate --quality-retry-on-hold --quality-retry-max-attempts 1
+```
+
+Artifacts:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\compile_r1_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\compile_r1_summary.json
+```
+
+Compile result:
+
+```text
+provider family: openrouter
+model: qwen/qwen3.6-35b-a3b
+lanes: 6
+fixtures: 8
+parsed OK: 8
+candidate predicates: 163
+compile admitted / skipped: 743 / 206
+effective admitted / skipped: 743 / 142
+diagnostic rejected flat-pass skips: 64
+```
+
+Compile quality gate:
+
+```text
+old pass / hold: 2 / 6
+blocking / diagnostic / advisory holds: 4 / 6 / 0
+minimum rough score: 0.775
+maximum risk count: 5
+```
+
+Pass:
+
+```text
+court_order_ugly_002
+osha_incident_ugly_006
+```
+
+Blocking holds:
+
+```text
+fda_warning_ugly_006
+labor_board_ugly_002
+puc_order_ugly_002
+state_ag_settlement_ugly_002
+```
+
+Diagnostic-only holds:
+
+```text
+procurement_contract_ugly_002
+sec_material_event_ugly_006
+```
+
+Read:
+
+The compile gate still sees source-authority/source-claim delivery pressure,
+especially around regulatory/legal document shapes. This is not release-clean
+compile coverage, even if QA later scores well.
+
+## R1 QA - 2026-05-29 UTC
+
+First QA attempt:
+
+```text
+qa_r1
+questions: 0
+```
+
+Cause: file parser did not yet accept plain `q001. Question?` lines. No model
+spend occurred. The parser was fixed and tested before the real QA run.
+
+Real QA run:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_summary.json
+```
+
+Result:
+
+```text
+questions: 200
+exact / partial / miss: 197 / 3 / 0
+exact rate: 98.5%
+runtime load errors: 0
+write proposal rows: 0
+compatibility rows: 0
+```
+
+Per fixture:
+
+| Fixture | Exact | Partial | Miss |
+| --- | ---: | ---: | ---: |
+| `court_order_ugly_002` | 24 | 1 | 0 |
+| `fda_warning_ugly_006` | 25 | 0 | 0 |
+| `labor_board_ugly_002` | 25 | 0 | 0 |
+| `osha_incident_ugly_006` | 25 | 0 | 0 |
+| `procurement_contract_ugly_002` | 25 | 0 | 0 |
+| `puc_order_ugly_002` | 25 | 0 | 0 |
+| `sec_material_event_ugly_006` | 23 | 2 | 0 |
+| `state_ag_settlement_ugly_002` | 25 | 0 | 0 |
+
+Residue adjudication:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_residue_adjudication.md
+```
+
+```text
+residue rows: 3
+classifications:
+  query_planning_gap: 1
+  source_support_adjudication_needed: 2
+surfaces:
+  compile_surface_gap: 1
+  hybrid_join_gap: 1
+  query_surface_gap: 1
+hygiene:
+  compatibility rows: 0
+  runtime load errors: 0
+  write proposal rows: 0
+```
+
+Residue rows:
+
+| Fixture | Row | Verdict | Surface | Note |
+| --- | --- | --- | --- | --- |
+| `court_order_ugly_002` | `q010` | partial | hybrid_join_gap | chronology ordering needed a better multi-hop join across termination, LOC sustain, Board dismissal, and Federal Circuit affirmance |
+| `sec_material_event_ugly_006` | `q006` | partial | query_surface_gap | CEO identity found, age was present in source text but query path tried an invalid `memberchk/2` support shape |
+| `sec_material_event_ugly_006` | `q015` | partial | compile_surface_gap | officer-tenure facts for CFO and board-member roles were not durable enough, though source text support existed |
+
+Provider metadata:
+
+The run used OpenRouter without explicit provider pinning. Artifact-level
+metadata records mixed backend providers across calls (`AkashML`, `Ambient`,
+`SiliconFlow`, `Parasail`, `WandB`, plus a small unknown remainder). Treat this
+as current-product hosted-path evidence, not single-provider variance evidence.
+
+Read:
+
+This is the strongest fresh ugly English public-document transfer result so
+far: `197 / 3 / 0` on 200 rows with clean hygiene. The important caveat is that
+compile-gate pressure did not disappear; QA was excellent while the compile
+gate remained meaningfully noisy, including four blocking-tier holds. That
+means the product-facing answer path is strong, but the compiler coverage lens
+is still telling us where release-grade evidence surfaces are thinner than the
+QA score alone suggests.
