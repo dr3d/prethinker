@@ -1,0 +1,40 @@
+United States Government Accountability Office
+Office of the General Counsel
+
+Matter of: Enviremedial Services, Inc.
+File: B-423552.3
+Date: March 24, 2026
+
+Counsel:
+- For protester: Anuj Vohra, Issac D. Schabes, Emily P. Golchini (Crowell & Moring LLP)
+- For intervenor BryMak: Lucas T. Hanback, Jules L. Szanton, Timothy A. Wieroniey (Rogers Joseph O'Donnell PC)
+- For agency: Michael P. Wilt (Department of the Army)
+- GAO/OGC participating: Christopher Alwood, Alexander O. Levine
+
+DIGEST
+1. Protest challenging agency's evaluation of past performance relevance is dismissed as untimely.
+2. Protest challenging agency's evaluation of past performance is denied.
+3. Protest challenging agency's best-value tradeoff is denied.
+
+We deny the protest.
+
+Procurement: RFP No. W912HP25R1000, issued February 10, 2025 by Department of the Army, Corps of Engineers, as a small business set-aside under FAR part 15. Fixed-price IDIQ, 12-month base + four 12-month option periods. 18 sites in GA/NC/SC supporting 81st Readiness Division. Closing date: March 13.
+
+Prior decision: Enviremedial Servs., B-423552, B-423552.2, Aug. 28, 2025 (sustained in part).
+
+Comparison table after agency reevaluation:
+  Understanding of the Work:   BryMak Good           / ESI Outstanding
+  Past Performance Relevancy:  BryMak Very Relevant  / ESI Very Relevant
+  Past Performance Confidence: BryMak Substantial    / ESI Substantial Confidence
+  Price:                       BryMak $16,754,056    / ESI $17,110,333
+
+Award notice to ESI: December 3. Current protest filed: December 17, 2025.
+
+Reconsideration regulation: 4 C.F.R. § 21.14(a),(b). 10-day deadline.
+
+ESI contract had 3 marginal ratings on a 6-month interim CPAR evaluation (63rd Readiness Division contract).
+BryMak's subcontractor: CB Facilities Solutions (CBFS).
+
+SSA conclusion: $356,277 / 2.1% price advantage to BryMak; "small technical benefit" / "slight" advantage to ESI; BryMak represented best value as lower-priced proposal.
+
+Signed: Edda Emmanuelli Perez, General Counsel.

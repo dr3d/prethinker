@@ -1,0 +1,24 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "procurement_contract_ugly_003",
+  "source_family": "procurement",
+  "source_title": "GAO Decision, Enviremedial Services, Inc., B-423552.3 (Department of the Army, Corps of Engineers; March 24, 2026)",
+  "source_url": "https://www.gao.gov/products/b-423552.3",
+  "source_date": "2026-03-24",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "source_coordinates",
+    "tables",
+    "cross_section",
+    "procedural_history",
+    "footnotes"
+  ]
+}

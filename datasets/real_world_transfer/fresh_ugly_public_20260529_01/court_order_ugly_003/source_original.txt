@@ -1,0 +1,55 @@
+NOTE: This disposition is nonprecedential.
+United States Court of Appeals for the Federal Circuit
+
+IN RE: KWANGJIN SONG, Appellant
+2025-1705
+
+Appeal from the United States Patent and Trademark Office, Patent Trial and Appeal Board in No. 18/199,940.
+Decided: February 18, 2026.
+
+Counsel:
+KWANGJIN SONG, Rockwell, NC, pro se.
+MARY L. KELLY, Office of the Solicitor, United States Patent and Trademark Office, Alexandria, VA, for appellee John A. Squires. Also represented by KAKOLI CAPRIHAN, NICHOLAS THEODORE MATICH, IV, ROBERT J. MCMANUS.
+
+Before DYK, HUGHES, and STOLL, Circuit Judges.
+PER CURIAM.
+
+Appeal from PTAB; application No. 18/199,940 filed May 20, 2023, prosecuted pro se.
+
+Prior art:
+- U.S. Patent Publication No. 2018/0043656 to Song et al. ("Song '656"), published February 15, 2018
+- U.S. Patent Publication No. 2016/0243525 to Song et al. ("Song '525"), published August 25, 2016
+
+Companion case: In re Song, No. 2025-1653 (also decided today).
+Jurisdiction: 28 U.S.C. § 1295(a)(4)(A).
+
+Contested claims: 1, 2, 4, 6-9, 12-21, 23, and 25-39.
+
+Claim 1 (porous separator film) recites:
+(a) matrix polymer with Tm or Tg >= 180 C;
+(b) open and interconnecting pore structure (Gurley air permeability >= 1 sec/100 cc; porosity <= 90 %);
+(c) ionic conductivity characterized by MacMullin number (NM) 1-15.
+
+Statutory grounds:
+- 35 U.S.C. § 102(a)(1) anticipation by Song '656 (all contested claims)
+- 35 U.S.C. § 102(a)(1) anticipation by Song '525 (claims 1, 2, 4, 6-9, 12-21, 23, 25-27, 38, 39)
+- 35 U.S.C. § 103 obviousness over Song '525 (claims 28-37)
+
+Footnote 1: "J.A." = corrected joint appendix; Dkt. No. 24.
+Footnote 2: Appellant invoked § 102(b)(2). Court: § 102(b)(2) can only disqualify prior art cited under § 102(a)(2); here references cited under § 102(a)(1); exception inapplicable.
+
+Cases cited:
+- Rapoport v. Dement, 254 F.3d 1053, 1057 (Fed. Cir. 2001)
+- Adasa Inc. v. Avery Dennison Corp., 55 F.4th 900, 913 (Fed. Cir. 2022)
+- Am. Calcar, Inc. v. Am. Honda Motor Co., 651 F.3d 1318, 1341 (Fed. Cir. 2011)
+- Arendi S.A.R.L. v. Apple Inc., 832 F.3d 1355, 1361 (Fed. Cir. 2016)
+- MEHL/Biophile Int'l Corp. v. Milgraum, 192 F.3d 1362, 1365 (Fed. Cir. 1999)
+- In re Google Tech. Holdings LLC, 980 F.3d 858, 863 (Fed. Cir. 2020)
+
+Holdings:
+- Preamble "separator film" not limiting; claim 1 recites structurally complete device.
+- Song '656 explicitly discloses open and interconnected pore structure; inherent anticipation not necessary.
+- Song '525 directly discloses open and interconnecting pore structure (Figure 2 identical to Figure 2B in appealed application).
+- Appellant forfeited "unanalogous" argument by not raising before Board.
+
+Disposition: AFFIRMED.

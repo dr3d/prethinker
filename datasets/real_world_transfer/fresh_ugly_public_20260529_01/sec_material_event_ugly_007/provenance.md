@@ -1,0 +1,8 @@
+# Provenance — sec_material_event_ugly_007
+
+- Source URL: https://www.sec.gov/Archives/edgar/data/1804745/000180474526000015/drvn-20260225.htm
+- Document: Driven Brands Holdings Inc., Current Report on Form 8-K filed pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934, Date of report (date of earliest event reported): February 25, 2026.
+- Official-source status: Public-record SEC EDGAR filing.
+- Collection date: 2026-05-29.
+- Extraction method: Retrieved the EDGAR HTML 8-K filing and extracted its text. source.md is a faithful Markdown transcription of the cover-page metadata block, the Item 4.02 disclosure (Determination, Lease Adjustments, Cash Adjustments, Expense Classification, Other Errors, Material Weaknesses, Form 12b-25 Notice, Auditor Discussion), Forward Looking Statements, Item 9.01 Exhibits, and Signatures. The EDGAR HTML uses multiple separate untagged single-row tables to present the cover-page metadata (issuer name, jurisdiction, IRS EIN, address, ZIP, ticker, exchange); these are consolidated into a single labeled [REGISTRANT COVER PAGE] block in source.md. The EDGAR HTML also displays two divergent Commission file number values on the cover page (001-39898 in the document header; 139898 in the structured cover-page table); both are preserved in source.md to reflect the as-filed document.
+- Extraction caveats: Inline-XBRL tag markup and presentation-only HTML elements (page-break artifacts, dollar-sign formatting on $0.01 par value) are simplified or preserved as plain text. All dates, period identifiers, dollar amounts (par value only), counterparty names, error categories, regulatory citations, signature block, and the verbatim "Restatement" defined term are retained as in the filing.

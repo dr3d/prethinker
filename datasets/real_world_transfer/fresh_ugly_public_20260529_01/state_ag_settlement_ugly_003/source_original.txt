@@ -1,0 +1,44 @@
+ATTORNEY GENERAL OF THE STATE OF NEW YORK
+BUREAU OF CONSUMER FRAUDS & PROTECTION
+
+In the Matter of the Investigation by Letitia James, Attorney General of New York, of Equifax Information Services LLC, Respondent.
+AOD 24-102
+ASSURANCE OF DISCONTINUANCE
+
+Investigation commenced under Executive Law § 63(12) and GBL Article 22-A (§§ 349-350).
+
+FINDINGS:
+- Equifax = for-profit Georgia LLC; principal place of business 1550 Peachtree Street, N.W., Atlanta, GA 30309.
+- Registered agent in NY: The Prentice-Hall Corporation System, Inc., 80 State Street, Albany NY 12207.
+- "OMS Issue": code change to Online Model Server on March 17, 2022.
+- Equifax initiated investigation March 22, 2022; partially resolved April 6, 2022; fully resolved April 8, 2022.
+- ~76,000 credit-seeking NY consumers experienced negative score shifts.
+- Unknown number of additional NY consumers had affected "soft" credit inquiries not included in Equifax's calculation.
+- Equifax's representations of consistent-formula calculation were incorrect while OMS Issue was operating.
+
+AGREEMENT (39 paragraphs total):
+Prospective Relief (paras 5-14):
+- Comply with Exec. Law § 63(12), GBL §§ 349, 350, 380-j, 15 U.S.C. 1681 et seq.
+- Comply with FCRA 15 U.S.C. § 1681e(b) and NYFCRA GBL § 380-j(a).
+- Update change-control policies; Change Advisory Board review.
+- Developer training module on FCRA accuracy.
+- Weekly monitoring of incident reports for adverse-impact issues.
+- Cooperate with NYAG info requests re OMS Issue; Public Officers Law § 87, § 89(5) procedures.
+- NYAG release & discharge re OMS Issue.
+
+Monetary Relief (para 15):
+- $725,000 under GBL §§ 349-d; due within 30 days; payable to AAG Glenna Goldis, 28 Liberty Street, 20th Floor, New York NY 10005.
+
+Miscellaneous:
+- Para 17: Equifax does not admit any negligence, wrongdoing, or violation of law.
+- Para 18: default under paras 6-14 violates the Assurance.
+- Para 26: voidable if material representations later inaccurate.
+- Para 36: counterparts clause.
+- Para 37: effective date January 2, 2025.
+
+Signatures:
+- For NYAG: Letitia James (AG); Jane Azia (Bureau Chief) (212)416-8727; Glenna Goldis (AAG) (646)856-3697.
+- For Equifax: Nick Oldham, Chief Compliance Officer (Nicholas.Oldham@Equifax.com).
+- Counsel for Equifax: John C. Redding, Alston & Bird LLP, 1120 South Tryon Street, Ste. 300, Charlotte NC 28203-6818, (704) 444-1070.
+
+Date: Jan. 2, 2025.

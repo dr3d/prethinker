@@ -18726,7 +18726,8 @@ def _source_record_messy_summary_companions(
         _source_record_missing_field_count_companion(runtime, utterance=utterance),
         _source_record_assessment_contrast_companion(runtime, utterance=utterance),
         _source_record_distinct_field_count_companion(runtime, utterance=utterance),
-        _source_record_identifier_set_companion(runtime, utterance=utterance),
+        _source_record_identifier_set_companion(runtime, utterance=utterance, query_intents=query_intents),
+        _source_record_same_day_case_disposition_companion(runtime, utterance=utterance, query_intents=query_intents),
         _compiled_case_identifier_location_roster_companion(runtime, query_intents=query_intents),
         _source_record_citation_list_companion(runtime, utterance=utterance),
         _source_record_exhibit_index_companion(runtime, utterance=utterance),
@@ -19628,11 +19629,9 @@ def _source_record_identifier_set_companion(
     runtime: CorePrologRuntime,
     *,
     utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:identifier|identifiers|reference number|reference numbers|report id|inspection-related|nr)\b", text):
-        return None
-    if not re.search(r"\b(?:what|which|how many|list|identify|reference|identifier|id|nr|number)\b", text):
+    if not _source_record_identifier_set_active(utterance=utterance, query_intents=query_intents):
         return None
 
     support_rows: list[dict[str, str]] = []
@@ -19668,6 +19667,8 @@ def _source_record_identifier_set_companion(
         )
 
     text_atoms_by_row = {source_row: atom for source_row, atom in _source_record_text_atoms(runtime)}
+    surfaces_by_row = _source_record_surface_mentions_by_row(runtime)
+    query_label = _source_record_identifier_label_from_query_intents(query_intents)
     labels_by_row: dict[str, str] = {}
     numeric_by_row: dict[str, list[str]] = {}
     for fact in _runtime_fact_rows(runtime):
@@ -19731,6 +19732,27 @@ def _source_record_identifier_set_companion(
                 text_atom=text_atom,
             )
 
+    for source_row, surface_mentions in sorted(surfaces_by_row.items(), key=lambda item: _source_row_sort_key(item[0])):
+        row_label = labels_by_row.get(source_row, "")
+        row_text_atom = text_atoms_by_row.get(source_row, "")
+        label = (
+            _source_record_identifier_label(row_label)
+            or _source_record_identifier_label(row_text_atom)
+            or query_label
+            or "identifier"
+        )
+        for atom, display in surface_mentions:
+            if not _source_record_identifier_surface_candidate(atom=atom, display=display):
+                continue
+            append_row(
+                source_row=source_row,
+                label=label,
+                value=atom,
+                source_predicate="source_record_surface_mention",
+                text_atom=row_text_atom,
+                display_override=display,
+            )
+
     if not support_rows:
         return None
     support_rows.sort(key=lambda row: (_source_row_sort_key(row.get("SourceRow", "")), row.get("IdentifierKind", "")))
@@ -19759,14 +19781,95 @@ def _source_record_identifier_set_companion(
             "source_record_field_item_pair(SourceRow, LeftField, LeftValue, RightField, RightValue).",
             "source_record_numeric_token(SourceRow, Value).",
             "source_record_text_atom(SourceRow, TextAtom).",
+            "source_record_surface_mention(SourceRow, MentionAtom, MentionDisplay).",
         ],
     }
+
+
+def _source_record_identifier_set_active(
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> bool:
+    tokens = _query_intents_target_tokens(query_intents)
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        tokens.update(_query_intent_constraint_tokens(intent))
+        intent_type = str(intent.get("intent_type", "")).strip()
+        tokens.update(token for token in _query_atom_tokens(intent_type) if len(token) >= 3)
+    identifier_tokens = {
+        "case",
+        "control",
+        "docket",
+        "document",
+        "fei",
+        "file",
+        "id",
+        "identifier",
+        "identifiers",
+        "inspection",
+        "investigation",
+        "letter",
+        "number",
+        "numbers",
+        "reference",
+        "report",
+        "tracking",
+    }
+    if tokens & identifier_tokens and (tokens & {"id", "identifier", "identifiers", "number", "numbers", "reference"}):
+        return True
+    text = str(utterance or "").casefold()
+    if not re.search(r"\b(?:identifier|identifiers|reference number|reference numbers|report id|inspection-related|nr)\b", text):
+        return False
+    return bool(re.search(r"\b(?:what|which|how many|list|identify|reference|identifier|id|nr|number)\b", text))
+
+
+def _source_record_identifier_label_from_query_intents(query_intents: list[dict[str, Any]] | None) -> str:
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        fields = [
+            *[str(item or "") for item in intent.get("target_terms", []) or []],
+            *[str(item or "") for item in intent.get("answer_constraints", []) or []],
+            str(intent.get("intent_type", "") or ""),
+        ]
+        for field in fields:
+            label = _source_record_identifier_label(field)
+            if label:
+                return label
+    return ""
+
+
+def _source_record_identifier_surface_candidate(*, atom: str, display: str) -> bool:
+    shown = str(display or "").strip()
+    normalized = _normalize_source_record_display_value(atom or shown)
+    if not shown or not re.search(r"\d", shown + normalized):
+        return False
+    shown_key = _compact_identifier_key(shown)
+    normalized_key = _compact_identifier_key(normalized)
+    if not shown_key and not normalized_key:
+        return False
+    lower_display = shown.casefold()
+    if re.search(r"\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\b", lower_display):
+        return False
+    if re.fullmatch(r"\d{1,2}[/-]\d{1,2}[/-]\d{2,4}", shown):
+        return False
+    if re.fullmatch(r"\d{4}[-_/]\d{1,2}[-_/]\d{1,2}", shown):
+        return False
+    has_letter_digit = bool(re.search(r"[a-zA-Z]", shown + normalized)) and bool(re.search(r"\d", shown + normalized))
+    has_identifier_punctuation = bool(re.search(r"[#./-]", shown)) or "_" in normalized
+    return has_letter_digit and has_identifier_punctuation
 
 
 def _source_record_identifier_label(value: str) -> str:
     tokens = set(_source_record_field_name_tokens(value))
     if not tokens:
         return ""
+    if {"document", "control", "number"} <= tokens:
+        return "document_control_number"
+    if {"control", "number"} <= tokens:
+        return "control_number"
     if {"incorporation", "state", "country", "code"} <= tokens:
         return "incorporation_state_country_code"
     if {"file", "number"} <= tokens:
@@ -19902,6 +20005,120 @@ def _source_record_identifier_label_display(label: str) -> str:
     if all(1 < len(part) <= 5 for part in parts):
         return "-".join(part.upper() for part in parts)
     return _display_source_phrase("_".join(parts))
+
+
+def _source_record_same_day_case_disposition_companion(
+    runtime: CorePrologRuntime,
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> dict[str, Any] | None:
+    if not _source_record_same_day_case_disposition_active(utterance=utterance, query_intents=query_intents):
+        return None
+    surfaces_by_row = _source_record_surface_mentions_by_row(runtime)
+    support_rows: list[dict[str, str]] = []
+    for source_row, display in sorted(_source_record_text_display_by_row(runtime).items(), key=lambda item: _source_row_sort_key(item[0])):
+        text = unicodedata.normalize("NFKC", str(display or ""))
+        lowered = text.casefold()
+        if not (
+            re.search(r"\b(?:also|same)\s+decid(?:e|ed)\s+(?:today|the same day)\b", lowered)
+            or re.search(r"\bsame\s+day\b", lowered)
+        ):
+            continue
+        if not re.search(r"\b(?:affirm(?:ing|ed)?|uphold(?:ing|s|held)?|deny|denied|grant(?:ed)?|dismiss(?:ed)?)\b", lowered):
+            continue
+        case_display = _source_record_same_day_case_identifier_display(
+            text=text,
+            surface_mentions=surfaces_by_row.get(source_row, []),
+        )
+        if not case_display:
+            continue
+        support_rows.append(
+            {
+                "SupportKind": "source_record_same_day_case_disposition",
+                "SourceRow": source_row,
+                "CaseDisplay": case_display,
+                "DispositionDisplay": _source_record_same_day_case_disposition_excerpt(text),
+                "SourceTextDisplay": text,
+                "SupportClass": "deterministic-source-record-summary",
+            }
+        )
+    if not support_rows:
+        return None
+    return {
+        "query": "source_record_same_day_case_disposition_support(SourceRow, CaseDisplay, DispositionDisplay).",
+        "result": {
+            "status": "success",
+            "predicate": "source_record_same_day_case_disposition_support",
+            "prolog_query": "source_record_same_day_case_disposition_support(SourceRow, CaseDisplay, DispositionDisplay).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "query-only same-day companion-case support preserved admitted source-record text "
+                    "that links another case identifier to a same-day disposition"
+                ),
+                "utterance": utterance,
+                "query_intents": query_intents or [],
+            },
+        },
+        "derived_from_queries": [
+            "source_record_text_display(SourceRow, Text).",
+            "source_record_surface_mention(SourceRow, MentionAtom, MentionDisplay).",
+        ],
+    }
+
+
+def _source_record_same_day_case_disposition_active(
+    *,
+    utterance: str,
+    query_intents: list[dict[str, Any]] | None = None,
+) -> bool:
+    tokens = _query_intents_target_tokens(query_intents)
+    for intent in query_intents or []:
+        if not isinstance(intent, dict):
+            continue
+        tokens.update(_query_intent_constraint_tokens(intent))
+        tokens.update(token for token in _query_atom_tokens(str(intent.get("intent_type", ""))) if len(token) >= 3)
+    if {"case", "companion"} & tokens and {"disposition", "status", "same", "date", "decided"} & tokens:
+        return True
+    text = str(utterance or "").casefold()
+    return bool(
+        re.search(r"\b(?:companion|same day|decided the same day|also decided)\b", text)
+        and re.search(r"\b(?:case|disposition|status|decided)\b", text)
+    )
+
+
+def _source_record_same_day_case_identifier_display(
+    *,
+    text: str,
+    surface_mentions: list[tuple[str, str]],
+) -> str:
+    for _atom, display in surface_mentions:
+        shown = str(display or "").strip()
+        if re.fullmatch(r"(?:No\.\s*)?(?:\d{4}-\d+(?:\.\d+)?)", shown, flags=re.IGNORECASE):
+            return shown if shown.casefold().startswith("no.") else f"No. {shown}"
+    match = re.search(r"\bNo\.\s*(?P<number>\d{4}-\d+(?:\.\d+)?)\b", text, flags=re.IGNORECASE)
+    if match:
+        return f"No. {match.group('number')}"
+    return ""
+
+
+def _source_record_same_day_case_disposition_excerpt(text: str) -> str:
+    value = unicodedata.normalize("NFKC", str(text or ""))
+    if not value:
+        return ""
+    for pattern in (
+        r"[^.]*\b(?:also|same)\s+decid(?:e|ed)\s+(?:today|the same day)\b[^.]*\.",
+        r"[^.]*\bsame\s+day\b[^.]*\.",
+    ):
+        match = re.search(pattern, value, flags=re.IGNORECASE)
+        if match:
+            return re.sub(r"\s+", " ", match.group(0)).strip()
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def _compiled_case_identifier_location_roster_companion(
@@ -23101,6 +23318,11 @@ def _source_record_dated_event_inventory_companion(
             sequence += 1
     if not support_rows:
         return None
+    if structured_intent is not None:
+        support_rows.sort(key=_source_record_dated_event_inventory_sort_key)
+        for index, row in enumerate(support_rows, start=1):
+            row["SequenceIndex"] = str(index)
+            row["FullAnswerDisplay"] = f"{index}. {row['EventDateDisplay']}: {row['EventDisplay']}"
     reasoning_basis = {
         "kind": "core-local",
         "note": (
@@ -23141,6 +23363,24 @@ def _source_record_dated_event_inventory_companion(
     }
 
 
+def _source_record_dated_event_inventory_sort_key(row: dict[str, str]) -> tuple[int, int, int, int, tuple[int, int], str]:
+    event_date = str(row.get("EventDate", "")).strip()
+    full_key = _date_atom_sort_key(event_date)
+    if full_key is not None:
+        return (*full_key, 0, _source_row_sort_key(row.get("SourceRow", "")), row.get("EventDisplay", ""))
+    match = re.fullmatch(r"(?P<year>(?:19|20)\d{2})_(?P<month>\d{2})", event_date)
+    if match:
+        return (
+            int(match.group("year")),
+            int(match.group("month")),
+            0,
+            0,
+            _source_row_sort_key(row.get("SourceRow", "")),
+            row.get("EventDisplay", ""),
+        )
+    return (9999, 99, 99, 1, _source_row_sort_key(row.get("SourceRow", "")), row.get("EventDisplay", ""))
+
+
 def _source_record_dated_event_inventory_intent(
     query_intents: list[dict[str, Any]] | None,
 ) -> dict[str, Any] | None:
@@ -23166,6 +23406,7 @@ def _source_record_dated_event_inventory_intent(
 def _source_record_display_date_inventory_mentions(runtime: CorePrologRuntime) -> list[dict[str, str]]:
     out: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
+    default_year = _source_record_runtime_default_year(runtime)
     for source_row, surface_kind, cell_index, display in sorted(
         _source_record_display_surfaces(runtime),
         key=lambda item: (_source_row_sort_key(item[0]), item[1], item[2]),
@@ -23175,7 +23416,7 @@ def _source_record_display_date_inventory_mentions(runtime: CorePrologRuntime) -
         text = unicodedata.normalize("NFKC", str(display or "")).strip()
         if not text or len(text) > 1200:
             continue
-        for mention in _source_record_display_date_mentions(text):
+        for mention in _source_record_display_date_mentions(text, default_year=default_year):
             key = (source_row, surface_kind, mention["DateDisplay"])
             if key in seen:
                 continue
@@ -23196,9 +23437,14 @@ def _source_record_display_date_inventory_mentions(runtime: CorePrologRuntime) -
     return out
 
 
-def _source_record_display_date_mentions(text: str) -> list[dict[str, str]]:
+def _source_record_display_date_mentions(text: str, *, default_year: str = "") -> list[dict[str, str]]:
     mentions: list[dict[str, str]] = []
     seen: set[tuple[int, str]] = set()
+    occupied: list[tuple[int, int]] = []
+
+    def overlaps(start: int, end: int) -> bool:
+        return any(left < end and start < right for left, right in occupied)
+
     for match in re.finditer(r"(?<!\d)(?P<year>(?:19|20)\d{2})[-_/](?P<month>\d{1,2})[-_/](?P<day>\d{1,2})(?!\d)", text):
         year = match.group("year")
         month = match.group("month").lstrip("0") or "0"
@@ -23212,8 +23458,125 @@ def _source_record_display_date_mentions(text: str) -> list[dict[str, str]]:
                 "DateAtom": f"{year}_{month.zfill(2)}_{day.zfill(2)}",
                 "DateDisplay": match.group(0),
                 "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
             }
         )
+        occupied.append((match.start(), match.end()))
+    month_pattern = "|".join(re.escape(month) for month in _SOURCE_MONTHS)
+    month_day_year = re.compile(
+        rf"(?<![A-Za-z0-9])(?P<month>{month_pattern})\s+"
+        r"(?P<day>[0-3]?\d)(?:st|nd|rd|th)?[,]?\s+"
+        r"(?P<year>(?:19|20)\d{2})(?!\d)",
+        flags=re.IGNORECASE | re.UNICODE,
+    )
+    for match in month_day_year.finditer(text):
+        if overlaps(match.start(), match.end()):
+            continue
+        month_name = match.group("month").casefold()
+        month_number = _SOURCE_MONTHS.get(month_name, "")
+        if not month_number:
+            continue
+        day = int(match.group("day"))
+        if day < 1 or day > 31:
+            continue
+        snippet = re.sub(r"\s+", " ", match.group(0)).strip(" ,.;:")
+        key = (match.start(), snippet.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        mentions.append(
+            {
+                "DateAtom": f"{match.group('year')}_{month_number}_{day:02d}",
+                "DateDisplay": snippet,
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+        occupied.append((match.start(), match.end()))
+    day_month_year = re.compile(
+        rf"(?<![A-Za-z0-9])(?P<day>[0-3]?\d)(?:st|nd|rd|th)?\s+"
+        rf"(?P<month>{month_pattern})\s+(?P<year>(?:19|20)\d{{2}})(?!\d)",
+        flags=re.IGNORECASE | re.UNICODE,
+    )
+    for match in day_month_year.finditer(text):
+        if overlaps(match.start(), match.end()):
+            continue
+        month_name = match.group("month").casefold()
+        month_number = _SOURCE_MONTHS.get(month_name, "")
+        if not month_number:
+            continue
+        day = int(match.group("day"))
+        if day < 1 or day > 31:
+            continue
+        snippet = re.sub(r"\s+", " ", match.group(0)).strip(" ,.;:")
+        key = (match.start(), snippet.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        mentions.append(
+            {
+                "DateAtom": f"{match.group('year')}_{month_number}_{day:02d}",
+                "DateDisplay": snippet,
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+        occupied.append((match.start(), match.end()))
+    month_day = re.compile(
+        rf"(?<![A-Za-z0-9])(?P<month>{month_pattern})\s+"
+        r"(?P<day>[0-3]?\d)(?:st|nd|rd|th)?(?!\s*[,]?\s*(?:19|20)\d{2})(?![A-Za-z0-9])",
+        flags=re.IGNORECASE | re.UNICODE,
+    )
+    for match in month_day.finditer(text):
+        if overlaps(match.start(), match.end()):
+            continue
+        month_name = match.group("month").casefold()
+        month_number = _SOURCE_MONTHS.get(month_name, "")
+        if not month_number:
+            continue
+        day = int(match.group("day"))
+        if day < 1 or day > 31:
+            continue
+        snippet = re.sub(r"\s+", " ", match.group(0)).strip(" ,.;:")
+        key = (match.start(), snippet.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        year_prefix = f"{int(default_year):04d}_" if str(default_year).isdigit() else ""
+        mentions.append(
+            {
+                "DateAtom": f"{year_prefix}{month_number}_{day:02d}" if year_prefix else f"month_day_{month_number}_{day:02d}",
+                "DateDisplay": snippet,
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+        occupied.append((match.start(), match.end()))
+    month_year = re.compile(
+        rf"(?<![A-Za-z0-9])(?P<month>{month_pattern})\s+(?P<year>(?:19|20)\d{{2}})(?!\d)",
+        flags=re.IGNORECASE | re.UNICODE,
+    )
+    for match in month_year.finditer(text):
+        if overlaps(match.start(), match.end()):
+            continue
+        month_name = match.group("month").casefold()
+        month_number = _SOURCE_MONTHS.get(month_name, "")
+        if not month_number:
+            continue
+        snippet = re.sub(r"\s+", " ", match.group(0)).strip(" ,.;:")
+        key = (match.start(), snippet.casefold())
+        if key in seen:
+            continue
+        seen.add(key)
+        mentions.append(
+            {
+                "DateAtom": f"{match.group('year')}_{month_number}",
+                "DateDisplay": snippet,
+                "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
+            }
+        )
+        occupied.append((match.start(), match.end()))
     text_date_pattern = re.compile(
         r"(?<![A-Za-z0-9])(?P<day>[0-3]?\d)(?![A-Za-z0-9])"
         r"(?P<middle>[^\d]{1,48}?)"
@@ -23221,11 +23584,21 @@ def _source_record_display_date_mentions(text: str) -> list[dict[str, str]]:
         flags=re.UNICODE,
     )
     for match in text_date_pattern.finditer(text):
+        if overlaps(match.start(), match.end()):
+            continue
         day = int(match.group("day"))
         if day < 1 or day > 31:
             continue
         middle = match.group("middle")
         if not re.search(r"[^\W\d_]", middle, flags=re.UNICODE):
+            continue
+        middle_text = middle.casefold()
+        if "and between" in middle_text:
+            continue
+        if not (
+            re.search(rf"\b(?:{month_pattern})\b", middle, flags=re.IGNORECASE)
+            or re.search(r"\bof\s+[^\W\d_]+", middle, flags=re.UNICODE)
+        ):
             continue
         if re.search(r"[-_/]{2,}", middle):
             continue
@@ -23239,8 +23612,10 @@ def _source_record_display_date_mentions(text: str) -> list[dict[str, str]]:
                 "DateAtom": f"{match.group('year')}_day_{day:02d}",
                 "DateDisplay": snippet,
                 "EventDisplay": _source_record_display_date_context(text, match.start(), match.end()),
+                "OccurrenceStart": str(match.start()),
             }
         )
+    mentions.sort(key=lambda item: int(item.get("OccurrenceStart", "0") or "0"))
     return mentions
 
 
@@ -33509,6 +33884,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "source_record_measurement_discrepancy_support",
             "source_record_threshold_comparison_support",
             "source_record_document_event_chronology_support",
+            "source_record_same_day_case_disposition_support",
             "source_record_group_formation_exception_support",
             "source_record_destination_support",
             "source_record_body_signatory_support",
@@ -33606,7 +33982,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
-            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_question_overlap_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_case_identifier_location_roster_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
+            "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_question_overlap_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_case_identifier_location_roster_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_case_disposition_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
             "Calendar-authority policy: source_record_era_date_conversion_support rows are not source-stated facts; they are deterministic calendar conversions triggered by admitted source-display era dates and must be treated as external calendar authority support.",
             "Parenthetical role/name support policy: source_record_parenthetical_role_name_support rows are display evidence only. They can support source-stated entity/person/role rosters when activated by admitted person_role query results, but they do not create durable identity or alias facts.",
             "Employment-history support policy: source_record_employment_history_support rows are deterministic structured support rows for role-history, title-history, prior-employer, and biographical-employment questions. They can fully support listed roles, employers, and source-stated dates even when primitive role_appointed, employer, or worked_at predicates are incomplete; do not downgrade solely because those primitive predicates are missing.",
@@ -34007,9 +34383,7 @@ def _source_record_dated_event_inventory_reference_supported_by_results(
             if not isinstance(result_row, dict):
                 continue
             if str(result_row.get("SupportKind", "")) == "source_record_dated_event_inventory_item":
-                sequence_display = _display_source_phrase(
-                    result_row.get("FullAnswerDisplay") or result_row.get("EventDisplay") or ""
-                )
+                sequence_display = _display_source_phrase(result_row.get("EventDateDisplay") or "")
                 if sequence_display:
                     sequence_values.append(sequence_display)
             for value in _iter_scalar_values(result_row):
@@ -34371,6 +34745,8 @@ def _source_record_reference_supported_by_results(*, row: dict[str, Any], refere
             "source_record_status_inline_field_support",
             "source_record_semantic_target_window_support",
             "source_record_count_breakdown_support",
+            "source_record_identifier_set_support",
+            "source_record_same_day_case_disposition_support",
             "source_record_address_line_support",
             "method_actor_frame_source_support",
         }:

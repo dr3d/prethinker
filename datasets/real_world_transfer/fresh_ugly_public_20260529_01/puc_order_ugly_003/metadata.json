@@ -1,0 +1,24 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "puc_order_ugly_003",
+  "source_family": "puc",
+  "source_title": "Utah Public Service Commission, Order Memorializing Decision, In re Rocky Mountain Power (Application for Rate Increase), Docket No. 24-035-04",
+  "source_url": "https://pscdocs.utah.gov/electric/24docs/2403504/3403572403504omd6-24-2025.pdf",
+  "source_date": "2025-06-24",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "source_coordinates",
+    "tables",
+    "cross_section",
+    "deadlines",
+    "statutory_citations"
+  ]
+}

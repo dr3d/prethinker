@@ -1,0 +1,7 @@
+# Anti-leakage manifest — procurement_contract_ugly_003
+
+- The source document was NOT authored by an LLM. It is an official U.S. Government Accountability Office bid protest decision (Office of the General Counsel; File B-423552.3) published on gao.gov.
+- The source text was NOT rewritten or paraphrased by an LLM beyond condensation of repetitive parallel GAO case-string citations (documented in provenance.md). All identifiers, dates, dollar figures, statutory and regulatory cites, the comparison table, the digest, the substantive holdings, and the verbatim phrases ("and this decision"; "small technical benefit"; "approximately equal in importance to price"; "had [three] marginal ratings on a 6-month interim CPAR evaluation"; "a serious problem for which the contractor has not yet identified corrective actions"; "While our decision does not specifically address every argument...") are preserved verbatim; source_original.txt is a near-raw extraction.
+- No Prethinker source code, documentation, worksheets, compiled knowledge bases, run artifacts, prior QA outputs, or prior fixture answers were inspected or used in building this fixture.
+- All 25 questions were authored solely from the content of this public source document. No question requires outside knowledge or any system's internal vocabulary.
+- metadata.json fields llm_authored_source and llm_rewritten_source are both false.

@@ -1,0 +1,23 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "state_ag_settlement_ugly_003",
+  "source_family": "state_ag_settlement",
+  "source_title": "NY AG Assurance of Discontinuance, In the Matter of Equifax Information Services LLC, AOD 24-102",
+  "source_url": "https://ag.ny.gov/sites/default/files/settlements-agreements/equifax_information_services_assurance_of_discontinuance_2025.pdf",
+  "source_date": "2025-01-02",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "paragraph_numbers",
+    "statutory_citations",
+    "monetary",
+    "cross_section"
+  ]
+}

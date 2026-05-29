@@ -1,0 +1,15 @@
+# Fixture notes — sec_material_event_ugly_007
+
+## Why this document is "ugly"
+The 8-K combines a structurally awkward EDGAR cover page (six separately-rendered untagged tables for what is logically one issuer-metadata block, with two non-identical Commission file number values on the same cover page) with a multi-period, multi-category restatement disclosure that spans two prior fiscal years (FY2023 ended Dec 30, 2023; FY2024 ended Dec 28, 2024), every quarterly and YTD period within FY2024, and three specific 2025 quarterly periods (March 29; June 28; September 27, 2025). The Item 4.02 narrative names four enumerated error categories, each tied to different statement lines and different period scopes, plus an Other Errors bucket itemizing seven sub-items including an ATI-business revenue issue tagged primarily to fiscal year 2025. A separate Form 12b-25 filing is teed up for the same day with a precise 15-calendar-day extension. The forward-looking-statements section identifies three classes of forward-looking statements plus risk factors with sub-clauses. The document is rich with cross-section pressure (cover page <-> Item 4.02 <-> Item 9.01 <-> signatures) and absence/exception pressure (Expense Classification specifies no net change in total operating expenses; both emerging-growth-company boxes are unchecked).
+
+## QA pressure structures (per fresh_ugly_public_batch_v2 spec)
+- metadata/id/party (>=5): q001 (registrant name, jurisdiction, EIN), q002 (Commission file numbers), q003 (address+phone), q004 (signatory+title+date), q005 (auditor), q006 (ticker/par/exchange), q007 (Audit Committee + management determination party)
+- date/deadline/sequence (>=5): q008 (date of report + FY2024 year-end), q009 (FY2023 + FY2025 year-ends), q010 (2025 quarterly periods in calendar order), q011 (12b-25 extension days + expected filing date), q012 (ICFR not-effective date), q013 (event-order chronology)
+- table/list/citation/coord (>=5): q014 (four error categories), q015 (Item 4.02 + Item 9.01 coordinates), q016 (Exhibit 104 description), q017 (four checkbox regulatory citations), q018 (two balance-sheet dates for Lease Adjustments), q019 (seven Other-Errors sub-items list)
+- source-state/exception/absence (>=4): q020 (Expense Classification no-change-in-total exception), q021 (Cash Adjustments effect on statement of operations), q022 (two emerging-growth-company boxes not checked, verbatim text), q023 (ongoing review absence of finality)
+- cross-section (>=4): q002 (cover-page vs document-header CFN cross-reference), q013 (sequence spans Item 4.02 + 12b-25 + 10-K), q024 (Determination + FY2025 reporting plan), q025 (Forward-Looking + Item 4.02 categorization)
+- exact-wording (>=3): q022 (verbatim emerging-growth-company text), q023 (verbatim "review is ongoing"), q017 (verbatim regulatory citation strings)
+
+## What the QA does NOT do
+The QA does not ask for the magnitude of restated dollar amounts (the 8-K does not quantify them) or for assessment of the auditor's conclusions. All questions are answerable from the reproduced filing text.

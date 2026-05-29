@@ -1,0 +1,44 @@
+WARNING LETTER 320-26-22
+Seaway Pharma Inc. MARCS-CMS 717355 -- December 01, 2025
+
+Delivery Method: VIA UPS
+Product: Drugs
+
+Recipient: Venkata R. Gogineni, Ph.D., CEO
+Seaway Pharma Inc., 5 County Route 42, Massena, NY 13662
+FEI 3012275336
+Issuing Office: Office of Manufacturing Quality
+
+Salutation: Dear Dr. Gogineni and Mr. Lingam:
+
+Inspection: May 19 - June 18, 2025
+Form FDA 483 response reviewed: July 30, 2025
+
+Adulteration: drugs are adulterated within the meaning of section 501(a)(2)(B) FD&C Act, 21 U.S.C. 351(a)(2)(B).
+
+CGMP Violations:
+1. Failed to establish/follow QU written responsibilities and procedures (21 CFR 211.22(d)).
+   Released numerous batches between April 2024 and May 2025 prior to reviewing all test results (SOP No. QA-009 Rev 01 Batch Record Review and Release for Distribution).
+   Sub-citations: 21 CFR 211.165(a) strength testing; 21 CFR 211.194(a) lab records.
+
+2. Failed to conduct at least one identity test of each component (21 CFR 211.84(d)(1)).
+   High-risk DEG/EG concern: glycerin, sorbitol 70% used in OTC oral liquids for infants and children prior to identity testing.
+   Seaway argued no enforceable DEG/EG provisions; FDA responded USP is enforceable under section 501(b) FD&C Act, 21 U.S.C. 351(b).
+
+3. Failed to establish adequate written procedures for production and process control (21 CFR 211.100(a)).
+   Inadequate process validation for (b)(4) drug product; missing pre-defined critical steps, component lot, equipment ID.
+
+Responsibilities as a Contractor: FDA regards contractors as extensions of the manufacturer.
+
+Change of Ownership at Facility:
+- Previous WL May 14, 2019 (CMS #572904) to Kingston Pharma LLC -- same facility, multiple same responsible officials.
+- Subsequent inspections: September 2021, September 2023, June 2025.
+- Regulatory meetings: May 3, 2022 and May 13, 2024.
+- Conclusion: executive management oversight and control over the manufacture of drugs are inadequate.
+
+Ineffective Quality System / CGMP Consultant Recommended (21 CFR 211.34) / six-system audit.
+
+Conclusion: not all-inclusive list. Respond within 15 working days. Email CDER-OC-OMQ-Communications@fda.hhs.gov, ATTN: Lynnsey Renn.
+
+Signed: /s/ Francis Godwin, Director, Office of Manufacturing Quality, Office of Compliance, CDER.
+Content current as of: 12/09/2025.

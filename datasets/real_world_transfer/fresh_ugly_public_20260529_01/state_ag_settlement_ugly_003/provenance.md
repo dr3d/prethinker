@@ -1,0 +1,8 @@
+# Provenance — state_ag_settlement_ugly_003
+
+- Source URL: https://ag.ny.gov/sites/default/files/settlements-agreements/equifax_information_services_assurance_of_discontinuance_2025.pdf
+- Document: Office of the Attorney General of the State of New York, Bureau of Consumer Frauds & Protection, Assurance of Discontinuance, In the Matter of the Investigation by Letitia James, Attorney General of New York, of Equifax Information Services LLC, AOD 24-102, effective January 2, 2025.
+- Official-source status: Public State of New York government work, published on the NY AG settlements-agreements repository at ag.ny.gov. Public record.
+- Collection date: 2026-05-29.
+- Extraction method: Retrieved the official NY AG PDF and extracted its text. source.md is a faithful Markdown transcription preserving the caption, recitals, findings (paragraphs 1-9), agreement paragraphs (introduction, prospective relief paragraphs 5-14, monetary relief paragraphs 15-16, miscellaneous paragraph 17, subsequent proceedings paragraphs 18-20, effects of assurance paragraphs 21-24, communications paragraph 25, representations and warranties paragraphs 26-28, general principles paragraphs 29-37), and the signature block. Bracketed coordinate labels are added but the underlying text is verbatim.
+- Extraction caveats: Section paragraph 22 sentence "No party may assign, delegate, or otherwise transfer any of its rights or obligations under this Assurance without the prior written consent of the parties hereto" is preserved by inclusion of paragraphs 22 in source.md (the closing sentence is in source_original.txt). The "§" symbol and "&" in firm names are preserved. The "$725,000" dollar figure is preserved verbatim.

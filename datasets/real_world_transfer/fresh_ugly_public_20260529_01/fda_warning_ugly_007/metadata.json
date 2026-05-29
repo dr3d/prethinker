@@ -1,0 +1,24 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "fda_warning_ugly_007",
+  "source_family": "fda",
+  "source_title": "FDA Warning Letter, Seaway Pharma Inc., MARCS-CMS 717355, Warning Letter 320-26-22 (December 1, 2025)",
+  "source_url": "https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/seaway-pharma-inc-717355-12012025",
+  "source_date": "2025-12-01",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "source_coordinates",
+    "regulatory_citations",
+    "repeat_violations",
+    "cross_section",
+    "dual_addressees"
+  ]
+}

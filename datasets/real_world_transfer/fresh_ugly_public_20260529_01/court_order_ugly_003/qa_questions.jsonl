@@ -1,0 +1,25 @@
+{"id": "q001", "question": "What is the Federal Circuit docket number, on what date was the decision filed, and what is the disposition?"}
+{"id": "q002", "question": "Who were the three Circuit Judges on the panel, and what type of opinion did they issue?"}
+{"id": "q003", "question": "Who is the appellant, what is the appellant's status, and what city and state is listed for the appellant?"}
+{"id": "q004", "question": "Who argued the case for appellee from the USPTO Office of the Solicitor, and which other attorneys are listed as also representing appellee, and who is the named appellee?"}
+{"id": "q005", "question": "What is the patent application number at issue, and on what date was it filed?"}
+{"id": "q006", "question": "What is the companion case decided the same day, and what is its disposition?"}
+{"id": "q007", "question": "Under what statute does the Federal Circuit have jurisdiction over this appeal?"}
+{"id": "q008", "question": "On what date was the prior-art reference designated \"Song '656\" published, and what is its U.S. Patent Publication number?"}
+{"id": "q009", "question": "On what date was the prior-art reference designated \"Song '525\" published, and what is its U.S. Patent Publication number?"}
+{"id": "q010", "question": "List in chronological order: the publication of Song '525; the publication of Song '656; the filing of the appealed application; the decision in this appeal."}
+{"id": "q011", "question": "Which specific claim numbers of the appealed application did the examiner reject (the \"contested claims\")?"}
+{"id": "q012", "question": "Independent claim 1 of the appealed application recites three lettered sub-elements. What does each sub-element describe?"}
+{"id": "q013", "question": "State the specific numerical parameters recited in claim 1 for: crystalline melting/glass transition temperature; Gurley air permeability; porosity; and MacMullin number."}
+{"id": "q014", "question": "Under what statutory grounds and against which claim ranges did the examiner reject the contested claims using Song '656 and Song '525?"}
+{"id": "q015", "question": "What is the content of Footnote 1?"}
+{"id": "q016", "question": "Footnote 2 addresses appellant's \u00a7 102(b)(2) argument that his own patent publications should not be prior art. What did the court conclude about why \u00a7 102(b)(2) does not disqualify the references?"}
+{"id": "q017", "question": "What argument did appellant raise against the \u00a7 103 obviousness rejection of claims 28-37, and how did the court treat that argument?"}
+{"id": "q018", "question": "Did the court treat the word \"separator\" in the preamble of claim 1 as a limiting term, and what did it explain about the term?"}
+{"id": "q019", "question": "What did the court conclude about the comparison between Figures 2A and 2B of the appealed application and Figures 2A and 2B of Song '656?"}
+{"id": "q020", "question": "Why did the court say it did not need to address the Board's inherent-anticipation theory for the Song '525 ground?"}
+{"id": "q021", "question": "How did the court treat appellant's argument that distinctions such as \"multiple form factors\" and \"complete in-plane interconnectivity\" between pores establish a difference between the claim and the prior art?"}
+{"id": "q022", "question": "List four Federal Circuit cases the panel cites for anticipation, obviousness, and forfeiture standards (with citation)."}
+{"id": "q023", "question": "In what proceeding below was the case decided before reaching the Federal Circuit, and what is identified as the underlying Board number?"}
+{"id": "q024", "question": "What did appellant describe some of the resulting films of his disclosed process as having, and how did the court relate that description to the inherent-anticipation theory?"}
+{"id": "q025", "question": "In one word, what is the disposition of the appeal, and which Board decisions did the court specifically affirm?"}

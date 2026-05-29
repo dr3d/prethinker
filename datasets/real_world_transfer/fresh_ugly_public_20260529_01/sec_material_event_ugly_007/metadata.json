@@ -1,0 +1,24 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "sec_material_event_ugly_007",
+  "source_family": "sec",
+  "source_title": "Driven Brands Holdings Inc., Current Report on Form 8-K, Item 4.02 Non-Reliance on Previously Issued Financial Statements (Date of earliest event reported: February 25, 2026)",
+  "source_url": "https://www.sec.gov/Archives/edgar/data/1804745/000180474526000015/drvn-20260225.htm",
+  "source_date": "2026-02-25",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "cover_page_metadata",
+    "lists",
+    "cross_section",
+    "exceptions",
+    "exact_wording"
+  ]
+}

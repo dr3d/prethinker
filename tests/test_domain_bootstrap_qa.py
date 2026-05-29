@@ -2844,7 +2844,20 @@ def test_source_record_messy_summary_orders_non_english_document_chronology_inte
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="",
-        query_intents=_query_intents_for("document_chronology"),
+        query_intents=[
+            {
+                "intent_type": "document_chronology",
+                "target_terms": [
+                    "previous warning letter",
+                    "subsequent inspections",
+                    "regulatory meetings",
+                ],
+                "answer_constraints": ["chronological_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -2855,6 +2868,102 @@ def test_source_record_messy_summary_orders_non_english_document_chronology_inte
     assert "2024-06-24: source_metadata_document_date" in sequence
     assert "2024-07-24: final_report_deadline" in sequence
     assert "within 15 days of quarter end: quarterly_report_deadline" in sequence
+
+
+def test_source_record_dated_event_inventory_preserves_english_display_dates() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_display(src_line_0045, 'In a previous warning letter, dated May 14, "
+            "2019 (CMS #572904), the agency cited similar violations. Repeated failures demonstrated "
+            "during subsequent inspections conducted in September 2021, September 2023, and June 2025 "
+            "indicate inadequate oversight.')."
+        ),
+        (
+            "source_record_text_display(src_line_0046, 'The firm was notified during the two subsequent "
+            "regulatory meetings held with it on May 3, 2022, and May 13, 2024.')."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "document_chronology",
+                "target_terms": [
+                    "previous warning letter",
+                    "subsequent inspections",
+                    "regulatory meetings",
+                ],
+                "answer_constraints": ["chronological_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    sequence = companion["result"]["rows"][-1]["SequenceDisplay"]
+    for expected in [
+        "May 14, 2019",
+        "September 2021",
+        "May 3, 2022",
+        "September 2023",
+        "May 13, 2024",
+        "June 2025",
+    ]:
+        assert expected in sequence
+    assert "01, and between April 2024" not in sequence
+    assert qa_module._source_record_dated_event_inventory_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference=(
+            "May 14, 2019; September 2021; May 3, 2022; September 2023; "
+            "May 13, 2024; June 2025."
+        ),
+    )
+
+
+def test_source_record_dated_event_inventory_preserves_omitted_year_month_day() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_display(src_line_0040, 'On December 3, the agency notified the protester "
+            "of the post-corrective action award.')."
+        ),
+        "source_record_text_display(src_line_0047, 'The protester filed this protest on December 17, 2025.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "document_chronology",
+                "target_terms": ["agency notice", "protest filing"],
+                "answer_constraints": ["chronological_order"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_dated_event_inventory_support"
+    )
+    sequence = companion["result"]["rows"][-1]["SequenceDisplay"]
+    assert "December 3" in sequence
+    assert "December 17, 2025" in sequence
+    assert qa_module._source_record_dated_event_inventory_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="agency notified protester (December 3); protester filed protest (December 17, 2025).",
+    )
 
 
 def test_deadline_rule_examples_companion_expands_quarter_end_rule_after_anchor() -> None:
@@ -4481,6 +4590,88 @@ def test_source_record_identifier_set_extracts_labeled_list_identifiers() -> Non
     assert "entity file number (2026-05-20 to 2026-05-20): 001-99999" in displays
     assert "entity tax identification number (2026-05-20 to 2026-05-20): 52-1234567" in displays
     assert "trading symbol (2026-05-20 to 2026-05-20): abc" in displays
+
+
+def test_source_record_identifier_set_uses_structured_intent_surface_mentions() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_atom(src_line_0024, signatures).",
+        "source_record_text_atom(src_line_0030, dw_340357).",
+        "source_record_surface_mention(src_line_0030, dw_340357, 'DW#340357.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "source_location",
+                "target_terms": ["document control number", "signature block"],
+                "answer_constraints": ["docket_number"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_identifier_set_support"
+    )
+    assert any(row["IdentifierDisplay"] == "DW#340357." for row in companion["result"]["rows"])
+    assert _source_record_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="DW#340357.",
+    )
+
+
+def test_source_record_same_day_case_disposition_from_source_display() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_display(src_line_0028, 'The corresponding application is the subject "
+            "of an appeal that we also decide today upholding the rejection of the application. "
+            "See In re Example, No. 2026-1042.')."
+        ),
+        "source_record_surface_mention(src_line_0028, v_2026_1042, '2026-1042').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["companion case", "decided the same day"],
+                "answer_constraints": ["same_date_as_e2"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+            {
+                "intent_type": "status",
+                "target_terms": ["disposition"],
+                "answer_constraints": ["for_e3"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            },
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_same_day_case_disposition_support"
+    )
+    row = companion["result"]["rows"][0]
+    assert row["CaseDisplay"] == "No. 2026-1042"
+    assert "upholding the rejection" in row["DispositionDisplay"]
+    assert qa_module._source_record_summary_reference_supported_by_results(
+        row={"query_results": [companion]},
+        reference="In re Example, No. 2026-1042, also decide today, upholding the rejection of the application.",
+        predicates={"source_record_same_day_case_disposition_support"},
+    )
 
 
 def test_source_record_messy_summary_extracts_duration_quantity() -> None:

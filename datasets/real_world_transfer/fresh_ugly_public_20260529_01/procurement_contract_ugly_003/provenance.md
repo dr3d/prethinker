@@ -1,0 +1,8 @@
+# Provenance — procurement_contract_ugly_003
+
+- Source URL: https://www.gao.gov/products/b-423552.3
+- Document: U.S. Government Accountability Office, Office of the General Counsel, Decision, Matter of: Enviremedial Services, Inc., File B-423552.3, Date March 24, 2026 (signed by General Counsel Edda Emmanuelli Perez). Document For Public Release (redacted from a version subject to a GAO Protective Order).
+- Official-source status: Public U.S. Government work, published on the GAO website (gao.gov). Public record.
+- Collection date: 2026-05-29.
+- Extraction method: Retrieved the official GAO decision web page and extracted its text. source.md is a faithful Markdown transcription preserving the matter caption, counsel block, highlights, digest, background (including the post-reevaluation comparison table), the discussion of each ground (dismissal of CBFS-subcontractor ground as untimely; denial of BryMak's substantial confidence rating challenge; denial of the best-value tradeoff challenge with eAlliant distinguishing analysis and tradeoff math), and the conclusion / signature. Long block-cited GAO case-string citations and parallel argument repetition are lightly condensed; all identifiers, dates, dollar figures, statutory and regulatory cites (FAR part 15, FAR 42.1503 Table 42-1, 4 C.F.R. § 21.14(a),(b)), the digest, the comparison table, and the substantive holdings are retained verbatim.
+- Extraction caveats: The "and this decision" footnote text is reproduced inline rather than as a numbered footnote; the embedded GAO case-string citations are condensed. The "$" symbol is preserved. No content was summarized or rewritten beyond the marked condensation.

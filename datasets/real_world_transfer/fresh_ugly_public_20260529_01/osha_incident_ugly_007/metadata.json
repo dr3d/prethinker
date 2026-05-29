@@ -1,0 +1,24 @@
+{
+  "schema_version": "fresh_ugly_public_batch_v2",
+  "batch_id": "fresh_ugly_public_20260529_01",
+  "fixture_id": "osha_incident_ugly_007",
+  "source_family": "osha",
+  "source_title": "Acting Secretary of Labor v. DISH Network, L.L.C., OSHRC Docket No. 23-0180, Decision and Order (March 18, 2025)",
+  "source_url": "https://www.oshrc.gov/decisions/pdf_2025/23-0180.pdf",
+  "source_date": "2025-03-18",
+  "collected_at": "2026-05-29",
+  "public_source": true,
+  "language": "en",
+  "llm_authored_source": false,
+  "llm_rewritten_source": false,
+  "question_count": 25,
+  "pressure_tags": [
+    "identifiers",
+    "dates",
+    "source_coordinates",
+    "tables",
+    "cross_section",
+    "footnotes",
+    "absence"
+  ]
+}

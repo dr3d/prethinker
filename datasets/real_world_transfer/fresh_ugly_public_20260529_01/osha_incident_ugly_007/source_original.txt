@@ -1,0 +1,64 @@
+UNITED STATES OF AMERICA
+OCCUPATIONAL SAFETY AND HEALTH REVIEW COMMISSION
+ACTING SECRETARY OF LABOR, Complainant,
+v.
+DISH NETWORK, L.L.C., Respondent.
+OSHRC Docket No. 23-0180
+
+DECISION AND ORDER
+
+Appearances:
+  Megan J. Harris, Amy Tai, Attorneys, Office of the Solicitor,
+  U.S. Department of Labor, New York, NY, for Complainant.
+  Jeremy K. Fisher, Attorney, Amy Conley, Jackson Lewis, P.C., Atlanta, GA,
+  for Respondent.
+
+BEFORE: John B. Gatto, United States Administrative Law Judge.
+
+I. INTRODUCTION
+Respondent DISH Network, L.L.C. was installing a DISH antenna at a Sonic restaurant in Syracuse, New York, when investigated by OSHA. OSHA issued a willful citation for an alleged violation of the Act with a proposed penalty of $124,305.00. Citation issued December 15, 2022.
+Allegation: willful violation of 29 C.F.R. § 1926.501(b)(1) (fall protection at 14-foot fall height).
+2-day trial held in Syracuse, New York.
+The Court concludes the Secretary failed to establish all elements of his prima facie case and VACATES the citation.
+
+II. BACKGROUND
+Date of inspection: September 7, 2022.
+Worksite: Sonic restaurant, Syracuse, NY. Roof was 14 feet above the ground.
+DISH employees: Travis Heim (field technician), Brandon Barrett (field service manager/supervisor).
+OSHA officers: Ashley Irwin, Lydia Calderon (Compliance Safety and Health Officers).
+Initial observation: from restaurant 175-200 feet across the street. First photograph time-stamped 12:16 p.m. About 14 minutes elapsed from first restaurant photo to entering the worksite.
+Photographs:
+  Ex. P-1 pp. 1-12: from inside restaurant (overcast sky)
+  Ex. P-1 pp. 13-16: from outside Sonic, drive-up
+  Ex. P-1 pp. 17-18: abatement photos after Heim re-tied
+Heim's gear: 1-inch grey 25-foot fall restraint rope; D-ring center-back of harness (4-6 inches diameter); anchored to HVAC unit within 25 feet of antenna mounting location.
+Heim took the rope off 20-30 times during the day.
+
+III. ANALYSIS
+Legal standard (Jake's Fireworks Inc. v. Sec'y of Labor, 893 F.3d 1248, 1256 (10th Cir. 2018)):
+  (a) applicability of the cited standard
+  (b) employer's noncompliance with standard's terms
+  (c) employee access to the violative conditions
+  (d) employer's actual or constructive knowledge
+
+Applicability + exposure: established by the Secretary.
+Standard violated: NOT established.
+  - Photographs do not show the D-ring
+  - Irwin's testimony not credited
+  - Barrett and Heim credible witnesses
+Knowledge: NOT established (actual or constructive).
+  - Barrett observed Heim was tied off at start of day
+  - Then Barrett worked inside; did not observe Heim later
+  - Barrett's "fired employees for less" comment NOT an admission
+  - Reasonable diligence did not require continuous monitoring
+Conduct not foreseeable.
+
+IV. ORDER
+For all the foregoing reasons, the citation is VACATED. SO ORDERED.
+
+/s/ JOHN B. GATTO, Judge
+Dated: March 18, 2025
+Atlanta, GA
+
+Footnote 1: Vincent N. Micone III became Acting Secretary of Labor on January 20, 2025, automatically substituted sub nom. for former Acting Secretary Julie A. Su under Fed. R. Civ. P. 25(d).
+Footnote 8: First photograph time-stamped 12:16 p.m.; 14 minutes elapsed between first photograph at the restaurant and entering the worksite.

@@ -1,0 +1,8 @@
+# Provenance — fda_warning_ugly_007
+
+- Source URL: https://www.fda.gov/inspections-compliance-enforcement-and-criminal-investigations/warning-letters/seaway-pharma-inc-717355-12012025
+- Document: U.S. Food and Drug Administration, Center for Drug Evaluation and Research (CDER), Office of Compliance, Office of Manufacturing Quality, Warning Letter 320-26-22 to Seaway Pharma Inc., MARCS-CMS 717355, dated December 1, 2025. Page content current as of 12/09/2025.
+- Official-source status: Public U.S. Government work on fda.gov. Public record.
+- Collection date: 2026-05-29.
+- Extraction method: Retrieved the official FDA warning letter web page and extracted its text. source.md is a faithful Markdown transcription preserving the header, recipient block, opening, three numbered CGMP violations with all their sub-citations, the Responsibilities as a Contractor section, the Change of Ownership at Facility narrative, the Ineffective Quality System finding, the CGMP Consultant Recommended section, the Conclusion (including the response deadline, the reply-to email, and the ATTN line), and the signature. Bracketed coordinate labels are added but the underlying text is verbatim. Verbatim FDA redaction markers "(b)(4)" are preserved.
+- Extraction caveats: A few internal hyperlinks to FDA guidance documents are referenced by title only rather than reproduced as full URLs in source.md (URLs preserved in source_original.txt). Sub-bullet response-request lists are mildly condensed; all numbered violations, regulatory citations, dates, identifiers, and Seaway's quoted defense are retained verbatim. The "&" in "FD&C Act" is preserved.

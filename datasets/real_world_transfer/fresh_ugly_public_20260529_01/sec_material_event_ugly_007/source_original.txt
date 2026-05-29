@@ -1,0 +1,51 @@
+UNITED STATES SECURITIES AND EXCHANGE COMMISSION
+Washington, D.C. 20549
+FORM 8-K
+CURRENT REPORT
+Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934
+
+Date of report (Date of earliest event reported): February 25, 2026
+Commission file number: 001-39898
+
+Driven Brands Holdings Inc.
+State or other jurisdiction of incorporation or organization: Delaware
+Commission File Number: 139898
+I.R.S. Employer Identification No.: 47-3595252
+Address: 440 South Church Street, Suite 700, Charlotte, North Carolina 28202
+Telephone: (704) 377-8855
+
+Securities registered pursuant to Section 12(b) of the Act:
+  Title: Common Stock, $0.01 par value
+  Trading Symbol: DRVN
+  Exchange: The Nasdaq Global Select Market
+
+Emerging growth company: o (not checked)
+
+Item 4.02 Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review.
+
+On February 23, 2026, the Audit Committee, after consultation with management, concluded there were material errors in:
+  - the consolidated financial statements for fiscal year 2024 (ended December 28, 2024)
+  - the consolidated financial statements for fiscal year 2023 (ended December 30, 2023)
+  - the previously issued unaudited condensed consolidated financial statements for each quarterly and YTD period within fiscal year 2024
+  - the quarterly and YTD periods ended September 27, 2025; June 28, 2025; and March 29, 2025
+and concluded that such financial statements should not be relied upon and required restatement (the "Restatement"). The Independent Registered Public Accounting Firm's Report on the financials and ICFR should also not be relied upon.
+
+Primary categories of errors (as of Feb 25 2026), to be reflected in the FY2025 Form 10-K (year ended Dec 27, 2025):
+  1. Lease Adjustments -- impacting ROU assets and liabilities on the balance sheet as of Dec 28, 2024 and Sept 27, 2025.
+  2. Cash Adjustments -- unreconciled differences originating in fiscal 2023 and earlier; overstatement of cash and revenue, understatement of SG&A for fiscal 2023 and 2024.
+  3. Expense Classification -- in fiscal 2023-2024, certain supply and other expenses presented as company-operated store expenses; overstates store expenses and equally understates supply/other, no change in total operating expenses.
+  4. Other Errors (primarily fiscal 2023 or 2024) -- income tax provision; supply and other revenue; fixed assets; cloud computing; lease cash application; balance sheet and income statement misclassifications; plus inappropriately recognized revenue in ATI business primarily for fiscal year 2025.
+
+Material weaknesses: management identified material weaknesses in ICFR; ICFR and disclosure controls and procedures NOT effective as of December 27, 2025.
+
+Form 12b-25: expected to be filed with the SEC later today (Feb 25 2026) to extend by fifteen calendar days the time to file the FY2025 Form 10-K.
+
+Auditor discussion: matters discussed with PricewaterhouseCoopers LLP (independent registered public accounting firm).
+
+Item 9.01 Exhibits: Exhibit 104 - Cover Page Interactive Data File.
+
+Signatures: DRIVEN BRANDS HOLDINGS INC.
+Date: February 25, 2026
+By: /s/ Scott O'Melia
+Name: Scott O'Melia
+Title: Executive Vice President, Chief Legal Officer

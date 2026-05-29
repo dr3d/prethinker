@@ -1,0 +1,8 @@
+# Provenance — court_order_ugly_003
+
+- Source URL: https://www.cafc.uscourts.gov/opinions-orders/25-1705.OPINION.2-18-2026_2649188.pdf
+- Document: United States Court of Appeals for the Federal Circuit, In re: Kwangjin Song, No. 2025-1705, decided February 18, 2026, per curiam, nonprecedential. Appeal from the United States Patent and Trademark Office, Patent Trial and Appeal Board in No. 18/199,940.
+- Official-source status: Public U.S. Government work on cafc.uscourts.gov. Public record.
+- Collection date: 2026-05-29.
+- Extraction method: Retrieved the official Federal Circuit PDF and extracted its text. source.md is a faithful Markdown transcription preserving the nonprecedential note, caption, counsel block, panel, per-curiam designation, introduction, background (with full claim 1 text), discussion of legal standards (with all six case citations), discussion of Song '656 anticipation, discussion of Song '525 anticipation and § 103 obviousness, "other arguments" paragraph, and the disposition. Footnotes 1 and 2 are reproduced inline as bracketed references. Bracketed coordinate labels are added but the underlying text is verbatim.
+- Extraction caveats: The degree-sign character is rendered as the spelled phrase "180 degrees C" once in the claim text. Joint-appendix (J.A.) pinpoint citations are preserved in source_original.txt and partly preserved in source.md (those embedded in narrative discussion are retained; pinpoint citations within the comparison-of-paragraphs cross-references are condensed to a single citation per quoted phrase). The "§" symbol is preserved throughout.

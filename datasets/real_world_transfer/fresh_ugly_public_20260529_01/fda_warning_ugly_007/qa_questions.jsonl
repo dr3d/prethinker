@@ -1,0 +1,25 @@
+{"id": "q001", "question": "What is the Warning Letter number, the MARCS-CMS number, and the issue date?"}
+{"id": "q002", "question": "Who is the named recipient (name, title), and to which two individuals is the salutation addressed?"}
+{"id": "q003", "question": "What is the facility's full street address?"}
+{"id": "q004", "question": "What is the Facility Establishment Identifier (FEI) for the inspected facility?"}
+{"id": "q005", "question": "Which issuing office did the letter come from, and who signed it (name, title, and chain of office)?"}
+{"id": "q006", "question": "What was the name of the company at this facility under prior ownership, and on what date did FDA issue a previous warning letter to that company (with its CMS number)?"}
+{"id": "q007", "question": "What category of drug products does Seaway Pharma manufacture, including the specific patient population mentioned?"}
+{"id": "q008", "question": "On what dates did FDA conduct the inspection that gave rise to this letter?"}
+{"id": "q009", "question": "On what date did Seaway Pharma respond to FDA's Form FDA 483, which the letter says FDA reviewed in detail?"}
+{"id": "q010", "question": "On what two dates were regulatory meetings held with the firm regarding persistent CGMP violations?"}
+{"id": "q011", "question": "On what dates were the three subsequent inspections (after the 2019 warning letter) that demonstrated repeated failures?"}
+{"id": "q012", "question": "Within how many working days must Seaway Pharma respond to this letter?"}
+{"id": "q013", "question": "Place these dated events in chronological order: the previous Kingston Pharma warning letter; the first subsequent inspection; the first regulatory meeting; the second subsequent inspection; the second regulatory meeting; the current inspection; the firm's Form 483 response; this warning letter."}
+{"id": "q014", "question": "List the three numbered CGMP violations cited in the letter together with their 21 CFR citations."}
+{"id": "q015", "question": "Under what statutory provision did FDA conclude that the firm's drugs are adulterated?"}
+{"id": "q016", "question": "Under what statutory provision did FDA say the United States Pharmacopeia (USP) is enforceable for purposes of the DEG and EG limits?"}
+{"id": "q017", "question": "Which two specific high-risk components does the letter identify as having been used or distributed without adequate identity testing?"}
+{"id": "q018", "question": "Between which months and years did the QU release numerous batches of drug products for distribution prior to reviewing all test results?"}
+{"id": "q019", "question": "Under Violation 1, the letter identifies two further CFR sub-citations for QU failures beyond the underlying 21 CFR 211.22(d) charge. What are those two sub-citations and what does each cover?"}
+{"id": "q020", "question": "Under what regulation does FDA say a CGMP consultant should be qualified?"}
+{"id": "q021", "question": "What disclaimer does the Conclusion section give about the completeness of the cited violations?"}
+{"id": "q022", "question": "What was Seaway Pharma's argument regarding DEG/EG enforceability, and what was FDA's response to it?"}
+{"id": "q023", "question": "Under the \"Change of Ownership at Facility\" finding, what does the letter conclude about executive management oversight, and what makes the change of ownership not exculpatory?"}
+{"id": "q024", "question": "Where (email address) should the firm send its electronic reply, and what attention line should it use?"}
+{"id": "q025", "question": "Pulling together the repeat-offender narrative: what specific elements does the letter combine to support the finding that the firm has failed to implement quality commitments in a timely manner?"}
