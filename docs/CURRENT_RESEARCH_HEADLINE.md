@@ -55,9 +55,16 @@ compile artifacts: reused/frozen from R1 to isolate query-path impact
 Diff against the prior May 29 clean replay was `197 / 1 / 2` to `161 / 22 /
 17`. The drop is too large to treat as hosted-provider variance. It means the
 retired raw-utterance routing was carrying meaningful delivery capacity. The
-good news is that the cleaned instrument failed honestly on compatibility,
+source-ledger dependency audit is sharper: in the `98.5%` R5 run, direct-only
+exact rows were `0 / 197`; every exact row used source-ledger evidence at least
+partly. In the R9 run, direct-only exact rows were `47 / 200` (`23.5%`). That
+makes `80.5%` an upper bound on the still-contaminated post-cut path, not a
+typed-thesis floor.
+
+The good news is that the cleaned instrument failed honestly on compatibility,
 runtime, and write-proposal hygiene. The bad news is that source-ledger
-free-text routing remains in active code, so the score is still provisional.
+free-text routing remains in active code, so all current scores are provisional
+until the strict audit passes.
 
 The high May 28/early May 29 ugly-public measurements are now historical
 pre-reset evidence, not current headline claims for the sign-clean instrument.
@@ -85,7 +92,9 @@ The current measurement stack is:
   `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
 - Fresh ugly public 2026-05-29 post-raw-utterance-cut replay: `161 / 22 / 17`
   over `200` rows (`80.5%` exact), hygiene `0 / 0 / 0`, but sign-clean claim
-  status blocked by the free-text semantic-routing audit.
+  status blocked by the free-text semantic-routing audit. Direct-only exact
+  rows in that run were `47 / 200`; treat `80.5%` as an upper bound until
+  free-text source routing is actually disabled.
 - Fresh ugly public 2026-05-28 and early 2026-05-29 high-score replays:
   historical pre-reset evidence only; do not use as current product or
   architecture claims until the sign-clean delivery path recovers.
@@ -153,8 +162,9 @@ The highest-value next work is sign-clean delivery recovery:
 
 1. Remove or quarantine Python semantic routing over free-text source/display fields.
 2. Rebuild query delivery without Python-side raw-utterance routing.
-3. Identify which of the `38` R5-exact rows that became non-exact need compile
-   surfaces versus semantic query-intent coverage.
+3. Identify which of the `38` R5-exact rows that became non-exact need typed
+   compile surfaces versus semantic query-intent coverage; do not rebuild
+   selected source-window delivery as a substitute.
 4. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
 5. Keep Batch 03 as regression evidence instead of polishing it for another

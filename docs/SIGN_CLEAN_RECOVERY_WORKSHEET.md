@@ -101,9 +101,12 @@ Claude's critique exposed a sharper boundary problem:
 New audit:
 
 ```powershell
-python scripts\audit_free_text_semantic_routing.py --out-json C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.json --out-md C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.md --exit-zero
-python scripts\audit_sign_clean.py --out-json C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.json --out-md C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.md --exit-zero
+python scripts\audit_free_text_semantic_routing.py --out-json C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.json --out-md C:\prethinker_tmp_archive\free_text_semantic_routing_audit_20260529.md
+python scripts\audit_sign_clean.py --out-json C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.json --out-md C:\prethinker_tmp_archive\sign_clean_audit_free_text_blocked_20260529.md
 ```
+
+For archive-only reporting while the gate is known to be blocked, add
+`--exit-zero`. The strict gate omits it and exits nonzero.
 
 Observed:
 
@@ -134,7 +137,8 @@ Read:
 
 - Source ledgers are not automatically invalid. They are valid as provenance and citation surfaces.
 - Source ledgers are unsafe as query-time semantic retrieval substrates when Python tokenizes, regexes, or substring-matches their free-text display values.
-- The 98.5% score was more source-ledger-dependent than the prior notes made clear.
+- The 98.5% score was more source-ledger-dependent than the prior notes made clear: direct-only exact was `0 / 197`.
+- The R9 score is not the typed-thesis floor. It is an upper bound on the still-contaminated post-raw-utterance-cut path. R9 direct-only exact was `47 / 200 = 23.5%`; the real post-enforcement score is somewhere below `80.5%` until the free-text path is actually disabled and rerun.
 - The sign-clean standard is now: Python may use typed source-record slots and source-row IDs, but may not derive answer-bearing semantics by reparsing free-text source displays.
 
 ## 2026-05-29 Surface-Coverage Diagnostic
@@ -188,7 +192,7 @@ Read:
 - Most reference answers were surface-present in the source text, so source-ledger/free-text retrieval looked strong on new documents.
 - The R5 score largely measured whether the support stack surfaced the right source phrase to the LLM judge.
 - R9 dropped because the evidence bundle stopped showing the judge those phrases, not because the source documents ceased to contain them.
-- The `80.5%` R9 floor is closer to the typed/structured thesis than the `98.5%` R5 score, but R9 is still provisional because free-text source-routing remains active elsewhere.
+- The `80.5%` R9 result is closer to the typed/structured thesis than the `98.5%` R5 score, but it is still an upper bound, not a floor, because free-text source-routing remains active elsewhere.
 
 Conclusion:
 
@@ -262,9 +266,9 @@ Recovery implication:
 - Do not restore the raw-question companion block.
 - Rebuild the useful capability through sign-clean routes:
   - improve model-authored `query_intents[]`;
-  - compile recurring answer-bearing source windows into admitted surfaces;
-  - let deterministic code join over `query_intents[]` and admitted source records;
-  - keep Python blind to raw human utterance semantics except for syntax, IDs, dates, and source-contained structure.
+  - compile recurring answer-bearing facts and relations into typed admitted surfaces;
+  - let deterministic code join over `query_intents[]` and typed admitted structure;
+  - keep Python blind to raw human utterance semantics and free-text source/display semantics except for syntax, IDs, dates, and typed source-contained structure.
 
 First exact-to-miss triage:
 
@@ -273,6 +277,12 @@ that the old failure-surface label is too blunt: many rows labeled
 `compile_surface_gap` still have the needed answer text inside admitted
 `source_record_*` rows. The missing piece is delivery through a sign-clean
 query surface.
+
+This table is diagnostic, not a rebuild plan. Rows marked "query support" must
+not be repaired by reintroducing selected source-window delivery. A repair is
+claim-bearing only if it uses structured query intent plus typed admitted slots,
+or promotes a genuinely recurring fact/relation into the compile artifact and
+survives unlike-document transfer.
 
 | Row | R9 label | Incident classification | Why |
 | --- | --- | --- | --- |
@@ -299,6 +309,7 @@ Working read:
 - They are mostly the loss of a broad source-record retrieval layer that used
   raw question text.
 - The first rebuild should focus on exact-to-miss rows, not partial rows.
-- Start with reusable sign-clean delivery for source windows and section/item
-  lists, but promote genuinely recurring event/date/legal/roster/negative
-  assertion facts into compile artifacts instead of query-time rescues.
+- Do not start with reusable source-window delivery. Start with genuinely
+  recurring event/date/legal/roster/negative-assertion facts and typed relation
+  surfaces, then test each new surface on unlike documents so question-genre
+  tuning does not get laundered into the compiler.
