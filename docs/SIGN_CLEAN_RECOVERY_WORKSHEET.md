@@ -191,6 +191,39 @@ Updated 95% condition:
 - The next phase must raise typed compile recall first, then rebuild query intent and deterministic joins over those typed surfaces.
 - No source-window or question-genre surface counts unless it survives unlike-document validation and does not require Python to parse source prose.
 
+First strict-not-available triage:
+
+- Strict not-available rows: `89 / 200`.
+- Largest fixture pressure:
+  - `osha_incident_ugly_007`: `20`
+  - `fda_warning_ugly_007`: `16`
+  - `procurement_contract_ugly_003`: `14`
+  - `labor_board_ugly_003`: `11`
+  - `sec_material_event_ugly_007`: `9`
+  - `court_order_ugly_003`: `8`
+  - `puc_order_ugly_003`: `7`
+  - `state_ag_settlement_ugly_003`: `4`
+- Rough oracle-answer family pressure, counting overlapping families:
+  - enumeration/list answers: `43`
+  - date/chronology answers: `34`
+  - identifier/citation answers: `27`
+  - person/role/contact answers: `24`
+  - finding/disposition/negation answers: `24`
+  - quantity/amount/duration answers: `9`
+  - other composition answers: `5`
+
+Repair read:
+
+- The first compile-recall work should target typed extraction of lists,
+  timelines, identifiers/citations, parties/roles/contacts, and explicit
+  findings/negative assertions.
+- This does not authorize selected source-window delivery. A promoted surface is
+  valid only if it represents a typed source-contained fact/relation and is
+  validated on unlike documents.
+- OSHA and FDA are the immediate pressure fixtures because their strict typed
+  recall holes are largest and their answers depend heavily on lists, citations,
+  chronology, contacts, and legal/regulatory findings.
+
 ## 2026-05-29 Surface-Coverage Diagnostic
 
 Question:
