@@ -8,29 +8,30 @@ Current status after the free-text semantic-routing audit update: blocked again.
 
 Prethinker was not sign-clean at the start of this worksheet. A narrower version of `scripts/audit_sign_clean.py` passed after raw-utterance routing was cut, but that audit drew the boundary at the wrong field name. The stricter free-text semantic-routing audit now blocks claims again.
 
-This is not a score regression note. It is an instrument-governance correction. The active repo still contains two classes of leakage that can shape measurements:
+This is not a score regression note. It is an instrument-governance correction. The active repo still contains leakage that can shape measurements:
 
 - high-risk corpus-shaped compatibility vocabulary in active runtime code;
-- Python-side semantic routing over raw English utterances.
+- Python-side semantic routing over raw English utterances;
+- Python-side semantic routing over free-text source/display fields.
 
-The existing active leakage audit was too narrow. It caught known fixture names and answer phrases, but it did not fail the repo for retired compatibility vocabulary or raw utterance regex routing. That let old adapters and query-side English heuristics remain near the instrument while the score story moved forward.
+The existing active leakage audit was too narrow. It caught known fixture names and answer phrases, but it did not fail the repo for retired compatibility vocabulary, raw utterance regex routing, or free-text source-ledger routing. That let old adapters and query-side English/source-text heuristics remain near the instrument while the score story moved forward.
 
-## Current Stop-Claim Gate
+## Superseded Stop-Claim Gate
 
-New audit:
+This was the first stop-claim gate. It is preserved here as history, not as the current definition of sign-clean:
 
 ```powershell
 python scripts\audit_sign_clean.py --out-json C:\prethinker_tmp_archive\sign_clean_audit_20260529.json --out-md C:\prethinker_tmp_archive\sign_clean_audit_20260529.md
 ```
 
-Current expected result: fail.
+Historical expected result at this point in the cleanup: fail.
 
 Observed blocker classes:
 
 - `high_risk_corpus_shaped_active_vocabulary`
 - `raw_utterance_semantic_regex`
 
-The rule is simple: if this audit fails, claims are blocked. Fresh QA scores can be used as internal research signals only.
+The rule was simple but incomplete: if this audit failed, claims were blocked. Later work showed that passing this version was not sufficient, because it did not see semantic routing over free-text source/display fields.
 
 ## 2026-05-29 First Containment Cut
 
@@ -66,25 +67,26 @@ Changes:
 - removed medical-profile regex rescues that converted clarification text into facts on the Python side;
 - tightened the regex governance audit so it blocks raw `utterance`/`question` semantics specifically instead of treating every source-record `text` parser as human-language routing.
 
-After this cut:
+At that moment, after this cut:
 
 - `high_risk_active_vocabulary_count = 0`
 - `raw_utterance_semantic_regex_count = 0`
-- `scripts/audit_sign_clean.py` status: `pass`
+- the narrower `scripts/audit_sign_clean.py` status was: `pass`
 
-This restores the sign-clean gate for the audited classes. It does not prove scores are unchanged; the next measurement must be an English regression run because containment deliberately removed paths that may have inflated prior QA results.
+This restored the sign-clean gate only for the audited classes. It did not prove scores were unchanged, and it did not prove the instrument was clean. The later free-text semantic-routing audit supersedes this pass and blocks claims again.
 
 ## Recovery Order
 
 1. Remove or quarantine retired native compatibility adapters from active runtime surfaces. Disabled-by-default is not enough when a flag can re-enable corpus-shaped behavior.
-2. Replace raw utterance semantic routing with LLM-authored `query_intents[]` or deterministic routing over compiled artifacts only.
-3. Keep structural parsers that operate on admitted source records, Prolog syntax, dates, identifiers, and display normalization, but classify them explicitly.
-4. Re-run English regression fixtures after cleanup, because score drops are possible if prior gains depended on leaked shape.
-5. Only after sign-clean passes: rerun fresh ugly/public fixtures and native stamps as claim-bearing measurements.
+2. Remove or quarantine Python semantic routing over free-text source/display fields. Classification is not containment.
+3. Replace raw utterance routing and free-text source-display routing with LLM-authored `query_intents[]`, typed compile surfaces, or deterministic joins over structured artifacts only.
+4. Keep structural parsers only when they operate on syntax or typed values: Prolog terms, source-row IDs, dates already parsed into typed slots, identifiers already in typed slots, numeric values already in typed slots, and display normalization that does not decide answer relevance.
+5. Re-run English regression fixtures after cleanup, because score drops are possible if prior gains depended on leaked shape.
+6. Only after the strict sign-clean audit passes: rerun fresh ugly/public fixtures and native stamps as claim-bearing measurements.
 
 ## Operating Rule
 
-No Python-side semantic interpretation of human utterances. Query language understanding belongs to the query compiler. Python may validate syntax, execute admitted queries, score deterministic evidence, and render audited outputs.
+No Python-side semantic interpretation of human utterances or free-text source/display prose. Query language understanding belongs to the query compiler. Source prose understanding belongs to the compile/model layer and must appear as typed admitted structure before Python can use it for answer-bearing joins. Python may validate syntax, execute admitted queries, score deterministic evidence, and render audited outputs.
 
 No research fixture shape in the active instrument. If a mechanism is real, it must be renamed, generalized, tested on unlike documents, and promoted through a sign-clean audit.
 
@@ -199,9 +201,10 @@ Conclusion:
 Observed regression:
 
 - Pre-clean R5 English ugly full replay: `197 / 1 / 2` over `200` (`98.5%`)
-- Post-sign-clean R9 English ugly full replay: `161 / 22 / 17` over `200` (`80.5%`)
+- Post-raw-utterance-cut R9 English ugly full replay: `161 / 22 / 17` over `200` (`80.5%`)
 - Hygiene stayed clean: `0` compatibility rows, `0` runtime load errors, `0` write proposals
-- Sign-clean audit passed before and after the R9 measurement
+- The narrower raw-utterance sign-clean audit passed before and after the R9 measurement
+- The stricter free-text semantic-routing audit now blocks claims
 
 Root cause:
 
