@@ -31898,6 +31898,11 @@ def _parse_simple_equality_goal(text: str) -> tuple[str, str] | None:
 
 SOURCE_RECORD_CONTAINS_FILTER_PREDICATES = {
     "source_record_text_atom",
+    "source_record_text_display",
+    "source_record_label_display",
+    "source_record_section_display",
+    "source_record_cell_display",
+    "source_record_cell_header_display",
     "source_record_field",
     "source_record_label",
     "source_record_section",
@@ -31905,8 +31910,18 @@ SOURCE_RECORD_CONTAINS_FILTER_PREDICATES = {
 }
 
 
-def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
+def _evidence_bundle_query_body(query: str) -> str:
     text = str(query or "").strip()
+    if ":-" not in text:
+        return text
+    head, body = text.split(":-", 1)
+    if parse_prolog_query(head.strip()) is None:
+        return text
+    return body.strip()
+
+
+def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
+    text = _evidence_bundle_query_body(query)
     parts = split_top_level_args(text.rstrip(". "))
     if len(parts) < 2:
         return None
@@ -31949,6 +31964,12 @@ def _source_record_contains_filter_repair(query: str) -> dict[str, Any] | None:
 
 def _source_text_contains_filter_needle(goal: str, text_var: str) -> str:
     variable_pattern = re.escape(str(text_var or ""))
+    substring_member_match = re.fullmatch(
+        rf"\s*member(?:chk)?\(\s*substring\(\s*{variable_pattern}\s*,\s*['\"]([^'\"]+)['\"]\s*\)\s*,\s*{variable_pattern}\s*\)\s*\.?\s*",
+        str(goal or ""),
+    )
+    if substring_member_match:
+        return _normalize_text_filter_atom(substring_member_match.group(1))
     member_match = re.fullmatch(
         rf"\s*memberchk\(\s*['\"]?([^,'\")]+)['\"]?\s*,\s*(?:{variable_pattern}|string_lower\(\s*{variable_pattern}\s*\)|string_split\(\s*{variable_pattern}\s*,\s*['\"][^'\"]*['\"]\s*\)|split_atom\(\s*{variable_pattern}(?:\s*,\s*['\"][^'\"]*['\"])?\s*\)|string_list\(\s*{variable_pattern}\s*\)|atom_chars\(\s*{variable_pattern}\s*,\s*[A-Za-z_][A-Za-z0-9_]*\s*\)|atom_codes\(\s*{variable_pattern}\s*,\s*[A-Za-z_][A-Za-z0-9_]*\s*\)|\[\s*{variable_pattern}\s*\])\s*\)\s*\.?\s*",
         str(goal or ""),

@@ -243,3 +243,78 @@ gate remained meaningfully noisy, including four blocking-tier holds. That
 means the product-facing answer path is strong, but the compiler coverage lens
 is still telling us where release-grade evidence surfaces are thinner than the
 QA score alone suggests.
+
+## R2 Targeted Query-Template Normalization Replay
+
+Question:
+
+Did the three R1 partials reflect a generic query-template normalization gap, or
+were they one-off corpus quirks?
+
+Mechanism change:
+
+- Evidence-bundle query execution already repaired source-record
+  `memberchk(...)` filters over `source_record_text_atom/2`.
+- It now applies the same query-only repair to admitted source display rows such
+  as `source_record_text_display/2`.
+- It also strips a rule-shaped evidence-bundle template head when the LLM emits
+  `head :- body` where the executable query is the body.
+- This is not fixture-language handling. It does not parse the user utterance,
+  add durable facts, or inspect raw source. It only normalizes LLM-proposed
+  query templates against admitted KB rows.
+
+Guard tests:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -k "evidence_bundle_plan_repairs_source_display_memberchk_filter or evidence_bundle_plan_repairs_rule_like_source_display_substring_filter or evidence_bundle_plan_repairs_source_text_memberchk_filter" -q
+```
+
+Result:
+
+```text
+3 passed
+```
+
+Targeted replay:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r2_targeted_display_filter_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r1b_vs_r2_targeted_display_filter_diff.md
+```
+
+Scope:
+
+- `court_order_ugly_002`
+- `sec_material_event_ugly_006`
+
+Result:
+
+```text
+baseline targeted slice: 47 / 3 / 0
+candidate targeted slice: 50 / 0 / 0
+delta: +3 exact, -3 partial, 0 miss
+changed rows: 3
+improved rows: 3
+regressed rows: 0
+baseline exact -> non-exact: 0
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+regression guard: pass
+```
+
+Changed rows:
+
+| Fixture | Row | Movement | Surface Change |
+| --- | --- | --- | --- |
+| `court_order_ugly_002` | `q010` | partial -> exact | `hybrid_join_gap` -> `not_applicable` |
+| `sec_material_event_ugly_006` | `q006` | partial -> exact | `query_surface_gap` -> `not_applicable` |
+| `sec_material_event_ugly_006` | `q015` | partial -> exact | `compile_surface_gap` -> `not_applicable` |
+
+Read:
+
+This is mechanism evidence, not a new 200-row corpus claim. The repair is
+promotable on the affected 50-row slice because it recovered all known residue
+with no exact-row churn. The next honest confirmation is either a full May 28
+R2 QA replay across all eight fixtures, or leaving this as locked mechanism
+evidence and waiting for the next fresh ugly batch to test transfer.

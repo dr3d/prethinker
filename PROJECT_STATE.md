@@ -77,6 +77,9 @@ Current transfer anchors:
 fresh ugly public 2026-05-28 R1:
   197 / 3 / 0 over 200 rows, 98.5% exact
   compile gate old pass/hold 2 / 6; blocking / diagnostic / advisory holds 4 / 6 / 0
+fresh ugly public 2026-05-28 R2 targeted query-template replay:
+  affected two-fixture slice moved 47 / 3 / 0 -> 50 / 0 / 0
+  changed rows 3, improved 3, regressed 0, compatibility/runtime/write 0/0/0
 fresh ugly public Batch 03 latest guarded slices:
   75 / 0 / 0 SEC
   216 / 6 / 3 non-SEC
@@ -96,6 +99,10 @@ The May 28 fresh ugly line is a single fresh R1 compile+QA run over newly
 landed public English official-document fixtures. Treat it as the strongest
 current fresh-transfer thermometer. Its QA hygiene is clean, but its compile
 gate is not release-clean.
+
+The R2 targeted replay is mechanism evidence only. It tested the two affected
+fixtures after a generic evidence-bundle query-template normalization repair;
+it is not a replacement for a full 200-row R2 corpus claim.
 
 Fresh fixture intake has a current cut-and-paste specification at
 `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
@@ -223,18 +230,18 @@ agent docs, public docs, and active scripts for retired document names.
 
 ## Next Decision
 
-The public claim should be preserved with caveats intact. The next engineering
-decision is whether the three May 28 R1 partials indicate generic mechanisms
-worth repairing before any broader stamp. Treat that separately from native QA
-accuracy: the native QA stamp remains `92.33%`, while the newest fresh ugly
-thermometer is `197 / 3 / 0` over `200` rows (`98.5%` exact).
+The public claim should be preserved with caveats intact. The three May 28 R1
+partials have now produced one generic, query-only normalization repair that
+was promotable on a 50-row targeted replay. Treat that separately from native
+QA accuracy: the native QA stamp remains `92.33%`, while the newest fresh ugly
+thermometer remains the full R1 `197 / 3 / 0` over `200` rows (`98.5%` exact).
 
 Next energy:
 
-1. adjudicate the three `fresh_ugly_public_20260528_01` R1 partials without
-   teaching fixture words to the instrument;
-2. decide whether a cheap QA N=2 or targeted non-mutating replay is needed to
-   separate row variance from real mechanism pressure;
+1. decide whether to spend a full May 28 R2 QA replay across all eight fixtures
+   or hold the targeted repair until the next fresh ugly batch tests transfer;
+2. keep inspecting compile-gate holds separately from QA exactness, especially
+   blocking-tier holds that QA can still answer around;
 3. validate and run `fresh_ach_stress_public_20260528_04` when the ACH lane
    needs a heldout sensitivity read;
 4. use the tiered compile gate in future compile stamps and report old

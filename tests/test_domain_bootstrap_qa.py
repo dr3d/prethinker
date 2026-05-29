@@ -1197,6 +1197,71 @@ def test_evidence_bundle_plan_repairs_multiple_source_text_memberchk_filters() -
     ]
 
 
+def test_evidence_bundle_plan_repairs_source_display_memberchk_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_1, 'Records are verified in the field.').",
+        "source_record_text_display(src_2, 'Records are verified in the laboratory.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_display/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "source_display_contains",
+                    "purpose": "Find source display text containing the requested normalized phrase.",
+                    "query_templates": [
+                        "source_record_text_display(Line, Text), memberchk('laboratory', Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_record_contains_filter_repaired"
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_2", "Text": "Records are verified in the laboratory."}
+    ]
+
+
+def test_evidence_bundle_plan_repairs_rule_like_source_display_substring_filter() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "source_record_text_display(src_1, 'The record names the billing contact.').",
+        "source_record_text_display(src_2, 'The record names the finance officer since 2024.').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["source_record_text_display/2"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "rule_like_source_display_contains",
+                    "purpose": "Find source display text from a rule-shaped query template.",
+                    "query_templates": [
+                        "source_record_text_display(Line, Text) :- "
+                        "source_record_text_display(Line, Text), "
+                        "member(substring(Text, 'finance officer'), Text)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["result"]["reasoning_basis"]["validation"] == "source_record_contains_filter_repaired"
+    assert results[0]["result"]["reasoning_basis"]["contains_needles"] == ["finance_officer"]
+    assert results[0]["result"]["rows"] == [
+        {"Line": "src_2", "Text": "The record names the finance officer since 2024."}
+    ]
+
+
 def test_evidence_bundle_plan_repairs_source_row_context_token_filter() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [

@@ -45,6 +45,11 @@ compile gate old pass/hold: 2 / 6
 compile gate blocking / diagnostic / advisory holds: 4 / 6 / 0
 ```
 
+A targeted R2 replay of the two affected R1 fixtures after a generic
+evidence-bundle query-template normalization repair moved `47 / 3 / 0` to
+`50 / 0 / 0`, with `3` improved rows, `0` regressions, and clean hygiene. That
+is mechanism evidence, not a replacement for the full 200-row R1 claim.
+
 The prior fresh ugly public Batch 03 guarded slices remain useful regression
 evidence:
 
@@ -70,6 +75,9 @@ The current measurement stack is:
   exact), with `0` compatibility rows, `0` runtime load errors, `0` write
   proposals, old compile gate `2 / 6`, and tiered gate holds `4 / 6 / 0`
   blocking/diagnostic/advisory.
+- Fresh ugly public 2026-05-28 R2 targeted replay: affected two-fixture slice
+  `47 / 3 / 0` -> `50 / 0 / 0`, `0` regressions, hygiene still `0 / 0 / 0`;
+  mechanism evidence only.
 - Fresh ugly public Batch 03: latest guarded slices `75 / 0 / 0` SEC and
   `216 / 6 / 3` non-SEC, slice-combined `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
