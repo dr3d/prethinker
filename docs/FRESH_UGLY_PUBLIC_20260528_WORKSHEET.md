@@ -411,3 +411,64 @@ Read:
   because the regression guard failed. The disciplined claim is: one generic
   query-template normalization repair promoted; one role-tenure support row
   remains open; hosted-path variance is still material.
+
+## R5 SEC Role-Start Recovery
+
+Question:
+
+Was the remaining SEC role-tenure residue a true compile absence, or did a
+query-only role-history companion fail to activate because the query was typed
+as a `date` / `start_date` intent rather than an `employment_history` intent?
+
+Mechanism change:
+
+- `source_record_employment_history_support` can now activate from structured
+  `date` intents when the answer constraints ask for start dates and the intent
+  has target terms.
+- This still does not parse raw utterance text or create durable facts. It routes
+  only from Semantic IR metadata into a deterministic source-record companion.
+- Generic possessive cleanup now trims `the_company_s` before role names so
+  source-derived role displays do not become `s chief ...`.
+
+Guard tests:
+
+```text
+python -m pytest tests\test_domain_bootstrap_qa.py -k "role_start_from_date_intent or extracts_biography_role_history" -q
+```
+
+Result:
+
+```text
+2 passed
+```
+
+SEC targeted replay:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r5_sec_role_start_constraint_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r3_vs_r5_sec_role_start_constraint_diff.md
+```
+
+Result:
+
+```text
+sec_material_event_ugly_006: 25 / 0 / 0
+changed rows versus R3 targeted variance: 1
+improved rows: 1
+regressed rows: 0
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+```
+
+Changed row:
+
+| Fixture | Row | Movement | Read |
+| --- | --- | --- | --- |
+| `sec_material_event_ugly_006` | `q015` | partial -> exact | start-date `date` intent now activates employment-history support |
+
+Read:
+
+This is another targeted mechanism result, not a full corpus promotion. The
+remaining honest next confirmation is a full eight-fixture QA replay under the
+current code, or preferably the next fresh ugly package if it is ready.

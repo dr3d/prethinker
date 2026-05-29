@@ -87,6 +87,9 @@ fresh ugly public 2026-05-28 R2 full QA replay:
 fresh ugly public 2026-05-28 R3 targeted variance probe:
   labor+SEC slice 49 / 1 / 0 over 50 rows
   changed rows 1, improved 1, regressed 0, regression guard passed
+fresh ugly public 2026-05-28 R5 SEC role-start targeted replay:
+  SEC slice 25 / 0 / 0 over 25 rows
+  changed rows 1, improved 1, regressed 0, compatibility/runtime/write 0/0/0
 fresh ugly public Batch 03 latest guarded slices:
   75 / 0 / 0 SEC
   216 / 6 / 3 non-SEC
@@ -110,8 +113,10 @@ gate is not release-clean.
 The R2 targeted replay is mechanism evidence. The full R2 replay improved the
 aggregate but was not a clean promotion because one previously exact row became
 partial. The R3 targeted variance probe indicates that labor-board regression
-was transient judge/classifier variance, while the SEC role-tenure row remains
-an unresolved support gap with a provider-variance component.
+was transient judge/classifier variance. The R5 SEC targeted replay indicates
+the role-tenure row can be recovered by routing structured `date` / start-date
+intents into employment-history support; this is targeted mechanism evidence,
+not a full eight-fixture corpus promotion.
 
 Fresh fixture intake has a current cut-and-paste specification at
 `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
@@ -247,8 +252,8 @@ row-churn caveat, not as a clean promotion. Native QA remains `92.33%`.
 
 Next energy:
 
-1. inspect the remaining SEC role-tenure/source-display support row without
-   teaching fixture words to the instrument;
+1. decide whether to spend a full eight-fixture QA replay under current code or
+   let the next fresh ugly package be the transfer confirmation;
 2. decide whether future OpenRouter measurement should pin provider/quantization
    for stamp claims or explicitly report hosted-path variance bands;
 3. keep inspecting compile-gate holds separately from QA exactness, especially

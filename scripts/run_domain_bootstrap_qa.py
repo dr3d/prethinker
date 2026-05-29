@@ -20459,7 +20459,7 @@ def _source_record_biography_history_companion(
     utterance: str,
     query_intents: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any] | None:
-    intent = _first_query_intent(query_intents, "biography_history", "employment_history")
+    intent = _source_record_biography_history_intent(query_intents)
     if not intent:
         return None
     constraints = _query_intent_constraints(intent)
@@ -20571,6 +20571,28 @@ def _source_record_biography_history_companion(
         },
         "derived_from_queries": ["source_record_text_atom(SourceRow, TextAtom)."],
     }
+
+
+def _source_record_biography_history_intent(query_intents: list[dict[str, Any]] | None) -> dict[str, Any] | None:
+    intent = _first_query_intent(query_intents, "biography_history", "employment_history")
+    if intent:
+        return intent
+    for item in query_intents or []:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("intent_type", "")).strip() != "date":
+            continue
+        if not _query_intent_has_constraint(
+            item,
+            "start_date",
+            "start_dates",
+            "since_date",
+            "effective_start",
+        ):
+            continue
+        if _query_intent_target_tokens(item):
+            return item
+    return None
 
 
 def _source_record_biography_history_signal(atom: str) -> bool:
@@ -20920,7 +20942,11 @@ def _source_record_biography_clean_phrase(value: str, *, kind: str) -> str:
     text = _normalize_text_filter_atom(value)
     if not text:
         return ""
-    text = re.sub(r"^(?:mr|ms|mrs|dr|he|she|they|previously|before_that|prior_to_joining|the_company|company_s)_+", "", text)
+    text = re.sub(
+        r"^(?:mr|ms|mrs|dr|he|she|they|previously|before_that|prior_to_joining|the_company_s|the_company|company_s)_+",
+        "",
+        text,
+    )
     text = re.sub(r"_+(?:where|helping|including|from|to|and)$", "", text)
     text = re.sub(r"_+", "_", text).strip("_")
     if kind == "employer":

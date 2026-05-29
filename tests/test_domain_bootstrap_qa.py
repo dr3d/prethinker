@@ -3987,6 +3987,36 @@ def test_source_record_messy_summary_extracts_biography_role_history() -> None:
     assert any("next role interim ceo effective May 20, 2026" in display for display in displays)
 
 
+def test_source_record_messy_summary_extracts_role_start_from_date_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "source_record_text_atom(src_line_0042, "
+        "dr_rivera_age_44_has_served_as_the_company_s_chief_growth_strategy_officer_since_march_24_2026)."
+    ).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Since when has Dr. Rivera been chief growth strategy officer?",
+        query_intents=[
+            {
+                "intent_type": "date",
+                "target_terms": ["Dr Rivera", "chief growth strategy officer"],
+                "answer_constraints": ["Retrieve start dates for specific officer roles."],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
+    )
+
+    companion = next(
+        item for item in companions if item["result"]["predicate"] == "source_record_employment_history_support"
+    )
+    displays = [row.get("FullAnswerDisplay", "") for row in companion["result"]["rows"]]
+    assert any("chief growth strategy officer - since/effective March 24, 2026" in display for display in displays)
+    assert not any("s chief growth strategy officer" in display for display in displays)
+
+
 def test_source_record_messy_summary_extracts_prior_employers_from_biography() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     assert runtime.assert_fact(

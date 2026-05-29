@@ -56,8 +56,10 @@ The full R2 QA replay over all eight May 28 fixtures measured `198 / 2 / 0`
 (`99.0%`) with clean hygiene, but it is not a clean promotion: row churn was
 `2` improved and `1` regressed, so the regression guard failed. A follow-up R3
 targeted variance probe suggests the labor-board regression was transient
-judge/classifier variance, while the remaining SEC role-tenure support row is
-still open.
+judge/classifier variance. A later SEC-only R5 targeted replay recovered the
+remaining role-tenure support row by routing structured `date` / start-date
+intents into employment-history support. That is targeted mechanism evidence,
+not yet a full eight-fixture promotion.
 
 The prior fresh ugly public Batch 03 guarded slices remain useful regression
 evidence:
@@ -147,8 +149,8 @@ surface discipline:
 
 The highest-value next work is fresh-transfer discipline:
 
-1. Inspect the remaining SEC role-tenure/source-display support row without
-   teaching fixture words to the instrument.
+1. Decide whether to spend a full eight-fixture QA replay under current code or
+   let the next fresh ugly package be the transfer confirmation.
 2. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
 3. Keep Batch 03 as regression evidence instead of polishing it for another
