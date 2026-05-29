@@ -135,6 +135,65 @@ Read:
 - The 98.5% score was more source-ledger-dependent than the prior notes made clear.
 - The sign-clean standard is now: Python may use typed source-record slots and source-row IDs, but may not derive answer-bearing semantics by reparsing free-text source displays.
 
+## 2026-05-29 Surface-Coverage Diagnostic
+
+Question:
+
+- How did a broken instrument reach `98.5%` on unseen documents?
+- Was the score mostly document-generalization, or did question-shape and surface-token retrieval transfer to new documents?
+
+Diagnostic artifact:
+
+- `C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\surface_coverage_diagnostic_20260529.json`
+- `C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_post_signclean_20260529\surface_coverage_diagnostic_20260529.md`
+
+Method:
+
+- Compare each oracle/reference answer against:
+  - the fixture source text;
+  - the pre-clean R5 evidence bundle;
+  - the post-raw-utterance-cut R9 evidence bundle.
+- Measure normalized phrase presence, token coverage, and numeric coverage.
+
+Key findings:
+
+- All `200` rows:
+  - source phrase present: `163 / 200`
+  - R5 evidence phrase present: `162 / 200`
+  - R9 evidence phrase present: `101 / 200`
+  - average source token coverage: `0.976`
+  - average R5 evidence token coverage: `0.966`
+  - average R9 evidence token coverage: `0.670`
+- Rows that fell from R5 exact to R9 non-exact (`38` rows):
+  - source phrase present: `31 / 38`
+  - R5 evidence phrase present: `31 / 38`
+  - R9 evidence phrase present: `5 / 38`
+  - average source token coverage: `0.969`
+  - average R5 evidence token coverage: `0.969`
+  - average R9 evidence token coverage: `0.338`
+  - average evidence-token drop from R5 to R9: `0.631`
+- Rows that fell from R5 exact to R9 miss (`16` rows):
+  - source phrase present: `13 / 16`
+  - R5 evidence phrase present: `13 / 16`
+  - R9 evidence phrase present: `2 / 16`
+  - average R5 evidence token coverage: `0.967`
+  - average R9 evidence token coverage: `0.339`
+
+Read:
+
+- The unseen documents were new, but the QA/task distribution was not new.
+- The pre-clean stack transferred because it was tuned to recurring legal/regulatory question shapes: identifiers, dates, dispositions, chronology, citations, signatories, and list extraction.
+- Most reference answers were surface-present in the source text, so source-ledger/free-text retrieval looked strong on new documents.
+- The R5 score largely measured whether the support stack surfaced the right source phrase to the LLM judge.
+- R9 dropped because the evidence bundle stopped showing the judge those phrases, not because the source documents ceased to contain them.
+- The `80.5%` R9 floor is closer to the typed/structured thesis than the `98.5%` R5 score, but R9 is still provisional because free-text source-routing remains active elsewhere.
+
+Conclusion:
+
+- The high unseen score was not answer memorization.
+- It was question-genre transfer plus extraction-friendly oracle design plus judge-visible surface-token presentation.
+- That explains how the system could score above `95%` on unseen documents while still violating the sign-clean thesis.
+
 ## 2026-05-29 Incident Review: Why English Fell From 98.5% To 80.5%
 
 Observed regression:
