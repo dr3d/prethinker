@@ -313,6 +313,7 @@ def test_source_record_question_overlap_companion_ranks_relevant_source_rows() -
     assert companion is not None
     row = companion["result"]["rows"][0]
     assert row["SourceRow"] == "src_line_0001"
+    assert row["SourceTextDisplay"] == "application rec 2026 0093 jordan vale recused"
     assert "jordan" in row["QuestionOverlap"]
     assert "recusal" in row["QuestionOverlap"] or "recused" in row["QuestionOverlap"]
 

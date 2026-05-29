@@ -1,6 +1,6 @@
 # Current Research Headline
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## Current Measurement Position
 
@@ -34,16 +34,17 @@ The 2026-05-22 native restamp remains the internal non-regression anchor:
 0 write proposal rows
 ```
 
-The newest public-document pressure is fresh ugly public 2026-05-28 R2:
+The newest public-document pressure is fresh ugly public 2026-05-28:
 
 ```text
-Fresh ugly 2026-05-28 R2: 198 exact / 2 partial / 0 miss over 200 rows = 99.0%
+Fresh ugly 2026-05-28 R6 full current-code replay:
+199 exact / 1 partial / 0 miss over 200 rows = 99.5%
 0 compatibility rows
 0 runtime load errors
 0 write proposal rows
 compile gate old pass/hold: 2 / 6
 compile gate blocking / diagnostic / advisory holds: 4 / 6 / 0
-row churn versus R1: 2 improved, 1 regressed
+row churn versus R2: 2 improved, 1 regressed
 regression guard: fail
 ```
 
@@ -52,14 +53,14 @@ evidence-bundle query-template normalization repair moved `47 / 3 / 0` to
 `50 / 0 / 0`, with `3` improved rows, `0` regressions, and clean hygiene. That
 is mechanism evidence; the full R2 replay is the current corpus measurement.
 
-The full R2 QA replay over all eight May 28 fixtures measured `198 / 2 / 0`
-(`99.0%`) with clean hygiene, but it is not a clean promotion: row churn was
-`2` improved and `1` regressed, so the regression guard failed. A follow-up R3
-targeted variance probe suggests the labor-board regression was transient
-judge/classifier variance. A later SEC-only R5 targeted replay recovered the
-remaining role-tenure support row by routing structured `date` / start-date
-intents into employment-history support. That is targeted mechanism evidence,
-not yet a full eight-fixture promotion.
+The R6 full QA replay over all eight May 28 fixtures measured `199 / 1 / 0`
+(`99.5%`) with clean hygiene, but it is not a clean promotion because one
+baseline-exact row became partial. A later R8 targeted replay recovered that
+residue by making query-overlap source-record evidence visible to the judge.
+The attempted R9 full replay produced complete per-fixture artifacts at
+`198 / 1 / 1` with clean hygiene, but two full-run regressions recovered in R10
+isolated reruns. Treat this as 99% band transfer evidence plus hosted-path /
+query-plan variance, not as a clean `200 / 0 / 0` corpus claim.
 
 The prior fresh ugly public Batch 03 guarded slices remain useful regression
 evidence:
@@ -85,9 +86,13 @@ The current measurement stack is:
 - Fresh ugly public 2026-05-28 R2 targeted replay: affected two-fixture slice
   `47 / 3 / 0` -> `50 / 0 / 0`, `0` regressions, hygiene still `0 / 0 / 0`;
   mechanism evidence only.
-- Fresh ugly public 2026-05-28 R2 full replay: `198 / 2 / 0` over `200` rows
-  (`99.0%` exact), hygiene `0 / 0 / 0`, but with regression guard failed
+- Fresh ugly public 2026-05-28 R6 full replay: `199 / 1 / 0` over `200` rows
+  (`99.5%` exact), hygiene `0 / 0 / 0`, but with regression guard failed
   because one baseline-exact row became partial.
+- Fresh ugly public 2026-05-28 R8/R9/R10 question-overlap visibility check:
+  targeted R8 recovered the R6 residue, while R9 full replay landed
+  `198 / 1 / 1`; the two R9 regressions both recovered on R10 isolated rerun,
+  so do not treat R9 as a stable code regression or a promotable score.
 - Fresh ugly public Batch 03: latest guarded slices `75 / 0 / 0` SEC and
   `216 / 6 / 3` non-SEC, slice-combined `291 / 6 / 3` over `300` rows
   (`97.0%` exact), with `0` compatibility rows, `0` runtime load errors, and
@@ -149,8 +154,8 @@ surface discipline:
 
 The highest-value next work is fresh-transfer discipline:
 
-1. Decide whether to spend a full eight-fixture QA replay under current code or
-   let the next fresh ugly package be the transfer confirmation.
+1. Use the next fresh ugly package as the transfer confirmation rather than
+   polishing the May 28 batch into a fragile headline.
 2. Decide whether stamp claims should pin OpenRouter provider/quantization or
    report hosted-path variance bands explicitly.
 3. Keep Batch 03 as regression evidence instead of polishing it for another

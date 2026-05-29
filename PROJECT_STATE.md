@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-05-28
+Last updated: 2026-05-29
 
 ## One-Sentence Shape
 
@@ -90,6 +90,14 @@ fresh ugly public 2026-05-28 R3 targeted variance probe:
 fresh ugly public 2026-05-28 R5 SEC role-start targeted replay:
   SEC slice 25 / 0 / 0 over 25 rows
   changed rows 1, improved 1, regressed 0, compatibility/runtime/write 0/0/0
+fresh ugly public 2026-05-28 R6 full current-code replay:
+  199 / 1 / 0 over 200 rows, 99.5% exact
+  changed rows 3 versus R2, improved 2, regressed 1, regression guard failed
+  compatibility/runtime/write 0/0/0
+fresh ugly public 2026-05-28 R8/R9/R10 question-overlap visibility check:
+  targeted q017 recovery 1 / 0 / 0
+  full R9 artifacts 198 / 1 / 1 over 200 rows, 99.0% exact, compatibility/runtime/write 0/0/0
+  R9 regressions both recovered on isolated R10 rerun, indicating hosted-path/query-plan variance
 fresh ugly public Batch 03 latest guarded slices:
   75 / 0 / 0 SEC
   216 / 6 / 3 non-SEC
@@ -115,8 +123,12 @@ aggregate but was not a clean promotion because one previously exact row became
 partial. The R3 targeted variance probe indicates that labor-board regression
 was transient judge/classifier variance. The R5 SEC targeted replay indicates
 the role-tenure row can be recovered by routing structured `date` / start-date
-intents into employment-history support; this is targeted mechanism evidence,
-not a full eight-fixture corpus promotion.
+intents into employment-history support. The R6 full replay is the best full
+May 28 aggregate so far, but still not a clean promotion. R8 recovered the last
+R6 residue by making query-overlap source-record evidence visible to the judge;
+R9's two full-run regressions did not reproduce in R10 isolated reruns. Treat
+this as 99% band transfer evidence plus hosted-path variance, not as a clean
+`200 / 0 / 0` corpus claim.
 
 Fresh fixture intake has a current cut-and-paste specification at
 `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`. The priority package is
@@ -133,7 +145,7 @@ should remain distinct from externally sourced real-world documents.
 The current full-suite verification is:
 
 ```text
-2009 passed, 2 subtests passed
+2015 passed, 2 subtests passed
 ```
 
 These numbers are the current public measurement anchor, not a permanent

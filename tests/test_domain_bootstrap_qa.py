@@ -1895,6 +1895,55 @@ def test_source_record_reference_support_tokenizes_natural_phrases() -> None:
     assert _source_record_reference_supported_by_results(row=row, reference="Boston, Massachusetts") is False
 
 
+def test_source_record_reference_support_accepts_question_overlap_rows() -> None:
+    row = {
+        "query_results": [
+            {
+                "result": {
+                    "predicate": "source_record_question_overlap_support",
+                    "rows": [
+                        {
+                            "SourceRow": "src_line_0042",
+                            "TextAtom": (
+                                "if_the_condition_endangers_staff_or_property_the_director_may_"
+                                "pause_the_standard_sequence_with_pay_pending_review_in_an_"
+                                "emergency_for_reasons_stated_in_writing_and_sent_to_the_clerk_"
+                                "the_director_may_skip_one_or_more_steps"
+                            ),
+                            "SourceTextDisplay": (
+                                "if the condition endangers staff or property the director may "
+                                "pause the standard sequence with pay pending review in an "
+                                "emergency for reasons stated in writing and sent to the clerk "
+                                "the director may skip one or more steps"
+                            ),
+                            "QuestionOverlap": "condition,endangers,emergency,sequence",
+                            "Score": "40",
+                        }
+                    ],
+                }
+            }
+        ]
+    }
+
+    assert _source_record_reference_supported_by_results(
+        row=row,
+        reference=(
+            "Condition endangers staff or property; the director may pause the standard "
+            "sequence with pay; emergency reasons stated in writing and sent to the clerk; "
+            "the director may skip one or more steps."
+        ),
+    )
+    assert qa_module._source_record_summary_reference_supported_by_results(
+        row=row,
+        reference=(
+            "(1) condition endangers staff or property, with pay; and "
+            "(2) emergency reasons stated in writing and sent to the clerk, "
+            "director may skip one or more steps."
+        ),
+        predicates={"source_record_question_overlap_support"},
+    )
+
+
 def test_source_record_reference_support_handles_dates_and_connector_words() -> None:
     row = {
         "query_results": [

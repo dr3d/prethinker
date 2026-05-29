@@ -472,3 +472,156 @@ Read:
 This is another targeted mechanism result, not a full corpus promotion. The
 remaining honest next confirmation is a full eight-fixture QA replay under the
 current code, or preferably the next fresh ugly package if it is ready.
+
+## R6-R10 Question-Overlap Visibility And Variance Check
+
+Question:
+
+Can the last full-replay residue be recovered by making query-overlap
+source-record evidence visible to the deterministic judge, without adding
+fixture vocabulary or mutable KB facts?
+
+Mechanism change:
+
+- `source_record_question_overlap_support` rows now carry `SourceTextDisplay`
+  alongside the normalized `TextAtom`.
+- The deterministic reference checker and failure-surface classifier now treat
+  `source_record_question_overlap_support` as admitted source-record evidence
+  only when `SourceTextDisplay` or `TextAtom` directly contains the requested
+  source-stated answer material.
+- The overlap score remains routing evidence only; it is not an answer.
+- Numbered-list markers and generic `exception` / `exceptions` framing are no
+  longer required tokens for source-record summary support when the actual
+  answer material is present.
+
+Guard tests:
+
+```text
+python -m pytest tests\test_query_hint_surfaces.py::test_source_record_question_overlap_companion_ranks_relevant_source_rows tests\test_domain_bootstrap_qa.py::test_source_record_reference_support_accepts_question_overlap_rows -q
+python -m pytest tests\test_domain_bootstrap_qa.py tests\test_query_hint_surfaces.py -q
+python scripts\audit_active_instrument_leakage.py
+```
+
+Result:
+
+```text
+2 passed
+475 passed
+active instrument leakage audit: pass, 0 forbidden / 0 warning
+```
+
+R6 full current-code replay before this mechanism:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r6_full_current_code_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r2_vs_r6_full_current_code_diff.md
+```
+
+Result:
+
+```text
+full eight-fixture QA: 199 / 1 / 0 over 200 rows
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+R2 -> R6: +1 exact, -1 partial, 3 changed rows
+regression guard: fail
+```
+
+R6 residue:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r6_full_current_code_residue_adjudication.md
+```
+
+```text
+labor_board_ugly_002 q017: answer_rendering_gap / answer_surface_gap
+```
+
+Read:
+
+- The compile artifact already contained the needed source-record text.
+- The residue was a visibility/rendering issue: the answer-bearing normalized
+  `TextAtom` existed inside `source_record_question_overlap_support`, but that
+  support surface was weaker for the deterministic judge and LLM judge than
+  neighboring display-bearing support rows.
+- This is a generic source-record evidence visibility issue, not a labor-board
+  or Article-specific compiler repair.
+
+R8 targeted residue replay:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r8_labor_q017_question_overlap_visibility
+```
+
+Result:
+
+```text
+labor_board_ugly_002 q017: 1 / 0 / 0
+response envelope: established
+failure surface: not_applicable
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+```
+
+R9 full replay:
+
+The wrapper timed out after all per-fixture artifacts were written but before
+the batch summary was emitted, so the summary was reconstructed from the latest
+per-fixture JSON artifacts.
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r9_full_question_overlap_visibility_summary.md
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r6_vs_r9_question_overlap_visibility_diff.md
+```
+
+Result:
+
+```text
+full eight-fixture QA: 198 / 1 / 1 over 200 rows
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+R6 -> R9: -1 exact, +0 partial, +1 miss
+changed rows: 3
+improved rows: 1
+regressed rows: 2
+regression guard: fail
+```
+
+Changed rows:
+
+| Fixture | Row | Movement | Read |
+| --- | --- | --- | --- |
+| `labor_board_ugly_002` | `q017` | partial -> exact | question-overlap source display recovered the residue |
+| `court_order_ugly_002` | `q010` | exact -> partial | did not add support surfaces; likely hosted-path/query-plan variance |
+| `procurement_contract_ugly_002` | `q004` | exact -> miss | lost semantic-target support surfaces; likely hosted-path/query-plan variance |
+
+R10 variance probe:
+
+```text
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r10_variance_probe_court_q010
+C:\prethinker_tmp_archive\fresh_ugly_public_20260528_01_r1_20260528\qa_r10_variance_probe_procurement_q004
+```
+
+Result:
+
+```text
+court_order_ugly_002 q010: 1 / 0 / 0
+procurement_contract_ugly_002 q004: 1 / 0 / 0
+compatibility rows: 0
+runtime load errors: 0
+write proposal rows: 0
+```
+
+Read:
+
+- The `q017` mechanism is real on targeted replay.
+- The R9 full-run regressions did not reproduce in isolated rerun with the same
+  current code, so they should be treated as hosted-path/query-plan variance,
+  not as a stable code regression.
+- Do not promote R9 as a corpus score. The disciplined current reading is that
+  the May 28 batch is sitting in the 99% band, but row-level variance remains
+  large enough that a clean `200 / 0 / 0` claim needs either an N-cycle
+  protocol or a fresh-batch confirmation.
