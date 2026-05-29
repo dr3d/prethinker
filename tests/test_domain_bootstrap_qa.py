@@ -4581,6 +4581,16 @@ def test_source_record_identifier_set_extracts_labeled_list_identifiers() -> Non
     companions = _source_record_messy_summary_companions(
         runtime,
         utterance="What identifiers are presented in the bullet-list cover-page format?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["identifiers", "file number", "tax identification number", "trading symbol"],
+                "answer_constraints": ["cover page"],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     companion = next(
@@ -4674,6 +4684,30 @@ def test_source_record_same_day_case_disposition_from_source_display() -> None:
         row={"query_results": [companion]},
         reference="In re Example, No. 2026-1042, also decide today, upholding the rejection of the application.",
         predicates={"source_record_same_day_case_disposition_support"},
+    )
+
+
+def test_source_record_same_day_case_disposition_ignores_utterance_without_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        (
+            "source_record_text_display(src_line_0028, 'The corresponding application is the subject "
+            "of an appeal that we also decide today upholding the rejection of the application. "
+            "See In re Example, No. 2026-1042.')."
+        ),
+        "source_record_surface_mention(src_line_0028, v_2026_1042, '2026-1042').",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companions = _source_record_messy_summary_companions(
+        runtime,
+        utterance="Which companion case was decided the same day, and what was its disposition?",
+        query_intents=[],
+    )
+
+    assert all(
+        item["result"]["predicate"] != "source_record_same_day_case_disposition_support"
+        for item in companions
     )
 
 

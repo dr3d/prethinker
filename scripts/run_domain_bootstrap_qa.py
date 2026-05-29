@@ -19799,6 +19799,7 @@ def _source_record_identifier_set_active(
     utterance: str,
     query_intents: list[dict[str, Any]] | None = None,
 ) -> bool:
+    del utterance
     tokens = _query_intents_target_tokens(query_intents)
     for intent in query_intents or []:
         if not isinstance(intent, dict):
@@ -19825,12 +19826,7 @@ def _source_record_identifier_set_active(
         "report",
         "tracking",
     }
-    if tokens & identifier_tokens and (tokens & {"id", "identifier", "identifiers", "number", "numbers", "reference"}):
-        return True
-    text = str(utterance or "").casefold()
-    if not re.search(r"\b(?:identifier|identifiers|reference number|reference numbers|report id|inspection-related|nr)\b", text):
-        return False
-    return bool(re.search(r"\b(?:what|which|how many|list|identify|reference|identifier|id|nr|number)\b", text))
+    return bool(tokens & identifier_tokens and (tokens & {"id", "identifier", "identifiers", "number", "numbers", "reference"}))
 
 
 def _source_record_identifier_label_from_query_intents(query_intents: list[dict[str, Any]] | None) -> str:
@@ -20085,19 +20081,14 @@ def _source_record_same_day_case_disposition_active(
     utterance: str,
     query_intents: list[dict[str, Any]] | None = None,
 ) -> bool:
+    del utterance
     tokens = _query_intents_target_tokens(query_intents)
     for intent in query_intents or []:
         if not isinstance(intent, dict):
             continue
         tokens.update(_query_intent_constraint_tokens(intent))
         tokens.update(token for token in _query_atom_tokens(str(intent.get("intent_type", ""))) if len(token) >= 3)
-    if {"case", "companion"} & tokens and {"disposition", "status", "same", "date", "decided"} & tokens:
-        return True
-    text = str(utterance or "").casefold()
-    return bool(
-        re.search(r"\b(?:companion|same day|decided the same day|also decided)\b", text)
-        and re.search(r"\b(?:case|disposition|status|decided)\b", text)
-    )
+    return bool({"case", "companion"} & tokens and {"disposition", "status", "same", "date", "decided"} & tokens)
 
 
 def _source_record_same_day_case_identifier_display(

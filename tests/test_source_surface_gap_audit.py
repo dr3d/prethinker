@@ -195,12 +195,35 @@ def test_source_record_identifier_set_collects_reference_numbers() -> None:
     companion = _source_record_identifier_set_companion(
         runtime,
         utterance="What are the two reference numbers FDA uses for this warning letter?",
+        query_intents=[
+            {
+                "intent_type": "list",
+                "target_terms": ["reference numbers", "warning letter"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None
     displays = {row["IdentifierDisplay"] for row in companion["result"]["rows"]}
     assert "MARCS-CMS 721916" in displays
     assert "Warning Letter 320-26-61" in displays
+
+
+def test_source_record_identifier_set_ignores_utterance_without_structured_intent() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    runtime.assert_fact("source_record_text_atom(src_line_0003, warning_letter_320_26_61).")
+    runtime.assert_fact("source_record_numeric_token(src_line_0003, v_320_26_61).")
+
+    companion = _source_record_identifier_set_companion(
+        runtime,
+        utterance="What reference number does this warning letter use?",
+    )
+
+    assert companion is None
 
 
 def test_source_record_identifier_set_collects_inspection_related_identifiers() -> None:
@@ -213,6 +236,16 @@ def test_source_record_identifier_set_collects_inspection_related_identifiers() 
     companion = _source_record_identifier_set_companion(
         runtime,
         utterance="How many distinct inspection-related identifiers does this record contain?",
+        query_intents=[
+            {
+                "intent_type": "count",
+                "target_terms": ["inspection identifiers", "report id", "activity nr", "investigation nr"],
+                "answer_constraints": [],
+                "uncertainty_policy": "answer",
+                "language": "en",
+                "source": "semantic_ir",
+            }
+        ],
     )
 
     assert companion is not None

@@ -298,3 +298,30 @@ Current read:
 - Latest full-corpus clean replay remains R5: `197 / 1 / 2 = 98.5%`.
 - Latest target evidence indicates the stable procurement citation-context partial is repaired.
 - A fresh full replay would be needed before claiming an aggregate recovery above `98.5%`.
+
+## R8 Intent-Gate Cleanup
+
+Trigger:
+
+- Side audit reports in `C:\prethinker_tmp_archive\side_audit_fixture_leaks_20260529.*` and `C:\prethinker_tmp_archive\side_audit_utterance_regex_20260529.*`.
+- The audit concern was not direct fixture-name branching in active code; active leakage audit remained clean.
+- The sharper concern was raw utterance/question regex acting as a Python language-understanding layer.
+
+Code changes:
+
+- Removed specific native fixture names from current leakage-review docs.
+- Removed raw-utterance regex fallback activation from the newest identifier-set support gate.
+- Removed raw-utterance regex fallback activation from the newest same-day companion-case disposition gate.
+- Added regression guards proving those two support surfaces do not activate from raw question wording alone; they now require structured `query_intents`.
+
+Target replays after cleanup:
+
+- `procurement_contract_ugly_003 q009`: `1 / 0 / 0`, hygiene `0/0/0`
+- `court_order_ugly_003 q006`: `1 / 0 / 0`, hygiene `0/0/0`
+- `puc_order_ugly_003 q005`: `1 / 0 / 0`, hygiene `0/0/0`
+
+Read:
+
+- This is not a score-improvement intervention; it is a governance correction.
+- The repaired paths still work when the LLM-produced semantic query layer supplies structured intent.
+- Python remains allowed to parse source-contained structure and syntax, but these two support surfaces no longer use raw English question regex as their activation mechanism.

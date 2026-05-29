@@ -125,8 +125,7 @@ In the active compile/QA scripts, I did not find:
 
 - branches on `fresh_ugly_public_20260524_01`;
 - branches on Batch 01 fixture IDs;
-- branches on native fixture names such as `black_lantern_maze`,
-  `identifier_ledger_torture`, or `lantern_school_field_trip`;
+- branches on specific native fixture names;
 - direct use of QA row IDs as behavior switches;
 - use of oracle/reference answers by support surfaces.
 
