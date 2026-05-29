@@ -4597,6 +4597,7 @@ def test_source_record_identifier_set_uses_structured_intent_surface_mentions() 
     for fact in [
         "source_record_text_atom(src_line_0024, signatures).",
         "source_record_text_atom(src_line_0030, dw_340357).",
+        "source_record_text_display(src_line_0030, 'Document control number DW#340357.').",
         "source_record_surface_mention(src_line_0030, dw_340357, 'DW#340357.').",
     ]:
         assert runtime.assert_fact(fact).get("status") == "success"
@@ -4619,7 +4620,9 @@ def test_source_record_identifier_set_uses_structured_intent_surface_mentions() 
     companion = next(
         item for item in companions if item["result"]["predicate"] == "source_record_identifier_set_support"
     )
-    assert any(row["IdentifierDisplay"] == "DW#340357." for row in companion["result"]["rows"])
+    matched = [row for row in companion["result"]["rows"] if row["IdentifierDisplay"] == "DW#340357."]
+    assert matched
+    assert matched[0]["SourceTextDisplay"] == "Document control number DW#340357."
     assert _source_record_reference_supported_by_results(
         row={"query_results": [companion]},
         reference="DW#340357.",

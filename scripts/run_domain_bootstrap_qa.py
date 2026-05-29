@@ -19644,6 +19644,7 @@ def _source_record_identifier_set_companion(
         value: str,
         source_predicate: str,
         text_atom: str = "",
+        source_text_display: str = "",
         display_override: str = "",
     ) -> None:
         display = display_override or _source_record_identifier_display(label=label, value=value, text_atom=text_atom)
@@ -19662,11 +19663,13 @@ def _source_record_identifier_set_companion(
                 "SourceRow": source_row,
                 "SourcePredicate": source_predicate,
                 **({"SourceTextAtom": text_atom} if text_atom else {}),
+                **({"SourceTextDisplay": source_text_display} if source_text_display else {}),
                 "SupportClass": "deterministic-source-record-summary",
             }
         )
 
     text_atoms_by_row = {source_row: atom for source_row, atom in _source_record_text_atoms(runtime)}
+    text_display_by_row = _source_record_text_display_by_row(runtime)
     surfaces_by_row = _source_record_surface_mentions_by_row(runtime)
     query_label = _source_record_identifier_label_from_query_intents(query_intents)
     labels_by_row: dict[str, str] = {}
@@ -19691,6 +19694,7 @@ def _source_record_identifier_set_companion(
                     value=value,
                     source_predicate=predicate,
                     text_atom=text_atoms_by_row.get(source_row, ""),
+                    source_text_display=text_display_by_row.get(source_row, ""),
                 )
         elif predicate in {"source_record_field_item_pair", "source_record_cell_item_pair"} and len(args) >= 5:
             source_row, left_field, left_value, right_field, right_value = args[:5]
@@ -19702,6 +19706,7 @@ def _source_record_identifier_set_companion(
                         value=value,
                         source_predicate=predicate,
                         text_atom=text_atoms_by_row.get(source_row, ""),
+                        source_text_display=text_display_by_row.get(source_row, ""),
                     )
 
     for source_row, text_atom in text_atoms_by_row.items():
@@ -19717,6 +19722,7 @@ def _source_record_identifier_set_companion(
                 value=_source_record_identifier_value_from_label(row_label, text_atom) or text_atom,
                 source_predicate="source_record_text_atom",
                 text_atom=text_atom,
+                source_text_display=text_display_by_row.get(source_row, ""),
                 display_override=label_value_display,
             )
             continue
@@ -19730,6 +19736,7 @@ def _source_record_identifier_set_companion(
                 value=value,
                 source_predicate="source_record_text_atom",
                 text_atom=text_atom,
+                source_text_display=text_display_by_row.get(source_row, ""),
             )
 
     for source_row, surface_mentions in sorted(surfaces_by_row.items(), key=lambda item: _source_row_sort_key(item[0])):
@@ -19750,6 +19757,7 @@ def _source_record_identifier_set_companion(
                 value=atom,
                 source_predicate="source_record_surface_mention",
                 text_atom=row_text_atom,
+                source_text_display=text_display_by_row.get(source_row, ""),
                 display_override=display,
             )
 

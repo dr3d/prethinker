@@ -231,3 +231,70 @@ Read:
 - The two R4 summary-selected residues are not stable target-replay mechanism failures.
 - The current defensible claim is still the full R4 corpus score, `198 / 1 / 1 = 99.0%`.
 - A clean score would require a fresh full replay into an empty output directory, not reuse of the timeout-contaminated `qa_r4_full` directory.
+
+## R5 Clean Full Replay
+
+Command:
+
+```powershell
+python scripts\run_domain_bootstrap_qa_batch.py --dataset-root datasets\real_world_transfer\fresh_ugly_public_20260529_01 --compile-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\compile_r1 --out-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r5_full_clean --model qwen/qwen3.6-35b-a3b --base-url https://openrouter.ai/api/v1 --lanes 6 --timeout 420 --timeout-scale 6 --no-cache --out-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r5_full_clean_summary.json --out-md C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r5_full_clean_summary.md
+```
+
+Result:
+
+- QA: `197 / 1 / 2` over `200`
+- Exact rate: `98.5%`
+- Hygiene: `0` compatibility rows, `0` runtime load errors, `0` write proposals
+
+Per fixture:
+
+- All fixtures except `procurement_contract_ugly_003`: `25 / 0 / 0`
+- `procurement_contract_ugly_003`: `22 / 1 / 2`
+
+R5 adjudication:
+
+- `procurement_contract_ugly_003 q004`: miss, compile-labeled. Target replay had previously recovered this row, so this was treated as query-plan fragility around legal representative header rows, not a settled compile absence.
+- `procurement_contract_ugly_003 q009`: partial, query-surface. Identifier support carried the prior decision file numbers, but not enough surrounding source display for the judge to see the case name and date as one citation context.
+- `procurement_contract_ugly_003 q013`: miss from malformed/truncated provider response (`Expecting value...`), with empty query results. Target replay had previously recovered this row.
+
+Read:
+
+- The clean replay confirms the procurement fixture is now the high-variance pressure point.
+- The residue is not random: legal header representation, prior-decision citation context, and provider response integrity all stress query-side delivery rather than durable KB mutation.
+
+## R6/R7 Target Replays
+
+R6 target replay:
+
+```powershell
+python scripts\run_domain_bootstrap_qa.py --run-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\compile_r1\procurement_contract_ugly_003\domain_bootstrap_file_20260529T063933452519Z_source_qwen-qwen3-6-35b-a3b.json --qa-file datasets\real_world_transfer\fresh_ugly_public_20260529_01\procurement_contract_ugly_003\qa.md --oracle-jsonl datasets\real_world_transfer\fresh_ugly_public_20260529_01\procurement_contract_ugly_003\oracle.jsonl --only-ids q004,q009,q013 --base-url https://openrouter.ai/api/v1 --model qwen/qwen3.6-35b-a3b --temperature 0 --top-p 0.82 --no-cache --judge-reference-answers --classify-failure-surfaces --out-dir C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r6_target_procurement_q004_q009_q013 --timeout 420
+```
+
+Result:
+
+- `q004/q009/q013`: `2 / 1 / 0`
+- `q004`: exact
+- `q009`: partial
+- `q013`: exact
+- Hygiene: `0/0/0`
+
+R7 code change:
+
+- `source_record_identifier_set_support` rows now carry admitted `SourceTextDisplay` when available, not only normalized identifier atom/value. This is still query-only support over admitted source-record rows; it writes no durable facts and adds no fixture vocabulary.
+
+R7 target replay:
+
+```powershell
+python scripts\run_domain_bootstrap_qa.py --run-json C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\compile_r1\procurement_contract_ugly_003\domain_bootstrap_file_20260529T063933452519Z_source_qwen-qwen3-6-35b-a3b.json --qa-file datasets\real_world_transfer\fresh_ugly_public_20260529_01\procurement_contract_ugly_003\qa.md --oracle-jsonl datasets\real_world_transfer\fresh_ugly_public_20260529_01\procurement_contract_ugly_003\oracle.jsonl --only-ids q009 --base-url https://openrouter.ai/api/v1 --model qwen/qwen3.6-35b-a3b --temperature 0 --top-p 0.82 --no-cache --judge-reference-answers --classify-failure-surfaces --out-dir C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_r1_20260529\qa_r7_target_procurement_q009_identifier_display --timeout 420
+```
+
+Result:
+
+- `q009`: `1 / 0 / 0`
+- Hygiene: `0/0/0`
+
+Current read:
+
+- Latest full-corpus clean replay remains R5: `197 / 1 / 2 = 98.5%`.
+- Latest target evidence indicates the stable procurement citation-context partial is repaired.
+- A fresh full replay would be needed before claiming an aggregate recovery above `98.5%`.
