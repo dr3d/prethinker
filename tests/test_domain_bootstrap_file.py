@@ -89,9 +89,13 @@ from scripts.run_domain_bootstrap_file import (
     _profile_registry_palette_report,
     _profile_registry_palette_prior_context,
     _profile_registry_accountability_context,
+    _profile_registry_completion_context_lines,
+    _apply_profile_registry_completion_followup_pass,
     _profile_registry_accountability_followup_context_lines,
     _apply_profile_registry_accountability_followup_pass,
     _apply_domain_omission_carrier_signature_reduction,
+    _apply_fda_lot_identifier_atom_reduction,
+    _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
     _source_compiler_context,
@@ -6679,6 +6683,94 @@ def test_profile_registry_accountability_context_requires_typed_omission_rows() 
     assert "Do not leave this only in self_check" in joined
 
 
+def test_profile_registry_completion_context_is_closed_registry_only() -> None:
+    context = _profile_registry_completion_context_lines(
+        {
+            "predicates": [
+                {"signature": "fda_warning_letter/5", "category": "wrapper", "notes": "Wrapper note."},
+                {"signature": "fda_violation_detail/5", "category": "detail", "notes": "Detail note."},
+                {"signature": "domain_omission/5"},
+                {"signature": "made_up/3"},
+            ]
+        },
+        {
+            "facts": [
+                "fda_warning_letter(letter_1, fda, acme_inc, v_2026_01_01, src_line_1).",
+                "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_2).",
+            ]
+        },
+    )
+
+    joined = "\n".join(context)
+    assert "closed predicate registry" in joined
+    assert "do not emit source_record_* rows" in joined
+    assert "fda_warning_letter/5" in joined
+    assert "fda_violation_detail/5" in joined
+    assert "domain_omission/5 in this pass" in joined
+    assert "made_up/3" not in joined
+    assert "existing_fact: fda_warning_letter" in joined
+    assert "existing_fact: domain_omission" not in joined
+    assert "SIGNATURE NOTE: fda_violation_detail/5: category=detail; notes=Detail note." in joined
+
+
+def test_profile_registry_completion_followup_rejects_outside_registry(monkeypatch) -> None:
+    source_compile = {
+        "facts": ["fda_warning_letter(letter_1, fda, acme_inc, v_2026_01_01, src_line_1)."],
+        "rules": [],
+        "queries": [],
+        "admitted_count": 1,
+        "skipped_count": 0,
+    }
+    registry = {
+        "predicates": [
+            {"signature": "fda_warning_letter/5"},
+            {"signature": "fda_violation_detail/5"},
+            {"signature": "domain_omission/5"},
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "profile_registry_completion_followup"
+        assert "domain_omission/5" not in kwargs["predicates"]
+        assert all(
+            str(item.get("signature", "")).strip() != "domain_omission/5"
+            for item in kwargs["parsed_profile"]["candidate_predicates"]
+            if isinstance(item, dict)
+        )
+        assert kwargs["operation_target"] == 12
+        return {
+            "ok": True,
+            "admitted_count": 2,
+            "skipped_count": 0,
+            "facts": [
+                "fda_violation_detail(violation_1, missing_record_type, batch_production_records, pre_release_quality_review, src_line_12).",
+                "source_record_text(row_12, prose).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_profile_registry_completion_followup_pass(
+        source_compile=source_compile,
+        parsed_profile={"candidate_predicates": []},
+        profile_registry=registry,
+        source_text="The quality unit failed to review batch production records.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 12})(),
+        extra_context=[],
+    )
+
+    assert result["attempted"] is True
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, fda, acme_inc, v_2026_01_01, src_line_1).",
+        "fda_violation_detail(violation_1, missing_record_type, batch_production_records, pre_release_quality_review, src_line_12).",
+    ]
+
+
 def test_profile_registry_accountability_followup_context_is_domain_omission_only() -> None:
     context = _profile_registry_accountability_followup_context_lines(
         {
@@ -6804,6 +6896,45 @@ def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_re
     ]
     assert source_compile["deterministic_domain_omission_signature_invalid_count"] == 1
     assert source_compile["deterministic_domain_omission_signature_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_lot_identifier_atom_reduction_canonicalizes_affected_lot_values() -> None:
+    source_compile = {
+        "facts": [
+            "fda_violation_detail(violation_1, affected_lot, lot_a104, product_release_record_review, src_line_12).",
+            "fda_violation_detail(violation_1, affected_lot, batch_a_105, product_release_record_review, src_line_12).",
+            "fda_violation_detail(violation_2, affected_product, batch_a_106, sterile_drug_products, src_line_13).",
+        ]
+    }
+
+    report = _apply_fda_lot_identifier_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_violation_detail(violation_1, affected_lot, lot_a_104, product_release_record_review, src_line_12).",
+        "fda_violation_detail(violation_1, affected_lot, lot_a_105, product_release_record_review, src_line_12).",
+        "fda_violation_detail(violation_2, affected_product, batch_a_106, sterile_drug_products, src_line_13).",
+    ]
+    assert source_compile["deterministic_fda_lot_identifier_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_correspondence_party_placeholder_contract_rejects_omission_substitutes() -> None:
+    source_compile = {
+        "facts": [
+            "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_line_1).",
+            "fda_correspondence_party(letter_1, not_stated, signatory, not_stated, src_line_2).",
+            "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_2).",
+        ]
+    }
+
+    report = _enforce_fda_correspondence_party_placeholder_contract(source_compile)
+
+    assert report["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_correspondence_party(letter_1, acme_inc, recipient, acme_inc, src_line_1).",
+        "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_2).",
+    ]
+    assert source_compile["fda_correspondence_party_placeholder_contract_policy"]["not_source_interpretation"] is True
 
 
 def test_global_first_profile_registry_palette_prior_is_unsafe() -> None:

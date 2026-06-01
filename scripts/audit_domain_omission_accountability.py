@@ -72,6 +72,19 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
         if not _domain_omission_available(data):
             continue
         facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()] if isinstance(source_compile.get("facts"), list) else []
+        for fact in facts:
+            placeholder = _ordinary_omission_placeholder(fact)
+            if placeholder:
+                rows.append(
+                    {
+                        "fixture": path.parent.name,
+                        "compile_json": str(path),
+                        "class": "ordinary_carrier_omission_placeholder",
+                        "fact": fact,
+                        "carrier_signature": placeholder,
+                        "self_check_omission_notes": [],
+                    }
+                )
         domain_omission_rows = _domain_omission_rows(facts)
         has_domain_omission = bool(domain_omission_rows)
         for row in domain_omission_rows:
@@ -166,6 +179,22 @@ def _domain_omission_rows(facts: list[str]) -> list[dict[str, str]]:
             continue
         rows.append({"fact": fact, "carrier_signature": _normalize_arg(args[1])})
     return rows
+
+
+def _ordinary_omission_placeholder(fact: str) -> str:
+    match = FACT_RE.match(str(fact).strip())
+    if not match:
+        return ""
+    predicate = match.group(1)
+    args = [_normalize_arg(arg) for arg in _split_args(match.group(2))]
+    if predicate == "fda_correspondence_party" and len(args) == 5:
+        party_id, party_role, party_name = args[1], args[2], args[3]
+        if party_role in {"signatory", "contact", "responsible_official"} and (
+            party_id in {"not_stated", "unknown", "none_found", "not_applicable", "missing"}
+            or party_name in {"not_stated", "unknown", "none_found", "not_applicable", "missing"}
+        ):
+            return "fda_correspondence_party/5"
+    return ""
 
 
 def _normalize_arg(value: str) -> str:

@@ -252,6 +252,66 @@ R10 follow-up plus deterministic registry-reference reduction:
   atom-shape blockers: 0
   domain omission accountability audit: pass
   deterministic domain_omission signature reductions: 1
+
+R11 closed-registry completion follow-up, first attempt:
+  admitted facts: 19
+  strict expected match: 15 / 23
+  value-domain violations: 0
+  atom-shape blockers: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 0
+  note: pass rejected itself because domain_omission/5 was still visible in the
+        completion profile while the pass forbade omission rows
+
+R12 completion follow-up with domain_omission filtered from completion profile:
+  admitted facts: 23
+  strict expected match: 16 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 4
+  note: one useful lift (procedure_scope); three adjacent-but-not-target rows
+
+R13 extra FDA registry note pressure:
+  admitted facts: 24
+  strict expected match: 13 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 0
+  note: detailed schema prose destabilized the base compile; note-tuning not
+        promoted
+
+R14 generic completion machinery with original FDA registry notes:
+  admitted facts: 27
+  strict expected match: 14 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 5
+  note: completion added useful in-registry facts (procedure_scope,
+        consultant qualification citation, supporting-documentation response,
+        recurrence scope), but base compile drifted on lot atom formatting and
+        violation category. This is useful machinery, not a promoted score path.
+
+R15 lot-identifier normalization:
+  admitted facts: 23
+  strict expected match: 16 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 4
+  note: lot atoms already landed canonical in this run; the new reducer is a
+        guard for observed variants (`lot_a104`, `batch_a_104`), not the driver
+        of this score.
+  governance catch: completion emitted a signatory `not_stated` ordinary party
+        row beside the correct domain_omission row.
+
+R16 correspondence-party placeholder contract:
+  admitted facts: 19
+  strict expected match: 14 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass
+  completion pass new facts: 0
+  placeholder ordinary party rows rejected: 0
+  note: this run did not emit the R15 placeholder row; the new contract and
+        audit are retained because the R15 row is a real leakage shape.
 ```
 
 Artifacts:
@@ -267,6 +327,12 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r7_accountability_re
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r8_signature_accountability
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r9_accountability_followup
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r10_accountability_signature_reduction
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r11_registry_completion
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r12_registry_completion_filtered
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r13_registry_notes
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_registry_completion_original_notes
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r15_lot_reduction
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_placeholder_contract
 ```
 
 What this proved:
@@ -288,6 +354,18 @@ What this proved:
   typed registry-reference reducer canonicalizes `name_arity` back to the exact
   registered `'name/arity'` signature. This reducer reads registry syntax only;
   it does not inspect source prose or create omission facts.
+- closed-registry completion follow-up can add useful facts without breaking
+  governance, but it is still unstable. R12 lifted one row; R13 showed that
+  adding more prose to registry notes can worsen the base compile. Treat domain
+  notes as schema design material, not a row-polishing knob.
+- R14 shows the completion pass can find exactly the substantive rows we want,
+  but strict score can still move backward when the base compile changes nearby
+  atoms. The next blocker is stabilizing/canonicalizing governed value atoms,
+  not simply adding more completion passes.
+- absent signatory/contact/responsible-official information must stay in
+  `domain_omission/5`. A normal `fda_correspondence_party/5` row with
+  `not_stated`/`unknown` placeholder values is now rejected by typed contract
+  validation and blocked by `audit_domain_omission_accountability.py`.
 
 Current blocker:
 
@@ -316,6 +394,9 @@ R10 still misses:
 - recurrence/responsibility conclusion row;
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.
+- governed atom normalization for lot identifiers and violation categories is
+  now a live blocker: current runs vary between `lot_a_104`, `lot_a104`,
+  `batch_a_104`, and adjacent violation categories.
 
 ## Next Moves
 

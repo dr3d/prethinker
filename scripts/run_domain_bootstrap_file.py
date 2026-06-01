@@ -1207,6 +1207,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--profile-registry-completion-followup",
+        action="store_true",
+        help=(
+            "Experimental: after a profile-registry compile, run one bounded source-grounded completion pass "
+            "inside the closed registry predicate set. The pass may emit registered domain facts only."
+        ),
+    )
+    parser.add_argument(
         "--focused-pass-ops-schema",
         action="store_true",
         help=(
@@ -2138,6 +2146,8 @@ def main() -> int:
         _apply_governed_obligation_detail_atom_reduction(record["source_compile"])
         _apply_document_subject_atom_convergence(record["source_compile"])
         _attach_governed_companion_subject_health(record["source_compile"])
+        _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
             and
@@ -2155,6 +2165,20 @@ def main() -> int:
             )
             _attach_governed_companion_subject_health(record["source_compile"])
         if (
+            bool(getattr(args, "profile_registry_completion_followup", False))
+            and profile_registry
+            and isinstance(parsed, dict)
+        ):
+            _apply_profile_registry_completion_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                profile_registry=profile_registry,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
+        if (
             bool(getattr(args, "profile_registry_accountability_followup", False))
             and profile_registry
             and isinstance(parsed, dict)
@@ -2168,6 +2192,8 @@ def main() -> int:
                 args=args,
                 extra_context=extra_compile_context,
             )
+        _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
+        _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
@@ -6792,6 +6818,189 @@ def _apply_profile_registered_carrier_omission_followup_pass(
     return metadata
 
 
+def _profile_registry_predicate_signatures(profile_registry: dict[str, Any]) -> list[str]:
+    predicates = profile_registry.get("predicates") if isinstance(profile_registry.get("predicates"), list) else []
+    signatures: list[str] = []
+    seen: set[str] = set()
+    for item in predicates:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        if not signature or signature in seen or carrier_contract(signature) is None:
+            continue
+        seen.add(signature)
+        signatures.append(signature)
+    return signatures
+
+
+def _profile_registry_completion_signatures(profile_registry: dict[str, Any]) -> list[str]:
+    return [
+        signature
+        for signature in _profile_registry_predicate_signatures(profile_registry)
+        if signature != "domain_omission/5"
+    ]
+
+
+def _profile_registry_existing_fact_context(source_compile: dict[str, Any], *, limit: int = 80) -> list[str]:
+    facts: list[str] = []
+    for item in source_compile.get("facts", []) if isinstance(source_compile.get("facts"), list) else []:
+        fact = str(item).strip()
+        parsed = _parse_fact_clause(fact)
+        if parsed is not None and f"{parsed[0]}/{len(parsed[1])}" == "domain_omission/5":
+            continue
+        if fact:
+            facts.append(fact)
+    if not facts:
+        return []
+    lines = [
+        "PROFILE REGISTRY COMPLETION FOLLOWUP: existing typed facts are listed below. Reuse their subject IDs "
+        "when adding missing companion rows; do not replace them with prose-derived aliases."
+    ]
+    lines.extend(f"existing_fact: {fact}" for fact in facts[:limit])
+    return lines
+
+
+def _profile_without_signatures(parsed_profile: dict[str, Any], excluded_signatures: set[str]) -> dict[str, Any]:
+    excluded = {str(signature).strip() for signature in excluded_signatures if str(signature).strip()}
+    if not excluded:
+        return parsed_profile
+    out = dict(parsed_profile)
+    candidates = parsed_profile.get("candidate_predicates")
+    if isinstance(candidates, list):
+        out["candidate_predicates"] = [
+            item
+            for item in candidates
+            if not (
+                isinstance(item, dict)
+                and str(item.get("signature", "")).strip() in excluded
+            )
+        ]
+    return out
+
+
+def _profile_registry_completion_context_lines(
+    profile_registry: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    signatures = _profile_registry_completion_signatures(profile_registry)
+    if not signatures:
+        return []
+    lines = [
+        (
+            "PROFILE REGISTRY COMPLETION FOLLOWUP: this is a bounded domain-pack compile pass inside a closed "
+            "predicate registry. Emit only source-grounded compact rows whose signatures are in the listed registry."
+        ),
+        (
+            "PROFILE REGISTRY COMPLETION FOLLOWUP: do not emit source_record_* rows, prose excerpts, display text, "
+            "answer strings, or new predicate names. Do not use domain_omission/5 in this pass."
+        ),
+        (
+            "PROFILE REGISTRY COMPLETION FOLLOWUP: prefer missing atomic details over broad summaries: dates, "
+            "facility identifiers, numbered violation details, citations, response/documentation requirements, "
+            "consultant recommendations, and conclusion-scope rows."
+        ),
+        "PROFILE REGISTRY COMPLETION FOLLOWUP: allowed registry signatures = " + ", ".join(signatures[:24]) + ".",
+    ]
+    for item in profile_registry.get("predicates", []) if isinstance(profile_registry.get("predicates"), list) else []:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        if signature not in signatures:
+            continue
+        category = str(item.get("category", "")).strip()
+        notes = str(item.get("notes", "")).strip()
+        if category or notes:
+            lines.append(
+                "PROFILE REGISTRY COMPLETION FOLLOWUP SIGNATURE NOTE: "
+                f"{signature}: category={category or 'unspecified'}; notes={notes or 'none'}"
+            )
+    lines.extend(_profile_registry_existing_fact_context(source_compile))
+    lines.extend(carrier_contract_prompt_lines(signatures[:24]))
+    return lines
+
+
+def _apply_profile_registry_completion_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    profile_registry: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    signatures = _profile_registry_completion_signatures(profile_registry)
+    context_lines = _profile_registry_completion_context_lines(profile_registry, source_compile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_registry_completion_followup_pass_v1",
+        "attempted": False,
+        "allowed_signatures": signatures[:24],
+    }
+    if not signatures or not context_lines:
+        metadata["reason"] = "no_profile_registry_completion_signatures"
+        source_compile["profile_registry_completion_followup"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(12, min(48, int(getattr(args, "focused_pass_operation_target", 32) or 32)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=_profile_without_signatures(parsed_profile, {"domain_omission/5"}),
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_registry_completion_followup",
+        purpose="complete source-grounded rows inside the closed profile registry",
+        focus="missing compact FDA/domain registry facts, especially detail/citation/requirement/conclusion rows",
+        completion=(
+            "Emit only compact source-grounded rows inside the listed profile-registry signatures. "
+            "Do not summarize paragraphs, do not add predicates, and do not emit domain_omission/5."
+        ),
+        predicates=", ".join(signatures[:24]),
+        coverage_goals=(
+            "Populate missing atomic facts that the closed domain registry is designed to represent, while reusing "
+            "existing typed subject IDs where the current compile already established them."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_registry_completion_followup"
+    compiled["purpose"] = "complete source-grounded rows inside the closed profile registry"
+    compiled["focus"] = "missing compact FDA/domain registry facts"
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="profile_registry_completion_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(signatures[:24]),
+        metadata_prefix="profile_registry_completion_followup",
+        pass_record=compiled,
+    )
+    new_facts = (
+        compiled.get("_profile_registry_completion_followup_new_facts", [])
+        if isinstance(compiled.get("_profile_registry_completion_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_registry_completion_followup"] = metadata
+    return metadata
+
+
 def _profile_registry_accountability_requirements(profile_registry: dict[str, Any]) -> list[dict[str, str]]:
     raw_requirements = (
         profile_registry.get("accountability_requirements")
@@ -7016,6 +7225,98 @@ def _apply_domain_omission_carrier_signature_reduction(source_compile: dict[str,
         "reductions": reductions[:100],
         "invalid_facts": invalid[:100],
     }
+
+
+def _canonical_fda_lot_identifier(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    match = re.fullmatch(r"(?:lot|batch)_([a-z])_?(\d+)", text)
+    if not match:
+        return ""
+    return f"lot_{match.group(1)}_{match.group(2)}"
+
+
+def _apply_fda_lot_identifier_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize FDA affected-lot identifier atoms inside typed detail rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_violation_detail" and len(args) == 5 and args[1] == "affected_lot":
+            canonical = _canonical_fda_lot_identifier(args[2])
+            if canonical:
+                args[2] = canonical
+                reduced = f"fda_violation_detail({', '.join(args)})."
+                if reduced != fact:
+                    reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_lot_identifier_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_lot_identifier_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_lot_identifier_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_lot_identifier_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes fda_violation_detail/5 affected_lot values such as lot_a104 or batch_a_104 "
+            "to lot_a_104. It does not infer affected lots or inspect source prose."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _enforce_fda_correspondence_party_placeholder_contract(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Reject ordinary FDA correspondence-party rows used as omission placeholders."""
+
+    placeholder_values = {"", "not_stated", "unknown", "none_found", "not_applicable", "missing"}
+    omission_roles = {"signatory", "contact", "responsible_official"}
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    kept: list[str] = []
+    rejected: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "fda_correspondence_party" and len(args) == 5:
+            party_id = str(args[1]).strip()
+            party_role = str(args[2]).strip()
+            party_name = str(args[3]).strip()
+            if party_role in omission_roles and (
+                party_id in placeholder_values or party_name in placeholder_values
+            ):
+                rejected.append(fact)
+                continue
+        kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["fda_correspondence_party_placeholder_rejected_count"] = len(rejected)
+    source_compile["fda_correspondence_party_placeholder_rejected_facts"] = rejected[:100]
+    source_compile["fda_correspondence_party_placeholder_contract_policy"] = {
+        "schema_version": "fda_correspondence_party_placeholder_contract_v1",
+        "authority": "typed_contract_validation_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Rejects fda_correspondence_party/5 placeholder rows for absent signatory/contact/responsible_official "
+            "values. Explicit absence belongs in domain_omission/5, not an answer-bearing party fact."
+        ),
+    }
+    return {"rejected_count": len(rejected), "rejected_facts": rejected[:100]}
 
 
 def _profile_rating_scale_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:

@@ -74,6 +74,25 @@ def test_domain_omission_accountability_blocks_invalid_carrier_signature(tmp_pat
     assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party_5"
 
 
+def test_domain_omission_accountability_blocks_ordinary_placeholder_carrier(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "fda_correspondence_party(letter, not_stated, signatory, not_stated, source_utterance).",
+                "domain_omission(letter, 'fda_correspondence_party/5', role_missing, signatory_not_stated, source_utterance).",
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "ordinary_carrier_omission_placeholder"
+    assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party/5"
+
+
 def test_domain_omission_accountability_ignores_profiles_without_domain_omission(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",
