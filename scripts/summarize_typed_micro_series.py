@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.validate_typed_micro_fixtures import (  # noqa: E402
     DEFAULT_ROOT,
+    _parse_fact,
     _facts_from_compile_json,
     _load_fact_lines,
     _match_expected_facts,
@@ -65,6 +66,7 @@ def build_report(
     expected_facts = _load_fact_lines(expected_path)
     runs: list[dict[str, Any]] = []
     support: dict[str, list[str]] = {fact: [] for fact in expected_facts}
+    variants: dict[str, dict[str, list[str]]] = {fact: {} for fact in expected_facts}
     for index, path in enumerate(compile_paths, start=1):
         run_id = path.parent.name or f"run_{index}"
         compile_facts = _facts_from_compile_json(path)
@@ -73,6 +75,9 @@ def build_report(
         matched = [fact for fact in expected_facts if fact not in missing]
         for fact in matched:
             support.setdefault(fact, []).append(run_id)
+        for fact in missing:
+            for variant in _same_predicate_variants(fact, compile_facts):
+                variants.setdefault(fact, {}).setdefault(variant["fact"], []).append(run_id)
         runs.append(
             {
                 "run_id": run_id,
@@ -88,6 +93,13 @@ def build_report(
             "support_count": len(run_ids),
             "support_runs": run_ids,
             "meets_threshold": len(run_ids) >= support_threshold,
+            "same_predicate_variants": [
+                {"fact": variant, "runs": sorted(set(variant_runs)), "run_count": len(set(variant_runs))}
+                for variant, variant_runs in sorted(
+                    variants.get(fact, {}).items(),
+                    key=lambda item: (-len(set(item[1])), item[0]),
+                )
+            ],
         }
         for fact, run_ids in support.items()
     ]
@@ -133,7 +145,62 @@ def render_markdown(report: dict[str, Any]) -> str:
                 str(row.get("expected_fact", "")).replace("|", "/"),
             )
         )
+    unsupported_with_variants = [
+        row for row in report.get("rows", []) if not row.get("meets_threshold") and row.get("same_predicate_variants")
+    ]
+    if unsupported_with_variants:
+        lines.extend(["", "## Unsupported Same-Predicate Variants", ""])
+        for row in unsupported_with_variants:
+            lines.append(f"- Expected: `{row.get('expected_fact')}`")
+            for variant in row.get("same_predicate_variants", [])[:8]:
+                runs = ", ".join(variant.get("runs", []))
+                lines.append(f"  - {variant.get('run_count', 0)} run(s): `{variant.get('fact')}` [{runs}]")
     return "\n".join(lines) + "\n"
+
+
+def _same_predicate_variants(expected_fact: str, compile_facts: list[str]) -> list[dict[str, Any]]:
+    expected = _parse_fact(expected_fact)
+    if expected is None:
+        return []
+    predicate = str(expected.get("predicate") or "")
+    expected_args = [str(arg).strip() for arg in expected.get("args") or []]
+    arity = len(expected_args)
+    variants: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for fact in compile_facts:
+        parsed = _parse_fact(fact)
+        if parsed is None:
+            continue
+        if str(parsed.get("predicate") or "") != predicate:
+            continue
+        if len(parsed.get("args") or []) != arity:
+            continue
+        if fact == expected_fact:
+            continue
+        candidate_args = [str(arg).strip() for arg in parsed.get("args") or []]
+        overlap = _same_position_constant_overlap(expected_args, candidate_args)
+        if overlap <= 0:
+            continue
+        if fact not in seen:
+            variants.append({"fact": fact, "overlap": overlap})
+            seen.add(fact)
+    variants.sort(key=lambda item: (-int(item["overlap"]), str(item["fact"])))
+    return variants
+
+
+def _same_position_constant_overlap(expected_args: list[str], candidate_args: list[str]) -> int:
+    count = 0
+    for expected, candidate in zip(expected_args, candidate_args):
+        if _is_expected_variable(expected):
+            continue
+        if expected == candidate:
+            count += 1
+    return count
+
+
+def _is_expected_variable(value: str) -> bool:
+    text = str(value or "").strip()
+    return bool(text) and text[0].isupper()
 
 
 if __name__ == "__main__":

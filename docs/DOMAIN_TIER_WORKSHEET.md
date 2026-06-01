@@ -363,6 +363,13 @@ R23-R25 same-condition support summary, explicit dated model:
   note: facility identity and lot identifiers are now stable; the remaining
         unsupported rows are substantive compile-recall gaps or broad-wrapper
         specificity gaps, not value-domain/omission leakage.
+  variant lens:
+    regenerated with summarize_typed_micro_series.py same-predicate variant
+    reporting. Only the warning-letter wrapper and documentation-submission
+    requirement show near-miss typed variants. The procedure-scope,
+    missing-record, and recurrence rows have no useful same-position typed
+    near miss in the R23-R25 cell, so treat them as missing second-layer
+    compile recall, not normalizer candidates.
 ```
 
 Artifacts:
@@ -446,6 +453,9 @@ What this proved:
   support>=2 with clean gates. The gain is narrow and governance-clean:
   facility FEI/location normalization, affected-lot atom normalization, and
   consultant-citation scope normalization.
+- the micro-series summarizer now reports same-predicate typed variants for
+  unsupported rows. This is a governance aid: it separates near-miss typed atom
+  drift from true missing compile recall without re-reading source prose.
 
 Current blocker:
 
@@ -481,7 +491,8 @@ R23-R25 unsupported facts:
    for legitimate compact normalizations.
 2. Run a same-condition N=3 cell only after the current code settles; use
    `scripts\summarize_typed_micro_series.py` and promote only support>=2 rows
-   with clean gates.
+   with clean gates. Use the same-predicate variant section to decide whether a
+   remaining row is a normalizer candidate or a true compile-recall gap.
 3. Pressure second-layer detail completeness on the micro without allowing
    prose-shaped values.
 4. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
