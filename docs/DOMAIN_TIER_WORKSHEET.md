@@ -321,6 +321,19 @@ R14-R16 mixed-history support summary:
   artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_r16_series_summary.md
   note: this is diagnostic only because the runs are mixed-history, not a
         same-condition N=3 promotion cell.
+
+R16-R18 same-condition support summary:
+  compiles: 3
+  support threshold: >=2
+  supported expected facts: 16 / 23
+  unsupported expected facts: 7 / 23
+  per-run strict matches:
+    R16: 17 / 23, value-domain pass, omission audit pass
+    R17: 17 / 23, value-domain pass, omission audit pass
+    R18: 14 / 23, value-domain pass, omission audit pass
+  artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_r18_same_condition_summary.md
+  note: this is the first current-path N=3 cell for the FDA micro. It confirms
+        a 16/23 stable typed core and a seven-fact compile-recall wall.
 ```
 
 Artifacts:
@@ -343,6 +356,9 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_registry_complet
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r15_lot_reduction
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_placeholder_contract
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r14_r16_series_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r17_same_condition
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r18_same_condition
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r16_r18_same_condition_summary.md
 ```
 
 What this proved:
@@ -382,11 +398,14 @@ What this proved:
   17/23 with clean value-domain and omission gates.
 - the mixed-history R14-R16 series gives a provisional target map: 17/23 facts
   already have support>=2, while six facts are still unstable or absent.
+- the same-condition R16-R18 series is stricter and should be treated as the
+  current FDA micro baseline: 16/23 support>=2, with no value-domain or omission
+  audit failures in the three-run cell.
 
 Current blocker:
 
 ```text
-FDA detail completeness, not signature/value-domain/omission governance.
+FDA stable compile recall for the seven unsupported facts.
 ```
 
 New accountability contract:
@@ -400,14 +419,15 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R16 still misses after expected-file correction:
+R16-R18 unsupported facts:
 
+- facility identity canonical row;
 - one missing-record detail for violation 1;
-- procedure-scope detail for violation 2 when the completion pass does not
-  contribute it;
+- procedure-scope detail for violation 2;
 - written-response/corrective-actions row when the base compile chooses only
   the failure-consequence row;
 - documentation-submission response row;
+- consultant qualification citation scoped to the letter/recommendation;
 - recurrence/responsibility conclusion row;
 - wrapper/facility identity completeness is still unstable across runs even
   when individual runs can land it;
