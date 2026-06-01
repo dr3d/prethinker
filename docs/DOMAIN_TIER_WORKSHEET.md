@@ -229,6 +229,29 @@ R7 registry accountability requirement:
   domain omission accountability audit v2: 1 blocker
   blocker: emitted domain_omission/5 but rewrote 'fda_correspondence_party/5'
            as fda_correspondence_party_5
+
+R8 stricter slash-signature prompt:
+  admitted facts: 16
+  strict expected match: 11 / 23
+  value-domain violations: 0
+  domain omission accountability audit: pass only because no omission row
+  note: prompt pressure alone did not reliably produce accountable omission row
+
+R9 registry-accountability follow-up pass:
+  admitted facts: 23
+  strict expected match: 12 / 23
+  value-domain violations: 0
+  domain omission accountability audit: 2 blockers
+  blocker: base + follow-up both emitted fda_correspondence_party_5 in the
+           domain_omission/5 carrier_signature slot
+
+R10 follow-up plus deterministic registry-reference reduction:
+  admitted facts: 20
+  strict expected match: 15 / 23
+  value-domain violations: 0
+  atom-shape blockers: 0
+  domain omission accountability audit: pass
+  deterministic domain_omission signature reductions: 1
 ```
 
 Artifacts:
@@ -241,6 +264,9 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r4_datefix
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r5_omission
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r6_selfcheck_omission
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r7_accountability_registry
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r8_signature_accountability
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r9_accountability_followup
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r10_accountability_signature_reduction
 ```
 
 What this proved:
@@ -258,11 +284,15 @@ What this proved:
   `audit_domain_omission_accountability.py` gate flags this case.
 - omission-shaped rows are not sufficient either; the audit now requires the
   `carrier_signature` slot to name an actual registered carrier signature.
+- the bounded registry-accountability follow-up is useful, but only after a
+  typed registry-reference reducer canonicalizes `name_arity` back to the exact
+  registered `'name/arity'` signature. This reducer reads registry syntax only;
+  it does not inspect source prose or create omission facts.
 
 Current blocker:
 
 ```text
-Completeness/accountability, not signature or value-domain governance.
+FDA detail completeness, not signature/value-domain/omission governance.
 ```
 
 New accountability contract:
@@ -276,28 +306,25 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R5/R6 still miss:
+R10 still misses:
 
-- explicit `domain_omission/5` for the absent signatory;
+- letter/facility/inspection wrapper normalizations;
 - one missing-record detail for violation 1;
 - one procedure-scope detail for violation 2;
 - documentation-submission response row;
 - consultant-qualification citation row;
 - recurrence/responsibility conclusion row;
-- a few harmless normalization choices that may need expected alternatives
-  rather than code changes.
+- a few source/scope and compact-id normalization choices that may need
+  expected alternatives rather than code changes.
 
 ## Next Moves
 
-1. Decide whether explicit domain omissions should be produced by base compile,
-   a bounded omission follow-up pass, or a deterministic gate that forces
-   abstention until a row exists.
-2. Decide whether strict FDA micro expected facts need controlled alternatives
+1. Decide whether strict FDA micro expected facts need controlled alternatives
    for legitimate compact normalizations.
-3. Pressure second-layer detail completeness on the micro without allowing
+2. Pressure second-layer detail completeness on the micro without allowing
    prose-shaped values.
-4. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
+3. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
    on the current FDA fixture and promote only rows with support>=2.
-5. If current FDA improves, test on at least one unlike FDA warning letter.
-6. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
+4. If current FDA improves, test on at least one unlike FDA warning letter.
+5. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
    different wedge or conclude no wedge is ready.

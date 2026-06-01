@@ -1199,6 +1199,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--profile-registry-accountability-followup",
+        action="store_true",
+        help=(
+            "Experimental: after a profile-registry compile, run one bounded source-grounded completion pass "
+            "for registry accountability requirements. The pass may emit domain_omission/5 only."
+        ),
+    )
+    parser.add_argument(
         "--focused-pass-ops-schema",
         action="store_true",
         help=(
@@ -2146,6 +2154,21 @@ def main() -> int:
                 extra_context=extra_compile_context,
             )
             _attach_governed_companion_subject_health(record["source_compile"])
+        if (
+            bool(getattr(args, "profile_registry_accountability_followup", False))
+            and profile_registry
+            and isinstance(parsed, dict)
+        ):
+            _apply_profile_registry_accountability_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                profile_registry=profile_registry,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
+        _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
             source_compile=record["source_compile"],
@@ -6767,6 +6790,232 @@ def _apply_profile_registered_carrier_omission_followup_pass(
     )
     source_compile["profile_registered_carrier_omission_followup"] = metadata
     return metadata
+
+
+def _profile_registry_accountability_requirements(profile_registry: dict[str, Any]) -> list[dict[str, str]]:
+    raw_requirements = (
+        profile_registry.get("accountability_requirements")
+        if isinstance(profile_registry.get("accountability_requirements"), list)
+        else []
+    )
+    requirements: list[dict[str, str]] = []
+    for item in raw_requirements:
+        if not isinstance(item, dict):
+            continue
+        carrier_signature = str(item.get("carrier_signature", "")).strip()
+        omission_kind = str(item.get("omission_kind", "")).strip()
+        reason_code = str(item.get("reason_code", "")).strip()
+        trigger = str(item.get("trigger", "")).strip()
+        if not carrier_signature or not omission_kind or not reason_code:
+            continue
+        requirements.append(
+            {
+                "id": str(item.get("id", "")).strip(),
+                "carrier_signature": carrier_signature,
+                "omission_kind": omission_kind,
+                "reason_code": reason_code,
+                "trigger": trigger,
+            }
+        )
+    return requirements
+
+
+def _profile_registry_accountability_followup_context_lines(profile_registry: dict[str, Any]) -> list[str]:
+    requirements = _profile_registry_accountability_requirements(profile_registry)
+    if not requirements:
+        return []
+    lines = [
+        (
+            "PROFILE REGISTRY ACCOUNTABILITY FOLLOWUP: this is a bounded omission-accountability pass. "
+            "It may emit domain_omission/5 rows only. It must not emit source_record_* rows, answer text, "
+            "or ordinary answer-bearing carrier rows."
+        ),
+        (
+            "PROFILE REGISTRY ACCOUNTABILITY FOLLOWUP: inspect the raw source only for explicit omission "
+            "triggers required by the active profile registry. Silent absence is not enough unless the "
+            "registry trigger explicitly says so."
+        ),
+        (
+            "PROFILE REGISTRY ACCOUNTABILITY FOLLOWUP: carrier_signature must be the exact registered slash "
+            "signature in quotes, for example 'fda_correspondence_party/5'. Do not rewrite slash signatures "
+            "as underscore atoms."
+        ),
+    ]
+    for item in requirements[:12]:
+        label = item.get("id") or item["carrier_signature"]
+        trigger = item.get("trigger") or "the stated source trigger"
+        lines.append(
+            "PROFILE REGISTRY ACCOUNTABILITY FOLLOWUP REQUIREMENT: "
+            f"{label}: if raw_source_text satisfies {trigger}, emit "
+            f"domain_omission(DomainOrSubjectId, '{item['carrier_signature']}', "
+            f"{item['omission_kind']}, {item['reason_code']}, SourceOrScope)."
+        )
+    lines.extend(carrier_contract_prompt_lines(["domain_omission/5"]))
+    return lines
+
+
+def _apply_profile_registry_accountability_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    profile_registry: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    requirements = _profile_registry_accountability_requirements(profile_registry)
+    context_lines = _profile_registry_accountability_followup_context_lines(profile_registry)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_registry_accountability_followup_pass_v1",
+        "attempted": False,
+        "requirement_count": len(requirements),
+        "requirements": requirements[:12],
+        "allowed_signatures": ["domain_omission/5"],
+    }
+    if not requirements or not context_lines:
+        metadata["reason"] = "no_profile_registry_accountability_requirements"
+        source_compile["profile_registry_accountability_followup"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(4, min(16, int(getattr(args, "focused_pass_operation_target", 12) or 12)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_registry_accountability_followup",
+        purpose="complete registry omission-accountability rows only",
+        focus="explicit source omissions required by the profile registry",
+        completion=(
+            "Emit domain_omission/5 rows only when the raw source explicitly satisfies a listed registry "
+            "accountability trigger. If no trigger is satisfied, emit no facts and explain that in self_check."
+        ),
+        predicates="domain_omission/5",
+        coverage_goals=(
+            "For each registry accountability requirement, decide whether the raw source explicitly states "
+            "the required absence or omission. If yes, emit exactly one compact domain_omission/5 row."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_registry_accountability_followup"
+    compiled["purpose"] = "complete registry omission-accountability rows only"
+    compiled["focus"] = "explicit source omissions required by the profile registry"
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="profile_registry_accountability_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures={"domain_omission/5"},
+        metadata_prefix="profile_registry_accountability_followup",
+        pass_record=compiled,
+    )
+    new_facts = (
+        compiled.get("_profile_registry_accountability_followup_new_facts", [])
+        if isinstance(compiled.get("_profile_registry_accountability_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_registry_accountability_followup"] = metadata
+    return metadata
+
+
+def _canonical_registered_signature_reference(value: str) -> str:
+    text = str(value or "").strip().strip("'\"")
+    if not text:
+        return ""
+    if "/" in text and carrier_contract(text) is not None:
+        return text
+    match = re.fullmatch(r"([a-z][a-z0-9_]*)_(\d+)", text)
+    if not match:
+        return ""
+    candidate = f"{match.group(1)}/{match.group(2)}"
+    if carrier_contract(candidate) is not None:
+        return candidate
+    return ""
+
+
+def _apply_domain_omission_carrier_signature_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize registry signature references inside domain_omission/5 rows.
+
+    The second slot is a reference into the closed carrier-contract registry, not
+    source prose. This reducer only corrects registered signature syntax such as
+    fda_correspondence_party_5 -> 'fda_correspondence_party/5'; it does not infer
+    omitted facts or inspect source text.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    invalid: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        if predicate != "domain_omission" or len(args) != 5:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        canonical = _canonical_registered_signature_reference(args[1])
+        if not canonical:
+            invalid.append(fact)
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        args[1] = f"'{canonical}'"
+        reduced = f"domain_omission({', '.join(args)})."
+        if reduced != fact:
+            reductions.append({"from": fact, "to": reduced})
+        if reduced not in seen:
+            out.append(reduced)
+            seen.add(reduced)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_domain_omission_signature_reduction_count"] = len(reductions)
+    source_compile["deterministic_domain_omission_signature_reductions"] = reductions[:100]
+    source_compile["deterministic_domain_omission_signature_invalid_count"] = len(invalid)
+    source_compile["deterministic_domain_omission_signature_invalid_facts"] = invalid[:100]
+    source_compile["deterministic_domain_omission_signature_reduction_policy"] = {
+        "schema_version": "deterministic_domain_omission_signature_reduction_v1",
+        "authority": "typed_registry_reference_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes domain_omission/5 carrier_signature references to exact registered slash "
+            "signatures. It does not create omissions or read source prose."
+        ),
+    }
+    return {
+        "reduction_count": len(reductions),
+        "invalid_count": len(invalid),
+        "reductions": reductions[:100],
+        "invalid_facts": invalid[:100],
+    }
 
 
 def _profile_rating_scale_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:

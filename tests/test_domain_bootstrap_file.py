@@ -89,6 +89,9 @@ from scripts.run_domain_bootstrap_file import (
     _profile_registry_palette_report,
     _profile_registry_palette_prior_context,
     _profile_registry_accountability_context,
+    _profile_registry_accountability_followup_context_lines,
+    _apply_profile_registry_accountability_followup_pass,
+    _apply_domain_omission_carrier_signature_reduction,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
     _source_compiler_context,
@@ -6674,6 +6677,133 @@ def test_profile_registry_accountability_context_requires_typed_omission_rows() 
     assert "signatory_not_stated" in joined
     assert "do not rewrite it as an underscore atom" in joined
     assert "Do not leave this only in self_check" in joined
+
+
+def test_profile_registry_accountability_followup_context_is_domain_omission_only() -> None:
+    context = _profile_registry_accountability_followup_context_lines(
+        {
+            "accountability_requirements": [
+                {
+                    "id": "missing_signatory_role",
+                    "carrier_signature": "fda_correspondence_party/5",
+                    "omission_kind": "role_missing",
+                    "reason_code": "signatory_not_stated",
+                    "trigger": "source_explicitly_states_no_signatory_or_signature_block",
+                }
+            ]
+        }
+    )
+
+    joined = "\n".join(context)
+    assert "domain_omission/5 rows only" in joined
+    assert "It must not emit source_record_* rows" in joined
+    assert "'fda_correspondence_party/5'" in joined
+    assert "Do not rewrite slash signatures as underscore atoms" in joined
+    assert "CARRIER CONTRACT domain_omission/5" in joined
+
+
+def test_profile_registry_accountability_followup_rejects_non_omission_rows(monkeypatch) -> None:
+    source_compile = {
+        "facts": ["fda_warning_letter(letter_1, cder, acme_inc, v_2026_01_01, src_line_1)."],
+        "rules": [],
+        "queries": [],
+        "admitted_count": 1,
+        "skipped_count": 0,
+    }
+    profile = {
+        "candidate_predicates": [
+            {"signature": "domain_omission/5"},
+            {"signature": "fda_correspondence_party/5"},
+        ]
+    }
+    registry = {
+        "accountability_requirements": [
+            {
+                "id": "missing_signatory_role",
+                "carrier_signature": "fda_correspondence_party/5",
+                "omission_kind": "role_missing",
+                "reason_code": "signatory_not_stated",
+                "trigger": "source_explicitly_states_no_signatory_or_signature_block",
+            }
+        ]
+    }
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "profile_registry_accountability_followup"
+        assert kwargs["predicates"] == "domain_omission/5"
+        assert kwargs["operation_target"] == 8
+        assert "domain_omission/5 rows only" in "\n".join(kwargs["extra_context"])
+        return {
+            "ok": True,
+            "admitted_count": 2,
+            "skipped_count": 0,
+            "facts": [
+                "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_9).",
+                "fda_correspondence_party(letter_1, signatory_unknown, signatory, unknown, src_line_9).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = _apply_profile_registry_accountability_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        profile_registry=registry,
+        source_text="The downloaded source has no signature block.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["attempted"] is True
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, cder, acme_inc, v_2026_01_01, src_line_1).",
+        "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_9).",
+    ]
+
+
+def test_profile_registry_accountability_followup_no_requirements_is_noop() -> None:
+    source_compile = {"facts": ["document_title(doc_1, warning_letter)."], "rules": [], "queries": []}
+
+    result = _apply_profile_registry_accountability_followup_pass(
+        source_compile=source_compile,
+        parsed_profile={},
+        profile_registry={"accountability_requirements": []},
+        source_text="No source call should run.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        extra_context=[],
+    )
+
+    assert result["attempted"] is False
+    assert result["reason"] == "no_profile_registry_accountability_requirements"
+    assert source_compile["facts"] == ["document_title(doc_1, warning_letter)."]
+
+
+def test_domain_omission_carrier_signature_reduction_canonicalizes_registered_references() -> None:
+    source_compile = {
+        "facts": [
+            "domain_omission(letter_1, fda_correspondence_party_5, role_missing, signatory_not_stated, src_line_9).",
+            "domain_omission(letter_2, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_10).",
+            "domain_omission(letter_3, not_a_registered_signature_5, role_missing, signatory_not_stated, src_line_11).",
+        ]
+    }
+
+    report = _apply_domain_omission_carrier_signature_reduction(source_compile)
+
+    assert report["reduction_count"] == 1
+    assert report["invalid_count"] == 1
+    assert source_compile["facts"] == [
+        "domain_omission(letter_1, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_9).",
+        "domain_omission(letter_2, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_10).",
+        "domain_omission(letter_3, not_a_registered_signature_5, role_missing, signatory_not_stated, src_line_11).",
+    ]
+    assert source_compile["deterministic_domain_omission_signature_invalid_count"] == 1
+    assert source_compile["deterministic_domain_omission_signature_reduction_policy"]["not_source_interpretation"] is True
 
 
 def test_global_first_profile_registry_palette_prior_is_unsafe() -> None:
