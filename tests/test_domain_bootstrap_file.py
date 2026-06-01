@@ -104,6 +104,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_office_atom_reduction,
     _apply_fda_violation_detail_subject_integrity,
     _apply_fda_violation_number_atom_reduction,
+    _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
@@ -7243,6 +7244,27 @@ def test_fda_consultant_citation_scope_reduction_uses_typed_violation_letter() -
         "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_line_8).",
     ]
     assert source_compile["deterministic_fda_consultant_citation_scope_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_source_scope_payload_integrity_drops_citation_payload_provenance() -> None:
+    source_compile = {
+        "facts": [
+            "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, cfr_21_211_34).",
+            "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, src_line_20).",
+            "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+        ]
+    }
+
+    report = _apply_source_scope_payload_integrity(source_compile)
+
+    assert report["dropped_count"] == 1
+    assert source_compile["facts"] == [
+        "fda_consultant_recommendation(letter_1, qualified_cgmp_consultant, consultant_engagement, src_line_20).",
+        "fda_violation_citation(letter_1, cfr_21_211_34, consultant_qualification, src_line_20).",
+    ]
+    policy = source_compile["deterministic_source_scope_payload_integrity_policy"]
+    assert policy["not_source_interpretation"] is True
+    assert policy["not_query_interpretation"] is True
 
 
 def test_fda_office_atom_reduction_canonicalizes_registered_office_slots() -> None:

@@ -256,6 +256,8 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "FDA violation relation: the row preserves one numbered warning-letter violation and a controlled compact category.",
             "violation_number is the source-stated list number or compact item atom, such as violation_1.",
             "violation_category must come from the controlled FDA warning-letter category palette, such as quality_unit_failure, aseptic_processing, sterility_assurance, or data_integrity.",
+            "Use violation_category=contamination_control for source language about written procedures or controls to prevent microbiological contamination, including sterile-drug contamination-prevention procedure failures.",
+            "Use violation_category=aseptic_processing only when the source explicitly names aseptic processing, aseptic filling, aseptic operations, or a comparable aseptic-process failure.",
             "Do not place the violation paragraph, CFR citation, affected lots, or response critique inside violation_category.",
         ],
         "value_domains": {

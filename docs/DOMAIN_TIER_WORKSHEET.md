@@ -862,12 +862,12 @@ Reading:
   union remains useful diagnostic evidence, but it includes at least one row
   without support>=2 in its own lens history. Do not use R57 as the promoted
   score.
-- the two remaining unpromoted expected rows are the consultant qualification
-  citation (`fda_violation_citation(Letter, cfr_21_211_34,
+- at this point, the two remaining unpromoted expected rows were the consultant
+  qualification citation (`fda_violation_citation(Letter, cfr_21_211_34,
   consultant_qualification, SrcConsultantCitation)`) and the violation 2
   category boundary (`contamination_control` expected, `aseptic_processing`
-  emitted 3/3). The first is a support/acquisition stability problem; the
-  second is probably a domain value-boundary or oracle-alternative problem.
+  emitted 3/3). R67-R77 below resolved these inside the same-fixture domain
+  micro, subject to the transfer caveat.
 
 R67-R72 consultant citation probe and provenance-payload audit:
 
@@ -896,9 +896,49 @@ Reading:
   citation-shaped payloads in `source_or_scope` for registered carriers. The
   R70/R71/R72 cell therefore fails the audit even though the older support
   summary still lists the consultant recommendation row as present.
-- do not promote any response-lens cell that fails this audit. The current
-  promoted FDA micro state stays 20/22, and the consultant qualification
-  citation remains a compile-acquisition/provenance-boundary blocker.
+- do not promote any response-lens cell that fails this audit. After applying
+  the new source-scope payload integrity reducer, R67/R68/R69 still has valid
+  support>=2 for the consultant recommendation, while the hidden
+  citation-as-provenance row is dropped.
+
+R73-R77 category boundary repair and assembled micro validation:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r73_r74_r75_violation_series_reduced_v2_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r77_all_lens_reduced_stable_rep
+
+contract change: fda_violation/5 now distinguishes microbiological contamination-prevention procedures from explicit aseptic-processing failures
+violation lens support>=2 after category boundary repair: 10 expected rows
+violation 2 category support: contamination_control 3 / 3
+consultant qualification citation support in violation lens: 3 / 3
+representative reduced all-lens union R77: 22 / 22
+R77 runtime load errors: 0
+R77 value-domain/provenance audit: pass, 36 facts, 45 checked slots, 0 violations
+R77 omission accountability audit: pass
+```
+
+Reading:
+
+- the final category miss was a carrier value-boundary problem. The source says
+  written procedures designed to prevent microbiological contamination of
+  sterile drug products were not established and followed; it does not name
+  aseptic processing. The registered `fda_violation/5` contract now maps
+  microbiological contamination-prevention procedure failures to
+  `contamination_control`, while reserving `aseptic_processing` for source
+  language that explicitly names aseptic processing, aseptic filling, aseptic
+  operations, or a comparable aseptic-process failure.
+- R73/R74/R75 closed the violation lens cleanly: the category row, consultant
+  qualification citation, adulteration basis, violation citations, lot details,
+  record-review subject, and procedure-scope detail all reached 3/3 support
+  after reducers.
+- R77 is the first assembled FDA warning-letter micro artifact to validate
+  22/22 under the lens-scoped domain pack with deterministic reducers, zero
+  runtime load errors, zero value-domain/provenance violations, and zero
+  omission-accountability blockers.
+- this is still same-fixture micro evidence. It proves the domain-pack
+  architecture can assemble a complete hard-clean typed artifact for this FDA
+  warning-letter excerpt. It does not yet prove transfer; the next claim-bearing
+  move is the unlike FDA warning-letter package.
 
 ## Next Moves
 

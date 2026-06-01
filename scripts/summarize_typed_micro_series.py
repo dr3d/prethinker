@@ -32,6 +32,7 @@ from scripts.run_domain_bootstrap_file import (  # noqa: E402
     _apply_fda_violation_detail_subject_integrity,
     _apply_fda_violation_number_atom_reduction,
     _apply_fda_warning_letter_subject_convergence,
+    _apply_source_scope_payload_integrity,
     _enforce_fda_correspondence_party_placeholder_contract,
 )
 
@@ -243,6 +244,7 @@ def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:
         ("fda_office_atom_reduction", _apply_fda_office_atom_reduction),
         ("fda_violation_number_atom_reduction", _apply_fda_violation_number_atom_reduction),
         ("fda_violation_detail_subject_integrity", _apply_fda_violation_detail_subject_integrity),
+        ("source_scope_payload_integrity", _apply_source_scope_payload_integrity),
         ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
         ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
     ):

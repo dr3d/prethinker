@@ -274,6 +274,16 @@ def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> 
     assert "affected_lot" in text
 
 
+def test_fda_violation_contract_disambiguates_contamination_control_from_aseptic_processing() -> None:
+    lines = carrier_contract_prompt_lines(["fda_violation/5"])
+    text = "\n".join(lines)
+
+    assert "violation_category=contamination_control" in text
+    assert "prevent microbiological contamination" in text
+    assert "violation_category=aseptic_processing only" in text
+    assert "explicitly names aseptic processing" in text
+
+
 def test_fda_violation_citation_contract_allows_letter_level_consultant_citation() -> None:
     lines = carrier_contract_prompt_lines(["fda_violation_citation/4"])
     text = "\n".join(lines)

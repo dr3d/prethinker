@@ -2179,6 +2179,7 @@ def main() -> int:
         _apply_fda_office_atom_reduction(record["source_compile"])
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
+        _apply_source_scope_payload_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2236,6 +2237,7 @@ def main() -> int:
         _apply_fda_warning_letter_subject_convergence(record["source_compile"])
         _apply_fda_violation_number_atom_reduction(record["source_compile"])
         _apply_fda_violation_detail_subject_integrity(record["source_compile"])
+        _apply_source_scope_payload_integrity(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7869,6 +7871,61 @@ def _apply_fda_consultant_citation_scope_reduction(source_compile: dict[str, Any
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _source_scope_payload_issue(arg_name: str, value: str) -> str:
+    if arg_name != "source_or_scope":
+        return ""
+    normalized = str(value or "").strip().strip("'\"").casefold()
+    if re.match(r"^(?:cfr_|fdca_|usc_|u_s_c_|us_c_|\d+_cfr_|\d+_usc_)", normalized):
+        return "citation_payload_in_source_or_scope"
+    return ""
+
+
+def _apply_source_scope_payload_integrity(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Drop registered facts whose source_or_scope slot carries answer payload."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    kept: list[str] = []
+    dropped: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        contract = carrier_contract(signature)
+        if not isinstance(contract, dict):
+            kept.append(fact)
+            continue
+        arg_names = [str(item).strip() for item in contract.get("args", [])]
+        issue = ""
+        for index, arg_name in enumerate(arg_names):
+            if index >= len(args):
+                continue
+            issue = _source_scope_payload_issue(arg_name, args[index])
+            if issue:
+                break
+        if issue:
+            dropped.append({"fact": fact, "issue": issue})
+            continue
+        kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_source_scope_payload_integrity_count"] = len(dropped)
+    source_compile["deterministic_source_scope_payload_integrity_dropped_facts"] = dropped[:100]
+    source_compile["deterministic_source_scope_payload_integrity_policy"] = {
+        "schema_version": "deterministic_source_scope_payload_integrity_v1",
+        "authority": "typed_contract_validation_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Drops registered carrier rows when source_or_scope contains citation-shaped answer payload. "
+            "It does not infer replacement provenance or create facts."
+        ),
+    }
+    return {"dropped_count": len(dropped), "dropped": dropped[:100]}
 
 
 def _canonical_fda_office_atom(value: str) -> str:
