@@ -21,6 +21,19 @@ from scripts.validate_typed_micro_fixtures import (  # noqa: E402
     _load_fact_lines,
     _match_expected_facts,
 )
+from scripts.run_domain_bootstrap_file import (  # noqa: E402
+    _apply_domain_omission_carrier_signature_reduction,
+    _apply_fda_consultant_citation_scope_reduction,
+    _apply_fda_date_atom_reduction,
+    _apply_fda_facility_identity_atom_reduction,
+    _apply_fda_facility_subject_convergence,
+    _apply_fda_lot_identifier_atom_reduction,
+    _apply_fda_office_atom_reduction,
+    _apply_fda_violation_detail_subject_integrity,
+    _apply_fda_violation_number_atom_reduction,
+    _apply_fda_warning_letter_subject_convergence,
+    _enforce_fda_correspondence_party_placeholder_contract,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,6 +42,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--root", type=Path, default=DEFAULT_ROOT)
     parser.add_argument("--compile-json", action="append", default=[], type=Path, required=True)
     parser.add_argument("--support-threshold", type=int, default=2)
+    parser.add_argument(
+        "--apply-domain-reducers",
+        action="store_true",
+        help="Apply deterministic typed-domain reducers to each compile before measuring support.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--exit-zero", action="store_true")
@@ -42,6 +60,7 @@ def main() -> int:
         root=args.root,
         compile_paths=[path.resolve() for path in args.compile_json],
         support_threshold=int(args.support_threshold),
+        apply_domain_reducers=bool(args.apply_domain_reducers),
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -60,6 +79,7 @@ def build_report(
     root: Path = DEFAULT_ROOT,
     compile_paths: list[Path],
     support_threshold: int = 2,
+    apply_domain_reducers: bool = False,
 ) -> dict[str, Any]:
     fixture_dir = root / fixture_id
     expected_path = fixture_dir / "expected_facts.pl"
@@ -70,6 +90,11 @@ def build_report(
     for index, path in enumerate(compile_paths, start=1):
         run_id = path.parent.name or f"run_{index}"
         compile_facts = _facts_from_compile_json(path)
+        reducer_report: dict[str, Any] = {}
+        if apply_domain_reducers:
+            reduced_compile = {"facts": compile_facts, "rules": [], "queries": []}
+            reducer_report = _apply_domain_reducers(reduced_compile)
+            compile_facts = [str(item).strip() for item in reduced_compile.get("facts", []) if str(item).strip()]
         match_report = _match_expected_facts(expected_facts, compile_facts)
         missing = set(match_report["missing_expected_facts"])
         matched = [fact for fact in expected_facts if fact not in missing]
@@ -85,6 +110,7 @@ def build_report(
                 "matched_fact_count": len(matched),
                 "expected_fact_count": len(expected_facts),
                 "missing_fact_count": len(missing),
+                "domain_reducer_reports": reducer_report,
             }
         )
     rows = [
@@ -110,6 +136,7 @@ def build_report(
         "fixture_id": fixture_id,
         "expected_facts": str(expected_path),
         "support_threshold": support_threshold,
+        "domain_reducers_applied": bool(apply_domain_reducers),
         "summary": {
             "compile_count": len(compile_paths),
             "expected_fact_count": len(expected_facts),
@@ -130,6 +157,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Compiles: `{summary['compile_count']}`",
         f"- Expected facts: `{summary['expected_fact_count']}`",
         f"- Support threshold: `{report['support_threshold']}`",
+        f"- Domain reducers applied: `{report.get('domain_reducers_applied', False)}`",
         f"- Supported facts: `{summary['supported_fact_count']}`",
         f"- Unsupported facts: `{summary['unsupported_fact_count']}`",
         "",
@@ -201,6 +229,25 @@ def _same_position_constant_overlap(expected_args: list[str], candidate_args: li
 def _is_expected_variable(value: str) -> bool:
     text = str(value or "").strip()
     return bool(text) and text[0].isupper()
+
+
+def _apply_domain_reducers(source_compile: dict[str, Any]) -> dict[str, Any]:
+    reports: dict[str, Any] = {}
+    for name, reducer in (
+        ("fda_warning_letter_subject_convergence", _apply_fda_warning_letter_subject_convergence),
+        ("fda_date_atom_reduction", _apply_fda_date_atom_reduction),
+        ("fda_facility_subject_convergence", _apply_fda_facility_subject_convergence),
+        ("fda_lot_identifier_atom_reduction", _apply_fda_lot_identifier_atom_reduction),
+        ("fda_facility_identity_atom_reduction", _apply_fda_facility_identity_atom_reduction),
+        ("fda_consultant_citation_scope_reduction", _apply_fda_consultant_citation_scope_reduction),
+        ("fda_office_atom_reduction", _apply_fda_office_atom_reduction),
+        ("fda_violation_number_atom_reduction", _apply_fda_violation_number_atom_reduction),
+        ("fda_violation_detail_subject_integrity", _apply_fda_violation_detail_subject_integrity),
+        ("fda_correspondence_party_placeholder_contract", _enforce_fda_correspondence_party_placeholder_contract),
+        ("domain_omission_carrier_signature_reduction", _apply_domain_omission_carrier_signature_reduction),
+    ):
+        reports[name] = reducer(source_compile)
+    return reports
 
 
 if __name__ == "__main__":

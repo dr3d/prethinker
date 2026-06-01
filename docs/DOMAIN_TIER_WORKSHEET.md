@@ -791,6 +791,7 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r49_violation_lens_s
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r50_violation_lens_same_condition_or
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r55_chronology_lens_prior_scope_guidance_or
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r57_union_facility_suffix_alias
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r45_r49_r50_violation_series_reduced_summary.md
 
 current-condition violation lens repeats: R45/R49/R50
 record_review_subject support: 3 / 3
@@ -818,6 +819,12 @@ Reading:
   `aseptic_processing` is consistently emitted while the micro oracle expects
   `contamination_control`. This should be decided as a domain/oracle alternative
   question or tested on an unlike FDA warning letter; do not force it by code.
+- `scripts\summarize_typed_micro_series.py` now supports
+  `--apply-domain-reducers`, so support>=2 checks can be run after the same
+  typed normalization used by union compiles. The R45/R49/R50 reduced series
+  shows 8 violation/legal-basis rows at support 3/3, consultant citation at
+  support 1/3, and the violation 2 category variant as the only same-predicate
+  category conflict.
 
 ## Next Moves
 
