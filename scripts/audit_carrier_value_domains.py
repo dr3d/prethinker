@@ -24,6 +24,7 @@ from src.carrier_contract_registry import carrier_contract  # noqa: E402
 
 
 FACT_RE = re.compile(r"^\s*([a-z][A-Za-z0-9_]*)\((.*)\)\.\s*$")
+CITATION_PAYLOAD_RE = re.compile(r"^(?:cfr_|fdca_|usc_|u_s_c_|us_c_|\d+_cfr_|\d+_usc_)", re.IGNORECASE)
 
 
 def parse_args() -> argparse.Namespace:
@@ -73,15 +74,37 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
             contract = carrier_contract(signature)
             if not isinstance(contract, dict):
                 continue
-            domains = contract.get("value_domains")
-            if not isinstance(domains, dict) or not domains:
-                continue
-            facts_with_value_domains += 1
             arg_names = list(contract.get("args") or [])
             for index, raw_arg in enumerate(parsed["args"]):
                 if index >= len(arg_names):
                     continue
                 arg_name = str(arg_names[index]).strip()
+                value = _normalize_arg(raw_arg)
+                provenance_issue = _provenance_payload_issue(arg_name, value)
+                if provenance_issue:
+                    rows.append(
+                        {
+                            "fixture": fixture,
+                            "compile_json": str(path),
+                            "signature": signature,
+                            "predicate": parsed["predicate"],
+                            "arg_index": index + 1,
+                            "arg_name": arg_name,
+                            "value": value,
+                            "allowed_values": [],
+                            "issue": provenance_issue,
+                            "fact": fact,
+                        }
+                    )
+            domains = contract.get("value_domains")
+            if not isinstance(domains, dict) or not domains:
+                continue
+            facts_with_value_domains += 1
+            for index, raw_arg in enumerate(parsed["args"]):
+                if index >= len(arg_names):
+                    continue
+                arg_name = str(arg_names[index]).strip()
+                value = _normalize_arg(raw_arg)
                 allowed_values = [
                     str(item).strip()
                     for item in domains.get(arg_name, [])
@@ -90,7 +113,6 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                 if not allowed_values:
                     continue
                 checked_slot_count += 1
-                value = _normalize_arg(raw_arg)
                 if value not in set(allowed_values):
                     rows.append(
                         {
@@ -102,6 +124,7 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
                             "arg_name": arg_name,
                             "value": value,
                             "allowed_values": allowed_values,
+                            "issue": "value_not_allowed",
                             "fact": fact,
                         }
                     )
@@ -131,15 +154,16 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Violations: `{summary['violation_count']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Fixture | Signature | Arg | Value |",
-        "| --- | --- | --- | --- |",
+        "| Fixture | Signature | Arg | Issue | Value |",
+        "| --- | --- | --- | --- | --- |",
     ]
     for row in report.get("violations", []):
         lines.append(
-            "| `{}` | `{}` | `{}` | `{}` |".format(
+            "| `{}` | `{}` | `{}` | `{}` | `{}` |".format(
                 row.get("fixture", ""),
                 row.get("signature", ""),
                 row.get("arg_name", ""),
+                row.get("issue", ""),
                 row.get("value", ""),
             )
         )
@@ -184,6 +208,15 @@ def _normalize_arg(value: str) -> str:
     if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
         text = text[1:-1]
     return text.strip()
+
+
+def _provenance_payload_issue(arg_name: str, value: str) -> str | None:
+    if arg_name != "source_or_scope":
+        return None
+    normalized = str(value or "").strip().casefold()
+    if CITATION_PAYLOAD_RE.match(normalized):
+        return "citation_payload_in_source_or_scope"
+    return None
 
 
 def _split_args(raw: str) -> list[str]:

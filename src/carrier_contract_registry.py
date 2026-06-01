@@ -284,9 +284,10 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "required_provenance": ["source_or_scope"],
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
-            "FDA violation-citation relation: the row links one violation to an exact source-stated statute or regulation citation.",
+            "FDA violation-citation relation: the row links one violation or warning-letter subject to an exact source-stated statute or regulation citation.",
             "citation is a compact normalized citation atom such as cfr_21_211_192 or fdca_501_a_2_b.",
             "citation_role is compact, such as cgmps_requirement, adulteration_authority, or consultant_qualification.",
+            "For a consultant qualification citation such as 21 CFR 211.34 in a general consultant recommendation, use the warning-letter id as the first argument and citation_role=consultant_qualification.",
             "Do not use this row to preserve explanatory prose or full rule text.",
         ],
         "value_domains": {
@@ -395,6 +396,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "consultant_kind is compact, such as qualified_cgmp_consultant.",
             "action_kind is compact, such as consultant_engagement or system_assessment.",
             "Use fda_violation_citation/4 or legal_citation_detail/4 for the consultant qualification citation when source-stated.",
+            "Do not put a citation atom such as cfr_21_211_34 in source_or_scope as a substitute for the separate consultant qualification citation row.",
         ],
         "value_domains": {
             "consultant_kind": ["qualified_cgmp_consultant", "qualified_third_party_consultant"],
@@ -414,6 +416,9 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "Conclusion-scope relation: the row preserves one compact source-stated limitation, scope statement, recurrence-prevention statement, repeat-observation context, ownership context, or responsibility statement from the conclusion.",
             "scope_kind is a controlled compact value such as cited_violations_not_exhaustive, recurrence_prevention, repeat_observation_context, ownership_change_context, or product_scope.",
             "scope_value is compact, such as not_all_inclusive, responsibility_to_correct, prevent_recurrence, or drug_products.",
+            "For a conclusion sentence that assigns responsibility to investigate, determine causes, correct violations, or prevent recurrence, use scope_kind=recurrence_prevention and scope_value=responsibility_to_correct.",
+            "Use scope_value=prevent_recurrence only for source language about preventing recurrence that does not assign responsibility to the firm or recipient.",
+            "Use scope_kind=ownership_change_context only when the source explicitly mentions ownership, management, or operator change; do not use it for ordinary responsibility-to-correct language.",
             "Do not put the entire conclusion paragraph into scope_kind or scope_value.",
         ],
         "value_domains": {

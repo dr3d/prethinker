@@ -826,6 +826,80 @@ Reading:
   support 1/3, and the violation 2 category variant as the only same-predicate
   category conflict.
 
+R58-R66 lens-local N=3 support and conclusion boundary repair:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r55_r58_r59_chronology_series_reduced_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r32_r60_r61_wrapper_series_reduced_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r34_r62_r63_response_series_reduced_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r64_r65_r66_conclusion_series_reduced_summary.md
+
+wrapper lens support>=2: 4 expected rows
+chronology lens support>=2: 4 expected rows
+violation lens support>=2: 8 expected rows
+response_obligation lens support>=2: 4 expected rows, including two rows already counted through the violation lens
+conclusion lens support>=2 after contract boundary repair: 2 expected rows
+unique stable expected rows across lens-local support>=2 summaries: 20 / 22
+value-domain audit on R64/R65/R66 conclusion runs: pass, 8 facts, 16 checked slots, 0 violations
+```
+
+Reading:
+
+- the conclusion lens blocker was schema ambiguity, not a new predicate need.
+  The carrier allowed both `responsibility_to_correct` and
+  `prevent_recurrence` without telling the model how to handle the common FDA
+  sentence that assigns responsibility for investigating causes and preventing
+  recurrence. The registered carrier contract now says such sentences map to
+  `recurrence_prevention` / `responsibility_to_correct`; `prevent_recurrence`
+  is reserved for recurrence-prevention language without assigned
+  responsibility, and `ownership_change_context` requires explicit ownership
+  or management-change source language.
+- the repaired conclusion lens produced both expected conclusion rows at 3/3
+  support under same-condition OpenRouter compiles. This promotes the
+  recurrence/responsibility conclusion row from a diagnostic R57 recovery to a
+  stable lens-local support>=2 row.
+- the honest promoted micro picture is now 20/22, not 21/22. The 21/22 R57
+  union remains useful diagnostic evidence, but it includes at least one row
+  without support>=2 in its own lens history. Do not use R57 as the promoted
+  score.
+- the two remaining unpromoted expected rows are the consultant qualification
+  citation (`fda_violation_citation(Letter, cfr_21_211_34,
+  consultant_qualification, SrcConsultantCitation)`) and the violation 2
+  category boundary (`contamination_control` expected, `aseptic_processing`
+  emitted 3/3). The first is a support/acquisition stability problem; the
+  second is probably a domain value-boundary or oracle-alternative problem.
+
+R67-R72 consultant citation probe and provenance-payload audit:
+
+```text
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r67_r68_r69_response_series_reduced_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r70_r71_r72_response_series_reduced_summary.md
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r70_r71_r72_response_value_domains_v2.md
+
+contract change: fda_violation_citation/4 now explicitly allows a letter-level consultant qualification citation
+contract change: fda_consultant_recommendation/4 forbids using a citation atom as source_or_scope
+R67/R68/R69 consultant citation support: 1 / 3
+R70/R71/R72 consultant citation support: 0 / 3
+R70/R71/R72 value-domain/provenance audit: fail, 3 citation_payload_in_source_or_scope violations
+```
+
+Reading:
+
+- the consultant-citation miss is not solved by contract clarification. The
+  source sentence contains both the consultant recommendation and the
+  qualification citation, but the compiler still often stores `cfr_21_211_34`
+  as the provenance slot on `fda_consultant_recommendation/4` instead of
+  emitting the separate letter-level `fda_violation_citation/4` row.
+- this exposed a governance pinhole: wildcarded expected-source variables can
+  let an answer-bearing citation hide inside `source_or_scope` and still count
+  as support. `scripts\audit_carrier_value_domains.py` now blocks
+  citation-shaped payloads in `source_or_scope` for registered carriers. The
+  R70/R71/R72 cell therefore fails the audit even though the older support
+  summary still lists the consultant recommendation row as present.
+- do not promote any response-lens cell that fails this audit. The current
+  promoted FDA micro state stays 20/22, and the consultant qualification
+  citation remains a compile-acquisition/provenance-boundary blocker.
+
 ## Next Moves
 
 1. Build or receive an unlike FDA warning-letter transfer micro using

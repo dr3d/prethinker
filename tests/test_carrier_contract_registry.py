@@ -274,6 +274,23 @@ def test_fda_violation_detail_contract_names_record_review_subject_trigger() -> 
     assert "affected_lot" in text
 
 
+def test_fda_violation_citation_contract_allows_letter_level_consultant_citation() -> None:
+    lines = carrier_contract_prompt_lines(["fda_violation_citation/4"])
+    text = "\n".join(lines)
+
+    assert "one violation or warning-letter subject" in text
+    assert "use the warning-letter id as the first argument" in text
+    assert "citation_role=consultant_qualification" in text
+
+
+def test_fda_consultant_recommendation_contract_rejects_citation_as_provenance() -> None:
+    lines = carrier_contract_prompt_lines(["fda_consultant_recommendation/4"])
+    text = "\n".join(lines)
+
+    assert "Do not put a citation atom such as cfr_21_211_34 in source_or_scope" in text
+    assert "separate consultant qualification citation row" in text
+
+
 def test_fda_inspection_event_contract_keeps_agency_separate_from_issuing_office() -> None:
     lines = carrier_contract_prompt_lines(["fda_inspection_event/6"])
     text = "\n".join(lines)
@@ -288,3 +305,12 @@ def test_fda_prior_warning_contract_prefers_source_stated_firm_scope() -> None:
 
     assert "issued to the firm" in text
     assert "rather than the inspected facility" in text
+
+
+def test_fda_conclusion_scope_contract_disambiguates_responsibility_recurrence() -> None:
+    lines = carrier_contract_prompt_lines(["fda_conclusion_scope/4"])
+    text = "\n".join(lines)
+
+    assert "scope_kind=recurrence_prevention and scope_value=responsibility_to_correct" in text
+    assert "Use scope_value=prevent_recurrence only" in text
+    assert "ownership_change_context only when the source explicitly mentions ownership" in text

@@ -53,3 +53,20 @@ def test_carrier_value_domain_audit_blocks_off_palette_fda_values(tmp_path: Path
         "scope_value",
         "not_intended_to_be_an_all_inclusive_list_of_violations",
     ) in violations
+
+
+def test_carrier_value_domain_audit_blocks_citation_payload_in_source_scope(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "fda" / "compile.json",
+        [
+            "fda_consultant_recommendation(letter, qualified_cgmp_consultant, consultant_engagement, cfr_21_211_34).",
+        ],
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["summary"]["violation_count"] == 1
+    assert report["violations"][0]["signature"] == "fda_consultant_recommendation/4"
+    assert report["violations"][0]["arg_name"] == "source_or_scope"
+    assert report["violations"][0]["issue"] == "citation_payload_in_source_or_scope"

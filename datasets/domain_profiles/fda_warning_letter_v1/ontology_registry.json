@@ -152,7 +152,7 @@
       "signature": "fda_conclusion_scope/4",
       "args": ["letter_id", "scope_kind", "scope_value", "source_or_scope"],
       "category": "fda_conclusion_scope",
-      "notes": "Preserves one compact conclusion-scope statement such as not_all_inclusive, responsibility_to_correct, or recurrence_prevention."
+      "notes": "Preserves one compact conclusion-scope statement. Detailed value-boundary rules come from the registered carrier contract."
     },
     {
       "signature": "domain_omission/5",
