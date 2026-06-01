@@ -293,9 +293,9 @@ R14 generic completion machinery with original FDA registry notes:
 
 R15 lot-identifier normalization:
   admitted facts: 23
-  strict expected match: 16 / 23
+  strict expected match: 17 / 23 after expected-file entity correction
   value-domain violations: 0
-  domain omission accountability audit: pass
+  domain omission accountability audit v2: fail
   completion pass new facts: 4
   note: lot atoms already landed canonical in this run; the new reducer is a
         guard for observed variants (`lot_a104`, `batch_a_104`), not the driver
@@ -305,7 +305,7 @@ R15 lot-identifier normalization:
 
 R16 correspondence-party placeholder contract:
   admitted facts: 19
-  strict expected match: 14 / 23
+  strict expected match: 17 / 23 after expected-file entity correction
   value-domain violations: 0
   domain omission accountability audit: pass
   completion pass new facts: 0
@@ -366,6 +366,10 @@ What this proved:
   `domain_omission/5`. A normal `fda_correspondence_party/5` row with
   `not_stated`/`unknown` placeholder values is now rejected by typed contract
   validation and blocked by `audit_domain_omission_accountability.py`.
+- expected facts were corrected where the source says "firm" rather than
+  "facility" for prior warning letter and regulatory meeting rows. This is an
+  oracle correction, not a compiler repair; current honest R16 micro status is
+  17/23 with clean value-domain and omission gates.
 
 Current blocker:
 
@@ -384,13 +388,14 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R10 still misses:
+R16 still misses after expected-file correction:
 
-- letter/facility/inspection wrapper normalizations;
 - one missing-record detail for violation 1;
-- one procedure-scope detail for violation 2;
+- procedure-scope detail for violation 2 when the completion pass does not
+  contribute it;
+- written-response/corrective-actions row when the base compile chooses only
+  the failure-consequence row;
 - documentation-submission response row;
-- consultant-qualification citation row;
 - recurrence/responsibility conclusion row;
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.

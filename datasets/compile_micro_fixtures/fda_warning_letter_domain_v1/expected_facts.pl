@@ -1,11 +1,11 @@
-fda_warning_letter(Letter, fda_office_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, SrcLetter).
+fda_warning_letter(Letter, office_of_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, SrcLetter).
 fda_facility_identity(Facility, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, SrcFacility).
 fda_correspondence_party(Letter, Recipient, recipient, marigold_sterile_products_inc, SrcRecipient).
 
 fda_inspection_event(Inspection, Facility, v_2025_02_03, v_2025_02_07, fda, SrcInspection).
 fda_form483_response(Response, Inspection, v_2025_02_21, SrcResponse).
-fda_prior_warning_letter(PriorLetter, Facility, v_2022_08_12, prior_letter, SrcPriorLetter).
-fda_regulatory_meeting(Meeting, Facility, v_2025_04_03, SrcMeeting).
+fda_prior_warning_letter(PriorLetter, Recipient, v_2022_08_12, prior_letter, SrcPriorLetter).
+fda_regulatory_meeting(Meeting, Recipient, v_2025_04_03, SrcMeeting).
 
 fda_violation(Violation1, Letter, violation_1, quality_unit_failure, SrcViolation1).
 fda_violation_citation(Violation1, cfr_21_211_192, cgmps_requirement, SrcViolation1Citation).
