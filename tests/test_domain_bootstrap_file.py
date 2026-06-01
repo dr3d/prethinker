@@ -6711,6 +6711,33 @@ def test_profile_registry_for_lens_requires_known_lens() -> None:
         raise AssertionError("unknown lens did not fail")
 
 
+def test_profile_registry_for_lens_strips_omission_without_requirement() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "conclusion",
+                    "allowed_signatures": ["fda_conclusion_scope/4", "domain_omission/5"],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_conclusion_scope/4"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [],
+        },
+        "conclusion",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == ["fda_conclusion_scope/4"]
+    assert filtered["active_lens"]["declared_allowed_signatures"] == [
+        "domain_omission/5",
+        "fda_conclusion_scope/4",
+    ]
+    assert filtered["active_lens"]["allowed_signatures"] == ["fda_conclusion_scope/4"]
+    assert filtered["active_lens"]["accountability_requirement_count"] == 0
+
+
 def test_profile_registry_lens_limits_direct_profile_and_completion_context() -> None:
     registry = _profile_registry_for_lens(
         {
@@ -6743,13 +6770,13 @@ def test_profile_registry_lens_limits_direct_profile_and_completion_context() ->
     assert profile_signatures == [
         "fda_inspection_event/6",
         "fda_form483_response/4",
-        "domain_omission/5",
     ]
 
     context = _profile_registry_completion_context_lines(registry, {"facts": []})
     joined = "\n".join(context)
     assert "fda_inspection_event/6" in joined
     assert "fda_form483_response/4" in joined
+    assert "domain_omission/5 in this pass" in joined
     assert "fda_violation_detail/5" not in joined
 
 

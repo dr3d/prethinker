@@ -2751,24 +2751,27 @@ def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -
             )
         )
         raise ValueError(f"unknown profile registry lens {requested!r}; available lenses: {available or 'none'}")
-    allowed = {
+    declared_allowed = {
         _normalized_signature(str(signature))
         for signature in selected.get("allowed_signatures", [])
         if _normalized_signature(str(signature))
     }
-    predicates = [
-        dict(item)
-        for item in profile_registry.get("predicates", [])
-        if isinstance(item, dict) and _normalized_signature(str(item.get("signature", ""))) in allowed
-    ]
     accountability_requirements = [
         dict(item)
         for item in profile_registry.get("accountability_requirements", [])
         if (
             isinstance(item, dict)
-            and _normalized_signature(str(item.get("carrier_signature", ""))) in allowed
-            and "domain_omission/5" in allowed
+            and _normalized_signature(str(item.get("carrier_signature", ""))) in declared_allowed
+            and "domain_omission/5" in declared_allowed
         )
+    ]
+    offered_allowed = set(declared_allowed)
+    if not accountability_requirements:
+        offered_allowed.discard("domain_omission/5")
+    predicates = [
+        dict(item)
+        for item in profile_registry.get("predicates", [])
+        if isinstance(item, dict) and _normalized_signature(str(item.get("signature", ""))) in offered_allowed
     ]
     filtered = dict(profile_registry)
     filtered["predicates"] = predicates
@@ -2776,7 +2779,8 @@ def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -
     filtered["active_lens"] = {
         "id": requested,
         "purpose": str(selected.get("purpose", "")).strip(),
-        "allowed_signatures": sorted(allowed),
+        "declared_allowed_signatures": sorted(declared_allowed),
+        "allowed_signatures": sorted(offered_allowed),
         "predicate_count": len(predicates),
         "accountability_requirement_count": len(accountability_requirements),
     }

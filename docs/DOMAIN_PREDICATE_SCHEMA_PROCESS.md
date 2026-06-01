@@ -141,6 +141,12 @@ The post-backbone support and rule acquisition passes also accept
 `--profile-registry-lens` so an overlay/lens pass can be given a narrowed
 domain vocabulary without reopening the whole domain pack.
 
+`domain_omission/5` is special. A lens may declare it as possible shared
+vocabulary, but the runner only offers it when that active lens has at least
+one retained accountability requirement. Otherwise omission rows become a
+decorative escape hatch, which is exactly the thing the domain tier is trying
+to avoid.
+
 ## Build Loop
 
 1. Pick the wedge.

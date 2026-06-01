@@ -213,6 +213,9 @@ tests, so this boundary is covered by the default code-only governance gate.
 The batch wrapper also forwards the registry completion and accountability
 follow-up flags, so lens-scoped N=3 domain cells can use the same domain-pack
 machinery as single-fixture runs.
+`domain_omission/5` is no longer offered to an active lens unless that lens has
+a retained accountability requirement; this prevents conclusion/violation-style
+lenses from emitting decorative omission rows when no omission contract applies.
 
 ```text
 C:\prethinker_tmp_archive\research_integrity_gate_code_with_lens_wrappers_20260601
