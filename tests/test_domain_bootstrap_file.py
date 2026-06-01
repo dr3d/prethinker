@@ -97,6 +97,7 @@ from scripts.run_domain_bootstrap_file import (
     _apply_fda_lot_identifier_atom_reduction,
     _apply_fda_facility_identity_atom_reduction,
     _apply_fda_consultant_citation_scope_reduction,
+    _apply_fda_office_atom_reduction,
     _enforce_fda_correspondence_party_placeholder_contract,
     _unsafe_profile_registry_palette_prior_reason,
     _should_build_source_entity_ledger,
@@ -6956,6 +6957,26 @@ def test_fda_consultant_citation_scope_reduction_uses_typed_violation_letter() -
         "fda_violation_citation(violation_1, cfr_21_211_192, cgmps_requirement, src_line_8).",
     ]
     assert source_compile["deterministic_fda_consultant_citation_scope_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_fda_office_atom_reduction_canonicalizes_registered_office_slots() -> None:
+    source_compile = {
+        "facts": [
+            "fda_warning_letter(letter_1, office_pharmaceutical_quality_operations, acme_inc, v_2026_01_01, src_line_1).",
+            "fda_correspondence_party(letter_1, office_pharmaceutical_quality_operations, issuing_office, office_pharmaceutical_quality_operations, src_line_1).",
+            "fda_facility_identity(facility_1, office_pharmaceutical_quality_operations, camden_new_jersey, fei_1, src_line_2).",
+        ]
+    }
+
+    report = _apply_fda_office_atom_reduction(source_compile)
+
+    assert report["reduction_count"] == 2
+    assert source_compile["facts"] == [
+        "fda_warning_letter(letter_1, office_of_pharmaceutical_quality_operations, acme_inc, v_2026_01_01, src_line_1).",
+        "fda_correspondence_party(letter_1, office_of_pharmaceutical_quality_operations, issuing_office, office_of_pharmaceutical_quality_operations, src_line_1).",
+        "fda_facility_identity(facility_1, office_pharmaceutical_quality_operations, camden_new_jersey, fei_1, src_line_2).",
+    ]
+    assert source_compile["deterministic_fda_office_atom_reduction_policy"]["not_source_interpretation"] is True
 
 
 def test_fda_correspondence_party_placeholder_contract_rejects_omission_substitutes() -> None:

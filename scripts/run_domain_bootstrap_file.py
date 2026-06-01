@@ -2149,6 +2149,7 @@ def main() -> int:
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
+        _apply_fda_office_atom_reduction(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         if (
             bool(getattr(args, "profile_list_range_omission_followup", False))
@@ -2197,6 +2198,7 @@ def main() -> int:
         _apply_fda_lot_identifier_atom_reduction(record["source_compile"])
         _apply_fda_facility_identity_atom_reduction(record["source_compile"])
         _apply_fda_consultant_citation_scope_reduction(record["source_compile"])
+        _apply_fda_office_atom_reduction(record["source_compile"])
         _enforce_fda_correspondence_party_placeholder_contract(record["source_compile"])
         _apply_domain_omission_carrier_signature_reduction(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
@@ -7394,6 +7396,65 @@ def _apply_fda_consultant_citation_scope_reduction(source_compile: dict[str, Any
         "description": (
             "Canonicalizes fda_violation_citation/4 consultant_qualification rows from a numbered violation "
             "id to the associated warning-letter id using existing fda_violation/5 typed facts."
+        ),
+    }
+    return {"reduction_count": len(reductions), "reductions": reductions[:100]}
+
+
+def _canonical_fda_office_atom(value: str) -> str:
+    text = str(value or "").strip().strip("'\"").casefold()
+    if text == "office_pharmaceutical_quality_operations":
+        return "office_of_pharmaceutical_quality_operations"
+    return ""
+
+
+def _apply_fda_office_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Canonicalize narrow FDA office typed atoms."""
+
+    office_arg_positions = {
+        "fda_warning_letter": {1},
+        "fda_correspondence_party": {1, 3},
+    }
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    out: list[str] = []
+    seen: set[str] = set()
+    reductions: list[dict[str, str]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            if fact not in seen:
+                out.append(fact)
+                seen.add(fact)
+            continue
+        predicate, args = parsed
+        changed = False
+        for index in office_arg_positions.get(predicate, set()):
+            if index >= len(args):
+                continue
+            office = _canonical_fda_office_atom(args[index])
+            if office:
+                args[index] = office
+                changed = True
+        if changed:
+            reduced = f"{predicate}({', '.join(args)})."
+            if reduced != fact:
+                reductions.append({"from": fact, "to": reduced})
+                fact = reduced
+        if fact not in seen:
+            out.append(fact)
+            seen.add(fact)
+    source_compile["facts"] = out
+    source_compile["unique_fact_count"] = len(out)
+    source_compile["deterministic_fda_office_atom_reduction_count"] = len(reductions)
+    source_compile["deterministic_fda_office_atom_reductions"] = reductions[:100]
+    source_compile["deterministic_fda_office_atom_reduction_policy"] = {
+        "schema_version": "deterministic_fda_office_atom_reduction_v1",
+        "authority": "typed_value_normalization_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "description": (
+            "Canonicalizes the narrow FDA office atom office_pharmaceutical_quality_operations to "
+            "office_of_pharmaceutical_quality_operations in registered FDA office slots."
         ),
     }
     return {"reduction_count": len(reductions), "reductions": reductions[:100]}

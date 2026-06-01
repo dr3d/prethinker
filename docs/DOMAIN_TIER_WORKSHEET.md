@@ -398,6 +398,28 @@ R23-R25 oracle/schema correction:
   note: this is an oracle/schema correction, not a compiler repair. It keeps
         the fixture from rewarding facts that are not actually stated in the
         source.
+
+R27-R30 corrected-schema same-condition cell:
+  requested model: qwen/qwen3.6-35b-a3b-20260415
+  compiles: 3
+  support threshold: >=2
+  supported expected facts: 18 / 22
+  unsupported expected facts: 4 / 22
+  per-run strict probe notes:
+    R27: 17 / 22, value-domain pass, atom-shape pass
+    R29: 15 / 22, value-domain pass, atom-shape pass; completed after one 429
+         interruption in the attempted two-run batch
+    R30: 20 / 22, value-domain pass, atom-shape pass; completed after waiting
+         out OpenRouter retry window
+  artifacts:
+    C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r27_r30_corrected_schema_summary.md
+    C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r27_r30_atom_inventory.md
+  note: corrected schema did not lift the stable support count above 18/22, but
+        it changed the residual shape. Recurrence-prevention became supported
+        at 2/3; consultant-qualification citation fell to 1/3 in this cell.
+        This confirms the remaining blocker is unstable second-layer compile
+        recall under clean governed atoms, not atom-shape or value-domain
+        leakage.
 ```
 
 Artifacts:
@@ -492,6 +514,10 @@ What this proved:
   correction, current support is 18/22. This is the number to use going
   forward; the earlier 18/23 was over-penalizing one weakly supported expected
   row and two misnamed source claims.
+- a fresh corrected-schema same-condition cell stayed at 18/22. This is not a
+  climb in the count, but it is a cleaner measurement: recurrence is now named
+  correctly and stable, while consultant citation, procedure scope, wrapper
+  specificity, and record-review subject remain unstable or absent.
 
 Current blocker:
 
@@ -510,13 +536,15 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R23-R25 oracle-corrected unsupported facts:
+R27-R30 corrected-schema unsupported facts:
 
+- consultant-qualification citation scoped to the warning letter remains only
+  1/3 in this current cell;
 - procedure-scope detail for violation 2 remains only 1/3;
-- record-review-subject detail for violation 1 remains 0/3;
-- recurrence-prevention conclusion row remains 0/3;
 - warning-letter issuing office specificity remains only 1/3; the model often
-  emits broad `fda` rather than the named office. Do not normalize this by fiat.
+  emits broad or truncated office atoms rather than the named office. Do not
+  normalize this by fiat beyond narrow registered-office atom cleanup.
+- record-review-subject detail for violation 1 remains 0/3;
 - a few source/scope and compact-id normalization choices that may need
   expected alternatives rather than code changes.
 

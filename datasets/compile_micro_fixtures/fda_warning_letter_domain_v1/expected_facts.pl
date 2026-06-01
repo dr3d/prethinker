@@ -22,6 +22,6 @@ fda_response_requirement(Letter, written_response, fifteen_working_days, fda, co
 fda_consultant_recommendation(Letter, qualified_cgmp_consultant, consultant_engagement, SrcConsultant).
 fda_violation_citation(Letter, cfr_21_211_34, consultant_qualification, SrcConsultantCitation).
 fda_conclusion_scope(Letter, cited_violations_not_exhaustive, not_all_inclusive, SrcScope).
-fda_conclusion_scope(Letter, recurrence_prevention, prevent_recurrence, SrcRecurrence).
+fda_conclusion_scope(Letter, recurrence_prevention, responsibility_to_correct, SrcRecurrence).
 
 domain_omission(Letter, 'fda_correspondence_party/5', role_missing, signatory_not_stated, SrcSignatoryOmission).
