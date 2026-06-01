@@ -1,5 +1,13 @@
 ﻿# The Prethinker Semantic Instrument
 
+> Status: historical pre-reset instrument overview. The instrument vocabulary is
+> still useful, but old score figures in this document are not current claims.
+> Use
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+> for current status.
+
 ## What This Document Is
 
 Prethinker compiles natural language documents into governed knowledge bases,

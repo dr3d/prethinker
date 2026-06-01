@@ -1,0 +1,11 @@
+{
+  "schema_version": "typed_micro_fixture_v1",
+  "fixture_id": "claim_ground_set_relation_v1",
+  "purpose": "Verify that claim membership, range inventory, statutory basis, and ground/outcome relation meet on the same claim-set id.",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "expected_alternatives": "expected_alternatives.json",
+  "forbidden_facts": "forbidden_facts.pl",
+  "answer_types": ["numbered_inventory", "claim_ground", "legal_basis"],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

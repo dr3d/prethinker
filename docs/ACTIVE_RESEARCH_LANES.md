@@ -1,6 +1,6 @@
 # Active Research Lanes
 
-Last updated: 2026-05-28
+Last updated: 2026-06-01
 
 This page is the compact public map of current work. It is not a rolling
 session journal. Older lane notes, fixture-specific repair slices, retired
@@ -30,15 +30,14 @@ dataset label. Promote only when the principle survives unlike probes.
 
 | Priority | Lane | Question | Current Surface |
 | --- | --- | --- | --- |
-| 1 | Fresh ugly transfer discipline | Do generic mechanism repairs hold on messy public documents that did not shape the current fixes? | `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`, `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md` |
-| 2 | Compile-surface stability | Can recurring answer-bearing distinctions be emitted as direct admitted surfaces or deterministic ledgers instead of query-time compatibility bridges? | `docs/COMPILED_KB_ARTIFACT_PACKAGE.md`, active worksheets |
-| 3 | Native non-regression stamp | What does the current direct-surface instrument score on the maintained native corpus once the next mechanism batch is stable? | `docs/NATIVE_RESTAMP_WORKSHEET.md`, future stamp artifacts |
-| 4 | Overlay discipline | Can ACH, timeline, and future review lenses read compiled evidence without mutating KB truth, QA verdicts, or compile metrics? | `docs/OVERLAY_ARCHITECTURE.md`, `docs/ACH_STRESS_PUBLIC_20260528_WORKSHEET.md`, `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md` |
-| 5 | Lens and trigger discrimination | Do lens terms and query companions fire on unlike documents because they are structural, or because their triggers are too broad? | `docs/SEMANTIC_LENS_ROSTER.md`, targeted tests |
-| 6 | Palette/source-record governance | Can exact source coordinates, labels, raw spellings, quantities, and section joins be preserved without letting fixture values become architecture? | `src/source_record_ledger.py`, leakage audit |
-| 7 | Transition and scope contracts | Can state transitions, assignment scope, and preservation contracts be normalized deterministically without hiding meaning in ad hoc predicates? | `src/transition_delta_normalizer.py`, focused tests |
-| 8 | Language transfer | Which parts of the harness assume English surface forms, date formats, role verbs, or section conventions? | `docs/BOUNDARY_PROBE_RESEARCH_METHOD.md`, focused language probes |
-| 9 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete plans, generated artifact strata, or misleading history? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
+| 1 | Domain tier strategy | Can one closed document-type schema produce verified Tier 1 answers while the general compiler remains a lower-trust fallback? | `docs/DOMAIN_TIER_STRATEGY.md` |
+| 2 | Per-answer-class hard-clean table | Which answer classes survive the hard-clean gate, and which substantive classes need domain predicates? | `docs/DOMAIN_TIER_WORKSHEET.md`, archive artifacts |
+| 3 | Answer-judge governance | Does the evaluator reject empty evidence, wrong-reference evidence, prose-dependent evidence, and oracle leakage? | `scripts/audit_reference_judge_null_controls.py`, `scripts/audit_redaction_replay.py`, `scripts/audit_typed_plan_replay.py` |
+| 4 | Atom-shape and carrier governance | Can compiled atoms stay compact, typed, and contract-governed instead of hiding prose in names or slots? | `scripts/audit_kb_atom_inventory.py`, carrier registry |
+| 5 | Domain schema wedge selection | Which single regulatory document type has the strongest mix of value, repeated anatomy, and existing carrier coverage? | `docs/DOMAIN_TIER_STRATEGY.md`, per-class table |
+| 6 | Overlay discipline | Can ACH and future lenses read compiled evidence without mutating KB truth, QA verdicts, or compile metrics? | `docs/OVERLAY_ARCHITECTURE.md`, `docs/ACH_OVERLAY_PROBE.md` |
+| 7 | Provider/runtime discipline | Which model/provider/settings conditions are comparable enough for claims? | `docs/PROVIDER_RUNTIME_DISCIPLINE_NOTE.md` |
+| 8 | Public face hygiene | Does the repo front door describe the living project without surfacing obsolete claims or generated artifact strata? | `README.md`, `docs/PUBLIC_DOCS_GUIDE.md` |
 
 ## Current Architecture Pressure
 
@@ -73,39 +72,36 @@ clean evidence fastest:
 
 Provider failures are transport evidence, not architecture evidence.
 
-## Freeze Readiness
+## Reset Readiness
 
-The project has a publishable measurement snapshot, but not a permanent
-instrument freeze. The 2026-05-22 native restamp measured the internal corpus
-at `1997 / 46 / 120` over `2163` judged rows, exact rate `92.33%`, with zero
-compatibility rows, runtime load errors, or write proposals. Fresh ugly public
-2026-05-28 R1 measured `197 / 3 / 0` over `200` rows (`98.5%` exact), also with
-zero compatibility rows, runtime load errors, or write proposals, while the
-compile gate still held. Batch 03 latest guarded slices remain regression
-evidence at `291 / 6 / 3` over `300` rows (`97.0%` exact) as a slice-combined
-view, not a single fresh 300-row rerun. The same public claim also includes a
-clean four-fixture real-world spotcheck (`160 / 0 / 0`, `4 / 4` compile gates)
-and sealed unseen authored transfer at `152 / 1 / 6` over `160` rows (`95.0%`
-exact).
+The project is in a sign-clean reset, not a release freeze. Earlier high product
+scores remain useful history, but they are not current claim-bearing numbers
+because they depended on source-record prose paths, open predicate drift, or
+judge-facing surface tokens.
 
-Before the next full stamp:
+Current claim-bearing measurement is the hard-road floor on the current
+8-fixture English batch:
 
-1. Commit pending code and current-doc changes.
-2. Confirm compatibility adapter delivery is off by default.
-3. Run focused direct-surface smoke checks.
-4. Decide the exact corpus list and draw count.
-5. Journal anomalies as variance during the stamp; do not repair mid-stamp.
+```text
+Product exact:                  88 / 200 = 44.0%
+Typed-plan exact:               84 / 200 = 42.0%
+Redaction-survived exact:       81 / 200 = 40.5%
+Atom-shape-clean product exact: 84 / 200 = 42.0%
+Hard-clean floor:               73 / 200 = 36.5%
+```
 
-Current follow-up blockers:
+This is a research floor, not a product claim. It says the general typed layer
+is alive but not yet viable as the whole product. The next product-shaped move
+is a closed domain schema measured by the same hard-clean gate.
 
-- adjudicate the three fresh ugly May 28 R1 partials before deciding on another
-  repair pass or QA N=2;
-- run a fresh ACH stress batch with family sensitivity locked before claiming
-  ACH sensitivity is solved;
-- split native compile-gate output into blocking, diagnostic, and advisory
-  tiers before treating a noisy pass/hold headline as a release claim;
-- keep fixture nouns, row IDs, answer strings, and dataset labels out of the
-  harness.
+Before the next product-facing claim:
+
+1. Produce the per-answer-class hard-clean table.
+2. Select one domain/document wedge.
+3. Define the closed carrier schema and Tier 1 assignment rule.
+4. Run answer-judge null controls and oracle-isolation checks.
+5. Measure domain-schema answers with hard-clean gates before considering any
+   RAG fallback.
 
 ## What Stays Off The Front Door
 

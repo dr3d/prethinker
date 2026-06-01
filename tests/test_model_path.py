@@ -62,9 +62,28 @@ def test_model_serving_path_metadata_is_reproducibility_surface_not_secret_surfa
     assert metadata["schema_version"] == "model_serving_path_v1"
     assert metadata["provider_family"] == "openrouter"
     assert metadata["provider_routing"] == {"allow_fallbacks": False}
+    assert metadata["decoding"]["top_k"] is None
+    assert metadata["decoding"]["top_k_requested"] == 20
+    assert metadata["decoding"]["top_k_effective"] is None
     assert metadata["execution"]["lanes"] == 1
     assert metadata["observed_runtime"]["quantization"] == "Q8_0"
     assert "secret-value" not in str(metadata)
+
+
+def test_model_serving_path_metadata_records_ollama_top_k_as_effective() -> None:
+    metadata = model_serving_path_metadata(
+        backend="ollama",
+        base_url="http://127.0.0.1:11434",
+        model="qwen3:local",
+        temperature=0.0,
+        top_p=0.82,
+        top_k=20,
+    )
+
+    assert metadata["provider_family"] == "local_ollama"
+    assert metadata["decoding"]["top_k"] == 20
+    assert metadata["decoding"]["top_k_requested"] == 20
+    assert metadata["decoding"]["top_k_effective"] == 20
 
 
 def test_local_lmstudio_model_metadata_records_loaded_context_and_quantization() -> None:

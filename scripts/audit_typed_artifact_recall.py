@@ -21,11 +21,18 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 import unicodedata
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.carrier_contract_registry import carrier_contract
 
 
 STOP_TOKENS = {
@@ -84,11 +91,21 @@ class ParsedFact:
     args: tuple[str, ...]
     clause: str
 
+    @property
+    def signature(self) -> str:
+        return f"{self.predicate}/{len(self.args)}"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-root", type=Path, required=True)
     parser.add_argument("--compile-root", type=Path, required=True)
+    parser.add_argument(
+        "--fixture",
+        action="append",
+        default=[],
+        help="Restrict the audit to one fixture name. May be supplied more than once.",
+    )
     parser.add_argument("--out-json", type=Path, default=None)
     parser.add_argument("--out-md", type=Path, default=None)
     parser.add_argument("--coverage-threshold", type=float, default=0.85)
@@ -103,6 +120,7 @@ def main() -> int:
         compile_root=args.compile_root,
         coverage_threshold=float(args.coverage_threshold),
         partial_threshold=float(args.partial_threshold),
+        fixtures=set(args.fixture or []),
     )
     if args.out_json:
         args.out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -121,20 +139,26 @@ def build_report(
     compile_root: Path,
     coverage_threshold: float,
     partial_threshold: float,
+    fixtures: set[str] | None = None,
 ) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     by_fixture: dict[str, Counter[str]] = defaultdict(Counter)
+    by_answer_type: dict[str, Counter[str]] = defaultdict(Counter)
     predicate_counts: Counter[str] = Counter()
     strict_predicate_counts: Counter[str] = Counter()
     fact_counts: Counter[str] = Counter()
 
     for fixture_dir in sorted(path for path in dataset_root.iterdir() if path.is_dir()):
         fixture = fixture_dir.name
+        if fixtures and fixture not in fixtures:
+            continue
         oracle_rows = _read_oracle(fixture_dir / "oracle.jsonl")
+        questions = _read_questions(fixture_dir / "qa.md")
         compile_json = _latest_compile_json(compile_root / fixture)
-        typed_any_facts, typed_strict_facts, rejected = _typed_fact_sets(compile_json)
+        typed_any_facts, typed_strict_facts, typed_registered_facts, rejected = _typed_fact_sets(compile_json)
         fact_counts["typed_any"] += len(typed_any_facts)
         fact_counts["typed_strict"] += len(typed_strict_facts)
+        fact_counts["typed_registered"] += len(typed_registered_facts)
         fact_counts["rejected_source_record_or_prose"] += rejected
         for fact in typed_any_facts:
             predicate_counts[fact.predicate] += 1
@@ -142,29 +166,42 @@ def build_report(
             strict_predicate_counts[fact.predicate] += 1
         typed_any_text = _facts_text(typed_any_facts)
         typed_strict_text = _facts_text(typed_strict_facts)
+        typed_registered_text = _facts_text(typed_registered_facts)
         for oracle in oracle_rows:
             reference = str(oracle.get("reference_answer", ""))
+            question = questions.get(str(oracle.get("id", "")), "")
+            answer_type = _answer_type(question=question, reference=reference)
             any_metrics = _coverage_metrics(reference, typed_any_text)
             strict_metrics = _coverage_metrics(reference, typed_strict_text)
+            registered_metrics = _coverage_metrics(reference, typed_registered_text)
             any_class = _coverage_class(any_metrics, coverage_threshold, partial_threshold)
             strict_class = _coverage_class(strict_metrics, coverage_threshold, partial_threshold)
+            registered_class = _coverage_class(registered_metrics, coverage_threshold, partial_threshold)
             by_fixture[fixture][f"typed_any_{any_class}"] += 1
             by_fixture[fixture][f"typed_strict_{strict_class}"] += 1
+            by_fixture[fixture][f"typed_registered_{registered_class}"] += 1
+            by_answer_type[answer_type][f"typed_any_{any_class}"] += 1
+            by_answer_type[answer_type][f"typed_strict_{strict_class}"] += 1
+            by_answer_type[answer_type][f"typed_registered_{registered_class}"] += 1
             rows.append(
                 {
                     "fixture": fixture,
                     "id": oracle.get("id", ""),
+                    "question": question,
+                    "answer_type": answer_type,
                     "reference_answer": reference,
                     "typed_any": any_metrics | {"class": any_class},
                     "typed_strict": strict_metrics | {"class": strict_class},
+                    "typed_registered": registered_metrics | {"class": registered_class},
                 }
             )
 
     summary = _summarize_rows(rows)
     return {
-        "schema_version": "typed_artifact_recall_audit_v1",
+        "schema_version": "typed_artifact_recall_audit_v2",
         "dataset_root": str(dataset_root),
         "compile_root": str(compile_root),
+        "fixtures": sorted(fixtures) if fixtures else "all",
         "thresholds": {
             "coverage": coverage_threshold,
             "partial": partial_threshold,
@@ -174,6 +211,7 @@ def build_report(
         "top_typed_any_predicates": dict(predicate_counts.most_common(30)),
         "top_typed_strict_predicates": dict(strict_predicate_counts.most_common(30)),
         "by_fixture": {fixture: dict(counter) for fixture, counter in sorted(by_fixture.items())},
+        "by_answer_type": {answer_type: dict(counter) for answer_type, counter in sorted(by_answer_type.items())},
         "rows": rows,
     }
 
@@ -187,6 +225,58 @@ def _read_oracle(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _read_questions(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    out: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        match = re.match(r"^\s*(q\d+)\.\s+(?P<question>.+?)\s*$", line)
+        if match:
+            out[match.group(1)] = match.group("question")
+    return out
+
+
+def _answer_type(*, question: str, reference: str) -> str:
+    text = _normalize(f"{question} {reference}")
+    question_text = _normalize(question)
+    tokens = set(text.split())
+    chronology_question = bool(
+        {"chronological", "chronology"} & tokens
+        or "in chronological order" in question_text
+        or "chronological order" in question_text
+        or "calendar order" in question_text
+        or question_text.startswith("place these events")
+        or question_text.startswith("place these dated events")
+        or question_text.startswith("list in chronological order")
+        or question_text.startswith("list in calendar order")
+        or question_text.startswith("list these events")
+    )
+    if chronology_question:
+        return "chronology"
+    if {"date", "dates", "issued", "filed", "decided", "effective"} & tokens:
+        return "date_or_event"
+    if {"docket", "file", "number", "identifier", "fei", "cms", "accession"} & tokens:
+        return "identifier"
+    if {"citation", "citations", "statute", "statutory", "regulation", "provision", "cfr", "usc", "code"} & tokens:
+        return "legal_citation"
+    if {"who", "attorney", "attorneys", "signatory", "signed", "recipient", "panel", "judge", "judges", "member", "members", "office"} & tokens:
+        return "person_role_roster"
+    if {"address", "location", "city", "state", "where"} & tokens:
+        return "location_or_address"
+    quantity_question = bool(
+        {"amount", "dollar", "dollars", "percent", "percentage", "days", "net", "impact"} & tokens
+        or "how many" in question_text
+        or "how much" in question_text
+    )
+    if quantity_question or _numbers(reference):
+        return "quantity_or_amount"
+    if {"list", "which", "what", "categories", "components", "grounds", "violations", "provisions", "checkbox"} & tokens:
+        return "list_or_inventory"
+    if {"disposition", "status", "conclude", "concluded", "finding", "findings", "argument", "response", "why", "reason"} & tokens:
+        return "finding_or_rationale"
+    return "other"
+
+
 def _latest_compile_json(path: Path) -> Path:
     candidates = sorted(path.glob("*.json"), key=lambda item: item.stat().st_mtime)
     if not candidates:
@@ -194,11 +284,12 @@ def _latest_compile_json(path: Path) -> Path:
     return candidates[-1]
 
 
-def _typed_fact_sets(path: Path) -> tuple[list[ParsedFact], list[ParsedFact], int]:
+def _typed_fact_sets(path: Path) -> tuple[list[ParsedFact], list[ParsedFact], list[ParsedFact], int]:
     data = json.loads(path.read_text(encoding="utf-8"))
     facts = data.get("source_compile", {}).get("facts", [])
     typed_any: list[ParsedFact] = []
     typed_strict: list[ParsedFact] = []
+    typed_registered: list[ParsedFact] = []
     rejected = 0
     for clause in facts:
         fact = _parse_fact(str(clause))
@@ -210,9 +301,11 @@ def _typed_fact_sets(path: Path) -> tuple[list[ParsedFact], list[ParsedFact], in
         typed_any.append(fact)
         if _is_strict_typed_fact(fact):
             typed_strict.append(fact)
+            if carrier_contract(fact.signature) is not None:
+                typed_registered.append(fact)
         else:
             rejected += 1
-    return typed_any, typed_strict, rejected
+    return typed_any, typed_strict, typed_registered, rejected
 
 
 def _parse_fact(clause: str) -> ParsedFact | None:
@@ -267,7 +360,8 @@ def _split_args(text: str) -> list[str]:
 
 def _is_strict_typed_fact(fact: ParsedFact) -> bool:
     predicate = fact.predicate.casefold()
-    if any(hint in predicate for hint in FREE_TEXT_PREDICATE_HINTS):
+    predicate_tokens = _raw_tokens(predicate)
+    if any(hint in predicate_tokens for hint in FREE_TEXT_PREDICATE_HINTS):
         return False
     for arg in fact.args:
         if PROVENANCE_ARG_RE.search(arg.strip("'\"")):
@@ -331,7 +425,7 @@ def _coverage_class(metrics: dict[str, Any], coverage_threshold: float, partial_
 
 def _summarize_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     out: dict[str, Any] = {"row_count": len(rows)}
-    for view in ("typed_any", "typed_strict"):
+    for view in ("typed_any", "typed_strict", "typed_registered"):
         counts = Counter(row[view]["class"] for row in rows)
         avg_token = sum(row[view]["token_coverage"] for row in rows) / len(rows) if rows else 0
         number_rows = [row for row in rows if row[view]["number_coverage"] is not None]
@@ -388,6 +482,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Schema: `{report['schema_version']}`",
         f"- Dataset: `{report['dataset_root']}`",
         f"- Compile root: `{report['compile_root']}`",
+        f"- Fixtures: `{report['fixtures']}`",
         f"- Rows: `{summary['row_count']}`",
         "",
         "## Summary",
@@ -395,7 +490,7 @@ def render_markdown(report: dict[str, Any]) -> str:
         "| View | Likely available | Partial available | Not available | Likely rate | Partial+likely rate | Avg token coverage | Full number rows |",
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for view in ("typed_any", "typed_strict"):
+    for view in ("typed_any", "typed_strict", "typed_registered"):
         data = summary[view]
         lines.append(
             "| `{}` | {} | {} | {} | {} | {} | {} | {}/{} |".format(
@@ -417,25 +512,65 @@ def render_markdown(report: dict[str, Any]) -> str:
             "",
             "`typed_any` excludes `source_record_*` but may still include prose-like normalized atoms.",
             "`typed_strict` also excludes prose-like atoms and display/text/label predicates.",
+            "`typed_registered` further restricts `typed_strict` to carrier-contract predicates registered in `src/carrier_contract_registry.py`.",
             "Predicate names are not counted as answer tokens; only typed argument values contribute coverage.",
             "This is a deterministic recall proxy, not proof that a query layer can derive the answer.",
             "",
             "## By Fixture",
             "",
-            "| Fixture | Strict likely | Strict partial | Strict not available | Any likely | Any partial | Any not available |",
-            "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+            "| Fixture | Rows | Registered partial+likely | Strict partial+likely | Any partial+likely | Registered not available |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
         ]
     )
     for fixture, counts in report["by_fixture"].items():
+        strict_total = _counter_total(counts, "typed_strict")
+        strict_partial_likely = counts.get("typed_strict_likely_available", 0) + counts.get(
+            "typed_strict_partial_available", 0
+        )
+        registered_total = _counter_total(counts, "typed_registered")
+        registered_partial_likely = counts.get("typed_registered_likely_available", 0) + counts.get(
+            "typed_registered_partial_available", 0
+        )
+        any_total = _counter_total(counts, "typed_any")
+        any_partial_likely = counts.get("typed_any_likely_available", 0) + counts.get("typed_any_partial_available", 0)
         lines.append(
-            "| `{}` | {} | {} | {} | {} | {} | {} |".format(
+            "| `{}` | {} | {} | {} | {} | {} |".format(
                 fixture,
-                counts.get("typed_strict_likely_available", 0),
-                counts.get("typed_strict_partial_available", 0),
-                counts.get("typed_strict_not_available", 0),
-                counts.get("typed_any_likely_available", 0),
-                counts.get("typed_any_partial_available", 0),
-                counts.get("typed_any_not_available", 0),
+                strict_total,
+                _rate(registered_partial_likely, registered_total),
+                _rate(strict_partial_likely, strict_total),
+                _rate(any_partial_likely, any_total),
+                counts.get("typed_registered_not_available", 0),
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "## By Answer Type",
+            "",
+            "| Answer type | Rows | Registered partial+likely | Strict partial+likely | Any partial+likely | Registered not available |",
+            "| --- | ---: | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for answer_type, counts in report["by_answer_type"].items():
+        strict_total = _counter_total(counts, "typed_strict")
+        strict_partial_likely = counts.get("typed_strict_likely_available", 0) + counts.get(
+            "typed_strict_partial_available", 0
+        )
+        registered_total = _counter_total(counts, "typed_registered")
+        registered_partial_likely = counts.get("typed_registered_likely_available", 0) + counts.get(
+            "typed_registered_partial_available", 0
+        )
+        any_total = _counter_total(counts, "typed_any")
+        any_partial_likely = counts.get("typed_any_likely_available", 0) + counts.get("typed_any_partial_available", 0)
+        lines.append(
+            "| `{}` | {} | {} | {} | {} | {} |".format(
+                answer_type,
+                strict_total,
+                _rate(registered_partial_likely, registered_total),
+                _rate(strict_partial_likely, strict_total),
+                _rate(any_partial_likely, any_total),
+                counts.get("typed_registered_not_available", 0),
             )
         )
     lines.extend(
@@ -461,6 +596,20 @@ def render_markdown(report: dict[str, Any]) -> str:
             )
         )
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _counter_total(counts: dict[str, int], prefix: str) -> int:
+    return (
+        counts.get(f"{prefix}_likely_available", 0)
+        + counts.get(f"{prefix}_partial_available", 0)
+        + counts.get(f"{prefix}_not_available", 0)
+    )
+
+
+def _rate(numerator: int, denominator: int) -> str:
+    if denominator <= 0:
+        return "0.000"
+    return f"{numerator / denominator:.3f}"
 
 
 if __name__ == "__main__":

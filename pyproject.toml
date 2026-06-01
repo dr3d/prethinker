@@ -45,3 +45,8 @@ exclude = [
 
 [tool.setuptools.package-data]
 prethinker = ["py.typed"]
+
+[tool.pytest.ini_options]
+markers = [
+  "legacy_source_record_companion: retired source-record companion tests kept for forensic reference during sign-clean recovery",
+]

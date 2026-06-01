@@ -1,0 +1,10 @@
+{
+  "schema_version": "typed_micro_fixture_v1",
+  "fixture_id": "party_role_context_v1",
+  "purpose": "Verify that source-stated party roles preserve context, party, role, and provenance in the stable party_role_context/4 carrier instead of an ambiguous party_role/3 shape.",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "answer_types": ["party_roster", "person_role_roster"],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

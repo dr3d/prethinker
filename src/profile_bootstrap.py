@@ -4,6 +4,8 @@ import json
 import re
 from typing import Any
 
+from src.carrier_contract_registry import carrier_contract
+
 
 PROFILE_BOOTSTRAP_CONTRACT: dict[str, Any] = {
     "schema_version": "profile_bootstrap_v1",
@@ -283,6 +285,65 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "heading, or short label naming the regulated duty or prohibited conduct, the profile should allow that label to "
     "remain queryable as a legal-basis label, duty category, finding category, or source detail instead of only an "
     "article number.\n"
+    "- For official public documents, orders, decisions, filings, notices, warning letters, bid-protest decisions, "
+    "settlements, or agency releases, preserve the document wrapper as typed structure, not only as source text. "
+    "If the source visibly contains any of these wrapper surfaces, candidate_predicates should include compatible "
+    "typed carriers for them: docket/file/accession identifiers and aliases, issuing body, document type, "
+    "issue/report/decision date, disposition or action type, signatory/person-role chains, panel or commissioner "
+    "membership, opinion/decision form when stated (for example per curiam, memorandum, order, precedential, "
+    "or nonprecedential), party/entity role plus location/address when stated, footnotes or notes by number with "
+    "their source-stated content, cited authority, "
+    "and source-stated attachments/exhibits. Prefer registered or reusable predicates such as "
+    "document_identifier_occurrence/5, document_identifier/3, document_alias/3, document_date/3, "
+    "document_action/3, document_form/3, document_signatory/3, document_signature/5, document_security_listing/5, "
+    "document_checkbox_provision/5, panel_member/4, party_location/4, source_note/4, "
+    "footnote_content/3, legal_citation_detail/4, party_role_context/4, or close domain-owned equivalents when those slots fit. "
+    "Do not assume case_id/2, party_role/3, source_record_note_anchor/2, or source_detail/4 alone can carry panel members, numbered notes, party "
+    "locations, signatory office chains, or cited-authority context. A profile that leaves these wrapper facts only "
+    "in source_record text/display rows is too weak for sign-clean QA.\n"
+    "- For official documents that discuss related matters, companion cases, underlying proceedings, permits, "
+    "applications, filings, prior references, attached records, or incorporated documents, preserve each referenced "
+    "matter as its own typed record with its stated identifier, date, status/action, and relationship to the main "
+    "document when stated. A profile that only records the main document id cannot answer about embedded referenced "
+    "documents. Prefer reusable predicates such as related_document/4, referenced_matter/4, document_identifier/3, "
+    "document_date/3, document_action/3, proceeding_identifier/3, or close domain-owned equivalents.\n"
+    "- For legal, regulatory, procurement, enforcement, appellate, or review documents, preserve authority and "
+    "review-path surfaces directly: jurisdiction or authority basis, governing statute or rule, forum/body below, "
+    "underlying proceeding number, appeal/review target, and final disposition of the lower or reviewed decision. "
+    "These are wrapper facts, not narrative decoration. Prefer predicates such as jurisdiction_basis/3, "
+    "authority_basis/4, proceeding_below/4, review_path/4, reviewed_decision/4, or close domain-owned equivalents.\n"
+    "- For appellate, administrative-review, adjudicative, protest, grievance, or board-review sources, do not collapse "
+    "the action under review into the review outcome. Preserve the underlying actor/body, underlying action type or "
+    "status, governed item/set, and basis/ground separately from the reviewing body, review outcome, scope/effect, and "
+    "date/source anchor. A final affirmed/reversed/modified outcome row is not enough to answer what the lower body, "
+    "examiner, agency, reviewer, committee, or staff originally rejected, denied, cited, found, recommended, or ordered. "
+    "Prefer paired or linked predicates such as action_under_review/5, reviewed_action/5, review_outcome/5, "
+    "item_review_outcome/5, issue_treatment/5, claim_treatment/5, or close domain-owned equivalents.\n"
+    "- For counsel blocks, service rosters, contacts, representatives, reviewers, panelists, commissioners, or "
+    "signatory blocks, preserve every listed named person with role, represented party or office, organization, "
+    "and location when stated. For counsel and representative rows, keep the exact source-stated office or firm "
+    "as the represented organization; do not generalize Office of the Solicitor, a named law firm, local office, "
+    "or named bureau up to only a parent agency or party unless the source itself does so. Do not collapse a counsel "
+    "block to only the named party. Prefer predicates such as representative_role/5, counsel_for/5, contact_role/5, "
+    "panel_member/4, document_signatory/3, document_signature/5, or domain equivalents.\n"
+    "- For numbered claims, violations, counts, issues, rejected items, order paragraphs, or product lists, preserve "
+    "the complete stated set or range inventory and any group-to-ground/basis relationship as typed rows. Do not "
+    "compress a list into a lossy summary when later questions may ask which entries were included. Prefer "
+    "list_member/4, claim_range/4, item_ground/5, issue_ground/5, violation_basis/5, or domain equivalents.\n"
+    "- For agency digest, weekly-summary, notice-rollup, docket-list, decision-list, table-of-actions, or similar "
+    "multi-entry sources, treat each listed entry as a structured record. Preserve entry subject/name, case or file "
+    "numbers, location, decision/action date, deciding official or role-holder, citation/volume number, and outcome "
+    "when stated. Do not leave an entry as only a broad source_attributed_claim or source-record paragraph. Prefer "
+    "digest_entry/6, listed_decision/6, action_entry/6, decision_entry/6, entry_identifier/4, or domain equivalents.\n"
+    "- For financial filings, restatements, accounting-error notices, insurance schedules, rate tables, and other "
+    "periodized sources, preserve fiscal year, quarter, period-end date, balance-sheet date, report date, and affected "
+    "line item/account as joinable typed rows. A row that only says fiscal_year_2024 without the actual date is too "
+    "weak when the source states the date. Prefer fiscal_period/4, period_end/3, balance_sheet_date/3, "
+    "error_period_date/4, accounting_error_impact/5, or domain equivalents.\n"
+    "- For adjudicative, investigative, review, and enforcement documents, preserve each argument/objection/claim "
+    "and the decision-maker's treatment separately: who raised it, target issue or item, disposition/treatment "
+    "(accepted/rejected/forfeited/unpersuasive/not reached), and reason when stated. Prefer predicates such as "
+    "argument_treatment/5, issue_treatment/5, finding_detail/4, claim_treatment/5, or close equivalents.\n"
     "- For regulatory, enforcement, disciplinary, audit, inspection, or compliance sources, keep violation or "
     "deficiency categories separate from action type and legal basis. A business-improvement order, warning letter, "
     "citation, fine, or report demand is the intervention; it is not the violation type. If the source lists control "
@@ -316,7 +377,7 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "often asks for the difference between agreed facts, party positions, expert opinions, internal insurer matters, "
     "conditional future effects, and current entitlements; the profile must give the compiler slots for those distinctions.\n"
     "- For insurance dispute profiles, treat dual-role entities as a first-class design pressure. If one organization "
-    "appears under two contracts or two legal capacities, propose a role-scoped predicate such as party_role/3, "
+    "appears under two contracts or two legal capacities, propose a role-scoped predicate such as party_role_context/4, "
     "company_role/3, dual_role/3, or contract_party/4 so later compilation does not merge separate obligations, "
     "deductibles, notification duties, or defenses.\n"
     "- For insurance dispute profiles, entity_type/2 alone is not enough for insured assets or contract parties. "
@@ -345,10 +406,18 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "person-role or source-role predicate such as person_role/3, source_actor_role/4, attended_by/3, compiled_by/3, "
     "reviewed_by/3, recorded_by/3, or a close domain-owned equivalent. A profile that only preserves the document, "
     "event, or organization id is shallow when later questions may ask who held the stated role.\n"
+    "- For incident, inspection, workplace, adjudicative, or investigative narratives, source-stated appositive job "
+    "titles and supervisory relationships are role-bearing facts. If the source says a named person is a field "
+    "technician, supervisor, manager, officer, inspector, witness, employee, contractor, or similar role, the profile "
+    "should make person, role/title, organization or governed context, and supervised/related person when stated "
+    "queryable as typed rows. Do not leave job titles only in narrative source text.\n"
     "- For source-coordinate provenance, preserve both the semantic assertion and the source coordinate that states, "
     "supports, records, or corroborates it. If a named section, source row, note, document, report, correspondence item, "
     "or evidence item states the basis for a claim/status/access/control/finding, propose a source-coordinate link "
     "whose slots bind the governed subject or assertion label, the source coordinate, and the support role or status. "
+    "A provenance/source-coordinate predicate must not carry copied source prose, display text, quote text, excerpts, "
+    "sentences, or text_span/source_text/content slots. The semantic assertion belongs in a typed assertion row; the "
+    "provenance row only locates that assertion at a source coordinate and records support role/status. "
     "Avoid requiring an invented claim id unless the source already supplies one; a predicate that cannot be populated "
     "from source-stated slots will not repair provenance loss. Useful shapes include claim_source/4, assertion_source/4, "
     "fact_source/4, source_supports/4, recorded_in/3, or a close domain-owned equivalent. A profile that keeps only the "
@@ -465,6 +534,11 @@ PROFILE_BOOTSTRAP_GUIDANCE = (
     "source-record predicate shape unless an existing predicate family already exposes the record source, recorded "
     "content, and optional target. Useful generic shapes include ledger_entry/2, ledger_entry/3, recorded_in/3, "
     "source_recorded/3, or record_claim/3. Choose one canonical surface and keep it consistent.\n"
+    "- Source-record/provenance predicate role labels must stay structural. Do not propose role labels such as "
+    "text, source_text, text_span, excerpt, display, quote, sentence, raw_text, window_text, or content on "
+    "source_recorded/recorded_in/ledger_entry/source_supports/provenance-like predicates. Use source_coord, "
+    "record_id, assertion_id, subject, status, support_role, source_kind, or target instead, and put the asserted "
+    "meaning in separate typed predicates.\n"
     "- When a source says a person reported, complained, witnessed, certified, or observed a content item, that person "
     "is a reporting/source actor. Do not model the reporter only as the target of the grievance. If the same person is "
     "also punished or affected, use a separate affected_person/2 or grievance_target/2 relation when the profile needs it.\n"
@@ -688,7 +762,7 @@ PROFILE_BOOTSTRAP_REVIEW_GUIDANCE = (
     "coverage-position rows, and correction rows. Do not treat a single generic claim_amount or policy_clause predicate "
     "as sufficient for a dense coverage dispute.\n"
     "- Flag dual-role collapse: if the same entity participates under multiple contracts or legal capacities and the "
-    "profile has no role-scoped predicate, recommend a role/context predicate such as party_role/3, company_role/3, "
+    "profile has no role-scoped predicate, recommend a role/context predicate such as party_role_context/4, company_role/3, "
     "contract_party/4, or dual_role/3.\n"
     "- Flag financial-chain loss: if the source contains gross/net amounts, deductibles, shares, limits, attachment "
     "points, or differences and the profile cannot preserve both values and derivation basis, recommend calculation "
@@ -708,13 +782,66 @@ PROFILE_BOOTSTRAP_REVIEW_GUIDANCE = (
     "profile cannot query the named person, role, and governed source/context separately, recommend a role-bearing "
     "capability such as person_role/3, source_actor_role/4, attended_by/3, compiled_by/3, reviewed_by/3, recorded_by/3, "
     "or a domain-owned equivalent.\n"
+    "- Flag job-title/appositive-role loss: if an incident, inspection, workplace, adjudicative, or investigative "
+    "source identifies a named actor by job title, officer role, supervisor role, or manager title, and the profile "
+    "cannot query person, title/role, organization or context, and supervised/related person when stated, recommend "
+    "person_role/3, actor_role/4, employment_role/4, supervisor_relation/4, or an equivalent compact carrier.\n"
+    "- Flag official-document-wrapper loss: if the source is a public order, court decision, agency notice, filing, "
+    "warning letter, bid-protest decision, settlement, or similar official document and visibly states docket/file "
+    "identifiers, aliases, issuing body, document type/date, disposition/action, opinion or decision form, "
+    "signatory title/office chain, panel or commissioner membership, party/entity locations, numbered footnotes/notes with content, citations in context, or "
+    "attachments/exhibits, but the proposed profile cannot query those wrapper facts as typed rows, recommend "
+    "document_identifier_occurrence/5, document_identifier/3, document_alias/3, document_date/3, document_action/3, "
+    "document_form/3, document_signatory/3, document_signature/5, document_security_listing/5, document_checkbox_provision/5, "
+    "panel_member/4, party_location/4, source_note/4, footnote_content/3, legal_citation_detail/4, or close domain-owned equivalents. "
+    "Do not accept a profile that leaves these surfaces only in source_record text/display rows or source_record_note_anchor rows without note content.\n"
+    "- Flag related-matter wrapper loss: if an official document references a companion case, underlying proceeding, "
+    "permit/application/filing number, prior reference, attached record, or incorporated document, and the profile "
+    "cannot query that referenced matter's identifier plus date/status/action/relationship as typed rows, recommend "
+    "related_document/4, referenced_matter/4, proceeding_identifier/3, document_identifier/3, document_date/3, "
+    "document_action/3, or close equivalents.\n"
+    "- Flag counsel/contact/roster loss: if the source lists named representatives, counsel, contacts, panelists, "
+    "commissioners, reviewers, signatories, or office holders with represented party, office, organization, role, "
+    "or location, and the profile keeps only the main party or body, parent agency, or a generic role row, recommend "
+    "a role-roster carrier such as representative_role/5, counsel_for/5, contact_role/5, panel_member/4, "
+    "document_signatory/3, document_signature/5, or equivalent. The carrier should preserve the exact office or firm separately from the "
+    "represented party when both are stated.\n"
+    "- Flag authority/review-path loss: if the source states jurisdiction, governing statutory authority, forum below, "
+    "underlying proceeding number, reviewed decision, appeal target, or lower-body disposition, and the profile cannot "
+    "query those directly, recommend jurisdiction_basis/3, authority_basis/4, proceeding_below/4, review_path/4, "
+    "reviewed_decision/4, or a close equivalent.\n"
+    "- Flag action-under-review collapse: if an appellate, administrative-review, adjudicative, protest, grievance, "
+    "or board-review source states both an underlying action/status and a reviewing body's outcome, and the profile "
+    "can only query one combined final status, recommend paired or linked surfaces such as action_under_review/5, "
+    "reviewed_action/5, review_outcome/5, item_review_outcome/5, issue_treatment/5, claim_treatment/5, or a close "
+    "equivalent. The underlying rejection/denial/citation/finding/recommendation/order and the later "
+    "affirmance/reversal/modification/remand are different facts.\n"
+    "- Flag list/range inventory loss: if the source lists numbered claims, counts, issues, products, violations, "
+    "requirements, order paragraphs, or item ranges with grounds/bases/statuses, and the profile compresses them into "
+    "a lossy text label or partial member set, recommend list_member/4, claim_range/4, item_ground/5, issue_ground/5, "
+    "violation_basis/5, or equivalent.\n"
+    "- Flag digest/list-entry loss: if the source is a digest, weekly summary, docket list, decision list, notice rollup, "
+    "or table of actions and the profile cannot query each entry's subject/name, identifiers, location, date, official, "
+    "citation, and outcome separately, recommend digest_entry/6, listed_decision/6, action_entry/6, decision_entry/6, "
+    "entry_identifier/4, or a close equivalent.\n"
+    "- Flag period-date loss: if the source states fiscal years, quarters, period ends, balance-sheet dates, report dates, "
+    "or affected accounting periods and the profile keeps only fiscal-year labels without the actual dates and affected "
+    "accounts/items, recommend fiscal_period/4, period_end/3, balance_sheet_date/3, error_period_date/4, "
+    "accounting_error_impact/5, or equivalent.\n"
+    "- Flag argument-treatment loss: if a decision, order, finding, or review document states arguments, objections, "
+    "claims, issues, or defenses and how the decision-maker treated them, but the profile cannot query argument, "
+    "target issue, treatment/disposition, and reason separately, recommend argument_treatment/5, issue_treatment/5, "
+    "finding_detail/4, claim_treatment/5, or equivalent.\n"
     "- Flag source-coordinate provenance loss: if the source states that a named section, source row, note, document, "
     "report, correspondence item, or evidence item is the source, support, record, basis, or corroboration for a "
     "semantic assertion/status/access/control/finding, and the proposed profile cannot query both the governed "
     "semantic subject/assertion and the source coordinate separately, recommend a source-coordinate provenance "
     "capability whose argument slots can be filled from source-stated values, such as claim_source/4, "
     "assertion_source/4, fact_source/4, source_supports/4, recorded_in/3, or a close domain-owned equivalent. Do not "
-    "recommend id-only provenance predicates that require an invented claim id when no source id exists.\n"
+    "recommend id-only provenance predicates that require an invented claim id when no source id exists. Also reject "
+    "provenance/source-record predicates that include copied source prose or role labels such as text, source_text, "
+    "text_span, excerpt, display, quote, sentence, raw_text, window_text, or content; provenance locates a typed "
+    "assertion and must not become a prose carrier.\n"
     "- Flag overfit predicate drift: a profile that invents many one-off surface verbs instead of reusable record/property "
     "families may be hard to query and should be retried.\n"
     "- Flag over-compression: if a story-world profile preserves source-local names but drops ownership/design, event "
@@ -846,6 +973,36 @@ def build_profile_bootstrap_review_messages(
 
 
 _ARG_ROLE_RE = re.compile(r"^[a-z][a-z0-9_]{0,31}$")
+_PROSE_BEARING_ARG_ROLES = {
+    "content",
+    "content_text",
+    "display",
+    "display_text",
+    "excerpt",
+    "quote",
+    "raw",
+    "raw_text",
+    "sentence",
+    "source_excerpt",
+    "source_text",
+    "text",
+    "text_display",
+    "text_span",
+    "window_text",
+}
+_PROVENANCE_NAME_TERMS = (
+    "assertion_source",
+    "claim_source",
+    "fact_source",
+    "ledger_entry",
+    "provenance",
+    "record_claim",
+    "recorded",
+    "recorded_in",
+    "source_record",
+    "source_support",
+    "source_supports",
+)
 
 
 def _normalize_profile_bootstrap_arg_roles(parsed: dict[str, Any]) -> dict[str, Any]:
@@ -926,6 +1083,8 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             "recommendation_chain_slot_loss_refs": [],
             "violation_category_slot_loss_count": 0,
             "violation_category_slot_loss_refs": [],
+            "list_range_inventory_slot_loss_count": 0,
+            "list_range_inventory_slot_loss_refs": [],
             "repeated_structure_count": 0,
             "repeated_structure_unknown_predicate_refs": [],
             "repeated_structure_id_only_record_refs": [],
@@ -933,6 +1092,12 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             "repeated_structure_lookup_property_refs": [],
             "candidate_signature_arg_mismatch_count": 0,
             "candidate_signature_arg_mismatch_refs": [],
+            "candidate_duplicate_name_arity_count": 0,
+            "candidate_duplicate_name_arity_refs": [],
+            "governed_carrier_arg_role_mismatch_count": 0,
+            "governed_carrier_arg_role_mismatch_refs": [],
+            "provenance_prose_arg_role_count": 0,
+            "provenance_prose_arg_role_refs": [],
             "rough_score": 0.0,
         }
     schema_ok = parsed.get("schema_version") == "profile_bootstrap_v1"
@@ -942,12 +1107,17 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
     generic_names = {"event_occurred", "policy_constraint", "candidate_relation", "related_to", "has_relation"}
     generic_predicate_count = 0
     predicate_args_by_signature: dict[str, list[str]] = {}
+    signatures_by_name: dict[str, set[str]] = {}
     candidate_signature_arg_mismatch_refs: list[str] = []
+    governed_carrier_arg_role_mismatch_refs: list[str] = []
+    provenance_prose_arg_role_refs: list[str] = []
     recommendation_chain_candidate_refs: list[str] = []
     violation_category_candidate_refs: list[str] = []
     violation_category_fallback_refs: list[str] = []
+    list_range_inventory_candidate_refs: list[str] = []
     has_recommendation_chain_recipient_slot = False
     has_violation_category_carrier = False
+    has_list_range_inventory_carrier = False
     for item in predicates:
         signature = str(item.get("signature", ""))
         name = signature.split("/", 1)[0].strip().casefold()
@@ -955,6 +1125,7 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             generic_predicate_count += 1
         signature_key = _signature_key(signature)
         if signature_key:
+            signatures_by_name.setdefault(name, set()).add(signature_key)
             args = [
                 str(arg).strip().casefold()
                 for arg in item.get("args", [])
@@ -964,6 +1135,15 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
             declared_arity = _signature_arity(signature_key)
             if declared_arity is not None and declared_arity != len(args):
                 candidate_signature_arg_mismatch_refs.append(f"{signature_key}:args={len(args)}")
+            contract = carrier_contract(signature_key)
+            expected_args = contract.get("args") if isinstance(contract, dict) else None
+            if isinstance(expected_args, list) and args != [str(arg).casefold() for arg in expected_args]:
+                governed_carrier_arg_role_mismatch_refs.append(
+                    f"{signature_key}:args={','.join(args)} expected={','.join(str(arg) for arg in expected_args)}"
+                )
+            prose_roles = _prose_bearing_provenance_roles(name=name, args=args)
+            if prose_roles:
+                provenance_prose_arg_role_refs.append(f"{signature_key}:args={','.join(prose_roles)}")
             if _has_recommendation_chain_recipient_role(args):
                 has_recommendation_chain_recipient_slot = True
             if _is_recommendation_chain_candidate(name=name, args=args):
@@ -974,6 +1154,10 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
                 violation_category_candidate_refs.append(signature_key)
             elif _is_violation_category_context_candidate(name=name, args=args):
                 violation_category_fallback_refs.append(signature_key)
+            if _is_list_range_inventory_carrier(name=name, args=args):
+                has_list_range_inventory_carrier = True
+            if _is_lossy_list_range_inventory_candidate(name=name, args=args):
+                list_range_inventory_candidate_refs.append(signature_key)
     proposed_signatures = {_signature_key(str(item.get("signature", ""))) for item in predicates}
     proposed_signatures.discard("")
     risk_count = len([item for item in parsed.get("admission_risks", []) if str(item).strip()])
@@ -1020,6 +1204,13 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
     repeated_role_mismatch_refs = sorted(set(repeated_role_mismatch_refs))
     repeated_lookup_property_refs = sorted(set(repeated_lookup_property_refs))
     candidate_signature_arg_mismatch_refs = sorted(set(candidate_signature_arg_mismatch_refs))
+    duplicate_name_arity_refs = [
+        f"{name}:{','.join(sorted(signatures))}"
+        for name, signatures in sorted(signatures_by_name.items())
+        if name and len(signatures) > 1
+    ]
+    governed_carrier_arg_role_mismatch_refs = sorted(set(governed_carrier_arg_role_mismatch_refs))
+    provenance_prose_arg_role_refs = sorted(set(provenance_prose_arg_role_refs))
     recommendation_chain_slot_loss_refs = sorted(set(recommendation_chain_candidate_refs))
     if has_recommendation_chain_recipient_slot:
         recommendation_chain_slot_loss_refs = []
@@ -1028,11 +1219,19 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         violation_category_slot_loss_refs = sorted(set(violation_category_candidate_refs))
         if not violation_category_slot_loss_refs:
             violation_category_slot_loss_refs = sorted(set(violation_category_fallback_refs))
+    list_range_inventory_slot_loss_refs = sorted(set(list_range_inventory_candidate_refs))
+    if has_list_range_inventory_carrier:
+        list_range_inventory_slot_loss_refs = []
     specificity_score = 1.0 - min(generic_predicate_count, max(1, predicate_count)) / max(1, predicate_count)
     frontier_consistency = 1.0 if not unknown_frontier_refs else 0.0
     repeated_structure_score = min(len(repeated_structures), 2) / 2
     repeated_consistency = 1.0 if not (repeated_unknown_refs or repeated_id_only_record_refs or repeated_role_mismatch_refs) else 0.0
-    candidate_schema_consistency = 1.0 if not candidate_signature_arg_mismatch_refs else 0.0
+    candidate_schema_consistency = 1.0 if not (
+        candidate_signature_arg_mismatch_refs
+        or duplicate_name_arity_refs
+        or governed_carrier_arg_role_mismatch_refs
+        or provenance_prose_arg_role_refs
+    ) else 0.0
     rough_score = (
         (1 if schema_ok else 0)
         + min(entity_count, 4) / 4
@@ -1056,6 +1255,8 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "recommendation_chain_slot_loss_refs": recommendation_chain_slot_loss_refs,
         "violation_category_slot_loss_count": len(violation_category_slot_loss_refs),
         "violation_category_slot_loss_refs": violation_category_slot_loss_refs,
+        "list_range_inventory_slot_loss_count": len(list_range_inventory_slot_loss_refs),
+        "list_range_inventory_slot_loss_refs": list_range_inventory_slot_loss_refs,
         "repeated_structure_count": len(repeated_structures),
         "repeated_structure_unknown_predicate_refs": repeated_unknown_refs,
         "repeated_structure_id_only_record_refs": repeated_id_only_record_refs,
@@ -1063,10 +1264,34 @@ def profile_bootstrap_score(parsed: dict[str, Any] | None) -> dict[str, Any]:
         "repeated_structure_lookup_property_refs": repeated_lookup_property_refs,
         "candidate_signature_arg_mismatch_count": len(candidate_signature_arg_mismatch_refs),
         "candidate_signature_arg_mismatch_refs": candidate_signature_arg_mismatch_refs,
+        "candidate_duplicate_name_arity_count": len(duplicate_name_arity_refs),
+        "candidate_duplicate_name_arity_refs": duplicate_name_arity_refs,
+        "governed_carrier_arg_role_mismatch_count": len(governed_carrier_arg_role_mismatch_refs),
+        "governed_carrier_arg_role_mismatch_refs": governed_carrier_arg_role_mismatch_refs,
+        "provenance_prose_arg_role_count": len(provenance_prose_arg_role_refs),
+        "provenance_prose_arg_role_refs": provenance_prose_arg_role_refs,
         "risk_count": risk_count,
         "frontier_case_count": frontier_count,
         "rough_score": round(float(rough_score), 3),
     }
+
+
+def _prose_bearing_provenance_roles(*, name: str, args: list[str]) -> list[str]:
+    if not args:
+        return []
+    name_text = str(name or "").casefold()
+    if not any(term in name_text for term in _PROVENANCE_NAME_TERMS):
+        return []
+    return [
+        role
+        for role in args
+        if role in _PROSE_BEARING_ARG_ROLES
+        or role.endswith("_text")
+        or role.endswith("_display")
+        or role.endswith("_excerpt")
+        or role.endswith("_quote")
+        or role.endswith("_span")
+    ]
 
 
 def profile_bootstrap_allowed_predicates(parsed: dict[str, Any] | None) -> list[str]:
@@ -1335,6 +1560,59 @@ def _is_regulatory_violation_profile(parsed: dict[str, Any]) -> bool:
     return any(marker in surface for marker in regulatory_markers) and any(
         marker in surface for marker in violation_markers
     )
+
+
+def _is_list_range_inventory_carrier(*, name: str, args: list[str]) -> bool:
+    name_text = str(name or "").casefold()
+    args_text = " ".join(str(arg or "").casefold() for arg in args)
+    if name_text in {"list_member", "claim_range", "item_range", "issue_range", "count_range"}:
+        return True
+    if any(marker in name_text for marker in ("member", "range", "inventory")) and any(
+        marker in args_text for marker in ("item", "claim", "count", "issue", "number", "start", "end", "member")
+    ):
+        return True
+    if any(marker in name_text for marker in ("item_ground", "issue_ground", "violation_basis", "claim_rejection")):
+        return True
+    return False
+
+
+def _is_lossy_list_range_inventory_candidate(*, name: str, args: list[str]) -> bool:
+    name_text = str(name or "").casefold()
+    args_text = " ".join(str(arg or "").casefold() for arg in args)
+    if _is_list_range_inventory_carrier(name=name_text, args=args):
+        return False
+    list_surface = any(
+        marker in name_text or marker in args_text
+        for marker in (
+            "claim_range",
+            "item_range",
+            "number_range",
+            "count_range",
+            "claims",
+            "items",
+            "violations",
+            "requirements",
+            "paragraphs",
+        )
+    )
+    outcome_surface = any(
+        marker in name_text or marker in args_text
+        for marker in (
+            "action",
+            "basis",
+            "denial",
+            "denied",
+            "disposition",
+            "finding",
+            "ground",
+            "outcome",
+            "rejected",
+            "rejection",
+            "status",
+            "treatment",
+        )
+    )
+    return list_surface and outcome_surface
 
 
 def _profile_bootstrap_text_surface(parsed: dict[str, Any]) -> str:

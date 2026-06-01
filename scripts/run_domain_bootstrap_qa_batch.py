@@ -70,6 +70,11 @@ def parse_args() -> argparse.Namespace:
         help="Per-call timeout multiplier. Default 0 means max(1, lanes).",
     )
     parser.add_argument("--no-evidence-bundle", action="store_true")
+    parser.add_argument(
+        "--evidence-bundle-no-context-filter",
+        action="store_true",
+        help="Execute evidence-bundle plan queries without using the plan to compact the main query-planner context.",
+    )
     parser.add_argument("--no-classify-failure-surfaces", action="store_true")
     parser.add_argument("--no-cache", action="store_true", help="Pass through to QA runner for fresh hosted calls.")
     parser.add_argument(
@@ -99,6 +104,31 @@ def parse_args() -> argparse.Namespace:
         default=[],
         help="Pass through to QA runner. Repeat to disable multiple support predicates.",
     )
+    parser.add_argument(
+        "--sign-clean-strict",
+        action="store_true",
+        help="Pass through to QA runner: disable Python source-record/free-text helper routing and exact shortcuts. This is the default claim path.",
+    )
+    parser.add_argument(
+        "--allow-non-sign-clean-free-text-routing",
+        dest="sign_clean_strict",
+        action="store_false",
+        help=(
+            "Forensic replay mode: pass through to QA runner to re-enable retired source-record/free-text "
+            "helper routing. Runs using this flag are not sign-clean score evidence."
+        ),
+    )
+    parser.add_argument(
+        "--typed-support-companions",
+        action="store_true",
+        help="Pass through experimental typed support companions for guarded row-local probes.",
+    )
+    parser.add_argument(
+        "--atom-library-query-grounding",
+        action="store_true",
+        help="Pass through experimental shared-atom query grounding.",
+    )
+    parser.set_defaults(sign_clean_strict=True)
     parser.add_argument("--summarize-existing", action="store_true", help="Summarize latest existing QA artifacts without running jobs.")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--out-json", type=Path, default=None)
@@ -133,12 +163,16 @@ def main() -> int:
             limit=int(args.limit),
             timeout=effective_timeout,
             evidence_bundle=not bool(args.no_evidence_bundle),
+            evidence_bundle_context_filter=not bool(args.evidence_bundle_no_context_filter),
             classify_failure_surfaces=not bool(args.no_classify_failure_surfaces),
             cache=not bool(args.no_cache),
             compatibility_adapter_row_limit=args.compatibility_adapter_row_limit,
             include_retired_native_compatibility_adapters=bool(args.include_retired_native_compatibility_adapters),
             disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
             disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
+            sign_clean_strict=bool(args.sign_clean_strict),
+            typed_support_companions=bool(args.typed_support_companions),
+            atom_library_query_grounding=bool(args.atom_library_query_grounding),
             openrouter_provider_order=str(args.openrouter_provider_order or ""),
             openrouter_provider_only=str(args.openrouter_provider_only or ""),
             openrouter_provider_ignore=str(args.openrouter_provider_ignore or ""),
@@ -231,12 +265,16 @@ def _build_command(
     limit: int,
     timeout: int,
     evidence_bundle: bool,
+    evidence_bundle_context_filter: bool = True,
     classify_failure_surfaces: bool,
     cache: bool = True,
     compatibility_adapter_row_limit: int | None = 0,
     include_retired_native_compatibility_adapters: bool = False,
     disable_current_source_record_summaries: bool = False,
     disabled_support_predicates: tuple[str, ...] = (),
+    sign_clean_strict: bool = False,
+    typed_support_companions: bool = False,
+    atom_library_query_grounding: bool = False,
     openrouter_provider_order: str = "",
     openrouter_provider_only: str = "",
     openrouter_provider_ignore: str = "",
@@ -289,8 +327,16 @@ def _build_command(
         command.append("--disable-current-source-record-summaries")
     for predicate in disabled_support_predicates:
         command.extend(["--disable-support-predicate", predicate])
+    if sign_clean_strict:
+        command.append("--sign-clean-strict")
+    if typed_support_companions:
+        command.append("--typed-support-companions")
+    if atom_library_query_grounding:
+        command.append("--atom-library-query-grounding")
     if evidence_bundle:
-        command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan", "--evidence-bundle-context-filter"])
+        command.extend(["--evidence-bundle-plan", "--execute-evidence-bundle-plan"])
+        if evidence_bundle_context_filter:
+            command.append("--evidence-bundle-context-filter")
     return command
 
 

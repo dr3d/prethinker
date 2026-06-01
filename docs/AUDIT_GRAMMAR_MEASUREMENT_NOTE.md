@@ -2,6 +2,14 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset context. Do not cite the score claims in this
+> document as current. After the May 29 to June 1 sign-clean reset, the current
+> claim-bearing hard-clean floor is `73 / 200` (`36.5%`) on the 8-fixture
+> English batch. Current direction is documented in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 This note captures the current public measurement claim for Prethinker. It is
 not a benchmark leaderboard. It is a disciplined snapshot of the instrument as
 measured across native, fresh ugly public, sealed unseen, real-world, and older
@@ -86,23 +94,18 @@ runtime writes rescue weak compiles.
 
 ## Artifact Pointers
 
-- Native restamp worksheet: `docs/NATIVE_RESTAMP_WORKSHEET.md`
+- Retired detailed worksheets:
+  `C:\prethinker_tmp_archive\docs_worksheet_archive_20260601`
 - Real-world fixture inputs:
   `datasets/real_world_transfer/20260521`
 - Fresh ugly public Batch 03 fixture inputs:
   `datasets/real_world_transfer/fresh_ugly_public_20260524_03`
-- Fresh ugly public transfer worksheet:
-  `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
-- Fresh ugly public 2026-05-28 worksheet:
-  `docs/FRESH_UGLY_PUBLIC_20260528_WORKSHEET.md`
 - Sealed unseen fixture inputs:
   `datasets/sealed_unseen/20260521`
 - Native compile summary:
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_compile_stamp_20260522_current_summary.json`
 - Native QA summary:
   `C:\prethinker_tmp_archive\tmp_hot_artifacts_unload_20260522\native_corpus_full_qa_stamp_20260522_openrouter6_summary.json`
-- Fresh ugly public transfer worksheet:
-  `docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md`
 - Current fresh fixture request spec:
   `docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md`
 - Retired sealed-unseen worksheet in the local cold archive:

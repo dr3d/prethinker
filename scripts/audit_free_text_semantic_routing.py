@@ -95,6 +95,8 @@ class FreeTextRouteHit:
     operation: str
     subject: str
     rationale: str
+    claim_path: bool
+    disposition: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -138,14 +140,21 @@ def build_report(paths: tuple[Path, ...], *, max_rows: int = 500) -> dict[str, A
     for hit in hits:
         category_counts[hit.category] = category_counts.get(hit.category, 0) + 1
         file_counts[hit.file] = file_counts.get(hit.file, 0) + 1
+    claim_hits = [hit for hit in hits if hit.claim_path]
+    legacy_hits = [hit for hit in hits if not hit.claim_path]
     rows = [asdict(hit) for hit in sorted(hits, key=lambda row: (row.file, row.line, row.function))[:max_rows]]
     return {
         "schema_version": "free_text_semantic_routing_audit_v1",
-        "scope": "active Python runtime files; docs/tests/datasets excluded unless explicitly passed",
+        "scope": (
+            "active Python runtime files; docs/tests/datasets excluded unless explicitly passed; "
+            "claim-path status separates default strict QA from explicit forensic/structural legacy paths"
+        ),
         "summary": {
-            "status": "fail" if hits else "pass",
+            "status": "fail" if claim_hits else "pass",
             "file_count": len(files),
             "hit_count": len(hits),
+            "claim_path_hit_count": len(claim_hits),
+            "forensic_or_structural_hit_count": len(legacy_hits),
             "parse_error_count": len(parse_errors),
             "category_counts": dict(sorted(category_counts.items())),
             "file_counts": dict(sorted(file_counts.items())),
@@ -233,6 +242,7 @@ class _Visitor(ast.NodeVisitor):
         subject: str,
         rationale: str,
     ) -> None:
+        claim_path, disposition = _claim_path_disposition(file=_display_path(self.path), function=function)
         self.hits.append(
             FreeTextRouteHit(
                 file=_display_path(self.path),
@@ -242,6 +252,8 @@ class _Visitor(ast.NodeVisitor):
                 operation=operation,
                 subject=subject,
                 rationale=rationale,
+                claim_path=claim_path,
+                disposition=disposition,
             )
         )
 
@@ -285,8 +297,79 @@ def _is_structural_membership_subject(subject: str) -> bool:
         "generic_query_placeholders",
         "display_vars",
         "seen",
+        "item.get('role')",
+        'item.get("role")',
+        "soft_out_of_range_question_support_indexes",
+        "_prose_bearing_arg_roles",
     }
     return any(marker in text for marker in structural_markers)
+
+
+def _claim_path_disposition(*, file: str, function: str) -> tuple[bool, str]:
+    """Classify whether a hit belongs to the default strict score path.
+
+    This is intentionally narrow: the old source-record/free-text QA companion
+    stack remains visible as debt, but it is not claim-path evidence now that
+    strict QA is the default and non-strict routing requires an explicit
+    forensic opt-in. Hits outside these reviewed buckets still block claims.
+    """
+
+    normalized_file = file.replace("/", "\\")
+    if normalized_file == r"src\source_record_ledger.py" and function == "extract_source_record_ledger":
+        return False, "structural_source_record_ledger_parser"
+    if normalized_file == r"src\kb_pipeline_clean\parity_harness.py":
+        return False, "parity_harness_payload_kind_normalization"
+    if normalized_file == r"src\mcp_server.py" and function in {
+        "_normalize_clarification_answer",
+        "_clarification_family_relation_drift",
+    }:
+        return False, "clarification_control_plane_not_score_path"
+    if normalized_file == r"scripts\run_domain_bootstrap_qa.py" and _qa_function_is_forensic_legacy(function):
+        return False, "explicit_non_sign_clean_forensic_qa_surface"
+    return True, "claim_path_blocker"
+
+
+def _qa_function_is_forensic_legacy(function: str) -> bool:
+    prefixes = (
+        "_source_record",
+        "_source_text",
+        "_asks_for_source_record",
+        "_current_state_source_text",
+        "_source_field_question",
+        "_source_section_question",
+        "_source_label_question",
+        "_clinic",
+        "_grant_award",
+    )
+    exact = {
+        "_is_temporal_source_text_question",
+        "_is_quantity_source_text_question",
+        "_utterance_asks_for_count",
+        "_count_scope_tokens",
+        "_display_phrase_contains_reference",
+        "_numeric_measure_reference_supported_by_display_results",
+        "_negative_reference_supported_by_results",
+        "_agreement_counterparty_reference_supported_by_results",
+        "_event_date_range_reference_supported_by_results",
+        "_speaker_name_from_why_question",
+        "_turn_section_targets_from_utterance",
+        "_looks_like_source_record_person_label",
+        "_parenthetical_role_name_reference_chunk_matches_entry",
+        "_parenthetical_role_name_reference_chunks",
+        "_source_display_ascii_tokens",
+        "_source_rows_matching_query_tokens",
+        "_display_source_record_section_label",
+        "_asks_source_record_numeric_range",
+        "_display_case_identifier_atom",
+        "_display_source_record_exhibit",
+        "_compiled_value_set_target_tokens",
+        "_best_source_record_field_for_tokens",
+        "_numeric_unit_ranges_from_text_atom",
+        "_vote_threshold_from_query_results",
+        "_reference_count_tokens",
+        "_without_source_reference_stop_tokens",
+    }
+    return function in exact or function.startswith(prefixes)
 
 
 def _call_leaf(call_name: str) -> str:
@@ -332,18 +415,35 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Schema: `{report.get('schema_version')}`",
         f"- Status: `{summary.get('status')}`",
         f"- Hits: `{summary.get('hit_count')}`",
+        f"- Claim-path hits: `{summary.get('claim_path_hit_count')}`",
+        f"- Forensic/structural hits: `{summary.get('forensic_or_structural_hit_count')}`",
         f"- Parse errors: `{summary.get('parse_error_count')}`",
         f"- Category counts: `{summary.get('category_counts')}`",
         "",
         "## Meaning",
         "",
-        "A hit means active Python appears to pattern-match or tokenize prose-like fields.",
-        "This blocks sign-clean score claims until the path is removed, proven structural, or moved behind an explicit reviewed allowlist.",
+        "A claim-path hit means default strict QA can still pattern-match or tokenize prose-like fields.",
+        "Forensic/structural hits remain visible debt, but do not support sign-clean score claims unless the run explicitly opts out of strict mode.",
     ]
     rows = report.get("rows", [])
-    if rows:
+    claim_rows = [row for row in rows if row.get("claim_path")]
+    legacy_rows = [row for row in rows if not row.get("claim_path")]
+    if claim_rows:
+        lines.extend(["", "## Claim-Path Blocking Rows", "", "| File | Line | Function | Category | Operation | Subject |", "| --- | ---: | --- | --- | --- | --- |"])
+        for row in claim_rows[:80]:
+            lines.append(
+                "| `{}` | {} | `{}` | `{}` | `{}` | `{}` |".format(
+                    row.get("file", ""),
+                    row.get("line", ""),
+                    row.get("function", ""),
+                    row.get("category", ""),
+                    row.get("operation", ""),
+                    _md_cell(str(row.get("subject", ""))[:120]),
+                )
+            )
+    if legacy_rows:
         lines.extend(["", "## Rows", "", "| File | Line | Function | Category | Operation | Subject |", "| --- | ---: | --- | --- | --- | --- |"])
-        for row in rows[:80]:
+        for row in legacy_rows[:80]:
             lines.append(
                 "| `{}` | {} | `{}` | `{}` | `{}` | `{}` |".format(
                     row.get("file", ""),

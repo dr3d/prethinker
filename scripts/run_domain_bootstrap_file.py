@@ -28,6 +28,8 @@ DEFAULT_OUT_DIR = REPO_ROOT / "tmp" / "domain_bootstrap_file"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from src.carrier_contract_registry import carrier_contract, carrier_contract_prompt_lines
+
 PROFILE_ADMISSION_TOKEN_RE = re.compile(r"[a-z0-9]+")
 PROFILE_ADMISSION_DATE_RE = re.compile(r"\b(?:v_)?\d{4}[-_]\d{2}[-_]\d{2}\b")
 PROFILE_ADMISSION_FULL_DATE_ATOM_RE = re.compile(r"(?:^|[_\-\s])(?:v_)?(?:19|20)\d{2}[_\-]?[01]\d[_\-]?[0-3]\d(?:[_\-\s]|$)")
@@ -553,6 +555,197 @@ SOURCE_PASS_OPS_JSON_SCHEMA: dict[str, Any] = {
     },
 }
 
+GOVERNED_SUBJECT_MANIFEST_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "subjects", "self_check"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "governed_subject_manifest_v1"},
+        "subjects": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "subject_id",
+                    "kind",
+                    "ranges",
+                    "ground",
+                    "legal_citations",
+                    "review_outcomes",
+                    "omitted_companions",
+                ],
+                "properties": {
+                    "subject_id": {"type": "string", "maxLength": 80},
+                    "kind": {"type": "string", "maxLength": 80},
+                    "ranges": {
+                        "type": "array",
+                        "maxItems": 24,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["start", "end", "source_or_scope"],
+                            "properties": {
+                                "start": {"type": "string", "maxLength": 40},
+                                "end": {"type": "string", "maxLength": 40},
+                                "source_or_scope": {"type": "string", "maxLength": 80},
+                            },
+                        },
+                    },
+                    "ground": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "required": ["present", "theory", "reference", "status", "source_or_scope"],
+                        "properties": {
+                            "present": {"type": "boolean"},
+                            "theory": {"type": "string", "maxLength": 80},
+                            "reference": {"type": "string", "maxLength": 80},
+                            "status": {"type": "string", "maxLength": 80},
+                            "source_or_scope": {"type": "string", "maxLength": 80},
+                        },
+                    },
+                    "legal_citations": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["citation", "role", "source_or_scope"],
+                            "properties": {
+                                "citation": {"type": "string", "maxLength": 80},
+                                "role": {"type": "string", "maxLength": 80},
+                                "source_or_scope": {"type": "string", "maxLength": 80},
+                            },
+                        },
+                    },
+                    "review_outcomes": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["reviewer", "outcome", "source_or_scope"],
+                            "properties": {
+                                "reviewer": {"type": "string", "maxLength": 80},
+                                "outcome": {"type": "string", "maxLength": 80},
+                                "source_or_scope": {"type": "string", "maxLength": 80},
+                            },
+                        },
+                    },
+                    "omitted_companions": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {"type": "string", "maxLength": 160},
+                    },
+                },
+            },
+        },
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["missing_subjects", "notes"],
+            "properties": {
+                "missing_subjects": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 160}},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 160}},
+            },
+        },
+    },
+}
+
+GOVERNED_SUBJECT_ATOM_ROWS_JSON_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["schema_version", "rows", "self_check"],
+    "properties": {
+        "schema_version": {"type": "string", "const": "governed_subject_atom_rows_v1"},
+        "rows": {
+            "type": "array",
+            "maxItems": 48,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["signature", "args", "source_or_scope"],
+                "properties": {
+                    "signature": {
+                        "type": "string",
+                        "enum": [
+                            "claim_range/4",
+                            "claim_ground/4",
+                            "legal_citation_detail/4",
+                            "review_outcome/4",
+                            "list_member/4",
+                            "item_range/4",
+                        ],
+                    },
+                    "args": {
+                        "type": "array",
+                        "minItems": 4,
+                        "maxItems": 4,
+                        "items": {"type": "string", "maxLength": 100},
+                    },
+                    "source_or_scope": {"type": "string", "maxLength": 100},
+                },
+            },
+        },
+        "subject_accounts": {
+            "type": "array",
+            "maxItems": 24,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["subject_id", "companion_statuses"],
+                "properties": {
+                    "subject_id": {"type": "string", "maxLength": 100},
+                    "companion_statuses": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["signature", "status", "reason"],
+                            "properties": {
+                                "signature": {
+                                    "type": "string",
+                                    "enum": [
+                                        "claim_range/4",
+                                        "claim_ground/4",
+                                        "legal_citation_detail/4",
+                                        "review_outcome/4",
+                                        "list_member/4",
+                                        "item_range/4",
+                                    ],
+                                },
+                                "status": {
+                                    "type": "string",
+                                    "enum": ["instances", "none_found", "uncertain", "not_applicable"],
+                                },
+                                "reason": {"type": "string", "maxLength": 160},
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        "self_check": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": ["missing_subjects", "notes"],
+            "properties": {
+                "missing_subjects": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 160}},
+                "notes": {"type": "array", "maxItems": 8, "items": {"type": "string", "maxLength": 160}},
+            },
+        },
+    },
+}
+
+GOVERNED_SUBJECT_ATOM_ROW_PREDICATES: set[str] = {
+    "claim_range",
+    "claim_ground",
+    "legal_citation_detail",
+    "review_outcome",
+}
+
 POLICY_INCIDENT_SOURCE_COMPILER_CONTEXT_V1 = [
     "policy_incident_source_compiler_strategy_v1: Use this for sources classified by the LLM intake plan or domain hint as policy, compliance, incident, operations log, regulatory record, timeline, or municipal/organizational procedure.",
     "Policy incident rule: separate standing rules from observed incident facts. A threshold, deadline, required role, exception, or validity condition is not the same kind of state as a timestamped reading, notification, outage, authorization, correction, or review statement.",
@@ -743,6 +936,15 @@ COMPILE_SURFACE_INVARIANT_CONTEXT_V1 = [
     "compile_surface_invariant_strategy_v1: Source-record ledgers preserve fidelity, but recurring answer-bearing surfaces should also be proposed as direct candidate_operations when the allowed profile has compatible predicates.",
     "Compile surface invariant rule: if the source states people or organizations in roles, preserve the role-bound relation directly. Keep recorder, operator, holder, claimant, approver, recommender, witness, owner, and authority roles distinct when compatible predicates exist.",
     "Compile surface invariant rule: source/header/signature/correspondence lines that state a person plus role, office, institution, attendance duty, compiler/reviewer duty, or record-author/recorder duty should become direct role-bearing rows when compatible predicates exist. Do not leave the only role evidence inside source_record_text_atom/2.",
+    "Compile surface invariant rule: official-document wrapper facts are answer-bearing. When compatible predicates exist, preserve docket/file/accession identifiers and aliases, issuing body, document type, issue/report/decision date, disposition or action, opinion/decision form such as per curiam or precedential status, signatory/title/office chain, panel or commissioner membership, party/entity role plus location/address, numbered footnotes/notes with their content, cited authority context, and attachments/exhibits as direct typed rows. Source-record display rows and source_record_note_anchor rows are provenance, not delivery.",
+    "Compile surface invariant rule: official documents often contain answer-bearing referenced matters. Preserve companion cases, underlying proceedings, permit/application/filing numbers, prior references, attached records, and incorporated documents as typed rows with stated identifier, date, status/action, and relationship to the main document when stated.",
+    "Compile surface invariant rule: legal, regulatory, procurement, enforcement, appellate, and review documents need direct authority and review-path rows when stated. Preserve jurisdiction/authority basis, governing statute or rule, forum/body below, underlying proceeding number, appeal/review target, lower-body disposition, and final reviewed action as typed rows rather than leaving them inside source-record prose.",
+    "Compile surface invariant rule: appellate, administrative-review, adjudicative, protest, grievance, and board-review sources need the underlying action under review preserved separately from the reviewing outcome. When the source states that a lower body, examiner, agency, reviewer, committee, staff, or board rejected, denied, cited, found, recommended, or ordered something, and another body later affirmed, reversed, modified, vacated, remanded, or sustained it, emit typed rows for both layers when compatible predicates exist. Reuse the same governed item/claim/issue/action atom across the underlying-action row and review-outcome row. Do not encode the underlying rejection or denial only as a final affirmed status, and do not encode the final outcome only as a source-record display.",
+    "Compile surface invariant rule: counsel blocks, contacts, representatives, reviewers, commissioners, panelists, and signatory blocks are typed rosters. Preserve every named person with role, represented party or office, organization, and location when stated; do not collapse the block to only the main named party or issuing body.",
+    "Compile surface invariant rule: numbered claims, counts, issues, products, violations, requirements, order paragraphs, and item ranges need complete typed inventories with group-to-ground/basis/status relationships when stated. Do not compress ranges or lists into lossy summaries if the profile can express members, ranges, or grounds.",
+    "Compile surface invariant rule: agency digests, weekly summaries, docket lists, decision lists, notice rollups, and tables of actions are repeated structured entries. Preserve each entry's subject/name, case or file numbers, location, decision/action date, deciding official or role-holder, citation/volume number, and outcome when stated. Do not leave an entry only as source_attributed_claim text or a source-record paragraph.",
+    "Compile surface invariant rule: financial filings, restatements, accounting-error notices, rate tables, insurance schedules, and other periodized sources need typed period-date rows. Preserve fiscal year, quarter, period-end date, balance-sheet date, report date, affected account/line item, and error/category relationship when stated. Do not leave source-stated dates only in source_record_date_alias or inside a broad declaration atom.",
+    "Compile surface invariant rule: adjudicative, investigative, review, and enforcement documents need argument-treatment rows when stated. Preserve who raised an argument/objection/claim, the target issue or item, the treatment/disposition, and the stated reason separately when compatible predicates exist.",
     "Compile surface preservation rule: invariant-specific rows are additive and must not replace already-needed concrete typed rows. When preserving a new surface, keep direct backbone rows for rules, events, votes/choices, measurements, source authority, participant statements, corrections, lifecycle/status, and domain-specific admissible predicates. A replay compile that gains one surface while dropping typed backbone predicate families is not acceptable.",
     "Compile surface invariant rule: if the source has sections, titles, headings, chronology labels, basis language, or explicit absence/negative-inference statements, preserve source addressability as queryable rows rather than only source_record text.",
     "Compile surface invariant rule: when a record, order, claim, exhibit, item, event, or document is listed in, filed under, reproduced in, referenced by, or contained by a section/source layer, preserve the relation between the subject id and the section/source coordinate directly when compatible predicates exist.",
@@ -973,6 +1175,30 @@ def parse_args() -> argparse.Namespace:
         help="Prompt target for candidate_operations emitted by the compact retry for an unparseable focused pass.",
     )
     parser.add_argument(
+        "--profile-list-range-self-check-followup",
+        action="store_true",
+        help=(
+            "Experimental: if the list/range repair pass reports self_check.missing_slots, run one bounded "
+            "source-grounded completion pass for those missing typed rows."
+        ),
+    )
+    parser.add_argument(
+        "--profile-list-range-omission-followup",
+        action="store_true",
+        help=(
+            "Experimental: after governed companion health is attached, run one bounded source-grounded "
+            "completion pass for list/range omission-ledger rows."
+        ),
+    )
+    parser.add_argument(
+        "--profile-registered-carrier-omission-followup",
+        action="store_true",
+        help=(
+            "Experimental: after registered-carrier delivery accountability is attached, run one bounded "
+            "source-grounded completion pass for accountability-required registered carriers with zero emitted rows."
+        ),
+    )
+    parser.add_argument(
         "--focused-pass-ops-schema",
         action="store_true",
         help=(
@@ -1017,6 +1243,166 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Experimental: after an initial source compile, run one bounded proposal-only repair pass when "
             "profile-delivery diagnostics show offered direct carriers with missing emitted rows."
+        ),
+    )
+    parser.add_argument(
+        "--profile-role-roster-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass for "
+            "typed role/roster rows such as counsel, representatives, signatories, contacts, and job titles."
+        ),
+    )
+    parser.add_argument(
+        "--profile-identifier-occurrence-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass for "
+            "source-stated identifier occurrences such as docket, file, accession, control, FEI, CMS, and EIN values."
+        ),
+    )
+    parser.add_argument(
+        "--profile-document-date-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass for "
+            "source-stated document, application, publication, filing, decision, notice, and report dates."
+        ),
+    )
+    parser.add_argument(
+        "--profile-list-range-inventory-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass for "
+            "source-stated numbered list members and range segments."
+        ),
+    )
+    parser.add_argument(
+        "--profile-rating-scale-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after an initial source compile, run one bounded proposal-only repair pass for "
+            "source-stated rating-scale options such as adjectival evaluation scales."
+        ),
+    )
+    parser.add_argument(
+        "--profile-governed-subject-discovery-pass",
+        action="store_true",
+        help=(
+            "Experimental: after initial/source repair compile, run one bounded proposal-only pass for "
+            "governed subject bundles such as claim sets, findings, violations, or reviewed actions."
+        ),
+    )
+    parser.add_argument(
+        "--profile-governed-subject-manifest-pass",
+        action="store_true",
+        help=(
+            "Experimental: after initial/source repair compile, run a constrained JSON manifest pass for "
+            "governed subject bundles, then deterministically map typed slots to governed carrier facts."
+        ),
+    )
+    parser.add_argument(
+        "--profile-legal-citation-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after initial/source repair compile, run one bounded proposal-only pass for "
+            "source-stated legal citation details on already-emitted governed subjects."
+        ),
+    )
+    parser.add_argument(
+        "--profile-monetary-payment-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after initial/source repair compile, run one bounded proposal-only pass for "
+            "source-stated monetary payment rows on exact amount/authority/purpose carriers."
+        ),
+    )
+    parser.add_argument(
+        "--profile-review-outcome-repair-pass",
+        action="store_true",
+        help=(
+            "Experimental: after initial/source repair compile, run one bounded proposal-only pass for "
+            "source-stated review outcomes on already-emitted governed subjects."
+        ),
+    )
+    parser.add_argument(
+        "--document-metadata-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add generic document_title/2, document_publisher/2, document_date/3, document_date_range/3, "
+            "registrant_identity/2, and registrant_name/2 vocabulary carriers before source compilation."
+        ),
+    )
+    parser.add_argument(
+        "--role-detail-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic person_role_detail/5 vocabulary carrier when the profile has only "
+            "shallow role predicates."
+        ),
+    )
+    parser.add_argument(
+        "--legal-citation-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic legal_citation_detail/4 vocabulary carrier for exact statute, rule, "
+            "regulation, case, and clause citations."
+        ),
+    )
+    parser.add_argument(
+        "--monetary-payment-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic monetary_payment/5 vocabulary carrier for source-stated payment, "
+            "relief, penalty, restitution, reimbursement, and settlement amounts."
+        ),
+    )
+    parser.add_argument(
+        "--obligation-detail-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic obligation_detail/5 vocabulary carrier for compact source-stated "
+            "requirement, settlement, reporting, deadline, frequency, duration, scope, and condition terms."
+        ),
+    )
+    parser.add_argument(
+        "--procedural-rule-detail-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic procedural_rule_detail/5 vocabulary carrier for compact "
+            "source-stated review, rehearing, appeal, filing, deadline, and default-consequence rule terms."
+        ),
+    )
+    parser.add_argument(
+        "--document-checkbox-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic document_checkbox_provision/5 vocabulary carrier for source-stated "
+            "checkbox/list provisions, markings, rule labels, and citations on official forms."
+        ),
+    )
+    parser.add_argument(
+        "--document-identifier-occurrence-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic document_identifier_occurrence/5 vocabulary carrier for repeated "
+            "source-stated document identifiers with occurrence scope and order."
+        ),
+    )
+    parser.add_argument(
+        "--list-range-inventory-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add generic list_member/4, claim_range/4, and item_range/4 vocabulary carriers "
+            "for source-stated numbered lists and ranges."
+        ),
+    )
+    parser.add_argument(
+        "--rating-scale-profile-extension",
+        action="store_true",
+        help=(
+            "Experimental: add a generic rating_scale_option/4 vocabulary carrier for source-stated "
+            "rating-scale options and their scale/factor."
         ),
     )
     parser.add_argument(
@@ -1398,10 +1784,33 @@ def main() -> int:
             _ensure_quantity_event_predicate(parsed, source_text=source_text),
             _ensure_scheduled_event_predicate(parsed, source_text=source_text),
         ]
+        if bool(getattr(args, "document_metadata_profile_extension", False)):
+            extension_rows.append(_ensure_document_metadata_predicates(parsed))
+        if bool(getattr(args, "role_detail_profile_extension", False)):
+            extension_rows.append(_ensure_role_detail_predicate(parsed))
+        if bool(getattr(args, "legal_citation_profile_extension", False)):
+            extension_rows.append(_ensure_legal_citation_detail_predicate(parsed))
+        if bool(getattr(args, "monetary_payment_profile_extension", False)):
+            extension_rows.append(_ensure_monetary_payment_predicate(parsed))
+        if bool(getattr(args, "obligation_detail_profile_extension", False)):
+            extension_rows.append(_ensure_obligation_detail_predicate(parsed))
+        if bool(getattr(args, "procedural_rule_detail_profile_extension", False)):
+            extension_rows.append(_ensure_procedural_rule_detail_predicate(parsed))
+        if bool(getattr(args, "document_checkbox_profile_extension", False)):
+            extension_rows.append(_ensure_document_checkbox_provision_predicate(parsed))
+        if bool(getattr(args, "document_identifier_occurrence_profile_extension", False)):
+            extension_rows.append(_ensure_document_identifier_occurrence_predicate(parsed))
+        if bool(getattr(args, "list_range_inventory_profile_extension", False)):
+            extension_rows.append(_ensure_list_range_inventory_predicates(parsed))
+        if bool(getattr(args, "rating_scale_profile_extension", False)):
+            extension_rows.append(_ensure_rating_scale_option_predicate(parsed))
         profile_extension_metadata = {
             "schema_version": "profile_extensions_v1",
             "extensions": extension_rows,
         }
+        carrier_contract_reconciliation = _reconcile_profile_carrier_contracts(parsed)
+        if carrier_contract_reconciliation.get("changed_count"):
+            profile_extension_metadata["carrier_contract_registry_reconciliation"] = carrier_contract_reconciliation
     score = profile_bootstrap_score(parsed)
     record: dict[str, Any] = {
         "ts": _utc_now(),
@@ -1572,6 +1981,169 @@ def main() -> int:
             args=args,
             extra_context=extra_compile_context,
         )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_role_roster_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_role_roster_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_identifier_occurrence_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_identifier_occurrence_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_document_date_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_document_date_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_list_range_inventory_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_list_range_inventory_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_rating_scale_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_rating_scale_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_governed_subject_discovery_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_governed_subject_discovery_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_governed_subject_manifest_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_governed_subject_manifest_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_legal_citation_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_legal_citation_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_monetary_payment_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_monetary_payment_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if (
+        bool(args.compile_source)
+        and bool(args.profile_review_outcome_repair_pass)
+        and isinstance(parsed, dict)
+        and isinstance(record.get("source_compile"), dict)
+    ):
+        _apply_profile_review_outcome_repair_pass(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            source_text=source_text,
+            intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+            args=args,
+            extra_context=extra_compile_context,
+        )
+    if bool(args.compile_source) and isinstance(record.get("source_compile"), dict):
+        _apply_governed_reference_citation_atom_reduction(record["source_compile"])
+        _apply_governed_claim_ground_atom_reduction(record["source_compile"])
+        _apply_governed_review_atom_fact_reduction(record["source_compile"])
+        _apply_governed_obligation_detail_atom_reduction(record["source_compile"])
+        _apply_document_subject_atom_convergence(record["source_compile"])
+        _attach_governed_companion_subject_health(record["source_compile"])
+        if (
+            bool(getattr(args, "profile_list_range_omission_followup", False))
+            and
+            bool(args.profile_list_range_inventory_repair_pass)
+            and isinstance(parsed, dict)
+            and _profile_list_range_inventory_offered_omission_rows(record["source_compile"])
+        ):
+            _apply_profile_list_range_inventory_omission_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+            )
+            _attach_governed_companion_subject_health(record["source_compile"])
     if bool(args.compile_source) and isinstance(parsed, dict) and isinstance(record.get("source_compile"), dict):
         _attach_profile_admission_report(
             source_compile=record["source_compile"],
@@ -1580,6 +2152,32 @@ def main() -> int:
             intake_plan=intake_plan,
             domain_hint=str(args.domain_hint or ""),
         )
+        registered_carrier_delivery = _attach_registered_carrier_delivery_report(
+            source_compile=record["source_compile"],
+            parsed_profile=parsed,
+            profile_extension_metadata=profile_extension_metadata,
+            mark_health=not bool(getattr(args, "profile_registered_carrier_omission_followup", False)),
+        )
+        if (
+            bool(getattr(args, "profile_registered_carrier_omission_followup", False))
+            and registered_carrier_delivery.get("findings")
+        ):
+            _apply_profile_registered_carrier_omission_followup_pass(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                source_text=source_text,
+                intake_plan=intake_plan if isinstance(intake_plan, dict) else {},
+                args=args,
+                extra_context=extra_compile_context,
+                profile_extension_metadata=profile_extension_metadata,
+                registered_delivery_report=registered_carrier_delivery,
+            )
+            _apply_governed_obligation_detail_atom_reduction(record["source_compile"])
+            _attach_registered_carrier_delivery_report(
+                source_compile=record["source_compile"],
+                parsed_profile=parsed,
+                profile_extension_metadata=profile_extension_metadata,
+            )
     if (
         bool(args.source_record_ledger_facts)
         and isinstance(source_record_ledger, dict)
@@ -1664,7 +2262,10 @@ def _profile_schema_contract_retry_needed(score: dict[str, Any]) -> bool:
     if isinstance(score, dict):
         for key in (
             "candidate_signature_arg_mismatch_refs",
+            "candidate_duplicate_name_arity_refs",
+            "provenance_prose_arg_role_refs",
             "repeated_structure_role_mismatch_refs",
+            "list_range_inventory_slot_loss_refs",
         ):
             values = score.get(key, [])
             if isinstance(values, list):
@@ -1681,6 +2282,26 @@ def _profile_schema_contract_retry_context(score: dict[str, Any]) -> list[str]:
     repeated_role_refs = [
         str(ref).strip()
         for ref in (score.get("repeated_structure_role_mismatch_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    duplicate_name_arity_refs = [
+        str(ref).strip()
+        for ref in (score.get("candidate_duplicate_name_arity_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    provenance_prose_refs = [
+        str(ref).strip()
+        for ref in (score.get("provenance_prose_arg_role_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    governed_arg_refs = [
+        str(ref).strip()
+        for ref in (score.get("governed_carrier_arg_role_mismatch_refs", []) if isinstance(score, dict) else [])
+        if str(ref).strip()
+    ]
+    list_range_refs = [
+        str(ref).strip()
+        for ref in (score.get("list_range_inventory_slot_loss_refs", []) if isinstance(score, dict) else [])
         if str(ref).strip()
     ]
     context = [
@@ -1701,6 +2322,18 @@ def _profile_schema_contract_retry_context(score: dict[str, Any]) -> list[str]:
             "comma-bearing examples, generated counters, or alternate value lists inside args."
         ),
         (
+            "Provenance/source-record guardrail: provenance predicates locate typed assertions at source coordinates. "
+            "Do not put copied source prose, display text, quote text, excerpts, sentences, text_span/source_text/raw_text, "
+            "or content slots into source_recorded/recorded_in/ledger_entry/source_supports/provenance-like predicates. "
+            "Use source_coord, record_id, assertion_id, subject, status, support_role, source_kind, or target instead; "
+            "put asserted meaning in separate typed predicates."
+        ),
+        (
+            "Governed-carrier guardrail: if you use a registered carrier signature, its argument roles must match that "
+            "carrier's contract exactly. Do not keep the name while redefining the slots; same atom name means same "
+            "instrument language."
+        ),
+        (
             "Repeated-structure guardrail: if a predicate is listed as a repeated_structures[].property_predicates item, "
             "its first argument role must be the repeated record id or governed subject named by that repeated structure. "
             "For procedural outcome, remand, transfer, disposition, or review-effect surfaces, anchor the relation to "
@@ -1710,8 +2343,36 @@ def _profile_schema_contract_retry_context(score: dict[str, Any]) -> list[str]:
     ]
     if signature_refs:
         context.append(f"Previous signature/args mismatch refs: {', '.join(signature_refs[:12])}.")
+    if duplicate_name_arity_refs:
+        context.append(
+            "Previous duplicate predicate-name/arity refs: "
+            f"{', '.join(duplicate_name_arity_refs[:12])}. Use one approved arity for each predicate name; "
+            "do not introduce a private lower-arity version when a governed carrier already exists."
+        )
+    if provenance_prose_refs:
+        context.append(
+            "Previous provenance/source-record prose-slot refs: "
+            f"{', '.join(provenance_prose_refs[:12])}."
+        )
+    if governed_arg_refs:
+        context.append(
+            "Previous governed-carrier arg-role mismatch refs: "
+            f"{', '.join(governed_arg_refs[:12])}."
+        )
     if repeated_role_refs:
         context.append(f"Previous repeated-structure role mismatch refs: {', '.join(repeated_role_refs[:12])}.")
+    if list_range_refs:
+        context.append(
+            "Previous numbered list/range inventory slot-loss refs: "
+            f"{', '.join(list_range_refs[:12])}."
+        )
+        context.append(
+            "List/range inventory guardrail: if a source lists numbered claims, counts, issues, products, "
+            "violations, requirements, order paragraphs, or item ranges with grounds/status/outcomes, do not "
+            "store the whole range only as one compressed atom inside an outcome/status predicate. Add or use a "
+            "member/range carrier such as list_member/4, claim_range/4, item_range/4, item_ground/5, issue_ground/5, "
+            "or a close domain-owned equivalent so source-stated singleton and range boundaries remain queryable."
+        )
     return context
 
 
@@ -2243,6 +2904,7 @@ def _compile_source_with_draft_profile(
                 "When pass_plan names source boundary, principles/rules, repeated records, final declarations, appeals, or pledges, emit at least one representative safe operation from each supported pass before adding extra repeated-record details.",
                 "Use the breadth of the draft profile. If many allowed predicates are available, prefer a diverse skeleton that exercises distinct source/provenance, entity, claim, rule, repeated-record, declaration, and commitment predicate families over many operations using only one predicate family.",
                 "Predicate contracts are binding. Preserve the exact argument order from predicate_contracts/allowed profile args. Do not swap subject/object, actor/time, recipient/type, facility/officer, or status/timestamp slots to make a fact fit. If the source supports a fact but the argument order is uncertain, skip it or note the uncertainty in self_check instead of emitting a malformed clause.",
+                *_source_pass_predicate_contract_guidance(predicate_contracts),
                 "For dense source compilation, entities/assertions/propositions are optional audit scaffolding. Keep them sparse or empty if they would consume output budget. Candidate_operations are the primary artifact; use normalized atoms directly in candidate_operations instead of first listing every source entity.",
                 "Avoid predicate canonicalization drift. If the allowed palette contains synonymous prefixed and reusable detail predicates, such as grievance_observation_location/2 and observation_location/2, prefer the reusable detail predicate when its first argument is already the grievance/incident/record id.",
                 "Use one canonical predicate surface consistently for a repeated slot. Do not mix grievance_method/2 with method/2, grievance_effect/2 with effect_claimed/2, or grievance_explanation_given/2 with explanation_given/2 unless their meanings are explicitly different in the profile contract.",
@@ -2387,6 +3049,7 @@ def _compile_source_pass_ops(
                 source_text=source_text,
                 parsed_profile=parsed_profile,
             ),
+            *_source_pass_predicate_contract_guidance(predicate_contracts),
             *(extra_context or []),
             "This compact schema is for one bounded source pass. Follow current_pass.focus: broad skeleton passes should cover source-wide stable structure, while focused passes should not compile unrelated source sections.",
             "Emit only candidate_operations. Do not emit entities, assertions, propositions, temporal_graph, or truth_maintenance here.",
@@ -2498,7 +3161,7 @@ def _compile_source_pass_ops(
             "error": "source_pass_ops_parse_failed",
             "raw_content": str(response.get("content", ""))[:4000] if "response" in locals() else "",
         }
-    ir = _source_pass_ops_to_semantic_ir(parsed)
+    ir = _source_pass_ops_to_semantic_ir(parsed, predicate_contracts=predicate_contracts)
     mapped, warnings = semantic_ir_to_legacy_parse(
         ir,
         allowed_predicates=allowed_predicates,
@@ -2520,6 +3183,107 @@ def _compile_source_pass_ops(
         "self_check": ir.get("self_check", {}),
         "source_pass_ops": parsed,
     }
+
+
+def _source_pass_predicate_contract_guidance(predicate_contracts: list[dict[str, Any]]) -> list[str]:
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in predicate_contracts
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    guidance: list[str] = carrier_contract_prompt_lines(sorted(signatures)[:32])
+    if "document_identifier_occurrence/5" in signatures:
+        guidance.append(
+            "Contract delivery note for document_identifier_occurrence/5: when raw_source_text states the same "
+            "identifier kind in multiple source positions or scopes, emit one candidate operation per occurrence. "
+            "Do not collapse distinct identifier values into a single document-level identifier row."
+        )
+    if "document_checkbox_provision/5" in signatures:
+        guidance.append(
+            "Contract delivery note for document_checkbox_provision/5: when raw_source_text lists checkbox or "
+            "checklist rows, emit one candidate operation per source-stated row with mark, rule/provision label, "
+            "and citation in separate slots."
+        )
+    if "domain_omission/5" in signatures:
+        guidance.append(
+            "Contract delivery note for domain_omission/5: explicit absence statements are source facts. "
+            "When raw_source_text says an expected role, carrier item, detail, signature, date, citation, or "
+            "other domain slot is absent, unavailable, not shown, not stated, none found, or not applicable, "
+            "emit a compact domain_omission/5 row with the relevant registered carrier signature and omission kind. "
+            "If you mention an absence in self_check.notes or self_check.missing_slots, also emit the compact "
+            "domain_omission/5 row when this carrier is available; self_check alone does not satisfy omission "
+            "accountability. Do not use domain_omission/5 as an answer-bearing substitute; it is compile accountability only."
+        )
+    if {"list_member/4", "claim_range/4", "item_range/4"} & signatures:
+        guidance.append(
+            "Contract delivery note for list/range inventory carriers: when raw_source_text states a numbered "
+            "list or range such as claims, counts, issues, products, violations, requirements, or order paragraphs, "
+            "emit one candidate operation per source-stated singleton or source-stated range segment. Preserve "
+            "start and end values in separate typed slots for range carriers, reuse the same set/list id used by "
+            "outcome/ground/status rows when available, and do not compress separated segments into one label atom "
+            "or one broad numeric range. For a source phrase like 1, 2, 4, 6-9, emit 1-1, 2-2, 4-4, and 6-9; "
+            "do not emit 1-9."
+        )
+    if {"claim_range/4", "claim_ground/4"} <= signatures:
+        guidance.append(
+            "Contract delivery note for claim set anchor convergence: claim_range/4 has four arguments in this "
+            "order: claim_set_id, start_claim, end_claim, source_or_scope. Do not emit claim_range/4 with only "
+            "numeric boundaries. When claim_range/4, claim_ground/4, legal_citation_detail/4, and review_outcome/4 "
+            "refer to the same governed claim set or reviewed rejection, reuse one shared subject id across those "
+            "rows so query planning can join inventory, ground, citation, and review outcome without source prose. "
+            "If a broad all-items set and narrower governed subsets both appear, the narrower governed subset must "
+            "carry its own claim_range/4 rows on the same subject id as its claim_ground/4 rows; broad inventory "
+            "rows do not satisfy subset-specific ground, citation, or review questions. Do not distribute a broad "
+            "wrapper phrase such as items were rejected under ground A or ground B over references X and Y into "
+            "every ground/reference combination when the source later states narrower claim-to-ground mappings. "
+            "Do not use bare claim numbers as claim_ground/4 subject ids when a claim_range/4 set can represent "
+            "the same governed subset; membership belongs in claim_range/4, and the legal/ground assertion belongs "
+            "on the shared set id. If you emit claim_range/4, legal_citation_detail/4, or review_outcome/4 for a "
+            "governed set and the source states its rejection ground/reference/status, emit claim_ground/4 on that "
+            "same set id or mark the missing companion in self_check. When a source line applies a ground to all "
+            "items in a previously listed set, reuse the full prior set inventory for that ground; do not copy a "
+            "later narrower exception/subset inventory onto the all-items ground."
+        )
+    if {"claim_ground/4", "legal_citation_detail/4"} <= signatures:
+        guidance.append(
+            "Contract delivery note for legal_citation_detail/4 with claim_ground/4: when raw_source_text states "
+            "a statute, rule, section, regulation, or legal citation for a governed claim set, emit "
+            "legal_citation_detail/4 with the same subject id as claim_ground/4. Keep the citation in "
+            "legal_citation_detail/4; keep claim_ground/4's ground_or_theory slot for the theory such as "
+            "anticipation, obviousness, eligibility, written_description, or indefiniteness. Prefer governed "
+            "role atom statutory_ground rather than private variants such as statutory_basis."
+        )
+    if "review_outcome/4" in signatures:
+        guidance.append(
+            "Contract delivery note for review_outcome/4: when raw_source_text states that a reviewing body, board, "
+            "court, committee, agency, officer, or other review actor affirmed, reversed, modified, vacated, "
+            "remanded, sustained, granted, or denied an underlying action, emit review_outcome/4 using the same "
+            "reviewed subject id as the underlying typed action/ground/finding row. Do not invent private "
+            "affirmed_by/2 or reversed_by/2 atoms when review_outcome/4 is available. If one review outcome applies "
+            "to several governed subject ids emitted in the same pass, emit one review_outcome/4 row per governed "
+            "subject id rather than an umbrella reviewed-rejections id. Prefer the reviewing body as the actor "
+            "slot, such as review_board, rather than a role label such as board_role or the lower-body actor."
+        )
+    if "obligation_detail/5" in signatures:
+        guidance.append(
+            "Contract delivery note for obligation_detail/5: when raw_source_text states an obligation, requirement, "
+            "settlement term, reporting duty, corrective action, notice duty, or compliance condition with several "
+            "query-bearing parts, emit one obligation_detail/5 row per atomic part. Preserve deliverable, recipient "
+            "scope, tariff schedule, frequency, duration, deadline, condition, exception, authority, and method as "
+            "separate compact detail rows when stated. Do not leave the only queryable copy inside a long "
+            "settlement_obligation/3, requirement_text, source_detail, or source_record text atom. Reuse the same "
+            "obligation_id across all detail rows for the same obligation."
+        )
+    if "procedural_rule_detail/5" in signatures:
+        guidance.append(
+            "Contract delivery note for procedural_rule_detail/5: when raw_source_text states a procedural rule, "
+            "review right, rehearing right, appeal path, filing requirement, deadline rule, or default consequence, "
+            "emit one procedural_rule_detail/5 row per atomic part. Preserve trigger/action, period or deadline, "
+            "start anchor, consequence, condition, exception, and authority as separate compact detail rows when "
+            "stated. Do not leave the only queryable copy inside a long rule text, source_detail, source_record, "
+            "or review_deadline-only atom. Reuse the same rule_id across all detail rows for the same procedural rule."
+        )
+    return guidance
 
 
 def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_profile: dict[str, Any]) -> list[str]:
@@ -2625,7 +3389,9 @@ def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_pro
     event_date_carriers = [
         _candidate_signature(item)
         for item in candidate_rows
-        if _candidate_signature(item) and _candidate_signature(item).split("/", 1)[0] in {"event_date", "event_time", "event_timestamp", "event_wall_time", "hearing_date", "meeting_date"}
+        if _candidate_signature(item)
+        and _candidate_signature(item).split("/", 1)[0]
+        in {"document_date", "event_date", "event_time", "event_timestamp", "event_wall_time", "hearing_date", "meeting_date"}
     ]
     if event_date_carriers and (
         EVENT_DATE_TEXT_RE.search(str(source_text or ""))
@@ -2633,9 +3399,10 @@ def _source_pass_profile_delivery_target_context(*, source_text: str, parsed_pro
     ):
         lines.append(
             "PROFILE DELIVERY TARGET: this source has explicit event/hearing/filing dates or clock times. If a pass creates "
-            "an event id that embeds a date, also emit an event_date/2, event_time/2, event_timestamp/2, or "
-            "equivalent temporal row using that same event id and the explicit date, time, or timestamp. The id is an anchor, "
-            "not a substitute for a joinable temporal row."
+            "an event, document, filing, publication, application, or decision id that embeds a date, also emit a "
+            "document_date/3, event_date/2, event_time/2, event_timestamp/2, or equivalent temporal row using "
+            "that same subject id and the explicit date, time, or timestamp. The id is an anchor, not a substitute "
+            "for a joinable temporal row."
         )
     quorum_carriers = [
         _candidate_signature(item)
@@ -2762,8 +3529,15 @@ def _state_atom_from_text(text: str) -> str:
     return ""
 
 
-def _source_pass_ops_to_semantic_ir(parsed: dict[str, Any]) -> dict[str, Any]:
+def _source_pass_ops_to_semantic_ir(
+    parsed: dict[str, Any],
+    *,
+    predicate_contracts: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     self_check = parsed.get("self_check") if isinstance(parsed.get("self_check"), dict) else {}
+    candidate_operations = parsed.get("candidate_operations", [])
+    if not isinstance(candidate_operations, list):
+        candidate_operations = []
     return {
         "schema_version": "semantic_ir_v1",
         "decision": str(parsed.get("decision", "commit") or "commit"),
@@ -2773,9 +3547,10 @@ def _source_pass_ops_to_semantic_ir(parsed: dict[str, Any]) -> dict[str, Any]:
         "assertions": [],
         "propositions": [],
         "unsafe_implications": [],
-        "candidate_operations": parsed.get("candidate_operations", [])
-        if isinstance(parsed.get("candidate_operations"), list)
-        else [],
+        "candidate_operations": _reduce_source_pass_governed_atom_operations(
+            candidate_operations,
+            predicate_contracts=predicate_contracts,
+        ),
         "truth_maintenance": {
             "support_links": [],
             "conflicts": [],
@@ -2790,6 +3565,267 @@ def _source_pass_ops_to_semantic_ir(parsed: dict[str, Any]) -> dict[str, Any]:
             else [],
             "notes": self_check.get("notes", []) if isinstance(self_check.get("notes"), list) else [],
         },
+    }
+
+
+REVIEW_OUTCOME_REDUCTION_PREDICATES = {
+    "affirmed_by": "affirmed",
+    "reversed_by": "reversed",
+    "modified_by": "modified",
+    "vacated_by": "vacated",
+    "remanded_by": "remanded",
+    "sustained_by": "sustained",
+    "denied_by": "denied",
+    "granted_by": "granted",
+    "upheld_by": "upheld",
+}
+
+
+def _reduce_source_pass_governed_atom_operations(
+    candidate_operations: list[Any],
+    *,
+    predicate_contracts: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Add governed equivalents for narrow model-proposed review atoms.
+
+    This reducer operates only on the model's already-proposed typed atoms. It
+    does not read source prose or query text; it keeps the original operation
+    and adds the registry-owned `review_outcome/4` form so downstream query
+    planning can meet the same atom language.
+    """
+
+    out: list[dict[str, Any]] = []
+    seen: set[tuple[str, tuple[str, ...], str, str, str]] = set()
+    contracts = _source_pass_contracts_by_signature(predicate_contracts or [])
+    for operation_index, operation in enumerate(candidate_operations, start=1):
+        if not isinstance(operation, dict):
+            continue
+        copied = _normalize_source_pass_operation_args(dict(operation), contracts, operation_index=operation_index)
+        copied = _complete_governed_source_scope_operation(copied, contracts, operation_index=operation_index)
+        _append_source_pass_operation_once(out, seen, copied)
+        reduced = _review_outcome_reduction_operation(copied)
+        if reduced is not None:
+            _append_source_pass_operation_once(
+                out,
+                seen,
+                _complete_governed_source_scope_operation(reduced, contracts),
+            )
+        date_reduced = _document_date_role_reduction_operation(copied, contracts)
+        if date_reduced is not None:
+            _append_source_pass_operation_once(out, seen, date_reduced)
+    return out
+
+
+def _normalize_source_pass_operation_args(
+    operation: dict[str, Any],
+    contracts: dict[str, list[str]],
+    *,
+    operation_index: int,
+) -> dict[str, Any]:
+    signature = _source_pass_contract_signature_for_operation(operation, contracts)
+    roles = contracts.get(signature)
+    args = [str(arg).strip() for arg in operation.get("args", [])] if isinstance(operation.get("args"), list) else []
+    if not args:
+        return operation
+    predicate_name = signature.split("/", 1)[0].strip()
+    signature_markers = {signature.casefold(), signature.replace("/", "_").casefold(), predicate_name.casefold()}
+    if (
+        len(args) >= 2
+        and args[-2].casefold() in {"operation_name", "predicate_name"}
+        and args[-1].casefold() in signature_markers
+    ):
+        args = args[:-2]
+    elif args[-1].casefold() in signature_markers and roles and len(args) == len(roles) + 1:
+        args = args[:-1]
+    elif roles and roles[-1] == "source_order" and len(args) == len(roles) and args[-1].casefold() in {"operation_name", "predicate_name"}:
+        args = args[:-1]
+    operation["args"] = args
+    return operation
+
+
+def _source_pass_contracts_by_signature(predicate_contracts: list[dict[str, Any]]) -> dict[str, list[str]]:
+    out: dict[str, list[str]] = {}
+    for contract in predicate_contracts:
+        if not isinstance(contract, dict):
+            continue
+        signature = str(contract.get("signature", "")).strip()
+        args = contract.get("args")
+        if not isinstance(args, list):
+            args = contract.get("arguments")
+        if not signature or not isinstance(args, list):
+            continue
+        out[signature] = [str(arg).strip() for arg in args]
+    return out
+
+
+def _source_pass_contract_signature_for_operation(
+    operation: dict[str, Any],
+    contracts: dict[str, list[str]],
+) -> str:
+    signature = _operation_signature(operation)
+    if signature in contracts:
+        return signature
+    predicate_base = str(operation.get("predicate", "")).strip().split("/", 1)[0].strip()
+    if not predicate_base:
+        return signature
+    args = [str(arg).strip() for arg in operation.get("args", [])] if isinstance(operation.get("args"), list) else []
+    candidates: list[str] = []
+    for candidate_signature, roles in contracts.items():
+        candidate_base = candidate_signature.split("/", 1)[0].strip()
+        if candidate_base != predicate_base:
+            continue
+        if len(args) in {len(roles) - 1, len(roles), len(roles) + 1, len(roles) + 2}:
+            candidates.append(candidate_signature)
+    return candidates[0] if len(candidates) == 1 else signature
+
+
+def _document_date_role_reduction_operation(
+    operation: dict[str, Any],
+    contracts: dict[str, list[str]],
+) -> dict[str, Any] | None:
+    """Reduce a common date-carrier transport error to document_date/3.
+
+    Some source-pass models emit a three-slot event_date operation shaped like
+    (subject, date_role, date_value). That is not the registered event_date/2
+    carrier, but it is exactly the registered document_date/3 shape when that
+    contract is present. This reducer reads only the model's typed operation,
+    not source prose or query text.
+    """
+
+    if "document_date/3" not in contracts:
+        return None
+    if str(operation.get("operation", "")).strip() != "assert":
+        return None
+    if str(operation.get("polarity", "")).strip() != "positive":
+        return None
+    if str(operation.get("safety", "")).strip() != "safe":
+        return None
+    predicate = str(operation.get("predicate", "")).strip().split("/", 1)[0].strip().casefold()
+    if predicate != "event_date":
+        return None
+    args = [str(arg).strip() for arg in operation.get("args", []) if str(arg).strip()] if isinstance(operation.get("args"), list) else []
+    if len(args) != 3:
+        return None
+    if not _source_pass_arg_looks_like_date_value(args[2]):
+        return None
+    proposition = str(operation.get("proposition_id", "")).strip()
+    return {
+        "operation": "assert",
+        "proposition_id": f"{proposition}_document_date" if proposition else "event_date_role_document_date",
+        "predicate": "document_date/3",
+        "args": args,
+        "polarity": "positive",
+        "source": str(operation.get("source", "")).strip() or "direct",
+        "safety": "safe",
+    }
+
+
+def _source_pass_arg_looks_like_date_value(value: Any) -> bool:
+    text = str(value or "").strip().casefold()
+    if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}", text):
+        return True
+    if re.fullmatch(r"\d{4}_\d{1,2}", text):
+        return True
+    if re.fullmatch(r"\d{4}", text):
+        return True
+    month_names = (
+        "january",
+        "february",
+        "march",
+        "april",
+        "may",
+        "june",
+        "july",
+        "august",
+        "september",
+        "october",
+        "november",
+        "december",
+    )
+    return any(month in text for month in month_names) and bool(re.search(r"\d{2,4}", text))
+
+
+def _complete_governed_source_scope_operation(
+    operation: dict[str, Any],
+    contracts: dict[str, list[str]],
+    *,
+    operation_index: int = 1,
+) -> dict[str, Any]:
+    signature = _source_pass_contract_signature_for_operation(operation, contracts)
+    roles = contracts.get(signature)
+    if not roles:
+        return operation
+    args = [str(arg).strip() for arg in operation.get("args", [])] if isinstance(operation.get("args"), list) else []
+    source_scope = str(operation.get("source", "")).strip() or "direct"
+    if roles[-1].endswith("source_or_scope"):
+        if len(args) == len(roles) - 1:
+            operation["args"] = [*args, source_scope]
+        elif len(args) == len(roles) and not _looks_like_source_scope_arg(args[-1]):
+            operation["args"] = [*args[:-1], source_scope]
+    elif roles[-1] == "source_order" and len(args) == len(roles) - 1:
+        operation["args"] = [*args, str(max(1, int(operation_index)))]
+    return operation
+
+
+def _operation_signature(operation: dict[str, Any]) -> str:
+    predicate = str(operation.get("predicate", "")).strip()
+    if "/" in predicate:
+        return predicate
+    args = operation.get("args")
+    arity = len(args) if isinstance(args, list) else 0
+    return f"{predicate}/{arity}"
+
+
+def _looks_like_source_scope_arg(value: Any) -> bool:
+    text = str(value or "").strip().casefold()
+    if text in {"direct", "context", "inferred", "source", "source_text", "raw_source_text"}:
+        return True
+    return bool(re.fullmatch(r"(?:src|source|row|line|field|section|scope|record)[a-z0-9_:-]*", text))
+
+
+def _append_source_pass_operation_once(
+    out: list[dict[str, Any]],
+    seen: set[tuple[str, tuple[str, ...], str, str, str]],
+    operation: dict[str, Any],
+) -> None:
+    key = (
+        str(operation.get("predicate", "")).strip(),
+        tuple(str(arg).strip() for arg in operation.get("args", []) if isinstance(operation.get("args"), list)),
+        str(operation.get("operation", "")).strip(),
+        str(operation.get("polarity", "")).strip(),
+        str(operation.get("source", "")).strip(),
+    )
+    if key in seen:
+        return
+    seen.add(key)
+    out.append(operation)
+
+
+def _review_outcome_reduction_operation(operation: dict[str, Any]) -> dict[str, Any] | None:
+    if str(operation.get("operation", "")).strip() != "assert":
+        return None
+    if str(operation.get("polarity", "")).strip() != "positive":
+        return None
+    if str(operation.get("safety", "")).strip() != "safe":
+        return None
+    predicate = str(operation.get("predicate", "")).strip()
+    base = predicate.split("/", 1)[0].strip().casefold()
+    outcome = REVIEW_OUTCOME_REDUCTION_PREDICATES.get(base)
+    if not outcome:
+        return None
+    args = [str(arg).strip() for arg in operation.get("args", []) if str(arg).strip()] if isinstance(operation.get("args"), list) else []
+    if len(args) != 2:
+        return None
+    source_scope = str(operation.get("source", "")).strip() or "direct"
+    proposition = str(operation.get("proposition_id", "")).strip()
+    return {
+        "operation": "assert",
+        "proposition_id": f"{proposition}_review_outcome" if proposition else f"{base}_review_outcome",
+        "predicate": "review_outcome/4",
+        "args": [args[0], args[1], outcome, source_scope],
+        "polarity": "positive",
+        "source": source_scope,
+        "safety": "safe",
     }
 
 
@@ -3122,6 +4158,3681 @@ def _profile_delivery_repair_context_lines(delivery_report: dict[str, Any]) -> l
     return lines
 
 
+ROLE_ROSTER_REPAIR_BASE_HINTS = {
+    "affiliation",
+    "actor_role",
+    "attorney",
+    "counsel",
+    "contact",
+    "employment",
+    "officer",
+    "panel",
+    "participant",
+    "party_role",
+    "person_role",
+    "representative",
+    "signatory",
+    "supervisor",
+}
+
+
+IDENTIFIER_OCCURRENCE_REPAIR_BASE_HINTS = {
+    "accession",
+    "cms",
+    "control_number",
+    "docket",
+    "document_identifier",
+    "ein",
+    "employer_identification",
+    "fei",
+    "file_number",
+    "identifier",
+    "matter_number",
+    "proceeding_number",
+    "registration",
+}
+
+IDENTIFIER_OCCURRENCE_REPAIR_EXACT_BASES = {
+    "application_number",
+    "case_number",
+    "document_number",
+    "filing_number",
+    "matter_number",
+    "proceeding_number",
+    "publication_number",
+    "registration_number",
+}
+
+LIST_RANGE_INVENTORY_REPAIR_BASE_NAMES = {
+    "claim_range",
+    "claim_outcome",
+    "claim_rejection",
+    "claim_treatment",
+    "count_range",
+    "item_ground",
+    "item_range",
+    "issue_ground",
+    "issue_range",
+    "legal_citation_detail",
+    "list_member",
+    "rejection_ground",
+    "review_outcome",
+    "violation_basis",
+}
+
+
+LEGAL_CITATION_REPAIR_BASE_NAMES = {
+    "citation",
+    "citation_detail",
+    "legal_citation",
+    "legal_citation_detail",
+    "statute_citation",
+}
+
+MONETARY_PAYMENT_REPAIR_BASE_NAMES = {
+    "monetary_payment",
+}
+
+LEGAL_CITATION_REPAIR_CANONICAL_GROUNDS = {
+    "anticipation",
+    "obviousness",
+    "written_description",
+    "enablement",
+    "indefiniteness",
+    "eligibility",
+    "novelty",
+}
+
+
+def _profile_identifier_occurrence_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        base_has_identifier_shape = base in IDENTIFIER_OCCURRENCE_REPAIR_EXACT_BASES or any(
+            _identifier_occurrence_base_hint_matches(base, hint) for hint in IDENTIFIER_OCCURRENCE_REPAIR_BASE_HINTS
+        )
+        if not base_has_identifier_shape:
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _identifier_occurrence_base_hint_matches(base: str, hint: str) -> bool:
+    base_text = str(base or "").strip().lower()
+    hint_text = str(hint or "").strip().lower()
+    if not base_text or not hint_text:
+        return False
+    if "_" in hint_text:
+        return hint_text in base_text
+    return hint_text in {token for token in base_text.split("_") if token}
+
+
+def _profile_identifier_occurrence_repair_context_lines(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers = _profile_identifier_occurrence_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    contract_lines = carrier_contract_prompt_lines(carriers[:16])
+    return [
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: deterministic query delivery is missing typed "
+            "identifier occurrences in some documents. This pass is proposal-only; emit only source-grounded "
+            "typed rows through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: revisit source-stated docket numbers, file numbers, "
+            "Commission file numbers, accession numbers, document control numbers, CMS/FEI/EIN values, case "
+            "numbers, registration numbers, and repeated same-label identifiers. Preserve the identifier kind, "
+            "identifier value, document or record scope, source-stated location/scope label, and source order "
+            "when the allowed predicate contract supports them."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: printed document-control identifiers may appear as short "
+            "alphabetic prefixes joined to digits by punctuation, for example prefix#123456 or prefix-123456. "
+            "Preserve these as typed identifier occurrences when source-stated; use a compact kind such as "
+            "document_control_number or printed_control_number and keep the normalized prefix-number value in the "
+            "identifier value slot."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: if the same identifier label appears more than once "
+            "with different values, preserve each occurrence separately rather than choosing one canonical value. "
+            "Do not infer that two differently formatted identifiers are equivalent unless the source states it."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: do not emit source_record_* rows, display text rows, "
+            "prose windows, or answer-bearing source excerpts. The output must be typed identifier facts only."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: candidate_operations.args must contain exactly the "
+            "predicate's declared arguments and nothing else. Keep operation, polarity, predicate, proposition_id, "
+            "safety, and source as top-level candidate_operation fields; never place operation_assert, "
+            "predicate_..., proposition_id_..., safety_..., or source_... tokens inside args."
+        ),
+        (
+            "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS: compatible identifier signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+        *contract_lines,
+    ]
+
+
+def _apply_profile_identifier_occurrence_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_identifier_occurrence_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_identifier_occurrence_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    if not carriers:
+        metadata["reason"] = "no_identifier_occurrence_predicates_offered"
+        source_compile["profile_identifier_occurrence_repair"] = metadata
+        return metadata
+    context_lines = _profile_identifier_occurrence_repair_context_lines(parsed_profile)
+    target = max(8, min(32, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_identifier_occurrence_repair",
+        purpose="repair typed identifier occurrence delivery without source-record answer routing",
+        focus="missing docket, file, accession, control, CMS, FEI, EIN, case, registration, and repeated identifier rows",
+        completion=(
+            "Emit only source-grounded typed identifier rows and minimal supporting document/scope rows; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated identifier occurrences as typed predicates: identifier kind, value, "
+            "document or record scope, source-stated label/scope, and source order when available."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_identifier_occurrence_repair"
+    compiled["purpose"] = "repair typed identifier occurrence delivery without source-record answer routing"
+    compiled["focus"] = "missing docket, file, accession, control, CMS, FEI, EIN, case, registration, and repeated identifier rows"
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_identifier_occurrence_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_identifier_occurrence_repair",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_identifier_occurrence_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_identifier_occurrence_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_identifier_occurrence_repair"] = metadata
+    return metadata
+
+
+def _profile_list_range_inventory_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        args = candidate.get("args")
+        arg_text = " ".join(str(arg).lower() for arg in args if isinstance(args, list))
+        if base not in LIST_RANGE_INVENTORY_REPAIR_BASE_NAMES and not (
+            "range" in base and any(token in arg_text for token in ("start", "end", "item", "claim", "issue", "count"))
+        ) and not (
+            any(token in base for token in ("claim", "item", "issue", "violation"))
+            and any(token in arg_text for token in ("set", "claim", "item", "issue", "range"))
+            and any(token in arg_text for token in ("ground", "basis", "status", "outcome", "treatment", "prior_art"))
+        ):
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _profile_list_range_inventory_repair_context_lines(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers = _profile_list_range_inventory_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    contract_lines = carrier_contract_prompt_lines(carriers[:16])
+    return [
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: deterministic query delivery is missing typed "
+            "numbered list or range inventory in some documents. This pass is proposal-only; emit only "
+            "source-grounded typed rows through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: revisit source-stated numbered claims, counts, issues, "
+            "products, violations, requirements, order paragraphs, and other item sets. Preserve each "
+            "source-stated singleton and each source-stated range segment as its own typed operation."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: source-stated category, class, type, option, or "
+            "heading inventories are also list inventories, even when displayed as section headings rather "
+            "than numbered bullets. If list_member/4 is available, preserve each source-stated category "
+            "label as list_member(SetOrListId, CategoryAtom, CategoryKind, SourceOrScope)."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: stay inside the listed inventory carriers. Do not "
+            "emit period, impact, statement, effect, account, or narrative-detail predicates from this pass "
+            "unless those exact predicate signatures are in the compatible list/range carrier set."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: for a source range such as N-M, keep the start and end "
+            "values in separate typed slots. For a singleton such as N, either emit a list member row or a range "
+            "row with matching start and end values, according to the allowed predicate contract."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: a source-stated range is not satisfied by expanding it "
+            "into one list_member/4 row per inferred member. If a range carrier such as claim_range/4 or "
+            "item_range/4 is available, emit the range carrier for the source-stated segment."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: reuse the same set/list id used by related outcome, "
+            "status, ground, basis, rejection, or treatment rows when the source links the same governed set. "
+            "Do not compress separated source segments into one label atom."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: when an allowed predicate such as claim_treatment/5, "
+            "claim_outcome/3, claim_ground/4, rejection_ground/4, claim_rejection/5, item_ground/5, "
+            "issue_ground/5, legal_citation_detail/4, review_outcome/4, or violation_basis/5 can bind "
+            "a numbered set to its source-stated ground, status, prior-art reference, basis, or outcome, emit "
+            "that set-to-relation row using the same set/list id as the inventory rows. Do not attach the "
+            "relation only to the whole document when the source states the relation for a specific numbered set."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: do not hide a legal ground, prior-art reference, "
+            "causal reason, treatment basis, or statutory basis inside list_member/4's source/scope slot. "
+            "list_member/4 is membership inventory; use a companion typed relation such as claim_ground/4, "
+            "rejection_ground/4, claim_rejection/4, claim_treatment/5, item_ground/5, issue_ground/5, "
+            "legal_citation_detail/4, review_outcome/4, or violation_basis/5 for the relation."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: when a governed subset has ground, basis, citation, "
+            "outcome, status, treatment, or review rows, emit that subset's claim_range/4 or item_range/4 "
+            "rows with the same subject id. Do not put the inventory on a broad set id while putting the "
+            "ground or review outcome on a different subset id."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: if the source states that a reviewer, board, court, "
+            "or agency affirmed, reversed, sustained, denied, granted, or modified the governed actions you "
+            "emit, add review_outcome/4 for each governed subject id. Do not replace per-subject review rows "
+            "with one umbrella reviewed-rejections id."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: do not emit source_record_* rows, display text rows, "
+            "prose windows, or answer-bearing source excerpts. The output must be typed list/range facts only."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR PASS: compatible list/range signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+        *contract_lines,
+    ]
+
+
+def _source_pass_self_check_missing_slots(pass_record: dict[str, Any]) -> list[str]:
+    self_check = pass_record.get("self_check")
+    if not isinstance(self_check, dict):
+        nested = pass_record.get("source_pass_ops")
+        if isinstance(nested, dict):
+            self_check = nested.get("self_check")
+    if not isinstance(self_check, dict):
+        return []
+    missing = self_check.get("missing_slots")
+    if not isinstance(missing, list):
+        return []
+    return [str(item).strip() for item in missing if str(item).strip()]
+
+
+def _list_range_inventory_existing_fact_context(source_compile: dict[str, Any], *, limit: int = 80) -> list[str]:
+    relevant_prefixes = (
+        "claim_range(",
+        "item_range(",
+        "list_member(",
+        "claim_ground(",
+        "rejection_ground(",
+        "claim_rejection(",
+        "claim_treatment(",
+        "item_ground(",
+        "issue_ground(",
+        "violation_basis(",
+        "legal_citation_detail(",
+        "review_outcome(",
+    )
+    rows: list[str] = []
+    for fact in [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]:
+        if fact.startswith(relevant_prefixes):
+            rows.append(f"EXISTING LIST/RANGE FACT: {fact}")
+        if len(rows) >= limit:
+            break
+    if not rows:
+        return []
+    return [
+        (
+            "PROFILE LIST/RANGE INVENTORY REPAIR FOLLOW-UP: existing typed list/range and companion "
+            "facts are listed below for de-duplication and same-subject completion. They are context, "
+            "not source evidence; emit new facts only when the raw source text itself supports them."
+        ),
+        *rows,
+    ]
+
+
+def _profile_legal_citation_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        args = candidate.get("args")
+        arg_text = " ".join(str(arg).lower() for arg in args if isinstance(args, list))
+        haystack = base + " " + arg_text
+        if base not in LEGAL_CITATION_REPAIR_BASE_NAMES and not any(
+            token in haystack
+            for token in (
+                "citation",
+                "cfr",
+                "section",
+                "statute",
+                "statutory",
+                "regulation",
+                "rule",
+                "legal_basis",
+            )
+        ):
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+GOVERNED_SUBJECT_DISCOVERY_BASE_NAMES = {
+    "claim_ground",
+    "claim_range",
+    "item_range",
+    "legal_citation_detail",
+    "list_member",
+    "review_outcome",
+    "rejection_ground",
+    "violation_basis",
+}
+
+
+def _profile_governed_subject_discovery_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        if base not in GOVERNED_SUBJECT_DISCOVERY_BASE_NAMES:
+            continue
+        if carrier_contract(signature) is None:
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _profile_governed_subject_discovery_context_lines(
+    *,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    carriers = _profile_governed_subject_discovery_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    contract_lines = carrier_contract_prompt_lines(carriers[:16])
+    lines = [
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: source-owned subject discovery is unstable. This pass is "
+            "proposal-only; emit only source-grounded typed facts through allowed governed carrier contracts, "
+            "and let the mapper decide admission."
+        ),
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: discover the governed subjects first, then populate their "
+            "companion families. A governed subject is a source-stated set/action/finding/rejection/violation that "
+            "can carry range or membership, ground/status, citation/basis, and review/outcome rows on one shared id."
+        ),
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: when a source states overlapping subsets, make one stable "
+            "subject id per distinct source-stated subset. Do not use bare item numbers as subject ids when a range "
+            "or set carrier can represent the subset. Do not copy a later narrower subset inventory onto an earlier "
+            "all-items ground."
+        ),
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: for each governed subject you emit, populate every applicable "
+            "allowed companion carrier from the source. If claim_range/4, claim_ground/4, legal_citation_detail/4, "
+            "or review_outcome/4 are all allowed and applicable, reuse the exact same subject id across them."
+        ),
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, answer-bearing source excerpts, or private predicates. The output must be typed governed "
+            "carrier facts only."
+        ),
+        (
+            "PROFILE GOVERNED SUBJECT DISCOVERY PASS: compatible governed signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+    ]
+    existing = _governed_subject_existing_fact_context(source_compile)
+    if existing:
+        lines.extend(
+            line.replace("PROFILE LEGAL CITATION REPAIR PASS", "PROFILE GOVERNED SUBJECT DISCOVERY PASS")
+            for line in existing
+        )
+    return [*lines, *contract_lines]
+
+
+def _apply_profile_governed_subject_discovery_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_governed_subject_discovery_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_governed_subject_discovery_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    context_lines = _profile_governed_subject_discovery_context_lines(
+        parsed_profile=parsed_profile,
+        source_compile=source_compile,
+    )
+    if not carriers or not context_lines:
+        source_compile["profile_governed_subject_discovery"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_governed_subject_discovery",
+        purpose="repair governed subject discovery without source-record answer routing",
+        focus="stable governed subject bundles for set/action/finding/rejection/violation carriers",
+        completion=(
+            "Emit only source-grounded typed governed carrier facts for stable subject bundles; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver stable subject ids with applicable typed companion rows: range or membership, "
+            "ground/status, citation/basis, and review/outcome."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=max(16, min(48, int(getattr(args, "focused_pass_operation_target", 48) or 48))),
+    )
+    compiled["pass_id"] = "profile_governed_subject_discovery"
+    compiled["purpose"] = "repair governed subject discovery without source-record answer routing"
+    compiled["focus"] = "stable governed subject bundles for set/action/finding/rejection/violation carriers"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_governed_subject_discovery")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_governed_subject_discovery",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_governed_subject_discovery_new_facts", []))
+            if isinstance(compiled.get("_profile_governed_subject_discovery_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_governed_subject_discovery"] = metadata
+    return metadata
+
+
+def _governed_subject_manifest_messages(
+    *,
+    source_text: str,
+    carriers: list[str],
+    source_compile: dict[str, Any],
+    retry_note: str = "",
+) -> list[dict[str, str]]:
+    existing = _governed_subject_existing_fact_context(source_compile)
+    context_lines = [
+        "You are compiling source text into governed subject bundles.",
+        "Return governed_subject_manifest_v1 JSON only.",
+        "A subject is a source-stated set/action/finding/rejection/violation that companion facts can share.",
+        "Use one stable subject_id per distinct source-stated subset or action.",
+        "For each subject, fill ranges, ground, legal_citations, and review_outcomes when source-stated and applicable.",
+        "If a companion is unavailable or uncertain, leave its field empty or ground.present=false and add an omitted_companions note.",
+        "Do not emit source prose excerpts, source_record rows, answer text, or private predicate names.",
+        "Allowed governed carrier signatures: " + ", ".join(carriers[:16]),
+        *existing[:80],
+    ]
+    if retry_note:
+        context_lines.extend(
+            [
+                "RETRY: the previous governed_subject_manifest_v1 response was not valid JSON.",
+                retry_note,
+                "Return compact valid JSON only. Use fewer subjects if needed, but every object must satisfy the schema.",
+            ]
+        )
+    return [
+        {
+            "role": "system",
+            "content": "\n".join(context_lines),
+        },
+        {
+            "role": "user",
+            "content": source_text,
+        },
+    ]
+
+
+def _governed_subject_atom_rows_messages(
+    *,
+    source_text: str,
+    carriers: list[str],
+    source_compile: dict[str, Any],
+    retry_note: str = "",
+) -> list[dict[str, str]]:
+    carriers = _governed_subject_atom_row_carriers(carriers)
+    del source_compile
+    context_lines = [
+        "You are compiling source text into governed subject atom rows.",
+        "Return governed_subject_atom_rows_v1 JSON only, with no markdown and no prose outside the JSON object.",
+        "Emit one row per source-stated governed carrier fact.",
+        "Each row must use a registered signature and exactly four typed args in predicate order.",
+        "Reuse one stable subject_id for companion rows about the same subset, action, finding, rejection, or violation.",
+        "Do not emit source prose excerpts, source_record rows, answer text, or private predicate names.",
+        "This is a source-owned reconstruction pass. Re-read the source text instead of trusting any previous compiled facts.",
+        "Do not use list_member/4 or item_range/4 in this atom-row pass. Use claim_range/4 for claim subsets.",
+        "Allowed governed carrier signatures: " + ", ".join(carriers[:16]),
+        "For claim_range/4 args are subject_id, start_claim, end_claim, source_or_scope.",
+        "For claim_ground/4 args are subject_id, ground_or_theory, reference, status. The status slot is an outcome such as rejected, not a statute or citation.",
+        "For legal_citation_detail/4 args are subject_id, citation, role, source_or_scope. The role slot is a citation role such as statutory_ground, not the reference name.",
+        "For review_outcome/4 args are subject_id, reviewer, outcome, source_or_scope.",
+        "Do not collapse noncontiguous item lists into broad ranges. A list such as 1, 2, 4, 6-9 needs separate contiguous claim_range rows.",
+        "Keep ground, reference, and citation separate. For 'anticipated by Reference X', claim_ground args use anticipation, Reference X, rejected.",
+        "For 'obvious over Reference X', claim_ground args use obviousness, Reference X, rejected.",
+        "Do not use a statute or citation as the claim_ground reference; put statutes only in legal_citation_detail rows.",
+        "Preserve source list notation. Comma-separated adjacent items such as 1, 2 are two singleton claim_range rows; only hyphenated spans such as 6-9 become range rows.",
+        "When one source sentence states a reviewed rejection, preserve the same subject_id across its claim_range, claim_ground, and legal_citation_detail rows.",
+        "When a later review sentence affirms or reverses those rejections, add review_outcome rows for the same subject_id values.",
+        "Include subject_accounts when the accountability rows do not crowd out correct governed carrier rows.",
+        "For each governed subject_id in rows, account for applicable companion signatures with status instances, none_found, uncertain, or not_applicable.",
+        "Use subject_accounts: [] only if rows is empty or no governed subject is emitted.",
+        "subject_accounts are accountability diagnostics only; they do not create durable facts. Use them to expose silent omissions instead of hiding them.",
+    ]
+    if retry_note:
+        context_lines.extend(
+            [
+                "RETRY: the previous governed subject manifest response was not valid JSON.",
+                retry_note,
+                "Use the flat atom-row schema. Keep rows compact and valid JSON.",
+            ]
+        )
+    return [
+        {
+            "role": "system",
+            "content": "\n".join(context_lines),
+        },
+        {
+            "role": "user",
+            "content": source_text,
+        },
+    ]
+
+
+def _governed_subject_atom_row_carriers(carriers: list[str]) -> list[str]:
+    supported = {"claim_range/4", "claim_ground/4", "legal_citation_detail/4", "review_outcome/4"}
+    return [signature for signature in carriers if signature in supported]
+
+
+def _facts_from_governed_subject_manifest(
+    manifest: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+) -> dict[str, Any]:
+    facts: list[str] = []
+    skipped: list[dict[str, str]] = []
+    subjects = manifest.get("subjects")
+    if not isinstance(subjects, list):
+        return {"facts": [], "skipped": [{"reason": "subjects_not_list", "value": ""}]}
+    for index, subject in enumerate(subjects):
+        if not isinstance(subject, dict):
+            skipped.append({"reason": "subject_not_object", "value": str(index)})
+            continue
+        subject_id = _manifest_atom(subject.get("subject_id", ""))
+        if not subject_id:
+            skipped.append({"reason": "missing_subject_id", "value": str(index)})
+            continue
+        if "claim_range/4" in allowed_signatures:
+            ranges = subject.get("ranges")
+            if isinstance(ranges, list):
+                for range_index, item in enumerate(ranges):
+                    if not isinstance(item, dict):
+                        skipped.append({"reason": "range_not_object", "value": f"{subject_id}:{range_index}"})
+                        continue
+                    start = _manifest_range_value(item.get("start", ""))
+                    end = _manifest_range_value(item.get("end", ""))
+                    source_or_scope = _manifest_atom(item.get("source_or_scope", "")) or "direct"
+                    if not start or not end:
+                        skipped.append({"reason": "range_missing_boundary", "value": subject_id})
+                        continue
+                    facts.append(f"claim_range({subject_id}, {start}, {end}, {source_or_scope}).")
+        ground = subject.get("ground")
+        if "claim_ground/4" in allowed_signatures and isinstance(ground, dict) and bool(ground.get("present")):
+            theory = _governed_ground_atom(_manifest_atom(ground.get("theory", "")))
+            reference = _governed_reference_atom(_manifest_atom(ground.get("reference", "")))
+            status = _manifest_atom(ground.get("status", ""))
+            if theory and reference and status:
+                facts.append(f"claim_ground({subject_id}, {theory}, {reference}, {status}).")
+            else:
+                skipped.append({"reason": "ground_missing_slot", "value": subject_id})
+        if "legal_citation_detail/4" in allowed_signatures:
+            citations = subject.get("legal_citations")
+            if isinstance(citations, list):
+                for citation_index, item in enumerate(citations):
+                    if not isinstance(item, dict):
+                        skipped.append({"reason": "citation_not_object", "value": f"{subject_id}:{citation_index}"})
+                        continue
+                    citation = _governed_citation_atom(_manifest_citation_value(item.get("citation", "")))
+                    role = _governed_legal_role_atom(_manifest_atom(item.get("role", "")), citation)
+                    source_or_scope = _manifest_atom(item.get("source_or_scope", "")) or "direct"
+                    if not citation or not role:
+                        skipped.append({"reason": "citation_missing_slot", "value": subject_id})
+                        continue
+                    facts.append(f"legal_citation_detail({subject_id}, {citation}, {role}, {source_or_scope}).")
+        if "review_outcome/4" in allowed_signatures:
+            outcomes = subject.get("review_outcomes")
+            if isinstance(outcomes, list):
+                for outcome_index, item in enumerate(outcomes):
+                    if not isinstance(item, dict):
+                        skipped.append({"reason": "review_outcome_not_object", "value": f"{subject_id}:{outcome_index}"})
+                        continue
+                    reviewer = _governed_review_actor_atom(_manifest_atom(item.get("reviewer", "")))
+                    outcome = _governed_review_outcome_atom(_manifest_atom(item.get("outcome", "")))
+                    source_or_scope = _manifest_atom(item.get("source_or_scope", "")) or "direct"
+                    if not reviewer or not outcome:
+                        skipped.append({"reason": "review_outcome_missing_slot", "value": subject_id})
+                        continue
+                    facts.append(f"review_outcome({subject_id}, {reviewer}, {outcome}, {source_or_scope}).")
+    return {"facts": list(dict.fromkeys(facts)), "skipped": skipped}
+
+
+def _facts_from_governed_subject_atom_rows(
+    payload: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+) -> dict[str, Any]:
+    facts: list[str] = []
+    skipped: list[dict[str, str]] = []
+    rows = _governed_subject_atom_payload_rows(payload)
+    if rows is None:
+        return {"facts": [], "skipped": [{"reason": "rows_not_list", "value": ""}]}
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict):
+            skipped.append({"reason": "row_not_object", "value": str(index)})
+            continue
+        signature, args = _governed_subject_atom_row_signature_args(row)
+        if signature not in allowed_signatures:
+            skipped.append({"reason": "signature_not_allowed", "value": signature})
+            continue
+        if not isinstance(args, list) or len(args) != 4:
+            skipped.append({"reason": "args_not_four", "value": signature})
+            continue
+        arg0, arg1, arg2, arg3 = args
+        subject_id = _manifest_atom(arg0)
+        if not subject_id:
+            skipped.append({"reason": "missing_subject_id", "value": signature})
+            continue
+        if signature == "claim_range/4":
+            start = _manifest_range_value(arg1)
+            end = _manifest_range_value(arg2)
+            source_or_scope = _manifest_atom(arg3) or "direct"
+            if start and end:
+                facts.append(f"claim_range({subject_id}, {start}, {end}, {source_or_scope}).")
+            else:
+                skipped.append({"reason": "range_missing_boundary", "value": subject_id})
+        elif signature == "claim_ground/4":
+            theory = _governed_ground_atom(_manifest_atom(arg1))
+            reference = _governed_reference_atom(_manifest_atom(arg2))
+            status = _manifest_atom(arg3)
+            if theory and reference and status:
+                facts.append(f"claim_ground({subject_id}, {theory}, {reference}, {status}).")
+            else:
+                skipped.append({"reason": "ground_missing_slot", "value": subject_id})
+        elif signature == "legal_citation_detail/4":
+            citation = _governed_citation_atom(_manifest_citation_value(arg1))
+            role = _governed_legal_role_atom(_manifest_atom(arg2), citation)
+            source_or_scope = _manifest_atom(arg3) or "direct"
+            if citation and role:
+                facts.append(f"legal_citation_detail({subject_id}, {citation}, {role}, {source_or_scope}).")
+            else:
+                skipped.append({"reason": "citation_missing_slot", "value": subject_id})
+        elif signature == "review_outcome/4":
+            reviewer = _governed_review_actor_atom(_manifest_atom(arg1))
+            outcome = _governed_review_outcome_atom(_manifest_atom(arg2))
+            source_or_scope = _manifest_atom(arg3) or "direct"
+            if reviewer and outcome:
+                facts.append(f"review_outcome({subject_id}, {reviewer}, {outcome}, {source_or_scope}).")
+            else:
+                skipped.append({"reason": "review_outcome_missing_slot", "value": subject_id})
+        else:
+            skipped.append({"reason": "signature_mapping_unimplemented", "value": signature})
+    account_report = _governed_subject_atom_accounting_report(
+        payload,
+        allowed_signatures=allowed_signatures,
+    )
+    return {
+        "facts": list(dict.fromkeys(facts)),
+        "skipped": skipped,
+        "subject_accounts": account_report["subject_accounts"],
+        "account_skipped": account_report["account_skipped"],
+    }
+
+
+def _governed_subject_atom_accounting_report(
+    payload: dict[str, Any],
+    *,
+    allowed_signatures: set[str],
+) -> dict[str, Any]:
+    statuses = {"instances", "none_found", "uncertain", "not_applicable"}
+    rows = payload.get("subject_accounts")
+    if rows is None:
+        return {"subject_accounts": [], "account_skipped": [{"reason": "subject_accounts_missing", "value": ""}]}
+    if not isinstance(rows, list):
+        return {"subject_accounts": [], "account_skipped": [{"reason": "subject_accounts_not_list", "value": ""}]}
+    accounts: list[dict[str, str]] = []
+    skipped: list[dict[str, str]] = []
+    for account_index, row in enumerate(rows):
+        if not isinstance(row, dict):
+            skipped.append({"reason": "subject_account_not_object", "value": str(account_index)})
+            continue
+        subject_id = _manifest_atom(row.get("subject_id", ""))
+        if not subject_id:
+            skipped.append({"reason": "subject_account_missing_subject_id", "value": str(account_index)})
+            continue
+        companion_statuses = row.get("companion_statuses")
+        if not isinstance(companion_statuses, list):
+            skipped.append({"reason": "companion_statuses_not_list", "value": subject_id})
+            continue
+        for status_index, status_row in enumerate(companion_statuses):
+            if not isinstance(status_row, dict):
+                skipped.append({"reason": "companion_status_not_object", "value": f"{subject_id}:{status_index}"})
+                continue
+            signature = str(status_row.get("signature") or "").strip()
+            if signature not in allowed_signatures:
+                skipped.append({"reason": "companion_status_signature_not_allowed", "value": signature})
+                continue
+            status = str(status_row.get("status") or "").strip()
+            if status not in statuses:
+                skipped.append({"reason": "companion_status_invalid_status", "value": f"{subject_id}:{signature}:{status}"})
+                continue
+            accounts.append(
+                {
+                    "subject": subject_id,
+                    "signature": signature,
+                    "status": status,
+                    "reason": _manifest_account_reason(status_row.get("reason", "")),
+                }
+            )
+    return {"subject_accounts": accounts, "account_skipped": skipped}
+
+
+def _governed_subject_atom_payload_rows(payload: dict[str, Any]) -> list[Any] | None:
+    rows = payload.get("rows")
+    if isinstance(rows, list):
+        return rows
+    rows = payload.get("governed_subject_atom_rows_v1")
+    if isinstance(rows, list):
+        return rows
+    return None
+
+
+def _governed_subject_atom_row_signature_args(row: dict[str, Any]) -> tuple[str, Any]:
+    signature = str(row.get("signature") or row.get("sig") or "").strip()
+    args = row.get("args")
+    if signature:
+        return signature, args
+    predicate = str(row.get("predicate") or "").strip()
+    if predicate and isinstance(args, list):
+        return _governed_subject_signature_from_predicate(predicate), args
+    for predicate in ["claim_range", "claim_ground", "legal_citation_detail", "review_outcome"]:
+        value = row.get(predicate)
+        if isinstance(value, list):
+            return _governed_subject_signature_from_predicate(predicate), value
+    return "", args
+
+
+def _governed_subject_signature_from_predicate(predicate: str) -> str:
+    text = str(predicate or "").strip()
+    if "/" in text:
+        return text
+    if text in {"claim_range", "claim_ground", "legal_citation_detail", "review_outcome"}:
+        return f"{text}/4"
+    return text
+
+
+def _replace_governed_subject_atom_row_facts(
+    *,
+    existing_facts: list[str],
+    replacement_facts: list[str],
+) -> dict[str, Any]:
+    replacement_keys = {
+        key
+        for fact in replacement_facts
+        if (key := _governed_subject_atom_fact_key(fact)) is not None
+    }
+    retained: list[str] = []
+    replaced: list[str] = []
+    for fact in existing_facts:
+        key = _governed_subject_atom_fact_key(fact)
+        if key is not None and key in replacement_keys:
+            replaced.append(fact)
+            continue
+        retained.append(fact)
+    combined: list[str] = []
+    seen: set[str] = set()
+    for fact in [*retained, *replacement_facts]:
+        fact_text = str(fact).strip()
+        if not fact_text or fact_text in seen:
+            continue
+        seen.add(fact_text)
+        combined.append(fact_text)
+    appended = [fact for fact in combined if fact not in set(retained)]
+    return {
+        "facts": combined,
+        "retained_facts": retained,
+        "replaced_facts": replaced,
+        "appended_facts": appended,
+    }
+
+
+def _governed_subject_atom_fact_key(fact: Any) -> tuple[str, str] | None:
+    parsed = _parse_fact_clause(str(fact).strip())
+    if parsed is None:
+        return None
+    predicate, args = parsed
+    if predicate not in GOVERNED_SUBJECT_ATOM_ROW_PREDICATES or not args:
+        return None
+    return predicate, str(args[0]).strip()
+
+
+def _call_governed_subject_atom_rows_fallback(
+    *,
+    source_compile: dict[str, Any],
+    source_text: str,
+    carriers: list[str],
+    args: argparse.Namespace,
+    parse_error: str,
+) -> dict[str, Any]:
+    row_carriers = _governed_subject_atom_row_carriers(carriers)
+    response = _call_lmstudio_json_schema(
+        base_url=str(args.base_url),
+        model=str(args.model),
+        messages=_governed_subject_atom_rows_messages(
+            source_text=source_text,
+            carriers=row_carriers,
+            source_compile=source_compile,
+            retry_note=f"Manifest parse error was: {parse_error or 'unknown parse error'}.",
+        ),
+        schema=GOVERNED_SUBJECT_ATOM_ROWS_JSON_SCHEMA,
+        schema_name="governed_subject_atom_rows_v1",
+        timeout=int(args.timeout),
+        temperature=float(args.temperature),
+        top_p=float(args.top_p),
+        max_tokens=min(int(args.max_tokens), 6000),
+        strict_response_format=False,
+    )
+    parsed: dict[str, Any] | None = None
+    fallback_parse_error = ""
+    try:
+        loaded = json.loads(str(response.get("content", "")))
+        if isinstance(loaded, dict):
+            parsed = loaded
+    except json.JSONDecodeError as exc:
+        fallback_parse_error = str(exc)
+    report = (
+        _facts_from_governed_subject_atom_rows(
+            parsed,
+            allowed_signatures=set(row_carriers[:16]),
+        )
+        if isinstance(parsed, dict)
+        else {"facts": [], "skipped": []}
+    )
+    return {
+        "attempted": True,
+        "ok": isinstance(parsed, dict),
+        "parse_error": fallback_parse_error,
+        "raw_content": str(response.get("content", ""))[:2000],
+        "offered_carriers": row_carriers[:16],
+        "payload": parsed if isinstance(parsed, dict) else {},
+        "fact_report": report,
+        "openrouter_generation_metadata": response.get("openrouter_generation_metadata")
+        if isinstance(response.get("openrouter_generation_metadata"), dict)
+        else {},
+    }
+
+
+def _apply_profile_governed_subject_manifest_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    del intake_plan, extra_context
+    carriers = _profile_governed_subject_discovery_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_governed_subject_manifest_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    if not carriers:
+        source_compile["profile_governed_subject_manifest"] = metadata
+        return metadata
+    atom_rows_primary = _call_governed_subject_atom_rows_fallback(
+        source_compile=source_compile,
+        source_text=source_text,
+        carriers=carriers,
+        args=args,
+        parse_error="primary governed subject atom-row pass",
+    )
+    if bool(atom_rows_primary.get("ok")):
+        prior_facts = {
+            str(item).strip()
+            for item in source_compile.get("facts", [])
+            if str(item).strip()
+        }
+        fact_report = atom_rows_primary.get("fact_report")
+        atom_row_facts = fact_report.get("facts", []) if isinstance(fact_report, dict) else []
+        replacement_report = _replace_governed_subject_atom_row_facts(
+            existing_facts=[str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()],
+            replacement_facts=[str(item).strip() for item in atom_row_facts if str(item).strip()],
+        )
+        facts = replacement_report["facts"]
+        appended = replacement_report["appended_facts"]
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+        metadata.update(
+            {
+                "attempted": True,
+                "ok": True,
+                "manifest_attempted": False,
+                "atom_rows_primary": atom_rows_primary,
+                "new_fact_count": len(appended),
+                "new_facts": appended[:100],
+                "replaced_supported_fact_count": len(replacement_report["replaced_facts"]),
+                "replaced_supported_facts": replacement_report["replaced_facts"][:100],
+                "skipped": fact_report.get("skipped", [])[:100] if isinstance(fact_report, dict) else [],
+                "policy": {
+                    "schema_version": "governed_subject_atom_rows_mapping_v1",
+                    "authority": "llm_structured_atom_rows_to_typed_carriers",
+                    "not_query_interpretation": True,
+                    "not_source_record_interpretation": True,
+                    "description": (
+                        "Maps source-owned LLM atom rows into registered governed carrier facts. "
+                        "Python normalizes typed atom slots and applies no source-prose parsing."
+                    ),
+                },
+            }
+        )
+        source_compile["profile_governed_subject_manifest"] = metadata
+        source_compile["profile_governed_subject_manifest_new_fact_count"] = len(appended)
+        source_compile["profile_governed_subject_manifest_new_facts"] = appended[:100]
+        source_compile["profile_governed_subject_manifest_prior_fact_count"] = len(prior_facts)
+        return metadata
+    response = _call_lmstudio_json_schema(
+        base_url=str(args.base_url),
+        model=str(args.model),
+        messages=_governed_subject_manifest_messages(
+            source_text=source_text,
+            carriers=carriers,
+            source_compile=source_compile,
+        ),
+        schema=GOVERNED_SUBJECT_MANIFEST_JSON_SCHEMA,
+        schema_name="governed_subject_manifest_v1",
+        timeout=int(args.timeout),
+        temperature=float(args.temperature),
+        top_p=float(args.top_p),
+        max_tokens=min(int(args.max_tokens), 12000),
+    )
+    parsed: dict[str, Any] | None = None
+    parse_error = ""
+    try:
+        loaded = json.loads(str(response.get("content", "")))
+        if isinstance(loaded, dict):
+            parsed = loaded
+    except json.JSONDecodeError as exc:
+        parse_error = str(exc)
+    retry_response: dict[str, Any] | None = None
+    if not isinstance(parsed, dict):
+        retry_response = _call_lmstudio_json_schema(
+            base_url=str(args.base_url),
+            model=str(args.model),
+            messages=_governed_subject_manifest_messages(
+                source_text=source_text,
+                carriers=carriers,
+                source_compile=source_compile,
+                retry_note=f"Parse error was: {parse_error or 'unknown parse error'}.",
+            ),
+            schema=GOVERNED_SUBJECT_MANIFEST_JSON_SCHEMA,
+            schema_name="governed_subject_manifest_v1",
+            timeout=int(args.timeout),
+            temperature=float(args.temperature),
+            top_p=float(args.top_p),
+            max_tokens=min(int(args.max_tokens), 12000),
+        )
+        try:
+            loaded = json.loads(str(retry_response.get("content", "")))
+            if isinstance(loaded, dict):
+                parsed = loaded
+                parse_error = ""
+        except json.JSONDecodeError as exc:
+            parse_error = str(exc)
+    if not isinstance(parsed, dict):
+        atom_rows_fallback = _call_governed_subject_atom_rows_fallback(
+            source_compile=source_compile,
+            source_text=source_text,
+            carriers=carriers,
+            args=args,
+            parse_error=parse_error,
+        )
+        if bool(atom_rows_fallback.get("ok")):
+            prior_facts = {
+                str(item).strip()
+                for item in source_compile.get("facts", [])
+                if str(item).strip()
+            }
+            appended: list[str] = []
+            facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+            existing = set(facts)
+            fact_report = atom_rows_fallback.get("fact_report")
+            fallback_facts = fact_report.get("facts", []) if isinstance(fact_report, dict) else []
+            for fact in fallback_facts:
+                fact_text = str(fact).strip()
+                if not fact_text or fact_text in existing:
+                    continue
+                existing.add(fact_text)
+                appended.append(fact_text)
+                facts.append(fact_text)
+            if appended:
+                source_compile["facts"] = facts
+                source_compile["unique_fact_count"] = len(facts)
+            metadata.update(
+                {
+                    "attempted": True,
+                    "ok": True,
+                    "manifest_ok": False,
+                    "manifest_parse_error": parse_error or "manifest_parse_failed",
+                    "raw_content": str(response.get("content", ""))[:2000],
+                    "retry_raw_content": str((retry_response or {}).get("content", ""))[:2000],
+                    "atom_rows_fallback": atom_rows_fallback,
+                    "new_fact_count": len(appended),
+                    "new_facts": appended[:100],
+                    "skipped": fact_report.get("skipped", [])[:100] if isinstance(fact_report, dict) else [],
+                    "policy": {
+                        "schema_version": "governed_subject_atom_rows_mapping_v1",
+                        "authority": "llm_structured_atom_rows_to_typed_carriers",
+                        "not_query_interpretation": True,
+                        "not_source_record_interpretation": True,
+                        "description": (
+                            "Maps LLM-owned flat governed atom rows into registered carrier facts after "
+                            "the nested manifest schema failed. Python normalizes typed atom slots and applies "
+                            "no source-prose parsing."
+                        ),
+                    },
+                }
+            )
+            source_compile["profile_governed_subject_manifest"] = metadata
+            source_compile["profile_governed_subject_manifest_new_fact_count"] = len(appended)
+            source_compile["profile_governed_subject_manifest_new_facts"] = appended[:100]
+            source_compile["profile_governed_subject_manifest_prior_fact_count"] = len(prior_facts)
+            return metadata
+        metadata.update(
+            {
+                "attempted": True,
+                "ok": False,
+                "parse_error": parse_error or "manifest_parse_failed",
+                "raw_content": str(response.get("content", ""))[:2000],
+                "retry_raw_content": str((retry_response or {}).get("content", ""))[:2000],
+                "atom_rows_fallback": atom_rows_fallback,
+            }
+        )
+        source_compile["profile_governed_subject_manifest"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    fact_report = _facts_from_governed_subject_manifest(
+        parsed,
+        allowed_signatures=set(carriers[:16]),
+    )
+    appended: list[str] = []
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    for fact in fact_report["facts"]:
+        if fact in existing:
+            continue
+        existing.add(fact)
+        appended.append(fact)
+        facts.append(fact)
+    if appended:
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": True,
+            "new_fact_count": len(appended),
+            "new_facts": appended[:100],
+            "skipped": fact_report["skipped"][:100],
+            "manifest": parsed,
+            "openrouter_generation_metadata": response.get("openrouter_generation_metadata")
+            if isinstance(response.get("openrouter_generation_metadata"), dict)
+            else {},
+            "policy": {
+                "schema_version": "governed_subject_manifest_mapping_v1",
+                "authority": "llm_structured_manifest_to_typed_carriers",
+                "not_query_interpretation": True,
+                "not_source_record_interpretation": True,
+                "description": (
+                    "Maps an LLM-owned structured subject manifest into registered governed carrier facts. "
+                    "Python normalizes typed atom slots and applies no source-prose parsing."
+                ),
+            },
+        }
+    )
+    source_compile["profile_governed_subject_manifest"] = metadata
+    source_compile["profile_governed_subject_manifest_new_fact_count"] = len(appended)
+    source_compile["profile_governed_subject_manifest_new_facts"] = appended[:100]
+    source_compile["profile_governed_subject_manifest_prior_fact_count"] = len(prior_facts)
+    return metadata
+
+
+def _manifest_atom(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    if not text:
+        return ""
+    if re.match(r"^[0-9]", text):
+        text = f"v_{text}"
+    return text
+
+
+def _manifest_account_reason(value: Any) -> str:
+    text = str(value or "").strip()
+    text = re.sub(r"\s+", " ", text)
+    return text[:160]
+
+
+def _manifest_range_value(value: Any) -> str:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"\d+", text)
+    if match:
+        return str(int(text))
+    return _manifest_atom(text)
+
+
+def _manifest_citation_value(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    text = re.sub(r"[^a-z0-9]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    return text
+
+
+def _governed_subject_existing_fact_context(source_compile: dict[str, Any]) -> list[str]:
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    preferred_subjects = set(_legal_citation_repair_preferred_subject_ids(source_compile))
+    keep_predicates = {
+        "claim_ground",
+        "claim_range",
+        "item_range",
+        "list_member",
+        "rejection_ground",
+        "review_outcome",
+        "violation_basis",
+    }
+    kept: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, _args = parsed
+        if predicate not in keep_predicates:
+            continue
+        if preferred_subjects and _args and str(_args[0]).strip() not in preferred_subjects:
+            continue
+        kept.append(fact)
+        if len(kept) >= 80:
+            break
+    if not kept:
+        return []
+    lines = [
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: existing governed typed subject ids are listed below. "
+            "Reuse these ids when the source states a legal citation for the same governed action, claim set, "
+            "finding, rejection, violation, or reviewed subject. These are typed compile atoms, not source prose."
+        )
+    ]
+    if preferred_subjects:
+        lines.append(
+            "PROFILE LEGAL CITATION REPAIR PASS: preferred governed subject ids for legal citations: "
+            + ", ".join(sorted(preferred_subjects))
+            + ". If one of these ids fits the cited governed subject, emit legal_citation_detail/4 with "
+            "that exact subject id; do not create or revive a duplicate subject id."
+        )
+    for fact in kept:
+        lines.append(f"EXISTING GOVERNED FACT: {fact}")
+    return lines
+
+
+def _legal_citation_repair_preferred_subject_ids(source_compile: dict[str, Any]) -> list[str]:
+    """Return canonical typed subjects for legal-citation attachment.
+
+    This reducer reads only typed facts. It prefers claim-set subjects that
+    already have a canonical theory in claim_ground/4 and at least one governed
+    range/list/review companion, so citation repair does not attach statutes to
+    duplicate statute-stuffed subjects when better typed atoms already exist.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    canonical_claim_subjects: set[str] = set()
+    companion_subjects: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if not args:
+            continue
+        subject = str(args[0]).strip()
+        if not subject:
+            continue
+        if predicate == "claim_ground" and len(args) == 4:
+            ground = str(args[1]).strip().casefold()
+            if ground in LEGAL_CITATION_REPAIR_CANONICAL_GROUNDS:
+                canonical_claim_subjects.add(subject)
+            continue
+        if predicate in {"claim_range", "item_range", "list_member", "review_outcome", "rejection_ground", "violation_basis"}:
+            companion_subjects.add(subject)
+    preferred = sorted(canonical_claim_subjects & companion_subjects)
+    if preferred:
+        return preferred
+    return sorted(canonical_claim_subjects)
+
+
+def _profile_legal_citation_repair_context_lines(
+    *,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    carriers = _profile_legal_citation_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    contract_lines = carrier_contract_prompt_lines(carriers[:16])
+    return [
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: deterministic query delivery is missing typed legal citation "
+            "details in some documents. This pass is proposal-only; emit only source-grounded legal citation "
+            "detail rows through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: when the source states a statute, rule, section, regulation, "
+            "CFR citation, USC citation, case citation, clause, or legal basis for a governed subject, emit a "
+            "typed citation row with the subject id, citation, citation role/purpose, and source/scope anchor."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: preserve exact subsection markers in paragraph- or "
+            "section-scoped rows. If paragraph 6 states 15 U.S.C. 1681e(b) and GBL 380-j(a), emit the "
+            "full subsection atoms on rows scoped to the paragraph/section anchor instead of only a broader "
+            "act/title atom or only a document-level direct row."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: when the source says an investigation was commenced, "
+            "conducted, filed, issued, or brought pursuant to named provisions, preserve those provisions "
+            "as authority or statutory-ground citation rows with a recital/caption/investigation scope when "
+            "that is the source location. They need not be tied to a later obligation subject."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: when the same legal obligation clause says that cited laws include "
+            "future amendments, successor regulations, or later-adopted rules, preserve that coverage as its own "
+            "typed citation-scope row. For legal_citation_detail/4, use a compact citation atom such as "
+            "future_amendments_to_foregoing_laws_regulations_and_rules and a structural role such as amendment_scope; "
+            "do not preserve the whole obligation sentence as prose."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: when a numbered paragraph, item, obligation, or requirement says "
+            "the subject must comply with an enumerated set of laws, emit every enumerated citation on that same "
+            "paragraph/obligation scope anchor. Do not leave state-law citations only on recital, caption, or "
+            "document-level direct rows while emitting only a federal citation on the paragraph-scoped row."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: when a notice, order, or instruction groups citations by "
+            "procedural purpose, preserve that purpose in legal_citation_detail/4's role slot. Do not collapse "
+            "different citation-purpose groups into a generic role such as deadline_source when the source "
+            "distinguishes agency_review_or_rehearing_right, petition_for_review_requirements, appeal_path, "
+            "response_deadline, or similar purpose-specific groups."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: if claim_ground/4, claim_range/4, review_outcome/4, "
+            "rejection_ground/4, or violation_basis/5 already uses a subject id for the same source-stated "
+            "ground or action, reuse that exact subject id. Do not create a document-level citation row when "
+            "the citation belongs to a specific governed set or action."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, or answer-bearing source excerpts. The output must be typed citation facts only."
+        ),
+        (
+            "PROFILE LEGAL CITATION REPAIR PASS: compatible legal citation signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+        *_governed_subject_existing_fact_context(source_compile),
+        *contract_lines,
+    ]
+
+
+def _apply_profile_legal_citation_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_legal_citation_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_legal_citation_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    context_lines = _profile_legal_citation_repair_context_lines(
+        parsed_profile=parsed_profile,
+        source_compile=source_compile,
+    )
+    if not carriers or not context_lines:
+        source_compile["profile_legal_citation_repair"] = metadata
+        return metadata
+    preferred_subjects = set(_legal_citation_repair_preferred_subject_ids(source_compile))
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_legal_citation_repair",
+        purpose="repair typed legal citation detail delivery without source-record answer routing",
+        focus="missing typed statute, rule, section, regulation, case, clause, and legal-basis citation rows",
+        completion=(
+            "Emit only source-grounded typed legal citation rows tied to governed subjects where possible; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated legal citations as typed predicates with subject id, citation value, "
+            "citation role or purpose, and source/scope anchor. Prefer legal_citation_detail/4 when available."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=12,
+    )
+    compiled["pass_id"] = "profile_legal_citation_repair"
+    compiled["purpose"] = "repair typed legal citation detail delivery without source-record answer routing"
+    compiled["focus"] = "missing typed statute, rule, section, regulation, case, clause, and legal-basis citation rows"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_legal_citation_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_legal_citation_repair",
+        pass_record=compiled,
+    )
+    subject_contract_report = _enforce_legal_citation_repair_subject_contract(
+        source_compile,
+        preferred_subjects=preferred_subjects,
+        prior_facts=prior_facts,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_legal_citation_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_legal_citation_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "subject_contract": subject_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_legal_citation_repair"] = metadata
+    return metadata
+
+
+def _enforce_legal_citation_repair_subject_contract(
+    source_compile: dict[str, Any],
+    *,
+    preferred_subjects: set[str],
+    prior_facts: set[str],
+) -> dict[str, Any]:
+    """Reject repair-pass citation rows attached to noncanonical duplicate subjects.
+
+    This is typed-fact governance only. It does not inspect source text or query
+    wording; it only prevents a legal-citation repair pass from reviving a
+    duplicate subject id when canonical governed subjects were already present.
+    """
+
+    if not preferred_subjects:
+        source_compile["profile_legal_citation_subject_contract_rejected_count"] = 0
+        return {"rejected_count": 0, "rejected_facts": [], "preferred_subjects": []}
+    kept: list[str] = []
+    rejected: list[str] = []
+    for fact in [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]:
+        if fact in prior_facts:
+            kept.append(fact)
+            continue
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            kept.append(fact)
+            continue
+        predicate, args = parsed
+        if predicate == "legal_citation_detail" and args and str(args[0]).strip() not in preferred_subjects:
+            rejected.append(fact)
+            continue
+        kept.append(fact)
+    if rejected:
+        source_compile["facts"] = kept
+        source_compile["unique_fact_count"] = len(kept)
+        source_compile["profile_legal_citation_subject_contract_policy"] = {
+            "schema_version": "profile_legal_citation_subject_contract_v1",
+            "authority": "typed_contract_validation_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Rejects repair-pass legal_citation_detail/4 rows attached to nonpreferred subject ids "
+                "when canonical governed subject ids already exist in typed atoms."
+            ),
+        }
+    source_compile["profile_legal_citation_subject_contract_rejected_count"] = len(rejected)
+    source_compile["profile_legal_citation_subject_contract_rejected_facts"] = rejected[:100]
+    return {
+        "rejected_count": len(rejected),
+        "rejected_facts": rejected[:100],
+        "preferred_subjects": sorted(preferred_subjects),
+    }
+
+
+def _profile_review_outcome_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        if signature.split("/", 1)[0].strip().lower() != "review_outcome":
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _profile_monetary_payment_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        if base not in MONETARY_PAYMENT_REPAIR_BASE_NAMES:
+            continue
+        if carrier_contract(signature) is None:
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _profile_monetary_payment_repair_context_lines(
+    *,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    carriers = _profile_monetary_payment_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    keep_predicates = {
+        "document_date",
+        "legal_citation_detail",
+        "monetary_payment",
+        "obligation",
+        "obligation_enforces",
+        "payment_amount",
+        "payment_deadline",
+    }
+    kept: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, _args = parsed
+        if predicate not in keep_predicates:
+            continue
+        kept.append(fact)
+        if len(kept) >= 80:
+            break
+    contract_lines = carrier_contract_prompt_lines(carriers[:8])
+    lines = [
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: deterministic query delivery is missing typed payment "
+            "rows that carry amount, authority or basis, purpose or use, and source scope together. This "
+            "pass is proposal-only; emit only source-grounded monetary_payment/5 rows through allowed "
+            "predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: for each source-stated money amount, emit one "
+            "monetary_payment/5 row when the source states the amount and at least one of authority, "
+            "basis, purpose, use, restitution, penalty, reimbursement, refund, settlement, or payment "
+            "scope. Keep the amount, authority_or_basis, purpose_or_use, and source_or_scope in separate "
+            "typed slots."
+        ),
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: if existing facts split a payment amount, legal "
+            "authority, and purpose across different predicate families, use the source payment clause to "
+            "emit a single monetary_payment/5 row that unifies those source-stated slots. Do not solve this "
+            "by writing prose windows or display rows."
+        ),
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: use compact typed atoms such as usd_725000, "
+            "gbl_349_d, restitution_and_penalties, nyag_discretion, agreement_15, paragraph_15, or "
+            "source-local equivalents. Do not quote source prose as a slot value."
+        ),
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: do not emit source_record_* rows, display text rows, "
+            "broad obligation summaries, prose windows, or answer-bearing source excerpts. The output must "
+            "be typed monetary-payment facts only."
+        ),
+        (
+            "PROFILE MONETARY PAYMENT REPAIR PASS: compatible monetary signatures to consider: "
+            + ", ".join(carriers[:8])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+    ]
+    for fact in kept:
+        lines.append(f"EXISTING MONETARY FACT: {fact}")
+    return [*lines, *contract_lines]
+
+
+def _apply_profile_monetary_payment_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_monetary_payment_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_monetary_payment_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:8],
+    }
+    context_lines = _profile_monetary_payment_repair_context_lines(
+        parsed_profile=parsed_profile,
+        source_compile=source_compile,
+    )
+    if not carriers or not context_lines:
+        metadata["reason"] = "no_monetary_payment_carriers_offered"
+        source_compile["profile_monetary_payment_repair"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_monetary_payment_repair",
+        purpose="repair typed monetary payment delivery without source-record answer routing",
+        focus="missing typed monetary_payment rows for source-stated payment, relief, penalty, restitution, reimbursement, and settlement amounts",
+        completion=(
+            "Emit only source-grounded monetary_payment/5 rows that keep amount, authority, purpose, "
+            "and source/scope as separate typed slots; do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:8]),
+        coverage_goals=(
+            "Deliver source-stated monetary payment details as typed predicates with subject id, amount, "
+            "authority or basis, purpose or use, and source/scope anchor."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=10,
+    )
+    compiled["pass_id"] = "profile_monetary_payment_repair"
+    compiled["purpose"] = "repair typed monetary payment delivery without source-record answer routing"
+    compiled["focus"] = (
+        "missing typed monetary_payment rows for source-stated payment, relief, penalty, restitution, "
+        "reimbursement, and settlement amounts"
+    )
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_monetary_payment_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:8]),
+        metadata_prefix="profile_monetary_payment_repair",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_monetary_payment_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_monetary_payment_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_monetary_payment_repair"] = metadata
+    return metadata
+
+
+DOCUMENT_DATE_REPAIR_PREDICATES = {
+    "document_date",
+    "event_date",
+    "event_time",
+    "event_timestamp",
+    "event_wall_time",
+    "filing_date",
+    "hearing_date",
+    "meeting_date",
+    "publication_date",
+    "published_on",
+    "report_date",
+}
+
+
+def _profile_document_date_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        predicate, _, arity_text = signature.partition("/")
+        predicate = predicate.strip().lower()
+        if predicate not in DOCUMENT_DATE_REPAIR_PREDICATES:
+            continue
+        try:
+            arity = int(arity_text)
+        except ValueError:
+            continue
+        if predicate == "document_date" and arity != 3:
+            continue
+        if predicate != "document_date" and arity not in {2, 3, 4}:
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _document_date_repair_context_lines(
+    *,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    carriers = _profile_document_date_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    keep_predicates = {
+        "appeal_filed",
+        "case_identifier",
+        "document_action",
+        "document_identifier",
+        "document_identifier_occurrence",
+        "document_metadata",
+        "document_date",
+        "event_date",
+        "filing_date",
+        "final_disposition",
+        "prior_art_reference",
+        "proceeding_identifier",
+        "referenced_matter",
+        "related_document",
+        "review_outcome",
+    }
+    kept: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, _args = parsed
+        if predicate not in keep_predicates:
+            continue
+        kept.append(fact)
+        if len(kept) >= 80:
+            break
+    contract_lines = carrier_contract_prompt_lines([carrier for carrier in carriers if carrier == "document_date/3"])
+    lines = [
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: deterministic query delivery is missing typed document or "
+            "event dates. This pass is proposal-only; emit only source-grounded date rows through allowed "
+            "predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: when the source states issue, decision, filing, publication, "
+            "report, notice, application, received, effective, hearing, meeting, or related-matter dates, "
+            "emit compatible date rows using the same subject ids as existing identifier, action, prior-art, "
+            "related-matter, or review rows whenever possible."
+        ),
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: for chronology pressure, emit one typed date row per "
+            "source-stated dated event. The main document issue date does not replace related filing, "
+            "hearing, meeting, motion, prior-order, publication, application, or review dates."
+        ),
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: if both document_date/3 and event_date/2 are available, "
+            "use document_date/3 for document-like subjects and event_date/2 for procedural event ids; "
+            "preserving both is acceptable when both typed subjects are source-grounded."
+        ),
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, broad summaries, or answer-bearing source excerpts. The output must be typed date facts only."
+        ),
+        (
+            "PROFILE DOCUMENT DATE REPAIR PASS: compatible date signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+    ]
+    for fact in kept:
+        lines.append(f"EXISTING DATE/IDENTIFIER FACT: {fact}")
+    return [*lines, *contract_lines]
+
+
+def _apply_profile_document_date_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_document_date_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_document_date_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    context_lines = _document_date_repair_context_lines(
+        parsed_profile=parsed_profile,
+        source_compile=source_compile,
+    )
+    if not carriers or not context_lines:
+        metadata["reason"] = "no_document_date_carriers_offered"
+        source_compile["profile_document_date_repair"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_document_date_repair",
+        purpose="repair typed document and event date delivery without source-record answer routing",
+        focus="missing typed date rows for documents, applications, publications, filings, decisions, notices, and related matters",
+        completion=(
+            "Emit only source-grounded typed date rows tied to existing or source-stated subjects; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated dates as typed predicates with subject id, date role when the predicate "
+            "supports it, and date value."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=16,
+    )
+    compiled["pass_id"] = "profile_document_date_repair"
+    compiled["purpose"] = "repair typed document and event date delivery without source-record answer routing"
+    compiled["focus"] = "missing typed date rows for documents, applications, publications, filings, decisions, notices, and related matters"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_document_date_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_document_date_repair",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_document_date_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_document_date_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_document_date_repair"] = metadata
+    return metadata
+
+
+def _review_outcome_repair_context_lines(
+    *,
+    parsed_profile: dict[str, Any],
+    source_compile: dict[str, Any],
+) -> list[str]:
+    carriers = _profile_review_outcome_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    preferred_subjects = set(_legal_citation_repair_preferred_subject_ids(source_compile))
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    keep_predicates = {
+        "affirmed",
+        "appeal_filed",
+        "case_identifier",
+        "claim_ground",
+        "claim_range",
+        "document_date",
+        "document_identifier",
+        "document_identifier_occurrence",
+        "document_title",
+        "legal_citation_detail",
+        "review_outcome",
+    }
+    document_subjects: set[str] = set()
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate in {
+            "case_identifier",
+            "document_date",
+            "document_identifier",
+            "document_identifier_occurrence",
+            "document_title",
+        } and args:
+            document_subjects.add(str(args[0]).strip())
+    kept: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate not in keep_predicates or not args:
+            continue
+        subject = str(args[0]).strip()
+        if (
+            preferred_subjects
+            and subject not in preferred_subjects
+            and subject not in document_subjects
+            and predicate not in {"affirmed", "appeal_filed"}
+        ):
+            continue
+        kept.append(fact)
+        if len(kept) >= 80:
+            break
+    contract_lines = carrier_contract_prompt_lines(carriers[:16])
+    lines = [
+        (
+            "PROFILE REVIEW OUTCOME REPAIR PASS: deterministic query delivery is missing typed review outcomes "
+            "on already-emitted governed subjects. This pass is proposal-only; emit only source-grounded "
+            "review_outcome/4 rows through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE REVIEW OUTCOME REPAIR PASS: when the source states that a board, court, committee, agency, "
+            "officer, or other reviewer affirmed, reversed, modified, vacated, remanded, sustained, granted, or "
+            "denied governed actions, emit review_outcome/4 with the same subject id used by the governed "
+            "claim, item, violation, finding, or decision rows."
+        ),
+        (
+            "PROFILE REVIEW OUTCOME REPAIR PASS: when the source states a document-level or case-level final "
+            "disposition, emit review_outcome/4 on the same document/case subject id used by document_date/3, "
+            "case_identifier/2, document_identifier/2, or document_identifier_occurrence/5 when available. "
+            "This preserves wrapper answers such as docket/date/disposition without joining across unrelated "
+            "underlying issue subjects."
+        ),
+        (
+            "PROFILE REVIEW OUTCOME REPAIR PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, broad umbrella reviewed-rejections ids, or answer-bearing source excerpts. The output "
+            "must be typed review outcome facts only."
+        ),
+        (
+            "PROFILE REVIEW OUTCOME REPAIR PASS: compatible review signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+    ]
+    if preferred_subjects:
+        lines.append(
+            "PROFILE REVIEW OUTCOME REPAIR PASS: preferred governed subject ids for review outcomes: "
+            + ", ".join(sorted(preferred_subjects))
+            + ". If the review outcome applies, emit one review_outcome/4 row per applicable subject id."
+        )
+    if document_subjects:
+        lines.append(
+            "PROFILE REVIEW OUTCOME REPAIR PASS: available document/case subject ids for document-level final "
+            "dispositions: "
+            + ", ".join(sorted(document_subjects))
+            + ". Use these only when the source states the final disposition for that document or case."
+        )
+    for fact in kept:
+        lines.append(f"EXISTING GOVERNED FACT: {fact}")
+    return [*lines, *contract_lines]
+
+
+def _apply_profile_review_outcome_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_review_outcome_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_review_outcome_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    context_lines = _review_outcome_repair_context_lines(
+        parsed_profile=parsed_profile,
+        source_compile=source_compile,
+    )
+    if not carriers or not context_lines:
+        source_compile["profile_review_outcome_repair"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_review_outcome_repair",
+        purpose="repair typed review outcome delivery without source-record answer routing",
+        focus="missing typed review_outcome rows on governed or document/case subjects",
+        completion=(
+            "Emit only source-grounded typed review_outcome rows tied to governed or document/case subjects where applicable; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated review outcomes as typed predicates with reviewed subject id, reviewing "
+            "body or actor, outcome/action, and source/scope anchor."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=12,
+    )
+    compiled["pass_id"] = "profile_review_outcome_repair"
+    compiled["purpose"] = "repair typed review outcome delivery without source-record answer routing"
+    compiled["focus"] = "missing typed review_outcome rows on governed or document/case subjects"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_review_outcome_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_review_outcome_repair",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_review_outcome_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_review_outcome_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_review_outcome_repair"] = metadata
+    return metadata
+
+
+def _apply_profile_list_range_inventory_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_list_range_inventory_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_list_range_inventory_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    if not carriers:
+        metadata["reason"] = "no_list_range_inventory_predicates_offered"
+        source_compile["profile_list_range_inventory_repair"] = metadata
+        return metadata
+    context_lines = _profile_list_range_inventory_repair_context_lines(parsed_profile)
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(8, min(32, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_list_range_inventory_repair",
+        purpose="repair typed numbered list and range inventory without source-record answer routing",
+        focus="missing typed list members, claim ranges, item ranges, count ranges, issue ranges, and governed item-set segments",
+        completion=(
+            "Emit only source-grounded typed list/range rows and minimal supporting set ids; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated numbered inventory as typed predicates: set/list id, member value or "
+            "range start/end, member kind when the predicate supports it, and source/scope anchor."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_list_range_inventory_repair"
+    compiled["purpose"] = "repair typed numbered list and range inventory without source-record answer routing"
+    compiled["focus"] = "missing typed list members, claim ranges, item ranges, count ranges, issue ranges, and governed item-set segments"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_list_range_inventory_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_list_range_inventory_repair",
+        pass_record=compiled,
+    )
+    _enforce_list_range_inventory_fact_contract(source_compile)
+    missing_slots = _source_pass_self_check_missing_slots(compiled)
+    completion_compiled: dict[str, Any] | None = None
+    completion_signature_contract_report: dict[str, Any] | None = None
+    if bool(getattr(args, "profile_list_range_self_check_followup", False)) and missing_slots:
+        completion_prior_facts = {
+            str(item).strip()
+            for item in source_compile.get("facts", [])
+            if str(item).strip()
+        }
+        completion_context = [
+            (
+                "PROFILE LIST/RANGE INVENTORY REPAIR FOLLOW-UP: the previous bounded pass reported "
+                "missing typed slots. Complete only those source-grounded list/range companion rows. "
+                "Do not repeat existing facts and do not add source_record or prose display rows."
+            ),
+            "PROFILE LIST/RANGE INVENTORY REPAIR FOLLOW-UP: previous missing_slots:",
+            *[f"- {slot}" for slot in missing_slots[:8]],
+            (
+                "PROFILE LIST/RANGE INVENTORY REPAIR FOLLOW-UP: if a subject id appears in a typed "
+                "ground, rejection, treatment, legal citation, or review row, and the source states "
+                "the corresponding numbered range for that same subject, emit the companion "
+                "claim_range/4 or item_range/4 rows using that same subject id."
+            ),
+            *_list_range_inventory_existing_fact_context(source_compile),
+        ]
+        completion_target = max(16, min(48, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+        completion_compiled = _compile_source_pass_ops(
+            source_text=source_text,
+            parsed_profile=parsed_profile,
+            intake_plan=intake_plan,
+            args=args,
+            pass_id="profile_list_range_inventory_repair_followup",
+            purpose="complete self-declared missing typed list/range companion rows",
+            focus="source-grounded list/range rows named by the prior pass self_check.missing_slots",
+            completion=(
+                "Emit only missing typed list/range inventory and directly required same-subject companion rows; "
+                "do not recompile unrelated source material."
+            ),
+            predicates=", ".join(carriers[:16]),
+            coverage_goals=(
+                "Close the previous pass's explicit missing_slots with typed set/list id, member or range "
+                "boundaries, member kind when supported, and source/scope anchor."
+            ),
+            extra_context=[*(extra_context or []), *context_lines, *completion_context],
+            operation_target=completion_target,
+        )
+        completion_compiled["pass_id"] = "profile_list_range_inventory_repair_followup"
+        completion_compiled["purpose"] = "complete self-declared missing typed list/range companion rows"
+        completion_compiled["focus"] = "source-grounded list/range rows named by the prior pass self_check.missing_slots"
+        _merge_additive_source_pass(
+            source_compile,
+            completion_compiled,
+            metadata_prefix="profile_list_range_inventory_repair_followup",
+        )
+        completion_signature_contract_report = _enforce_additive_pass_allowed_signatures(
+            source_compile,
+            prior_facts=completion_prior_facts,
+            allowed_signatures=set(carriers[:16]),
+            metadata_prefix="profile_list_range_inventory_repair_followup",
+            pass_record=completion_compiled,
+        )
+        _enforce_list_range_inventory_fact_contract(source_compile)
+    initial_new_facts = (
+        compiled.get("_profile_list_range_inventory_repair_new_facts", [])
+        if isinstance(compiled.get("_profile_list_range_inventory_repair_new_facts"), list)
+        else []
+    )
+    completion_new_facts = (
+        completion_compiled.get("_profile_list_range_inventory_repair_followup_new_facts", [])
+        if isinstance(completion_compiled, dict)
+        and isinstance(completion_compiled.get("_profile_list_range_inventory_repair_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(initial_new_facts) + len(completion_new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+            "followup_attempted": bool(missing_slots),
+            "followup_missing_slots": missing_slots[:8],
+        }
+    )
+    if completion_compiled is not None:
+        metadata["followup_ok"] = bool(completion_compiled.get("ok"))
+        metadata["followup_admitted_count"] = int(completion_compiled.get("admitted_count", 0) or 0)
+        metadata["followup_skipped_count"] = int(completion_compiled.get("skipped_count", 0) or 0)
+        metadata["followup_new_fact_count"] = len(completion_new_facts)
+        metadata["followup_signature_contract"] = completion_signature_contract_report or {}
+        metadata["followup_pass"] = completion_compiled
+    source_compile["profile_list_range_inventory_repair"] = metadata
+    return metadata
+
+
+def _profile_list_range_inventory_offered_omission_rows(source_compile: dict[str, Any]) -> list[dict[str, Any]]:
+    health = source_compile.get("governed_companion_subject_health")
+    if not isinstance(health, dict):
+        return []
+    ledger = health.get("governed_companion_omission_ledger")
+    if not isinstance(ledger, list):
+        return []
+    rows: list[dict[str, Any]] = []
+    for row in ledger:
+        if not isinstance(row, dict):
+            continue
+        signature = str(row.get("signature") or "").strip()
+        status = str(row.get("status") or "").strip()
+        subject = str(row.get("subject") or "").strip()
+        if signature not in {"claim_range/4", "item_range/4"}:
+            continue
+        if status != "missing_unaccounted" or not subject:
+            continue
+        rows.append(
+            {
+                "subject": subject,
+                "signature": signature,
+                "observed_predicates": [
+                    str(item).strip()
+                    for item in row.get("observed_predicates", [])
+                    if str(item).strip()
+                ],
+                "reason": str(row.get("reason") or "").strip(),
+            }
+        )
+    return rows
+
+
+def _profile_list_range_inventory_omission_context(source_compile: dict[str, Any]) -> list[str]:
+    rows = _profile_list_range_inventory_offered_omission_rows(source_compile)
+    if not rows:
+        return []
+    lines = [
+        (
+            "PROFILE LIST/RANGE INVENTORY OMISSION FOLLOW-UP: governed companion health found typed "
+            "subjects with related companion facts but no typed range inventory. For each listed "
+            "subject, emit the missing claim_range/4 or item_range/4 rows only if the raw source text "
+            "directly states the subject's numbered inventory."
+        ),
+        (
+            "PROFILE LIST/RANGE INVENTORY OMISSION FOLLOW-UP: do not infer a range from the subject "
+            "name alone. If the raw source does not state the missing range for that subject, emit no "
+            "fact for it and note the omission in self_check."
+        ),
+    ]
+    for row in rows[:16]:
+        observed = ", ".join(row.get("observed_predicates") or [])
+        lines.append(
+            "OMISSION_LEDGER_ROW "
+            f"subject={row['subject']} signature={row['signature']} observed_predicates={observed or 'none'}"
+        )
+    lines.extend(_list_range_inventory_existing_fact_context(source_compile, limit=120))
+    return lines
+
+
+def _apply_profile_list_range_inventory_omission_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_list_range_inventory_repair_offered_carriers(parsed_profile)
+    omission_context = _profile_list_range_inventory_omission_context(source_compile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_list_range_inventory_omission_followup_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+        "omission_rows": _profile_list_range_inventory_offered_omission_rows(source_compile)[:16],
+    }
+    if not carriers or not omission_context:
+        metadata["reason"] = "no_list_range_inventory_omissions_or_carriers"
+        source_compile["profile_list_range_inventory_omission_followup"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    context_lines = _profile_list_range_inventory_repair_context_lines(parsed_profile)
+    target = max(16, min(48, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_list_range_inventory_omission_followup",
+        purpose="complete governed-companion omission ledger list/range rows",
+        focus="typed subjects missing claim_range/4 or item_range/4 according to the governed companion omission ledger",
+        completion=(
+            "Emit only source-grounded typed range inventory rows for the listed omission-ledger subjects; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "For every listed subject whose numbered inventory is stated in the source, deliver the "
+            "missing claim_range/4 or item_range/4 companion rows using the same subject id."
+        ),
+        extra_context=[*(extra_context or []), *context_lines, *omission_context],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_list_range_inventory_omission_followup"
+    compiled["purpose"] = "complete governed-companion omission ledger list/range rows"
+    compiled["focus"] = (
+        "typed subjects missing claim_range/4 or item_range/4 according to the governed companion omission ledger"
+    )
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="profile_list_range_inventory_omission_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_list_range_inventory_omission_followup",
+        pass_record=compiled,
+    )
+    _enforce_list_range_inventory_fact_contract(source_compile)
+    new_facts = (
+        compiled.get("_profile_list_range_inventory_omission_followup_new_facts", [])
+        if isinstance(compiled.get("_profile_list_range_inventory_omission_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_list_range_inventory_omission_followup"] = metadata
+    return metadata
+
+
+def _registered_carrier_omission_findings(report: dict[str, Any]) -> list[dict[str, Any]]:
+    findings = report.get("findings") if isinstance(report, dict) else []
+    return [
+        item
+        for item in findings
+        if isinstance(item, dict)
+        and str(item.get("class", "")).strip() == "registered_carrier_offered_but_undelivered"
+        and str(item.get("signature", "")).strip()
+    ]
+
+
+def _registered_carrier_omission_offered_carriers(report: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    for finding in _registered_carrier_omission_findings(report):
+        signature = str(finding.get("signature", "")).strip()
+        if signature and signature not in seen and carrier_contract(signature) is not None:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _registered_carrier_omission_context_lines(report: dict[str, Any]) -> list[str]:
+    carriers = _registered_carrier_omission_offered_carriers(report)
+    if not carriers:
+        return []
+    lines = [
+        (
+            "REGISTERED CARRIER OMISSION FOLLOWUP: deterministic accountability found registered carrier "
+            "signatures that were offered to the compiler and accountability-required, but emitted zero typed rows."
+        ),
+        (
+            "REGISTERED CARRIER OMISSION FOLLOWUP: this is a source-compile completion pass. Emit only "
+            "source-grounded rows for the listed registered carrier contracts. Do not emit source_record_* rows, "
+            "do not emit prose excerpts, and do not recompile unrelated material."
+        ),
+        "REGISTERED CARRIER OMISSION FOLLOWUP: missing registered carriers = " + ", ".join(carriers[:12]) + ".",
+    ]
+    lines.extend(carrier_contract_prompt_lines(carriers[:12]))
+    return lines
+
+
+def _apply_profile_registered_carrier_omission_followup_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+    profile_extension_metadata: dict[str, Any] | None = None,
+    registered_delivery_report: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    report = registered_delivery_report or _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=parsed_profile,
+        profile_extension_metadata=profile_extension_metadata,
+        mark_health=False,
+    )
+    carriers = _registered_carrier_omission_offered_carriers(report)
+    context_lines = _registered_carrier_omission_context_lines(report)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_registered_carrier_omission_followup_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:12],
+        "initial_findings": _registered_carrier_omission_findings(report)[:12],
+    }
+    if not carriers or not context_lines:
+        metadata["reason"] = "no_registered_carrier_omissions"
+        source_compile["profile_registered_carrier_omission_followup"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    target = max(8, min(32, int(getattr(args, "focused_pass_operation_target", 32) or 32)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_registered_carrier_omission_followup",
+        purpose="complete accountability-required registered carrier rows",
+        focus="registered carriers with zero emitted typed rows: " + ", ".join(carriers[:12]),
+        completion=(
+            "Emit only source-grounded rows for the listed registered carrier signatures. If the source does "
+            "not state an instance, omit it and note the missing slot in self_check; do not invent placeholder rows."
+        ),
+        predicates=", ".join(carriers[:12]),
+        coverage_goals=(
+            "For each listed registered carrier, populate compact typed rows for every source-stated instance "
+            "needed by that carrier contract."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_registered_carrier_omission_followup"
+    compiled["purpose"] = "complete accountability-required registered carrier rows"
+    compiled["focus"] = "registered carriers with zero emitted typed rows: " + ", ".join(carriers[:12])
+    _merge_additive_source_pass(
+        source_compile,
+        compiled,
+        metadata_prefix="profile_registered_carrier_omission_followup",
+    )
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:12]),
+        metadata_prefix="profile_registered_carrier_omission_followup",
+        pass_record=compiled,
+    )
+    refreshed = _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=parsed_profile,
+        profile_extension_metadata=profile_extension_metadata,
+        mark_health=False,
+    )
+    new_facts = (
+        compiled.get("_profile_registered_carrier_omission_followup_new_facts", [])
+        if isinstance(compiled.get("_profile_registered_carrier_omission_followup_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "remaining_findings": _registered_carrier_omission_findings(refreshed)[:12],
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_registered_carrier_omission_followup"] = metadata
+    return metadata
+
+
+def _profile_rating_scale_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return []
+    carriers: list[str] = []
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature") or "").strip()
+        if signature == "rating_scale_option/4":
+            carriers.append(signature)
+    return list(dict.fromkeys(carriers))
+
+
+def _profile_rating_scale_repair_context_lines(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers = _profile_rating_scale_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    contract_lines = carrier_contract_prompt_lines(carriers[:8])
+    return [
+        (
+            "PROFILE RATING SCALE REPAIR PASS: deterministic query delivery is missing typed rating-scale "
+            "options in some documents. This pass is proposal-only; emit only source-grounded typed rows "
+            "through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE RATING SCALE REPAIR PASS: distinguish allowed scale options from ratings assigned to "
+            "specific entities. A sentence listing possible ratings belongs in rating_scale_option/4; a "
+            "table assigning a rating to a party belongs in assigned_rating/3 or the document's existing "
+            "assigned-value carrier."
+        ),
+        (
+            "PROFILE RATING SCALE REPAIR PASS: preserve each source-stated option in an adjectival, "
+            "relevancy, confidence, quality, risk, or evaluation scale as one typed row. Reuse the same "
+            "scale_or_factor_id for all options in the same source-stated scale."
+        ),
+        (
+            "PROFILE RATING SCALE REPAIR PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, or answer-bearing source excerpts. The output must be typed rating-scale facts only."
+        ),
+        "PROFILE RATING SCALE REPAIR PASS: compatible signatures to consider: " + ", ".join(carriers[:8]) + ".",
+        *contract_lines,
+    ]
+
+
+def _apply_profile_rating_scale_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_rating_scale_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_rating_scale_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:8],
+    }
+    if not carriers:
+        metadata["reason"] = "no_rating_scale_predicates_offered"
+        source_compile["profile_rating_scale_repair"] = metadata
+        return metadata
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    context_lines = _profile_rating_scale_repair_context_lines(parsed_profile)
+    target = max(8, min(24, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_rating_scale_repair",
+        purpose="repair typed rating-scale option inventory without source-record answer routing",
+        focus="source-stated allowed rating-scale options and their scale/factor ids",
+        completion=(
+            "Emit only source-grounded typed rating-scale option rows; do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:8]),
+        coverage_goals=(
+            "Deliver every source-stated allowed rating option as rating_scale_option/4 with scale/factor id, "
+            "normalized option value, source order/rank or unranked, and source/scope anchor."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_rating_scale_repair"
+    compiled["purpose"] = "repair typed rating-scale option inventory without source-record answer routing"
+    compiled["focus"] = "source-stated allowed rating-scale options and their scale/factor ids"
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_rating_scale_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:8]),
+        metadata_prefix="profile_rating_scale_repair",
+        pass_record=compiled,
+    )
+    new_facts = (
+        compiled.get("_profile_rating_scale_repair_new_facts", [])
+        if isinstance(compiled.get("_profile_rating_scale_repair_new_facts"), list)
+        else []
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(new_facts),
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_rating_scale_repair"] = metadata
+    return metadata
+
+
+def _enforce_additive_pass_allowed_signatures(
+    source_compile: dict[str, Any],
+    *,
+    prior_facts: set[str],
+    allowed_signatures: set[str],
+    metadata_prefix: str,
+    pass_record: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Reject new additive-pass facts outside the pass's offered signatures."""
+
+    allowed = {str(signature).strip() for signature in allowed_signatures if str(signature).strip()}
+    if not allowed:
+        return {"rejected_count": 0, "rejected_facts": [], "allowed_signatures": []}
+    kept: list[str] = []
+    rejected: list[str] = []
+    for fact in [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]:
+        if fact in prior_facts:
+            kept.append(fact)
+            continue
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            rejected.append(fact)
+            continue
+        predicate, args = parsed
+        signature = f"{predicate}/{len(args)}"
+        if signature not in allowed:
+            rejected.append(fact)
+            continue
+        kept.append(fact)
+    if rejected:
+        source_compile["facts"] = kept
+        source_compile["unique_fact_count"] = len(kept)
+        if isinstance(pass_record, dict):
+            rejected_set = set(rejected)
+            pass_record["facts"] = [
+                str(item).strip()
+                for item in pass_record.get("facts", [])
+                if str(item).strip() and str(item).strip() not in rejected_set
+            ]
+            new_facts_key = f"_{metadata_prefix}_new_facts"
+            if isinstance(pass_record.get(new_facts_key), list):
+                pass_record[new_facts_key] = [
+                    str(item).strip()
+                    for item in pass_record.get(new_facts_key, [])
+                    if str(item).strip() and str(item).strip() not in rejected_set
+                ]
+        source_compile[f"{metadata_prefix}_signature_contract_policy"] = {
+            "schema_version": "additive_pass_signature_contract_v1",
+            "authority": "typed_contract_validation_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Rejects new additive-pass facts outside the explicit offered predicate signatures for this pass."
+            ),
+        }
+    source_compile[f"{metadata_prefix}_signature_contract_rejected_count"] = len(rejected)
+    source_compile[f"{metadata_prefix}_signature_contract_rejected_facts"] = rejected[:100]
+    return {
+        "rejected_count": len(rejected),
+        "rejected_facts": rejected[:100],
+        "allowed_signatures": sorted(allowed),
+    }
+
+
+def _enforce_list_range_inventory_fact_contract(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Reject typed list_member rows that violate range-inventory contracts.
+
+    This is deterministic validation over typed facts only. It does not inspect
+    source prose. If a source-stated range carrier exists for the same set and
+    source/scope, expanded singleton list_member rows inside that multi-item
+    range are treated as over-emission and removed.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    reduced_facts = _list_range_contract_reduced_facts(facts)
+    if reduced_facts:
+        existing = set(facts)
+        for reduced in reduced_facts:
+            if reduced not in existing:
+                facts.append(reduced)
+                existing.add(reduced)
+        source_compile["facts"] = facts
+        source_compile["deterministic_list_range_atom_reduction_count"] = len(reduced_facts)
+        source_compile["deterministic_list_range_atom_reduction_facts"] = reduced_facts[:100]
+        source_compile["deterministic_list_range_atom_reduction_policy"] = {
+            "schema_version": "deterministic_list_range_atom_reduction_v1",
+            "authority": "typed_atom_contract_reduction_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Reduces malformed governed range atoms such as "
+                "claim_range(Set, 6_9, claim, Source) into the contracted "
+                "start/end form claim_range(Set, 6, 9, Source). The original "
+                "malformed row remains subject to contract rejection."
+            ),
+        }
+    else:
+        source_compile["deterministic_list_range_atom_reduction_count"] = 0
+        source_compile["deterministic_list_range_atom_reduction_facts"] = []
+    malformed_range_facts: set[str] = set()
+    intervals: list[dict[str, Any]] = []
+    parsed_rows: list[tuple[str, str, list[str] | None]] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            parsed_rows.append((fact, "", None))
+            continue
+        predicate, args = parsed
+        parsed_rows.append((fact, predicate, args))
+        if predicate not in {"claim_range", "item_range"} or len(args) < 4:
+            continue
+        start = _list_range_contract_int(args[1])
+        end = _list_range_contract_int(args[2])
+        if start is None or end is None:
+            malformed_range_facts.add(fact)
+            continue
+        low, high = sorted((start, end))
+        intervals.append(
+            {
+                "fact": fact,
+                "set_id": args[0],
+                "source_or_scope": args[3],
+                "source_key": _list_range_source_key(args[3]),
+                "member_kind": "claim" if predicate == "claim_range" else "",
+                "low": low,
+                "high": high,
+                "predicate": predicate,
+            }
+        )
+    if not intervals and not malformed_range_facts:
+        source_compile["deterministic_list_range_contract_rejected_count"] = 0
+        return {"rejected_count": 0, "rejected_facts": []}
+    rejected_range_facts = set(malformed_range_facts) | {
+        str(interval["fact"])
+        for interval in intervals
+        if _list_range_interval_overcompresses_segments(interval, intervals)
+    }
+    intervals = [interval for interval in intervals if str(interval["fact"]) not in rejected_range_facts]
+    kept: list[str] = []
+    rejected: list[str] = []
+    for fact, predicate, args in parsed_rows:
+        if fact in rejected_range_facts:
+            rejected.append(fact)
+            continue
+        if predicate != "list_member" or not isinstance(args, list) or len(args) < 4:
+            kept.append(fact)
+            continue
+        member_value = _list_range_contract_int(args[1])
+        if member_value is None:
+            kept.append(fact)
+            continue
+        source_key = _list_range_source_key(args[3])
+        member_kind = str(args[2]).strip().casefold() if len(args) >= 3 else ""
+        violates = any(
+            int(interval["low"]) <= member_value <= int(interval["high"])
+            and int(interval["low"]) != int(interval["high"])
+            and (
+                (
+                    args[0] == interval["set_id"]
+                    and args[3] == interval["source_or_scope"]
+                )
+                or (
+                    bool(source_key)
+                    and source_key == interval.get("source_key")
+                    and (
+                        not interval.get("member_kind")
+                        or not member_kind
+                        or member_kind == interval.get("member_kind")
+                    )
+                )
+            )
+            for interval in intervals
+        )
+        if violates:
+            rejected.append(fact)
+        else:
+            kept.append(fact)
+    source_compile["facts"] = kept
+    source_compile["unique_fact_count"] = len(kept)
+    source_compile["deterministic_list_range_contract_rejected_count"] = len(rejected)
+    source_compile["deterministic_list_range_contract_rejected_facts"] = rejected[:100]
+    if rejected:
+        source_compile["deterministic_list_range_contract_policy"] = {
+            "schema_version": "deterministic_list_range_contract_rejection_v1",
+            "authority": "typed_contract_validation_only",
+            "not_source_interpretation": True,
+            "description": (
+                "Rejects malformed claim_range/4 and item_range/4 rows whose start/end slots are not typed "
+                "numeric boundaries, and rejects list_member/4 rows that merely expand a same-set same-source "
+                "typed range row. It also rejects cross-set singleton expansions when the typed range and "
+                "member rows share the same source coordinate. Range boundaries remain represented by "
+                "claim_range/4 or item_range/4."
+            ),
+        }
+    return {"rejected_count": len(rejected), "rejected_facts": rejected}
+
+
+def _list_range_contract_reduced_facts(facts: list[str]) -> list[str]:
+    reduced: list[str] = []
+    existing = set(facts)
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate not in {"claim_range", "item_range"} or len(args) < 4:
+            continue
+        if _list_range_contract_int(args[1]) is not None and _list_range_contract_int(args[2]) is not None:
+            continue
+        span = _list_range_contract_atom_span(args[1])
+        if span is None:
+            continue
+        if not _list_range_contract_member_kind_allows_span_reduction(predicate=predicate, value=args[2]):
+            continue
+        start, end = span
+        reduced_fact = f"{predicate}({args[0]}, {start}, {end}, {args[3]})."
+        if reduced_fact in existing or reduced_fact in reduced:
+            continue
+        reduced.append(reduced_fact)
+    return reduced
+
+
+def _list_range_contract_atom_span(value: Any) -> tuple[int, int] | None:
+    text = str(value or "").strip().casefold()
+    match = re.fullmatch(r"(?:claim_|item_)?(\d+)(?:_|_to_|_through_|_thru_)(?:claim_|item_)?(\d+)", text)
+    if not match:
+        return None
+    start = int(match.group(1))
+    end = int(match.group(2))
+    if start == end:
+        return None
+    low, high = sorted((start, end))
+    return low, high
+
+
+def _list_range_contract_member_kind_allows_span_reduction(*, predicate: str, value: Any) -> bool:
+    text = str(value or "").strip().casefold()
+    if not text or _list_range_contract_int(text) is not None:
+        return False
+    if predicate == "claim_range":
+        return text in {"claim", "claims", "contested_claim", "contested_claims", "claim_set"}
+    return text in {
+        "item",
+        "items",
+        "issue",
+        "issues",
+        "count",
+        "counts",
+        "requirement",
+        "requirements",
+        "paragraph",
+        "paragraphs",
+        "violation",
+        "violations",
+        "product",
+        "products",
+    }
+
+
+def _apply_governed_review_atom_fact_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Add registered review_outcome/4 rows for narrow typed review atoms.
+
+    This is a typed-atom reducer. It does not inspect source prose or query
+    text. It only maps LLM-proposed predicate names such as affirmed_by/2 onto
+    the governed carrier vocabulary so compile and query meet on the same atom.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    appended: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        outcome = REVIEW_OUTCOME_REDUCTION_PREDICATES.get(str(predicate).strip().casefold())
+        if not outcome or len(args) != 2:
+            continue
+        subject, actor = args
+        reduced = f"review_outcome({subject}, {actor}, {outcome}, direct)."
+        if reduced in existing:
+            continue
+        existing.add(reduced)
+        appended.append(reduced)
+    if appended:
+        facts.extend(appended)
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    source_compile["deterministic_governed_atom_reduction_count"] = len(appended)
+    source_compile["deterministic_governed_atom_reduction_facts"] = appended[:100]
+    if appended:
+        source_compile["deterministic_governed_atom_reduction_policy"] = {
+            "schema_version": "deterministic_governed_atom_reduction_v1",
+            "authority": "typed_atom_reduction_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Maps model-proposed narrow review predicate atoms such as affirmed_by/2 "
+                "onto registered review_outcome/4 facts using the operation/fact atom values only."
+            ),
+        }
+    return {"added_count": len(appended), "added_facts": appended}
+
+
+DOCUMENT_SUBJECT_CONVERGENCE_IDENTIFIER_KIND_HINTS = {
+    "appeal",
+    "application",
+    "case",
+    "docket",
+    "document",
+    "matter",
+    "proceeding",
+}
+
+DOCUMENT_SUBJECT_CONVERGENCE_IDENTIFIER_KIND_BLOCKERS = {
+    "appendix",
+    "footnote",
+    "joint",
+    "prior",
+    "reference",
+    "related",
+}
+
+DOCUMENT_SUBJECT_CONVERGENCE_PREDICATES = {
+    "document_date",
+    "review_outcome",
+}
+
+
+def _apply_document_subject_atom_convergence(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Clone document-level typed facts across document subject atoms.
+
+    This is a typed-atom reducer. It does not inspect source prose, source-record
+    text, query text, or oracle answers. It only uses source-stated identifier
+    atoms already emitted as document_identifier_occurrence/5 and document-level
+    typed atoms whose subject id carries the same identifier tokens.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    identifier_rows: list[tuple[str, set[str]]] = []
+    document_level_rows: list[tuple[str, list[str], set[str]]] = []
+
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate == "document_identifier_occurrence" and len(args) == 5:
+            doc_id, identifier_kind, identifier_value = [str(arg).strip() for arg in args[:3]]
+            if not _document_subject_convergence_kind_allowed(identifier_kind):
+                continue
+            value_tokens = _document_subject_identifier_tokens(identifier_value)
+            if not doc_id or not value_tokens:
+                continue
+            identifier_rows.append((doc_id, value_tokens))
+        elif predicate in DOCUMENT_SUBJECT_CONVERGENCE_PREDICATES and args:
+            subject = str(args[0]).strip()
+            subject_tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(subject.casefold()))
+            if subject and subject_tokens:
+                document_level_rows.append((predicate, [str(arg).strip() for arg in args], subject_tokens))
+
+    appended: list[str] = []
+    for target_subject, identifier_tokens in identifier_rows:
+        for predicate, args, source_subject_tokens in document_level_rows:
+            source_subject = args[0]
+            if source_subject == target_subject:
+                continue
+            if not identifier_tokens.issubset(source_subject_tokens):
+                continue
+            candidate_args = [target_subject, *args[1:]]
+            candidate = f"{predicate}({', '.join(candidate_args)})."
+            if candidate in existing:
+                continue
+            existing.add(candidate)
+            appended.append(candidate)
+
+    if appended:
+        facts.extend(appended)
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    source_compile["deterministic_document_subject_atom_convergence_count"] = len(appended)
+    source_compile["deterministic_document_subject_atom_convergence_facts"] = appended[:100]
+    if appended:
+        source_compile["deterministic_document_subject_atom_convergence_policy"] = {
+            "schema_version": "document_subject_atom_convergence_v1",
+            "authority": "typed_atom_governance_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Clones selected document-level typed facts across typed document subject atoms when a "
+                "document_identifier_occurrence/5 row gives the target subject an identifier value and "
+                "another document-level subject atom carries the same identifier tokens."
+            ),
+        }
+    return {"added_count": len(appended), "added_facts": appended}
+
+
+def _document_subject_convergence_kind_allowed(identifier_kind: str) -> bool:
+    tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(str(identifier_kind or "").casefold()))
+    if tokens & DOCUMENT_SUBJECT_CONVERGENCE_IDENTIFIER_KIND_BLOCKERS:
+        return False
+    return bool(tokens & DOCUMENT_SUBJECT_CONVERGENCE_IDENTIFIER_KIND_HINTS)
+
+
+def _document_subject_identifier_tokens(identifier_value: str) -> set[str]:
+    tokens = set(PROFILE_ADMISSION_TOKEN_RE.findall(str(identifier_value or "").casefold()))
+    if len(tokens) < 2:
+        return set()
+    if not any(token.isdigit() and len(token) >= 4 for token in tokens):
+        return set()
+    return tokens
+
+
+CLAIM_GROUND_STATUTE_REDUCTIONS: dict[str, tuple[str, str]] = {
+    "102_a_1": ("anticipation", "section_102_a_1"),
+    "102a1": ("anticipation", "section_102_a_1"),
+    "section_102_a_1": ("anticipation", "section_102_a_1"),
+    "35_usc_102_a_1": ("anticipation", "section_102_a_1"),
+    "35_u_s_c_102_a_1": ("anticipation", "section_102_a_1"),
+    "103": ("obviousness", "section_103"),
+    "section_103": ("obviousness", "section_103"),
+    "35_usc_103": ("obviousness", "section_103"),
+    "35_u_s_c_103": ("obviousness", "section_103"),
+}
+
+CLAIM_GROUND_OUTCOME_TO_STATUS: dict[str, str] = {
+    "anticipated": "rejected",
+    "anticipation": "rejected",
+    "obvious": "rejected",
+    "obviousness": "rejected",
+}
+
+
+def _governed_reference_atom(value: str) -> str:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"ref_([a-z0-9]+)", text.casefold())
+    if match:
+        return f"reference_{match.group(1)}"
+    return text
+
+
+def _governed_ground_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized in {"anticipated", "anticipates", "anticipation"}:
+        return "anticipation"
+    if normalized in {"obvious", "obviousness"}:
+        return "obviousness"
+    return text
+
+
+def _governed_citation_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized in {"sec_102a1", "sec_102_a_1", "102a1", "102_a_1"}:
+        return "section_102_a_1"
+    if normalized in {"sec_103", "103"}:
+        return "section_103"
+    compact = re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
+    if (
+        "amend" in compact
+        and ("foregoing" in compact or "cited" in compact or "these_laws" in compact or "those_laws" in compact)
+    ):
+        if "regulation" in compact or "rule" in compact:
+            return "future_amendments_to_foregoing_laws_regulations_and_rules"
+        return "future_amendments_to_foregoing_laws"
+    return text
+
+
+def _governed_legal_role_atom(value: str, citation: str = "") -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized in {"statutory_basis", "statutory_ground", "statute", "legal_basis"}:
+        return "statutory_ground"
+    if normalized in {
+        "amendment",
+        "amendments",
+        "amendment_scope",
+        "future_amendment_scope",
+        "future_amendments",
+        "future_law_coverage",
+        "scope_extension",
+        "successor_rules",
+        "successor_regulations",
+    }:
+        return "amendment_scope"
+    if str(citation or "").strip().casefold().startswith("future_amendments_to_"):
+        return "amendment_scope"
+    if str(citation or "").strip().casefold().startswith("section_") and normalized in {"anticipation", "obviousness"}:
+        return "statutory_ground"
+    return text
+
+
+def _governed_review_actor_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized in {"actor_board", "board_role", "review_board_role"}:
+        return "review_board"
+    return text
+
+
+def _governed_review_outcome_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized in {"affirmation_outcome", "affirmed_outcome", "affirmation", "affirm"}:
+        return "affirmed"
+    if normalized in {"reversal_outcome", "reversal", "reverse"}:
+        return "reversed"
+    return text
+
+
+def _apply_governed_reference_citation_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Normalize common atom variants in governed companion rows."""
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    appended: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        candidate = ""
+        if predicate == "claim_ground" and len(args) == 4:
+            subject, ground, reference, status = [str(arg).strip() for arg in args]
+            normalized_ground = _governed_ground_atom(ground)
+            normalized_reference = _governed_reference_atom(reference)
+            if normalized_ground != ground or normalized_reference != reference:
+                candidate = f"claim_ground({subject}, {normalized_ground}, {normalized_reference}, {status})."
+        elif predicate == "legal_citation_detail" and len(args) == 4:
+            subject, citation, role, source_or_scope = [str(arg).strip() for arg in args]
+            normalized_citation = _governed_citation_atom(citation)
+            normalized_role = _governed_legal_role_atom(role, normalized_citation)
+            if normalized_citation != citation or normalized_role != role:
+                candidate = f"legal_citation_detail({subject}, {normalized_citation}, {role}, {source_or_scope})."
+                if normalized_role != role:
+                    candidate = f"legal_citation_detail({subject}, {normalized_citation}, {normalized_role}, {source_or_scope})."
+        elif predicate == "review_outcome" and len(args) == 4:
+            subject, actor, outcome, source_or_scope = [str(arg).strip() for arg in args]
+            normalized_actor = _governed_review_actor_atom(actor)
+            normalized_outcome = _governed_review_outcome_atom(outcome)
+            if normalized_actor != actor or normalized_outcome != outcome:
+                candidate = f"review_outcome({subject}, {normalized_actor}, {normalized_outcome}, {source_or_scope})."
+        if not candidate or candidate in existing:
+            continue
+        existing.add(candidate)
+        appended.append(candidate)
+    if appended:
+        facts.extend(appended)
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    source_compile["deterministic_reference_citation_atom_reduction_count"] = len(appended)
+    source_compile["deterministic_reference_citation_atom_reduction_facts"] = appended[:100]
+    if appended:
+        source_compile["deterministic_reference_citation_atom_reduction_policy"] = {
+            "schema_version": "deterministic_reference_citation_atom_reduction_v1",
+            "authority": "typed_atom_reduction_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Normalizes governed atom variants such as ref_alpha, sec_102a1, anticipated, obvious, "
+                "statutory_basis, and board_role inside already-admitted typed companion rows."
+            ),
+        }
+    return {"added_count": len(appended), "added_facts": appended}
+
+
+def _apply_governed_claim_ground_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Normalize statute-stuffed claim_ground/4 rows into governed companions.
+
+    This is a typed-atom reducer. It does not read source prose or query text.
+    When the model places a statute atom in claim_ground/4's ground slot and a
+    theory/outcome atom in the status slot, add the registered governed shape:
+    claim_ground carries the theory and status, while legal_citation_detail
+    carries the statute.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    appended: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "claim_ground" or len(args) != 4:
+            continue
+        subject, ground_or_statute, reference, outcome_or_status = [str(arg).strip() for arg in args]
+        theory_and_citation = CLAIM_GROUND_STATUTE_REDUCTIONS.get(ground_or_statute.casefold())
+        if theory_and_citation is None:
+            continue
+        theory, citation = theory_and_citation
+        status = CLAIM_GROUND_OUTCOME_TO_STATUS.get(outcome_or_status.casefold(), outcome_or_status)
+        candidates = [
+            f"claim_ground({subject}, {theory}, {reference}, {status}).",
+            f"legal_citation_detail({subject}, {citation}, statutory_ground, direct).",
+        ]
+        for candidate in candidates:
+            if candidate in existing:
+                continue
+            existing.add(candidate)
+            appended.append(candidate)
+    if appended:
+        facts.extend(appended)
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    source_compile["deterministic_claim_ground_atom_reduction_count"] = len(appended)
+    source_compile["deterministic_claim_ground_atom_reduction_facts"] = appended[:100]
+    if appended:
+        source_compile["deterministic_claim_ground_atom_reduction_policy"] = {
+            "schema_version": "deterministic_claim_ground_atom_reduction_v1",
+            "authority": "typed_atom_reduction_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Normalizes claim_ground/4 rows where the model placed a statute atom in the ground slot, "
+                "adding a governed claim_ground/4 theory row plus legal_citation_detail/4 citation row."
+            ),
+        }
+    return {"added_count": len(appended), "added_facts": appended}
+
+
+def _apply_governed_obligation_detail_atom_reduction(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Reduce broader obligation detail atoms into more atomic companion rows.
+
+    This reads only already-admitted `obligation_detail/5` typed atoms. It does
+    not inspect source prose, source-record display rows, query text, or oracle
+    answers.
+    """
+
+    facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
+    existing = set(facts)
+    appended: list[str] = []
+    for fact in facts:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate != "obligation_detail" or len(args) != 5:
+            continue
+        obligation_id, detail_kind, detail_value, role_or_purpose, source_or_scope = [
+            str(arg).strip() for arg in args
+        ]
+        if detail_kind.casefold() not in {"recipient_scope", "scope", "condition"}:
+            continue
+        schedule = _obligation_detail_schedule_atom(detail_value)
+        if not schedule:
+            continue
+        candidate = (
+            f"obligation_detail({obligation_id}, tariff_schedule, {schedule}, "
+            f"{role_or_purpose}, {source_or_scope})."
+        )
+        if candidate in existing:
+            continue
+        existing.add(candidate)
+        appended.append(candidate)
+    if appended:
+        facts.extend(appended)
+        source_compile["facts"] = facts
+        source_compile["unique_fact_count"] = len(facts)
+    source_compile["deterministic_obligation_detail_atom_reduction_count"] = len(appended)
+    source_compile["deterministic_obligation_detail_atom_reduction_facts"] = appended[:100]
+    if appended:
+        source_compile["deterministic_obligation_detail_atom_reduction_policy"] = {
+            "schema_version": "deterministic_obligation_detail_atom_reduction_v1",
+            "authority": "typed_atom_reduction_only",
+            "not_source_interpretation": True,
+            "not_query_interpretation": True,
+            "description": (
+                "Adds tariff_schedule obligation_detail/5 rows when an already-admitted obligation detail "
+                "scope atom contains a controlled schedule_N atom."
+            ),
+        }
+    return {"added_count": len(appended), "added_facts": appended}
+
+
+def _obligation_detail_schedule_atom(value: str) -> str:
+    match = re.search(r"(?:^|_)schedule_([a-z0-9]+)(?:_|$)", str(value or "").casefold())
+    if not match:
+        return ""
+    return f"schedule_{match.group(1)}"
+
+
+def _attach_governed_companion_subject_health(source_compile: dict[str, Any]) -> dict[str, Any]:
+    """Report missing companion carrier families per typed subject.
+
+    This is a diagnostic over already-admitted typed facts. It does not inspect
+    source prose, query text, or oracle answers.
+    """
+
+    companion_predicates = {
+        "claim_range",
+        "claim_ground",
+        "legal_citation_detail",
+        "review_outcome",
+    }
+    predicate_signatures = {
+        "claim_range": "claim_range/4",
+        "claim_ground": "claim_ground/4",
+        "legal_citation_detail": "legal_citation_detail/4",
+        "review_outcome": "review_outcome/4",
+    }
+    subjects: dict[str, dict[str, Any]] = {}
+    for fact in [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]:
+        parsed = _parse_fact_clause(fact)
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if predicate not in companion_predicates or not args:
+            continue
+        subject = str(args[0]).strip()
+        if not subject:
+            continue
+        row = subjects.setdefault(subject, {"subject": subject, "predicates": set(), "facts": []})
+        row["predicates"].add(predicate)
+        row["facts"].append(fact)
+    rows: list[dict[str, Any]] = []
+    omission_ledger: list[dict[str, Any]] = []
+    for subject, row in sorted(subjects.items()):
+        predicates = set(row.get("predicates") or set())
+        missing: list[str] = []
+        if {"claim_ground", "legal_citation_detail", "review_outcome"} & predicates and "claim_range" not in predicates:
+            missing.append("claim_range/4")
+        if {"claim_range", "legal_citation_detail", "review_outcome"} & predicates and "claim_ground" not in predicates:
+            missing.append("claim_ground/4")
+        if {"claim_range", "claim_ground", "review_outcome"} & predicates and "legal_citation_detail" not in predicates:
+            missing.append("legal_citation_detail/4")
+        if {"claim_range", "claim_ground", "legal_citation_detail"} & predicates and "review_outcome" not in predicates:
+            missing.append("review_outcome/4")
+        family_statuses: dict[str, str] = {}
+        for predicate, signature in sorted(predicate_signatures.items(), key=lambda item: item[1]):
+            if predicate in predicates:
+                family_statuses[signature] = "present"
+            elif signature in missing:
+                family_statuses[signature] = "missing_unaccounted"
+                omission_ledger.append(
+                    {
+                        "subject": subject,
+                        "signature": signature,
+                        "status": "missing_unaccounted",
+                        "observed_predicates": sorted(predicates),
+                        "reason": "typed subject has at least one governed companion family but this companion family is absent",
+                    }
+                )
+            else:
+                family_statuses[signature] = "not_required_by_observed_typed_surface"
+        rows.append(
+            {
+                "subject": subject,
+                "predicates": sorted(predicates),
+                "missing_companions": missing,
+                "family_statuses": family_statuses,
+                "fact_count": len(row.get("facts") or []),
+            }
+        )
+    flagged = [row for row in rows if row["missing_companions"]]
+    report = {
+        "schema_version": "governed_companion_subject_health_v1",
+        "authority": "typed_fact_diagnostic_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "subject_count": len(rows),
+        "flagged_subject_count": len(flagged),
+        "omission_ledger_count": len(omission_ledger),
+        "governed_companion_omission_ledger": omission_ledger,
+        "rows": rows,
+    }
+    source_compile["governed_companion_subject_health"] = report
+    return report
+
+
+def _list_range_source_key(value: Any) -> str:
+    text = str(value or "").strip().casefold()
+    match = re.fullmatch(r"(?:src|source)_line_0*(\d+)", text)
+    if match:
+        return f"src_line_{int(match.group(1)):04d}"
+    if text.startswith("src_") or text.startswith("source_"):
+        return text.replace("source_line_", "src_line_")
+    return ""
+
+
+def _list_range_interval_overcompresses_segments(
+    interval: dict[str, Any],
+    intervals: list[dict[str, Any]],
+) -> bool:
+    source_key = str(interval.get("source_key") or "")
+    if not source_key:
+        return False
+    low = int(interval.get("low", 0))
+    high = int(interval.get("high", 0))
+    if low == high:
+        return False
+    predicate = str(interval.get("predicate") or "")
+    segments: list[tuple[int, int]] = []
+    for other in intervals:
+        if other is interval:
+            continue
+        if str(other.get("predicate") or "") != predicate:
+            continue
+        if str(other.get("source_key") or "") != source_key:
+            continue
+        other_low = int(other.get("low", 0))
+        other_high = int(other.get("high", 0))
+        if low <= other_low <= other_high <= high:
+            segments.append((other_low, other_high))
+    if len(segments) < 2:
+        return False
+    merged: list[list[int]] = []
+    for start, end in sorted(segments):
+        if not merged or start > merged[-1][1] + 1:
+            merged.append([start, end])
+        else:
+            merged[-1][1] = max(merged[-1][1], end)
+    if len(merged) < 2:
+        return False
+    return merged[0][0] == low and merged[-1][1] == high
+
+
+def _list_range_contract_int(value: Any) -> int | None:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"(?:claim|count|item|issue|violation|paragraph)_(-?\d+)", text)
+    if match:
+        text = match.group(1)
+    if re.fullmatch(r"-?\d+", text):
+        return int(text)
+    return None
+
+
+def _profile_role_roster_repair_offered_carriers(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers: list[str] = []
+    seen: set[str] = set()
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return carriers
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        signature = str(candidate.get("signature", "")).strip()
+        if not signature or "/" not in signature:
+            continue
+        base = signature.split("/", 1)[0].strip().lower()
+        args = candidate.get("args")
+        arg_text = " ".join(str(arg).lower() for arg in args if isinstance(args, list))
+        haystack = base + " " + arg_text
+        if not any(hint in haystack for hint in ROLE_ROSTER_REPAIR_BASE_HINTS):
+            continue
+        if signature not in seen:
+            seen.add(signature)
+            carriers.append(signature)
+    return carriers
+
+
+def _profile_role_roster_repair_context_lines(parsed_profile: dict[str, Any]) -> list[str]:
+    carriers = _profile_role_roster_repair_offered_carriers(parsed_profile)
+    if not carriers:
+        return []
+    return [
+        (
+            "PROFILE ROLE ROSTER REPAIR PASS: deterministic query delivery is missing typed role/roster "
+            "facts in some documents. This pass is proposal-only; emit only source-grounded typed rows "
+            "through allowed predicate contracts, and let the mapper decide admission."
+        ),
+        (
+            "PROFILE ROLE ROSTER REPAIR PASS: revisit source-stated appearances, counsel blocks, signature "
+            "blocks, contact blocks, panel/member lists, appositive job titles, employment titles, and "
+            "supervisor/managed-by relations. Preserve the person, exact stated office/firm/organization, "
+            "represented party or scope, source-stated location, and role/title as separate typed arguments "
+            "when the allowed predicate contract supports them."
+        ),
+        (
+            "PROFILE ROLE ROSTER REPAIR PASS: do not collapse an office, bureau, local office, firm, or "
+            "department into a parent party when the source states the more specific organization. Do not "
+            "replace a job title with a generic participant label when the title is source-stated."
+        ),
+        (
+            "PROFILE ROLE ROSTER REPAIR PASS: do not emit source_record_* rows, display text rows, prose "
+            "windows, or answer-bearing source excerpts. The output must be typed role/roster facts only."
+        ),
+        (
+            "PROFILE ROLE ROSTER REPAIR PASS: compatible role/roster signatures to consider: "
+            + ", ".join(carriers[:16])
+            + ". Use exact allowed predicate names and argument order."
+        ),
+    ]
+
+
+def _apply_profile_role_roster_repair_pass(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    source_text: str,
+    intake_plan: dict[str, Any],
+    args: argparse.Namespace,
+    extra_context: list[str] | None = None,
+) -> dict[str, Any]:
+    carriers = _profile_role_roster_repair_offered_carriers(parsed_profile)
+    metadata: dict[str, Any] = {
+        "schema_version": "profile_role_roster_repair_pass_v1",
+        "attempted": False,
+        "offered_carriers": carriers[:16],
+    }
+    if not carriers:
+        metadata["reason"] = "no_role_roster_predicates_offered"
+        source_compile["profile_role_roster_repair"] = metadata
+        return metadata
+    context_lines = _profile_role_roster_repair_context_lines(parsed_profile)
+    target = max(8, min(32, int(getattr(args, "focused_pass_operation_target", 48) or 48)))
+    compiled = _compile_source_pass_ops(
+        source_text=source_text,
+        parsed_profile=parsed_profile,
+        intake_plan=intake_plan,
+        args=args,
+        pass_id="profile_role_roster_repair",
+        purpose="repair typed role and roster delivery without source-record answer routing",
+        focus="missing counsel, representative, signatory, contact, panel, employee, job-title, and supervisor rows",
+        completion=(
+            "Emit only source-grounded typed role/roster rows and minimal supporting organization/location rows; "
+            "do not recompile unrelated source material."
+        ),
+        predicates=", ".join(carriers[:16]),
+        coverage_goals=(
+            "Deliver source-stated role/roster facts as typed predicates: person, role/title, organization, "
+            "represented party or scope, location, and supervisor relation when available."
+        ),
+        extra_context=[*(extra_context or []), *context_lines],
+        operation_target=target,
+    )
+    compiled["pass_id"] = "profile_role_roster_repair"
+    compiled["purpose"] = "repair typed role and roster delivery without source-record answer routing"
+    compiled["focus"] = "missing counsel, representative, signatory, contact, panel, employee, job-title, and supervisor rows"
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
+    _merge_additive_source_pass(source_compile, compiled, metadata_prefix="profile_role_roster_repair")
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures=set(carriers[:16]),
+        metadata_prefix="profile_role_roster_repair",
+        pass_record=compiled,
+    )
+    metadata.update(
+        {
+            "attempted": True,
+            "ok": bool(compiled.get("ok")),
+            "admitted_count": int(compiled.get("admitted_count", 0) or 0),
+            "skipped_count": int(compiled.get("skipped_count", 0) or 0),
+            "new_fact_count": len(compiled.get("_profile_role_roster_repair_new_facts", []))
+            if isinstance(compiled.get("_profile_role_roster_repair_new_facts"), list)
+            else 0,
+            "signature_contract": signature_contract_report,
+            "pass": compiled,
+        }
+    )
+    source_compile["profile_role_roster_repair"] = metadata
+    return metadata
+
+
 def _apply_profile_delivery_repair_pass(
     *,
     source_compile: dict[str, Any],
@@ -3181,7 +7892,19 @@ def _apply_profile_delivery_repair_pass(
     compiled["pass_id"] = "profile_delivery_repair"
     compiled["purpose"] = "repair direct carrier delivery after deterministic profile-delivery diagnostics"
     compiled["focus"] = "missing direct source-claim, source-authority, and status/state carrier rows"
+    prior_facts = {
+        str(item).strip()
+        for item in source_compile.get("facts", [])
+        if str(item).strip()
+    }
     _merge_profile_delivery_repair_pass(source_compile, compiled)
+    signature_contract_report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts=prior_facts,
+        allowed_signatures={signature for signature in carriers[:12] if "/" in str(signature)},
+        metadata_prefix="profile_delivery_repair",
+        pass_record=compiled,
+    )
     refreshed = _profile_delivery_report(
         source_compile=source_compile,
         parsed_profile=parsed_profile,
@@ -3198,6 +7921,7 @@ def _apply_profile_delivery_repair_pass(
             if isinstance(compiled.get("_profile_delivery_repair_new_facts"), list)
             else 0,
             "offered_carriers": carriers[:12],
+            "signature_contract": signature_contract_report,
             "initial_finding_count": len(findings),
             "remaining_finding_classes": [
                 str(finding.get("class", "")).strip()
@@ -3212,6 +7936,15 @@ def _apply_profile_delivery_repair_pass(
 
 
 def _merge_profile_delivery_repair_pass(source_compile: dict[str, Any], pass_record: dict[str, Any]) -> None:
+    _merge_additive_source_pass(source_compile, pass_record, metadata_prefix="profile_delivery_repair")
+
+
+def _merge_additive_source_pass(
+    source_compile: dict[str, Any],
+    pass_record: dict[str, Any],
+    *,
+    metadata_prefix: str,
+) -> None:
     before_facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()]
     before_rules = [str(item).strip() for item in source_compile.get("rules", []) if str(item).strip()]
     before_queries = [str(item).strip() for item in source_compile.get("queries", []) if str(item).strip()]
@@ -3239,9 +7972,9 @@ def _merge_profile_delivery_repair_pass(source_compile: dict[str, Any], pass_rec
     added_facts = extend_unique(before_facts, before_fact_set, pass_record.get("facts", []))
     added_rules = extend_unique(before_rules, before_rule_set, pass_record.get("rules", []))
     added_queries = extend_unique(before_queries, before_query_set, pass_record.get("queries", []))
-    pass_record["_profile_delivery_repair_new_facts"] = added_facts
-    pass_record["_profile_delivery_repair_new_rules"] = added_rules
-    pass_record["_profile_delivery_repair_new_queries"] = added_queries
+    pass_record[f"_{metadata_prefix}_new_facts"] = added_facts
+    pass_record[f"_{metadata_prefix}_new_rules"] = added_rules
+    pass_record[f"_{metadata_prefix}_new_queries"] = added_queries
 
     source_compile["facts"] = before_facts
     source_compile["rules"] = before_rules
@@ -3445,6 +8178,984 @@ def _ensure_source_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str,
         "schema_version": "profile_source_detail_extension_v1",
         "added": True,
         "signature": "source_detail/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+SHALLOW_ROLE_BASES = {
+    "actor_role",
+    "adult_role",
+    "employee_role",
+    "entity_role",
+    "party_role",
+    "person_role",
+    "representative_role",
+    "staff_role",
+}
+
+RICH_ROLE_BASES = {
+    "counsel_for",
+    "employment_role",
+    "person_role_detail",
+    "representative_for",
+    "role_detail",
+    "signatory_for",
+    "supervisor_relation",
+}
+
+
+def _signature_base_arity(signature: str) -> tuple[str, int] | None:
+    text = str(signature).strip()
+    if "/" not in text:
+        return None
+    base, arity_text = text.rsplit("/", 1)
+    try:
+        arity = int(arity_text)
+    except ValueError:
+        return None
+    return base.strip(), arity
+
+
+def _ensure_role_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    """Ensure a compact typed role-detail carrier when the profile is too shallow.
+
+    This is a vocabulary extension only. It does not inspect source prose or
+    extract role facts; it gives the LLM-owned compile pass a typed place to put
+    source-stated offices, firms, titles, represented parties, and locations
+    that would otherwise be squeezed into a lossy role atom.
+    """
+
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_role_detail_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = [
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    ]
+    parsed_signatures = [item for item in (_signature_base_arity(signature) for signature in signatures) if item]
+    if any(base in RICH_ROLE_BASES or (base.endswith("_role") and arity >= 4) for base, arity in parsed_signatures):
+        return {
+            "schema_version": "profile_role_detail_extension_v1",
+            "added": False,
+            "reason": "rich_role_carrier_present",
+        }
+    if not any(base in SHALLOW_ROLE_BASES and arity <= 3 for base, arity in parsed_signatures):
+        return {
+            "schema_version": "profile_role_detail_extension_v1",
+            "added": False,
+            "reason": "no_shallow_role_carrier",
+        }
+    if "person_role_detail/5" in signatures:
+        return {
+            "schema_version": "profile_role_detail_extension_v1",
+            "added": False,
+            "reason": "person_role_detail_already_present",
+        }
+
+    candidates.append(
+        {
+            "signature": "person_role_detail/5",
+            "args": [
+                "person_id",
+                "role_or_title",
+                "organization_or_office",
+                "represented_party_or_scope",
+                "location_or_context",
+            ],
+            "description": (
+                "Typed carrier for exact source-stated person roles, titles, offices, firms, represented "
+                "parties, scopes, and locations when a shallow role predicate would lose slots."
+            ),
+            "why": (
+                "Prevents lossy role atoms such as supervisor or attorney from replacing source-stated "
+                "titles, local offices, firms, parties, and locations."
+            ),
+            "admission_notes": [
+                "Use only for source-stated role/roster facts.",
+                "Preserve exact source-stated office, firm, bureau, department, or local office separately from the represented party.",
+                "Preserve exact job title or appositive role instead of replacing it with a generic participant label.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "person_role_detail/5" not in provenance:
+        provenance.append("person_role_detail/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added person_role_detail/5 as an additive typed role-detail carrier."
+            )
+    return {
+        "schema_version": "profile_role_detail_extension_v1",
+        "added": True,
+        "signature": "person_role_detail/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+DOCUMENT_METADATA_SIGNATURES = {
+    "document_title/2": {
+        "args": ["document_id", "title"],
+        "description": "Exact source-stated title, caption, report title, notice title, or filing title for the document.",
+        "why": "Keeps document identity answerable without retrieving a prose source window.",
+        "admission_notes": [
+            "Use only when the source states a document title, caption, notice title, filing title, or equivalent heading.",
+            "Preserve the title as a normalized atom; do not invent a marketing summary.",
+        ],
+    },
+    "document_publisher/2": {
+        "args": ["document_id", "publisher_or_issuing_body"],
+        "description": "Source-stated publisher, issuing body, agency, office, court, commission, or board for the document.",
+        "why": "Separates source authority metadata from answer-bearing prose windows.",
+        "admission_notes": [
+            "Use only for source-stated issuing or publishing bodies.",
+            "Prefer the specific source-stated office or body over a broader parent when both are present.",
+        ],
+    },
+    "document_date/3": {
+        "args": ["document_or_subject_id", "date_kind_or_role", "date_value"],
+        "description": (
+            "Source-stated date for a document, related matter, application, filing, publication, decision, "
+            "report, notice, or other document-like subject."
+        ),
+        "why": (
+            "Keeps issue, decision, filing, publication, report, and related-matter dates joinable by typed "
+            "subject and date role instead of relying on prose source windows or date-bearing atom labels."
+        ),
+        "admission_notes": [
+            "Use only for dates explicitly stated by the source.",
+            "Keep date_kind_or_role as a structural role such as issue_date, decision_date, filing_date, publication_date, report_date, effective_date, or received_date.",
+            "Use the same document_or_subject_id that identifier, action, reference, or related-matter rows use when possible.",
+            "Do not use document_date/3 for ranges; use document_date_range/3 for a source-stated coverage range or period.",
+        ],
+    },
+    "document_date_range/3": {
+        "args": ["document_id", "start_date", "end_date"],
+        "description": "Source-stated coverage range, reporting week, period, or effective date range for the document.",
+        "why": "Keeps document period metadata queryable as typed dates instead of deriving it from unrelated event rows.",
+        "admission_notes": [
+            "Use only when the source states a document coverage range or reporting period.",
+            "Do not infer a range from the minimum and maximum event dates unless the source itself labels that range.",
+        ],
+    },
+    "registrant_identity/2": {
+        "args": ["registrant_entity", "incorporation_or_organization_jurisdiction"],
+        "description": (
+            "Source-stated registrant/entity identity linked to its state or jurisdiction of incorporation "
+            "or organization."
+        ),
+        "why": (
+            "Keeps cover-page registrant jurisdiction as a typed identity relation instead of treating it "
+            "as a lifecycle/status row or retrieving it from a prose source window."
+        ),
+        "admission_notes": [
+            "Use only when the source states the exact registrant/entity and state or jurisdiction of incorporation or organization.",
+            "The jurisdiction slot is a static charter or organization attribute, not a current status, restatement status, lifecycle state, or operational condition.",
+            "Do not use status_state_at/4 for state-of-incorporation or jurisdiction-of-organization facts when this carrier is available.",
+            "Preserve EIN, commission file number, ticker, address, and phone in separate typed carriers such as document_identifier_occurrence/5 or entity_location/3.",
+        ],
+    },
+    "registrant_name/2": {
+        "args": ["registrant_entity", "legal_name"],
+        "description": "Exact source-stated registrant/entity legal name from an official document cover-page identity field.",
+        "why": (
+            "Keeps exact registrant names answerable as typed identity atoms instead of compact aliases "
+            "or prose source windows."
+        ),
+        "admission_notes": [
+            "Use only when the source states the exact registrant/entity legal name as an official identity field.",
+            "The legal_name slot is a normalized atom for that source-stated legal name, not a ticker, short name, trade name, inferred alias, or section heading.",
+            "Preserve jurisdiction in registrant_identity/2 and identifiers in document_identifier_occurrence/5 when those carriers are available.",
+        ],
+    },
+}
+
+
+LIST_RANGE_INVENTORY_SIGNATURES = {
+    "list_member/4": {
+        "args": ["list_or_set_id", "member_value", "member_kind_or_role", "source_or_scope"],
+        "description": (
+            "One source-stated member of a numbered list, item set, claim set, count set, issue set, "
+            "product set, violation set, requirement set, or order-paragraph set."
+        ),
+        "why": (
+            "Preserves list membership as typed atoms so complete-list questions do not depend on "
+            "source-record prose or compressed summary labels."
+        ),
+        "admission_notes": [
+            "Use only for members explicitly stated by the source.",
+            "Emit one row per source-stated singleton member when the source lists individual members.",
+            "Use member_kind_or_role for a short structural role such as claim, count, issue, product, violation, requirement, paragraph, or contested_item.",
+            "Do not use source_or_scope to encode a legal ground, prior-art reference, causal reason, treatment basis, or statutory basis.",
+            "Preserve ground, basis, outcome, or treatment in a companion typed relation that shares the same list_or_set_id or member_value.",
+            "Reuse the same list_or_set_id that related outcome, ground, basis, or status predicates use when one is available.",
+            "Do not infer unstated members merely because a nearby source range could be expanded.",
+        ],
+    },
+    "claim_range/4": {
+        "args": ["claim_set_id", "start_claim", "end_claim", "source_or_scope"],
+        "description": (
+            "A source-stated claim-number singleton or range belonging to a governed claim set, such as "
+            "contested, rejected, affirmed, anticipated, or obviousness claim groups."
+        ),
+        "why": (
+            "Preserves source-stated claim range boundaries as typed values instead of hiding them inside "
+            "one compressed claim-set atom."
+        ),
+        "admission_notes": [
+            "Use only for claim numbers or claim ranges explicitly stated by the source.",
+            "Emit one row per source-stated segment: a singleton such as N should have start_claim and end_claim both set to N; a range such as N-M should have start_claim N and end_claim M.",
+            "Reuse the same claim_set_id in related claim_outcome, claim_rejection, claim_treatment, ground, or basis predicates when those rows refer to the same governed set.",
+            "Do not replace outcome, ground, or treatment rows with claim_range/4; this carrier only preserves the list/range inventory.",
+            "Do not compress several separated source segments into one atom such as claims_1_2_4_6_9_12_21.",
+        ],
+    },
+    "item_range/4": {
+        "args": ["item_set_id", "start_item", "end_item", "source_or_scope"],
+        "description": (
+            "A source-stated numbered item, count, issue, product, violation, requirement, paragraph, or "
+            "other item-range segment belonging to a governed set."
+        ),
+        "why": (
+            "Gives non-claim documents the same typed range boundary surface as claim_range/4 without "
+            "requiring Python to parse display text."
+        ),
+        "admission_notes": [
+            "Use only for source-stated numbered item singletons or ranges.",
+            "Emit one row per source-stated segment, preserving start and end separately.",
+            "Reuse the same item_set_id in related outcome, status, basis, ground, or treatment predicates when available.",
+            "Keep item_range/4 as inventory only; preserve outcome, ground, basis, status, or treatment in companion typed rows.",
+            "Do not use item_range/4 for date ranges, money ranges, or measurement ranges unless the governed subject is a numbered source item set.",
+        ],
+    },
+}
+
+
+CLAIM_SET_RELATION_SIGNATURES = {
+    "claim_ground/4": {
+        "args": ["claim_set_id", "ground_or_theory", "reference_or_basis", "outcome_or_status"],
+        "description": (
+            "A governed claim or claim set linked to its source-stated legal/technical ground, "
+            "reference or basis, and outcome/status."
+        ),
+        "why": (
+            "Lets claim-range inventory meet the ground/basis relation on the same typed set id instead "
+            "of hiding the relation in a list label or source display string."
+        ),
+        "admission_notes": [
+            "Use for source-stated claim or claim-set grounds, theories, references, bases, outcomes, or statuses.",
+            "Reuse the same claim_set_id used by claim_range/4 or list_member/4 when the source applies the ground to that governed set.",
+            "Do not use claim_ground/4 as inventory; preserve numbered membership and source-stated ranges in list_member/4 and claim_range/4.",
+            "If a statute or rule is source-stated, preserve it in legal_citation_detail/4 when that carrier is available.",
+            "When legal_citation_detail/4 is available, use ground_or_theory for the theory such as anticipation or obviousness, not the statute number.",
+            "When a later review body affirms or reverses the same ground, preserve both layers: the underlying action/status here and the review layer in review_outcome/4 when available.",
+        ],
+    },
+    "review_outcome/4": {
+        "args": ["reviewed_subject_id", "reviewing_body_or_actor", "review_outcome_or_action", "source_or_scope"],
+        "description": (
+            "A reviewed claim set, order, finding, decision, or action linked to the source-stated "
+            "reviewing body and review outcome."
+        ),
+        "why": (
+            "Keeps appellate, board, agency, protest, grievance, or administrative review outcomes "
+            "joinable to the underlying typed subject instead of inventing private affirmed_by-style atoms."
+        ),
+        "admission_notes": [
+            "Use for later review actions such as affirmed, reversed, modified, vacated, remanded, sustained, denied, or granted.",
+            "Reuse the same reviewed_subject_id used by the underlying action, ground, finding, decision, or inventory rows.",
+            "Do not use review_outcome/4 for the original lower-body action when no later review outcome is stated.",
+            "Do not hide the underlying action, ground, basis, or affected items inside reviewed_subject_id; preserve those in companion typed rows.",
+        ],
+    },
+}
+
+
+RATING_SCALE_SIGNATURES = {
+    "rating_scale_option/4": {
+        "args": ["scale_or_factor_id", "rating_value", "rating_order_or_rank", "source_or_scope"],
+        "description": (
+            "One source-stated option in an adjectival, relevancy, confidence, quality, risk, or "
+            "evaluation rating scale."
+        ),
+        "why": (
+            "Preserves allowed rating options as typed atoms distinct from ratings actually assigned to "
+            "a particular party, proposal, contract, product, or record."
+        ),
+        "admission_notes": [
+            "Use only for rating options explicitly listed by the source as a scale or allowed value set.",
+            "Use scale_or_factor_id for the source-stated scale or factor, such as past_performance_relevancy or confidence_assessment.",
+            "Use rating_value for the exact normalized option value, such as very_relevant or substantial_confidence.",
+            "Use rating_order_or_rank for the source order when stated or inferable from the explicit list order; otherwise use unranked.",
+            "Do not use this carrier for an assigned rating; assigned_rating/3 remains the assigned-value carrier.",
+        ],
+    }
+}
+
+
+def _ensure_list_range_inventory_predicates(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_list_range_inventory_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    claim_relation_signal = _profile_has_claim_set_relation_signal(parsed_profile)
+    added: list[str] = []
+    for signature, spec in LIST_RANGE_INVENTORY_SIGNATURES.items():
+        if signature in signatures:
+            continue
+        candidates.append(
+            {
+                "signature": signature,
+                "args": list(spec["args"]),
+                "description": str(spec["description"]),
+                "why": str(spec["why"]),
+                "admission_notes": list(spec["admission_notes"]),
+            }
+        )
+        added.append(signature)
+    if claim_relation_signal:
+        for signature, spec in CLAIM_SET_RELATION_SIGNATURES.items():
+            if signature in signatures:
+                continue
+            candidates.append(
+                {
+                    "signature": signature,
+                    "args": list(spec["args"]),
+                    "description": str(spec["description"]),
+                    "why": str(spec["why"]),
+                    "admission_notes": list(spec["admission_notes"]),
+                }
+            )
+            signatures.add(signature)
+            added.append(signature)
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list):
+        for signature in added:
+            if signature not in provenance:
+                provenance.append(signature)
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list) and added:
+            notes.append(
+                "Deterministic profile extension added typed list/range inventory carriers for source-stated numbered sets."
+            )
+    return {
+        "schema_version": "profile_list_range_inventory_extension_v1",
+        "added": bool(added),
+        "signatures": added,
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _profile_has_claim_set_relation_signal(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if isinstance(candidates, list):
+        for candidate in candidates:
+            if not isinstance(candidate, dict):
+                continue
+            haystack = " ".join(
+                [
+                    str(candidate.get("signature", "")),
+                    " ".join(str(arg) for arg in candidate.get("args", []) if isinstance(candidate.get("args"), list)),
+                    str(candidate.get("description", "")),
+                    str(candidate.get("why", "")),
+                ]
+            ).casefold()
+            if "claim" in haystack and any(token in haystack for token in ("ground", "basis", "reject", "outcome", "status", "reference")):
+                return True
+    entities = parsed_profile.get("entity_types")
+    if isinstance(entities, list):
+        for entity in entities:
+            if isinstance(entity, dict) and "claim" in str(entity.get("name", "")).casefold():
+                return True
+    return False
+
+
+def _ensure_rating_scale_option_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_rating_scale_extension_v1", "added": False, "reason": "no_candidate_list"}
+    if not _profile_has_rating_scale_signal(parsed_profile):
+        return {"schema_version": "profile_rating_scale_extension_v1", "added": False, "reason": "no_rating_scale_signal"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    added: list[str] = []
+    for signature, spec in RATING_SCALE_SIGNATURES.items():
+        if signature in signatures:
+            continue
+        candidates.append(
+            {
+                "signature": signature,
+                "args": list(spec["args"]),
+                "description": str(spec["description"]),
+                "why": str(spec["why"]),
+                "admission_notes": list(spec["admission_notes"]),
+            }
+        )
+        added.append(signature)
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list):
+        for signature in added:
+            if signature not in provenance:
+                provenance.append(signature)
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list) and added:
+            notes.append(
+                "Deterministic profile extension added a typed rating-scale option carrier for source-stated rating scales."
+            )
+    return {
+        "schema_version": "profile_rating_scale_extension_v1",
+        "added": bool(added),
+        "signatures": added,
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _profile_has_rating_scale_signal(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        haystack = " ".join(
+            [
+                str(candidate.get("signature", "")),
+                " ".join(str(arg) for arg in candidate.get("args", []) if isinstance(candidate.get("args"), list)),
+                str(candidate.get("description", "")),
+                str(candidate.get("why", "")),
+                " ".join(str(note) for note in candidate.get("admission_notes", []) if isinstance(candidate.get("admission_notes"), list)),
+            ]
+        ).casefold()
+        if "rating" in haystack and any(
+            token in haystack
+            for token in (
+                "assign",
+                "assigned",
+                "adjectival",
+                "relevancy",
+                "confidence",
+                "evaluation",
+                "quality",
+                "risk",
+                "scale",
+                "option",
+                "factor",
+            )
+        ):
+            return True
+    return False
+
+
+def _reconcile_profile_carrier_contracts(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {
+            "schema_version": "profile_carrier_contract_registry_reconciliation_v1",
+            "changed_count": 0,
+            "changes": [],
+            "reason": "no_candidate_list",
+        }
+    changes: list[dict[str, Any]] = []
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if not isinstance(provenance, list):
+        provenance = []
+        parsed_profile["provenance_sensitive_predicates"] = provenance
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).strip()
+        contract = carrier_contract(signature)
+        if not isinstance(contract, dict):
+            continue
+        expected_args = [str(arg) for arg in contract.get("args", []) if str(arg).strip()]
+        current_args = [str(arg) for arg in item.get("args", [])] if isinstance(item.get("args"), list) else []
+        change: dict[str, Any] = {"signature": signature}
+        changed = False
+        if expected_args and current_args != expected_args:
+            item["args"] = expected_args
+            change["previous_args"] = current_args
+            change["expected_args"] = expected_args
+            changed = True
+        required_provenance = contract.get("required_provenance")
+        if isinstance(required_provenance, list) and required_provenance and signature not in provenance:
+            provenance.append(signature)
+            change["provenance_sensitive_added"] = True
+            changed = True
+        if changed:
+            changes.append(change)
+    return {
+        "schema_version": "profile_carrier_contract_registry_reconciliation_v1",
+        "changed_count": len(changes),
+        "authority": "registered_carrier_contract_only",
+        "fact_extraction": False,
+        "changes": changes,
+    }
+
+
+def _ensure_document_metadata_predicates(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_document_metadata_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    added: list[str] = []
+    for signature, spec in DOCUMENT_METADATA_SIGNATURES.items():
+        if signature in signatures:
+            continue
+        candidates.append(
+            {
+                "signature": signature,
+                "args": list(spec["args"]),
+                "description": str(spec["description"]),
+                "why": str(spec["why"]),
+                "admission_notes": list(spec["admission_notes"]),
+            }
+        )
+        added.append(signature)
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list):
+        for signature in added:
+            if signature not in provenance:
+                provenance.append(signature)
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list) and added:
+            notes.append(
+                "Deterministic profile extension added document metadata carriers for title, publisher, and stated date range."
+            )
+    return {
+        "schema_version": "profile_document_metadata_extension_v1",
+        "added": bool(added),
+        "signatures": added,
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_legal_citation_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_legal_citation_detail_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "legal_citation_detail/4" in signatures:
+        return {
+            "schema_version": "profile_legal_citation_detail_extension_v1",
+            "added": False,
+            "reason": "legal_citation_detail_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "legal_citation_detail/4",
+            "args": ["subject_id", "citation", "citation_role_or_purpose", "source_or_scope"],
+            "description": (
+                "Exact source-stated legal citations linked to the obligation, notice, finding, rule, "
+                "exception, checkbox provision, or procedural right they support."
+            ),
+            "why": (
+                "Preserves exact statutes, regulations, named procedural rule sets, rules, clauses, "
+                "subsections, and case citations as typed values instead of embedding them in prose-like "
+                "obligation atoms."
+            ),
+            "admission_notes": [
+                "Use only for exact source-stated legal citations.",
+                "Keep the cited authority separate from the role or purpose it serves.",
+                "When a source lists multiple citations for one notice, obligation, checkbox, or exception, emit one row per citation.",
+                "Named procedural rule sets such as rules of appellate procedure are citation-like authorities even when no section number is stated.",
+                "When a source-stated citation clause includes future amendments, successor regulations, or later-adopted rules, preserve that coverage as a compact typed citation-scope row with role amendment_scope.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "legal_citation_detail/4" not in provenance:
+        provenance.append("legal_citation_detail/4")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added legal_citation_detail/4 for exact source-stated citations."
+            )
+    return {
+        "schema_version": "profile_legal_citation_detail_extension_v1",
+        "added": True,
+        "signature": "legal_citation_detail/4",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_monetary_payment_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_monetary_payment_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "monetary_payment/5" in signatures:
+        return {
+            "schema_version": "profile_monetary_payment_extension_v1",
+            "added": False,
+            "reason": "monetary_payment_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "monetary_payment/5",
+            "args": ["subject_id", "amount", "authority_or_basis", "purpose_or_use", "source_or_scope"],
+            "description": (
+                "Source-stated payment, relief, restitution, penalty, reimbursement, settlement, or other "
+                "monetary amount tied to a governed subject and source scope."
+            ),
+            "why": (
+                "Official documents often state a money amount together with a legal basis and use/purpose. "
+                "Preserve the amount as a typed value instead of leaving it in prose or a date/range carrier."
+            ),
+            "admission_notes": [
+                "Use only for exact source-stated money amounts.",
+                "Use compact amount atoms such as usd_725000 for $725,000.",
+                "Keep authority_or_basis as a compact statute, rule, paragraph, order, or agreement atom when stated; use none_stated only if the source gives no basis.",
+                "Keep purpose_or_use compact, such as restitution_and_penalties, civil_penalty, refund, reimbursement, or settlement_payment.",
+                "Keep source_or_scope as the paragraph, agreement section, source coordinate, or payment scope that states the amount.",
+                "Do not use monetary_payment/5 for date ranges, item counts, or broad payment prose without an exact amount.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "monetary_payment/5" not in provenance:
+        provenance.append("monetary_payment/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added monetary_payment/5 for exact source-stated payment amounts."
+            )
+    return {
+        "schema_version": "profile_monetary_payment_extension_v1",
+        "added": True,
+        "signature": "monetary_payment/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_obligation_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_obligation_detail_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "obligation_detail/5" in signatures:
+        return {
+            "schema_version": "profile_obligation_detail_extension_v1",
+            "added": False,
+            "reason": "obligation_detail_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "obligation_detail/5",
+            "args": ["obligation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
+            "description": (
+                "One compact source-stated term of an obligation, requirement, settlement condition, "
+                "reporting duty, corrective action, or compliance obligation."
+            ),
+            "why": (
+                "Obligations often bundle deliverables, recipient scope, frequency, duration, schedule, "
+                "deadline, and conditions in one sentence. Preserve those as joinable typed details instead "
+                "of one long obligation prose atom."
+            ),
+            "admission_notes": [
+                "Use one obligation_detail/5 row per atomic source-stated obligation term.",
+                "Use detail_kind values such as deliverable, recipient_scope, tariff_schedule, frequency, duration, deadline, authority, condition, exception, or method.",
+                "Use compact detail_value atoms such as schedule_9, one_year, quarterly, individual_and_power_quality_data, or written_request.",
+                "Use role_or_purpose to preserve the obligation family, such as data_reporting, settlement_obligation, compliance_requirement, notice_requirement, or corrective_action.",
+                "Use source_or_scope for the paragraph, agreement section, source line, table row, or local source scope that states the detail.",
+                "Do not place the full obligation sentence or several details into detail_value.",
+                "If a broad obligation summary predicate such as settlement_obligation/3 exists, reuse the same obligation_id where possible.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "obligation_detail/5" not in provenance:
+        provenance.append("obligation_detail/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added obligation_detail/5 for compact source-stated obligation terms."
+            )
+    source_pressure = _profile_has_obligation_detail_pressure(parsed_profile)
+    return {
+        "schema_version": "profile_obligation_detail_extension_v1",
+        "added": True,
+        "signature": "obligation_detail/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+        "source_pressure": source_pressure,
+        "accountability_required": source_pressure,
+    }
+
+
+def _profile_has_obligation_detail_pressure(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    pressure_terms = {
+        "compliance",
+        "condition",
+        "corrective",
+        "duty",
+        "obligation",
+        "requirement",
+        "settlement",
+        "term",
+    }
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).casefold().replace("_", " ")
+        args = " ".join(str(arg) for arg in item.get("args", []) if str(arg).strip()) if isinstance(item.get("args"), list) else ""
+        text = f"{signature} {args}".casefold().replace("_", " ")
+        if _profile_admission_tokens(text) & pressure_terms:
+            return True
+    return False
+
+
+def _ensure_procedural_rule_detail_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {
+            "schema_version": "profile_procedural_rule_detail_extension_v1",
+            "added": False,
+            "reason": "no_candidate_list",
+        }
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "procedural_rule_detail/5" in signatures:
+        return {
+            "schema_version": "profile_procedural_rule_detail_extension_v1",
+            "added": False,
+            "reason": "procedural_rule_detail_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "procedural_rule_detail/5",
+            "args": ["rule_id", "detail_kind", "detail_value", "rule_context_or_action", "source_or_scope"],
+            "description": (
+                "One compact source-stated term of a procedural rule, review right, rehearing right, appeal path, "
+                "filing requirement, deadline rule, or default consequence."
+            ),
+            "why": (
+                "Procedural rules often bundle a trigger, filing/action, period, start anchor, authority, and "
+                "consequence in one sentence. Preserve those as joinable typed details instead of one long rule "
+                "or deadline prose atom."
+            ),
+            "admission_notes": [
+                "Use one procedural_rule_detail/5 row per atomic source-stated procedural rule term.",
+                "Use detail_kind values such as trigger, action, deadline, period, consequence, authority, condition, exception, start_anchor, or filing_window.",
+                "Use compact detail_value atoms such as thirty_days, ten_days, deemed_denied, request_for_review_or_rehearing, or basis_known_or_should_have_been_known.",
+                "Use rule_context_or_action to preserve the procedural family, such as review_or_rehearing_request, reconsideration_request, appeal_path, filing_requirement, or agency_review.",
+                "Use source_or_scope for the statute, regulation, paragraph, notice section, source line, table row, or local source scope that states the detail.",
+                "Do not place the full rule sentence or several details into detail_value.",
+                "If legal_citation_detail/4 is present, preserve exact authorities there and reuse the same rule_id when possible.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "procedural_rule_detail/5" not in provenance:
+        provenance.append("procedural_rule_detail/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added procedural_rule_detail/5 for compact source-stated procedural rule terms."
+            )
+    source_pressure = _profile_has_procedural_rule_detail_pressure(parsed_profile)
+    return {
+        "schema_version": "profile_procedural_rule_detail_extension_v1",
+        "added": True,
+        "signature": "procedural_rule_detail/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+        "source_pressure": source_pressure,
+        "accountability_required": source_pressure,
+    }
+
+
+def _profile_has_procedural_rule_detail_pressure(parsed_profile: dict[str, Any]) -> bool:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return False
+    pressure_terms = {
+        "appeal",
+        "authority",
+        "condition",
+        "consequence",
+        "deadline",
+        "filing",
+        "period",
+        "procedure",
+        "procedural",
+        "reconsideration",
+        "rehearing",
+        "request",
+        "review",
+        "rule",
+    }
+    for item in candidates:
+        if not isinstance(item, dict):
+            continue
+        signature = str(item.get("signature", "")).casefold().replace("_", " ")
+        args = " ".join(str(arg) for arg in item.get("args", []) if str(arg).strip()) if isinstance(item.get("args"), list) else ""
+        text = f"{signature} {args}".casefold().replace("_", " ")
+        if _profile_admission_tokens(text) & pressure_terms:
+            return True
+    return False
+
+
+def _ensure_document_checkbox_provision_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_document_checkbox_provision_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "document_checkbox_provision/5" in signatures:
+        return {
+            "schema_version": "profile_document_checkbox_provision_extension_v1",
+            "added": False,
+            "reason": "document_checkbox_provision_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "document_checkbox_provision/5",
+            "args": ["document_id", "provision_label_or_text", "checkbox_mark", "rule_or_provision", "citation"],
+            "description": (
+                "Source-stated checkbox or checklist provisions on official forms, including the literal mark, "
+                "the provision/rule label, and any exact citation printed with that checkbox row."
+            ),
+            "why": (
+                "Official forms often carry answer-bearing checkbox rows where the mark, rule label, and citation "
+                "are distinct typed values. Preserve those values as structure rather than as source-record prose."
+            ),
+            "admission_notes": [
+                "Use only for checkbox or checklist rows that are explicitly present in the source.",
+                "Emit one row per checkbox/list provision.",
+                "Keep the checkbox mark as the literal source mark when present, or a normalized checked/unchecked atom when the source states the state in words.",
+                "Keep rule labels and citations separate: for example, a rule label and a CFR citation should occupy distinct slots.",
+                "Do not infer a substantive legal consequence from a checkbox state unless another typed predicate explicitly carries that consequence.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "document_checkbox_provision/5" not in provenance:
+        provenance.append("document_checkbox_provision/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added document_checkbox_provision/5 for source-stated checkbox/list rows."
+            )
+    return {
+        "schema_version": "profile_document_checkbox_provision_extension_v1",
+        "added": True,
+        "signature": "document_checkbox_provision/5",
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+
+
+def _ensure_document_identifier_occurrence_predicate(parsed_profile: dict[str, Any]) -> dict[str, Any]:
+    candidates = parsed_profile.get("candidate_predicates")
+    if not isinstance(candidates, list):
+        return {"schema_version": "profile_document_identifier_occurrence_extension_v1", "added": False, "reason": "no_candidate_list"}
+    signatures = {
+        str(item.get("signature", "")).strip()
+        for item in candidates
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    }
+    if "document_identifier_occurrence/5" in signatures:
+        return {
+            "schema_version": "profile_document_identifier_occurrence_extension_v1",
+            "added": False,
+            "reason": "document_identifier_occurrence_already_present",
+        }
+    candidates.append(
+        {
+            "signature": "document_identifier_occurrence/5",
+            "args": ["document_id", "identifier_kind", "identifier_value", "occurrence_scope_or_label", "source_order"],
+            "description": (
+                "Each source-stated occurrence of a document identifier, preserving repeated identifiers of the "
+                "same kind when they appear in different cover-page blocks, headers, tables, or form fields. "
+                "This carrier is specifically for cases where a single collapsed identifier row would lose a "
+                "distinct source-stated value."
+            ),
+            "why": (
+                "Documents can state multiple identifiers with the same label in different scopes. Preserve each "
+                "occurrence as a typed row so exact identifier questions do not depend on source-record text."
+            ),
+            "admission_notes": [
+                "Use only for identifiers explicitly stated in the source.",
+                "Emit one row per occurrence when the same identifier kind appears more than once.",
+                "If two source lines or fields use the same identifier label but state different values, preserve both values as separate rows.",
+                "Keep occurrence_scope_or_label source-local and structural, such as header, cover_page_block, table_row, or filed_form_field.",
+                "Use source_order to preserve source order with a small integer or source-line atom.",
+                "Do not collapse distinct values merely because they share the same identifier_kind.",
+            ],
+        }
+    )
+    provenance = parsed_profile.get("provenance_sensitive_predicates")
+    if isinstance(provenance, list) and "document_identifier_occurrence/5" not in provenance:
+        provenance.append("document_identifier_occurrence/5")
+    self_check = parsed_profile.get("self_check")
+    if isinstance(self_check, dict):
+        notes = self_check.get("notes")
+        if isinstance(notes, list):
+            notes.append(
+                "Deterministic profile extension added document_identifier_occurrence/5 for repeated source-stated identifiers."
+            )
+    return {
+        "schema_version": "profile_document_identifier_occurrence_extension_v1",
+        "added": True,
+        "signature": "document_identifier_occurrence/5",
         "authority": "vocabulary_extension_only",
         "fact_extraction": False,
     }
@@ -4685,6 +10396,188 @@ def _attach_profile_admission_report(
         unhealthy_passes.append("profile_admission")
     if delivery_warning_flags and "profile_delivery" not in unhealthy_passes:
         unhealthy_passes.append("profile_delivery")
+    health["flag_counts"] = flag_counts
+    health["unhealthy_passes"] = unhealthy_passes
+    health["unhealthy_pass_count"] = len(unhealthy_passes)
+    if health.get("verdict") == "healthy":
+        health["verdict"] = "warning"
+        health["recommendation"] = "run_qa_but_treat_thin_lens_results_as_diagnostic"
+    source_compile["compile_health"] = health
+
+
+def _attach_registered_carrier_delivery_report(
+    *,
+    source_compile: dict[str, Any],
+    parsed_profile: dict[str, Any],
+    profile_extension_metadata: dict[str, Any] | None = None,
+    mark_health: bool = True,
+) -> dict[str, Any]:
+    """Report registered carrier signatures offered by extensions but not emitted.
+
+    This is intentionally narrower than profile-delivery diagnostics: it does
+    not scan source text and it does not infer what should have been emitted.
+    It only asks whether a registered carrier made available to the compiler
+    produced any typed rows.
+    """
+
+    offered_rows = _registered_carrier_delivery_offered_rows(
+        parsed_profile=parsed_profile,
+        profile_extension_metadata=profile_extension_metadata,
+    )
+    offered_signatures = [row["signature"] for row in offered_rows]
+    accountable_signatures = [
+        row["signature"]
+        for row in offered_rows
+        if row.get("accountability_required") is True
+    ]
+    parsed_fact_rows = [
+        (predicate, args, fact)
+        for fact in _clause_list(source_compile.get("facts", []))
+        if (parsed := _parse_fact_clause(fact)) is not None
+        for predicate, args in [parsed]
+        if not predicate.startswith("source_record")
+    ]
+    delivered_row_counts: dict[str, int] = {}
+    delivered_fact_sample: dict[str, list[str]] = {}
+    for signature in offered_signatures:
+        predicate, arity = _signature_predicate_arity(signature)
+        if not predicate:
+            continue
+        rows = [
+            fact
+            for fact_predicate, args, fact in parsed_fact_rows
+            if fact_predicate == predicate and (arity is None or len(args) == arity)
+        ]
+        delivered_row_counts[signature] = len(rows)
+        if rows:
+            delivered_fact_sample[signature] = rows[:12]
+    findings = [
+        {
+            "class": "registered_carrier_offered_but_undelivered",
+            "signature": signature,
+            "delivered_carrier_row_count": delivered_row_counts.get(signature, 0),
+            "reason": "registered carrier signature was offered by profile extension metadata but no typed rows were emitted",
+        }
+        for signature in accountable_signatures
+        if delivered_row_counts.get(signature, 0) <= 0
+    ]
+    report = {
+        "schema_version": "registered_carrier_delivery_v1",
+        "authority": "profile_extension_metadata_and_typed_facts_only",
+        "not_source_interpretation": True,
+        "not_query_interpretation": True,
+        "offered_signatures": offered_signatures,
+        "accountable_signatures": accountable_signatures,
+        "delivered_row_counts": delivered_row_counts,
+        "delivered_fact_sample": delivered_fact_sample,
+        "findings": findings,
+    }
+    source_compile["registered_carrier_delivery"] = report
+    if findings and mark_health:
+        _mark_compile_health_warning(
+            source_compile=source_compile,
+            pass_name="registered_carrier_delivery",
+            warning_flags=[
+                str(item.get("class", "")).strip()
+                for item in findings
+                if str(item.get("class", "")).strip()
+            ],
+        )
+    return report
+
+
+def _registered_carrier_delivery_offered_rows(
+    *,
+    parsed_profile: dict[str, Any],
+    profile_extension_metadata: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
+    candidate_signatures = {
+        str(item.get("signature", "")).strip()
+        for item in parsed_profile.get("candidate_predicates", [])
+        if isinstance(item, dict) and str(item.get("signature", "")).strip()
+    } if isinstance(parsed_profile.get("candidate_predicates"), list) else set()
+    extension_rows: list[dict[str, Any]] = []
+    extensions = (
+        profile_extension_metadata.get("extensions", [])
+        if isinstance(profile_extension_metadata, dict)
+        else []
+    )
+    for row in extensions if isinstance(extensions, list) else []:
+        if not isinstance(row, dict) or row.get("added") is not True:
+            continue
+        signature = str(row.get("signature", "")).strip()
+        if signature:
+            extension_rows.append({"signature": signature, "extension": row})
+        for item in row.get("signatures", []) if isinstance(row.get("signatures"), list) else []:
+            text = str(item).strip()
+            if text:
+                extension_rows.append({"signature": text, "extension": row})
+    offered: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in extension_rows:
+        signature = str(row.get("signature", "")).strip()
+        if signature in seen or signature not in candidate_signatures:
+            continue
+        if carrier_contract(signature) is None:
+            continue
+        seen.add(signature)
+        extension = row.get("extension") if isinstance(row.get("extension"), dict) else {}
+        offered.append(
+            {
+                "signature": signature,
+                "accountability_required": bool(
+                    extension.get("accountability_required") is True
+                    or extension.get("source_pressure") is True
+                ),
+            }
+        )
+    return offered
+
+
+def _signature_predicate_arity(signature: str) -> tuple[str, int | None]:
+    text = str(signature or "").strip()
+    if "/" not in text:
+        return text, None
+    predicate, arity_text = text.rsplit("/", 1)
+    try:
+        return predicate, int(arity_text)
+    except ValueError:
+        return predicate, None
+
+
+def _mark_compile_health_warning(
+    *,
+    source_compile: dict[str, Any],
+    pass_name: str,
+    warning_flags: list[str],
+) -> None:
+    flags = [str(flag).strip() for flag in warning_flags if str(flag).strip()]
+    if not flags:
+        return
+    health = source_compile.get("compile_health")
+    if not isinstance(health, dict):
+        health = {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 0,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": int(source_compile.get("unique_fact_count", 0) or 0),
+            "duplicate_total": 0,
+            "semantic_progress": assess_semantic_progress(surface_contribution=[]),
+        }
+    flag_counts = health.get("flag_counts") if isinstance(health.get("flag_counts"), dict) else {}
+    for flag in flags:
+        flag_counts[flag] = int(flag_counts.get(flag, 0) or 0) + 1
+    unhealthy_passes = [
+        str(item)
+        for item in health.get("unhealthy_passes", [])
+        if str(item).strip()
+    ] if isinstance(health.get("unhealthy_passes"), list) else []
+    if pass_name not in unhealthy_passes:
+        unhealthy_passes.append(pass_name)
     health["flag_counts"] = flag_counts
     health["unhealthy_passes"] = unhealthy_passes
     health["unhealthy_pass_count"] = len(unhealthy_passes)
@@ -7306,8 +13199,13 @@ def _call_lmstudio_json_schema(
     reasoning_effort: str = "none",
     empty_response_retries: int = 2,
     empty_response_backoff_seconds: float = 1.0,
+    strict_response_format: bool = True,
 ) -> dict[str, Any]:
     request_messages = [dict(message) for message in messages]
+    is_openrouter = _is_openrouter_base_url(base_url)
+    portable_openrouter_payload = is_openrouter and str(
+        os.environ.get("PRETHINKER_OPENROUTER_PORTABLE_PAYLOAD", "") or ""
+    ).strip().lower() in {"1", "true", "yes", "on"}
     if str(reasoning_effort or "").strip().lower() in {"none", "off", "false", "0"}:
         for message in request_messages:
             if message.get("role") == "system":
@@ -7321,22 +13219,32 @@ def _call_lmstudio_json_schema(
         "temperature": temperature,
         "top_p": top_p,
         "max_tokens": max_tokens,
-        "think": False,
-        "thinking": False,
-        "response_format": {
+    }
+    if strict_response_format:
+        payload["response_format"] = {
             "type": "json_schema",
             "json_schema": {
                 "name": schema_name,
                 "strict": True,
                 "schema": schema,
             },
-        },
-    }
-    if str(reasoning_effort or "").strip():
+        }
+
+    if not portable_openrouter_payload:
+        payload["think"] = False
+        payload["thinking"] = False
+    seed_text = str(os.environ.get("PRETHINKER_LLM_SEED", "") or "").strip()
+    if seed_text:
+        try:
+            payload["seed"] = int(seed_text)
+        except ValueError:
+            payload["seed"] = seed_text
+    if str(reasoning_effort or "").strip() and not portable_openrouter_payload:
         payload["reasoning_effort"] = str(reasoning_effort).strip()
-    if _is_openrouter_base_url(base_url):
-        payload["reasoning"] = {"effort": "none", "exclude": True}
-        payload["include_reasoning"] = False
+    if is_openrouter:
+        if not portable_openrouter_payload:
+            payload["reasoning"] = {"effort": "none", "exclude": True}
+            payload["include_reasoning"] = False
         provider_routing = openrouter_provider_routing_from_env()
         if provider_routing:
             payload["provider"] = provider_routing
@@ -7488,8 +13396,12 @@ def _write_summary(record: dict[str, Any], path: Path) -> None:
         f"- Candidate predicates: `{score.get('predicate_count', 0)}`",
         f"- Generic predicates: `{score.get('generic_predicate_count', 0)}`",
         f"- Candidate signature/args mismatches: `{score.get('candidate_signature_arg_mismatch_refs', [])}`",
+        f"- Candidate duplicate name/arity refs: `{score.get('candidate_duplicate_name_arity_refs', [])}`",
+        f"- Governed carrier arg-role mismatch refs: `{score.get('governed_carrier_arg_role_mismatch_refs', [])}`",
+        f"- Provenance prose arg-role refs: `{score.get('provenance_prose_arg_role_refs', [])}`",
         f"- Recommendation-chain slot-loss refs: `{score.get('recommendation_chain_slot_loss_refs', [])}`",
         f"- Violation-category slot-loss refs: `{score.get('violation_category_slot_loss_refs', [])}`",
+        f"- List/range inventory slot-loss refs: `{score.get('list_range_inventory_slot_loss_refs', [])}`",
         f"- Repeated structures: `{score.get('repeated_structure_count', 0)}`",
         f"- Repeated-structure unknown predicate refs: `{score.get('repeated_structure_unknown_predicate_refs', [])}`",
         f"- Repeated-structure id-only record refs: `{score.get('repeated_structure_id_only_record_refs', [])}`",

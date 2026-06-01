@@ -407,10 +407,11 @@ rows.
 
 ## 2026-05-28 Stress-Batch Read
 
-The newer ACH stress worksheet is now the live place for sensitivity work:
+The detailed ACH stress worksheet has been retired from `docs` to the local
+archive to keep the public tree lean:
 
 ```text
-docs\ACH_STRESS_PUBLIC_20260528_WORKSHEET.md
+C:\prethinker_tmp_archive\docs_worksheet_archive_20260601\ACH_STRESS_PUBLIC_20260528_WORKSHEET.md
 ```
 
 Current read:

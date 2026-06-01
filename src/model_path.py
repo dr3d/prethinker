@@ -491,18 +491,24 @@ def model_serving_path_metadata(
     observed_runtime: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     provider = dict(provider_routing or {})
+    family = provider_family(backend=backend, base_url=base_url)
+    requested_top_k = None if top_k is None else int(top_k)
+    effective_top_k = requested_top_k if str(backend or "").strip().lower() == "ollama" else None
     metadata = {
         "schema_version": "model_serving_path_v1",
         "run_role": str(run_role or ""),
         "transport_backend": str(backend or ""),
-        "provider_family": provider_family(backend=backend, base_url=base_url),
+        "provider_family": family,
         "base_url": str(base_url or ""),
         "model": str(model or ""),
         "provider_routing": provider,
         "decoding": {
             "temperature": float(temperature),
             "top_p": float(top_p),
-            "top_k": None if top_k is None else int(top_k),
+            "top_k": effective_top_k,
+            "top_k_requested": requested_top_k,
+            "top_k_effective": effective_top_k,
+            "top_k_note": "sent only on the Ollama chat path; OpenAI-compatible LM Studio/OpenRouter requests do not carry top_k",
             "context_length": None if context_length is None else int(context_length),
             "max_tokens": None if max_tokens is None else int(max_tokens),
         },

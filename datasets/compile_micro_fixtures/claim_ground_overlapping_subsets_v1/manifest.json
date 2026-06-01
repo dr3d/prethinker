@@ -1,0 +1,8 @@
+{
+  "fixture_id": "claim_ground_overlapping_subsets_v1",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "expected_alternatives": "expected_alternatives.json",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Pressure governed claim-set carriers to preserve overlapping item subsets by ground/reference instead of reusing one broad container set."
+}

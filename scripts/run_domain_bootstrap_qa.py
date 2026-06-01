@@ -34,6 +34,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from kb_pipeline import CorePrologRuntime  # noqa: E402
+from src.carrier_contract_registry import carrier_contract  # noqa: E402
 from src.profile_bootstrap import (  # noqa: E402
     profile_bootstrap_allowed_predicates,
     profile_bootstrap_domain_context,
@@ -275,7 +276,7 @@ EVIDENCE_BUNDLE_PLAN_SCHEMA: dict[str, Any] = {
             "items": {
                 "type": "object",
                 "additionalProperties": False,
-                "required": ["bundle_id", "purpose", "query_templates", "missing_if_empty"],
+                "required": ["bundle_id", "purpose", "query_templates", "missing_if_empty", "anchor_bindings"],
                 "properties": {
                     "bundle_id": {"type": "string", "maxLength": 80},
                     "purpose": {"type": "string", "maxLength": 240},
@@ -285,6 +286,21 @@ EVIDENCE_BUNDLE_PLAN_SCHEMA: dict[str, Any] = {
                         "items": {"type": "string", "maxLength": 240},
                     },
                     "missing_if_empty": {"type": "string", "maxLength": 240},
+                    "anchor_bindings": {
+                        "type": "array",
+                        "maxItems": 6,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": False,
+                            "required": ["predicate", "arg_role", "compiled_atom", "why"],
+                            "properties": {
+                                "predicate": {"type": "string", "maxLength": 80},
+                                "arg_role": {"type": "string", "maxLength": 80},
+                                "compiled_atom": {"type": "string", "maxLength": 180},
+                                "why": {"type": "string", "maxLength": 180},
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -359,6 +375,9 @@ POST_INGESTION_QA_QUERY_STRATEGY: dict[str, Any] = {
         "For product-category questions using words such as bulk item, retail packaged item, pepper, cucumber, herb, box, or bag, treat the category word as a filter over returned item/name rows, not as a guessed lowercase constant. Query recall/item/product predicates with Item as a variable, then retrieve product_name(Item, Name), item_name(Item, Name), product_category(Item, Category), or equivalent rows to select matching returned items.",
         "For questions asking which products a retailer/location carried within a state or row-specific distribution scope, retrieve restriction and constraint predicates as answer-bearing rows, such as retailer_product_restriction/3, product_restriction/3, bulk_item_retailer_constraint/3-4, or equivalent, and join them with state/retailer distribution rows when needed. A broad sold_in_state/2 result alone is not enough for product-restriction questions.",
         "For table-shaped distribution questions where direct paired predicates are missing or thin, use deterministic source-record pair rows as source-structure evidence: source_record_cell_item_pair(Row, LeftIndex, StateOrScope, RightIndex, RetailerOrLocation) and source_record_cell_item_pair_qualifier(Row, LeftIndex, StateOrScope, RightIndex, RetailerOrLocation, Qualifier). These rows preserve printed table coordinates only; use them to support source-surface answers, not to invent facts beyond the table.",
+        "For official-document identifier questions, do not stop at the first identifier-like predicate whose name resembles the question. If the compiled KB has sibling identifier predicates such as case_number, docket_number, filing_number, matter_number, application_number, accession_number, publication_number, document_number, or patent_application_number, query plausible siblings with variables and let returned typed atoms identify the requested docket/case/application/publication value.",
+        "For companion-case, related-document, prior-reference, permit, application, filing, attachment, or underlying-proceeding questions, query related-matter predicates such as related_document/4, referenced_matter/4, proceeding_identifier/3, document_identifier/3, document_date/3, document_action/2, document_action/3, document_title/2, prior_art_reference/4, prior_art_ref/2, or domain equivalents as a bundle.",
+        "For document_date/3, the second argument is the date role and the third argument is the date value. When the question asks when something happened, bind the role only when known, such as publication_date, filing_date, or decision_date, and leave the date value as a variable: document_date(ref_song_525, publication_date, Date). Do not put placeholder atoms such as date_525 or date_656 in the date-value slot.",
     ],
     "epistemic_policy": [
         "Return claim/source/support queries for claimed or alleged content; do not ask for objective fact predicates when the KB only contains source-attributed claims.",
@@ -622,6 +641,41 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--sign-clean-strict",
+        action="store_true",
+        help=(
+            "Runtime enforcement mode: disable Python source-record/free-text helper routing "
+            "and deterministic reference-answer exact shortcuts. This is the default claim path."
+        ),
+    )
+    parser.add_argument(
+        "--allow-non-sign-clean-free-text-routing",
+        dest="sign_clean_strict",
+        action="store_false",
+        help=(
+            "Forensic replay mode: re-enable retired source-record/free-text helper routing. "
+            "Runs using this flag are not sign-clean and cannot support public score claims."
+        ),
+    )
+    parser.add_argument(
+        "--typed-support-companions",
+        action="store_true",
+        help=(
+            "Experimental row-local typed support companions. Use only for candidate "
+            "redaction probes until an affected-set guard promotes the mechanism."
+        ),
+    )
+    parser.add_argument(
+        "--atom-library-query-grounding",
+        action="store_true",
+        help=(
+            "Experimental shared-atom query mode: ground the query planner in the KB's actual emitted "
+            "non-source-record typed predicate inventory instead of the broader profile predicate list. "
+            "Planner still proposes; runtime still executes deterministically."
+        ),
+    )
+    parser.set_defaults(sign_clean_strict=True)
+    parser.add_argument(
         "--judge-reference-answers",
         action="store_true",
         help="Use the model in structured-output mode to compare query results with markdown reference answers.",
@@ -707,6 +761,7 @@ def main() -> int:
         "For multi-hop questions, emit multiple safe query operations over the actual KB predicates instead of inventing a composite predicate.",
         "For explicit table membership or member-count questions, if compiled_query_templates includes explicit_table_membership/4, prefer explicit_table_membership(SourceRow, Version, Group, Member) for direct grouping/member table evidence before sparse semantic member predicates. Legacy roster_table_member/4 is compatibility-only.",
         "For source/institution questions, prefer predicates that actually expose source, ledger, actor, reporter, complainant, or institution values in the compiled KB examples.",
+        "For official-document identifier questions, do not stop at the first identifier-like predicate whose name resembles the question. If the compiled KB has sibling identifier predicates such as case_number, docket_number, filing_number, matter_number, application_number, accession_number, publication_number, document_number, or patent_application_number, query the relevant siblings with variables and let returned typed atoms identify the requested docket/case/application/publication value.",
         "For source-stated reasons, responsibility, correction notes, unresolved claims, non-fault statements, or availability claims, query direct attribution predicates when present, such as source_attributed_claim(SourceOrSpeaker, Subject, ClaimOrFinding, Scope), source_claim(Source, Subject, Claim, Status), claim_made(Source, Claim, Scope), or source_authority(SubjectOrScope, Authority, Action). Source-record text or fields can corroborate addressability, but direct attribution rows are the answer-bearing surface when the question asks what a source said or who gave the reason.",
         "For ledger/record/institution questions, pair the descriptive event predicate with the likely container predicate using the same variable name, such as grievance_method(Grievance, Method) plus grievance_target(Grievance, Institution).",
         "Do not lock onto a single grievance/document id before discovering answer-bearing rows; duplicate compiled records may contain different detail levels.",
@@ -716,9 +771,21 @@ def main() -> int:
         "Keep QA workspaces compact by default: at most 4 query operations and at most 2 short self_check notes. If the question asks for all conditions, a summary, multiple violations, threshold elapsed time, deadline derivation, or multi-step duration, use up to 16 query operations rather than dropping whole support bundles.",
         "For unsafe inference traps, preserve the difference between direct KB support, source claim, inference, and unknown.",
         "Use post_ingestion_qa_query_strategy_v1 in kb_context_pack as the query-planning procedure.",
+        "For QA query turns, keep self_check.notes empty unless a schema-critical caveat is needed; if present, use at most one short phrase. Do not spend tokens explaining predicate limitations when candidate_operations already express the query plan.",
         "For omission/set-difference questions, the semantic IR operation itself must carry polarity='negative' on the absent-side predicate. The runtime can then build query-only negation; do not approximate omission by listing positive rows only.",
         "If the compiled inventory contains story-world predicates such as event/5, story_time/2, kind/2, lives_at/2, owned_by/2, said/3, judged/4, causes/2, initial_location/2, location_after_event/3, final_state/1, or condition_after_story/2, also use story_world_qa_query_strategy_v1.",
     ]
+    if bool(args.sign_clean_strict):
+        domain_context.extend(
+            [
+                "Sign-clean strict mode is active. Do not use source_record_text_display, source_record_label_display, source_record_section_display, source_record_cell_display, source_record_cell_header_display, source_record_text_atom, source_record_surface_mention, or source_record_*_support predicates.",
+                "In sign-clean strict mode, answer through typed compiled predicates and deterministic joins over those predicates. The only source_record predicates available are explicitly structured slots such as source_record_field/3, source_record_cell/3, source_record_cell_header/3, source_record_label/2, source_record_section/2, source_record_line/2, source_record_kind/2.",
+                "For multi-part questions, emit a query for each requested part. If one part asks for an identifier, date, disposition, role, title, citation, location, amount, or status, use broad variables over the typed predicates rather than guessing a constant.",
+                "If a question names a document, case, filing, solicitation, or settlement id and the compile may use multiple aliases for the same matter, first retrieve all candidate ids through typed identity, party, court, date, disposition, or status predicates, then query the requested facts with variables over those ids.",
+                "For named party-role questions such as petitioner, respondent, employer, union, appellant, appellee, protester, awardee, recipient, issuer, or charging party, prefer party_role_context/4 when present. Start with broad variables such as party_role_context(Context, Party, Role, SourceOrScope) or bind only the clearly named role slot; then join Context or Party to typed case/entity identifiers. When the question names one party/entity and asks for another party role, include a conjunctive shared-Context query that binds the named-party atom from compiled arg values or relevant clauses and the requested role in a sibling party_role_context/4 row, for example party_role_context(Context, named_party_atom, NamedRole, NamedSource), party_role_context(Context, AnswerParty, requested_role_atom, AnswerSource). A role-only scan such as party_role_context(Context, AnswerParty, requested_role_atom, Source) is not enough when the question also names a party/entity. Do not route through document_title/2 unless the question asks for the document title. Do not assume party_role/3 is Person-Role-Case; common compiled shapes include Case-Entity-Role and Entity-Role-Case.",
+                *SIGN_CLEAN_STRICT_OFFICIAL_DOCUMENT_QUERY_GUIDANCE,
+            ]
+        )
     if bool(args.evidence_bundle_plan or args.execute_evidence_bundle_plan or args.evidence_bundle_context_filter):
         domain_context.append(
             "A separate evidence_bundle_plan_v1 control-plane pass may be present in kb_context_pack. Treat it as query-planning guidance only: it can suggest support bundles, but it cannot authorize writes or replace mapper admission."
@@ -726,6 +793,14 @@ def main() -> int:
     if bool(args.execute_evidence_bundle_plan):
         domain_context.append(
             "If evidence-bundle plan queries are executed, they are query-only diagnostics validated against the compiled KB predicate inventory; they do not authorize writes or durable truth."
+        )
+    if bool(args.atom_library_query_grounding):
+        domain_context.extend(
+            [
+                "Atom-library query grounding is active. Plan only over predicates actually emitted in the compiled KB atom inventory.",
+                "The query planner may inspect typed predicate signatures, argument shapes, counts, and compact typed examples. It must not request source prose or invent predicates absent from the inventory.",
+                "If the KB atom library lacks an atom needed by the question, abstain or return a compile/query-surface gap rather than using source-record prose.",
+            ]
         )
     if bool(args.evidence_bundle_context_filter):
         domain_context.append(
@@ -775,6 +850,9 @@ def main() -> int:
         disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
         disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
         classify_failure_surfaces=bool(args.classify_failure_surfaces),
+        sign_clean_strict=bool(args.sign_clean_strict),
+        typed_support_companions=bool(args.typed_support_companions),
+        atom_library_query_grounding=bool(args.atom_library_query_grounding),
     )
     for item in questions:
         question_oracle = oracle.get(item["id"], {})
@@ -808,11 +886,15 @@ def main() -> int:
                 include_legacy_native_helper_adapters=bool(args.include_legacy_native_helper_adapters),
                 disable_current_source_record_summaries=bool(args.disable_current_source_record_summaries),
                 disabled_support_predicates=tuple(str(item).strip() for item in args.disable_support_predicate if str(item).strip()),
+                sign_clean_strict=bool(args.sign_clean_strict),
+                typed_support_companions=bool(args.typed_support_companions),
+                atom_library_query_grounding=bool(args.atom_library_query_grounding),
             )
             if bool(args.judge_reference_answers):
                 row["reference_judge"] = judge_reference_answer(
                     row=row,
                     config=config,
+                    sign_clean_strict=bool(args.sign_clean_strict),
                 )
             if bool(args.classify_failure_surfaces):
                 row["failure_surface"] = classify_failure_surface(
@@ -822,6 +904,9 @@ def main() -> int:
                     rules=rules,
                     config=config,
                 )
+            anchor_failure = _anchor_filter_failure_surface(row)
+            if anchor_failure is not None:
+                row["failure_surface"] = anchor_failure
             row["response_envelope"] = build_qa_response_envelope(row)
             row["cache_hit"] = False
             row["cache_key"] = cache_key
@@ -840,6 +925,7 @@ def main() -> int:
         "run_json": str(run_path),
         "qa_file": str(qa_path),
         "model": str(args.model),
+        "sign_clean_strict": bool(args.sign_clean_strict),
         "model_serving_path": model_serving_path_metadata(
             backend=str(args.backend),
             base_url=str(args.base_url),
@@ -919,6 +1005,9 @@ def build_cache_context(
     disable_current_source_record_summaries: bool,
     disabled_support_predicates: tuple[str, ...],
     classify_failure_surfaces: bool,
+    sign_clean_strict: bool = False,
+    typed_support_companions: bool = False,
+    atom_library_query_grounding: bool = False,
 ) -> dict[str, Any]:
     return {
         "schema_version": CACHE_SCHEMA_VERSION,
@@ -972,6 +1061,9 @@ def build_cache_context(
         "disable_current_source_record_summaries": bool(disable_current_source_record_summaries),
         "disabled_support_predicates": list(disabled_support_predicates),
         "classify_failure_surfaces": bool(classify_failure_surfaces),
+        "sign_clean_strict": bool(sign_clean_strict),
+        "typed_support_companions": bool(typed_support_companions),
+        "atom_library_query_grounding": bool(atom_library_query_grounding),
     }
 
 
@@ -1107,6 +1199,8 @@ def parse_markdown_answer_key(text: str) -> dict[str, str]:
 def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, Any]:
     counts: dict[str, int] = {}
     examples: dict[str, list[str]] = {}
+    arg_profiles: dict[str, list[Counter[str]]] = {}
+    arg_values: dict[str, list[Counter[str]]] = {}
     source_record_field_headers: list[str] = []
     source_record_label_headers: list[str] = []
     source_record_section_headers: list[str] = []
@@ -1118,22 +1212,34 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
         bucket = examples.setdefault(signature, [])
         if len(bucket) < 8:
             bucket.append(str(clause).strip())
+        parsed_clause = parse_prolog_query(str(clause).strip().rstrip(".") + ".")
+        if parsed_clause is not None:
+            _predicate, parsed_args = parsed_clause
+            slots = arg_profiles.setdefault(signature, [])
+            while len(slots) < len(parsed_args):
+                slots.append(Counter())
+            value_slots = arg_values.setdefault(signature, [])
+            while len(value_slots) < len(parsed_args):
+                value_slots.append(Counter())
+            for index, arg in enumerate(parsed_args):
+                kind = _compiled_atom_arg_kind(arg)
+                slots[index][kind] += 1
+                value = _compiled_atom_arg_value(arg)
+                if value and kind not in {"long_text", "source_coord"}:
+                    value_slots[index][value] += 1
         if signature == "source_record_field/3":
-            parsed = parse_prolog_query(str(clause))
-            if parsed is not None:
-                predicate, args = parsed
+            if parsed_clause is not None:
+                predicate, args = parsed_clause
                 if predicate == "source_record_field" and len(args) >= 3 and not _is_prolog_variable(args[1]):
                     source_record_field_headers.append(args[1])
         if signature == "source_record_label/2":
-            parsed = parse_prolog_query(str(clause))
-            if parsed is not None:
-                predicate, args = parsed
+            if parsed_clause is not None:
+                predicate, args = parsed_clause
                 if predicate == "source_record_label" and len(args) >= 2 and not _is_prolog_variable(args[1]):
                     source_record_label_headers.append(args[1])
         if signature == "source_record_section/2":
-            parsed = parse_prolog_query(str(clause))
-            if parsed is not None:
-                predicate, args = parsed
+            if parsed_clause is not None:
+                predicate, args = parsed_clause
                 if predicate == "source_record_section" and len(args) >= 2 and not _is_prolog_variable(args[1]):
                     source_record_section_headers.append(args[1])
     signatures = sorted(counts, key=lambda item: (-counts[item], item))
@@ -1141,12 +1247,48 @@ def compiled_kb_inventory(*, facts: list[str], rules: list[str]) -> dict[str, An
         "signatures": signatures,
         "counts": counts,
         "examples": {signature: examples.get(signature, []) for signature in signatures[:80]},
+        "arg_profiles": {
+            signature: [dict(counter.most_common()) for counter in arg_profiles.get(signature, [])]
+            for signature in signatures[:120]
+        },
+        "arg_values": {
+            signature: [dict(counter.most_common(24)) for counter in arg_values.get(signature, [])]
+            for signature in signatures[:120]
+        },
         "source_record_field_headers": _ordered_atom_unique(source_record_field_headers),
         "source_record_label_headers": _ordered_atom_unique(source_record_label_headers),
         "source_record_section_headers": _ordered_atom_unique(source_record_section_headers),
         "query_templates": [query_template_for_signature(signature) for signature in signatures],
         "surface_alias_inventory": compiled_surface_alias_inventory(signatures),
-    }
+}
+
+
+def _compiled_atom_arg_value(arg: str) -> str:
+    value = str(arg or "").strip().strip("'\"")
+    if not value or _is_prolog_variable(value):
+        return ""
+    return value
+
+
+def _compiled_atom_arg_kind(arg: str) -> str:
+    raw = str(arg or "").strip()
+    value = raw.strip("'\"")
+    if re.fullmatch(r"src_(?:line|row)_\d+|source_[A-Za-z0-9_]+", value, flags=re.IGNORECASE):
+        return "source_coord"
+    if re.fullmatch(r"-?\d+", value):
+        return "integer"
+    if re.fullmatch(r"-?\d+\.\d+", value):
+        return "decimal"
+    if re.fullmatch(r"(?:v_)?\d{4}(?:[_-]\d{1,2}){0,2}", value):
+        return "date_atom"
+    tokens = [token for token in re.split(r"[^A-Za-z0-9]+", value) if token]
+    if (len(value) > 90 and len(tokens) > 8) or len(tokens) > 14:
+        return "long_text"
+    if raw.startswith("'") or raw.startswith('"'):
+        return "quoted_atom"
+    if "_" in value:
+        return "compound_atom"
+    return "atom"
 
 
 def _predicate_alias_tokens(predicate: str) -> set[str]:
@@ -1348,19 +1490,48 @@ def compiled_surface_alias_inventory(signatures: list[str]) -> list[dict[str, An
 
 def compiled_kb_contracts(signatures: list[str]) -> list[dict[str, Any]]:
     special_args = {
-        "person_role/2": ["person", "role"],
-        "person_role/3": ["person", "role", "scope_or_context"],
         "group_assignment/3": ["person", "version_or_context", "group"],
         "recorded_statement/3": ["statement_id", "speaker", "content"],
     }
     contracts: list[dict[str, Any]] = []
     for signature in signatures:
+        name = str(signature or "").split("/", 1)[0].strip()
         try:
             arity = int(signature.rsplit("/", 1)[1])
         except Exception:
             continue
-        contracts.append({"signature": signature, "args": special_args.get(signature, [f"arg{i}" for i in range(1, arity + 1)])})
+        registry_contract = carrier_contract(signature)
+        registry_args = registry_contract.get("args") if isinstance(registry_contract, dict) else None
+        args = registry_args if isinstance(registry_args, list) and len(registry_args) == arity else None
+        row = {
+            "signature": signature,
+            "predicate": name,
+            "args": args or special_args.get(signature, [f"arg{i}" for i in range(1, arity + 1)]),
+        }
+        if isinstance(registry_contract, dict):
+            for key in (
+                "status",
+                "answer_types",
+                "required_provenance",
+                "omission_behavior",
+                "contract",
+                "forbidden_uses",
+            ):
+                value = registry_contract.get(key)
+                if value:
+                    row[key] = value
+        contracts.append(row)
     return contracts
+
+
+def _predicate_name_from_contract(contract: dict[str, Any]) -> str:
+    predicate = str(contract.get("predicate", "") or "").strip()
+    if predicate:
+        return predicate
+    signature = str(contract.get("signature", "") or "").strip()
+    if "/" in signature:
+        return signature.split("/", 1)[0].strip()
+    return signature
 
 
 def query_template_for_signature(signature: str) -> str:
@@ -1481,8 +1652,301 @@ def format_prolog_query_goals(goals: list[tuple[str, list[str]]]) -> str:
     return ", ".join(format_prolog_query(predicate, args).rstrip(".") for predicate, args in goals) + "."
 
 
+SIGN_CLEAN_STRICT_ALLOWED_SOURCE_RECORD_PREDICATES: set[str] = set()
+
+SIGN_CLEAN_STRICT_OFFICIAL_DOCUMENT_QUERY_GUIDANCE = [
+    "Official-document wrapper facts are answer-bearing typed facts in strict mode. For court orders, agency orders, notices, filings, warning letters, settlements, bid-protest decisions, and releases, look for typed predicates that preserve docket/file/accession identifiers, issuing body, document date, disposition/action, panel membership, signatory/person-role chains, party locations, numbered notes or footnotes, citations, and underlying proceeding identifiers.",
+    "For panel, board, commissioner, signatory, or listed-official questions, prefer direct typed predicates such as panel_member/2, document_signatory/3, document_signature/5, person_role/2, official_role/3, or domain equivalents. Do not use source-record display rows to infer a roster.",
+    "For signature or signing-date questions, prefer document_signature/5 when present because it binds signer, capacity, signature date, and source scope in one typed row. If only document_signatory/3 identifies the document subject, retrieve document_date(Document, DateRole, DateValue), filing_date/2, signed_date/2, or domain equivalents with broad roles; do not treat filing_date or report_date as a signing date unless the compiled typed row labels it that way.",
+    "For numbered note or footnote questions, prefer direct typed predicates such as footnote_content/3, source_note/4, note_content/3, or domain equivalents, with the note number as a typed argument when present. A note-anchor predicate without content only proves that a note marker exists; it does not answer a content question.",
+    "For citation-list questions, prefer typed citation predicates such as citation/3, legal_citation/4, legal_citation_detail/4, citation_context/4, legal_standard/2, or domain equivalents. Use broad variables first when the question asks for several cases or authorities.",
+    "For legal_citation_detail/4, the fourth argument is a source/provenance/scope anchor. Do not over-bind it when the question asks for a complete law list for a paragraph, obligation, settlement, notice, or order; source anchors may be split across related atoms such as agreement_5, agreement_5_7, or agreement_5_8. Retrieve broad citation rows for the governed subject and role first, then use source/scope anchors only as supporting context.",
+    "For questions asking under what provisions, statutes, laws, or authority an agency commenced an investigation or acted, query typed authority/citation predicates with broad variables, especially legal_citation_detail/4 rows with recitals, statutory_ground, investigative_authority, authority_basis, or legal_authority roles/scopes. Do not require the authority to be attached to an obligation subject when the question asks about the investigation itself.",
+    "For citation questions that include further amendments, subsequent laws, subsequent regulations, later rules, or equivalent prospective-amendment language, query amendment-scope roles explicitly, for example legal_citation_detail(Subject, Citation, amendment_scope, SourceOrScope), along with statutory_ground or compliance_standard rows. The deterministic legal-citation inventory can combine those typed roles; do not answer from statutory_ground rows alone when amendment_scope rows exist.",
+    "For paragraph-specific subsection questions, query scoped citation rows for the requested paragraph/section anchor such as agreement_6, paragraph_6, item_6, or source-local equivalents before relying on document-level direct citation rows. A document-level citation inventory is supporting context; the thesis-clean answer needs the specific subsection atom tied to the paragraph or obligation when the compiled KB contains that scope.",
+    "For payment, relief, restitution, reimbursement, penalty, settlement amount, or monetary-obligation questions, query typed amount carriers such as monetary_payment/5, monetary_relief/4, source_detail/4 amount rows, payment_amount/3, or domain equivalents before date/range predicates. Pair amount rows with legal_citation_detail/4 when the question asks under which statute or authority.",
+    "For opinion, decision-form, publication-status, precedential-status, order-type, or disposition-form questions, prefer typed predicates such as document_form/3, opinion_type/2, decision_type/2, procedural_status/2, document_action/2, document_action/3, document_title/2, or domain equivalents. If the question asks both who decided and what form they used, query both the roster predicate and the form/type predicate. A generic document_identifier type such as order, notice, report, or decision is only a class label; it is not the specific order type or title when a document_action or document_title predicate exists.",
+    "For case, docket, file, application, accession, proceeding, and board-number questions, query typed identifier predicates such as case_id/2, document_identifier_occurrence/5, document_identifier/3, document_alias/3, application_identifier/2, proceeding_identifier/2, or domain equivalents before querying the requested status, date, action, or disposition.",
+    "For registrant, exact-name, charter, state-of-incorporation, jurisdiction-of-organization, or EIN cover-page questions, query registered carriers first when present: registrant_name/2 for the exact legal name, registrant_identity/2 for the registrant and jurisdiction, and document_identifier_occurrence/5 for EIN or file-number slots. Compact alias predicates such as incorporation_jurisdiction/2 or ein/2 may be supporting context, but they should not replace the registered carriers when the registered carrier rows exist. Do not use status_state_at/4 for incorporation or organization jurisdiction; status_state_at/4 is for lifecycle/status facts.",
+    "For listed-security, trading-symbol, ticker, par-value, or exchange questions, prefer a joined typed carrier such as document_security_listing/5 when present: document_security_listing(Document, SecurityClass, ParValue, TradingSymbol, ExchangeOrMarket). Use separate ticker or exchange predicates only as supporting rows when the listing carrier is absent.",
+    "For assurance number, order number, document number, or settlement identifier questions, do not treat a subject key such as aod_24_102 as proof unless the identifier value is returned by a typed identifier predicate. Query identifier surfaces with the identifier slot left variable, such as document_identifier_occurrence/5, document_identifier/3, case_id/2, or a domain-specific identifier predicate, alongside the requested date/status predicate.",
+    "For document_identifier/3 alias chains, do not automatically reuse the returned identifier value as the subject for document_date/3, document_title/2, document_publisher/2, or document_action predicates. Query attributes on the document subject when the compiled examples key those attributes to the document subject, and retrieve identifier values as sibling answer data.",
+    "When an identifier such as a docket, file number, accession, application number, proceeding number, or case number is part of the requested answer, leave that identifier slot as a variable in at least one query even if relevant clauses reveal a likely constant. Bound query constants alone do not prove that the KB returned the identifier.",
+    "For issue date, report date, filing date, fiscal-year-end date, inspection date, meeting date, or document-date questions, prefer typed date predicates such as document_date/3, case_metadata/4, event_date/2, fiscal_period/3, period_end/3, inspection_event/4, regulatory_meeting/3, filing_submitted/3, procedural_event/3, or domain equivalents. Do not query a guessed source-record field key for a date unless no typed date surface exists.",
+    "For document_date/3, the second argument is the date role and the third argument is the date value. For when/date questions, bind the role only when known, such as publication_date, filing_date, or decision_date, and leave the date value as a variable: document_date(ref_song_525, publication_date, Date). Do not put placeholder atoms such as date_525 or date_656 in the date-value slot.",
+    "For fiscal-year, quarter, period-end, balance-sheet-date, restatement, accounting-error, or non-reliance period questions, query period/date/account bundles such as fiscal_period/4, period_end/3, balance_sheet_date/3, error_period_date/4, accounting_error_impact/5, error_period/2, error_category/2, and assertion_source/4 with broad variables. When a question asks for the date defining a fiscal year or balance-sheet date, a fiscal-year label without its actual date is only partial.",
+    "For questions asking for source-stated categories, classes, types, options, or headings identified in connection with preparing, filing, reporting, restating, reviewing, or issuing a document, treat filing/report-year phrases as document scope unless the question asks which items impacted or affected that period. Prefer broad typed inventory/declaration rows such as list_member/4, error_category/2, error_type/2, error_declaration/4, category_declaration/4, or domain equivalents before joining to impact-period predicates. Do not add period-impact verification rows when they would turn a document-scope category inventory into a narrower impact-period subset.",
+    "For digest, weekly-summary, docket-list, decision-list, table-of-actions, or notice-rollup questions, query entry-level predicates such as digest_entry/5-6, listed_decision/6, action_entry/6, decision_entry/6, entry_identifier/4, entry_official/4, entry_citation/4, related_entry/4, alj_decision/3, case_id/1, case_outcome/2, party_role_context/4, party_role/3, and status_state_at/4 as a bundle. Entry paragraphs often require case id, location, date, official, citation, and outcome together.",
+    "For named party-role questions such as petitioner, respondent, employer, union, appellant, appellee, protester, awardee, recipient, issuer, or charging party, prefer party_role_context/4 when present. Start with broad variables such as party_role_context(Context, Party, Role, SourceOrScope) or bind only the clearly named role slot; then join Context or Party to typed case/entity identifiers. When the question names one party/entity and asks for another party role, include a conjunctive shared-Context query that binds the named-party atom from compiled arg values or relevant clauses and the requested role in a sibling party_role_context/4 row, for example party_role_context(Context, named_party_atom, NamedRole, NamedSource), party_role_context(Context, AnswerParty, requested_role_atom, AnswerSource). A role-only scan such as party_role_context(Context, AnswerParty, requested_role_atom, Source) is not enough when the question also names a party/entity. Do not route through document_title/2 unless the question asks for the document title.",
+    "For companion-case, related-document, prior-reference, permit, application, filing, attachment, or underlying-proceeding questions, query related-matter predicates such as related_document/4, referenced_matter/4, proceeding_identifier/3, document_identifier/3, document_date/3, document_action/2, document_action/3, document_title/2, prior_art_reference/4, prior_art_ref/2, or domain equivalents as a bundle.",
+    "For jurisdiction, authority, forum-below, appeal-target, or reviewed-decision questions, query typed authority and review-path predicates such as jurisdiction_basis/2-3, authority_basis/4, proceeding_below/4, review_path/4, reviewed_decision/4, procedural_event/3, or domain equivalents before broad legal-standard rows.",
+    "For counsel, attorney, representative, contact, panel, reviewer, commissioner, or signatory roster questions, query typed roster predicates such as representative_role/5, counsel_for/5, contact_role/5, panel_member/2-4, document_signatory/3, party_role_context/4, party_role/3, entity_location/3, or domain equivalents. Use broad variables if the predicate's argument order is unfamiliar.",
+    "For role-roster questions that ask for represented party, office, firm, or location, use broad variables over the roster predicate first and then join location or organization predicates using the returned person or party id. Do not bind attorney, firm, office, complainant, respondent, appellant, or appellee into an argument position unless examples show that slot is a role/status slot.",
+    "For complete numbered claim, count, issue, product, violation, requirement, order-paragraph, or item-range questions, query typed inventory predicates such as list_member/4, claim_range/4, item_ground/5, issue_ground/5, violation_basis/5, rejection_ground/4, claim_number/2, claim_element/3, or domain equivalents. Avoid answering a complete-list question from one representative row.",
+    "For numbered item questions asking which claims, counts, issues, products, violations, requirements, or order paragraphs were rejected, denied, cited, found, affirmed, reversed, sustained, or otherwise disposed of, prefer typed predicates that keep item/range slots next to action/outcome slots, such as claim_outcome/3, claim_rejection/5, item_ground/5, issue_ground/5, violation_basis/5, list_member/4, or domain equivalents. Use argument/objection treatment predicates only when the requested answer is the argument, objection, reason, or treatment itself.",
+    "When outcome/status predicates and inventory predicates split a numbered item answer, join them through their shared set/list/item id. For example, if claim_outcome/3 names a claim set and claim_range/4 preserves that set's source-stated ranges, query both predicates with the shared set variable; do not answer a range question from the compressed outcome atom alone.",
+    "For statutory-ground plus claim-range questions, query the governed bundle and per-claim finding rows when both exist: claim_ground/4, claim_range/4, legal_citation_detail/4 when present, review_outcome/4 when the question asks what was affirmed or reviewed, and finding predicates such as anticipation_finding/3 or obviousness_finding/3. Per-claim finding rows can fill narrower range gaps, but they do not replace a source-stated claim set that already joins ground/reference/range/citation atoms.",
+    "For source-citation, footnote-citation, transcript-citation, record-cite, or support-citation questions, query typed citation/ground carriers that preserve the citation value, such as claim_ground/4 reference_or_basis and legal_citation_detail/4 citation slots, before provenance-only rows. assertion_source/4 can prove source addressability or attribution status, but it does not answer the citation text when its source_ref slot is only a source coordinate.",
+    "Use full predicate arity for numbered inventory predicates: list_member(SetOrList, MemberValue, MemberKind, SourceOrScope), claim_range(ClaimSet, StartClaim, EndClaim, SourceOrScope), and item_range(ItemSet, StartItem, EndItem, SourceOrScope). Do not shorten list_member/4 to list_member/2.",
+    "When the KB inventory contains both list_member/4 and claim_range/4 or item_range/4 for the same numbered set, emit both query operations for complete-list questions. list_member/4 supplies source-stated singleton members; range predicates supply source-stated range segments. Either one alone is incomplete.",
+    "Unary or shallow container predicates such as contested_claims(Case), issue_list(Document), violation_set(Document), or item_group(Document) identify a container or document relationship. They do not answer complete numbered-inventory questions when list_member/4, claim_range/4, item_range/4, or another member/range predicate is present.",
+    "For argument, objection, issue-treatment, defense-treatment, or decision-maker-treatment questions, query typed treatment predicates such as argument_treatment/5, issue_treatment/5, claim_treatment/5, finding_detail/4, argument_rejected/2, court_finding/3, or domain equivalents as a bundle.",
+    "For party address, location, city/state, and office questions, use typed location or role predicates when present, such as party_location/4, address/3, office_location/3, document_party/4, or domain equivalents. If the compile lacks a typed location surface, report a compile-surface gap rather than falling back to source-record prose.",
+    "For final disposition questions, pair typed disposition/action predicates with the specific document, case, proceeding, or board-decision identifiers using shared variables. A generic affirmed/denied/granted row is only partial when the question asks which underlying decisions were affected.",
+    "For questions asking which lower decisions, board decisions, reviewed matters, grounds, references, or issues were affirmed, denied, granted, upheld, vacated, or rejected, query reviewed_decision/4, document_action/3, procedural_step/4, court_finding/4, claim_rejection/5, issue_treatment/5, or domain equivalents as a bundle. A one-word disposition row alone is not enough when the question asks what the disposition applied to.",
+    "For chronology questions, retrieve each named event family with broad variables before ordering: document_date/case_metadata rows for the main document, event_date/procedural_event rows for proceedings, inspection_event and regulatory_meeting rows for regulatory sequences, filing_submitted rows for filings, and referenced-matter date rows for related documents. Do not over-bind one event id and reuse its date for every event.",
+    "For response-instruction questions asking where to send a reply, attention line, FEI/file identifier, email, address, or deadline, query the whole instruction bundle using typed source_detail/document_identifier/contact predicates with broad variables. A returned email without the attention/file identifier is only partial.",
+    "For prior-art, product, grant, contract, warning-letter, or enforcement identifiers, retrieve the identifier row and its typed date/status/action rows as a bundle. Do not bind a guessed object id such as case or document unless that exact constant appears in the compiled facts.",
+]
+
+SIGN_CLEAN_STRICT_BLOCKED_STRATEGY_TERMS = (
+    "source_record_text",
+    "source_record_text_atom",
+    "source_record_text_display",
+    "source_record_label_display",
+    "source_record_section_display",
+    "source_record_cell_display",
+    "source_record_cell_header_display",
+    "source_record_surface_mention",
+    "_support",
+    "source-record text",
+    "source-record display",
+    "source display",
+    "display predicates",
+)
+
+
+def _sign_clean_strict_query_strategy() -> dict[str, Any]:
+    strategy = json.loads(json.dumps(POST_INGESTION_QA_QUERY_STRATEGY))
+    strategy["name"] = "post_ingestion_qa_query_strategy_sign_clean_strict_v1"
+    strategy["core_principle"] = (
+        "Answer source-document questions by planning queries over typed compiled KB predicates and "
+        "deterministic joins only. Free-text, display, surface-mention, and query-only support predicates "
+        "are not answer-bearing in sign-clean strict mode."
+    )
+
+    def keep_policy_line(value: Any) -> bool:
+        text = str(value or "").casefold()
+        if not text:
+            return True
+        return not any(term in text for term in SIGN_CLEAN_STRICT_BLOCKED_STRATEGY_TERMS)
+
+    for key, value in list(strategy.items()):
+        if isinstance(value, list) and all(isinstance(item, str) for item in value):
+            strategy[key] = [item for item in value if keep_policy_line(item)]
+    strategy["sign_clean_strict_delivery_policy"] = [
+        "Do not query source_record_* predicates in sign-clean strict mode. Source-record ledgers are provenance/source-addressability surfaces, not answer-bearing thesis evidence.",
+        "If an answer needs a field value, checkbox state, label, section, note, citation, date, identifier, amount, or row relationship, the compile must promote it into a non-source_record typed predicate before QA can claim it.",
+        *SIGN_CLEAN_STRICT_OFFICIAL_DOCUMENT_QUERY_GUIDANCE,
+    ]
+    return strategy
+
+
+def _sign_clean_strict_disallowed_predicate(predicate: str) -> bool:
+    text = str(predicate or "").strip()
+    if not text.startswith("source_record_"):
+        return False
+    return text not in SIGN_CLEAN_STRICT_ALLOWED_SOURCE_RECORD_PREDICATES
+
+
+def _sign_clean_strict_blocked_query(query: str) -> dict[str, Any] | None:
+    goals = parse_prolog_query_goals(query)
+    if not goals:
+        return None
+    blocked = [predicate for predicate, _args in goals if _sign_clean_strict_disallowed_predicate(predicate)]
+    if not blocked:
+        return None
+    return {
+        "query": str(query or "").strip(),
+        "result": {
+            "status": "blocked_by_sign_clean_strict",
+            "result_type": "blocked",
+            "num_rows": 0,
+            "rows": [],
+            "blocked_predicates": sorted(set(blocked)),
+            "reasoning_basis": {
+                "kind": "sign-clean-strict",
+                "policy": "free-text/source-display/source-record-support predicates are not queryable in strict mode",
+            },
+        },
+        "derived_from_queries": [],
+    }
+
+
+def _sign_clean_strict_clause_allowed(clause: str) -> bool:
+    parsed = parse_prolog_query(str(clause or "").strip().rstrip(".") + ".")
+    if parsed is None:
+        return True
+    predicate, _args = parsed
+    return not _sign_clean_strict_disallowed_predicate(predicate)
+
+
+def _sign_clean_strict_filtered_clauses(clauses: list[str]) -> list[str]:
+    return [str(item) for item in clauses if _sign_clean_strict_clause_allowed(str(item))]
+
+
+def _sign_clean_strict_filtered_inventory(kb_inventory: dict[str, Any]) -> dict[str, Any]:
+    signatures = [
+        str(signature)
+        for signature in kb_inventory.get("signatures", [])
+        if not _sign_clean_strict_disallowed_predicate(str(signature).split("/", 1)[0])
+    ]
+    examples = {
+        str(predicate): value
+        for predicate, value in (kb_inventory.get("examples", {}) or {}).items()
+        if not _sign_clean_strict_disallowed_predicate(str(predicate))
+    }
+    counts = {
+        str(predicate): value
+        for predicate, value in (kb_inventory.get("counts", {}) or {}).items()
+        if not _sign_clean_strict_disallowed_predicate(str(predicate))
+    }
+    arg_profiles = {
+        str(predicate): value
+        for predicate, value in (kb_inventory.get("arg_profiles", {}) or {}).items()
+        if not _sign_clean_strict_disallowed_predicate(str(predicate))
+    }
+    arg_values = {
+        str(predicate): value
+        for predicate, value in (kb_inventory.get("arg_values", {}) or {}).items()
+        if not _sign_clean_strict_disallowed_predicate(str(predicate))
+    }
+    query_templates = []
+    for query in kb_inventory.get("query_templates", []) or []:
+        blocked = _sign_clean_strict_blocked_query(str(query))
+        if blocked is None:
+            query_templates.append(str(query))
+    surface_alias_inventory = []
+    for item in kb_inventory.get("surface_alias_inventory", []) or []:
+        if not isinstance(item, dict):
+            continue
+        predicate = str(item.get("predicate", "")).strip()
+        if predicate and _sign_clean_strict_disallowed_predicate(predicate):
+            continue
+        surface_alias_inventory.append(item)
+    return {
+        **kb_inventory,
+        "signatures": signatures,
+        "counts": counts,
+        "examples": examples,
+        "arg_profiles": arg_profiles,
+        "arg_values": arg_values,
+        "query_templates": query_templates,
+        "surface_alias_inventory": surface_alias_inventory,
+    }
+
+
+ATOM_LIBRARY_FREE_TEXT_PREDICATE_HINTS = (
+    "text",
+    "display",
+    "label",
+    "summary",
+    "description",
+    "narrative",
+    "quote",
+    "raw",
+)
+
+
+def _atom_library_filtered_inventory(kb_inventory: dict[str, Any]) -> dict[str, Any]:
+    raw_examples = kb_inventory.get("examples", {}) or {}
+    examples = {
+        str(signature): _atom_library_filtered_clauses([str(item) for item in value])
+        for signature, value in raw_examples.items()
+        if isinstance(value, list)
+    }
+    signatures = []
+    for raw_signature in kb_inventory.get("signatures", []) or []:
+        signature = str(raw_signature)
+        if not _atom_library_signature_allowed(signature):
+            continue
+        if signature in examples and not examples[signature]:
+            continue
+        signatures.append(signature)
+    allowed_signatures = set(signatures)
+    counts = {
+        str(signature): value
+        for signature, value in (kb_inventory.get("counts", {}) or {}).items()
+        if str(signature) in allowed_signatures
+    }
+    arg_profiles = {
+        str(signature): value
+        for signature, value in (kb_inventory.get("arg_profiles", {}) or {}).items()
+        if str(signature) in allowed_signatures
+    }
+    arg_values = {
+        str(signature): value
+        for signature, value in (kb_inventory.get("arg_values", {}) or {}).items()
+        if str(signature) in allowed_signatures
+    }
+    examples = {signature: value for signature, value in examples.items() if signature in allowed_signatures}
+    query_templates = []
+    for query in kb_inventory.get("query_templates", []) or []:
+        goals = parse_prolog_query_goals(str(query))
+        if not goals:
+            continue
+        if all(f"{predicate}/{len(args)}" in allowed_signatures for predicate, args in goals):
+            query_templates.append(str(query))
+    surface_alias_inventory = []
+    for item in kb_inventory.get("surface_alias_inventory", []) or []:
+        if not isinstance(item, dict):
+            continue
+        predicate = str(item.get("predicate", "")).strip()
+        if predicate and _atom_library_predicate_allowed(predicate):
+            surface_alias_inventory.append(item)
+    return {
+        **kb_inventory,
+        "signatures": signatures,
+        "counts": counts,
+        "examples": examples,
+        "arg_profiles": arg_profiles,
+        "arg_values": arg_values,
+        "query_templates": query_templates,
+        "surface_alias_inventory": surface_alias_inventory,
+    }
+
+
+def _atom_library_signature_allowed(signature: str) -> bool:
+    predicate = str(signature or "").split("/", 1)[0]
+    return _atom_library_predicate_allowed(predicate)
+
+
+def _atom_library_predicate_allowed(predicate: str) -> bool:
+    text = str(predicate or "").strip().casefold()
+    if not text or text.startswith("source_record_"):
+        return False
+    return not _predicate_name_has_free_text_token(text)
+
+
+def _predicate_name_has_free_text_token(predicate: str) -> bool:
+    text = str(predicate or "").strip().casefold()
+    tokens = [token for token in re.split(r"[^a-z0-9]+", text) if token]
+    return any(hint in tokens for hint in ATOM_LIBRARY_FREE_TEXT_PREDICATE_HINTS)
+
+
+def _atom_library_filtered_clauses(clauses: list[str]) -> list[str]:
+    out: list[str] = []
+    for clause in clauses:
+        parsed = parse_prolog_query(str(clause or "").strip().rstrip(".") + ".")
+        if parsed is None:
+            continue
+        predicate, args = parsed
+        if not _atom_library_predicate_allowed(predicate):
+            continue
+        if any(_atom_library_arg_looks_prose_like(arg) for arg in args):
+            continue
+        out.append(str(clause))
+    return out
+
+
+def _atom_library_arg_looks_prose_like(arg: str) -> bool:
+    value = str(arg or "").strip().strip("'\"")
+    tokens = [token for token in re.split(r"[^A-Za-z0-9]+", value) if token]
+    return (len(value) > 90 and len(tokens) > 8) or len(tokens) > 14
+
+
 def _is_prolog_variable(value: str) -> bool:
-    return bool(re.fullmatch(r"[A-Z][A-Za-z0-9_]*", str(value or "").strip()))
+    return bool(re.fullmatch(r"(?:_|[A-Z])[A-Za-z0-9_]*", str(value or "").strip()))
 
 
 def _is_status_projection_variable(value: str) -> bool:
@@ -1910,7 +2374,9 @@ def build_evidence_bundle_plan(
     kb_inventory: dict[str, Any],
     facts: list[str],
     rules: list[str],
+    predicate_contracts: list[dict[str, Any]] | None,
     config: SemanticIRCallConfig,
+    sign_clean_strict: bool = False,
 ) -> dict[str, Any]:
     payload = {
         "task": "Plan query evidence bundles over an already compiled Prolog KB.",
@@ -1926,7 +2392,10 @@ def build_evidence_bundle_plan(
             "signatures": kb_inventory.get("signatures", [])[:120],
             "counts": kb_inventory.get("counts", {}),
             "examples": kb_inventory.get("examples", {}),
+            "arg_profiles": kb_inventory.get("arg_profiles", {}),
+            "arg_values": kb_inventory.get("arg_values", {}),
         },
+        "compiled_predicate_contracts": list(predicate_contracts or [])[:120],
         "compiled_surface_alias_inventory": kb_inventory.get("surface_alias_inventory", [])[:32],
         "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
         "relevant_clauses": [*facts[:600], *rules[:160]],
@@ -1937,13 +2406,41 @@ def build_evidence_bundle_plan(
         "Use uppercase variables for unknown answer slots.",
         "Remember the Prolog surface: uppercase terms are variables, not constants. Constants must be copied exactly from relevant_clauses or quoted display values; do not invent document-id-like uppercase constants.",
         "If the KB appears to lack a needed row class, state that in missing_if_empty rather than inventing it.",
+        "Warnings are not evidence. If a warning mentions an anchor fact or compiled atom as relevant support, include a query_template that retrieves that fact; otherwise do not rely on it.",
+        "Each support_bundle must include anchor_bindings. Use [] when there is no named question term that must be bound to a compiled atom.",
+        "For named entities, parties, records, or statuses in the question that must constrain the answer, add anchor_bindings entries using compiled atoms copied from compiled_predicate_inventory.arg_values or relevant_clauses.",
         "For compound premises that require the same source subject, act, record, event, or decision to satisfy multiple predicates, use a single conjunctive query with a shared variable. Independent positive rows over different subjects do not establish the compound premise.",
+        "For statutory citation questions tied to a notice, review right, rehearing right, appeal path, petition requirement, or procedural deadline, include both citation predicates and available typed procedure/review-path predicates such as procedural_rule/2, review_path/3, deadline/3, or requirement/3. Citation atoms alone may list authorities without the procedural role the question asks about.",
+        "For legal_citation_detail/4, treat the fourth argument as source/provenance/scope. If the question asks for all laws under a paragraph, obligation, settlement, notice, or order, include at least one broad query such as legal_citation_detail(Subject, Citation, Role, SourceOrScope) before binding SourceOrScope to a narrow anchor. Split anchors like agreement_5_7 can still answer an agreement_5 question.",
+        "For questions asking under what provisions, statutes, laws, or authority an agency commenced an investigation or acted, include broad authority/citation queries before declaring no evidence: legal_citation_detail(Subject, Citation, Role, SourceOrScope), authority_basis(...), legal_authority(...), or domain equivalents. Recitals and statutory_ground rows can answer investigation-authority questions even when no obligation subject is involved.",
+        "For citation questions that include further amendments, subsequent laws, subsequent regulations, later rules, or equivalent prospective-amendment language, include amendment-scope rows such as legal_citation_detail(Subject, Citation, amendment_scope, SourceOrScope) with the statutory/compliance citation rows so the deterministic inventory can build the full typed answer bundle.",
+        "For paragraph-specific subsection questions, include scoped citation queries for the requested paragraph or section anchor when those anchors appear in compiled arg values, for example legal_citation_detail(Subject, Citation, Role, agreement_6). Document-level direct citation rows can support display/context, but they do not replace a scoped subsection row when the question asks what paragraph N requires.",
+        "For source-citation, footnote-citation, transcript-citation, record-cite, or support-citation questions, plan typed citation-value queries before source-coordinate provenance: claim_ground(Subject, Ground, ReferenceOrBasis, Outcome) when ReferenceOrBasis carries the cited transcript/record atom, and legal_citation_detail(Subject, Citation, Role, SourceOrScope) when Citation carries the cited authority. assertion_source/4 alone is not enough when its source_ref slot is only a source coordinate.",
+        "For payment, relief, restitution, reimbursement, penalty, settlement amount, or monetary-obligation questions, include typed amount predicates when present, especially monetary_payment/5. If the question also asks for legal authority, pair monetary_payment/5 with legal_citation_detail/4 over the same subject or source scope.",
+        "For obligation, requirement, settlement-term, reporting-duty, corrective-action, tariff-schedule, frequency, duration, deadline, condition, exception, or recipient-scope questions, include compact obligation detail predicates when present, especially obligation_detail/5. Prefer obligation_detail(ObligationId, DetailKind, DetailValue, RoleOrPurpose, SourceOrScope) over long prose summary predicates such as settlement_obligation/3 when the answer asks for individual terms like a schedule, cadence, duration, deliverable, or recipient scope.",
+        "For procedural-rule, review-right, rehearing-right, appeal-path, filing-window, deadline-result, deemed-denied, default-consequence, or reconsideration questions, include compact procedural rule detail predicates when present, especially procedural_rule_detail/5. Prefer procedural_rule_detail(RuleId, DetailKind, DetailValue, RuleContextOrAction, SourceOrScope) over deadline-only predicates when the answer asks for both a period and what happens, what authority controls, what trigger starts the clock, or what filing/action is required.",
         "For why questions, plan queries for reason/tradeoff/effect/procedure rows, not only the headline recommendation.",
         "For policy or guidance questions, separate requirement, observed fact, preference, avoid-pattern, and rationale rows.",
         "For complementary phrasing such as in addition to, besides, along with, apart from, or not only/but also, include a query for the named baseline relation only as context; the answer query should target sibling predicates over the same subject that expose the additional relation or property.",
-        "When source_record_text_display/source_record_label_display/source_record_cell_display signatures are present, use them for exact printed source text. These display predicates are source addressability rows and can preserve rows or cells whose normalized source_record_text_atom/source_record_cell atom is empty or lossy.",
+        "For order-type, decision-form, document-title, disposition-form, or specific action questions, include typed form/action/title predicates when they exist in the compiled inventory, such as document_action/2, document_action/3, document_title/2, document_form/3, decision_type/2, or opinion_type/2. A generic document_identifier type value such as order, notice, report, or decision is only a class label and is not enough when the question asks for the specific type or title.",
+        "For assurance number, order number, document number, or settlement identifier questions, retrieve the identifier as an answer slot from typed identifier predicates such as document_identifier_occurrence/5, document_identifier/3, case_id/2, or domain-specific identifier predicates; a subject key bound in another query is context, not the returned identifier value.",
+        "For registrant, exact-name, state-of-incorporation, jurisdiction-of-organization, charter, or EIN cover-page questions, include registered carrier rows when present: registrant_name(RegistrantEntity, LegalName) for the exact legal name, registrant_identity(RegistrantEntity, Jurisdiction) for the entity/jurisdiction pair, and document_identifier_occurrence(Document, IdentifierKind, EIN, Scope, Order) for the EIN with IdentifierKind bound to a present typed value such as ein or i_r_s_employer_identification_no. Compact alias predicates such as incorporation_jurisdiction/2 or ein/2 may be supporting context, but they should not replace the registered carriers when the registered carrier rows exist. Do not plan status_state_at/4 as the incorporation or organization jurisdiction.",
+        "For named party-role questions such as petitioner, respondent, employer, union, appellant, appellee, protester, awardee, recipient, issuer, or charging party, prefer party_role_context/4 when present. Start with broad variables such as party_role_context(Context, Party, Role, SourceOrScope) or bind only the clearly named role slot; then join Context or Party to typed case/entity identifiers. When the question names one party/entity and asks for another party role, include a conjunctive shared-Context query that binds the named-party atom from compiled arg values or relevant clauses and the requested role in a sibling party_role_context/4 row, for example party_role_context(Context, named_party_atom, NamedRole, NamedSource), party_role_context(Context, AnswerParty, requested_role_atom, AnswerSource). A role-only scan such as party_role_context(Context, AnswerParty, requested_role_atom, Source) is not enough when the question also names a party/entity. Do not route through document_title/2 unless the question asks for the document title.",
+        "For body-member, commissioner, board-member, panel, signatory-roster, or officer-roster questions that ask for people and titles, include a broad role roster query such as person_role(Person, Role, Body) or the document-signatory equivalent before narrower role-bound queries. Do not require every member to have the same title atom when the question asks which member has a special title such as chair, secretary, president, or commissioner-chair.",
+        "For document_identifier/3 alias chains, the third argument may be an identifier value or alias rather than the subject that owns document attributes. If a question asks for both an identifier and a document attribute such as effective date, issue date, title, publisher, or action, retrieve the identifier value and the attribute as sibling facts on the document subject unless the compiled examples show the attribute fact is keyed to the alias. Do not automatically feed the identifier value returned by document_identifier/3 into document_date/3.",
+        "For source-stated category, class, type, option, or heading inventory questions tied to a report, filing, restatement, review, notice, order, or issued document, retrieve broad typed inventory/declaration rows first: list_member/4, error_category/2, error_type/2, error_declaration/4, category_declaration/4, or domain equivalents. Do not filter categories through period-impact or affected-statement predicates unless the question asks which categories impacted or affected that period. Do not add verification bundles that change document-scope categories into an impact-period subset.",
     ],
     }
+    if sign_clean_strict:
+        payload["sign_clean_strict_policy"] = [
+            "Strict mode is active: do not use source_record_text_display, source_record_label_display, source_record_section_display, source_record_cell_display, source_record_cell_header_display, source_record_text_atom, source_record_surface_mention, or any source_record_*_support predicate.",
+            "Plan over typed compiled predicates and deterministic virtual predicates only. Structured source_record coordinate predicates may identify rows, labels, fields, cells, sections, or lines, but they are not free-text answer surfaces.",
+            "If the typed KB lacks the needed fact, put that in missing_if_empty rather than planning a source-prose lookup.",
+        ]
+    else:
+        payload["planning_policy"].append(
+            "When source_record_text_display/source_record_label_display/source_record_cell_display signatures are present, use them for exact printed source text. These display predicates are source addressability rows and can preserve rows or cells whose normalized source_record_text_atom/source_record_cell atom is empty or lossy."
+        )
     messages = [
         {
             "role": "system",
@@ -2062,8 +2559,63 @@ def _query_templates_from_evidence_plan(evidence_plan: dict[str, Any] | None) ->
     for bundle in evidence_plan.get("support_bundles", []) or []:
         if not isinstance(bundle, dict):
             continue
-        out.extend(str(template or "").strip() for template in bundle.get("query_templates", []) or [])
+        out.extend(_coalesce_fragmented_evidence_query_templates(bundle.get("query_templates", []) or []))
     return [query for query in out if query]
+
+
+def _coalesce_fragmented_evidence_query_templates(templates: Any) -> list[str]:
+    """Join query templates split across JSON list entries by the planner.
+
+    This is a structural Prolog-shape repair only. It does not inspect the
+    natural-language question, source text, or reference answer.
+    """
+
+    if not isinstance(templates, list):
+        return []
+    out: list[str] = []
+    pending = ""
+    for raw in templates:
+        part = str(raw or "").strip()
+        if not part:
+            continue
+        candidate = _join_query_template_fragments(pending, part) if pending else part
+        if parse_prolog_query_goals(candidate):
+            out.append(candidate)
+            pending = ""
+            continue
+        if _query_template_fragment_needs_more(candidate):
+            pending = candidate
+            continue
+        if pending:
+            out.append(pending)
+            pending = ""
+        out.append(part)
+    if pending:
+        out.append(pending)
+    return out
+
+
+def _join_query_template_fragments(left: str, right: str) -> str:
+    prefix = str(left or "").strip().rstrip(",")
+    suffix = str(right or "").strip().lstrip(",")
+    if not prefix:
+        return suffix
+    if not suffix:
+        return prefix
+    return f"{prefix}, {suffix}"
+
+
+def _query_template_fragment_needs_more(query: str) -> bool:
+    text = str(query or "").strip()
+    if not text:
+        return False
+    depth = 0
+    for char in text:
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+    return depth > 0
 
 
 def _query_intents_from_structured_queries(
@@ -2491,32 +3043,95 @@ def run_one_question(
     include_legacy_native_helper_adapters: bool,
     disable_current_source_record_summaries: bool = False,
     disabled_support_predicates: tuple[str, ...] = (),
+    sign_clean_strict: bool = False,
+    typed_support_companions: bool = False,
+    atom_library_query_grounding: bool = False,
 ) -> dict[str, Any]:
     utterance = str(item.get("utterance", ""))
+    query_kb_inventory = _sign_clean_strict_filtered_inventory(kb_inventory) if sign_clean_strict else kb_inventory
+    query_allowed_predicates = [
+        predicate
+        for predicate in allowed_predicates
+        if not _sign_clean_strict_disallowed_predicate(str(predicate).split("/", 1)[0])
+    ] if sign_clean_strict else allowed_predicates
+    query_predicate_contracts = [
+        contract
+        for contract in predicate_contracts
+        if not _sign_clean_strict_disallowed_predicate(_predicate_name_from_contract(contract))
+    ] if sign_clean_strict else predicate_contracts
+    query_facts = _sign_clean_strict_filtered_clauses(facts) if sign_clean_strict else facts
+    query_rules = _sign_clean_strict_filtered_clauses(rules) if sign_clean_strict else rules
+    if bool(atom_library_query_grounding):
+        query_kb_inventory = _atom_library_filtered_inventory(query_kb_inventory)
+        query_allowed_predicates = list(query_kb_inventory.get("signatures", []) or [])
+        actual_predicates = {
+            str(signature).split("/", 1)[0]
+            for signature in query_allowed_predicates
+            if str(signature).strip()
+        }
+        query_predicate_contracts = [
+            contract
+            for contract in query_predicate_contracts
+            if _predicate_name_from_contract(contract) in actual_predicates
+        ]
+        query_facts = _atom_library_filtered_clauses(query_facts)
+        query_rules = _atom_library_filtered_clauses(query_rules)
     kb_context_pack = {
         "version": "semantic_ir_context_pack_v1",
         "mode": "post_ingestion_qa",
-        "post_ingestion_qa_query_strategy": POST_INGESTION_QA_QUERY_STRATEGY,
+        "post_ingestion_qa_query_strategy": (
+            _sign_clean_strict_query_strategy() if sign_clean_strict else POST_INGESTION_QA_QUERY_STRATEGY
+        ),
         "story_world_qa_query_strategy": STORY_WORLD_QA_QUERY_STRATEGY,
         "compiled_predicate_inventory": {
-            "signatures": kb_inventory.get("signatures", [])[:120],
-            "counts": kb_inventory.get("counts", {}),
-            "examples": kb_inventory.get("examples", {}),
+            "signatures": query_kb_inventory.get("signatures", [])[:120],
+            "counts": query_kb_inventory.get("counts", {}),
+            "examples": query_kb_inventory.get("examples", {}),
+            "arg_profiles": query_kb_inventory.get("arg_profiles", {}),
+            "arg_values": query_kb_inventory.get("arg_values", {}),
         },
-        "compiled_surface_alias_inventory": kb_inventory.get("surface_alias_inventory", [])[:32],
-        "compiled_query_templates": kb_inventory.get("query_templates", [])[:120],
-        "relevant_clauses": [*facts[:600], *rules[:160]],
+        "compiled_surface_alias_inventory": query_kb_inventory.get("surface_alias_inventory", [])[:32],
+        "compiled_query_templates": query_kb_inventory.get("query_templates", [])[:120],
+        "relevant_clauses": [*query_facts[:600], *query_rules[:160]],
         "source_fact_count": len(facts),
         "source_rule_count": len(rules),
     }
+    if bool(atom_library_query_grounding):
+        kb_context_pack["atom_library_query_grounding"] = {
+            "schema_version": "atom_library_query_grounding_v1",
+            "policy": [
+                "The planner is grounded in emitted KB atoms, not profile wish-list predicates.",
+                "The planner may propose query operations only over compiled_predicate_inventory.signatures.",
+                "compiled_predicate_inventory.arg_values lists compact constants actually present in each argument slot. If the question names a status, type, or value not present in that slot, leave the slot as a variable rather than substituting a nearby value.",
+                "When several predicates share a status word, choose the predicate whose argument slots match the requested answer type. If the question asks for item numbers or ranges, prefer predicates with item/range slots over argument-treatment predicates.",
+                "When an outcome/status predicate and a list/range inventory predicate share a set/list id, join them with the shared variable so the answer comes from typed member/range slots, not from a compressed set label.",
+                "For numbered inventory, preserve full arity: list_member/4 uses set/list id, member value, member kind, and source/scope; claim_range/4 and item_range/4 use set id, start, end, and source/scope.",
+        "If a numbered set has both singleton member rows and range rows, emit separate query operations for both surfaces; one surface alone is not a complete inventory.",
+        "Do not answer complete numbered-inventory questions from unary or shallow container predicates when member/range predicates are available. Query the member/range predicates directly.",
+        "For official-document identifier questions, inspect sibling identifier predicates actually present in the atom library. If several identifier predicates exist, query the plausible siblings with variables instead of trusting only the predicate whose name most closely matches the question wording.",
+        "Use compiled_predicate_contracts as the source of argument role order. A predicate name alone is not enough to infer which argument is the subject, role, answer slot, or provenance.",
+        "For document_identifier/3 alias chains, treat the returned identifier or alias value as answer data first, not automatically as the subject for sibling attributes. When date/title/action facts are keyed to the document subject in compiled examples, query those facts on that document subject while separately retrieving the identifier value.",
+        "The deterministic runtime validates and executes proposed queries; Python does not infer the user's meaning from predicate names.",
+            ],
+            "typed_atom_clause_count": len(query_facts) + len(query_rules),
+        }
+    if sign_clean_strict:
+        kb_context_pack["sign_clean_strict_policy"] = {
+            "schema_version": "sign_clean_strict_policy_v1",
+            "blocked_query_predicate_family": "source_record free-text, display, surface mention, and query-only support predicates",
+            "allowed_source_record_predicates": sorted(SIGN_CLEAN_STRICT_ALLOWED_SOURCE_RECORD_PREDICATES),
+            "goal": "plan queries over typed compiled predicates or explicitly structured source-record slots only",
+        }
     evidence_plan: dict[str, Any] | None = None
     if bool(evidence_bundle_plan):
         evidence_plan = build_evidence_bundle_plan(
             utterance=utterance,
-            kb_inventory=kb_inventory,
-            facts=facts,
-            rules=rules,
+            kb_inventory=query_kb_inventory,
+            facts=query_facts,
+            rules=query_rules,
+            predicate_contracts=query_predicate_contracts,
             config=config,
+            sign_clean_strict=sign_clean_strict,
         )
         kb_context_pack["evidence_bundle_plan_v1"] = evidence_plan
         kb_context_pack["evidence_bundle_plan_policy"] = [
@@ -2527,8 +3142,8 @@ def run_one_question(
         if bool(evidence_bundle_context_filter):
             compact_clauses = compact_relevant_clauses_for_evidence_plan(
                 evidence_plan=evidence_plan,
-                facts=facts,
-                rules=rules,
+                facts=query_facts,
+                rules=query_rules,
                 max_clauses=max(1, int(evidence_bundle_context_max_clauses or 220)),
                 broad_floor=max(0, int(evidence_bundle_context_broad_floor or 80)),
             )
@@ -2548,8 +3163,8 @@ def run_one_question(
             config=config,
             context=[],
             domain_context=domain_context,
-            allowed_predicates=allowed_predicates,
-            predicate_contracts=predicate_contracts,
+            allowed_predicates=query_allowed_predicates,
+            predicate_contracts=query_predicate_contracts,
             kb_context_pack=kb_context_pack,
             domain="post_ingestion_qa",
             include_model_input=include_model_input,
@@ -2583,8 +3198,8 @@ def run_one_question(
         return row
     mapped, warnings = semantic_ir_to_legacy_parse(
         ir,
-        allowed_predicates=allowed_predicates,
-        predicate_contracts=predicate_contracts,
+        allowed_predicates=query_allowed_predicates,
+        predicate_contracts=query_predicate_contracts,
     )
     diagnostics = mapped.get("admission_diagnostics", {}) if isinstance(mapped, dict) else {}
     clauses = diagnostics.get("clauses", {}) if isinstance(diagnostics.get("clauses"), dict) else {}
@@ -2603,8 +3218,10 @@ def run_one_question(
     query_results = run_query_plan(
         runtime,
         queries,
-        helper_companions_enabled=_helper_companions_enabled(helper_companion_row_limit),
+        helper_companions_enabled=(False if sign_clean_strict else _helper_companions_enabled(helper_companion_row_limit)),
         include_legacy_native_helpers=include_legacy_native_helper_adapters,
+        sign_clean_strict=sign_clean_strict,
+        typed_support_companions=typed_support_companions,
     )
     evidence_plan_query_results: list[dict[str, Any]] = []
     if evidence_plan is not None and bool(execute_evidence_bundle_plan):
@@ -2612,10 +3229,22 @@ def run_one_question(
             runtime=runtime,
             evidence_plan=evidence_plan,
             kb_inventory=kb_inventory,
-            helper_companions_enabled=_helper_companions_enabled(helper_companion_row_limit),
+            helper_companions_enabled=(False if sign_clean_strict else _helper_companions_enabled(helper_companion_row_limit)),
             include_legacy_native_helpers=include_legacy_native_helper_adapters,
+            sign_clean_strict=sign_clean_strict,
+            typed_support_companions=typed_support_companions,
         )
-        query_results = [*query_results, *evidence_plan_query_results]
+        if evidence_plan_query_results:
+            query_results = list(evidence_plan_query_results)
+            queries = _ordered_query_unique(
+                [
+                    *(
+                        str(item.get("query", "")).strip()
+                        for item in evidence_plan_query_results
+                        if isinstance(item, dict) and str(item.get("query", "")).strip()
+                    ),
+                ]
+            )
     # Sign-clean recovery: do not route raw human utterance text through
     # Python-side semantic companions. Query understanding must come from the
     # Semantic IR query compiler or from deterministic execution of compiled
@@ -2633,6 +3262,31 @@ def run_one_question(
         utterance=utterance,
         queries=queries,
     )
+    strict_claim_path_filter: list[dict[str, Any]] = []
+    if sign_clean_strict:
+        query_results, strict_claim_path_filter = _filter_strict_claim_path_query_results(query_results)
+        if strict_claim_path_filter:
+            queries = _ordered_query_unique(
+                [
+                    str(item.get("query", "")).strip()
+                    for item in query_results
+                    if isinstance(item, dict) and str(item.get("query", "")).strip()
+                ]
+            )
+    named_role_anchor_filter: list[dict[str, Any]] = []
+    if sign_clean_strict:
+        query_results, named_role_anchor_filter = _filter_unanchored_named_role_query_results(
+            query_results=query_results,
+            query_intents=query_intents,
+        )
+        if named_role_anchor_filter:
+            queries = _ordered_query_unique(
+                [
+                    str(item.get("query", "")).strip()
+                    for item in query_results
+                    if isinstance(item, dict) and str(item.get("query", "")).strip()
+                ]
+            )
     row.update(
         {
             "projected_decision": diagnostics.get("projected_decision", ""),
@@ -2647,6 +3301,27 @@ def run_one_question(
             "self_check": ir.get("self_check", {}),
         }
     )
+    if strict_claim_path_filter:
+        row["strict_claim_path_filter"] = {
+            "schema_version": "strict_claim_path_filter_v1",
+            "filtered_count": len(strict_claim_path_filter),
+            "filtered_queries": strict_claim_path_filter,
+            "policy": (
+                "Sign-clean mode removed source-record or prose-like context rows from the recorded "
+                "claim path. Raw evidence-plan traces may still list them for diagnosis, but thesis "
+                "metrics replay only the retained typed rows."
+            ),
+        }
+    if named_role_anchor_filter:
+        row["evidence_anchor_filter"] = {
+            "schema_version": "evidence_anchor_filter_v1",
+            "filtered_count": len(named_role_anchor_filter),
+            "filtered_queries": named_role_anchor_filter,
+            "policy": (
+                "Named role-roster questions with both a named entity and requested role require "
+                "a typed query that anchors the named party/entity, not only a broad role scan."
+            ),
+        }
     if evidence_plan is not None:
         row["evidence_bundle_plan"] = evidence_plan
         if bool(execute_evidence_bundle_plan):
@@ -2710,6 +3385,30 @@ def build_qa_response_envelope(row: dict[str, Any]) -> dict[str, Any]:
         "policy_note": (
             "This envelope reports whether admitted evidence supports the supplied reference answer; "
             "it is not an autonomous final-answer renderer."
+        ),
+    }
+
+
+def _anchor_filter_failure_surface(row: dict[str, Any]) -> dict[str, Any] | None:
+    anchor_filter = row.get("evidence_anchor_filter")
+    if not isinstance(anchor_filter, dict) or not anchor_filter.get("filtered_count"):
+        return None
+    judge = row.get("reference_judge")
+    verdict = str(judge.get("verdict", "")).strip() if isinstance(judge, dict) else ""
+    if verdict == "exact":
+        return None
+    return {
+        "schema_version": "qa_failure_surface_v1",
+        "surface": "query_surface_gap",
+        "confidence": 1.0,
+        "rationale": (
+            "Strict named-role anchor validation removed a role-only party_role_context/4 scan. "
+            "The query planner did not return a typed proof that binds the named party/entity and "
+            "requested role through the same context."
+        ),
+        "suggested_next_action": (
+            "Plan an anchored party_role_context/4 query, for example one goal binding the named "
+            "party/entity atom and a sibling goal binding the requested role over the same Context."
         ),
     }
 
@@ -3900,6 +4599,8 @@ def run_query_plan(
     *,
     helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = False,
+    sign_clean_strict: bool = False,
+    typed_support_companions: bool = False,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     previous_queries: list[str] = []
@@ -3915,7 +4616,13 @@ def run_query_plan(
     for query in queries:
         effective_query = query
         used_relaxed_fallback = False
-        source_record_filter = _source_record_contains_filter_repair(query)
+        if sign_clean_strict:
+            blocked = _sign_clean_strict_blocked_query(query)
+            if blocked:
+                results.append(blocked)
+                previous_queries.append(query)
+                continue
+        source_record_filter = None if sign_clean_strict else _source_record_contains_filter_repair(query)
         if source_record_filter:
             results.append(
                 _run_source_record_contains_filter(
@@ -3960,7 +4667,7 @@ def run_query_plan(
             if source_clock_duration:
                 append_companion(source_clock_duration)
             continue
-        numeric_token_repair = _source_record_numeric_token_repaired_query(query)
+        numeric_token_repair = None if sign_clean_strict else _source_record_numeric_token_repaired_query(query)
         if numeric_token_repair:
             repaired_query = str(numeric_token_repair.get("query", "")).strip()
             repaired_result = runtime.query_rows(repaired_query)
@@ -4026,13 +4733,13 @@ def run_query_plan(
                 )
 
         last_result = results[-1].get("result", {}) if results else {}
-        row_context = _source_record_row_context_companion(runtime, query=effective_query, result=last_result)
+        row_context = None if sign_clean_strict else _source_record_row_context_companion(runtime, query=effective_query, result=last_result)
         if row_context:
             append_companion(row_context)
-        source_clock_duration = _source_record_clock_duration_companion(results=results, query=effective_query)
+        source_clock_duration = None if sign_clean_strict else _source_record_clock_duration_companion(results=results, query=effective_query)
         if source_clock_duration:
             append_companion(source_clock_duration)
-        source_record_repair = _source_record_field_sibling_repaired_query(effective_query)
+        source_record_repair = None if sign_clean_strict else _source_record_field_sibling_repaired_query(effective_query)
         if source_record_repair:
             repaired_query = str(source_record_repair.get("query", "")).strip()
             repaired_result = runtime.query_rows(repaired_query)
@@ -4058,7 +4765,7 @@ def run_query_plan(
                 effective_query = repaired_query
                 last_result = repaired_result
         if isinstance(last_result, dict) and last_result.get("status") != "success":
-            source_text_fallback = _source_record_field_text_atom_fallback_query(effective_query)
+            source_text_fallback = None if sign_clean_strict else _source_record_field_text_atom_fallback_query(effective_query)
             if source_text_fallback:
                 fallback_query = str(source_text_fallback.get("query", "")).strip()
                 fallback_result = runtime.query_rows(fallback_query)
@@ -4116,7 +4823,7 @@ def run_query_plan(
         unary_distinct_count = _unary_distinct_count_companion(runtime, query=effective_query)
         if unary_distinct_count:
             append_companion(unary_distinct_count)
-        source_record_pair = _source_record_distribution_pair_query(runtime, query=effective_query)
+        source_record_pair = None if sign_clean_strict else _source_record_distribution_pair_query(runtime, query=effective_query)
         if source_record_pair:
             append_companion(source_record_pair)
         if helper_companions_enabled:
@@ -4127,7 +4834,7 @@ def run_query_plan(
             ):
                 append_companion(domain_companion)
         if isinstance(last_result, dict) and last_result.get("status") != "success":
-            source_slot_fallbacks = _source_identifier_slot_fallback_queries(runtime, query=effective_query)
+            source_slot_fallbacks = [] if sign_clean_strict else _source_identifier_slot_fallback_queries(runtime, query=effective_query)
             if source_slot_fallbacks:
                 results.extend(source_slot_fallbacks)
                 for fallback_item in source_slot_fallbacks:
@@ -4138,6 +4845,13 @@ def run_query_plan(
         if isinstance(last_result, dict) and last_result.get("status") != "success":
             relaxed = _relaxed_constant_query(runtime, query=effective_query)
             if relaxed:
+                if (
+                    results
+                    and str(results[-1].get("query", "")).strip() == str(effective_query or "").strip()
+                    and isinstance(results[-1].get("result"), dict)
+                    and results[-1]["result"].get("status") != "success"
+                ):
+                    results.pop()
                 results.append(relaxed)
                 relaxed_frequency = _relaxed_frequency_summary_companion(relaxed)
                 if relaxed_frequency:
@@ -4148,6 +4862,34 @@ def run_query_plan(
         category_ratio = _category_count_ratio_companion(runtime, query=effective_query)
         if category_ratio:
             append_companion(category_ratio)
+        if typed_support_companions:
+            signatory_office_chain = _typed_signatory_office_chain_companion(runtime=runtime, results=results)
+            if signatory_office_chain:
+                append_companion(signatory_office_chain)
+            for identifier_inventory in _typed_subject_identifier_inventory_queries(runtime=runtime, results=results):
+                append_companion(identifier_inventory)
+            for date_inventory in _typed_subject_document_date_inventory_queries(runtime=runtime, results=results):
+                append_companion(date_inventory)
+            for list_member_inventory in _typed_list_member_inventory_from_returned_values(
+                runtime=runtime,
+                results=results,
+            ):
+                append_companion(list_member_inventory)
+            for list_range_inventory in _typed_list_range_inventory_sibling_queries(runtime=runtime, results=results):
+                append_companion(list_range_inventory)
+            for list_member_citation in _typed_list_member_legal_citation_queries(runtime=runtime, results=results):
+                append_companion(list_member_citation)
+            for citation_inventory in _typed_subject_legal_citation_inventory_queries(runtime=runtime, results=results):
+                append_companion(citation_inventory)
+            source_claim_exchange = _typed_source_claim_exchange_companion(results=results)
+            if source_claim_exchange:
+                append_companion(source_claim_exchange)
+            obligation_statute_join = _typed_obligation_statute_join_companion(results=results)
+            if obligation_statute_join:
+                append_companion(obligation_statute_join)
+            monetary_relief_join = _typed_monetary_relief_join_companion(results=results)
+            if monetary_relief_join:
+                append_companion(monetary_relief_join)
         if helper_companions_enabled:
             companion = _evidence_table_companion_query(runtime, query=effective_query)
             append_companion(companion)
@@ -4165,7 +4907,1759 @@ def run_query_plan(
         if negative_join:
             results.append(negative_join)
         previous_queries.append(effective_query)
+    typed_inventory = _typed_list_range_inventory_composition_results(results)
+    for item in typed_inventory:
+        if item not in results:
+            results.append(item)
+    typed_claim_findings = _typed_claim_finding_range_composition_results(results)
+    for item in typed_claim_findings:
+        if item not in results:
+            results.append(item)
+    typed_legal_citations = _typed_legal_citation_inventory_composition_results(results)
+    for item in typed_legal_citations:
+        if item not in results:
+            results.append(item)
     return results
+
+
+def _typed_list_range_inventory_composition_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Compose complete numbered inventories from typed singleton and range rows.
+
+    This is a deterministic typed-result renderer. It never reads source prose or
+    question text; it only combines already-executed list_member/4 and
+    claim_range/4/item_range/4 query results that share a set id.
+    """
+
+    groups: dict[str, dict[str, Any]] = {}
+    derived_queries: dict[str, list[str]] = {}
+    for item in results or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {"list_member", "claim_range", "item_range"}:
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or item.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            values = [
+                _query_result_arg_value(row=row, query_args=query_args, index=index)
+                for index in range(1, len(query_args) + 1)
+            ]
+            if predicate == "list_member" and len(values) >= 4:
+                set_id, member_value, member_kind, source_or_scope = values[:4]
+                if not set_id or not member_value:
+                    continue
+                group = groups.setdefault(set_id, {"set_id": set_id, "members": [], "ranges": []})
+                group["members"].append(
+                    {
+                        "member": member_value,
+                        "member_kind": member_kind,
+                        "source_or_scope": source_or_scope,
+                    }
+                )
+                derived_queries.setdefault(set_id, []).append(str(item.get("query", "")))
+            elif predicate in {"claim_range", "item_range"} and len(values) >= 4:
+                set_id, start_value, end_value, source_or_scope = values[:4]
+                if not set_id or not start_value or not end_value:
+                    continue
+                group = groups.setdefault(set_id, {"set_id": set_id, "members": [], "ranges": []})
+                group["ranges"].append(
+                    {
+                        "start": start_value,
+                        "end": end_value,
+                        "range_kind": "claim" if predicate == "claim_range" else "item",
+                        "source_or_scope": source_or_scope,
+                    }
+                )
+                derived_queries.setdefault(set_id, []).append(str(item.get("query", "")))
+    composed_rows: list[dict[str, Any]] = []
+    for set_id, group in groups.items():
+        members = group.get("members", [])
+        ranges = group.get("ranges", [])
+        if not members and not ranges:
+            continue
+        segments = _typed_list_range_segments(members=members, ranges=ranges)
+        if not segments:
+            continue
+        composed_rows.append(
+            {
+                "SetId": set_id,
+                "Segments": segments,
+                "RenderedInventory": _render_typed_list_range_segments(segments),
+                "SingletonCount": sum(1 for segment in segments if segment.get("segment_type") == "singleton"),
+                "RangeCount": sum(1 for segment in segments if segment.get("segment_type") == "range"),
+            }
+        )
+    if not composed_rows:
+        return []
+    composed_rows.sort(key=lambda row: str(row.get("SetId", "")))
+    derived = _ordered_query_unique(query for queries in derived_queries.values() for query in queries if query)
+    return [
+        {
+            "query": "typed_list_range_inventory_composition(SetId, RenderedInventory).",
+            "derived_from_queries": derived,
+            "result": {
+                "status": "success",
+                "result_type": "derived_table",
+                "predicate": "typed_list_range_inventory_composition",
+                "prolog_query": "typed_list_range_inventory_composition(SetId, RenderedInventory).",
+                "variables": ["SetId", "RenderedInventory"],
+                "num_rows": len(composed_rows),
+                "rows": composed_rows,
+                "reasoning_basis": {
+                    "kind": "deterministic_typed_inventory_composition",
+                    "source_predicates": ["list_member/4", "claim_range/4", "item_range/4"],
+                    "note": "Composed only from typed query results; no source prose or question text was parsed.",
+                },
+            },
+        }
+    ]
+
+
+def _typed_claim_finding_range_composition_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Compose per-claim finding rows into typed claim-range summaries.
+
+    This is deterministic typed-result rendering. It never reads source prose or
+    question text; it only compacts already-executed claim finding predicates
+    whose rows expose a reference/basis, claim atom, and finding/outcome.
+    """
+
+    groups: dict[tuple[str, str, str], dict[str, Any]] = {}
+    derived_queries: list[str] = []
+    for item in results or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {"anticipation_finding", "obviousness_finding"}:
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or item.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        if len(query_args) < 3:
+            continue
+        derived_queries.append(str(item.get("query", "")))
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            reference = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            claim = _query_result_arg_value(row=row, query_args=query_args, index=2)
+            outcome = _query_result_arg_value(row=row, query_args=query_args, index=3)
+            claim_number = _claim_atom_number(claim)
+            if not reference or claim_number is None:
+                continue
+            key = (predicate, reference, outcome)
+            group = groups.setdefault(
+                key,
+                {
+                    "FindingPredicate": predicate,
+                    "Ground": "anticipation" if predicate == "anticipation_finding" else "obviousness",
+                    "Reference": reference,
+                    "Outcome": outcome,
+                    "claims": [],
+                },
+            )
+            group["claims"].append(claim_number)
+    rows: list[dict[str, Any]] = []
+    for group in groups.values():
+        claim_numbers = sorted(set(int(value) for value in group.get("claims", [])))
+        segments = _number_segments(claim_numbers)
+        if not segments:
+            continue
+        rows.append(
+            {
+                "FindingPredicate": group.get("FindingPredicate", ""),
+                "Ground": group.get("Ground", ""),
+                "Reference": group.get("Reference", ""),
+                "Outcome": group.get("Outcome", ""),
+                "RenderedClaimRanges": _render_number_segments(segments),
+                "ClaimCount": len(claim_numbers),
+                "Segments": segments,
+            }
+        )
+    if not rows:
+        return []
+    rows.sort(key=lambda row: (str(row.get("Reference", "")), str(row.get("Ground", "")), str(row.get("Outcome", ""))))
+    return [
+        {
+            "query": "typed_claim_finding_range_composition(Reference, Ground, RenderedClaimRanges).",
+            "derived_from_queries": _ordered_query_unique(query for query in derived_queries if query),
+            "result": {
+                "status": "success",
+                "result_type": "derived_table",
+                "predicate": "typed_claim_finding_range_composition",
+                "prolog_query": "typed_claim_finding_range_composition(Reference, Ground, RenderedClaimRanges).",
+                "variables": ["Reference", "Ground", "RenderedClaimRanges"],
+                "num_rows": len(rows),
+                "rows": rows,
+                "reasoning_basis": {
+                    "kind": "deterministic_typed_claim_finding_range_composition",
+                    "source_predicates": ["anticipation_finding/3", "obviousness_finding/3"],
+                    "note": "Composed only from typed query results; no source prose or question text was parsed.",
+                },
+            },
+        }
+    ]
+
+
+def _typed_legal_citation_inventory_composition_results(results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Compose typed legal citation detail rows into grouped citation inventories.
+
+    The citation carrier often uses a provenance/scope anchor in arg 4, while
+    official-document questions ask for the whole paragraph or obligation. This
+    composition groups already-returned legal_citation_detail/4 rows by subject,
+    role, and typed scope ancestors such as agreement_5 for agreement_5_7. It
+    never reads source prose or question text.
+    """
+
+    groups: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    derived_queries: list[str] = []
+
+    def add_row(
+        *,
+        subject: str,
+        role: str,
+        scope_group: str,
+        scope_group_kind: str,
+        citation: str,
+        source_scope: str,
+    ) -> None:
+        key = (subject, role, scope_group, scope_group_kind)
+        group = groups.setdefault(
+            key,
+            {
+                "Subject": subject,
+                "RoleGroup": role,
+                "ScopeGroup": scope_group,
+                "ScopeGroupKind": scope_group_kind,
+                "citations": [],
+                "source_scopes": [],
+            },
+        )
+        if citation not in group["citations"]:
+            group["citations"].append(citation)
+        if source_scope and source_scope not in group["source_scopes"]:
+            group["source_scopes"].append(source_scope)
+
+    for item in results or []:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate != "legal_citation_detail":
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or item.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        if len(query_args) < 4:
+            continue
+        derived_queries.append(str(item.get("query", "")))
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            subject = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            citation = _typed_legal_citation_atom(_query_result_arg_value(row=row, query_args=query_args, index=2))
+            role = _query_result_arg_value(row=row, query_args=query_args, index=3) or "unspecified_role"
+            source_scope = _query_result_arg_value(row=row, query_args=query_args, index=4) or "unspecified_scope"
+            if not subject or not citation:
+                continue
+            add_row(
+                subject=subject,
+                role=role,
+                scope_group=source_scope,
+                scope_group_kind="exact_scope",
+                citation=citation,
+                source_scope=source_scope,
+            )
+            for ancestor_scope in _typed_legal_citation_scope_ancestor_groups(source_scope):
+                add_row(
+                    subject=subject,
+                    role=role,
+                    scope_group=ancestor_scope,
+                    scope_group_kind="scope_ancestor",
+                    citation=citation,
+                    source_scope=source_scope,
+                )
+            add_row(
+                subject=subject,
+                role=role,
+                scope_group="all_scopes",
+                scope_group_kind="subject_role_all_scopes",
+                citation=citation,
+                source_scope=source_scope,
+            )
+
+    amendment_groups_by_subject: dict[str, dict[str, Any]] = {}
+    for group in groups.values():
+        if str(group.get("RoleGroup", "")) != "amendment_scope":
+            continue
+        subject = str(group.get("Subject", "")).strip()
+        if not subject:
+            continue
+        amendment_group = amendment_groups_by_subject.setdefault(
+            subject,
+            {
+                "citations": [],
+                "source_scopes": [],
+            },
+        )
+        for citation in group.get("citations", []) or []:
+            if citation and citation not in amendment_group["citations"]:
+                amendment_group["citations"].append(citation)
+        for source_scope in group.get("source_scopes", []) or []:
+            if source_scope and source_scope not in amendment_group["source_scopes"]:
+                amendment_group["source_scopes"].append(source_scope)
+
+    for group in list(groups.values()):
+        role = str(group.get("RoleGroup", "")).strip()
+        if role not in {"compliance_standard", "statutory_ground"}:
+            continue
+        subject = str(group.get("Subject", "")).strip()
+        amendment_group = amendment_groups_by_subject.get(subject)
+        if not subject or not amendment_group:
+            continue
+        citations = [str(value).strip() for value in group.get("citations", []) if str(value).strip()]
+        amendment_citations = [
+            str(value).strip()
+            for value in amendment_group.get("citations", [])
+            if str(value).strip()
+        ]
+        if not citations or not amendment_citations:
+            continue
+        key = (
+            subject,
+            "citation_answer_bundle",
+            str(group.get("ScopeGroup", "")).strip(),
+            f"{group.get('ScopeGroupKind', '')}_with_amendment_scope",
+        )
+        bundle = groups.setdefault(
+            key,
+            {
+                "Subject": subject,
+                "RoleGroup": "citation_answer_bundle",
+                "RoleGroups": [role, "amendment_scope"],
+                "ScopeGroup": group.get("ScopeGroup", ""),
+                "ScopeGroupKind": key[3],
+                "citations": [],
+                "source_scopes": [],
+            },
+        )
+        for citation in [*citations, *amendment_citations]:
+            if citation not in bundle["citations"]:
+                bundle["citations"].append(citation)
+        for source_scope in [
+            *(str(value).strip() for value in group.get("source_scopes", []) if str(value).strip()),
+            *(str(value).strip() for value in amendment_group.get("source_scopes", []) if str(value).strip()),
+        ]:
+            if source_scope and source_scope not in bundle["source_scopes"]:
+                bundle["source_scopes"].append(source_scope)
+
+    rows: list[dict[str, Any]] = []
+    for group in groups.values():
+        citations = [str(value).strip() for value in group.get("citations", []) if str(value).strip()]
+        if not citations:
+            continue
+        rows.append(
+            {
+                "SupportKind": "typed_legal_citation_inventory",
+                "Subject": group.get("Subject", ""),
+                "RoleGroup": group.get("RoleGroup", ""),
+                **({"RoleGroups": group.get("RoleGroups", [])} if group.get("RoleGroups") else {}),
+                "ScopeGroup": group.get("ScopeGroup", ""),
+                "ScopeGroupKind": group.get("ScopeGroupKind", ""),
+                "CitationAtoms": citations,
+                "CitationAtomSummary": "|".join(citations),
+                "CitationCount": len(citations),
+                "SourceScopes": sorted(str(value) for value in group.get("source_scopes", []) if str(value)),
+            }
+        )
+    if not rows:
+        return []
+    rows.sort(
+        key=lambda row: (
+            str(row.get("Subject", "")),
+            _typed_legal_citation_role_group_sort_key(str(row.get("RoleGroup", ""))),
+            _typed_legal_citation_scope_group_kind_sort_key(str(row.get("ScopeGroupKind", ""))),
+            str(row.get("ScopeGroup", "")),
+        )
+    )
+    return [
+        {
+            "query": "typed_legal_citation_inventory_composition(Subject, RoleGroup, ScopeGroup, CitationAtoms).",
+            "derived_from_queries": _ordered_query_unique(query for query in derived_queries if query),
+            "result": {
+                "status": "success",
+                "result_type": "derived_table",
+                "predicate": "typed_legal_citation_inventory_composition",
+                "prolog_query": "typed_legal_citation_inventory_composition(Subject, RoleGroup, ScopeGroup, CitationAtoms).",
+                "variables": ["Subject", "RoleGroup", "ScopeGroup", "CitationAtoms"],
+                "num_rows": len(rows),
+                "rows": rows,
+                "reasoning_basis": {
+                    "kind": "deterministic_typed_legal_citation_inventory_composition",
+                    "source_predicates": ["legal_citation_detail/4"],
+                    "note": (
+                        "Composed only from already-returned typed legal_citation_detail rows; "
+                        "no source prose or question text was parsed."
+                    ),
+                },
+            },
+        }
+    ]
+
+
+def _typed_legal_citation_atom(value: str) -> str:
+    text = str(value or "").strip()
+    normalized = text.casefold()
+    if normalized.startswith("gbg_"):
+        return "gbl_" + normalized.removeprefix("gbg_")
+    return text
+
+
+def _typed_legal_citation_role_group_sort_key(value: str) -> tuple[int, str]:
+    text = str(value or "").strip()
+    order = {
+        "citation_answer_bundle": 0,
+        "compliance_standard": 1,
+        "statutory_ground": 2,
+        "amendment_scope": 3,
+    }
+    return (order.get(text, 20), text)
+
+
+def _typed_legal_citation_scope_group_kind_sort_key(value: str) -> tuple[int, str]:
+    text = str(value or "").strip()
+    order = {
+        "scope_ancestor_with_amendment_scope": 0,
+        "subject_role_all_scopes_with_amendment_scope": 1,
+        "exact_scope_with_amendment_scope": 2,
+        "scope_ancestor": 3,
+        "subject_role_all_scopes": 4,
+        "exact_scope": 5,
+    }
+    return (order.get(text, 20), text)
+
+
+def _typed_legal_citation_scope_ancestor_groups(value: str) -> list[str]:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"([a-z][a-z0-9]*_\d+)(?:_\d+)*", text)
+    if not match:
+        return []
+    return [match.group(1)]
+
+
+def _claim_atom_number(value: Any) -> int | None:
+    text = str(value or "").strip().casefold()
+    match = re.fullmatch(r"(?:claim_)?(\d+)", text)
+    if not match:
+        return None
+    return int(match.group(1))
+
+
+def _number_segments(values: list[int]) -> list[dict[str, Any]]:
+    if not values:
+        return []
+    segments: list[dict[str, Any]] = []
+    start = prev = int(values[0])
+    for value in values[1:]:
+        current = int(value)
+        if current == prev + 1:
+            prev = current
+            continue
+        segments.append(_number_segment(start, prev))
+        start = prev = current
+    segments.append(_number_segment(start, prev))
+    return segments
+
+
+def _number_segment(start: int, end: int) -> dict[str, Any]:
+    if start == end:
+        return {"segment_type": "singleton", "start": start, "end": end, "rendered": str(start)}
+    return {"segment_type": "range", "start": start, "end": end, "rendered": f"{start}-{end}"}
+
+
+def _render_number_segments(segments: list[dict[str, Any]]) -> str:
+    return ", ".join(str(segment.get("rendered", "")).strip() for segment in segments if str(segment.get("rendered", "")).strip())
+
+
+def _query_result_arg_value(*, row: dict[str, Any], query_args: list[str], index: int) -> str:
+    arg = str(query_args[index - 1] if 0 <= index - 1 < len(query_args) else "").strip()
+    if _is_prolog_variable(arg):
+        return str(row.get(arg, "")).strip()
+    bound = row.get(f"BoundArg{index}")
+    if bound is not None and str(bound).strip():
+        return str(bound).strip()
+    return arg
+
+
+def _typed_list_range_segments(*, members: list[dict[str, str]], ranges: list[dict[str, str]]) -> list[dict[str, str]]:
+    raw_segments: list[dict[str, str]] = []
+    for member in members:
+        value = _typed_inventory_display_value(str(member.get("member", "")).strip())
+        if not value:
+            continue
+        raw_segments.append(
+            {
+                "start": value,
+                "end": value,
+                "segment_type": "singleton",
+                "member_kind": str(member.get("member_kind", "")).strip(),
+                "source_or_scope": str(member.get("source_or_scope", "")).strip(),
+            }
+        )
+    for range_row in ranges:
+        start = _typed_inventory_display_value(str(range_row.get("start", "")).strip())
+        end = _typed_inventory_display_value(str(range_row.get("end", "")).strip())
+        if not start or not end:
+            continue
+        segment_type = "singleton" if start == end else "range"
+        raw_segments.append(
+            {
+                "start": start,
+                "end": end,
+                "segment_type": segment_type,
+                "member_kind": str(range_row.get("range_kind", "")).strip(),
+                "source_or_scope": str(range_row.get("source_or_scope", "")).strip(),
+            }
+        )
+    range_intervals: list[tuple[int, int]] = []
+    for segment in raw_segments:
+        if segment.get("segment_type") != "range":
+            continue
+        start_num = _typed_inventory_int(segment.get("start", ""))
+        end_num = _typed_inventory_int(segment.get("end", ""))
+        if start_num is None or end_num is None or start_num == end_num:
+            continue
+        low, high = sorted((start_num, end_num))
+        range_intervals.append((low, high))
+    segments: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for segment in raw_segments:
+        if segment.get("segment_type") == "singleton":
+            value_num = _typed_inventory_int(segment.get("start", ""))
+            if value_num is not None and any(low <= value_num <= high for low, high in range_intervals):
+                continue
+            if value_num is None and range_intervals:
+                continue
+        elif segment.get("segment_type") == "range":
+            start_num = _typed_inventory_int(segment.get("start", ""))
+            end_num = _typed_inventory_int(segment.get("end", ""))
+            if start_num is not None and end_num is not None:
+                low, high = sorted((start_num, end_num))
+                if any(
+                    outer_low <= low <= high <= outer_high
+                    and (outer_low, outer_high) != (low, high)
+                    for outer_low, outer_high in range_intervals
+                ):
+                    continue
+        start = str(segment.get("start", "")).strip()
+        end = str(segment.get("end", "")).strip()
+        segment_type = str(segment.get("segment_type", "")).strip()
+        key = (start, end, segment_type)
+        if key in seen:
+            continue
+        seen.add(key)
+        segments.append(segment)
+    segments.sort(key=_typed_list_range_segment_sort_key)
+    return segments
+
+
+def _typed_inventory_display_value(value: str) -> str:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"(?:claim|count|item|issue|violation|paragraph)_(-?\d+)", text)
+    if match:
+        return match.group(1)
+    return text
+
+
+def _typed_inventory_int(value: Any) -> int | None:
+    text = _typed_inventory_display_value(str(value or "").strip())
+    if re.fullmatch(r"-?\d+", text):
+        return int(text)
+    return None
+
+
+TYPED_INVENTORY_MONTH_NUMBERS = {
+    "january": 1,
+    "jan": 1,
+    "february": 2,
+    "feb": 2,
+    "march": 3,
+    "mar": 3,
+    "april": 4,
+    "apr": 4,
+    "may": 5,
+    "june": 6,
+    "jun": 6,
+    "july": 7,
+    "jul": 7,
+    "august": 8,
+    "aug": 8,
+    "september": 9,
+    "sep": 9,
+    "sept": 9,
+    "october": 10,
+    "oct": 10,
+    "november": 11,
+    "nov": 11,
+    "december": 12,
+    "dec": 12,
+}
+
+
+def _typed_inventory_date_sort_key(value: Any) -> tuple[int, int, int] | None:
+    """Return a date key from a typed atom value, without reading source prose."""
+
+    text = _typed_inventory_display_value(str(value or "").strip()).casefold()
+    if not text:
+        return None
+    direct = _date_atom_sort_key(text)
+    if direct is not None:
+        return direct
+    tokens = [token for token in re.split(r"[^a-z0-9]+", text) if token]
+    for index, token in enumerate(tokens):
+        month = TYPED_INVENTORY_MONTH_NUMBERS.get(token)
+        if month is None:
+            continue
+        if index + 2 >= len(tokens):
+            continue
+        day_text = tokens[index + 1]
+        year_text = tokens[index + 2]
+        if not re.fullmatch(r"\d{1,2}", day_text) or not re.fullmatch(r"(?:19|20)\d{2}", year_text):
+            continue
+        day = int(day_text)
+        year = int(year_text)
+        if 1 <= day <= 31:
+            return (year, month, day)
+    return None
+
+
+def _typed_list_range_segment_sort_key(segment: dict[str, str]) -> tuple[int, Any, Any, str]:
+    start = str(segment.get("start", "")).strip()
+    end = str(segment.get("end", "")).strip()
+    if re.fullmatch(r"-?\d+", start) and re.fullmatch(r"-?\d+", end):
+        return (0, int(start), int(end), str(segment.get("segment_type", "")))
+    start_date = _typed_inventory_date_sort_key(start)
+    end_date = _typed_inventory_date_sort_key(end)
+    if start_date is not None and end_date is not None:
+        return (1, start_date, end_date, str(segment.get("segment_type", "")))
+    return (2, start, end, str(segment.get("segment_type", "")))
+
+
+def _render_typed_list_range_segments(segments: list[dict[str, str]]) -> str:
+    rendered: list[str] = []
+    for segment in segments:
+        start = str(segment.get("start", "")).strip()
+        end = str(segment.get("end", "")).strip()
+        if not start:
+            continue
+        if not end or end == start:
+            rendered.append(start)
+        else:
+            rendered.append(f"{start}-{end}")
+    return ", ".join(rendered)
+
+
+def _typed_signatory_office_chain_companion(
+    results: list[dict[str, Any]],
+    runtime: Any | None = None,
+) -> dict[str, Any] | None:
+    """Join typed issuing-office chain rows to typed signatory role rows."""
+
+    offices_by_subject: dict[str, set[str]] = {}
+    centers_by_subject: dict[str, set[str]] = {}
+    signatories: list[dict[str, str]] = []
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            row_values = {str(key): str(value).strip() for key, value in row.items()}
+            if predicate == "issuing_office_chain":
+                subject = row_values.get("BoundArg1") or row_values.get("Document") or row_values.get("X") or ""
+                chain_kind = row_values.get("BoundArg2") or row_values.get("X") or row_values.get("Kind") or ""
+                chain_value = row_values.get("Y") or row_values.get("OFFICE") or row_values.get("CENTER") or row_values.get("Value") or ""
+                if subject and chain_value and chain_kind == "office":
+                    offices_by_subject.setdefault(subject, set()).add(chain_value)
+                if subject and chain_value and chain_kind == "center":
+                    centers_by_subject.setdefault(subject, set()).add(chain_value)
+            elif predicate == "person_role_context":
+                bound_person = row_values.get("BoundArg1") or ""
+                person = (
+                    row_values.get("SIGNER_NAME")
+                    or row_values.get("SignatoryName")
+                    or bound_person
+                    or row_values.get("X")
+                    or row_values.get("Person")
+                    or ""
+                )
+                title = (
+                    row_values.get("SIGNER_TITLE")
+                    or row_values.get("TITLE")
+                    or row_values.get("Title")
+                    or (row_values.get("X") if bound_person else "")
+                    or row_values.get("Y")
+                    or row_values.get("Role")
+                    or ""
+                )
+                organization = (
+                    row_values.get("BoundArg3")
+                    or row_values.get("Organization")
+                    or row_values.get("Context")
+                    or (row_values.get("Y") if bound_person else "")
+                    or row_values.get("Z")
+                    or ""
+                )
+                role_context = (
+                    row_values.get("BoundArg4")
+                    or row_values.get("RoleContext")
+                    or row_values.get("OfficeContext")
+                    or row_values.get("ContextRole")
+                    or ""
+                )
+                if person and title and organization and role_context:
+                    signatories.append(
+                        {
+                            "Person": person,
+                            "Title": title,
+                            "Organization": organization,
+                            "RoleContext": role_context,
+                        }
+                    )
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str, str]] = set()
+    for subject, offices in sorted(offices_by_subject.items()):
+        for signatory in signatories:
+            role_contexts = {signatory["RoleContext"]}
+            if runtime is not None:
+                role_context_query = (
+                    "person_role_context("
+                    f"{signatory['Person']}, {signatory['Title']}, {signatory['Organization']}, RoleContext)."
+                )
+                role_context_result = runtime.query_rows(role_context_query)
+                if isinstance(role_context_result, dict) and role_context_result.get("status") == "success":
+                    for row in role_context_result.get("rows") or []:
+                        if not isinstance(row, dict):
+                            continue
+                        role_context = str(
+                            row.get("RoleContext")
+                            or row.get("OfficeContext")
+                            or row.get("X")
+                            or row.get("Y")
+                            or row.get("BoundArg4")
+                            or ""
+                        ).strip()
+                        if role_context:
+                            role_contexts.add(role_context)
+            role_context = signatory["RoleContext"]
+            matched_offices = sorted(
+                (office, context)
+                for context in role_contexts
+                for office in offices
+                if context.endswith("_" + office)
+            )
+            if not matched_offices:
+                continue
+            for office, role_context in matched_offices:
+                key = (subject, signatory["Person"], signatory["Title"], office)
+                if key in seen:
+                    continue
+                seen.add(key)
+                centers = sorted(centers_by_subject.get(subject, set()))
+                support_rows.append(
+                    {
+                        "SupportKind": "typed_signatory_office_chain",
+                        "DocumentOrIssuer": subject,
+                        "Signatory": signatory["Person"],
+                        "Title": signatory["Title"],
+                        "IssuingOffice": office,
+                        "ParentOffices": "_and_".join(sorted(offices - {office})),
+                        "Center": "_and_".join(centers),
+                        "RoleContext": role_context,
+                    }
+                )
+    if not support_rows:
+        return None
+    return {
+        "query": "typed_signatory_office_chain_support(DocumentOrIssuer, Signatory, Title, IssuingOffice, Center).",
+        "result": {
+            "status": "success",
+            "predicate": "typed_signatory_office_chain_support",
+            "prolog_query": (
+                "typed_signatory_office_chain_support"
+                "(DocumentOrIssuer, Signatory, Title, IssuingOffice, Center)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:12],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "typed signatory-office companion joined person_role_context rows to "
+                    "issuing_office_chain rows using matching office atoms; no source-record "
+                    "or utterance text was parsed"
+                ),
+            },
+        },
+        "derived_from_queries": [
+            "issuing_office_chain(DocumentOrIssuer, office, IssuingOffice).",
+            "person_role_context(Signatory, Title, Organization, RoleContext).",
+        ],
+    }
+
+
+def _typed_subject_identifier_inventory_queries(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return typed identifier rows for document subjects already in evidence."""
+
+    subjects: dict[str, list[str]] = {}
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if not predicate or predicate.startswith("source_record_") or predicate.startswith("typed_"):
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or query_result.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        if not query_args:
+            continue
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            subject = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            if not _typed_subject_identifier_candidate(subject):
+                continue
+            subjects.setdefault(subject, [])
+            if source_query and source_query not in subjects[subject]:
+                subjects[subject].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for subject, source_queries in sorted(subjects.items()):
+        for query in [
+            f"document_identifier_occurrence({subject}, IdentifierKind, Identifier, SourceOrScope, OccurrenceOrder).",
+            f"document_identifier({subject}, IdentifierKind, Identifier).",
+        ]:
+            if query in seen_queries or query in existing_queries:
+                continue
+            seen_queries.add(query)
+            result = runtime.query_rows(query)
+            if not isinstance(result, dict) or result.get("status") != "success":
+                continue
+            result = _augment_result_with_bound_query_constants(query=query, result=result)
+            out.append(
+                {
+                    "query": query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": (
+                                "typed subject-identifier companion retrieved sibling identifier rows "
+                                "for a document subject already present in successful typed evidence; "
+                                "no question text or source prose was parsed"
+                            ),
+                            "source_subject": subject,
+                            "source_queries": source_queries,
+                        },
+                    },
+                    "derived_from_queries": source_queries,
+                }
+            )
+            break
+        if len(out) >= 8:
+            break
+    return out
+
+
+def _typed_subject_document_date_inventory_queries(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return typed date rows for document subjects already in evidence."""
+
+    subject_seed_predicates = {
+        "document_action",
+        "document_form",
+        "document_publisher",
+        "document_security_listing",
+        "document_signature",
+        "document_signatory",
+        "document_title",
+        "signed_by",
+        "signatory_title",
+    }
+    subject_sources: dict[str, list[str]] = {}
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in subject_seed_predicates:
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or query_result.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        if not query_args:
+            continue
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            subject = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            if not _typed_subject_identifier_candidate(subject):
+                continue
+            subject_sources.setdefault(subject, [])
+            if source_query and source_query not in subject_sources[subject]:
+                subject_sources[subject].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for subject, source_queries in sorted(subject_sources.items()):
+        for query in [
+            f"document_date({subject}, DateRole, DateValue).",
+            f"filing_date({subject}, DateValue).",
+            f"signed_date({subject}, DateValue).",
+            f"report_date({subject}, DateValue).",
+        ]:
+            if query in seen_queries or query in existing_queries:
+                continue
+            seen_queries.add(query)
+            result = runtime.query_rows(query)
+            if not isinstance(result, dict) or result.get("status") != "success":
+                continue
+            result = _augment_result_with_bound_query_constants(query=query, result=result)
+            out.append(
+                {
+                    "query": query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": (
+                                "typed subject-date companion retrieved sibling date rows "
+                                "for a document subject already present in successful typed evidence; "
+                                "no question text or source prose was parsed"
+                            ),
+                            "source_subject": subject,
+                            "source_queries": source_queries,
+                        },
+                    },
+                    "derived_from_queries": source_queries,
+                }
+            )
+            if len(out) >= 8:
+                return out
+    return out
+
+
+def _typed_subject_identifier_candidate(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text or _is_prolog_variable(text) or _is_numeric_atom(text):
+        return False
+    if text.lower() in GENERIC_QUERY_PLACEHOLDERS:
+        return False
+    if len(text) > 96:
+        return False
+    return bool(re.search(r"[A-Za-z]", text) and re.search(r"[0-9]", text))
+
+
+def _typed_list_member_inventory_from_returned_values(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Retrieve full typed list inventories seeded by already-returned member atoms.
+
+    The seed values come only from successful typed query rows. We do not inspect
+    the user question or source prose; this is a deterministic closure over the
+    compiled atom graph. Requiring at least two matched members keeps a single
+    incidental atom from broadening the evidence bundle.
+    """
+
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    candidate_sources: dict[str, list[str]] = {}
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if not predicate or predicate.startswith("source_record_") or predicate.startswith("typed_"):
+            continue
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            for key, raw_value in row.items():
+                key_text = str(key or "")
+                if key_text.startswith("BoundArg") and key_text.endswith("Display"):
+                    continue
+                value = str(raw_value or "").strip()
+                if not _typed_list_member_value_candidate(value):
+                    continue
+                candidate_sources.setdefault(value, [])
+                if source_query and source_query not in candidate_sources[value]:
+                    candidate_sources[value].append(source_query)
+                if len(candidate_sources) >= 96:
+                    break
+            if len(candidate_sources) >= 96:
+                break
+
+    matched_sets: dict[tuple[str, str], dict[str, Any]] = {}
+    for value, source_queries in sorted(candidate_sources.items()):
+        member_query = f"list_member(SetId, {value}, MemberKind, SourceOrScope)."
+        result = runtime.query_rows(member_query)
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            set_id = str(row.get("SetId", "")).strip()
+            member_kind = str(row.get("MemberKind", "")).strip()
+            if not _typed_list_member_subject_part(set_id) or not _typed_list_member_subject_part(member_kind):
+                continue
+            group = matched_sets.setdefault(
+                (set_id, member_kind),
+                {"set_id": set_id, "member_kind": member_kind, "matched_values": set(), "source_queries": []},
+            )
+            group["matched_values"].add(value)
+            for source_query in source_queries:
+                if source_query and source_query not in group["source_queries"]:
+                    group["source_queries"].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for (_set_id, _member_kind), group in sorted(matched_sets.items()):
+        matched_values = sorted(str(value) for value in group.get("matched_values", set()) if str(value))
+        if len(matched_values) < 2:
+            continue
+        set_id = str(group.get("set_id", "")).strip()
+        member_kind = str(group.get("member_kind", "")).strip()
+        query = f"list_member({set_id}, MemberValue, {member_kind}, SourceOrScope)."
+        if query in seen_queries or query in existing_queries:
+            continue
+        seen_queries.add(query)
+        result = runtime.query_rows(query)
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        result = _augment_result_with_bound_query_constants(query=query, result=result)
+        out.append(
+            {
+                "query": query,
+                "result": {
+                    **result,
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": (
+                            "typed list-member inventory companion retrieved the full list_member/4 set "
+                            "after multiple returned typed atoms matched members of that set; no question "
+                            "text or source prose was parsed"
+                        ),
+                        "source_set_id": set_id,
+                        "source_member_kind": member_kind,
+                        "matched_member_values": matched_values,
+                        "source_queries": group.get("source_queries", []),
+                    },
+                },
+                "derived_from_queries": group.get("source_queries", []),
+            }
+        )
+        if len(out) >= 8:
+            break
+    return out
+
+
+def _typed_list_member_value_candidate(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text or _is_prolog_variable(text) or _is_numeric_atom(text):
+        return False
+    if text.lower() in GENERIC_QUERY_PLACEHOLDERS:
+        return False
+    if text.startswith("src_") or text.startswith("source_"):
+        return False
+    if len(text) > 96:
+        return False
+    return bool(re.fullmatch(r"[a-z][a-z0-9_]*", text))
+
+
+def _typed_list_range_inventory_sibling_queries(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Retrieve sibling member/range rows for set ids already present in typed evidence."""
+
+    set_sources: dict[str, list[str]] = {}
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {"list_member", "claim_range", "item_range"}:
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or query_result.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            set_id = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            if not _typed_list_member_subject_part(set_id):
+                continue
+            set_sources.setdefault(set_id, [])
+            if source_query and source_query not in set_sources[set_id]:
+                set_sources[set_id].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for set_id, source_queries in sorted(set_sources.items()):
+        for query in [
+            f"list_member({set_id}, MemberValue, MemberKind, SourceOrScope).",
+            f"claim_range({set_id}, StartValue, EndValue, SourceOrScope).",
+            f"item_range({set_id}, StartValue, EndValue, SourceOrScope).",
+        ]:
+            if query in seen_queries or query in existing_queries:
+                continue
+            seen_queries.add(query)
+            result = runtime.query_rows(query)
+            if not isinstance(result, dict) or result.get("status") != "success":
+                continue
+            result = _augment_result_with_bound_query_constants(query=query, result=result)
+            out.append(
+                {
+                    "query": query,
+                    "result": {
+                        **result,
+                        "reasoning_basis": {
+                            "kind": "core-local",
+                            "note": (
+                                "typed list/range sibling companion retrieved member and range rows "
+                                "for a set id already present in successful typed evidence; "
+                                "no question text or source prose was parsed"
+                            ),
+                            "source_set_id": set_id,
+                            "source_queries": source_queries,
+                        },
+                    },
+                    "derived_from_queries": source_queries,
+                }
+            )
+            if len(out) >= 12:
+                return out
+    return out
+
+
+def _typed_subject_legal_citation_inventory_queries(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Return document-level typed citation rows for subjects already in typed list/obligation evidence."""
+
+    subject_sources: dict[str, list[str]] = {}
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate not in {"list_member", "item_range", "claim_range", "compliance_obligation"}:
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or query_result.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            subject = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            if not _typed_subject_identifier_candidate(subject):
+                continue
+            subject_sources.setdefault(subject, [])
+            if source_query and source_query not in subject_sources[subject]:
+                subject_sources[subject].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for subject, source_queries in sorted(subject_sources.items()):
+        query = f"legal_citation_detail({subject}, Citation, Role, direct)."
+        if query in seen_queries or query in existing_queries:
+            continue
+        seen_queries.add(query)
+        result = runtime.query_rows(query)
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        result = _augment_result_with_bound_query_constants(query=query, result=result)
+        out.append(
+            {
+                "query": query,
+                "result": {
+                    **result,
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": (
+                            "typed subject-citation companion retrieved document-level legal_citation_detail rows "
+                            "for a subject already present in typed list/range/obligation evidence; "
+                            "no question text or source prose was parsed"
+                        ),
+                        "source_subject": subject,
+                        "source_queries": source_queries,
+                    },
+                },
+                "derived_from_queries": source_queries,
+            }
+        )
+        if len(out) >= 8:
+            break
+    return out
+
+
+def _typed_list_member_legal_citation_queries(
+    *,
+    runtime: Any,
+    results: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Bridge governed list_member tuple atoms to matching typed citation subject atoms."""
+
+    existing_queries = {
+        str(item.get("query", "")).strip()
+        for item in results or []
+        if isinstance(item, dict) and str(item.get("query", "")).strip()
+    }
+    candidates: dict[str, list[str]] = {}
+    for query_result in results or []:
+        if not isinstance(query_result, dict):
+            continue
+        result = query_result.get("result")
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        if str(result.get("predicate", "")).strip() != "list_member":
+            continue
+        parsed = parse_prolog_query(str(result.get("prolog_query") or query_result.get("query") or ""))
+        if parsed is None:
+            continue
+        _query_predicate, query_args = parsed
+        source_query = str(query_result.get("query") or result.get("prolog_query") or "").strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            set_id = _query_result_arg_value(row=row, query_args=query_args, index=1)
+            member = _query_result_arg_value(row=row, query_args=query_args, index=2)
+            member_kind = _query_result_arg_value(row=row, query_args=query_args, index=3)
+            source_or_scope = _query_result_arg_value(row=row, query_args=query_args, index=4)
+            if not all(_typed_list_member_subject_part(value) for value in [set_id, member, member_kind, source_or_scope]):
+                continue
+            subject = f"list_member_{set_id}_{member}_{member_kind}_{source_or_scope}"
+            candidates.setdefault(subject, [])
+            if source_query and source_query not in candidates[subject]:
+                candidates[subject].append(source_query)
+
+    out: list[dict[str, Any]] = []
+    seen_queries: set[str] = set()
+    for subject, source_queries in sorted(candidates.items()):
+        query = f"legal_citation_detail({subject}, Citation, Role, SourceOrScope)."
+        if query in seen_queries or query in existing_queries:
+            continue
+        seen_queries.add(query)
+        result = runtime.query_rows(query)
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        result = _augment_result_with_bound_query_constants(query=query, result=result)
+        out.append(
+            {
+                "query": query,
+                "result": {
+                    **result,
+                    "reasoning_basis": {
+                        "kind": "core-local",
+                        "note": (
+                            "typed list-member citation companion mapped a returned list_member/4 tuple "
+                            "to the governed list_member_* subject atom used by legal_citation_detail/4; "
+                            "no question text or source prose was parsed"
+                        ),
+                        "governed_subject": subject,
+                        "source_queries": source_queries,
+                    },
+                },
+                "derived_from_queries": source_queries,
+            }
+        )
+        if len(out) >= 8:
+            break
+    return out
+
+
+def _typed_list_member_subject_part(value: str) -> bool:
+    text = str(value or "").strip()
+    if not text or _is_prolog_variable(text):
+        return False
+    return bool(re.fullmatch(r"[A-Za-z0-9_]+", text))
+
+
+def _typed_source_claim_exchange_companion(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Bundle typed source-attributed claim/rebuttal rows sharing an anchor."""
+
+    claims_by_anchor: dict[str, list[dict[str, str]]] = {}
+    evaluations_by_violation_key: dict[str, list[dict[str, str]]] = {}
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            row_values = {str(key): str(value).strip() for key, value in row.items()}
+            if predicate == "response_evaluation":
+                subject = (
+                    row_values.get("Subject")
+                    or row_values.get("ResponseId")
+                    or row_values.get("RespId")
+                    or row_values.get("Respid")
+                    or row_values.get("BoundArg1")
+                    or row_values.get("Relaxed1")
+                    or row_values.get("X")
+                    or ""
+                )
+                status = (
+                    row_values.get("Status")
+                    or row_values.get("EvaluationStatus")
+                    or row_values.get("Relaxed2")
+                    or row_values.get("Y")
+                    or ""
+                )
+                reason = (
+                    row_values.get("Reason")
+                    or row_values.get("EvaluationText")
+                    or row_values.get("EvaluationReason")
+                    or row_values.get("Relaxed3")
+                    or row_values.get("Z")
+                    or ""
+                )
+                violation_key = _typed_violation_number_key(subject)
+                if subject and status and reason and violation_key:
+                    evaluations_by_violation_key.setdefault(violation_key, []).append(
+                        {
+                            "ResponseId": subject,
+                            "Status": status,
+                            "Response": reason,
+                            "ViolationKey": violation_key,
+                        }
+                    )
+                continue
+            if predicate != "source_attributed_claim":
+                continue
+            claim_id = (
+                row_values.get("ClaimId")
+                or row_values.get("ClaimID")
+                or row_values.get("Claimid")
+                or row_values.get("claim_id")
+                or row_values.get("Relaxed1")
+                or row_values.get("X")
+                or ""
+            )
+            claimant = (
+                row_values.get("Claimant")
+                or row_values.get("Source")
+                or row_values.get("Author")
+                or row_values.get("Speaker")
+                or row_values.get("Relaxed2")
+                or ""
+            )
+            claim_text = (
+                row_values.get("ClaimText")
+                or row_values.get("Claim")
+                or row_values.get("Content")
+                or row_values.get("Relaxed3")
+                or ""
+            )
+            anchor = (
+                row_values.get("SourceAnchor")
+                or row_values.get("Anchor")
+                or row_values.get("Scope")
+                or row_values.get("SourceRef")
+                or row_values.get("Relaxed4")
+                or ""
+            )
+            if not claim_id or not claimant or not claim_text or not anchor:
+                continue
+            claims_by_anchor.setdefault(anchor, []).append(
+                {
+                    "ClaimId": claim_id,
+                    "Claimant": claimant,
+                    "Claim": claim_text,
+                    "SourceAnchor": anchor,
+                }
+            )
+
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for anchor, claims in sorted(claims_by_anchor.items()):
+        fda_claims = [claim for claim in claims if claim["Claimant"] == "fda"]
+        other_claims = [claim for claim in claims if claim["Claimant"] != "fda"]
+        for other in other_claims:
+            for fda_claim in fda_claims:
+                key = (anchor, other["ClaimId"], fda_claim["ClaimId"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(
+                    {
+                        "SupportKind": "typed_source_claim_exchange",
+                        "SourceAnchor": anchor,
+                        "Claimant": other["Claimant"],
+                        "ClaimId": other["ClaimId"],
+                        "Claim": other["Claim"],
+                        "Responder": fda_claim["Claimant"],
+                        "ResponseId": fda_claim["ClaimId"],
+                        "Response": fda_claim["Claim"],
+                    }
+                )
+            violation_key = _typed_violation_number_key(anchor)
+            for evaluation in evaluations_by_violation_key.get(violation_key, []) if violation_key else []:
+                key = (anchor, other["ClaimId"], evaluation["ResponseId"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(
+                    {
+                        "SupportKind": "typed_source_claim_response_evaluation",
+                        "SourceAnchor": anchor,
+                        "Claimant": other["Claimant"],
+                        "ClaimId": other["ClaimId"],
+                        "Claim": other["Claim"],
+                        "Responder": "fda",
+                        "ResponseId": evaluation["ResponseId"],
+                        "Response": evaluation["Response"],
+                        "ResponseStatus": evaluation["Status"],
+                    }
+                )
+    if not support_rows:
+        return None
+    return {
+        "query": "typed_source_claim_exchange_support(SourceAnchor, Claimant, Claim, Responder, Response).",
+        "result": {
+            "status": "success",
+            "predicate": "typed_source_claim_exchange_support",
+            "prolog_query": (
+                "typed_source_claim_exchange_support"
+                "(SourceAnchor, Claimant, Claim, Responder, Response)."
+            ),
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:20],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "typed claim-exchange companion grouped already-returned "
+                    "source_attributed_claim rows by typed source anchor when both "
+                    "an FDA claim and another attributed claim were present; no "
+                    "source-record or utterance text was parsed"
+                ),
+            },
+        },
+        "derived_from_queries": [
+            "source_attributed_claim(ClaimId, Claimant, Claim, SourceAnchor).",
+            "response_evaluation(ResponseId, Status, Response).",
+        ],
+    }
+
+
+def _typed_violation_number_key(value: str) -> str:
+    match = re.search(r"(?:^|_)violation_([0-9]+)(?:_|$)", str(value or ""))
+    return f"violation_{match.group(1)}" if match else ""
+
+
+def _typed_obligation_statute_join_companion(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Join typed obligation rows to typed statute rows across zero-padded ids."""
+
+    obligations: dict[str, list[dict[str, str]]] = {}
+    statutes: dict[str, list[dict[str, str]]] = {}
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            row_values = {str(key): str(value).strip() for key, value in row.items()}
+            if predicate == "obligation":
+                obligation_id = (
+                    row_values.get("ObligationID")
+                    or row_values.get("BoundArg1")
+                    or row_values.get("X")
+                    or ""
+                )
+                obligation_text = (
+                    row_values.get("ObligationText")
+                    or row_values.get("Y")
+                    or row_values.get("Text")
+                    or ""
+                )
+                source_doc = row_values.get("BoundArg3") or row_values.get("SourceDoc") or row_values.get("Z") or ""
+                canonical_id = _typed_numeric_suffix_canonical_id(obligation_id)
+                if obligation_id and obligation_text and canonical_id:
+                    obligations.setdefault(canonical_id, []).append(
+                        {
+                            "ObligationID": obligation_id,
+                            "ObligationText": obligation_text,
+                            "SourceDoc": source_doc,
+                        }
+                    )
+            elif predicate == "obligation_statute":
+                obligation_id = (
+                    row_values.get("ObligationID")
+                    or row_values.get("BoundArg1")
+                    or row_values.get("Relaxed1")
+                    or row_values.get("X")
+                    or ""
+                )
+                statute = (
+                    row_values.get("StatuteName")
+                    or row_values.get("BoundArg2")
+                    or row_values.get("Relaxed2")
+                    or row_values.get("Y")
+                    or ""
+                )
+                canonical_id = _typed_numeric_suffix_canonical_id(obligation_id)
+                if obligation_id and statute and canonical_id:
+                    statutes.setdefault(canonical_id, []).append(
+                        {
+                            "StatuteObligationID": obligation_id,
+                            "Statute": statute,
+                        }
+                    )
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for canonical_id in sorted(set(obligations) & set(statutes)):
+        for obligation in obligations[canonical_id]:
+            for statute in statutes[canonical_id]:
+                key = (obligation["ObligationID"], statute["StatuteObligationID"], statute["Statute"])
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(
+                    {
+                        "SupportKind": "typed_obligation_statute_join",
+                        "CanonicalRecordID": canonical_id,
+                        "ObligationID": obligation["ObligationID"],
+                        "StatuteObligationID": statute["StatuteObligationID"],
+                        "ObligationText": obligation["ObligationText"],
+                        "Statute": statute["Statute"],
+                        "SourceDoc": obligation["SourceDoc"],
+                    }
+                )
+    if not support_rows:
+        return None
+    return {
+        "query": "typed_obligation_statute_join_support(CanonicalRecordID, ObligationText, Statute).",
+        "result": {
+            "status": "success",
+            "predicate": "typed_obligation_statute_join_support",
+            "prolog_query": "typed_obligation_statute_join_support(CanonicalRecordID, ObligationText, Statute).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "typed obligation-statute companion joined obligation and "
+                    "obligation_statute rows after canonicalizing typed record ids "
+                    "that differ only by zero padding; no source-record or utterance "
+                    "text was parsed"
+                ),
+            },
+        },
+        "derived_from_queries": [
+            "obligation(ObligationID, ObligationText, SourceDoc).",
+            "obligation_statute(ObligationID, Statute).",
+        ],
+    }
+
+
+def _typed_numeric_suffix_canonical_id(value: str) -> str:
+    text = str(value or "").strip()
+    match = re.fullmatch(r"(?P<prefix>[a-z][a-z0-9]*(?:_[a-z][a-z0-9]*)*)_(?P<number>0*[0-9]+)", text)
+    if not match:
+        return text
+    number = str(int(match.group("number")))
+    return f"{match.group('prefix')}_{number}"
+
+
+def _typed_monetary_relief_join_companion(results: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Join typed monetary relief amount rows to typed purpose rows by relief id."""
+
+    amounts: dict[str, list[dict[str, str]]] = {}
+    purposes: dict[str, list[str]] = {}
+    for query_result in results or []:
+        result = query_result.get("result") if isinstance(query_result, dict) else None
+        if not isinstance(result, dict) or result.get("status") != "success":
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        for row in result.get("rows") or []:
+            if not isinstance(row, dict):
+                continue
+            row_values = {str(key): str(value).strip() for key, value in row.items()}
+            if predicate == "source_detail":
+                subject_id = (
+                    row_values.get("Subject")
+                    or row_values.get("SubjectID")
+                    or row_values.get("BoundArg1")
+                    or row_values.get("Relaxed1")
+                    or row_values.get("X")
+                    or ""
+                )
+                detail_key = (
+                    row_values.get("DetailKey")
+                    or row_values.get("PaymentAmount")
+                    or row_values.get("BoundArg2")
+                    or row_values.get("Relaxed2")
+                    or row_values.get("Y")
+                    or ""
+                )
+                amount = (
+                    row_values.get("Amount")
+                    or row_values.get("Value")
+                    or row_values.get("BoundArg3")
+                    or row_values.get("Relaxed3")
+                    or row_values.get("Z")
+                    or ""
+                )
+                source_line = row_values.get("SourceLine") or row_values.get("BoundArg4") or row_values.get("Relaxed4") or ""
+                if subject_id and detail_key == "payment_amount" and amount:
+                    amounts.setdefault(subject_id, []).append(
+                        {
+                            "ReliefID": subject_id,
+                            "Amount": amount,
+                            "SourceLine": source_line,
+                        }
+                    )
+            elif predicate == "monetary_relief_purpose":
+                relief_id = (
+                    row_values.get("ReliefID")
+                    or row_values.get("BoundArg1")
+                    or row_values.get("Relaxed1")
+                    or row_values.get("X")
+                    or ""
+                )
+                purpose = (
+                    row_values.get("Purpose")
+                    or row_values.get("BoundArg2")
+                    or row_values.get("Relaxed2")
+                    or row_values.get("Y")
+                    or ""
+                )
+                if relief_id and purpose:
+                    purposes.setdefault(relief_id, []).append(purpose)
+    support_rows: list[dict[str, str]] = []
+    seen: set[tuple[str, str, str]] = set()
+    for relief_id in sorted(set(amounts) & set(purposes)):
+        for amount_row in amounts[relief_id]:
+            for purpose in purposes[relief_id]:
+                key = (relief_id, amount_row["Amount"], purpose)
+                if key in seen:
+                    continue
+                seen.add(key)
+                support_rows.append(
+                    {
+                        "SupportKind": "typed_monetary_relief_join",
+                        "ReliefID": relief_id,
+                        "Amount": amount_row["Amount"],
+                        "Purpose": purpose,
+                        "SourceLine": amount_row["SourceLine"],
+                    }
+                )
+    if not support_rows:
+        return None
+    return {
+        "query": "typed_monetary_relief_support(ReliefID, Amount, Purpose).",
+        "result": {
+            "status": "success",
+            "predicate": "typed_monetary_relief_support",
+            "prolog_query": "typed_monetary_relief_support(ReliefID, Amount, Purpose).",
+            "result_type": "table",
+            "num_rows": len(support_rows),
+            "variables": _row_variable_names(support_rows),
+            "rows": support_rows[:40],
+            "reasoning_basis": {
+                "kind": "core-local",
+                "note": (
+                    "typed monetary-relief companion joined source_detail "
+                    "payment_amount rows to monetary_relief_purpose rows by "
+                    "typed relief id; no source-record or utterance text was parsed"
+                ),
+            },
+        },
+        "derived_from_queries": [
+            "source_detail(ReliefID, payment_amount, Amount, SourceLine).",
+            "monetary_relief_purpose(ReliefID, Purpose).",
+        ],
+    }
 
 
 def _augment_result_with_bound_query_constants(*, query: str, result: dict[str, Any]) -> dict[str, Any]:
@@ -9966,6 +12460,229 @@ def _filter_disabled_support_surfaces(
             continue
         out.append(item)
     return out
+
+
+def _filter_strict_claim_path_query_results(
+    query_results: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Remove prose-like context rows from the sign-clean recorded claim path.
+
+    This is a governance filter, not a query router: it reads only the returned
+    predicate/value shapes, never the human question or source prose. The raw
+    evidence-plan trace can still preserve filtered rows for diagnosis; the
+    replayable thesis path should contain only typed non-prose atoms and
+    deterministic compositions over those atoms.
+    """
+
+    kept: list[dict[str, Any]] = []
+    filtered: list[dict[str, Any]] = []
+    for item in query_results:
+        if not isinstance(item, dict):
+            kept.append(item)
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict):
+            kept.append(item)
+            continue
+        predicate = str(result.get("predicate") or "").strip()
+        if predicate.startswith("source_record_"):
+            filtered.append(
+                {
+                    "query": str(item.get("query", "")).strip(),
+                    "predicate": predicate,
+                    "reason": "source_record_claim_path_blocked",
+                }
+            )
+            continue
+        redacted_result, redacted_fields = _strict_claim_path_redacted_result(result)
+        if redacted_result is None:
+            filtered.append(
+                {
+                    "query": str(item.get("query", "")).strip(),
+                    "predicate": predicate,
+                    "reason": "prose_like_typed_context_blocked",
+                }
+            )
+            continue
+        if redacted_fields:
+            filtered.append(
+                {
+                    "query": str(item.get("query", "")).strip(),
+                    "predicate": predicate,
+                    "reason": "prose_like_typed_values_redacted",
+                    "redacted_fields": redacted_fields,
+                }
+            )
+            kept.append({**item, "result": redacted_result})
+            continue
+        kept.append(item)
+    return kept, filtered
+
+
+def _filter_unanchored_named_role_query_results(
+    *,
+    query_results: list[dict[str, Any]],
+    query_intents: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if not _named_role_anchor_required(query_intents):
+        return query_results, []
+    anchored_query_present = any(
+        _party_role_context_query_has_named_party_anchor(str(item.get("query", "")))
+        for item in query_results
+        if isinstance(item, dict)
+    )
+    if anchored_query_present:
+        return query_results, []
+    kept: list[dict[str, Any]] = []
+    filtered: list[dict[str, Any]] = []
+    for item in query_results:
+        if not isinstance(item, dict):
+            kept.append(item)
+            continue
+        result = item.get("result")
+        predicate = str(result.get("predicate") or "").strip() if isinstance(result, dict) else ""
+        query = str(item.get("query", "")).strip()
+        if predicate == "party_role_context" and _party_role_context_query_is_role_only_scan(query):
+            filtered.append(
+                {
+                    "query": query,
+                    "predicate": predicate,
+                    "reason": "missing_named_party_anchor",
+                }
+            )
+            continue
+        kept.append(item)
+    return kept, filtered
+
+
+def _named_role_anchor_required(query_intents: list[dict[str, Any]]) -> bool:
+    for intent in query_intents:
+        if not isinstance(intent, dict):
+            continue
+        if str(intent.get("intent_type", "")).strip() != "named_role_roster":
+            continue
+        target_terms = intent.get("target_terms")
+        if isinstance(target_terms, list) and len([item for item in target_terms if str(item).strip()]) >= 2:
+            return True
+    return False
+
+
+def _party_role_context_query_has_named_party_anchor(query: str) -> bool:
+    goals = parse_prolog_query_goals(str(query or ""))
+    if not goals:
+        return False
+    role_goals = [(predicate, args) for predicate, args in goals if predicate == "party_role_context" and len(args) == 4]
+    if not role_goals:
+        return False
+    for _predicate, args in role_goals:
+        if not _is_prolog_variable(args[1]):
+            return True
+    return False
+
+
+def _party_role_context_query_is_role_only_scan(query: str) -> bool:
+    goals = parse_prolog_query_goals(str(query or ""))
+    if not goals:
+        return False
+    role_goals = [(predicate, args) for predicate, args in goals if predicate == "party_role_context" and len(args) == 4]
+    if not role_goals:
+        return False
+    return all(_is_prolog_variable(args[1]) for _predicate, args in role_goals)
+
+
+def _strict_claim_path_redacted_result(result: dict[str, Any]) -> tuple[dict[str, Any] | None, list[str]]:
+    predicate = str(result.get("predicate") or "").strip()
+    if not predicate:
+        return result, []
+    if predicate.startswith("typed_"):
+        return result, []
+    lowered = predicate.casefold()
+    if _predicate_name_has_free_text_token(lowered):
+        return None, []
+    rows = result.get("rows")
+    if not isinstance(rows, list):
+        return result, []
+    redacted_rows: list[Any] = []
+    redacted_fields: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            if _strict_claim_path_value_is_prose_like(row):
+                redacted_fields.add("<row>")
+                continue
+            redacted_rows.append(row)
+            continue
+        redacted_row: dict[str, Any] = {}
+        for key, value in row.items():
+            key_text = str(key or "")
+            if key_text.endswith("Display") or _strict_claim_path_value_is_prose_like(value):
+                redacted_fields.add(key_text)
+                continue
+            redacted_row[key] = value
+        if _strict_claim_path_row_has_typed_value(redacted_row):
+            redacted_rows.append(redacted_row)
+    if rows and not redacted_rows:
+        return None, sorted(redacted_fields)
+    if not redacted_fields:
+        return result, []
+    variables = _row_variable_names([row for row in redacted_rows if isinstance(row, dict)])
+    redacted_basis = {
+        **(result.get("reasoning_basis", {}) if isinstance(result.get("reasoning_basis"), dict) else {}),
+        "strict_claim_path_redaction": {
+            "schema_version": "strict_claim_path_redaction_v1",
+            "policy": "prose-like returned values were removed before strict claim-path judging",
+            "redacted_fields": sorted(redacted_fields),
+        },
+    }
+    return (
+        {
+            **result,
+            "rows": redacted_rows,
+            "num_rows": len(redacted_rows),
+            "variables": variables or result.get("variables", []),
+            "reasoning_basis": redacted_basis,
+        },
+        sorted(redacted_fields),
+    )
+
+
+def _strict_claim_path_result_is_prose_like_context(result: dict[str, Any]) -> bool:
+    predicate = str(result.get("predicate") or "").strip()
+    if not predicate:
+        return False
+    if predicate.startswith("typed_"):
+        return False
+    lowered = predicate.casefold()
+    if _predicate_name_has_free_text_token(lowered):
+        return True
+    rows = result.get("rows")
+    if not isinstance(rows, list):
+        return False
+    return any(_strict_claim_path_row_has_prose_like_value(row) for row in rows)
+
+
+def _strict_claim_path_row_has_prose_like_value(value: Any) -> bool:
+    if isinstance(value, dict):
+        return any(_strict_claim_path_row_has_prose_like_value(inner) for inner in value.values())
+    if isinstance(value, list):
+        return any(_strict_claim_path_row_has_prose_like_value(inner) for inner in value)
+    if isinstance(value, str):
+        return _atom_library_arg_looks_prose_like(value)
+    return False
+
+
+def _strict_claim_path_value_is_prose_like(value: Any) -> bool:
+    return _strict_claim_path_row_has_prose_like_value(value)
+
+
+def _strict_claim_path_row_has_typed_value(row: dict[str, Any]) -> bool:
+    for value in row.values():
+        if isinstance(value, str):
+            text = value.strip()
+            if text and not _is_prolog_variable(text) and not _atom_library_arg_looks_prose_like(text):
+                return True
+        elif value not in (None, "", [], {}):
+            return True
+    return False
 
 
 def _is_current_source_record_summary_result(predicate: str, result: dict[str, Any]) -> bool:
@@ -30028,6 +32745,186 @@ def _unique_status_from_intervals(intervals: list[dict[str, str]], notice_status
     return next(iter(statuses)) if len(statuses) == 1 else ""
 
 
+def _evidence_bundle_anchor_binding_queries(bundle: dict[str, Any], source_queries: list[str]) -> list[dict[str, Any]]:
+    bindings = bundle.get("anchor_bindings", []) if isinstance(bundle, dict) else []
+    if not isinstance(bindings, list) or not bindings:
+        return []
+    out: list[dict[str, Any]] = []
+    for binding in bindings:
+        if not isinstance(binding, dict):
+            continue
+        predicate = str(binding.get("predicate", "")).strip()
+        arg_role = str(binding.get("arg_role", "")).strip()
+        compiled_atom = str(binding.get("compiled_atom", "")).strip()
+        if predicate != "party_role_context" or arg_role in {"scope_or_context", "context", "source_or_scope"}:
+            continue
+        if not compiled_atom or _is_prolog_variable(compiled_atom) or not re.fullmatch(r"[a-z0-9_]+", compiled_atom):
+            continue
+        for query in source_queries:
+            anchored = _party_role_context_anchor_query(
+                query=str(query or ""),
+                compiled_party_atom=compiled_atom,
+            )
+            if not anchored:
+                continue
+            out.append(
+                {
+                    "query": anchored,
+                    "source_queries": [str(query or "").strip()],
+                    "anchor_binding": {
+                        "predicate": predicate,
+                        "arg_role": arg_role,
+                        "compiled_atom": compiled_atom,
+                    },
+                }
+            )
+    return out
+
+
+def _party_role_context_anchor_query(query: str, *, compiled_party_atom: str) -> str:
+    goals = parse_prolog_query_goals(str(query or ""))
+    if not goals or len(goals) != 1:
+        return ""
+    predicate, args = goals[0]
+    if predicate != "party_role_context" or len(args) != 4:
+        return ""
+    context, party, role, source = [str(arg).strip() for arg in args]
+    if not _is_prolog_variable(party):
+        return ""
+    if _is_prolog_variable(role):
+        return ""
+    anchor_role = _fresh_variable("AnchorRole", {context, party, role, source})
+    anchor_source = _fresh_variable("AnchorSource", {context, party, role, source, anchor_role})
+    return (
+        f"party_role_context({context}, {compiled_party_atom}, {anchor_role}, {anchor_source}), "
+        f"party_role_context({context}, {party}, {role}, {source})."
+    )
+
+
+def _fresh_variable(prefix: str, used: set[str]) -> str:
+    candidate = prefix
+    index = 2
+    while candidate in used:
+        candidate = f"{prefix}{index}"
+        index += 1
+    return candidate
+
+
+REGISTERED_IDENTIFIER_KIND_REDUCTIONS: dict[str, tuple[str, ...]] = {
+    "ein": ("ein", "i_r_s_employer_identification_no", "irs_employer_identification_no"),
+}
+
+UNREGISTERED_REFERENCE_BASIS_CONTEXT_SIGNATURES = {
+    "assertion_source/4",
+    "source_attributed_claim/4",
+}
+
+
+def _evidence_bundle_registered_carrier_reduction(
+    query: str,
+    *,
+    kb_inventory: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Reduce known compact typed aliases to registered carrier queries.
+
+    This operates only on LLM-authored query templates and the compiled typed
+    predicate inventory. It never reads the user question or source prose.
+    """
+
+    parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+    if not parsed_goals or len(parsed_goals) != 1:
+        return None
+    predicate, args = parsed_goals[0]
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if predicate == "incorporation_jurisdiction" and len(args) == 2 and "registrant_identity/2" in signatures:
+        subject, jurisdiction = [str(arg).strip() for arg in args]
+        if not _compiled_inventory_arg_accepts(kb_inventory, "registrant_identity/2", 1, subject):
+            return None
+        if not _compiled_inventory_arg_accepts(kb_inventory, "registrant_identity/2", 2, jurisdiction):
+            return None
+        replacement = format_prolog_query("registrant_identity", [subject, jurisdiction])
+        if replacement == query:
+            return None
+        return {
+            "query": replacement,
+            "repair": {
+                "kind": "registered_carrier_query_reduction",
+                "from_signature": "incorporation_jurisdiction/2",
+                "to_signature": "registrant_identity/2",
+            },
+        }
+    if predicate in REGISTERED_IDENTIFIER_KIND_REDUCTIONS and len(args) == 2 and "document_identifier_occurrence/5" in signatures:
+        subject, identifier_value = [str(arg).strip() for arg in args]
+        if not _compiled_inventory_arg_accepts(kb_inventory, "document_identifier_occurrence/5", 1, subject):
+            return None
+        if not _compiled_inventory_arg_accepts(kb_inventory, "document_identifier_occurrence/5", 3, identifier_value):
+            return None
+        identifier_kind = _compiled_inventory_first_present_arg_value(
+            kb_inventory,
+            "document_identifier_occurrence/5",
+            2,
+            REGISTERED_IDENTIFIER_KIND_REDUCTIONS[predicate],
+        )
+        if not identifier_kind:
+            return None
+        used = {subject, identifier_kind, identifier_value}
+        scope = _fresh_variable("Scope", used)
+        source_order = _fresh_variable("SourceOrder", used | {scope})
+        replacement = format_prolog_query(
+            "document_identifier_occurrence",
+            [subject, identifier_kind, identifier_value, scope, source_order],
+        )
+        return {
+            "query": replacement,
+            "repair": {
+                "kind": "registered_carrier_query_reduction",
+                "from_signature": f"{predicate}/2",
+                "to_signature": "document_identifier_occurrence/5",
+                "identifier_kind": identifier_kind,
+            },
+        }
+    return None
+
+
+def _compiled_inventory_arg_accepts(
+    kb_inventory: dict[str, Any],
+    signature: str,
+    arg_index: int,
+    value: str,
+) -> bool:
+    text = str(value or "").strip()
+    if not text or _is_prolog_variable(text):
+        return True
+    allowed = _compiled_inventory_arg_values(kb_inventory, signature, arg_index)
+    return not allowed or text in allowed
+
+
+def _compiled_inventory_first_present_arg_value(
+    kb_inventory: dict[str, Any],
+    signature: str,
+    arg_index: int,
+    candidates: tuple[str, ...],
+) -> str:
+    allowed = _compiled_inventory_arg_values(kb_inventory, signature, arg_index)
+    for candidate in candidates:
+        if candidate in allowed:
+            return candidate
+    return ""
+
+
+def _compiled_inventory_arg_values(kb_inventory: dict[str, Any], signature: str, arg_index: int) -> set[str]:
+    arg_values_by_signature = kb_inventory.get("arg_values", {})
+    if not isinstance(arg_values_by_signature, dict):
+        return set()
+    arg_values = arg_values_by_signature.get(signature)
+    if not isinstance(arg_values, list):
+        return set()
+    offset = arg_index - 1
+    if offset < 0 or offset >= len(arg_values) or not isinstance(arg_values[offset], dict):
+        return set()
+    return {str(value).strip() for value in arg_values[offset].keys() if str(value).strip()}
+
+
 def _status_from_event_type(value: str) -> str:
     normalized = str(value or "").strip().lower()
     return {
@@ -30071,6 +32968,8 @@ def run_evidence_bundle_plan_queries(
     kb_inventory: dict[str, Any],
     helper_companions_enabled: bool = True,
     include_legacy_native_helpers: bool = False,
+    sign_clean_strict: bool = False,
+    typed_support_companions: bool = False,
 ) -> list[dict[str, Any]]:
     signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
     signatures.update(str(item).strip() for item in TEMPORAL_VIRTUAL_SIGNATURES)
@@ -30085,12 +32984,12 @@ def run_evidence_bundle_plan_queries(
         bundle_id = str(bundle.get("bundle_id", "")).strip()
         purpose = str(bundle.get("purpose", "")).strip()
         bundle_plan_queries: list[str] = []
-        for template in bundle.get("query_templates", []):
+        for template in _coalesce_fragmented_evidence_query_templates(bundle.get("query_templates", []) or []):
             query = str(template or "").strip()
             if not query or query in seen:
                 continue
             seen.add(query)
-            source_record_filter = _source_record_contains_filter_repair(query)
+            source_record_filter = None if sign_clean_strict else _source_record_contains_filter_repair(query)
             if source_record_filter:
                 results.append(
                     _run_source_record_contains_filter(
@@ -30120,6 +33019,35 @@ def run_evidence_bundle_plan_queries(
                 continue
             normalized = _normalize_evidence_bundle_query_constraints(query)
             normalized_query = str(normalized.get("query") or query).strip()
+            repairs = list(normalized.get("repairs", []) if isinstance(normalized.get("repairs"), list) else [])
+            registered_reduction = _evidence_bundle_registered_carrier_reduction(
+                normalized_query,
+                kb_inventory=kb_inventory,
+            )
+            if registered_reduction:
+                normalized_query = str(registered_reduction.get("query") or normalized_query).strip()
+                repair = registered_reduction.get("repair")
+                if isinstance(repair, dict):
+                    repairs.append(repair)
+            if sign_clean_strict:
+                blocked = _sign_clean_strict_blocked_query(normalized_query)
+                if blocked:
+                    result = dict(blocked.get("result", {}))
+                    result["reasoning_basis"] = {
+                        "kind": "evidence-bundle-plan",
+                        "bundle_id": bundle_id,
+                        "purpose": purpose,
+                        "validation": "blocked_by_sign_clean_strict",
+                        "inner_basis": result.get("reasoning_basis", {}),
+                    }
+                    results.append(
+                        {
+                            "query": query,
+                            "result": result,
+                            "derived_from_queries": [query],
+                        }
+                    )
+                    continue
             parsed_goals = parse_prolog_query_goals(normalized_query)
             if parsed_goals is None:
                 results.append(
@@ -30163,19 +33091,153 @@ def run_evidence_bundle_plan_queries(
                     }
                 )
                 continue
-            plan_queries.append(normalized_query)
-            bundle_plan_queries.append(normalized_query)
-            query_basis[normalized_query] = {
+            absent_constants = _evidence_bundle_absent_typed_constants(parsed_goals, kb_inventory=kb_inventory)
+            if absent_constants:
+                continue
+            scope_expansion = _evidence_bundle_legal_citation_scope_expansion_query(
+                parsed_goals,
+                kb_inventory=kb_inventory,
+            )
+            skip_normalized_query = bool(scope_expansion) and _evidence_bundle_single_goal_no_result(
+                runtime,
+                normalized_query,
+            )
+            if not skip_normalized_query:
+                plan_queries.append(normalized_query)
+                bundle_plan_queries.append(normalized_query)
+                query_basis[normalized_query] = {
+                    "bundle_id": bundle_id,
+                    "purpose": purpose,
+                    **(
+                        {
+                            "original_query": query,
+                            "repairs": repairs,
+                        }
+                        if normalized_query != query or repairs
+                        else {}
+                    ),
+                }
+            if scope_expansion:
+                expanded_query = str(scope_expansion.get("query", "")).strip()
+                if expanded_query and expanded_query not in seen:
+                    seen.add(expanded_query)
+                    plan_queries.append(expanded_query)
+                    bundle_plan_queries.append(expanded_query)
+                    query_basis[expanded_query] = {
+                        "bundle_id": bundle_id,
+                        "purpose": purpose,
+                        "original_query": normalized_query,
+                        "repairs": [scope_expansion.get("repair", {})],
+                    }
+        for broad in _evidence_bundle_role_roster_broadening_queries(bundle_plan_queries):
+            broad_query = str(broad.get("query", "")).strip()
+            if not broad_query or broad_query in seen:
+                continue
+            seen.add(broad_query)
+            plan_queries.append(broad_query)
+            bundle_plan_queries.append(broad_query)
+            query_basis[broad_query] = {
                 "bundle_id": bundle_id,
                 "purpose": purpose,
-                **(
+                "original_queries": broad.get("source_queries", []),
+                "repairs": [
                     {
-                        "original_query": query,
-                        "repairs": normalized.get("repairs", []),
+                        "kind": "typed_role_roster_broadening",
+                        "predicate": broad.get("predicate", ""),
+                        "body": broad.get("body", ""),
                     }
-                    if normalized_query != query
-                    else {}
-                ),
+                ],
+            }
+        for sibling in _evidence_bundle_procedural_rule_detail_sibling_queries(bundle_plan_queries):
+            sibling_query = str(sibling.get("query", "")).strip()
+            if not sibling_query or sibling_query in seen:
+                continue
+            replaced_deadline_queries: list[str] = []
+            if sign_clean_strict:
+                for source_query in list(bundle_plan_queries):
+                    source_query_text = str(source_query or "").strip()
+                    if not source_query_text:
+                        continue
+                    if not _evidence_bundle_unregistered_review_deadline_query(source_query_text):
+                        continue
+                    replaced_deadline_queries.append(source_query_text)
+                    plan_queries = [query for query in plan_queries if query != source_query_text]
+                    bundle_plan_queries = [query for query in bundle_plan_queries if query != source_query_text]
+                    query_basis.pop(source_query_text, None)
+            seen.add(sibling_query)
+            plan_queries.append(sibling_query)
+            bundle_plan_queries.append(sibling_query)
+            query_basis[sibling_query] = {
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "original_queries": sibling.get("source_queries", []),
+                "repairs": [
+                    {
+                        "kind": "typed_procedural_deadline_sibling",
+                        "predicate": sibling.get("predicate", ""),
+                        "rule_id": sibling.get("rule_id", ""),
+                        "rule_context_or_action": sibling.get("rule_context_or_action", ""),
+                        **(
+                            {"replaced_unregistered_deadline_queries": replaced_deadline_queries}
+                            if replaced_deadline_queries
+                            else {}
+                        ),
+                    }
+                ],
+            }
+        for anchored in _evidence_bundle_anchor_binding_queries(bundle, bundle_plan_queries):
+            anchored_query = str(anchored.get("query", "")).strip()
+            if not anchored_query or anchored_query in seen:
+                continue
+            seen.add(anchored_query)
+            plan_queries.append(anchored_query)
+            query_basis[anchored_query] = {
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "original_queries": anchored.get("source_queries", []),
+                "repairs": [
+                    {
+                        "kind": "anchor_binding_conjunction",
+                        "anchor_binding": anchored.get("anchor_binding", {}),
+                    }
+                ],
+            }
+        for sibling in _evidence_bundle_registered_reference_basis_queries(
+            bundle_plan_queries,
+            kb_inventory=kb_inventory,
+        ):
+            sibling_query = str(sibling.get("query", "")).strip()
+            if not sibling_query or sibling_query in seen:
+                continue
+            replaced_context_queries: list[str] = []
+            if sign_clean_strict:
+                for source_query in sibling.get("source_queries", []) or []:
+                    source_query_text = str(source_query or "").strip()
+                    if not source_query_text:
+                        continue
+                    if not _evidence_bundle_unregistered_reference_context_query(source_query_text):
+                        continue
+                    replaced_context_queries.append(source_query_text)
+                    plan_queries = [query for query in plan_queries if query != source_query_text]
+                    bundle_plan_queries = [query for query in bundle_plan_queries if query != source_query_text]
+                    query_basis.pop(source_query_text, None)
+            seen.add(sibling_query)
+            plan_queries.append(sibling_query)
+            query_basis[sibling_query] = {
+                "bundle_id": bundle_id,
+                "purpose": purpose,
+                "original_queries": sibling.get("source_queries", []),
+                "repairs": [
+                    {
+                        "kind": "registered_reference_basis_sibling_query",
+                        "source_predicates": sibling.get("source_predicates", []),
+                        **(
+                            {"replaced_context_queries": replaced_context_queries}
+                            if replaced_context_queries
+                            else {}
+                        ),
+                    }
+                ],
             }
         for joined in _evidence_bundle_same_variable_join_queries(bundle_plan_queries):
             joined_query = str(joined.get("query", "")).strip()
@@ -30201,6 +33263,8 @@ def run_evidence_bundle_plan_queries(
         plan_queries,
         helper_companions_enabled=helper_companions_enabled,
         include_legacy_native_helpers=include_legacy_native_helpers,
+        sign_clean_strict=sign_clean_strict,
+        typed_support_companions=typed_support_companions,
     ):
         item = dict(item)
         result = item.get("result", {})
@@ -30241,6 +33305,251 @@ def run_evidence_bundle_plan_queries(
     return results
 
 
+def _evidence_bundle_role_roster_broadening_queries(queries: list[str]) -> list[dict[str, Any]]:
+    """Add a broad typed roster scan when the planner over-binds role atoms.
+
+    The repair operates only on already-planned Prolog templates. It does not
+    inspect the user question or source text; it just recognizes two or more
+    concrete `person_role/3` probes against the same body and adds the broader
+    typed inventory query for that body.
+    """
+    by_body: dict[str, list[str]] = {}
+    for query in queries:
+        text = str(query or "").strip()
+        if not text:
+            continue
+        goals = parse_prolog_query_goals(text)
+        if goals is None or len(goals) != 1:
+            continue
+        predicate, args = goals[0]
+        if predicate != "person_role" or len(args) != 3:
+            continue
+        _person, role, body = [str(arg).strip() for arg in args]
+        if not body or _is_prolog_variable(body):
+            continue
+        if not role or _is_prolog_variable(role):
+            continue
+        by_body.setdefault(body, []).append(text)
+
+    broad: list[dict[str, Any]] = []
+    for body, source_queries in sorted(by_body.items()):
+        if len(source_queries) < 2:
+            continue
+        broad.append(
+            {
+                "query": f"person_role(Person, Role, {body}).",
+                "predicate": "person_role",
+                "body": body,
+                "source_queries": source_queries,
+            }
+        )
+    return broad
+
+
+def _evidence_bundle_procedural_rule_detail_sibling_queries(queries: list[str]) -> list[dict[str, Any]]:
+    """Recover deadline siblings for a concrete procedural rule/context.
+
+    This is a typed carrier inventory repair. It reads only already-planned
+    `procedural_rule_detail/5` Prolog templates and asks for a same-rule,
+    same-context deadline row when the planner asked for another concrete
+    detail kind.
+    """
+    source_by_key: dict[tuple[str, str], list[str]] = {}
+    kinds_by_key: dict[tuple[str, str], set[str]] = {}
+    for query in queries:
+        text = str(query or "").strip()
+        if not text:
+            continue
+        goals = parse_prolog_query_goals(text)
+        if goals is None or len(goals) != 1:
+            continue
+        predicate, args = goals[0]
+        if predicate != "procedural_rule_detail" or len(args) != 5:
+            continue
+        rule_id, detail_kind, _detail_value, rule_context_or_action, _source_or_scope = [
+            str(arg).strip() for arg in args
+        ]
+        if not rule_id or _is_prolog_variable(rule_id):
+            continue
+        if not detail_kind or _is_prolog_variable(detail_kind):
+            continue
+        if not rule_context_or_action or _is_prolog_variable(rule_context_or_action):
+            continue
+        key = (rule_id, rule_context_or_action)
+        source_by_key.setdefault(key, []).append(text)
+        kinds_by_key.setdefault(key, set()).add(detail_kind)
+
+    siblings: list[dict[str, Any]] = []
+    for (rule_id, rule_context_or_action), source_queries in sorted(source_by_key.items()):
+        if "deadline" in kinds_by_key.get((rule_id, rule_context_or_action), set()):
+            continue
+        siblings.append(
+            {
+                "query": (
+                    "procedural_rule_detail("
+                    f"{rule_id}, deadline, DeadlineValue, {rule_context_or_action}, SourceOrScope)."
+                ),
+                "predicate": "procedural_rule_detail",
+                "rule_id": rule_id,
+                "rule_context_or_action": rule_context_or_action,
+                "source_queries": source_queries,
+            }
+        )
+    return siblings
+
+
+def _evidence_bundle_unregistered_review_deadline_query(query: str) -> bool:
+    goals = parse_prolog_query_goals(str(query or "").strip())
+    if goals is None or len(goals) != 1:
+        return False
+    predicate, args = goals[0]
+    return predicate == "review_deadline" and len(args) == 3
+
+
+def _evidence_bundle_absent_typed_constants(
+    parsed_goals: list[tuple[str, list[str]]],
+    *,
+    kb_inventory: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """Return typed constants that cannot match the compiled predicate inventory.
+
+    This is a validation step over LLM-authored query templates. It does not
+    inspect the user question or source prose; it only prevents known-impossible
+    concrete legal citation queries from entering the replay plan.
+    """
+
+    arg_values_by_signature = kb_inventory.get("arg_values", {})
+    if not isinstance(arg_values_by_signature, dict):
+        return []
+    absent: list[dict[str, Any]] = []
+    for predicate, args in parsed_goals:
+        if predicate != "legal_citation_detail":
+            continue
+        signature = f"{predicate}/{len(args)}"
+        arg_values = arg_values_by_signature.get(signature)
+        if not isinstance(arg_values, list):
+            continue
+        for index, arg in enumerate(args, start=1):
+            item = str(arg or "").strip()
+            if not item or _is_prolog_variable(item) or _is_numeric_atom(item):
+                continue
+            if index > len(arg_values) or not isinstance(arg_values[index - 1], dict):
+                continue
+            allowed = {str(value).strip() for value in arg_values[index - 1].keys()}
+            if allowed and item not in allowed:
+                absent.append(
+                    {
+                        "predicate": predicate,
+                        "arg_index": index,
+                        "value": item,
+                        "signature": signature,
+                    }
+                )
+    return absent
+
+
+def _evidence_bundle_single_goal_no_result(runtime: CorePrologRuntime, query: str) -> bool:
+    parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+    if not parsed_goals or len(parsed_goals) != 1:
+        return False
+    predicate, _args = parsed_goals[0]
+    if predicate != "legal_citation_detail":
+        return False
+    result = runtime.query_rows(query)
+    return str(result.get("status", "")).strip() == "no_results"
+
+
+def _evidence_bundle_legal_citation_scope_expansion_query(
+    parsed_goals: list[tuple[str, list[str]]],
+    *,
+    kb_inventory: dict[str, Any],
+) -> dict[str, Any] | None:
+    if len(parsed_goals) != 1:
+        return None
+    predicate, args = parsed_goals[0]
+    if predicate != "legal_citation_detail" or len(args) != 4:
+        return None
+    subject, citation, role, source_scope = [str(arg or "").strip() for arg in args]
+    if _is_prolog_variable(subject) or _is_prolog_variable(source_scope):
+        return None
+    if not subject or not source_scope or _is_numeric_atom(source_scope):
+        return None
+    arg_values_by_signature = kb_inventory.get("arg_values", {})
+    arg_values = (
+        arg_values_by_signature.get("legal_citation_detail/4")
+        if isinstance(arg_values_by_signature, dict)
+        else None
+    )
+    if not isinstance(arg_values, list) or len(arg_values) < 4 or not isinstance(arg_values[3], dict):
+        return None
+    scope_values = {str(value).strip() for value in arg_values[3].keys()}
+    sibling_prefix = source_scope + "_"
+    has_scope_family = source_scope in scope_values and any(value.startswith(sibling_prefix) for value in scope_values)
+    if not has_scope_family:
+        return None
+    expanded_args = [
+        subject,
+        citation if _is_prolog_variable(citation) else "Citation",
+        role if role and (_is_prolog_variable(role) or not _is_numeric_atom(role)) else "Role",
+        "SourceOrScope",
+    ]
+    expanded_query = format_prolog_query("legal_citation_detail", expanded_args)
+    original_query = format_prolog_query("legal_citation_detail", args)
+    if expanded_query == original_query:
+        return None
+    return {
+        "query": expanded_query,
+        "repair": {
+            "kind": "legal_citation_scope_sibling_expansion",
+            "source_scope": source_scope,
+            "expanded_scope_variable": "SourceOrScope",
+        },
+    }
+
+
+def _evidence_bundle_registered_reference_basis_queries(
+    queries: list[str],
+    *,
+    kb_inventory: dict[str, Any],
+) -> list[dict[str, Any]]:
+    signatures = {str(item).strip() for item in kb_inventory.get("signatures", []) if str(item).strip()}
+    if "claim_ground/4" not in signatures:
+        return []
+    source_predicates: set[str] = set()
+    source_queries: list[str] = []
+    already_has_claim_ground = False
+    for query in queries:
+        parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+        if not parsed_goals:
+            continue
+        predicates = {predicate for predicate, _args in parsed_goals}
+        if "claim_ground" in predicates:
+            already_has_claim_ground = True
+        if predicates & {"assertion_source", "source_attributed_claim", "legal_citation_detail"}:
+            source_predicates.update(sorted(predicates & {"assertion_source", "source_attributed_claim", "legal_citation_detail"}))
+            source_queries.append(str(query or "").strip())
+    if already_has_claim_ground or not source_predicates:
+        return []
+    return [
+        {
+            "query": "claim_ground(Subject, Ground, ReferenceOrBasis, Outcome).",
+            "source_queries": _ordered_query_unique(source_queries),
+            "source_predicates": sorted(source_predicates),
+        }
+    ]
+
+
+def _evidence_bundle_unregistered_reference_context_query(query: str) -> bool:
+    parsed_goals = parse_prolog_query_goals(str(query or "").strip())
+    if not parsed_goals:
+        return False
+    for predicate, args in parsed_goals:
+        signature = f"{predicate}/{len(args)}"
+        if signature not in UNREGISTERED_REFERENCE_BASIS_CONTEXT_SIGNATURES:
+            return False
+    return True
+
+
 def _evidence_bundle_same_variable_join_queries(queries: list[str]) -> list[dict[str, Any]]:
     """Add same-variable conjunction probes for evidence-bundle templates.
 
@@ -30264,6 +33573,7 @@ def _evidence_bundle_same_variable_join_queries(queries: list[str]) -> list[dict
                 str(arg).strip()
                 for arg in args
                 if _is_prolog_variable(str(arg).strip())
+                and _evidence_bundle_join_variable_allowed(str(arg).strip())
             }
             if not variables:
                 continue
@@ -30315,6 +33625,8 @@ def _evidence_bundle_same_variable_join_queries(queries: list[str]) -> list[dict
         goals = [goal_items[index]["goal"] for index in component]
         if len(goals) < 2 or len(goals) > 5:
             continue
+        if all(predicate == "legal_citation_detail" for predicate, _args in goals):
+            continue
         shared_variables = sorted(
             variable
             for variable in set().union(*(set(goal_items[index]["variables"]) for index in component))
@@ -30336,6 +33648,50 @@ def _evidence_bundle_same_variable_join_queries(queries: list[str]) -> list[dict
             }
         )
     return out
+
+
+EVIDENCE_BUNDLE_JOIN_VARIABLE_TOKENS = {
+    "act",
+    "action",
+    "actor",
+    "case",
+    "decision",
+    "document",
+    "entity",
+    "event",
+    "instrument",
+    "item",
+    "obligation",
+    "order",
+    "party",
+    "person",
+    "record",
+    "respondent",
+    "section",
+    "subject",
+}
+
+
+def _evidence_bundle_join_variable_allowed(value: str) -> bool:
+    """Allow same-variable join probes only for subject-like variables.
+
+    Evidence-bundle plans often reuse answer-slot variables such as Citation,
+    Amount, Source, or ShortCode across independent primitive queries. Joining
+    on those values creates brittle no-result probes that do not represent a
+    shared subject premise. Subject-like variables still get the conjunction
+    guard; answer-slot variables stay as primitive evidence.
+    """
+
+    text = str(value or "").strip()
+    if not text or not _is_prolog_variable(text):
+        return False
+    parts = [
+        part.casefold()
+        for chunk in re.split(r"[_\W]+", text)
+        for part in re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?=[A-Z]|$)|\d+", chunk)
+        if part
+    ]
+    return bool(set(parts) & EVIDENCE_BUNDLE_JOIN_VARIABLE_TOKENS)
 
 
 def _normalize_evidence_bundle_query_constraints(query: str) -> dict[str, Any]:
@@ -31772,8 +35128,106 @@ def _compact_query_results_for_reference_judge(
     return compact_results
 
 
-def _reference_judge_payload(row: dict[str, Any], *, reference: str) -> dict[str, Any]:
+REFERENCE_JUDGE_STRICT_PROSE_FIELD_RE = re.compile(
+    r"(?:"
+    r"^utterance$|^question$|^raw_|"
+    r"^note$|^message$|^purpose$|^policy$|^original_query$|^repaired_query$|^_?description$|^value$|"
+    r"textdisplay$|windowtextdisplay$|definitiontext$|display$|displayvalue$|"
+    r"_display$|text_atom$|textatom$|surface_text|snippet|passage|prose|narrative"
+    r")",
+    re.IGNORECASE,
+)
+
+
+def _reference_judge_strict_prose_field(field_name: str) -> bool:
+    text = str(field_name or "")
+    if re.fullmatch(r"BoundArg\d+Display", text):
+        return False
+    return bool(REFERENCE_JUDGE_STRICT_PROSE_FIELD_RE.search(text))
+
+
+def _reference_judge_strict_metadata_field(field_name: str) -> bool:
+    text = str(field_name or "").strip()
+    if text in {
+        "predicate",
+        "prolog_query",
+        "result_type",
+        "status",
+        "num_rows",
+        "variables",
+        "bound_query_constants",
+    }:
+        return True
+    if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", text):
+        return True
+    if re.fullmatch(r"_[A-Z][A-Za-z0-9_]*", text):
+        return True
+    if text.startswith("BoundArg"):
+        return True
+    return False
+
+
+def _reference_judge_strict_typed_scalar(value: Any) -> bool:
+    if isinstance(value, (int, float, bool)):
+        return True
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    if not text:
+        return False
+    if len(text) > 160:
+        return False
+    if " " in text and not re.fullmatch(r"[A-Za-z0-9_.:/#-]+", text):
+        return False
+    return True
+
+
+def _reference_judge_strict_value(value: Any) -> Any:
+    if isinstance(value, list):
+        return [_reference_judge_strict_value(item) for item in value]
+    if isinstance(value, dict):
+        out: dict[str, Any] = {}
+        for key, inner in value.items():
+            key_text = str(key)
+            if _reference_judge_strict_prose_field(key_text):
+                continue
+            if isinstance(inner, (dict, list)):
+                out[key_text] = _reference_judge_strict_value(inner)
+            elif _reference_judge_strict_metadata_field(key_text) or _reference_judge_strict_typed_scalar(inner):
+                out[key_text] = inner
+        return out
+    return value
+
+
+def _reference_judge_strict_query_results(query_results: Any) -> list[dict[str, Any]]:
+    if not isinstance(query_results, list):
+        return []
+    out: list[dict[str, Any]] = []
+    for item in query_results:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict):
+            continue
+        predicate = str(result.get("predicate", "")).strip()
+        if predicate.startswith("source_record_"):
+            continue
+        out.append({**item, "result": _reference_judge_strict_value(result)})
+    return out
+
+
+def _reference_judge_payload(
+    row: dict[str, Any],
+    *,
+    reference: str,
+    sign_clean_strict: bool = False,
+) -> dict[str, Any]:
     focus_terms = _reference_judge_focus_terms(reference)
+    query_results = (
+        _reference_judge_strict_query_results(row.get("query_results", []))
+        if sign_clean_strict
+        else row.get("query_results", [])
+    )
     payload = {
         "task": "Compare deterministic Prolog query results with a human reference answer.",
         "authority": "You are a scorer only. Do not invent missing KB rows. Judge only what the query results support.",
@@ -31783,7 +35237,7 @@ def _reference_judge_payload(row: dict[str, Any], *, reference: str) -> dict[str
         "model_decision": row.get("model_decision", ""),
         "projected_decision": row.get("projected_decision", ""),
         "queries": row.get("queries", []),
-        "query_results": row.get("query_results", []),
+        "query_results": query_results,
         "proposed_write_counts": {
             "facts": len(row.get("proposed_facts", []) or []),
             "rules": len(row.get("proposed_rules", []) or []),
@@ -31793,7 +35247,7 @@ def _reference_judge_payload(row: dict[str, Any], *, reference: str) -> dict[str
     if raw_len <= REFERENCE_JUDGE_PAYLOAD_SOFT_LIMIT_CHARS:
         return payload
     payload["query_results"] = _compact_query_results_for_reference_judge(
-        row.get("query_results", []),
+        query_results,
         focus_terms=focus_terms,
     )
     payload["query_result_compaction"] = {
@@ -31888,7 +35342,12 @@ def _failure_surface_payload(
     return payload
 
 
-def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig) -> dict[str, Any]:
+def judge_reference_answer(
+    *,
+    row: dict[str, Any],
+    config: SemanticIRCallConfig,
+    sign_clean_strict: bool = False,
+) -> dict[str, Any]:
     reference = str(row.get("reference_answer", "")).strip()
     if not reference:
         return {
@@ -31898,7 +35357,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "",
             "issues": ["no reference answer supplied"],
         }
-    if _negative_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _negative_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31906,7 +35365,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain explicit negative support matching the short negative reference answer.",
             "issues": [],
         }
-    if _source_record_generic_designation_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_generic_designation_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31914,7 +35373,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain source-record generic-designation support matching the no-name reference answer.",
             "issues": [],
         }
-    if _source_record_signatory_responsibility_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_signatory_responsibility_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31922,7 +35381,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic source-record signatory responsibility mappings matching the reference answer.",
             "issues": [],
         }
-    if _source_record_ratio_calculation_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_ratio_calculation_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31930,7 +35389,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic source-record ratio calculation support matching the reference answer.",
             "issues": [],
         }
-    if _source_record_table_delta_check_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_table_delta_check_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31941,7 +35400,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             ),
             "issues": [],
         }
-    if _source_record_numeric_count_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_numeric_count_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31949,7 +35408,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain source-record text with the requested count and matching question scope.",
             "issues": [],
         }
-    if _source_record_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31957,7 +35416,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain source-record text that clearly embeds the reference answer.",
             "issues": [],
         }
-    if _source_record_parenthetical_role_name_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_parenthetical_role_name_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31968,7 +35427,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             ),
             "issues": [],
         }
-    if _source_record_label_value_pair_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_label_value_pair_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31976,7 +35435,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic source-record label/value support matching the referenced field value.",
             "issues": [],
         }
-    if _agreement_counterparty_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _agreement_counterparty_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31984,7 +35443,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic agreement-counterparty support matching the reference answer.",
             "issues": [],
         }
-    if _event_date_range_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _event_date_range_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -31992,7 +35451,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "concise_answer": "Query results contain deterministic event date-range support matching the reference answer.",
             "issues": [],
         }
-    if _source_record_dated_event_inventory_reference_supported_by_results(row=row, reference=reference):
+    if not sign_clean_strict and _source_record_dated_event_inventory_reference_supported_by_results(row=row, reference=reference):
         return {
             "schema_version": "qa_judge_v1",
             "verdict": "exact",
@@ -32003,7 +35462,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             ),
             "issues": [],
         }
-    if _source_record_summary_reference_supported_by_results(
+    if not sign_clean_strict and _source_record_summary_reference_supported_by_results(
         row=row,
         reference=reference,
         predicates={
@@ -32074,7 +35533,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "issues": [],
         }
     payload = {
-        **_reference_judge_payload(row, reference=reference),
+        **_reference_judge_payload(row, reference=reference, sign_clean_strict=sign_clean_strict),
         "verdict_policy": [
             "exact: query results clearly support the reference answer, allowing harmless extra rows when the answer set still contains the reference.",
             "partial: query results contain some relevant support but miss important reference content or include unresolved noise.",
@@ -32106,6 +35565,7 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Causal support policy: a direct causal_end_state_support row is answer-bearing for cause-of-ending questions. If Cause matches the reference answer and EndedState binds the asked state/process, mark exact even when the primitive ended/2 query also returns the immediate EndingEvent.",
             "Method-frame policy: a direct method_frame_purpose_support row is answer-bearing for method-use questions when Method binds the asked method, Agent binds the asked user or role, and FramePurpose or FrameText binds the broader source-stated task/purpose. Do not downgrade solely because method_action or method_produces_metric rows also expose lower-level measurements.",
             "Identifier-display policy: normalized identifier atoms such as cn_2026_04_15, ar_2026_027, rc_2026_04_20_v, or sc_2026_04_22 support display identifiers such as CN-2026-04-15, AR-2026-027, RC-2026-04-20-V, or SC-2026-04-22 when the alphanumeric token sequence is identical. Do not mark a row miss solely for case, underscore, or hyphen differences in an identifier.",
+            "Date-display policy: normalized typed date atoms in YYYY_MM_DD or YYYY-MM-DD form support equivalent month-day-year reference dates such as January 2, 2025. This is deterministic calendar formatting, not source-prose evidence. Do not downgrade solely because a returned typed date is normalized as 2025_01_02 while the reference renders the same date in words.",
             "Identifier-metadata policy: direct source-record metadata rows such as source_record_packet_metadata_support with Kind values ending in _identifier or _license_identifier are answer-bearing for identifier/license/code questions when Value or DisplayValue matches the reference identifier. Do not downgrade solely because a narrower predicate such as driver_license/2 was unavailable.",
             "Scoped-count policy: for count questions scoped to a named section, subset, criterion, or status, direct scoped rows such as scoped_status_count_support/source_section_status_count are answer-bearing when they bind the requested scope, semantic criterion, count, and members. Broader unscoped status rows are context, not contradiction, when the scoped row directly matches the reference answer.",
             "Source-record aggregate policy: query-only support rows such as source_record_agreement_counterparty_support, source_record_event_date_range_support, source_record_date_range_duration_support, source_record_elapsed_date_duration_support, source_record_definition_entry_support, source_record_question_overlap_support, source_record_semantic_target_display_support, source_record_semantic_target_cell_value_support, source_record_status_inline_field_support, source_record_semantic_target_window_support, source_record_count_breakdown_support, source_record_alias_translation_support, source_record_obligation_bundle_support, compiled_case_identifier_location_roster_support, compiled_value_set_exclusion_support, source_record_returned_action_section_support, source_record_table_delta_check_support, source_record_named_section_window_support, source_record_preceding_heading_support, source_record_quote_heading_locator_support, source_record_section_list_detail_support, source_record_same_day_case_disposition_support, source_record_same_day_event_time_support, source_record_measurement_discrepancy_support, source_record_threshold_comparison_support, source_record_missing_field_count_support, source_record_assessment_contrast_support, source_record_distinct_field_count_support, source_record_earliest_date_field_pair_support, source_record_extreme_date_field_support, source_record_scoped_numeric_frequency_support, source_record_max_numeric_field_support, source_record_exhibit_index_support, source_record_employment_history_support, source_record_amount_inventory_support, source_record_ratio_calculation_support, source_record_duration_quantity_support, source_record_restrictive_covenant_support, source_record_defined_term_contrast_support, source_record_signature_mismatch_support, source_record_dated_event_inventory_support, source_record_negative_assertion_support, source_record_role_transition_support, source_record_board_nominee_path_support, source_record_named_role_roster_support, source_record_parenthetical_role_name_support, deadline_rule_examples_support, source_record_era_date_conversion_support, source_record_label_value_pair_support, source_record_postal_state_code_support, source_record_address_line_support, source_record_address_block_support, source_record_link_attachment_support, source_record_incident_statistic_support, source_record_enforcement_action_inventory_support, source_record_generic_designation_support, source_record_signatory_responsibility_support, source_record_speed_change_support, source_record_weather_observation_support, source_record_issued_product_chronology_support, source_record_document_event_chronology_support, source_record_group_formation_exception_support, source_record_destination_support, source_record_contact_signatory_support, and source_record_body_signatory_support are answer-bearing when they derive only from admitted source_record/entity_role/source_metadata rows, already-returned compiled predicate rows, or explicitly labeled deterministic calendar authorities. Do not downgrade solely because the original compile lacked a narrower semantic predicate.",
@@ -32140,6 +35600,28 @@ def judge_reference_answer(*, row: dict[str, Any], config: SemanticIRCallConfig)
             "Return the final judgment only. Do not include internal debate, alternative verdicts, or self-correction in concise_answer.",
         ],
     }
+    if sign_clean_strict:
+        payload["sign_clean_strict"] = True
+        retained_policy = [
+            policy
+            for policy in payload["verdict_policy"]
+            if "source_record" not in str(policy)
+            and "source-record" not in str(policy).casefold()
+            and "source display" not in str(policy).casefold()
+            and "source-display" not in str(policy).casefold()
+            and "display predicates" not in str(policy).casefold()
+            and "display evidence" not in str(policy).casefold()
+            and "display rows" not in str(policy).casefold()
+        ]
+        payload["verdict_policy"] = [
+            "Sign-clean strict mode: no deterministic reference-answer shortcut has already awarded exact.",
+            "Judge only the query results actually returned by model-authored query plans and deterministic Prolog execution.",
+            "Free-text source-record displays, source-record text atoms, source-record surface mentions, and source_record_* support predicates are not trusted answer surfaces in this strict score.",
+            "Exact requires every substantive requested reference part to be supported by returned typed rows, normalized typed atoms, or deterministic calculations over returned typed rows.",
+            "For multi-part questions, if any requested identifier, date, person, role, title, office, firm, organization, location, amount, citation, status, reason, or quoted/near-quoted content is missing or wrong, use partial when some other substantive part is supported; use miss when no substantive part is supported.",
+            "Do not mark exact merely because one requested part is present, because a bound query constant resembles the reference, or because the rationale can infer a missing part from the question text.",
+            *retained_policy,
+        ]
     messages = [
         {
             "role": "system",
@@ -33182,6 +36664,12 @@ def classify_failure_surface(
             "rationale": "No reference answer was available for failure classification.",
             "suggested_next_action": "Supply a reference answer before classifying the failure surface.",
         }
+    registered_missing_surface = _registered_missing_query_signature_failure_surface(
+        row=row,
+        kb_inventory=kb_inventory,
+    )
+    if registered_missing_surface is not None:
+        return registered_missing_surface
     payload = {
         "task": "Classify the remaining failure surface for a post-ingestion symbolic QA row.",
         "authority": [
@@ -33254,6 +36742,74 @@ def classify_failure_surface(
             "rationale": f"classifier error: {str(exc)[:440]}",
             "suggested_next_action": "Inspect the row manually or rerun the failure classifier.",
         }
+
+
+def _registered_missing_query_signature_failure_surface(
+    *,
+    row: dict[str, Any],
+    kb_inventory: dict[str, Any],
+) -> dict[str, Any] | None:
+    query_results = row.get("query_results")
+    if not isinstance(query_results, list) or not query_results:
+        return None
+    if any(
+        isinstance(item, dict)
+        and isinstance(item.get("result"), dict)
+        and item["result"].get("status") == "success"
+        for item in query_results
+    ):
+        return None
+    inventory_signatures = {
+        str(item).strip()
+        for item in kb_inventory.get("signatures", [])
+        if str(item).strip()
+    } if isinstance(kb_inventory.get("signatures"), list) else set()
+    missing_signatures: list[str] = []
+    seen: set[str] = set()
+    for item in query_results:
+        if not isinstance(item, dict):
+            continue
+        result = item.get("result")
+        if not isinstance(result, dict) or result.get("status") != "error":
+            continue
+        message = str(result.get("message", ""))
+        reasoning = result.get("reasoning_basis") if isinstance(result.get("reasoning_basis"), dict) else {}
+        signature_candidates = [
+            str(sig).strip()
+            for sig in reasoning.get("query_signatures", [])
+            if str(sig).strip()
+        ] if isinstance(reasoning.get("query_signatures"), list) else []
+        if not signature_candidates:
+            parsed = parse_prolog_query(str(item.get("query", "")))
+            if parsed is not None:
+                predicate, args = parsed
+                signature_candidates = [f"{predicate}/{len(args)}"]
+        for signature in signature_candidates:
+            if (
+                signature
+                and signature not in seen
+                and signature not in inventory_signatures
+                and carrier_contract(signature) is not None
+                and "not in compiled inventory" in message
+            ):
+                seen.add(signature)
+                missing_signatures.append(signature)
+    if not missing_signatures:
+        return None
+    return {
+        "schema_version": "qa_failure_surface_v1",
+        "surface": "compile_surface_gap",
+        "confidence": 0.9,
+        "rationale": (
+            "The atom-grounded query plan selected registered carrier signatures that are absent from the "
+            f"compiled KB inventory: {', '.join(missing_signatures)}. This is compile-recall pressure, not a "
+            "query-runtime failure."
+        ),
+        "suggested_next_action": (
+            "Inspect registered-carrier delivery/accountability for the missing signatures and improve typed "
+            "compile recall before adding query-side recovery."
+        ),
+    }
 
 
 def call_lmstudio_json_schema(

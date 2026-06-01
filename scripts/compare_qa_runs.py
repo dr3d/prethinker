@@ -85,7 +85,8 @@ def compare_qa_runs(
     candidate_detail_rows = _fixture_detail_rows(candidate, artifact_root=candidate_artifact_root)
     row_changes = _compare_detail_rows(baseline_detail_rows, candidate_detail_rows)
     regression_guard = _build_regression_guard(row_changes["summary"])
-    aggregate = _aggregate_comparison(comparisons)
+    comparisons = _apply_regression_guard_to_comparisons(comparisons, row_changes)
+    aggregate = _apply_regression_guard_to_aggregate(_aggregate_comparison(comparisons), regression_guard)
     return {
         "schema_version": "qa_run_comparison_v1",
         "summary": {
@@ -132,7 +133,60 @@ def normalize_comparison_payload(payload: dict[str, Any]) -> dict[str, Any]:
     )
     payload["summary"] = summary
     payload["regression_guard"] = _build_regression_guard(summary)
+    aggregate = payload.get("aggregate")
+    if isinstance(aggregate, dict):
+        aggregate = _apply_regression_guard_to_aggregate(aggregate, payload["regression_guard"])
+        payload["aggregate"] = aggregate
+        summary["aggregate_promotion_status"] = aggregate.get(
+            "promotion_status",
+            summary.get("aggregate_promotion_status", ""),
+        )
+        payload["summary"] = summary
+    elif (
+        payload["regression_guard"].get("status") == "fail"
+        and summary.get("aggregate_promotion_status") == "promotable"
+    ):
+        summary["aggregate_promotion_status"] = "blocked_by_regression_guard"
+        payload["summary"] = summary
     return payload
+
+
+def _apply_regression_guard_to_aggregate(
+    aggregate: dict[str, Any],
+    regression_guard: dict[str, Any],
+) -> dict[str, Any]:
+    """Make row-level exact regressions block promotion in the report itself."""
+
+    aggregate = dict(aggregate)
+    if (
+        regression_guard.get("status") == "fail"
+        and aggregate.get("promotion_status") == "promotable"
+    ):
+        aggregate["promotion_status"] = "blocked_by_regression_guard"
+    return aggregate
+
+
+def _apply_regression_guard_to_comparisons(
+    comparisons: list[dict[str, Any]],
+    row_changes: dict[str, Any],
+) -> list[dict[str, Any]]:
+    baseline_exact_regression_fixtures = {
+        str(row.get("fixture") or "")
+        for row in row_changes.get("changes", [])
+        if row.get("baseline_verdict") == "exact" and row.get("candidate_verdict") != "exact"
+    }
+    if not baseline_exact_regression_fixtures:
+        return comparisons
+    updated: list[dict[str, Any]] = []
+    for row in comparisons:
+        row = dict(row)
+        if (
+            row.get("fixture") in baseline_exact_regression_fixtures
+            and row.get("promotion_status") == "promotable"
+        ):
+            row["promotion_status"] = "blocked_by_regression_guard"
+        updated.append(row)
+    return updated
 
 
 def _fixture_summaries(payload: dict[str, Any]) -> dict[str, dict[str, Any]]:

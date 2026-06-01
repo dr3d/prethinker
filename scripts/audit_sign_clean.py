@@ -75,7 +75,9 @@ def build_report(*, max_regex_rows: int = 120) -> dict[str, Any]:
     regex_counts = regex_report.get("summary", {}).get("category_counts", {})
     semantic_trigger_count = int(regex_counts.get("semantic_trigger", 0) or 0)
     forbidden_regex_count = int(regex_counts.get("forbidden_or_needs_review", 0) or 0)
-    free_text_semantic_count = int(free_text_report.get("summary", {}).get("hit_count", 0) or 0)
+    free_text_summary = free_text_report.get("summary", {})
+    free_text_semantic_count = int(free_text_summary.get("claim_path_hit_count", 0) or 0)
+    free_text_forensic_or_structural_count = int(free_text_summary.get("forensic_or_structural_hit_count", 0) or 0)
 
     vocab_rows = _fixture_vocabulary_rows()
     high_risk_active = [
@@ -148,6 +150,7 @@ def build_report(*, max_regex_rows: int = 120) -> dict[str, Any]:
             "high_risk_active_vocabulary_count": len(high_risk_active),
             "raw_utterance_semantic_regex_count": semantic_trigger_count,
             "free_text_semantic_routing_count": free_text_semantic_count,
+            "free_text_forensic_or_structural_count": free_text_forensic_or_structural_count,
             "forbidden_or_needs_review_regex_count": forbidden_regex_count,
         },
         "blockers": blockers,
@@ -192,7 +195,8 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Fixture-name leaks: `{summary.get('fixture_name_leak_count')}`",
         f"- High-risk active vocabulary terms: `{summary.get('high_risk_active_vocabulary_count')}`",
         f"- Raw utterance semantic regex hits: `{summary.get('raw_utterance_semantic_regex_count')}`",
-        f"- Free-text semantic routing hits: `{summary.get('free_text_semantic_routing_count')}`",
+        f"- Free-text semantic routing claim-path hits: `{summary.get('free_text_semantic_routing_count')}`",
+        f"- Free-text forensic/structural hits retained: `{summary.get('free_text_forensic_or_structural_count')}`",
         f"- Forbidden/needs-review regex hits: `{summary.get('forbidden_or_needs_review_regex_count')}`",
         "",
         "## Meaning",

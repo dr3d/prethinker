@@ -1,0 +1,41 @@
+{
+  "schema_version": "typed_micro_fixture_alternatives_v1",
+  "groups": [
+    {
+      "id": "claim_1_singleton_membership",
+      "description": "Claim 1 may be represented as a singleton range or as an explicit set member.",
+      "any_of": [
+        {
+          "id": "singleton_claim_range",
+          "facts": [
+            "claim_range(Set, 1, 1, Source)."
+          ]
+        },
+        {
+          "id": "explicit_list_member",
+          "facts": [
+            "list_member(Set, 1, claim, Source)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "claim_8_singleton_membership",
+      "description": "Claim 8 may be represented as a singleton range or as an explicit set member.",
+      "any_of": [
+        {
+          "id": "singleton_claim_range",
+          "facts": [
+            "claim_range(Set, 8, 8, Source)."
+          ]
+        },
+        {
+          "id": "explicit_list_member",
+          "facts": [
+            "list_member(Set, 8, claim, Source)."
+          ]
+        }
+      ]
+    }
+  ]
+}

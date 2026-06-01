@@ -2,6 +2,13 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset public explainer. The core metaphor is still
+> useful, but the measurement figures below are not current claims. Current
+> strategy and score posture live in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 How Prethinker treats ordinary English as compilable input and turns it into a
 queryable, auditable knowledge program.
 

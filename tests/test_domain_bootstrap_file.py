@@ -19,17 +19,28 @@ from scripts.run_domain_bootstrap_file import (
     _compile_source_pass_ops,
     _compile_source_with_plan_passes,
     _ensure_appeal_filing_predicate,
+    _ensure_document_checkbox_provision_predicate,
+    _ensure_document_identifier_occurrence_predicate,
+    _ensure_document_metadata_predicates,
     _ensure_entity_location_predicate,
+    _ensure_legal_citation_detail_predicate,
+    _ensure_list_range_inventory_predicates,
+    _ensure_rating_scale_option_predicate,
+    _ensure_monetary_payment_predicate,
+    _ensure_obligation_detail_predicate,
+    _ensure_procedural_rule_detail_predicate,
     _ensure_event_date_predicate,
     _ensure_quantity_event_predicate,
     _ensure_quorum_status_predicate,
     _ensure_repeated_structure_predicates,
+    _ensure_role_detail_predicate,
     _ensure_scheduled_event_predicate,
     _ensure_source_attributed_claim_predicate,
     _ensure_source_authority_predicate,
     _ensure_source_detail_predicate,
     _ensure_status_state_predicate,
     _ensure_vote_tally_predicate,
+    _source_pass_predicate_contract_guidance,
     _profile_admission_report,
     _profile_admission_retry_context,
     _attach_profile_admission_report,
@@ -40,6 +51,38 @@ from scripts.run_domain_bootstrap_file import (
     _invalid_profile_retry_context,
     _profile_schema_contract_retry_context,
     _profile_schema_contract_retry_needed,
+    _profile_list_range_inventory_repair_context_lines,
+    _profile_list_range_inventory_repair_offered_carriers,
+    _profile_list_range_inventory_offered_omission_rows,
+    _profile_list_range_inventory_omission_context,
+    _profile_rating_scale_repair_context_lines,
+    _profile_rating_scale_repair_offered_carriers,
+    _document_date_repair_context_lines,
+    _profile_document_date_repair_offered_carriers,
+    _profile_governed_subject_discovery_context_lines,
+    _profile_governed_subject_discovery_offered_carriers,
+    _facts_from_governed_subject_atom_rows,
+    _facts_from_governed_subject_manifest,
+    _replace_governed_subject_atom_row_facts,
+    _profile_legal_citation_repair_context_lines,
+    _profile_legal_citation_repair_offered_carriers,
+    _profile_monetary_payment_repair_context_lines,
+    _profile_monetary_payment_repair_offered_carriers,
+    _review_outcome_repair_context_lines,
+    _profile_review_outcome_repair_offered_carriers,
+    _registered_carrier_omission_context_lines,
+    _legal_citation_repair_preferred_subject_ids,
+    _enforce_legal_citation_repair_subject_contract,
+    _enforce_additive_pass_allowed_signatures,
+    _reconcile_profile_carrier_contracts,
+    _enforce_list_range_inventory_fact_contract,
+    _apply_document_subject_atom_convergence,
+    _apply_governed_claim_ground_atom_reduction,
+    _apply_governed_obligation_detail_atom_reduction,
+    _apply_governed_reference_citation_atom_reduction,
+    _apply_governed_review_atom_fact_reduction,
+    _attach_governed_companion_subject_health,
+    _attach_registered_carrier_delivery_report,
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
@@ -51,6 +94,8 @@ from scripts.run_domain_bootstrap_file import (
     _source_entity_ledger_context,
     _source_pass_profile_delivery_target_context,
     _source_pass_ops_to_semantic_ir,
+    _source_pass_self_check_missing_slots,
+    _list_range_inventory_existing_fact_context,
 )
 import scripts.run_domain_bootstrap_file as domain_bootstrap_file
 import json
@@ -124,6 +169,1376 @@ def test_source_detail_profile_extension_respects_specific_detail_carrier() -> N
         "added": False,
         "reason": "specific_detail_carrier_present",
     }
+
+
+def test_role_detail_profile_extension_adds_carrier_for_shallow_roles() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "party_role/3",
+                "args": ["person", "role", "organization"],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_role_detail_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "person_role_detail/5"
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "person_role_detail/5")
+    assert carrier["args"] == [
+        "person_id",
+        "role_or_title",
+        "organization_or_office",
+        "represented_party_or_scope",
+        "location_or_context",
+    ]
+    assert "person_role_detail/5" in profile["provenance_sensitive_predicates"]
+
+
+def test_role_detail_profile_extension_respects_rich_role_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "counsel_for/5", "args": ["proceeding", "person", "office", "party", "location"]},
+            {"signature": "party_role/3", "args": ["person", "role", "organization"]},
+        ]
+    }
+
+    assert _ensure_role_detail_predicate(profile) == {
+        "schema_version": "profile_role_detail_extension_v1",
+        "added": False,
+        "reason": "rich_role_carrier_present",
+    }
+
+
+def test_document_metadata_profile_extension_adds_general_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "decision_date/2", "args": ["case", "date"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_document_metadata_predicates(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signatures"] == [
+        "document_title/2",
+        "document_publisher/2",
+        "document_date/3",
+        "document_date_range/3",
+        "registrant_identity/2",
+        "registrant_name/2",
+    ]
+    signatures = {item["signature"] for item in profile["candidate_predicates"]}
+    assert "document_title/2" in signatures
+    assert "document_publisher/2" in signatures
+    assert "document_date/3" in signatures
+    assert "document_date_range/3" in signatures
+    assert "registrant_identity/2" in signatures
+    assert "registrant_name/2" in signatures
+    registrant = next(item for item in profile["candidate_predicates"] if item["signature"] == "registrant_identity/2")
+    assert registrant["args"] == ["registrant_entity", "incorporation_or_organization_jurisdiction"]
+    assert "not a current status" in " ".join(registrant["admission_notes"])
+    name = next(item for item in profile["candidate_predicates"] if item["signature"] == "registrant_name/2")
+    assert name["args"] == ["registrant_entity", "legal_name"]
+    assert "not a ticker" in " ".join(name["admission_notes"])
+    assert "document_title/2" in profile["provenance_sensitive_predicates"]
+
+
+def test_document_metadata_profile_extension_is_idempotent() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "document_title/2", "args": ["document_id", "title"]},
+            {"signature": "document_publisher/2", "args": ["document_id", "publisher_or_issuing_body"]},
+            {"signature": "document_date/3", "args": ["document_or_subject_id", "date_kind_or_role", "date_value"]},
+            {"signature": "document_date_range/3", "args": ["document_id", "start_date", "end_date"]},
+            {
+                "signature": "registrant_identity/2",
+                "args": ["registrant_entity", "incorporation_or_organization_jurisdiction"],
+            },
+            {"signature": "registrant_name/2", "args": ["registrant_entity", "legal_name"]},
+        ],
+    }
+
+    metadata = _ensure_document_metadata_predicates(profile)
+
+    assert metadata["added"] is False
+    assert metadata["signatures"] == []
+    assert len(profile["candidate_predicates"]) == 6
+
+
+def test_legal_citation_detail_profile_extension_adds_exact_citation_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "obligation_statute/2", "args": ["obligation", "statute"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_legal_citation_detail_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "legal_citation_detail/4"
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "legal_citation_detail/4")
+    assert carrier["args"] == ["subject_id", "citation", "citation_role_or_purpose", "source_or_scope"]
+    assert "Named procedural rule sets" in " ".join(carrier["admission_notes"])
+    assert "legal_citation_detail/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_legal_citation_detail_profile_extension_is_idempotent() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "legal_citation_detail/4",
+                "args": ["subject_id", "citation", "citation_role_or_purpose", "source_or_scope"],
+            }
+        ],
+    }
+
+    assert _ensure_legal_citation_detail_predicate(profile) == {
+        "schema_version": "profile_legal_citation_detail_extension_v1",
+        "added": False,
+        "reason": "legal_citation_detail_already_present",
+    }
+
+
+def test_monetary_payment_profile_extension_adds_exact_amount_carrier() -> None:
+    profile = {
+        "candidate_predicates": [],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_monetary_payment_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "monetary_payment/5"
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "monetary_payment/5")
+    assert carrier["args"] == ["subject_id", "amount", "authority_or_basis", "purpose_or_use", "source_or_scope"]
+    assert "Use compact amount atoms such as usd_725000" in " ".join(carrier["admission_notes"])
+    assert "monetary_payment/5" in profile["provenance_sensitive_predicates"]
+
+
+def test_obligation_detail_profile_extension_adds_compact_term_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "settlement_obligation/3", "args": ["obligation_id", "type", "description"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_obligation_detail_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "obligation_detail/5"
+    assert metadata["source_pressure"] is True
+    assert metadata["accountability_required"] is True
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "obligation_detail/5")
+    assert carrier["args"] == ["obligation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"]
+    assert "Use one obligation_detail/5 row per atomic" in " ".join(carrier["admission_notes"])
+    assert "obligation_detail/5" in profile["provenance_sensitive_predicates"]
+    assert any("obligation_detail/5" in note for note in profile["self_check"]["notes"])
+
+
+def test_procedural_rule_detail_profile_extension_adds_compact_rule_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "review_deadline/3",
+                "args": ["deadline_id", "review_or_rehearing_request", "period"],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_procedural_rule_detail_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "procedural_rule_detail/5"
+    assert metadata["source_pressure"] is True
+    assert metadata["accountability_required"] is True
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "procedural_rule_detail/5")
+    assert carrier["args"] == ["rule_id", "detail_kind", "detail_value", "rule_context_or_action", "source_or_scope"]
+    assert "Use one procedural_rule_detail/5 row per atomic" in " ".join(carrier["admission_notes"])
+    assert "procedural_rule_detail/5" in profile["provenance_sensitive_predicates"]
+
+
+def test_registered_carrier_delivery_flags_extension_carrier_without_rows() -> None:
+    source_compile = {
+        "unique_fact_count": 1,
+        "facts": ["settlement_obligation(obligation_1, data_reporting, broad_summary)."],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "obligation_detail/5",
+                "args": ["obligation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
+            }
+        ]
+    }
+
+    report = _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        profile_extension_metadata={
+            "extensions": [
+                {"added": True, "signature": "obligation_detail/5", "source_pressure": True},
+            ]
+        },
+    )
+
+    assert report["not_source_interpretation"] is True
+    assert report["offered_signatures"] == ["obligation_detail/5"]
+    assert report["accountable_signatures"] == ["obligation_detail/5"]
+    assert report["findings"] == [
+        {
+            "class": "registered_carrier_offered_but_undelivered",
+            "signature": "obligation_detail/5",
+            "delivered_carrier_row_count": 0,
+            "reason": (
+                "registered carrier signature was offered by profile extension metadata but no typed rows "
+                "were emitted"
+            ),
+        }
+    ]
+    assert source_compile["compile_health"]["flag_counts"]["registered_carrier_offered_but_undelivered"] == 1
+    assert "registered_carrier_delivery" in source_compile["compile_health"]["unhealthy_passes"]
+
+
+def test_registered_carrier_delivery_accepts_extension_carrier_rows() -> None:
+    source_compile = {
+        "facts": [
+            "obligation_detail(obligation_1, tariff_schedule, schedule_9, data_reporting, source_line_13).",
+            "obligation_detail(obligation_1, duration, one_year, data_reporting, source_line_13).",
+        ],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 2,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "obligation_detail/5",
+                "args": ["obligation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
+            }
+        ]
+    }
+
+    report = _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        profile_extension_metadata={
+            "extensions": [
+                {"added": True, "signature": "obligation_detail/5", "source_pressure": True},
+            ]
+        },
+    )
+
+    assert report["delivered_row_counts"]["obligation_detail/5"] == 2
+    assert report["findings"] == []
+    assert source_compile["compile_health"]["verdict"] == "healthy"
+
+
+def test_registered_carrier_delivery_keeps_non_accountable_extensions_report_only() -> None:
+    source_compile = {
+        "facts": [],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 1,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 0,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "document_checkbox_provision/5",
+                "args": ["document_id", "provision_label", "checkbox_state", "rule_label", "citation"],
+            }
+        ]
+    }
+
+    report = _attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        profile_extension_metadata={
+            "extensions": [
+                {"added": True, "signature": "document_checkbox_provision/5"},
+            ]
+        },
+    )
+
+    assert report["offered_signatures"] == ["document_checkbox_provision/5"]
+    assert report["accountable_signatures"] == []
+    assert report["findings"] == []
+    assert source_compile["compile_health"]["verdict"] == "healthy"
+
+
+def test_registered_carrier_omission_context_uses_contract_registry() -> None:
+    lines = _registered_carrier_omission_context_lines(
+        {
+            "findings": [
+                {
+                    "class": "registered_carrier_offered_but_undelivered",
+                    "signature": "obligation_detail/5",
+                }
+            ]
+        }
+    )
+
+    joined = "\n".join(lines)
+    assert "REGISTERED CARRIER OMISSION FOLLOWUP" in joined
+    assert "obligation_detail/5" in joined
+    assert "Emit one row per atomic detail" in joined
+    assert "do not emit prose excerpts" in joined
+
+
+def test_registered_carrier_omission_followup_merges_allowed_rows(monkeypatch) -> None:
+    source_compile = {
+        "admitted_count": 1,
+        "skipped_count": 0,
+        "effective_admitted_count": 1,
+        "effective_skipped_count": 0,
+        "facts": ["document_title(doc_1, title_atom)."],
+        "rules": [],
+        "queries": [],
+        "surface_contribution": [],
+        "compile_health": {
+            "schema_version": "compile_lens_health_v1",
+            "verdict": "healthy",
+            "recommendation": "qa_run_reasonable",
+            "pass_count": 0,
+            "unhealthy_pass_count": 0,
+            "unhealthy_passes": [],
+            "flag_counts": {},
+            "unique_contribution_total": 1,
+            "duplicate_total": 0,
+            "semantic_progress": {"zombie_risk": "low", "recommended_action": "continue"},
+        },
+    }
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "obligation_detail/5",
+                "args": ["obligation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
+            }
+        ]
+    }
+    metadata = {"extensions": [{"added": True, "signature": "obligation_detail/5", "source_pressure": True}]}
+    initial = domain_bootstrap_file._attach_registered_carrier_delivery_report(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        profile_extension_metadata=metadata,
+        mark_health=False,
+    )
+
+    def fake_compile_source_pass_ops(**kwargs):
+        assert kwargs["pass_id"] == "profile_registered_carrier_omission_followup"
+        assert kwargs["predicates"] == "obligation_detail/5"
+        return {
+            "ok": True,
+            "admitted_count": 2,
+            "skipped_count": 1,
+            "facts": [
+                "obligation_detail(obligation_1, tariff_schedule, schedule_9, data_reporting, source_line_13).",
+                "unregistered_escape(obligation_1, source_sentence).",
+            ],
+            "rules": [],
+            "queries": [],
+        }
+
+    monkeypatch.setattr(domain_bootstrap_file, "_compile_source_pass_ops", fake_compile_source_pass_ops)
+
+    result = domain_bootstrap_file._apply_profile_registered_carrier_omission_followup_pass(
+        source_compile=source_compile,
+        parsed_profile=profile,
+        source_text="RMP agreed to provide data under Schedule 9.",
+        intake_plan={},
+        args=type("Args", (), {"focused_pass_operation_target": 8})(),
+        profile_extension_metadata=metadata,
+        registered_delivery_report=initial,
+    )
+
+    assert result["attempted"] is True
+    assert result["new_fact_count"] == 1
+    assert result["signature_contract"]["rejected_count"] == 1
+    assert source_compile["facts"] == [
+        "document_title(doc_1, title_atom).",
+        "obligation_detail(obligation_1, tariff_schedule, schedule_9, data_reporting, source_line_13).",
+    ]
+    assert source_compile["registered_carrier_delivery"]["findings"] == []
+
+
+def test_monetary_payment_repair_context_uses_typed_payment_and_citation_facts() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "monetary_payment/5",
+                "args": ["subject_id", "amount", "authority_or_basis", "purpose_or_use", "source_or_scope"],
+            },
+            {"signature": "payment_amount/2", "args": ["obligation_id", "amount"]},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "obligation(obligation_payment, payment_of_725_000_to_the_state_of_new_york).",
+            "payment_amount(obligation_payment, 725000_usd).",
+            "obligation_enforces(obligation_payment, gbl_349_d).",
+            "legal_citation_detail(eq_ny_ag_24_102_monetary_relief, gbl_349_d, statutory_ground, direct).",
+            "source_record_text(row_15, 'pay $725,000 pursuant to GBL').",
+        ]
+    }
+
+    assert _profile_monetary_payment_repair_offered_carriers(profile) == ["monetary_payment/5"]
+    lines = _profile_monetary_payment_repair_context_lines(
+        parsed_profile=profile,
+        source_compile=source_compile,
+    )
+    context = "\n".join(lines)
+
+    assert "PROFILE MONETARY PAYMENT REPAIR PASS" in context
+    assert "monetary_payment/5" in context
+    assert "EXISTING MONETARY FACT: payment_amount(obligation_payment, 725000_usd)." in context
+    assert "EXISTING MONETARY FACT: obligation_enforces(obligation_payment, gbl_349_d)." in context
+    assert "source_record_text" not in context
+    assert "subject_id, amount, authority_or_basis, purpose_or_use, source_or_scope" in context
+
+
+def test_document_checkbox_profile_extension_adds_general_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "document_identifier/3", "args": ["document_id", "identifier_kind", "value"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_document_checkbox_provision_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "document_checkbox_provision/5"
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "document_checkbox_provision/5")
+    assert carrier["args"] == ["document_id", "provision_label_or_text", "checkbox_mark", "rule_or_provision", "citation"]
+    assert "one row per checkbox/list provision" in " ".join(carrier["admission_notes"])
+    assert "document_checkbox_provision/5" in profile["provenance_sensitive_predicates"]
+
+
+def test_document_checkbox_profile_extension_is_idempotent() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "document_checkbox_provision/5",
+                "args": ["document_id", "provision_label_or_text", "checkbox_mark", "rule_or_provision", "citation"],
+            }
+        ],
+    }
+
+    assert _ensure_document_checkbox_provision_predicate(profile) == {
+        "schema_version": "profile_document_checkbox_provision_extension_v1",
+        "added": False,
+        "reason": "document_checkbox_provision_already_present",
+    }
+
+
+def test_document_identifier_occurrence_profile_extension_adds_general_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "document_identifier/3", "args": ["document_id", "identifier_kind", "value"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_document_identifier_occurrence_predicate(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signature"] == "document_identifier_occurrence/5"
+    carrier = next(item for item in profile["candidate_predicates"] if item["signature"] == "document_identifier_occurrence/5")
+    assert carrier["args"] == [
+        "document_id",
+        "identifier_kind",
+        "identifier_value",
+        "occurrence_scope_or_label",
+        "source_order",
+    ]
+    assert "Do not collapse distinct values" in " ".join(carrier["admission_notes"])
+    assert "document_identifier_occurrence/5" in profile["provenance_sensitive_predicates"]
+
+
+def test_document_identifier_occurrence_profile_extension_is_idempotent() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "document_identifier_occurrence/5",
+                "args": [
+                    "document_id",
+                    "identifier_kind",
+                    "identifier_value",
+                    "occurrence_scope_or_label",
+                    "source_order",
+                ],
+            }
+        ],
+    }
+
+    assert _ensure_document_identifier_occurrence_predicate(profile) == {
+        "schema_version": "profile_document_identifier_occurrence_extension_v1",
+        "added": False,
+        "reason": "document_identifier_occurrence_already_present",
+    }
+
+
+def test_list_range_inventory_profile_extension_adds_general_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "claim_outcome/3", "args": ["claim_set_id", "ground", "outcome"]},
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_list_range_inventory_predicates(profile)
+
+    assert metadata["added"] is True
+    assert metadata["signatures"] == ["list_member/4", "claim_range/4", "item_range/4", "claim_ground/4", "review_outcome/4"]
+    signatures = {item["signature"] for item in profile["candidate_predicates"]}
+    assert "list_member/4" in signatures
+    assert "claim_range/4" in signatures
+    assert "item_range/4" in signatures
+    assert "claim_ground/4" in signatures
+    assert "review_outcome/4" in signatures
+    claim_range = next(item for item in profile["candidate_predicates"] if item["signature"] == "claim_range/4")
+    assert claim_range["args"] == ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]
+    assert "source-stated segment" in " ".join(claim_range["admission_notes"])
+    list_member = next(item for item in profile["candidate_predicates"] if item["signature"] == "list_member/4")
+    list_member_notes = " ".join(list_member["admission_notes"])
+    assert "Do not use source_or_scope to encode a legal ground" in list_member_notes
+    assert "companion typed relation" in list_member_notes
+    assert "claim_range/4" in profile["provenance_sensitive_predicates"]
+    assert "claim_ground/4" in profile["provenance_sensitive_predicates"]
+    assert "review_outcome/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_list_range_inventory_profile_extension_is_idempotent() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "list_member/4", "args": ["list_or_set_id", "member_value", "member_kind_or_role", "source_or_scope"]},
+            {"signature": "claim_range/4", "args": ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]},
+            {"signature": "item_range/4", "args": ["item_set_id", "start_item", "end_item", "source_or_scope"]},
+        ],
+    }
+
+    metadata = _ensure_list_range_inventory_predicates(profile)
+
+    assert metadata["added"] is False
+    assert metadata["signatures"] == []
+    assert len(profile["candidate_predicates"]) == 3
+
+
+def test_list_range_inventory_profile_extension_does_not_add_claim_ground_without_ground_signal() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "item_range/4", "args": ["item_set_id", "start_item", "end_item", "source_or_scope"]},
+        ],
+        "provenance_sensitive_predicates": [],
+    }
+
+    metadata = _ensure_list_range_inventory_predicates(profile)
+
+    assert "claim_ground/4" not in metadata["signatures"]
+    assert not any(item["signature"] == "claim_ground/4" for item in profile["candidate_predicates"])
+
+
+def test_rating_scale_profile_extension_adds_option_carrier_from_rating_profile_signal() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "assigned_rating/3",
+                "args": ["offeror_name", "factor_name", "rating"],
+                "description": "Adjectival rating assigned to an offeror for a factor.",
+                "why": "Captures assigned ratings.",
+                "admission_notes": ["Use for specific ratings assigned to offerors."],
+            }
+        ],
+        "provenance_sensitive_predicates": [],
+        "self_check": {"notes": []},
+    }
+
+    metadata = _ensure_rating_scale_option_predicate(profile)
+
+    assert metadata == {
+        "schema_version": "profile_rating_scale_extension_v1",
+        "added": True,
+        "signatures": ["rating_scale_option/4"],
+        "authority": "vocabulary_extension_only",
+        "fact_extraction": False,
+    }
+    assert profile["candidate_predicates"][-1]["signature"] == "rating_scale_option/4"
+    assert "rating_scale_option/4" in profile["provenance_sensitive_predicates"]
+
+
+def test_rating_scale_profile_extension_requires_rating_signal() -> None:
+    profile = {"candidate_predicates": [{"signature": "document_date/3", "args": []}]}
+
+    assert _ensure_rating_scale_option_predicate(profile) == {
+        "schema_version": "profile_rating_scale_extension_v1",
+        "added": False,
+        "reason": "no_rating_scale_signal",
+    }
+
+
+def test_rating_scale_repair_context_targets_only_rating_scale_carrier() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "rating_scale_option/4", "args": ["scale", "rating", "rank", "source"]},
+            {"signature": "assigned_rating/3", "args": ["entity", "factor", "rating"]},
+        ]
+    }
+
+    assert _profile_rating_scale_repair_offered_carriers(profile) == ["rating_scale_option/4"]
+    text = "\n".join(_profile_rating_scale_repair_context_lines(profile))
+    assert "distinguish allowed scale options from ratings assigned" in text
+    assert "rating_scale_option/4" in text
+    assert "compatible signatures to consider: rating_scale_option/4" in text
+    assert "do not emit source_record_* rows" in text
+
+
+def test_profile_carrier_contract_reconciliation_restores_registered_roles() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "claim_range/4",
+                "args": ["proceeding_id", "claim_start", "claim_end", "claim_label"],
+            },
+            {
+                "signature": "list_member/4",
+                "args": ["set_id", "member_id", "set_label", "member_label"],
+            },
+        ],
+        "provenance_sensitive_predicates": [],
+    }
+
+    metadata = _reconcile_profile_carrier_contracts(profile)
+
+    assert metadata["changed_count"] == 2
+    claim_range = next(item for item in profile["candidate_predicates"] if item["signature"] == "claim_range/4")
+    list_member = next(item for item in profile["candidate_predicates"] if item["signature"] == "list_member/4")
+    assert claim_range["args"] == ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]
+    assert list_member["args"] == ["list_or_set_id", "member_value", "member_kind_or_role", "source_or_scope"]
+    assert "claim_range/4" in profile["provenance_sensitive_predicates"]
+    assert "list_member/4" in profile["provenance_sensitive_predicates"]
+    assert metadata["authority"] == "registered_carrier_contract_only"
+
+
+def test_profile_schema_retry_does_not_fire_for_governed_carrier_roles_only() -> None:
+    assert _profile_schema_contract_retry_needed(
+        {
+            "governed_carrier_arg_role_mismatch_refs": [
+                "claim_range/4:args=proceeding_id,claim_start,claim_end,claim_label "
+                "expected=claim_set_id,start_claim,end_claim,source_or_scope"
+            ],
+            "candidate_signature_arg_mismatch_refs": [],
+            "candidate_duplicate_name_arity_refs": [],
+            "provenance_prose_arg_role_refs": [],
+            "repeated_structure_role_mismatch_refs": [],
+            "list_range_inventory_slot_loss_refs": [],
+        }
+    ) is False
+
+
+def test_list_range_inventory_repair_context_targets_only_range_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "list_member/4", "args": ["list_or_set_id", "member_value", "member_kind_or_role", "source_or_scope"]},
+            {"signature": "claim_range/4", "args": ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]},
+            {"signature": "claim_treatment/5", "args": ["claim_set_id", "ground", "prior_art", "basis", "source"]},
+            {"signature": "document_identifier/3", "args": ["document_id", "identifier_kind", "value"]},
+        ]
+    }
+
+    assert _profile_list_range_inventory_repair_offered_carriers(profile) == [
+        "list_member/4",
+        "claim_range/4",
+        "claim_treatment/5",
+    ]
+    text = "\n".join(_profile_list_range_inventory_repair_context_lines(profile))
+    assert "source-stated singleton" in text
+    assert "source-stated range segment" in text
+    assert "source-stated category, class, type, option, or heading inventories" in text
+    assert "period, impact, statement, effect, account, or narrative-detail predicates" in text
+    assert "not satisfied by expanding" in text
+    assert "set-to-relation row" in text
+    assert "do not hide a legal ground" in text
+    assert "CARRIER CONTRACT claim_range/4" in text
+    assert "must not encode the legal ground" in text
+    assert "do not emit source_record_* rows" in text
+    assert "claim_range/4" in text
+    assert "claim_treatment/5" in text
+    assert "document_identifier/3" not in text
+
+
+def test_source_pass_self_check_missing_slots_reads_nested_payload() -> None:
+    assert _source_pass_self_check_missing_slots(
+        {"source_pass_ops": {"self_check": {"missing_slots": [" claim_range rows ", "", "review rows"]}}}
+    ) == ["claim_range rows", "review rows"]
+
+
+def test_list_range_inventory_existing_fact_context_filters_typed_companions_only() -> None:
+    lines = _list_range_inventory_existing_fact_context(
+        {
+            "facts": [
+                "source_record_text_display(src1, prose).",
+                "claim_range(contested_claims, 6, 9, direct).",
+                "rejection_ground(contested_claims, song_525, 35_u_s_c_102_a_1, anticipated).",
+                "document_identifier(no_2025_1705, docket, 2025_1705).",
+            ]
+        }
+    )
+
+    text = "\n".join(lines)
+    assert "EXISTING LIST/RANGE FACT: claim_range(contested_claims, 6, 9, direct)." in text
+    assert (
+        "EXISTING LIST/RANGE FACT: rejection_ground(contested_claims, song_525, 35_u_s_c_102_a_1, anticipated)."
+        in text
+    )
+    assert "source_record_text_display" not in text
+    assert "document_identifier" not in text
+
+
+def test_list_range_inventory_omission_context_uses_governed_health_rows() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(claims_28_37, obviousness, song_525, rejected).",
+            "source_record_text_display(src1, claims_28_37_were_rejected_as_obvious).",
+        ],
+        "governed_companion_subject_health": {
+            "governed_companion_omission_ledger": [
+                {
+                    "subject": "claims_28_37",
+                    "signature": "claim_range/4",
+                    "status": "missing_unaccounted",
+                    "observed_predicates": ["claim_ground", "legal_citation_detail"],
+                    "reason": "typed subject has companion families but no range",
+                },
+                {
+                    "subject": "claims_28_37",
+                    "signature": "review_outcome/4",
+                    "status": "missing_unaccounted",
+                    "observed_predicates": ["claim_ground"],
+                },
+            ]
+        },
+    }
+
+    rows = _profile_list_range_inventory_offered_omission_rows(source_compile)
+    assert rows == [
+        {
+            "subject": "claims_28_37",
+            "signature": "claim_range/4",
+            "observed_predicates": ["claim_ground", "legal_citation_detail"],
+            "reason": "typed subject has companion families but no range",
+        }
+    ]
+    text = "\n".join(_profile_list_range_inventory_omission_context(source_compile))
+    assert "OMISSION_LEDGER_ROW subject=claims_28_37 signature=claim_range/4" in text
+    assert "EXISTING LIST/RANGE FACT: claim_ground(claims_28_37, obviousness, song_525, rejected)." in text
+    assert "source_record_text_display" not in text
+
+
+def test_list_range_inventory_contract_rejects_same_source_range_expansion() -> None:
+    source_compile = {
+        "facts": [
+            "list_member(count_set_1, 2, count, src_line_0003).",
+            "list_member(count_set_1, 4, count, src_line_0003).",
+            "list_member(count_set_1, 5, count, src_line_0003).",
+            "list_member(count_set_1, 6, count, src_line_0003).",
+            "list_member(count_set_1, 9, count, src_line_0003).",
+            "item_range(count_set_1, 4, 6, src_line_0003).",
+            "list_member(count_set_1, 4, count, src_line_0099).",
+        ]
+    }
+
+    report = _enforce_list_range_inventory_fact_contract(source_compile)
+
+    assert report["rejected_count"] == 3
+    assert source_compile["facts"] == [
+        "list_member(count_set_1, 2, count, src_line_0003).",
+        "list_member(count_set_1, 9, count, src_line_0003).",
+        "item_range(count_set_1, 4, 6, src_line_0003).",
+        "list_member(count_set_1, 4, count, src_line_0099).",
+    ]
+    assert source_compile["deterministic_list_range_contract_policy"]["not_source_interpretation"] is True
+
+
+def test_list_range_inventory_contract_rejects_cross_set_source_line_range_expansion() -> None:
+    source_compile = {
+        "facts": [
+            "list_member(claim_set_expanded, 1, claim, source_line_0003).",
+            "list_member(claim_set_expanded, 3, claim, source_line_0003).",
+            "list_member(claim_set_expanded, 4, claim, source_line_0003).",
+            "list_member(claim_set_expanded, 5, claim, source_line_0003).",
+            "list_member(claim_set_expanded, 8, claim, source_line_0003).",
+            "claim_range(claim_set_segment, 3, 5, src_line_0003).",
+        ]
+    }
+
+    report = _enforce_list_range_inventory_fact_contract(source_compile)
+
+    assert report["rejected_count"] == 3
+    assert source_compile["facts"] == [
+        "list_member(claim_set_expanded, 1, claim, source_line_0003).",
+        "list_member(claim_set_expanded, 8, claim, source_line_0003).",
+        "claim_range(claim_set_segment, 3, 5, src_line_0003).",
+    ]
+    assert report["rejected_facts"] == [
+        "list_member(claim_set_expanded, 3, claim, source_line_0003).",
+        "list_member(claim_set_expanded, 4, claim, source_line_0003).",
+        "list_member(claim_set_expanded, 5, claim, source_line_0003).",
+    ]
+
+
+def test_list_range_inventory_contract_rejects_overcompressed_range_when_finer_segments_exist() -> None:
+    source_compile = {
+        "facts": [
+            "claim_range(claim_set_broad, 1, 8, source_line_0003).",
+            "claim_range(claim_set_exact, 1, 1, src_line_0003).",
+            "claim_range(claim_set_exact, 3, 5, src_line_0003).",
+            "claim_range(claim_set_exact, 8, 8, src_line_0003).",
+            "list_member(claim_set_expanded, 3, claim, source_line_0003).",
+            "list_member(claim_set_expanded, 8, claim, source_line_0003).",
+        ]
+    }
+
+    report = _enforce_list_range_inventory_fact_contract(source_compile)
+
+    assert report["rejected_count"] == 2
+    assert report["rejected_facts"] == [
+        "claim_range(claim_set_broad, 1, 8, source_line_0003).",
+        "list_member(claim_set_expanded, 3, claim, source_line_0003).",
+    ]
+    assert source_compile["facts"] == [
+        "claim_range(claim_set_exact, 1, 1, src_line_0003).",
+        "claim_range(claim_set_exact, 3, 5, src_line_0003).",
+        "claim_range(claim_set_exact, 8, 8, src_line_0003).",
+        "list_member(claim_set_expanded, 8, claim, source_line_0003).",
+    ]
+
+
+def test_list_range_inventory_contract_rejects_malformed_claim_range_boundaries() -> None:
+    source_compile = {
+        "facts": [
+            "claim_range(contested_claims_set, 6_9, claim, source_src_line_0028).",
+            "claim_range(contested_claims_set, 6, 9, src_line_0028).",
+            "list_member(contested_claims_set, 1, claim, src_line_0028).",
+        ]
+    }
+
+    report = _enforce_list_range_inventory_fact_contract(source_compile)
+
+    assert report["rejected_count"] == 1
+    assert report["rejected_facts"] == [
+        "claim_range(contested_claims_set, 6_9, claim, source_src_line_0028).",
+    ]
+    assert source_compile["facts"] == [
+        "claim_range(contested_claims_set, 6, 9, src_line_0028).",
+        "list_member(contested_claims_set, 1, claim, src_line_0028).",
+        "claim_range(contested_claims_set, 6, 9, source_src_line_0028).",
+    ]
+    assert source_compile["deterministic_list_range_atom_reduction_facts"] == [
+        "claim_range(contested_claims_set, 6, 9, source_src_line_0028).",
+    ]
+    assert source_compile["deterministic_list_range_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_source_pass_predicate_contract_guidance_names_optional_carriers() -> None:
+    guidance = _source_pass_predicate_contract_guidance(
+        [
+            {"signature": "document_identifier_occurrence/5"},
+            {"signature": "document_checkbox_provision/5"},
+            {"signature": "claim_range/4"},
+            {"signature": "claim_ground/4"},
+            {"signature": "legal_citation_detail/4"},
+            {"signature": "review_outcome/4"},
+            {"signature": "procedural_rule_detail/5"},
+            {"signature": "domain_omission/5"},
+        ]
+    )
+
+    text = "\n".join(guidance)
+    assert "CARRIER CONTRACT document_identifier_occurrence/5" in text
+    assert "identifier_value is the source-stated value" in text
+    assert "CARRIER CONTRACT document_checkbox_provision/5" in text
+    assert "checkbox_state is the source-stated mark" in text
+    assert "document_identifier_occurrence/5" in text
+    assert "one candidate operation per occurrence" in text
+    assert "document_checkbox_provision/5" in text
+    assert "one candidate operation per source-stated row" in text
+    assert "list/range inventory carriers" in text
+    assert "source-stated singleton or source-stated range segment" in text
+    assert "do not emit 1-9" in text
+    assert "claim set anchor convergence" in text
+    assert "Do not emit claim_range/4 with only numeric boundaries" in text
+    assert "reuse one shared subject id" in text
+    assert "broad inventory rows do not satisfy subset-specific ground" in text
+    assert "Do not distribute a broad wrapper phrase" in text
+    assert "Do not use bare claim numbers as claim_ground/4 subject ids" in text
+    assert "emit claim_ground/4 on that same set id" in text
+    assert "Contract delivery note for domain_omission/5" in text
+    assert "explicit absence statements are source facts" in text
+    assert "self_check alone does not satisfy omission accountability" in text
+    assert "reuse the full prior set inventory" in text
+    assert "same subject id as claim_ground/4" in text
+    assert "statutory_ground rather than private variants" in text
+    assert "review_outcome/4" in text
+    assert "Do not invent private affirmed_by/2" in text
+    assert "one review_outcome/4 row per governed subject id" in text
+    assert "rather than a role label such as board_role" in text
+    assert "procedural_rule_detail/5" in text
+    assert "default consequence" in text
+    assert "one procedural_rule_detail/5 row per atomic part" in text
+
+
+def test_legal_citation_repair_context_reuses_governed_subject_ids() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "legal_citation_detail/4", "args": ["subject_id", "citation", "role", "source_or_scope"]},
+            {"signature": "claim_ground/4", "args": ["subject_id", "ground", "reference", "status"]},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected).",
+            "claim_range(claim_set_alpha, 1, 1, src_line_0002).",
+            "source_record_text_atom(src_line_0002, section_102_a_1).",
+        ]
+    }
+
+    carriers = _profile_legal_citation_repair_offered_carriers(profile)
+    text = "\n".join(
+        _profile_legal_citation_repair_context_lines(
+            parsed_profile=profile,
+            source_compile=source_compile,
+        )
+    )
+
+    assert carriers == ["legal_citation_detail/4"]
+    assert "reuse that exact subject id" in text
+    assert "preserve that purpose in legal_citation_detail/4's role slot" in text
+    assert "preserve exact subsection markers in paragraph- or section-scoped rows" in text
+    assert "investigation was commenced" in text
+    assert "future_amendments_to_foregoing_laws_regulations_and_rules" in text
+    assert "emit every enumerated citation on that same paragraph/obligation scope anchor" in text
+    assert "EXISTING GOVERNED FACT: claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected)." in text
+    assert "source_record_text_atom" not in text
+
+
+def test_governed_subject_discovery_context_uses_only_governed_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "claim_range/4", "args": ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]},
+            {"signature": "claim_ground/4", "args": ["claim_or_set_id", "ground", "reference", "status"]},
+            {"signature": "legal_citation_detail/4", "args": ["subject_id", "citation", "role", "source_or_scope"]},
+            {"signature": "review_outcome/4", "args": ["subject_id", "reviewer", "outcome", "source_or_scope"]},
+            {"signature": "source_record_surface_mention/3"},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "claim_range(claim_set_alpha, 1, 1, src_line_0002).",
+            "claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected).",
+            "source_record_surface_mention(src_line_0002, claim_set_alpha, display).",
+        ]
+    }
+
+    carriers = _profile_governed_subject_discovery_offered_carriers(profile)
+    text = "\n".join(
+        _profile_governed_subject_discovery_context_lines(
+            parsed_profile=profile,
+            source_compile=source_compile,
+        )
+    )
+
+    assert carriers == ["claim_range/4", "claim_ground/4", "legal_citation_detail/4", "review_outcome/4"]
+    assert "source-owned subject discovery" in text
+    assert "one stable subject id per distinct source-stated subset" in text
+    assert "do not emit source_record_* rows" in text
+    assert "claim_range/4" in text
+    assert "review_outcome/4" in text
+    assert "EXISTING GOVERNED FACT: claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected)." in text
+    assert "source_record_surface_mention" not in text
+
+
+def test_governed_subject_manifest_maps_typed_slots_to_governed_facts() -> None:
+    manifest = {
+        "schema_version": "governed_subject_manifest_v1",
+        "subjects": [
+            {
+                "subject_id": "Set Alpha",
+                "kind": "claim rejection",
+                "ranges": [{"start": "1", "end": "1", "source_or_scope": "Line 0002"}],
+                "ground": {
+                    "present": True,
+                    "theory": "anticipated",
+                    "reference": "ref_alpha",
+                    "status": "rejected",
+                    "source_or_scope": "Line 0002",
+                },
+                "legal_citations": [{"citation": "102(a)(1)", "role": "statutory_basis", "source_or_scope": "Line 0002"}],
+                "review_outcomes": [{"reviewer": "actor_board", "outcome": "affirmation_outcome", "source_or_scope": "Line 0005"}],
+                "omitted_companions": [],
+            }
+        ],
+        "subject_accounts": [
+            {
+                "subject_id": "Set Alpha",
+                "companion_statuses": [
+                    {"signature": "claim_range/4", "status": "instances", "reason": "range stated"},
+                    {"signature": "claim_ground/4", "status": "instances", "reason": "ground stated"},
+                    {"signature": "review_outcome/4", "status": "uncertain", "reason": "later sentence unclear"},
+                    {"signature": "source_record_surface_mention/3", "status": "instances", "reason": "not allowed"},
+                ],
+            }
+        ],
+        "subject_accounts": [
+            {
+                "subject_id": "Set Alpha",
+                "companion_statuses": [
+                    {"signature": "claim_range/4", "status": "instances", "reason": "range stated"},
+                    {"signature": "claim_ground/4", "status": "instances", "reason": "ground stated"},
+                    {"signature": "review_outcome/4", "status": "uncertain", "reason": "later sentence unclear"},
+                    {"signature": "source_record_surface_mention/3", "status": "instances", "reason": "not allowed"},
+                ],
+            }
+        ],
+        "self_check": {"missing_subjects": [], "notes": []},
+    }
+
+    report = _facts_from_governed_subject_manifest(
+        manifest,
+        allowed_signatures={"claim_range/4", "claim_ground/4", "legal_citation_detail/4", "review_outcome/4"},
+    )
+
+    assert report["facts"] == [
+        "claim_range(set_alpha, 1, 1, line_0002).",
+        "claim_ground(set_alpha, anticipation, reference_alpha, rejected).",
+        "legal_citation_detail(set_alpha, section_102_a_1, statutory_ground, line_0002).",
+        "review_outcome(set_alpha, review_board, affirmed, line_0005).",
+    ]
+    assert report["skipped"] == []
+
+
+def test_governed_subject_atom_rows_maps_flat_rows_to_governed_facts() -> None:
+    payload = {
+        "schema_version": "governed_subject_atom_rows_v1",
+        "rows": [
+            {
+                "signature": "claim_range/4",
+                "args": ["Set Alpha", "1", "1", "Line 0002"],
+                "source_or_scope": "Line 0002",
+            },
+            {
+                "signature": "claim_ground/4",
+                "args": ["Set Alpha", "anticipated", "ref_alpha", "rejected"],
+                "source_or_scope": "Line 0002",
+            },
+            {
+                "signature": "legal_citation_detail/4",
+                "args": ["Set Alpha", "102(a)(1)", "statutory_basis", "Line 0002"],
+                "source_or_scope": "Line 0002",
+            },
+            {
+                "signature": "review_outcome/4",
+                "args": ["Set Alpha", "actor_board", "affirmation_outcome", "Line 0005"],
+                "source_or_scope": "Line 0005",
+            },
+            {
+                "signature": "source_record_surface_mention/3",
+                "args": ["Set Alpha", "display", "Line 0002", "extra"],
+                "source_or_scope": "Line 0002",
+            },
+        ],
+        "subject_accounts": [
+            {
+                "subject_id": "Set Alpha",
+                "companion_statuses": [
+                    {"signature": "claim_range/4", "status": "instances", "reason": "range stated"},
+                    {"signature": "claim_ground/4", "status": "instances", "reason": "ground stated"},
+                    {"signature": "review_outcome/4", "status": "uncertain", "reason": "later sentence unclear"},
+                    {"signature": "source_record_surface_mention/3", "status": "instances", "reason": "not allowed"},
+                ],
+            }
+        ],
+        "self_check": {"missing_subjects": [], "notes": []},
+    }
+
+    report = _facts_from_governed_subject_atom_rows(
+        payload,
+        allowed_signatures={"claim_range/4", "claim_ground/4", "legal_citation_detail/4", "review_outcome/4"},
+    )
+
+    assert report["facts"] == [
+        "claim_range(set_alpha, 1, 1, line_0002).",
+        "claim_ground(set_alpha, anticipation, reference_alpha, rejected).",
+        "legal_citation_detail(set_alpha, section_102_a_1, statutory_ground, line_0002).",
+        "review_outcome(set_alpha, review_board, affirmed, line_0005).",
+    ]
+    assert report["skipped"] == [{"reason": "signature_not_allowed", "value": "source_record_surface_mention/3"}]
+    assert report["subject_accounts"] == [
+        {"subject": "set_alpha", "signature": "claim_range/4", "status": "instances", "reason": "range stated"},
+        {"subject": "set_alpha", "signature": "claim_ground/4", "status": "instances", "reason": "ground stated"},
+        {
+            "subject": "set_alpha",
+            "signature": "review_outcome/4",
+            "status": "uncertain",
+            "reason": "later sentence unclear",
+        },
+    ]
+    assert report["account_skipped"] == [
+        {"reason": "companion_status_signature_not_allowed", "value": "source_record_surface_mention/3"}
+    ]
+
+    alternate_report = _facts_from_governed_subject_atom_rows(
+        {
+            "governed_subject_atom_rows_v1": [
+                {"claim_range": ["Set Alpha", 1, 1, "Line 0002"]},
+                {"predicate": "claim_ground", "args": ["Set Alpha", "anticipated", "ref_alpha", "rejected"]},
+                {"sig": "legal_citation_detail/4", "args": ["Set Alpha", "102(a)(1)", "statutory_basis", "Line 0002"]},
+            ]
+        },
+        allowed_signatures={"claim_range/4", "claim_ground/4", "legal_citation_detail/4"},
+    )
+
+    assert alternate_report["facts"] == [
+        "claim_range(set_alpha, 1, 1, line_0002).",
+        "claim_ground(set_alpha, anticipation, reference_alpha, rejected).",
+        "legal_citation_detail(set_alpha, section_102_a_1, statutory_ground, line_0002).",
+    ]
+    assert alternate_report["skipped"] == []
+
+
+def test_governed_subject_atom_rows_replace_prior_supported_carriers_only() -> None:
+    report = _replace_governed_subject_atom_row_facts(
+        existing_facts=[
+            "claim_range(stale_subject, 1, 9, old_source).",
+            "claim_ground(stale_subject, section_102, reference_alpha, rejected).",
+            "claim_ground(clean_subject, section_103, reference_beta, rejected).",
+            "source_record_surface_mention(src1, stale_subject, display).",
+        ],
+        replacement_facts=[
+            "claim_range(clean_subject, 1, 1, line_1).",
+            "claim_ground(clean_subject, anticipation, reference_alpha, rejected).",
+        ],
+    )
+
+    assert report["facts"] == [
+        "claim_range(stale_subject, 1, 9, old_source).",
+        "claim_ground(stale_subject, section_102, reference_alpha, rejected).",
+        "source_record_surface_mention(src1, stale_subject, display).",
+        "claim_range(clean_subject, 1, 1, line_1).",
+        "claim_ground(clean_subject, anticipation, reference_alpha, rejected).",
+    ]
+    assert report["replaced_facts"] == [
+        "claim_ground(clean_subject, section_103, reference_beta, rejected).",
+    ]
+    assert report["appended_facts"] == [
+        "claim_range(clean_subject, 1, 1, line_1).",
+        "claim_ground(clean_subject, anticipation, reference_alpha, rejected).",
+    ]
+
+
+def test_legal_citation_repair_context_prefers_canonical_claim_set_ids() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "legal_citation_detail/4", "args": ["subject_id", "citation", "role", "source_or_scope"]},
+            {"signature": "claim_ground/4", "args": ["subject_id", "ground", "reference", "status"]},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha, 102_a_1, reference_alpha, anticipated).",
+            "claim_range(claim_set_alpha, 1, 1, src_line_0002).",
+            "claim_ground(claim_set_alpha_102, anticipation, reference_alpha, rejected).",
+            "claim_range(claim_set_alpha_102, 1, 1, src_line_0002).",
+            "review_outcome(claim_set_alpha_102, review_board, affirmed, src_line_0005).",
+        ]
+    }
+
+    preferred = _legal_citation_repair_preferred_subject_ids(source_compile)
+    text = "\n".join(
+        _profile_legal_citation_repair_context_lines(
+            parsed_profile=profile,
+            source_compile=source_compile,
+        )
+    )
+
+    assert preferred == ["claim_set_alpha_102"]
+    assert "preferred governed subject ids for legal citations: claim_set_alpha_102" in text
+    assert "EXISTING GOVERNED FACT: claim_ground(claim_set_alpha_102, anticipation, reference_alpha, rejected)." in text
+    assert "EXISTING GOVERNED FACT: claim_ground(claim_set_alpha, 102_a_1, reference_alpha, anticipated)." not in text
+
+
+def test_legal_citation_subject_contract_rejects_new_duplicate_subject_citations() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha_102, anticipation, reference_alpha, rejected).",
+            "legal_citation_detail(claim_set_alpha_102, section_102_a_1, statutory_ground, direct).",
+            "legal_citation_detail(claim_set_alpha, section_102_a_1, statutory_ground, src_line_0005).",
+            "legal_citation_detail(document_order, section_102_a_1, statutory_ground, src_line_0005).",
+        ]
+    }
+
+    report = _enforce_legal_citation_repair_subject_contract(
+        source_compile,
+        preferred_subjects={"claim_set_alpha_102"},
+        prior_facts={
+            "claim_ground(claim_set_alpha_102, anticipation, reference_alpha, rejected).",
+            "legal_citation_detail(document_order, section_102_a_1, statutory_ground, src_line_0005).",
+        },
+    )
+
+    assert report["rejected_facts"] == [
+        "legal_citation_detail(claim_set_alpha, section_102_a_1, statutory_ground, src_line_0005)."
+    ]
+    assert "legal_citation_detail(claim_set_alpha_102, section_102_a_1, statutory_ground, direct)." in source_compile["facts"]
+    assert "legal_citation_detail(document_order, section_102_a_1, statutory_ground, src_line_0005)." in source_compile["facts"]
+
+
+def test_review_outcome_repair_context_targets_governed_subject_ids() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "review_outcome/4", "args": ["reviewed_subject_id", "reviewing_body", "outcome", "source_or_scope"]},
+            {"signature": "claim_ground/4", "args": ["subject_id", "ground", "reference", "status"]},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected).",
+            "claim_range(claim_set_alpha, 1, 1, src_line_0003).",
+            "legal_citation_detail(claim_set_alpha, section_102_a_1, statutory_ground, src_line_0005).",
+            "review_outcome(reviewed_rejections, review_board, affirmed, src_line_0011).",
+            "source_record_text_atom(src_line_0011, board_affirmed).",
+        ]
+    }
+
+    carriers = _profile_review_outcome_repair_offered_carriers(profile)
+    text = "\n".join(
+        _review_outcome_repair_context_lines(
+            parsed_profile=profile,
+            source_compile=source_compile,
+        )
+    )
+
+    assert carriers == ["review_outcome/4"]
+    assert "preferred governed subject ids for review outcomes: claim_set_alpha" in text
+    assert "EXISTING GOVERNED FACT: claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected)." in text
+    assert "reviewed-rejections ids" in text
+    assert "source_record_text_atom" not in text
+
+
+def test_review_outcome_repair_context_allows_document_level_final_disposition_subjects() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "review_outcome/4",
+                "args": ["reviewed_subject_id", "reviewing_body", "outcome", "source_or_scope"],
+            }
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "document_identifier_occurrence(fed_cir_2025_1705_song, appeal_no, 2025_1705, header, 1).",
+            "document_date(fed_cir_2025_1705_song, decision_date, february_18_2026).",
+            "affirmed(2025_1705, affirmed).",
+            "claim_ground(song_18199940_rejection_1, anticipation, song_656, rejected).",
+            "review_outcome(song_18199940_rejection_1, federal_circuit, affirmed, final_disposition).",
+        ]
+    }
+
+    text = "\n".join(
+        _review_outcome_repair_context_lines(
+            parsed_profile=profile,
+            source_compile=source_compile,
+        )
+    )
+
+    assert "document-level or case-level final disposition" in text
+    assert "available document/case subject ids for document-level final dispositions: fed_cir_2025_1705_song" in text
+    assert "EXISTING GOVERNED FACT: document_date(fed_cir_2025_1705_song, decision_date, february_18_2026)." in text
+    assert "EXISTING GOVERNED FACT: affirmed(2025_1705, affirmed)." in text
+    assert "EXISTING GOVERNED FACT: source_record" not in text
+
+
+def test_additive_pass_signature_contract_rejects_offered_carrier_escape() -> None:
+    source_compile = {
+        "facts": [
+            "claim_id(1).",
+            "claim_range(claim_set_alpha, 1, 1, src_line_0003).",
+            "anticipated_by_reference(1, reference_alpha).",
+        ]
+    }
+    pass_record = {
+        "facts": [
+            "claim_range(claim_set_alpha, 1, 1, src_line_0003).",
+            "anticipated_by_reference(1, reference_alpha).",
+        ],
+        "_profile_list_range_inventory_repair_new_facts": [
+            "claim_range(claim_set_alpha, 1, 1, src_line_0003).",
+            "anticipated_by_reference(1, reference_alpha).",
+        ],
+    }
+
+    report = _enforce_additive_pass_allowed_signatures(
+        source_compile,
+        prior_facts={"claim_id(1)."},
+        allowed_signatures={"claim_range/4", "claim_ground/4"},
+        metadata_prefix="profile_list_range_inventory_repair",
+        pass_record=pass_record,
+    )
+
+    assert report["rejected_facts"] == ["anticipated_by_reference(1, reference_alpha)."]
+    assert source_compile["facts"] == [
+        "claim_id(1).",
+        "claim_range(claim_set_alpha, 1, 1, src_line_0003).",
+    ]
+    assert pass_record["facts"] == ["claim_range(claim_set_alpha, 1, 1, src_line_0003)."]
+    assert pass_record["_profile_list_range_inventory_repair_new_facts"] == [
+        "claim_range(claim_set_alpha, 1, 1, src_line_0003)."
+    ]
+    assert source_compile["profile_list_range_inventory_repair_signature_contract_rejected_count"] == 1
 
 
 def test_vote_tally_profile_extension_adds_direct_carrier_for_explicit_tallies() -> None:
@@ -894,6 +2309,10 @@ def test_compile_surface_invariants_keep_current_adjudication_disposition_separa
     assert "resolves it directly/on the merits" in context
     assert "If no stricter profile predicate can carry the disposition mode or effect" in context
     assert "source_detail/4" in context
+    assert "underlying action under review preserved separately from the reviewing outcome" in context
+    assert "emit typed rows for both layers" in context
+    assert "Reuse the same governed item/claim/issue/action atom" in context
+    assert "Do not encode the underlying rejection or denial only as a final affirmed status" in context
 
 
 def test_compile_surface_invariants_keep_violation_categories_separate_from_actions() -> None:
@@ -1245,6 +2664,343 @@ def test_source_pass_ops_wraps_for_normal_mapper() -> None:
     assert ir["candidate_operations"][0]["predicate"] == "person_role"
     assert ir["truth_maintenance"]["support_links"] == []
     assert ir["self_check"]["notes"] == ["compact pass"]
+
+
+def test_source_pass_ops_reduces_review_atoms_to_governed_carrier() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "pass_id": "pass_1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_affirmed",
+                    "predicate": "affirmed_by/2",
+                    "args": ["claim_set_102_rejection", "Board"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        }
+    )
+
+    operations = ir["candidate_operations"]
+
+    assert operations[0]["predicate"] == "affirmed_by/2"
+    assert operations[1] == {
+        "operation": "assert",
+        "proposition_id": "prop_affirmed_review_outcome",
+        "predicate": "review_outcome/4",
+        "args": ["claim_set_102_rejection", "Board", "affirmed", "direct"],
+        "polarity": "positive",
+        "source": "direct",
+        "safety": "safe",
+    }
+
+
+def test_source_pass_ops_reduces_three_slot_event_date_to_document_date_contract() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "pass_id": "profile_document_date_repair",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "evt_date_hearing",
+                    "predicate": "event_date/2",
+                    "args": ["docket_24_035_04", "hearing_date", "2024_12_16"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "document_date/3",
+                "args": ["document_or_subject_id", "date_kind_or_role", "date_value"],
+            },
+            {
+                "signature": "event_date/2",
+                "args": ["event_id", "date"],
+            },
+        ],
+    )
+
+    operations = ir["candidate_operations"]
+
+    assert operations[0]["predicate"] == "event_date/2"
+    assert operations[1] == {
+        "operation": "assert",
+        "proposition_id": "evt_date_hearing_document_date",
+        "predicate": "document_date/3",
+        "args": ["docket_24_035_04", "hearing_date", "2024_12_16"],
+        "polarity": "positive",
+        "source": "direct",
+        "safety": "safe",
+    }
+
+
+def test_source_pass_ops_completes_governed_source_scope_slots() -> None:
+    contracts = [
+        {
+            "signature": "claim_range/4",
+            "args": ["claim_set_id", "start_claim", "end_claim", "source_or_scope"],
+        },
+        {
+            "signature": "review_outcome/4",
+            "args": ["reviewed_subject_id", "reviewing_body_or_actor", "review_outcome_or_action", "source_or_scope"],
+        },
+    ]
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "pass_id": "pass_1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_range",
+                    "predicate": "claim_range/4",
+                    "args": ["claim_set_1", "3", "5"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+                {
+                    "operation": "assert",
+                    "proposition_id": "prop_review",
+                    "predicate": "review_outcome/4",
+                    "args": ["claim_set_1", "board", "affirmed", "rejection"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                },
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=contracts,
+    )
+
+    assert ir["candidate_operations"][0]["args"] == ["claim_set_1", "3", "5", "direct"]
+    assert ir["candidate_operations"][1]["args"] == ["claim_set_1", "board", "affirmed", "direct"]
+
+
+def test_governed_review_atom_fact_reduction_adds_review_outcome_without_source_text() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_102_rejection, anticipation, reference_alpha, rejected).",
+            "affirmed_by(claim_set_102_rejection, board).",
+        ]
+    }
+
+    report = _apply_governed_review_atom_fact_reduction(source_compile)
+
+    assert report == {
+        "added_count": 1,
+        "added_facts": [
+            "review_outcome(claim_set_102_rejection, board, affirmed, direct)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "claim_ground(claim_set_102_rejection, anticipation, reference_alpha, rejected).",
+        "affirmed_by(claim_set_102_rejection, board).",
+        "review_outcome(claim_set_102_rejection, board, affirmed, direct).",
+    ]
+    assert source_compile["deterministic_governed_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_governed_obligation_detail_atom_reduction_extracts_schedule_atoms_only_from_typed_rows() -> None:
+    source_compile = {
+        "facts": [
+            "obligation_detail(settlement_24_035_04, recipient_scope, customers_receiving_service_under_schedule_9, data_reporting, src_line_0013).",
+            "source_record_text_atom(src_1, customers_receiving_service_under_schedule_5).",
+        ]
+    }
+
+    report = _apply_governed_obligation_detail_atom_reduction(source_compile)
+
+    assert report == {
+        "added_count": 1,
+        "added_facts": [
+            "obligation_detail(settlement_24_035_04, tariff_schedule, schedule_9, data_reporting, src_line_0013)."
+        ],
+    }
+    assert source_compile["facts"] == [
+        "obligation_detail(settlement_24_035_04, recipient_scope, customers_receiving_service_under_schedule_9, data_reporting, src_line_0013).",
+        "source_record_text_atom(src_1, customers_receiving_service_under_schedule_5).",
+        "obligation_detail(settlement_24_035_04, tariff_schedule, schedule_9, data_reporting, src_line_0013).",
+    ]
+    assert source_compile["deterministic_obligation_detail_atom_reduction_policy"]["not_source_interpretation"] is True
+    assert source_compile["deterministic_obligation_detail_atom_reduction_policy"]["not_query_interpretation"] is True
+
+    second_report = _apply_governed_obligation_detail_atom_reduction(source_compile)
+
+    assert second_report == {"added_count": 0, "added_facts": []}
+    assert source_compile["facts"].count(
+        "obligation_detail(settlement_24_035_04, tariff_schedule, schedule_9, data_reporting, src_line_0013)."
+    ) == 1
+
+
+def test_document_subject_atom_convergence_clones_document_level_facts_by_typed_identifier() -> None:
+    source_compile = {
+        "facts": [
+            "document_identifier_occurrence(fed_cir_2025_1705_song, docket_number, 2025_1705, header, 1).",
+            "document_date(doc_fed_cir_2025_1705, decision_date, february_18_2026).",
+            "review_outcome(doc_fed_cir_2025_1705, federal_circuit, affirmed, src_line_0054).",
+            "source_record_text_atom(src_1, tempting_prose).",
+        ]
+    }
+
+    report = _apply_document_subject_atom_convergence(source_compile)
+
+    assert report == {
+        "added_count": 2,
+        "added_facts": [
+            "document_date(fed_cir_2025_1705_song, decision_date, february_18_2026).",
+            "review_outcome(fed_cir_2025_1705_song, federal_circuit, affirmed, src_line_0054).",
+        ],
+    }
+    assert report["added_facts"][0] in source_compile["facts"]
+    assert report["added_facts"][1] in source_compile["facts"]
+    assert not any(fact.startswith("source_record") and fact != "source_record_text_atom(src_1, tempting_prose)." for fact in source_compile["facts"])
+    assert source_compile["deterministic_document_subject_atom_convergence_policy"]["not_source_interpretation"] is True
+    assert source_compile["deterministic_document_subject_atom_convergence_policy"]["not_query_interpretation"] is True
+
+
+def test_document_subject_atom_convergence_does_not_use_related_or_single_number_identifiers() -> None:
+    source_compile = {
+        "facts": [
+            "document_identifier_occurrence(fed_cir_2025_1705_song, related_case_number, 2025_1653, related_case, 1).",
+            "document_identifier_occurrence(fed_cir_2025_1705_song, joint_appendix_docket_number, 24, footnote, 2).",
+            "document_date(doc_fed_cir_2025_1705, decision_date, february_18_2026).",
+        ]
+    }
+
+    report = _apply_document_subject_atom_convergence(source_compile)
+
+    assert report == {"added_count": 0, "added_facts": []}
+    assert "document_date(fed_cir_2025_1705_song, decision_date, february_18_2026)." not in source_compile["facts"]
+
+
+def test_governed_claim_ground_atom_reduction_splits_statute_from_theory() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha, 102_a_1, reference_alpha, anticipated).",
+            "claim_ground(claim_set_beta, 103, reference_beta, obvious).",
+        ]
+    }
+
+    report = _apply_governed_claim_ground_atom_reduction(source_compile)
+
+    assert report["added_count"] == 4
+    assert "claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected)." in source_compile["facts"]
+    assert "legal_citation_detail(claim_set_alpha, section_102_a_1, statutory_ground, direct)." in source_compile["facts"]
+    assert "claim_ground(claim_set_beta, obviousness, reference_beta, rejected)." in source_compile["facts"]
+    assert "legal_citation_detail(claim_set_beta, section_103, statutory_ground, direct)." in source_compile["facts"]
+    assert source_compile["deterministic_claim_ground_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_governed_reference_citation_atom_reduction_normalizes_abbreviations() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(claim_set_alpha, anticipation, ref_alpha, rejected).",
+            "legal_citation_detail(claim_set_alpha, sec_102a1, statutory_ground, src_line_0005).",
+            "legal_citation_detail(claim_set_beta, sec_103, statutory_ground, src_line_0009).",
+            "legal_citation_detail(claim_set_gamma, sec_103, obviousness, src_line_0009).",
+        ]
+    }
+
+    report = _apply_governed_reference_citation_atom_reduction(source_compile)
+
+    assert report["added_count"] == 4
+    assert "claim_ground(claim_set_alpha, anticipation, reference_alpha, rejected)." in source_compile["facts"]
+    assert "legal_citation_detail(claim_set_alpha, section_102_a_1, statutory_ground, src_line_0005)." in source_compile["facts"]
+    assert "legal_citation_detail(claim_set_beta, section_103, statutory_ground, src_line_0009)." in source_compile["facts"]
+    assert "legal_citation_detail(claim_set_gamma, section_103, statutory_ground, src_line_0009)." in source_compile["facts"]
+    assert source_compile["deterministic_reference_citation_atom_reduction_policy"]["not_query_interpretation"] is True
+
+
+def test_governed_reference_citation_atom_reduction_normalizes_governed_atom_synonyms() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(set_alpha, anticipated, ref_alpha, rejected).",
+            "claim_ground(set_beta, obvious, ref_beta, rejected).",
+            "legal_citation_detail(set_alpha, 102_a_1, statutory_basis, contested_claims).",
+            "review_outcome(set_alpha, actor_board, affirmation_outcome, src_line_0011).",
+        ]
+    }
+
+    report = _apply_governed_reference_citation_atom_reduction(source_compile)
+
+    assert report["added_count"] == 4
+    assert "claim_ground(set_alpha, anticipation, reference_alpha, rejected)." in source_compile["facts"]
+    assert "claim_ground(set_beta, obviousness, reference_beta, rejected)." in source_compile["facts"]
+    assert "legal_citation_detail(set_alpha, section_102_a_1, statutory_ground, contested_claims)." in source_compile["facts"]
+    assert "review_outcome(set_alpha, review_board, affirmed, src_line_0011)." in source_compile["facts"]
+    assert source_compile["deterministic_reference_citation_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_governed_reference_citation_atom_reduction_normalizes_amendment_scope() -> None:
+    source_compile = {
+        "facts": [
+            (
+                "legal_citation_detail(aod_24_102, "
+                "any_further_amendments_to_the_foregoing_laws_regulations_and_rules, "
+                "scope_extension, src_line_0034)."
+            ),
+        ]
+    }
+
+    report = _apply_governed_reference_citation_atom_reduction(source_compile)
+
+    assert report["added_count"] == 1
+    assert (
+        "legal_citation_detail(aod_24_102, future_amendments_to_foregoing_laws_regulations_and_rules, "
+        "amendment_scope, src_line_0034)."
+        in source_compile["facts"]
+    )
+    assert source_compile["deterministic_reference_citation_atom_reduction_policy"]["not_source_interpretation"] is True
+
+
+def test_governed_companion_subject_health_flags_missing_typed_companions() -> None:
+    source_compile = {
+        "facts": [
+            "claim_ground(set_alpha, anticipation, reference_alpha, rejected).",
+            "legal_citation_detail(set_alpha, section_102_a_1, statutory_ground, src_line_0002).",
+            "review_outcome(set_alpha, review_board, affirmed, src_line_0011).",
+            "claim_range(set_beta, 1, 1, src_line_0003).",
+            "claim_ground(set_beta, anticipation, reference_beta, rejected).",
+            "legal_citation_detail(set_beta, section_102_a_1, statutory_ground, src_line_0003).",
+            "review_outcome(set_beta, review_board, affirmed, src_line_0011).",
+        ]
+    }
+
+    report = _attach_governed_companion_subject_health(source_compile)
+
+    flagged = {row["subject"]: row["missing_companions"] for row in report["rows"] if row["missing_companions"]}
+    assert flagged == {"set_alpha": ["claim_range/4"]}
+    alpha = next(row for row in report["rows"] if row["subject"] == "set_alpha")
+    assert alpha["family_statuses"]["claim_range/4"] == "missing_unaccounted"
+    assert alpha["family_statuses"]["claim_ground/4"] == "present"
+    assert report["flagged_subject_count"] == 1
+    assert report["omission_ledger_count"] == 1
+    assert report["governed_companion_omission_ledger"] == [
+        {
+            "subject": "set_alpha",
+            "signature": "claim_range/4",
+            "status": "missing_unaccounted",
+            "observed_predicates": ["claim_ground", "legal_citation_detail", "review_outcome"],
+            "reason": "typed subject has at least one governed companion family but this companion family is absent",
+        }
+    ]
+    assert report["not_source_interpretation"] is True
+    assert source_compile["governed_companion_subject_health"] == report
 
 
 def test_source_pass_ops_guidance_preserves_explicit_negative_surfaces(monkeypatch) -> None:
@@ -3466,6 +5222,7 @@ def test_source_pass_profile_delivery_target_names_event_date_carrier() -> None:
         source_text="Hearing date April 24, 2026. Appeal filed 2026-05-08. About 1415 the status changed to open.",
         parsed_profile={
             "candidate_predicates": [
+                {"signature": "document_date/3", "args": ["document_or_subject_id", "date_kind_or_role", "date_value"]},
                 {"signature": "event_date/2", "args": ["event_id", "date"]},
                 {"signature": "event_time/2", "args": ["event_id", "time"]},
             ]
@@ -3474,9 +5231,41 @@ def test_source_pass_profile_delivery_target_names_event_date_carrier() -> None:
 
     joined = "\n".join(lines)
     assert "explicit event/hearing/filing dates or clock times" in joined
+    assert "document_date/3" in joined
     assert "event_date/2" in joined
     assert "event_time/2" in joined
     assert "not a substitute for a joinable temporal row" in joined
+
+
+def test_document_date_repair_context_targets_typed_date_carriers_only() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "document_date/3", "args": ["document_or_subject_id", "date_kind_or_role", "date_value"]},
+            {"signature": "event_date/2", "args": ["event_id", "date"]},
+            {"signature": "source_note/4", "args": ["note_id", "number", "content", "source"]},
+        ]
+    }
+    source_compile = {
+        "facts": [
+            "document_identifier(case_2025_1705, appeal_no, 2025_1705).",
+            "prior_art_reference(song_525, 2016_0243525, 2016_08_25).",
+            "source_note(note_1, 1, prose_content, src_line_0025).",
+        ]
+    }
+
+    assert _profile_document_date_repair_offered_carriers(profile) == ["document_date/3", "event_date/2"]
+
+    lines = _document_date_repair_context_lines(parsed_profile=profile, source_compile=source_compile)
+    joined = "\n".join(lines)
+
+    assert "PROFILE DOCUMENT DATE REPAIR PASS" in joined
+    assert "document_date/3" in joined
+    assert "event_date/2" in joined
+    assert "one typed date row per source-stated dated event" in joined
+    assert "The main document issue date does not replace related filing" in joined
+    assert "use document_date/3 for document-like subjects and event_date/2 for procedural event ids" in joined
+    assert "source_note/4" not in joined
+    assert "EXISTING DATE/IDENTIFIER FACT: prior_art_reference(song_525, 2016_0243525, 2016_08_25)." in joined
 
 
 def test_source_pass_profile_delivery_target_names_prior_recall_date_carrier() -> None:
@@ -3579,6 +5368,280 @@ def test_profile_delivery_repair_ignores_nonrepair_findings() -> None:
     )
 
     assert lines == []
+
+
+def test_profile_role_roster_repair_context_targets_typed_role_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "counsel_for/5", "args": ["proceeding", "person", "organization", "party", "location"]},
+            {"signature": "person_role/3", "args": ["person", "role", "organization"]},
+            {"signature": "case_status/2", "args": ["case", "status"]},
+        ]
+    }
+
+    lines = domain_bootstrap_file._profile_role_roster_repair_context_lines(profile)
+    joined = "\n".join(lines)
+
+    assert "PROFILE ROLE ROSTER REPAIR PASS" in joined
+    assert "proposal-only" in joined
+    assert "counsel_for/5" in joined
+    assert "person_role/3" in joined
+    assert "case_status/2" not in joined
+    assert "exact stated office/firm/organization" in joined
+    assert "do not collapse an office" in joined
+    assert "do not emit source_record_* rows" in joined
+
+
+def test_profile_role_roster_repair_context_absent_without_role_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "case_status/2", "args": ["case", "status"]},
+            {"signature": "event_date/2", "args": ["event", "date"]},
+        ]
+    }
+
+    assert domain_bootstrap_file._profile_role_roster_repair_context_lines(profile) == []
+
+
+def test_profile_identifier_occurrence_repair_context_targets_identifier_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {
+                "signature": "document_identifier_occurrence/5",
+                "args": ["document_id", "identifier_kind", "identifier_value", "scope_label", "source_order"],
+            },
+            {"signature": "case_status/2", "args": ["case", "status"]},
+            {"signature": "docket_number/2", "args": ["case", "docket_number"]},
+        ]
+    }
+
+    lines = domain_bootstrap_file._profile_identifier_occurrence_repair_context_lines(profile)
+    joined = "\n".join(lines)
+
+    assert "PROFILE IDENTIFIER OCCURRENCE REPAIR PASS" in joined
+    assert "proposal-only" in joined
+    assert "document_identifier_occurrence/5" in joined
+    assert "docket_number/2" in joined
+    assert "case_status/2" not in joined
+    assert "same identifier label appears more than once" in joined
+    assert "prefix#123456" in joined
+    assert "operation_assert" in joined
+    assert "never place" in joined
+    assert "CARRIER CONTRACT document_identifier_occurrence/5" in joined
+    assert "Do not collapse distinct values" in joined
+    assert "do not emit source_record_* rows" in joined
+
+
+def test_profile_identifier_occurrence_repair_context_ignores_footnote_numbers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "footnote_content/3", "args": ["document_id", "footnote_number", "content"]},
+            {"signature": "procedural_forfeiture/2", "args": ["argument", "reason"]},
+            {"signature": "forfeiture_text/2", "args": ["argument_identifier", "text"]},
+        ]
+    }
+
+    assert domain_bootstrap_file._profile_identifier_occurrence_repair_context_lines(profile) == []
+
+
+def test_profile_identifier_occurrence_repair_context_absent_without_identifier_carriers() -> None:
+    profile = {
+        "candidate_predicates": [
+            {"signature": "case_status/2", "args": ["case", "status"]},
+            {"signature": "event_date/2", "args": ["event", "date"]},
+        ]
+    }
+
+    assert domain_bootstrap_file._profile_identifier_occurrence_repair_context_lines(profile) == []
+
+
+def test_source_pass_ops_normalizes_operation_name_suffix_and_missing_source_order() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "doc_id_001",
+                    "predicate": "document_identifier_occurrence/5",
+                    "args": [
+                        "FedCir_2025-1705_Song",
+                        "docket_number",
+                        "2025-1705",
+                        "header",
+                        "predicate_name",
+                        "document_identifier_occurrence_5",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "document_identifier_occurrence/5",
+                "args": [
+                    "document_id",
+                    "identifier_kind",
+                    "identifier_value",
+                    "occurrence_scope_or_label",
+                    "source_order",
+                ],
+            }
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"] == [
+        "FedCir_2025-1705_Song",
+        "docket_number",
+        "2025-1705",
+        "header",
+        "1",
+    ]
+
+
+def test_source_pass_ops_uses_contract_arity_when_model_omits_predicate_signature() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "doc_id_001",
+                    "predicate": "document_identifier_occurrence",
+                    "args": [
+                        "fed_cir_2025_1705_song",
+                        "docket_number",
+                        "2025_1705",
+                        "header",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "document_identifier_occurrence/5",
+                "args": [
+                    "document_id",
+                    "identifier_kind",
+                    "identifier_value",
+                    "occurrence_scope_or_label",
+                    "source_order",
+                ],
+            }
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"] == [
+        "fed_cir_2025_1705_song",
+        "docket_number",
+        "2025_1705",
+        "header",
+        "1",
+    ]
+
+
+def test_source_pass_ops_reads_profile_contract_arguments_alias_for_completion() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "doc_id_001",
+                    "predicate": "document_identifier_occurrence/5",
+                    "args": [
+                        "fed_cir_2025_1705_song",
+                        "docket_number",
+                        "2025-1705",
+                        "header",
+                        "predicate_name",
+                        "document_identifier_occurrence/5",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "document_identifier_occurrence/5",
+                "arguments": [
+                    "document_id",
+                    "identifier_kind",
+                    "identifier_value",
+                    "occurrence_scope_or_label",
+                    "source_order",
+                ],
+            }
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"] == [
+        "fed_cir_2025_1705_song",
+        "docket_number",
+        "2025-1705",
+        "header",
+        "1",
+    ]
+
+
+def test_source_pass_ops_replaces_bare_source_order_marker_with_operation_index() -> None:
+    ir = _source_pass_ops_to_semantic_ir(
+        {
+            "schema_version": "source_pass_ops_v1",
+            "decision": "commit",
+            "candidate_operations": [
+                {
+                    "operation": "assert",
+                    "proposition_id": "doc_id_001",
+                    "predicate": "document_identifier_occurrence/5",
+                    "args": [
+                        "fed_cir_2025_1705_song",
+                        "docket_number",
+                        "2025-1705",
+                        "header",
+                        "operation_name",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ],
+            "self_check": {"bad_commit_risk": "low", "missing_slots": [], "notes": []},
+        },
+        predicate_contracts=[
+            {
+                "signature": "document_identifier_occurrence/5",
+                "arguments": [
+                    "document_id",
+                    "identifier_kind",
+                    "identifier_value",
+                    "occurrence_scope_or_label",
+                    "source_order",
+                ],
+            }
+        ],
+    )
+
+    assert ir["candidate_operations"][0]["args"] == [
+        "fed_cir_2025_1705_song",
+        "docket_number",
+        "2025-1705",
+        "header",
+        "1",
+    ]
 
 
 def test_source_claim_mentions_ignore_sole_source_support_purpose() -> None:
@@ -3775,6 +5838,43 @@ def test_merge_profile_delivery_repair_pass_adds_unique_rows_and_health() -> Non
     assert source_compile["surface_contribution"][-1]["pass_id"] == "profile_delivery_repair"
     assert source_compile["surface_contribution"][-1]["unique_fact_count"] == 1
     assert source_compile["compile_health"]["verdict"] in {"healthy", "warning"}
+
+
+def test_merge_additive_source_pass_keeps_role_roster_metadata_separate() -> None:
+    source_compile = {
+        "admitted_count": 1,
+        "skipped_count": 0,
+        "effective_admitted_count": 1,
+        "effective_skipped_count": 0,
+        "facts": ["base_fact(alpha)."],
+        "rules": [],
+        "queries": [],
+        "surface_contribution": [],
+    }
+    repair_pass = {
+        "ok": True,
+        "pass_id": "profile_role_roster_repair",
+        "purpose": "repair typed role and roster delivery",
+        "focus": "missing role rows",
+        "admitted_count": 2,
+        "skipped_count": 0,
+        "facts": ["base_fact(alpha).", "person_role(travis_heim, field_technician, dish_network_l_l_c)."],
+        "rules": [],
+        "queries": [],
+    }
+
+    domain_bootstrap_file._merge_additive_source_pass(
+        source_compile,
+        repair_pass,
+        metadata_prefix="profile_role_roster_repair",
+    )
+
+    assert repair_pass["_profile_role_roster_repair_new_facts"] == [
+        "person_role(travis_heim, field_technician, dish_network_l_l_c)."
+    ]
+    assert "_profile_delivery_repair_new_facts" not in repair_pass
+    assert source_compile["repair_passes"] == [repair_pass]
+    assert source_compile["surface_contribution"][-1]["pass_id"] == "profile_role_roster_repair"
 
 
 def test_source_claim_key_treats_justified_source_statement_as_finding() -> None:
@@ -4703,6 +6803,54 @@ def test_lmstudio_json_schema_adds_openrouter_provider_routing(monkeypatch) -> N
         "require_parameters": True,
     }
     assert captured["headers"]["X-openrouter-experimental-metadata"] == "enabled"
+
+
+def test_lmstudio_json_schema_portable_openrouter_payload_omits_nonportable_thinking_fields(monkeypatch) -> None:
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return b'{"choices":[{"message":{"content":"{\\"ok\\":true}"}}]}'
+
+    def fake_urlopen(request, timeout):
+        captured["payload"] = json.loads(request.data.decode("utf-8"))
+        return FakeResponse()
+
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_PORTABLE_PAYLOAD", "true")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_PROVIDER_ONLY", "provider-a")
+    monkeypatch.setenv("PRETHINKER_OPENROUTER_REQUIRE_PARAMETERS", "true")
+    monkeypatch.setattr(domain_bootstrap_file.urllib.request, "urlopen", fake_urlopen)
+
+    result = _call_lmstudio_json_schema(
+        base_url="https://openrouter.ai/api/v1",
+        model="model",
+        messages=[{"role": "user", "content": "hello"}],
+        schema={"type": "object"},
+        schema_name="test_schema",
+        timeout=5,
+        temperature=0,
+        top_p=1,
+        max_tokens=100,
+        reasoning_effort="none",
+    )
+
+    payload = captured["payload"]
+    assert result["content"] == '{"ok":true}'
+    assert "think" not in payload
+    assert "thinking" not in payload
+    assert "reasoning" not in payload
+    assert "include_reasoning" not in payload
+    assert "reasoning_effort" not in payload
+    assert payload["provider"] == {
+        "only": ["provider-a"],
+        "require_parameters": True,
+    }
 
 
 def test_lmstudio_chat_url_accepts_root_or_v1_base_url() -> None:

@@ -1,0 +1,7 @@
+{
+  "fixture_id": "fda_warning_letter_domain_v1",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Pressure a closed FDA warning-letter domain schema to preserve warning-letter wrapper, facility, chronology, numbered violations, CFR citations, response obligations, consultant recommendation, conclusion scope, and omission accountability without prose-shaped atom slots."
+}

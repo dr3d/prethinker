@@ -2,6 +2,14 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset orientation. Use
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md),
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md),
+> and
+> [Domain Tier Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_WORKSHEET.md)
+> for current score posture
+> and operating direction.
+
 This is the fastest orientation for a new high-context collaborator. Read it
 as the current operating doctrine, not as a research diary.
 

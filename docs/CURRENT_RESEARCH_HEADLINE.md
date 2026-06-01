@@ -2,6 +2,14 @@
 
 Last updated: 2026-05-29
 
+> Status: historical bridge note from the reset period. Do not cite the old
+> 80.5%, 92.33%, 95%, 98.5%, or 99% figures here as current public claims.
+> The current claim-bearing hard-clean floor is `73 / 200` (`36.5%`) on the
+> 8-fixture English batch. Current direction is documented in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 ## Current Measurement Position
 
 Prethinker now has a measurable direct-surface instrument and fresh public

@@ -1,0 +1,103 @@
+{
+  "schema": "candidate_profile_registry_v1",
+  "fixture": "fda_warning_letter_v1",
+  "source": "Closed FDA warning-letter carrier pack drafted from carrier_contract_registry.py; vocabulary only, not facts.",
+  "purpose": "Constrain FDA warning-letter compiles to a small governed carrier set for warning-letter wrapper, facility identity, chronology, violations, citations, response requirements, consultant recommendation, conclusion scope, and omission accountability.",
+  "selection": {
+    "mode": "domain_pack_manual",
+    "draw_count": 1,
+    "date": "2026-06-01"
+  },
+  "predicates": [
+    {
+      "signature": "fda_warning_letter/5",
+      "args": ["letter_id", "issuing_office", "recipient_entity", "issue_date", "source_or_scope"],
+      "category": "fda_document_wrapper",
+      "notes": "Identifies one source-stated FDA warning letter. Do not hide violations, response instructions, or conclusion text in wrapper slots."
+    },
+    {
+      "signature": "fda_facility_identity/5",
+      "args": ["facility_id", "facility_name", "facility_location", "identifier_value", "source_or_scope"],
+      "category": "fda_facility_identity",
+      "notes": "Links one regulated facility to compact name, location, and identifier values such as FEI."
+    },
+    {
+      "signature": "fda_correspondence_party/5",
+      "args": ["letter_id", "party_id", "party_role", "party_name", "source_or_scope"],
+      "category": "fda_correspondence_party",
+      "notes": "Links a letter to recipient, issuing office, signatory, contact, or responsible official roles without inferring responsibility."
+    },
+    {
+      "signature": "fda_inspection_event/6",
+      "args": ["inspection_id", "facility_id", "start_date", "end_date", "inspecting_body", "source_or_scope"],
+      "category": "fda_chronology",
+      "notes": "Preserves one source-stated FDA inspection event with typed start and end dates."
+    },
+    {
+      "signature": "fda_form483_response/4",
+      "args": ["response_id", "inspection_id", "response_date", "source_or_scope"],
+      "category": "fda_chronology",
+      "notes": "Links a source-stated Form FDA 483 response to its inspection and response date."
+    },
+    {
+      "signature": "fda_prior_warning_letter/5",
+      "args": ["prior_letter_id", "entity_or_facility_id", "prior_issue_date", "relation_or_status", "source_or_scope"],
+      "category": "fda_chronology",
+      "notes": "Preserves a source-stated prior warning letter and compact relation or status."
+    },
+    {
+      "signature": "fda_regulatory_meeting/4",
+      "args": ["meeting_id", "entity_or_facility_id", "meeting_date", "source_or_scope"],
+      "category": "fda_chronology",
+      "notes": "Preserves a source-stated FDA meeting or teleconference date."
+    },
+    {
+      "signature": "fda_violation/5",
+      "args": ["violation_id", "letter_id", "violation_number", "violation_category", "source_or_scope"],
+      "category": "fda_violation",
+      "notes": "Preserves one numbered violation with a controlled compact category, never a paragraph summary."
+    },
+    {
+      "signature": "fda_violation_citation/4",
+      "args": ["violation_id", "citation", "citation_role", "source_or_scope"],
+      "category": "fda_violation_citation",
+      "notes": "Links one violation or letter-level subject to an exact compact citation atom."
+    },
+    {
+      "signature": "fda_violation_detail/5",
+      "args": ["violation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
+      "category": "fda_violation_detail",
+      "notes": "Preserves one atomic violation detail such as affected_lot, process_area, response_status, or procedure_scope."
+    },
+    {
+      "signature": "fda_adulteration_basis/5",
+      "args": ["letter_id", "basis_kind", "authority_or_scope", "product_scope", "source_or_scope"],
+      "category": "fda_legal_basis",
+      "notes": "States a compact source-stated adulteration basis and authority without explanatory prose."
+    },
+    {
+      "signature": "fda_response_requirement/6",
+      "args": ["letter_id", "action_kind", "deadline_value", "recipient_or_channel", "consequence_or_purpose", "source_or_scope"],
+      "category": "fda_response_requirement",
+      "notes": "Preserves one response action, deadline, channel, and compact consequence or purpose."
+    },
+    {
+      "signature": "fda_consultant_recommendation/4",
+      "args": ["letter_id", "consultant_kind", "action_kind", "source_or_scope"],
+      "category": "fda_consultant_recommendation",
+      "notes": "Preserves a source-stated consultant recommendation without turning it into a full paragraph slot."
+    },
+    {
+      "signature": "fda_conclusion_scope/4",
+      "args": ["letter_id", "scope_kind", "scope_value", "source_or_scope"],
+      "category": "fda_conclusion_scope",
+      "notes": "Preserves one compact conclusion-scope statement such as not_all_inclusive or responsibility_to_correct."
+    },
+    {
+      "signature": "domain_omission/5",
+      "args": ["domain_or_subject_id", "carrier_signature", "omission_kind", "reason_code", "source_or_scope"],
+      "category": "compile_accountability",
+      "notes": "Records expected carrier absence or uncertainty. It is not an answer substitute."
+    }
+  ]
+}

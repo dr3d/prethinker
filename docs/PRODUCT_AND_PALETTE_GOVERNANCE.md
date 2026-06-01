@@ -2,6 +2,13 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset governance note. Use
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+> for current public claim
+> posture.
+
 Prethinker has two related governance problems that should be kept together:
 
 - Product state must distinguish durable corpus facts from live session

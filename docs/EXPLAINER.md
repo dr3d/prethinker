@@ -1,5 +1,12 @@
 # Prethinker Explainer
 
+> Status: historical pre-reset explainer. The project story remains useful, but
+> score claims in this document are not current. The current claim-bearing floor
+> and strategy live in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 This is the plain-language explanation of what Prethinker is trying to become, what it already does well, and where the boundaries still are.
 
 ## The Short Version

@@ -131,6 +131,9 @@ def test_compare_qa_runs_reports_row_level_churn_and_added_support_surfaces() ->
         "baseline_exact_regression_count": 1,
         "baseline_exact_to_miss_count": 1,
     }
+    assert payload["aggregate"]["promotion_status"] == "blocked_by_regression_guard"
+    assert payload["comparisons"][0]["promotion_status"] == "blocked_by_regression_guard"
+    assert payload["summary"]["aggregate_promotion_status"] == "blocked_by_regression_guard"
     assert payload["row_changes"]["summary"]["regression_with_added_support_count"] == 1
     assert payload["row_changes"]["summary"]["regression_with_added_helper_count"] == 1
     regression = [
@@ -198,6 +201,7 @@ def test_normalize_comparison_payload_adds_regression_guard_to_archived_payload(
 
     assert normalized["summary"]["baseline_exact_regression_count"] == 5
     assert normalized["summary"]["baseline_exact_to_miss_count"] == 2
+    assert normalized["summary"]["aggregate_promotion_status"] == "blocked_by_regression_guard"
     assert normalized["regression_guard"]["status"] == "fail"
     assert normalized["regression_guard"]["baseline_exact_to_miss_count"] == 2
 

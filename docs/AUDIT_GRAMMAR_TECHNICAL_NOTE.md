@@ -2,6 +2,14 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset context. Do not cite the score claims in this
+> document as current. After the May 29 to June 1 sign-clean reset, the current
+> claim-bearing hard-clean floor is `73 / 200` (`36.5%`) on the 8-fixture
+> English batch. Current direction is documented in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 This is the public technical note for Prethinker's current measurement method.
 It explains what the audit grammar measures, why the discipline metrics matter,
 and how to read the current numbers without turning them into a benchmark claim
@@ -301,12 +309,8 @@ caveats.
 
 - Current measurement card:
   [Audit Grammar Measurement Note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md)
-- Native restamp worksheet:
-  [Native Restamp Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/NATIVE_RESTAMP_WORKSHEET.md)
-- Fresh ugly transfer worksheet:
-  [Fresh Ugly Public Batch 04 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_BATCH_04_WORKSHEET.md)
-- Fresh ugly May 28 worksheet:
-  [Fresh Ugly Public 20260528 Worksheet](https://github.com/dr3d/prethinker/blob/main/docs/FRESH_UGLY_PUBLIC_20260528_WORKSHEET.md)
+- Retired detailed worksheets:
+  `C:\prethinker_tmp_archive\docs_worksheet_archive_20260601`
 - Current fresh fixture request spec:
   [Next Fresh Fixture Requests](https://github.com/dr3d/prethinker/blob/main/docs/NEXT_FRESH_FIXTURE_REQUESTS_20260528.md)
 - QA boundary:
@@ -314,5 +318,6 @@ caveats.
 - Compiled artifact contract:
   [Compiled KB Artifact Package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md)
 
-The local bulk artifacts live in `C:\prethinker_tmp_archive`, with paths named
-in the worksheets. They are intentionally not committed to the public repo.
+The local bulk artifacts live in `C:\prethinker_tmp_archive`. Retired
+worksheets are preserved there and in Git history; they are intentionally not
+kept in the public docs front door.

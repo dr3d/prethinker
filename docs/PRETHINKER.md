@@ -1,5 +1,12 @@
 # Prethinker
 
+> Status: historical design overview. The architecture context remains useful,
+> but any score posture here is pre-reset. Use
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md)
+> for current claims.
+
 This is the stable design overview for the project. It is intentionally
 secondary to the current snapshot and headline docs.
 

@@ -1,0 +1,10 @@
+{
+  "schema_version": "typed_micro_fixture_v1",
+  "fixture_id": "numbered_inventory_segments_v1",
+  "purpose": "Verify that source-stated singleton and range segments are emitted as typed inventory facts without expanding ranges or hiding outcomes in inventory slots.",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "answer_types": ["numbered_inventory"],
+  "claim_path_policy": "compile-only; no QA question text; no source-record prose retrieval"
+}

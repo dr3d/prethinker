@@ -1,5 +1,6 @@
 import io
 import json
+import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -11,6 +12,8 @@ from scripts.run_domain_bootstrap_qa import (
     POST_INGESTION_QA_QUERY_STRATEGY,
     _assessment_revenue_companion,
     _assessment_transfer_policy_companion,
+    _atom_library_filtered_clauses,
+    _atom_library_filtered_inventory,
     _award_cap_quantity_hint_queries,
     _authority_instrument_metadata_hint_queries,
     _counsel_opinion_hint_queries,
@@ -21,9 +24,12 @@ from scripts.run_domain_bootstrap_qa import (
     _dedupe_helper_query_results,
     _fallback_queries_from_semantic_ir,
     _event_elapsed_duration_companion,
+    _evidence_bundle_absent_typed_constants,
+    _evidence_bundle_legal_citation_scope_expansion_query,
     _evidence_bundle_same_variable_join_queries,
     _failure_surface_payload,
     _filter_disabled_support_surfaces,
+    _filter_strict_claim_path_query_results,
     _limit_helper_query_results,
     _location_floor_hint_queries,
     _negative_join_with_previous,
@@ -63,7 +69,9 @@ from scripts.run_domain_bootstrap_qa import (
     _placeholder_repaired_query,
     _query_independent_source_record_support,
     _reference_judge_payload,
+    _registered_missing_query_signature_failure_surface,
     _relaxed_constant_query,
+    _sign_clean_strict_query_strategy,
     _source_record_field_sibling_repaired_query,
     _source_record_messy_summary_companions,
     _source_coordinate_hint_queries,
@@ -73,6 +81,16 @@ from scripts.run_domain_bootstrap_qa import (
     _source_record_under_heading_companion,
     _source_text_question_token_hint_queries,
     _temporal_join_with_previous,
+    _typed_monetary_relief_join_companion,
+    _typed_claim_finding_range_composition_results,
+    _typed_legal_citation_inventory_composition_results,
+    _typed_list_member_inventory_from_returned_values,
+    _typed_list_range_inventory_sibling_queries,
+    _typed_list_range_inventory_composition_results,
+    _typed_obligation_statute_join_companion,
+    _typed_source_claim_exchange_companion,
+    _typed_subject_document_date_inventory_queries,
+    _typed_signatory_office_chain_companion,
     _urlopen_json_with_transient_retries,
     _vacancy_voting_eligibility_companion,
     _vote_record_hint_queries,
@@ -118,6 +136,573 @@ def _query_intents_for(*intent_types: str) -> list[dict[str, object]]:
             "source": "semantic_ir",
         }
         for intent_type in intent_types
+    ]
+
+
+def test_atom_library_filtered_inventory_keeps_only_emitted_typed_atoms() -> None:
+    inventory = {
+        "signatures": [
+            "document_date/2",
+            "source_record_text_display/2",
+            "source_detail/4",
+            "party_role/3",
+            "party_role_context/4",
+        ],
+        "counts": {
+            "document_date/2": 2,
+            "source_record_text_display/2": 10,
+            "source_detail/4": 1,
+            "party_role/3": 1,
+            "party_role_context/4": 1,
+        },
+        "examples": {
+            "document_date/2": ["document_date(doc_a, v_2026_05_30)."],
+            "source_record_text_display/2": ["source_record_text_display(src_line_1, 'prose')."],
+            "source_detail/4": [
+                "source_detail(doc_a, note, 'This is a long display-like sentence with far too many natural language tokens to be a query atom.', src_line_1)."
+            ],
+            "party_role/3": ["party_role(person_a, signatory, company_a)."],
+            "party_role_context/4": ["party_role_context(case_a, person_a, signatory, source_block_a)."],
+        },
+        "arg_profiles": {
+            "document_date/2": [{"compound_atom": 1}, {"date_atom": 1}],
+            "source_record_text_display/2": [{"source_coord": 1}, {"quoted_atom": 1}],
+            "source_detail/4": [{"compound_atom": 1}, {"atom": 1}, {"long_text": 1}, {"source_coord": 1}],
+            "party_role/3": [{"compound_atom": 1}, {"atom": 1}, {"compound_atom": 1}],
+            "party_role_context/4": [{"compound_atom": 1}, {"compound_atom": 1}, {"atom": 1}, {"compound_atom": 1}],
+        },
+        "arg_values": {
+            "document_date/2": [{"doc_a": 1}, {"v_2026_05_30": 1}],
+            "source_record_text_display/2": [{"src_line_1": 1}, {"prose": 1}],
+            "source_detail/4": [{"doc_a": 1}, {"note": 1}, {"too_many_words": 1}, {"src_line_1": 1}],
+            "party_role/3": [{"person_a": 1}, {"signatory": 1}, {"company_a": 1}],
+            "party_role_context/4": [{"case_a": 1}, {"person_a": 1}, {"signatory": 1}, {"source_block_a": 1}],
+        },
+        "query_templates": [
+            "document_date(Document, Date).",
+            "source_record_text_display(Row, Text).",
+            "source_detail(Subject, Kind, Value, Row).",
+            "party_role(Person, Role, Entity).",
+            "party_role_context(Context, Party, Role, SourceOrScope).",
+        ],
+        "surface_alias_inventory": [
+            {"predicate": "document_date"},
+            {"predicate": "source_record_text_display"},
+            {"predicate": "party_role"},
+            {"predicate": "party_role_context"},
+        ],
+    }
+
+    filtered = _atom_library_filtered_inventory(inventory)
+
+    assert filtered["signatures"] == ["document_date/2", "party_role/3", "party_role_context/4"]
+    assert filtered["counts"] == {"document_date/2": 2, "party_role/3": 1, "party_role_context/4": 1}
+    assert filtered["arg_profiles"] == {
+        "document_date/2": [{"compound_atom": 1}, {"date_atom": 1}],
+        "party_role/3": [{"compound_atom": 1}, {"atom": 1}, {"compound_atom": 1}],
+        "party_role_context/4": [{"compound_atom": 1}, {"compound_atom": 1}, {"atom": 1}, {"compound_atom": 1}],
+    }
+    assert filtered["arg_values"] == {
+        "document_date/2": [{"doc_a": 1}, {"v_2026_05_30": 1}],
+        "party_role/3": [{"person_a": 1}, {"signatory": 1}, {"company_a": 1}],
+        "party_role_context/4": [{"case_a": 1}, {"person_a": 1}, {"signatory": 1}, {"source_block_a": 1}],
+    }
+    assert filtered["examples"] == {
+        "document_date/2": ["document_date(doc_a, v_2026_05_30)."],
+        "party_role/3": ["party_role(person_a, signatory, company_a)."],
+        "party_role_context/4": ["party_role_context(case_a, person_a, signatory, source_block_a)."],
+    }
+    assert filtered["query_templates"] == [
+        "document_date(Document, Date).",
+        "party_role(Person, Role, Entity).",
+        "party_role_context(Context, Party, Role, SourceOrScope).",
+    ]
+    assert filtered["surface_alias_inventory"] == [
+        {"predicate": "document_date"},
+        {"predicate": "party_role"},
+        {"predicate": "party_role_context"},
+    ]
+
+
+def test_sign_clean_query_guidance_prefers_item_range_slots_over_status_word_match() -> None:
+    policy = "\n".join(_sign_clean_strict_query_strategy()["sign_clean_strict_delivery_policy"])
+
+    assert "which claims, counts, issues, products, violations, requirements, or order paragraphs" in policy
+    assert "item/range slots next to action/outcome slots" in policy
+    assert "statutory-ground plus claim-range questions" in policy
+    assert "claim_ground/4, claim_range/4, legal_citation_detail/4" in policy
+    assert "legal_citation_detail/4, the fourth argument is a source/provenance/scope anchor" in policy
+    assert "agreement_5_7" in policy
+    assert "commenced an investigation" in policy
+    assert "recitals, statutory_ground, investigative_authority" in policy
+    assert "paragraph-specific subsection questions" in policy
+    assert "agreement_6, paragraph_6" in policy
+    assert "claim_outcome/3" in policy
+    assert "join them through their shared set/list/item id" in policy
+    assert "Do not shorten list_member/4 to list_member/2" in policy
+    assert "emit both query operations" in policy
+    assert "filing/report-year phrases as document scope" in policy
+    assert "error_declaration/4" in policy
+    assert "period-impact verification rows" in policy
+    assert "Unary or shallow container predicates" in policy
+    assert "Use argument/objection treatment predicates only when" in policy
+
+
+def test_typed_list_range_inventory_composition_combines_members_and_ranges() -> None:
+    query_results = [
+        {
+            "query": "list_member(contested_claims_set, X, claim, Y).",
+            "result": {
+                "status": "success",
+                "predicate": "list_member",
+                "prolog_query": "list_member(contested_claims_set, X, claim, Y).",
+                "rows": [
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "1", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "2", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "4", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "23", "Y": "src_line_0028"},
+                ],
+            },
+        },
+        {
+            "query": "claim_range(contested_claims_set, X, Y, Z).",
+            "result": {
+                "status": "success",
+                "predicate": "claim_range",
+                "prolog_query": "claim_range(contested_claims_set, X, Y, Z).",
+                "rows": [
+                    {"BoundArg1": "contested_claims_set", "X": "6", "Y": "9", "Z": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "X": "12", "Y": "21", "Z": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "X": "25", "Y": "39", "Z": "src_line_0028"},
+                ],
+            },
+        },
+    ]
+
+    composed = _typed_list_range_inventory_composition_results(query_results)
+
+    assert len(composed) == 1
+    result = composed[0]["result"]
+    assert result["reasoning_basis"]["kind"] == "deterministic_typed_inventory_composition"
+    assert result["rows"][0]["SetId"] == "contested_claims_set"
+    assert result["rows"][0]["RenderedInventory"] == "1, 2, 4, 6-9, 12-21, 23, 25-39"
+    assert result["rows"][0]["SingletonCount"] == 4
+    assert result["rows"][0]["RangeCount"] == 3
+
+
+def test_typed_list_range_inventory_composition_removes_range_boundary_duplicates() -> None:
+    query_results = [
+        {
+            "query": "list_member(contested_claims_set, X, claim, Y).",
+            "result": {
+                "status": "success",
+                "predicate": "list_member",
+                "prolog_query": "list_member(contested_claims_set, X, claim, Y).",
+                "rows": [
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "claim_1", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "claim_6", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "claim_9", "Y": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "BoundArg3": "claim", "X": "claim_12", "Y": "src_line_0028"},
+                ],
+            },
+        },
+        {
+            "query": "claim_range(contested_claims_set, X, Y, Z).",
+            "result": {
+                "status": "success",
+                "predicate": "claim_range",
+                "prolog_query": "claim_range(contested_claims_set, X, Y, Z).",
+                "rows": [
+                    {"BoundArg1": "contested_claims_set", "X": "6", "Y": "9", "Z": "src_line_0028"},
+                ],
+            },
+        },
+    ]
+
+    composed = _typed_list_range_inventory_composition_results(query_results)
+
+    row = composed[0]["result"]["rows"][0]
+    assert row["RenderedInventory"] == "1, 6-9, 12"
+    assert row["SingletonCount"] == 2
+    assert row["RangeCount"] == 1
+
+
+def test_typed_list_range_inventory_composition_removes_compressed_and_subsumed_segments() -> None:
+    query_results = [
+        {
+            "query": "list_member(contested_claims_set, X, Kind, Source).",
+            "result": {
+                "status": "success",
+                "predicate": "list_member",
+                "prolog_query": "list_member(contested_claims_set, X, Kind, Source).",
+                "rows": [
+                    {
+                        "BoundArg1": "contested_claims_set",
+                        "X": "1_2_4_6_9_12_21_23_and_25_39",
+                        "Kind": "contested_item",
+                        "Source": "direct",
+                    },
+                    {"BoundArg1": "contested_claims_set", "X": "1", "Kind": "claim", "Source": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "X": "23", "Kind": "claim", "Source": "src_line_0028"},
+                ],
+            },
+        },
+        {
+            "query": "claim_range(contested_claims_set, Start, End, Source).",
+            "result": {
+                "status": "success",
+                "predicate": "claim_range",
+                "prolog_query": "claim_range(contested_claims_set, Start, End, Source).",
+                "rows": [
+                    {"BoundArg1": "contested_claims_set", "Start": "6", "End": "9", "Source": "src_line_0028"},
+                    {"BoundArg1": "contested_claims_set", "Start": "25", "End": "27", "Source": "src_line_0043"},
+                    {"BoundArg1": "contested_claims_set", "Start": "25", "End": "39", "Source": "src_line_0028"},
+                ],
+            },
+        },
+    ]
+
+    composed = _typed_list_range_inventory_composition_results(query_results)
+
+    row = composed[0]["result"]["rows"][0]
+    assert row["RenderedInventory"] == "1, 6-9, 23, 25-39"
+    assert row["SingletonCount"] == 2
+    assert row["RangeCount"] == 2
+
+
+def test_typed_list_range_inventory_composition_sorts_date_like_atoms_chronologically() -> None:
+    query_results = [
+        {
+            "query": "claim_range(non_reliance_periods, Start, End, Source).",
+            "result": {
+                "status": "success",
+                "predicate": "claim_range",
+                "prolog_query": "claim_range(non_reliance_periods, Start, End, Source).",
+                "rows": [
+                    {
+                        "BoundArg1": "non_reliance_periods",
+                        "Start": "periods_ended_june_28_2025",
+                        "End": "periods_ended_june_28_2025",
+                        "Source": "item_4_02",
+                    },
+                    {
+                        "BoundArg1": "non_reliance_periods",
+                        "Start": "periods_ended_march_29_2025",
+                        "End": "periods_ended_march_29_2025",
+                        "Source": "item_4_02",
+                    },
+                    {
+                        "BoundArg1": "non_reliance_periods",
+                        "Start": "periods_ended_september_27_2025",
+                        "End": "periods_ended_september_27_2025",
+                        "Source": "item_4_02",
+                    },
+                ],
+            },
+        }
+    ]
+
+    composed = _typed_list_range_inventory_composition_results(query_results)
+
+    row = composed[0]["result"]["rows"][0]
+    assert row["RenderedInventory"] == (
+        "periods_ended_march_29_2025, periods_ended_june_28_2025, periods_ended_september_27_2025"
+    )
+
+
+def test_typed_list_range_inventory_sibling_queries_fetch_same_set_ranges() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "list_member(contested_claims, 1, claim, src_line_0028).",
+        "list_member(contested_claims, 2, claim, src_line_0028).",
+        "claim_range(contested_claims, 6, 9, src_line_0028).",
+        "claim_range(contested_claims, 12, 21, src_line_0028).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = [
+        {
+            "query": "list_member(contested_claims, Member, claim, Source).",
+            "result": {
+                "status": "success",
+                "predicate": "list_member",
+                "prolog_query": "list_member(contested_claims, Member, claim, Source).",
+                "rows": [
+                    {
+                        "BoundArg1": "contested_claims",
+                        "BoundArg3": "claim",
+                        "Member": "1",
+                        "Source": "src_line_0028",
+                    },
+                    {
+                        "BoundArg1": "contested_claims",
+                        "BoundArg3": "claim",
+                        "Member": "2",
+                        "Source": "src_line_0028",
+                    },
+                ],
+            },
+        }
+    ]
+
+    sibling_queries = _typed_list_range_inventory_sibling_queries(runtime=runtime, results=results)
+
+    range_query = next(
+        item
+        for item in sibling_queries
+        if item["query"] == "claim_range(contested_claims, StartValue, EndValue, SourceOrScope)."
+    )
+    assert range_query["result"]["status"] == "success"
+    assert [
+        (row["StartValue"], row["EndValue"])
+        for row in range_query["result"]["rows"]
+    ] == [("6", "9"), ("12", "21")]
+    assert "no question text or source prose" in range_query["result"]["reasoning_basis"]["note"]
+
+
+def test_typed_list_member_inventory_from_returned_values_fetches_full_typed_set() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "list_member(error_categories, lease_adjustments, error_category, direct).",
+        "list_member(error_categories, cash_adjustments, error_category, direct).",
+        "list_member(error_categories, expense_classification, error_category, direct).",
+        "list_member(error_categories, other_errors, error_category, direct).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = [
+        {
+            "query": "error_type(ErrorID, ErrorCategory).",
+            "result": {
+                "status": "success",
+                "predicate": "error_type",
+                "prolog_query": "error_type(ErrorID, ErrorCategory).",
+                "rows": [
+                    {"ErrorID": "err_lease", "ErrorCategory": "lease_adjustments"},
+                    {"ErrorID": "err_other", "ErrorCategory": "other_errors"},
+                ],
+            },
+        }
+    ]
+
+    sibling_queries = _typed_list_member_inventory_from_returned_values(runtime=runtime, results=results)
+
+    assert len(sibling_queries) == 1
+    assert sibling_queries[0]["query"] == "list_member(error_categories, MemberValue, error_category, SourceOrScope)."
+    result = sibling_queries[0]["result"]
+    assert result["status"] == "success"
+    assert result["reasoning_basis"]["matched_member_values"] == ["lease_adjustments", "other_errors"]
+    assert {row["MemberValue"] for row in result["rows"]} == {
+        "lease_adjustments",
+        "cash_adjustments",
+        "expense_classification",
+        "other_errors",
+    }
+    assert "no question text or source prose" in result["reasoning_basis"]["note"]
+
+
+def test_typed_list_member_inventory_from_returned_values_requires_multiple_members() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "list_member(error_categories, lease_adjustments, error_category, direct).",
+        "list_member(error_categories, cash_adjustments, error_category, direct).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = [
+        {
+            "query": "error_type(ErrorID, ErrorCategory).",
+            "result": {
+                "status": "success",
+                "predicate": "error_type",
+                "prolog_query": "error_type(ErrorID, ErrorCategory).",
+                "rows": [{"ErrorID": "err_lease", "ErrorCategory": "lease_adjustments"}],
+            },
+        }
+    ]
+
+    assert _typed_list_member_inventory_from_returned_values(runtime=runtime, results=results) == []
+
+
+def test_typed_subject_document_date_inventory_fetches_sibling_dates() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "document_signatory(filing_8k_20260225, scott_o_melia, executive_vice_president_chief_legal_officer).",
+        "document_date(filing_8k_20260225, filing_date, february_25_2026).",
+        "filing_date(filing_8k_20260225, february_25_2026).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = [
+        {
+            "query": "document_signatory(filing_8k_20260225, SignatoryName, SignatoryTitle).",
+            "result": {
+                "status": "success",
+                "predicate": "document_signatory",
+                "prolog_query": "document_signatory(filing_8k_20260225, SignatoryName, SignatoryTitle).",
+                "rows": [
+                    {
+                        "BoundArg1": "filing_8k_20260225",
+                        "SignatoryName": "scott_o_melia",
+                        "SignatoryTitle": "executive_vice_president_chief_legal_officer",
+                    }
+                ],
+            },
+        }
+    ]
+
+    sibling_queries = _typed_subject_document_date_inventory_queries(runtime=runtime, results=results)
+
+    assert [item["query"] for item in sibling_queries] == [
+        "document_date(filing_8k_20260225, DateRole, DateValue).",
+        "filing_date(filing_8k_20260225, DateValue).",
+    ]
+    document_date = sibling_queries[0]["result"]
+    assert document_date["status"] == "success"
+    assert document_date["rows"] == [
+        {
+            "BoundArg1": "filing_8k_20260225",
+            "BoundArg1Display": "filing 8k 20260225",
+            "DateRole": "filing_date",
+            "DateValue": "february_25_2026",
+        }
+    ]
+    assert "no question text or source prose" in document_date["reasoning_basis"]["note"]
+
+
+def test_typed_subject_document_date_inventory_ignores_source_record_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    assert runtime.assert_fact(
+        "document_date(filing_8k_20260225, filing_date, february_25_2026)."
+    ).get("status") == "success"
+
+    results = [
+        {
+            "query": "source_record_text_display(src_001, Text).",
+            "result": {
+                "status": "success",
+                "predicate": "source_record_text_display",
+                "prolog_query": "source_record_text_display(src_001, Text).",
+                "rows": [{"BoundArg1": "src_001", "Text": "Signed February 25, 2026"}],
+            },
+        }
+    ]
+
+    assert _typed_subject_document_date_inventory_queries(runtime=runtime, results=results) == []
+
+
+def test_typed_claim_finding_range_composition_compacts_per_claim_findings() -> None:
+    query_results = [
+        {
+            "query": "anticipation_finding(X, Y, Z).",
+            "result": {
+                "status": "success",
+                "predicate": "anticipation_finding",
+                "prolog_query": "anticipation_finding(X, Y, Z).",
+                "rows": [
+                    {"X": "song_525", "Y": "claim_1", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_2", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_4", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_6", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_7", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_8", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_9", "Z": "anticipated"},
+                    {"X": "song_525", "Y": "claim_12", "Z": "anticipated"},
+                ],
+            },
+        },
+        {
+            "query": "obviousness_finding(X, Y, Z).",
+            "result": {
+                "status": "success",
+                "predicate": "obviousness_finding",
+                "prolog_query": "obviousness_finding(X, Y, Z).",
+                "rows": [
+                    {"X": "song_525", "Y": "claim_28", "Z": "obvious"},
+                    {"X": "song_525", "Y": "claim_29", "Z": "obvious"},
+                    {"X": "song_525", "Y": "claim_30", "Z": "obvious"},
+                ],
+            },
+        },
+    ]
+
+    composed = _typed_claim_finding_range_composition_results(query_results)
+
+    assert len(composed) == 1
+    rows = composed[0]["result"]["rows"]
+    assert rows == [
+        {
+            "FindingPredicate": "anticipation_finding",
+            "Ground": "anticipation",
+            "Reference": "song_525",
+            "Outcome": "anticipated",
+            "RenderedClaimRanges": "1-2, 4, 6-9, 12",
+            "ClaimCount": 8,
+            "Segments": [
+                {"segment_type": "range", "start": 1, "end": 2, "rendered": "1-2"},
+                {"segment_type": "singleton", "start": 4, "end": 4, "rendered": "4"},
+                {"segment_type": "range", "start": 6, "end": 9, "rendered": "6-9"},
+                {"segment_type": "singleton", "start": 12, "end": 12, "rendered": "12"},
+            ],
+        },
+        {
+            "FindingPredicate": "obviousness_finding",
+            "Ground": "obviousness",
+            "Reference": "song_525",
+            "Outcome": "obvious",
+            "RenderedClaimRanges": "28-30",
+            "ClaimCount": 3,
+            "Segments": [
+                {"segment_type": "range", "start": 28, "end": 30, "rendered": "28-30"},
+            ],
+        },
+    ]
+
+
+def test_atom_library_filtered_clauses_rejects_source_records_and_prose_like_values() -> None:
+    clauses = [
+        "document_date(doc_a, v_2026_05_30).",
+        "source_record_field(src_line_1, filing_date, v_2026_05_30).",
+        "document_description(doc_a, short_label).",
+        "source_detail(doc_a, note, 'This is a long display-like sentence with far too many natural language tokens to be a query atom.', src_line_1).",
+    ]
+
+    assert _atom_library_filtered_clauses(clauses) == ["document_date(doc_a, v_2026_05_30)."]
+
+
+def test_compiled_kb_inventory_includes_structural_arg_profiles() -> None:
+    inventory = compiled_kb_inventory(
+        facts=[
+            "document_date(doc_a, v_2026_05_30).",
+            "document_date(doc_b, v_2026_05_31).",
+            "party_role(person_a, signatory, company_a).",
+            "source_record_field(src_line_0001, filing_date, v_2026_05_30).",
+        ],
+        rules=[],
+    )
+
+    assert inventory["arg_profiles"]["document_date/2"] == [
+        {"compound_atom": 2},
+        {"date_atom": 2},
+    ]
+    assert inventory["arg_profiles"]["party_role/3"] == [
+        {"compound_atom": 1},
+        {"atom": 1},
+        {"compound_atom": 1},
+    ]
+    assert inventory["arg_profiles"]["source_record_field/3"] == [
+        {"source_coord": 1},
+        {"compound_atom": 1},
+        {"date_atom": 1},
+    ]
+    assert inventory["arg_values"]["document_date/2"] == [
+        {"doc_a": 1, "doc_b": 1},
+        {"v_2026_05_30": 1, "v_2026_05_31": 1},
+    ]
+    assert inventory["arg_values"]["party_role/3"] == [
+        {"person_a": 1},
+        {"signatory": 1},
+        {"company_a": 1},
     ]
 
 
@@ -209,6 +794,604 @@ def test_parse_markdown_answer_key_reads_answer_section_only() -> None:
         "q001": "Batch P-44 and the welcome loaf.",
         "q002": "Unknown until K. Lume is resolved.",
     }
+
+
+def test_sign_clean_strict_strategy_removes_free_text_source_record_guidance() -> None:
+    strategy = _sign_clean_strict_query_strategy()
+    encoded = json.dumps(strategy, ensure_ascii=False).casefold()
+
+    assert "source_record_* predicates" in encoded
+    assert "not answer-bearing thesis evidence" in encoded
+    assert "document_identifier/3 alias chains" in encoded
+    assert "document_date/3" in encoded
+    assert "when source_record_text_display/source_record_label_display" not in encoded
+    assert "source-record text or fields can corroborate addressability" not in encoded
+    assert "source_record_field/3" not in encoded
+    assert "panel_member/2" in encoded
+    assert "footnote_content/3" in encoded
+
+
+def test_atom_library_and_bundle_planner_warn_about_identifier_alias_subjects() -> None:
+    source = Path("scripts/run_domain_bootstrap_qa.py").read_text(encoding="utf-8")
+
+    assert "For document_identifier/3 alias chains" in source
+    assert "Do not automatically feed the identifier value returned by document_identifier/3 into document_date/3" in source
+    assert "treat the returned identifier or alias value as answer data first" in source
+    assert "Split anchors like agreement_5_7 can still answer an agreement_5 question" in source
+
+
+def test_sign_clean_strict_blocks_all_source_record_predicates() -> None:
+    blocked = qa_module._sign_clean_strict_blocked_query("source_record_field(Row, field, Value).")
+
+    assert blocked is not None
+    assert blocked["result"]["status"] == "blocked_by_sign_clean_strict"
+    assert blocked["result"]["blocked_predicates"] == ["source_record_field"]
+
+
+def test_sign_clean_strict_is_cli_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "compile.json",
+            "--qa-file",
+            "qa.md",
+        ],
+    )
+
+    args = qa_module.parse_args()
+
+    assert args.sign_clean_strict is True
+
+
+def test_non_sign_clean_free_text_routing_requires_explicit_cli_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "compile.json",
+            "--qa-file",
+            "qa.md",
+            "--allow-non-sign-clean-free-text-routing",
+        ],
+    )
+
+    args = qa_module.parse_args()
+
+    assert args.sign_clean_strict is False
+
+
+def test_typed_support_companions_are_cli_opt_in(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "run.json",
+            "--qa-file",
+            "qa.md",
+        ],
+    )
+    args = qa_module.parse_args()
+
+    assert args.typed_support_companions is False
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_domain_bootstrap_qa.py",
+            "--run-json",
+            "run.json",
+            "--qa-file",
+            "qa.md",
+            "--typed-support-companions",
+        ],
+    )
+    args = qa_module.parse_args()
+
+    assert args.typed_support_companions is True
+
+
+def test_typed_support_companions_do_not_run_by_default() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "issuing_office_chain(doc_1, office, office_of_manufacturing_quality).",
+        "person_role_context(francis_godwin, director, fda, signatory).",
+        "person_role_context(francis_godwin, director, fda, director_office_of_manufacturing_quality).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    without_flag = run_query_plan(
+        runtime,
+        [
+            "issuing_office_chain(doc_1, X, Y).",
+            "person_role_context(francis_godwin, X, Y, signatory).",
+        ],
+        helper_companions_enabled=False,
+    )
+    with_flag = run_query_plan(
+        runtime,
+        [
+            "issuing_office_chain(doc_1, X, Y).",
+            "person_role_context(francis_godwin, X, Y, signatory).",
+        ],
+        helper_companions_enabled=False,
+        typed_support_companions=True,
+    )
+
+    assert not any(
+        item.get("result", {}).get("predicate") == "typed_signatory_office_chain_support"
+        for item in without_flag
+    )
+    assert any(
+        item.get("result", {}).get("predicate") == "typed_signatory_office_chain_support"
+        for item in with_flag
+    )
+
+
+def test_typed_signatory_office_chain_companion_uses_typed_rows_only() -> None:
+    companion = _typed_signatory_office_chain_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "issuing_office_chain",
+                    "rows": [
+                        {
+                            "BoundArg1": "doc_1",
+                            "X": "center",
+                            "Y": "center_for_drug_evaluation_and_research",
+                        },
+                        {
+                            "BoundArg1": "doc_1",
+                            "X": "office",
+                            "Y": "office_of_compliance",
+                        },
+                        {
+                            "BoundArg1": "doc_1",
+                            "X": "office",
+                            "Y": "office_of_manufacturing_quality",
+                        },
+                    ],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "person_role_context",
+                    "rows": [
+                        {
+                            "X": "francis_godwin",
+                            "Y": "director",
+                            "BoundArg3": "fda",
+                            "BoundArg4": "director_office_of_manufacturing_quality",
+                        }
+                    ],
+                }
+            },
+        ]
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "typed_signatory_office_chain_support"
+    assert result["rows"] == [
+        {
+            "SupportKind": "typed_signatory_office_chain",
+            "DocumentOrIssuer": "doc_1",
+            "Signatory": "francis_godwin",
+            "Title": "director",
+            "IssuingOffice": "office_of_manufacturing_quality",
+            "ParentOffices": "office_of_compliance",
+            "Center": "center_for_drug_evaluation_and_research",
+            "RoleContext": "director_office_of_manufacturing_quality",
+        }
+    ]
+    assert "source-record" in result["reasoning_basis"]["note"]
+
+
+def test_typed_signatory_office_chain_companion_can_fetch_typed_role_context() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "person_role_context(francis_godwin, director, fda, signatory).",
+        "person_role_context(francis_godwin, director, fda, director_office_of_manufacturing_quality).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    companion = _typed_signatory_office_chain_companion(
+        runtime=runtime,
+        results=[
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "issuing_office_chain",
+                    "rows": [
+                        {"BoundArg1": "doc_1", "X": "office", "Y": "office_of_compliance"},
+                        {"BoundArg1": "doc_1", "X": "office", "Y": "office_of_manufacturing_quality"},
+                    ],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "person_role_context",
+                    "rows": [
+                        {
+                            "X": "francis_godwin",
+                            "Y": "director",
+                            "BoundArg3": "fda",
+                            "BoundArg4": "signatory",
+                        }
+                    ],
+                }
+            },
+        ],
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert len(rows) == 1
+    assert rows[0]["IssuingOffice"] == "office_of_manufacturing_quality"
+    assert rows[0]["RoleContext"] == "director_office_of_manufacturing_quality"
+
+
+def test_typed_source_claim_exchange_companion_groups_claims_by_anchor() -> None:
+    companion = _typed_source_claim_exchange_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_attributed_claim",
+                    "rows": [
+                        {
+                            "Relaxed1": "claim_firm_001",
+                            "Relaxed2": "seaway_pharma_inc",
+                            "Relaxed3": "no_enforceable_provisions_for_deg_eg",
+                            "Relaxed4": "src_line_0031",
+                        },
+                        {
+                            "Relaxed1": "finding_fda_rebuttal_001",
+                            "Relaxed2": "fda",
+                            "Relaxed3": "identity_testing_required_under_21_cfr_211_84_d_1",
+                            "Relaxed4": "src_line_0031",
+                        },
+                    ],
+                }
+            }
+        ]
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "typed_source_claim_exchange_support"
+    assert result["rows"] == [
+        {
+            "SupportKind": "typed_source_claim_exchange",
+            "SourceAnchor": "src_line_0031",
+            "Claimant": "seaway_pharma_inc",
+            "ClaimId": "claim_firm_001",
+            "Claim": "no_enforceable_provisions_for_deg_eg",
+            "Responder": "fda",
+            "ResponseId": "finding_fda_rebuttal_001",
+            "Response": "identity_testing_required_under_21_cfr_211_84_d_1",
+        }
+    ]
+
+
+def test_typed_source_claim_exchange_companion_pairs_numbered_response_evaluation() -> None:
+    companion = _typed_source_claim_exchange_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_attributed_claim",
+                    "rows": [
+                        {
+                            "Claimid": "claim_firm_001",
+                            "Relaxed2": "seaway_pharma_inc",
+                            "Relaxed3": "no_enforceable_provisions_for_deg_eg",
+                            "Relaxed4": "violation_2_21_cfr_211_84_d_1",
+                        },
+                    ],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "response_evaluation",
+                    "rows": [
+                        {
+                            "Relaxed1": "response_violation_2",
+                            "Relaxed2": "inadequate",
+                            "EvaluationText": "refuted_by_21_cfr_211_84_d_1_and_usp",
+                        },
+                    ],
+                }
+            },
+        ]
+    )
+
+    assert companion is not None
+    rows = companion["result"]["rows"]
+    assert rows == [
+        {
+            "SupportKind": "typed_source_claim_response_evaluation",
+            "SourceAnchor": "violation_2_21_cfr_211_84_d_1",
+            "Claimant": "seaway_pharma_inc",
+            "ClaimId": "claim_firm_001",
+            "Claim": "no_enforceable_provisions_for_deg_eg",
+            "Responder": "fda",
+            "ResponseId": "response_violation_2",
+            "Response": "refuted_by_21_cfr_211_84_d_1_and_usp",
+            "ResponseStatus": "inadequate",
+        }
+    ]
+
+
+def test_typed_obligation_statute_join_companion_normalizes_zero_padded_ids() -> None:
+    companion = _typed_obligation_statute_join_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "obligation",
+                    "rows": [
+                        {
+                            "ObligationID": "obligation_6",
+                            "ObligationText": "comply_with_fcra_15_u_s_c_1681e_b_and_nyfcra_gbl_380_j_a",
+                            "BoundArg3": "aod_24_102",
+                        }
+                    ],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "obligation_statute",
+                    "rows": [
+                        {"ObligationID": "obligation_06", "StatuteName": "fair_credit_reporting_act"},
+                        {"ObligationID": "obligation_06", "StatuteName": "new_york_fair_credit_reporting_act"},
+                    ],
+                }
+            },
+        ]
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "typed_obligation_statute_join_support"
+    assert result["rows"] == [
+        {
+            "SupportKind": "typed_obligation_statute_join",
+            "CanonicalRecordID": "obligation_6",
+            "ObligationID": "obligation_6",
+            "StatuteObligationID": "obligation_06",
+            "ObligationText": "comply_with_fcra_15_u_s_c_1681e_b_and_nyfcra_gbl_380_j_a",
+            "Statute": "fair_credit_reporting_act",
+            "SourceDoc": "aod_24_102",
+        },
+        {
+            "SupportKind": "typed_obligation_statute_join",
+            "CanonicalRecordID": "obligation_6",
+            "ObligationID": "obligation_6",
+            "StatuteObligationID": "obligation_06",
+            "ObligationText": "comply_with_fcra_15_u_s_c_1681e_b_and_nyfcra_gbl_380_j_a",
+            "Statute": "new_york_fair_credit_reporting_act",
+            "SourceDoc": "aod_24_102",
+        },
+    ]
+
+
+def test_typed_legal_citation_inventory_composition_groups_split_scope_anchors() -> None:
+    composition = _typed_legal_citation_inventory_composition_results(
+        [
+            {
+                "query": "legal_citation_detail(Relaxed1, Citation, Relaxed3, Relaxed4).",
+                "result": {
+                    "status": "success",
+                    "predicate": "legal_citation_detail",
+                    "prolog_query": "legal_citation_detail(Relaxed1, Citation, Relaxed3, Relaxed4).",
+                    "rows": [
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "n_y_exec_law_63_12",
+                            "Relaxed3": "compliance_standard",
+                            "Relaxed4": "agreement_5",
+                        },
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "n_y_gen_bus_law_349",
+                            "Relaxed3": "compliance_standard",
+                            "Relaxed4": "agreement_5_7",
+                        },
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "n_y_gen_bus_law_350",
+                            "Relaxed3": "compliance_standard",
+                            "Relaxed4": "agreement_5_7",
+                        },
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "n_y_gen_bus_law_380_j",
+                            "Relaxed3": "compliance_standard",
+                            "Relaxed4": "agreement_5_8",
+                        },
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "15_u_s_c_1681_et_seq",
+                            "Relaxed3": "compliance_standard",
+                            "Relaxed4": "agreement_5",
+                        },
+                        {
+                            "Relaxed1": "sub_24_102_equifax_compliance",
+                            "Citation": "future_amendments_to_foregoing_laws_regulations_and_rules",
+                            "Relaxed3": "amendment_scope",
+                            "Relaxed4": "direct",
+                        },
+                    ],
+                },
+            }
+        ]
+    )
+
+    assert len(composition) == 1
+    result = composition[0]["result"]
+    assert result["predicate"] == "typed_legal_citation_inventory_composition"
+    rows = result["rows"]
+    ancestor_row = next(
+        row
+        for row in rows
+        if row["Subject"] == "sub_24_102_equifax_compliance"
+        and row["RoleGroup"] == "compliance_standard"
+        and row["ScopeGroup"] == "agreement_5"
+        and row["ScopeGroupKind"] == "scope_ancestor"
+    )
+    assert ancestor_row["CitationAtoms"] == [
+        "n_y_exec_law_63_12",
+        "n_y_gen_bus_law_349",
+        "n_y_gen_bus_law_350",
+        "n_y_gen_bus_law_380_j",
+        "15_u_s_c_1681_et_seq",
+    ]
+    all_scopes_row = next(
+        row
+        for row in rows
+        if row["Subject"] == "sub_24_102_equifax_compliance"
+        and row["RoleGroup"] == "compliance_standard"
+        and row["ScopeGroup"] == "all_scopes"
+    )
+    assert all_scopes_row["CitationAtoms"] == [
+        "n_y_exec_law_63_12",
+        "n_y_gen_bus_law_349",
+        "n_y_gen_bus_law_350",
+        "n_y_gen_bus_law_380_j",
+        "15_u_s_c_1681_et_seq",
+    ]
+    amendment_row = next(
+        row
+        for row in rows
+        if row["RoleGroup"] == "amendment_scope" and row["ScopeGroup"] == "direct"
+    )
+    assert amendment_row["CitationAtoms"] == ["future_amendments_to_foregoing_laws_regulations_and_rules"]
+    bundle_row = next(
+        row
+        for row in rows
+        if row["Subject"] == "sub_24_102_equifax_compliance"
+        and row["RoleGroup"] == "citation_answer_bundle"
+        and row["ScopeGroup"] == "agreement_5"
+        and row["ScopeGroupKind"] == "scope_ancestor_with_amendment_scope"
+    )
+    assert bundle_row["RoleGroups"] == ["compliance_standard", "amendment_scope"]
+    assert bundle_row["CitationAtoms"] == [
+        "n_y_exec_law_63_12",
+        "n_y_gen_bus_law_349",
+        "n_y_gen_bus_law_350",
+        "n_y_gen_bus_law_380_j",
+        "15_u_s_c_1681_et_seq",
+        "future_amendments_to_foregoing_laws_regulations_and_rules",
+    ]
+    assert "no source prose or question text" in result["reasoning_basis"]["note"]
+
+
+def test_typed_monetary_relief_join_companion_uses_typed_rows_only() -> None:
+    companion = _typed_monetary_relief_join_companion(
+        [
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "source_detail",
+                    "rows": [
+                        {
+                            "Relaxed1": "monetary_relief_725k",
+                            "PaymentAmount": "payment_amount",
+                            "Amount": "725_000",
+                            "Relaxed4": "src_line_0046",
+                        },
+                        {
+                            "Relaxed1": "monetary_relief_725k",
+                            "PaymentAmount": "payment_deadline",
+                            "Amount": "within_thirty_30_days_after_the_date_of_this_assurance",
+                            "Relaxed4": "src_line_0046",
+                        },
+                    ],
+                }
+            },
+            {
+                "result": {
+                    "status": "success",
+                    "predicate": "monetary_relief_purpose",
+                    "rows": [
+                        {
+                            "Relaxed1": "monetary_relief_725k",
+                            "Relaxed2": "restitution_and_penalties_pursuant_to_gbl_349_d",
+                        }
+                    ],
+                }
+            },
+        ]
+    )
+
+    assert companion is not None
+    result = companion["result"]
+    assert result["predicate"] == "typed_monetary_relief_support"
+    assert result["rows"] == [
+        {
+            "SupportKind": "typed_monetary_relief_join",
+            "ReliefID": "monetary_relief_725k",
+            "Amount": "725_000",
+            "Purpose": "restitution_and_penalties_pursuant_to_gbl_349_d",
+            "SourceLine": "src_line_0046",
+        }
+    ]
+
+
+def test_reference_judge_payload_sanitizes_strict_query_results() -> None:
+    row = {
+        "id": "q001",
+        "utterance": "What is the filed value?",
+        "query_results": [
+            {
+                "query": "source_record_field(Row, label, Value).",
+                "result": {
+                    "predicate": "source_record_field",
+                    "status": "success",
+                    "rows": [{"Value": "answer_from_source_record"}],
+                },
+            },
+            {
+                "query": "document_identifier(Document, kind, Value).",
+                "result": {
+                    "predicate": "document_identifier",
+                    "status": "success",
+                    "note": "control-plane prose should disappear",
+                    "rows": [
+                        {
+                            "Document": "doc_a",
+                            "Kind": "commission_file_number",
+                            "Value": "001_39898",
+                            "LabelDisplay": "Commission file number",
+                            "BoundArg2Display": "commission file number",
+                        }
+                    ],
+                },
+            },
+        ],
+    }
+
+    payload = _reference_judge_payload(row, reference="001-39898", sign_clean_strict=True)
+
+    assert len(payload["query_results"]) == 1
+    result = payload["query_results"][0]["result"]
+    assert result["predicate"] == "document_identifier"
+    assert "note" not in result
+    assert "LabelDisplay" not in result["rows"][0]
+    assert result["rows"][0]["BoundArg2Display"] == "commission file number"
 
 
 def test_load_oracle_indexes_prefixed_and_original_question_ids(tmp_path: Path) -> None:
@@ -338,6 +1521,54 @@ def test_failure_surface_payload_compacts_oversized_query_results() -> None:
     assert payload["failure_surface_compaction"]["reason"] == "payload_exceeded_soft_limit"
     assert len(result["rows"]) == 48
     assert len(payload["relevant_clauses"]) == 300
+
+
+def test_missing_registered_query_signature_classifies_as_compile_gap() -> None:
+    surface = _registered_missing_query_signature_failure_surface(
+        row={
+            "query_results": [
+                {
+                    "query": "obligation_detail(ObligationId, DetailKind, DetailValue, RoleOrPurpose, SourceOrScope).",
+                    "result": {
+                        "status": "error",
+                        "message": "evidence-bundle query signature not in compiled inventory: obligation_detail/5",
+                        "reasoning_basis": {
+                            "query_signatures": ["obligation_detail/5"],
+                        },
+                    },
+                }
+            ]
+        },
+        kb_inventory={"signatures": ["document_title/2"]},
+    )
+
+    assert surface is not None
+    assert surface["surface"] == "compile_surface_gap"
+    assert "obligation_detail/5" in surface["rationale"]
+
+
+def test_missing_registered_query_signature_does_not_override_successful_rows() -> None:
+    surface = _registered_missing_query_signature_failure_surface(
+        row={
+            "query_results": [
+                {
+                    "query": "document_title(Document, Title).",
+                    "result": {"status": "success", "rows": [{"Document": "doc_1", "Title": "title"}]},
+                },
+                {
+                    "query": "obligation_detail(ObligationId, DetailKind, DetailValue, RoleOrPurpose, SourceOrScope).",
+                    "result": {
+                        "status": "error",
+                        "message": "evidence-bundle query signature not in compiled inventory: obligation_detail/5",
+                        "reasoning_basis": {"query_signatures": ["obligation_detail/5"]},
+                    },
+                },
+            ]
+        },
+        kb_inventory={"signatures": ["document_title/2"]},
+    )
+
+    assert surface is None
 
 
 def test_reference_answers_are_not_structured_oracle_expectations() -> None:
@@ -677,24 +1908,495 @@ def test_compiled_kb_inventory_groups_present_surface_alias_families() -> None:
 
 
 def test_compiled_kb_contracts_name_role_and_generic_replacement_slots() -> None:
-    contracts = {
-        row["signature"]: row["args"]
-        for row in compiled_kb_contracts(
-            [
-                "person_role/2",
-                "person_role/3",
-                "group_assignment/3",
-                "recorded_statement/3",
-                "custom_fact/2",
-            ]
-        )
-    }
+    rows = compiled_kb_contracts(
+        [
+            "person_role/2",
+            "person_role/3",
+            "group_assignment/3",
+            "list_member/4",
+        "claim_range/4",
+        "item_range/4",
+        "registrant_identity/2",
+        "registrant_name/2",
+        "party_role_context/4",
+        "recorded_statement/3",
+        "custom_fact/2",
+        ]
+    )
+    contracts = {row["signature"]: row["args"] for row in rows}
+    by_signature = {row["signature"]: row for row in rows}
 
-    assert contracts["person_role/2"] == ["person", "role"]
-    assert contracts["person_role/3"] == ["person", "role", "scope_or_context"]
+    assert contracts["person_role/2"] == ["person_id_or_name", "role_or_title"]
+    assert contracts["person_role/3"] == ["person_id_or_name", "role_or_title", "scope_or_context"]
     assert contracts["group_assignment/3"] == ["person", "version_or_context", "group"]
+    assert contracts["list_member/4"] == ["list_or_set_id", "member_value", "member_kind_or_role", "source_or_scope"]
+    assert contracts["claim_range/4"] == ["claim_set_id", "start_claim", "end_claim", "source_or_scope"]
+    assert contracts["item_range/4"] == ["item_set_id", "start_item", "end_item", "source_or_scope"]
+    assert contracts["registrant_identity/2"] == [
+        "registrant_entity",
+        "incorporation_or_organization_jurisdiction",
+    ]
+    assert contracts["registrant_name/2"] == ["registrant_entity", "legal_name"]
+    assert contracts["party_role_context/4"] == [
+        "scope_or_context",
+        "party_or_person",
+        "role_or_status",
+        "source_or_scope",
+    ]
+    assert by_signature["party_role_context/4"]["predicate"] == "party_role_context"
+    assert "party_roster" in by_signature["party_role_context/4"]["answer_types"]
+    assert any("Stable party-role relation" in item for item in by_signature["party_role_context/4"]["contract"])
     assert contracts["recorded_statement/3"] == ["statement_id", "speaker", "content"]
     assert contracts["custom_fact/2"] == ["arg1", "arg2"]
+
+
+def test_contract_predicate_name_accepts_signature_or_predicate() -> None:
+    assert qa_module._predicate_name_from_contract({"signature": "party_role_context/4"}) == "party_role_context"
+    assert qa_module._predicate_name_from_contract({"predicate": "document_title"}) == "document_title"
+
+
+def test_fragmented_evidence_query_templates_are_coalesced_without_semantic_repair() -> None:
+    templates = [
+        "event_date(EventPriorOrder, DatePriorOrder), document_identifier_occurrence(DocPriorOrder, docket_identifier",
+        "24_035_04",
+        "_",
+        "_).",
+        "document_title(Doc, Title).",
+    ]
+
+    assert qa_module._coalesce_fragmented_evidence_query_templates(templates) == [
+        "event_date(EventPriorOrder, DatePriorOrder), document_identifier_occurrence(DocPriorOrder, docket_identifier, 24_035_04, _, _).",
+        "document_title(Doc, Title).",
+    ]
+
+
+def test_role_roster_broadening_adds_broad_person_role_query_without_text_routing() -> None:
+    queries = [
+        "person_role(Commissioner, commissioner, public_service_commission_of_utah).",
+        "person_role(Chair, chair, public_service_commission_of_utah).",
+        "document_title(Doc, Title).",
+    ]
+
+    assert qa_module._evidence_bundle_role_roster_broadening_queries(queries) == [
+        {
+            "query": "person_role(Person, Role, public_service_commission_of_utah).",
+            "predicate": "person_role",
+            "body": "public_service_commission_of_utah",
+            "source_queries": [
+                "person_role(Commissioner, commissioner, public_service_commission_of_utah).",
+                "person_role(Chair, chair, public_service_commission_of_utah).",
+            ],
+        }
+    ]
+
+
+def test_procedural_rule_detail_sibling_adds_deadline_from_typed_plan() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "procedural_rule_detail(rule_1, consequence, deemed_denied, review_request, direct).",
+        "procedural_rule_detail(rule_1, deadline, thirty_days, review_request, direct).",
+        "review_deadline(deadline_1, response_to_review_request, 15).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["procedural_rule_detail/5", "review_deadline/3"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "review_rule",
+                    "purpose": "Retrieve typed rule details.",
+                    "query_templates": [
+                        "procedural_rule_detail(rule_1, consequence, Consequence, review_request, SourceOrScope).",
+                        "review_deadline(DeadlineId, response_to_review_request, Period).",
+                    ],
+                }
+            ]
+        },
+        sign_clean_strict=True,
+    )
+
+    deadline = [
+        item
+        for item in results
+        if item["query"]
+        == "procedural_rule_detail(rule_1, deadline, DeadlineValue, review_request, SourceOrScope)."
+    ][0]
+    assert deadline["result"]["status"] == "success"
+    assert deadline["result"]["reasoning_basis"]["repairs"] == [
+        {
+            "kind": "typed_procedural_deadline_sibling",
+            "predicate": "procedural_rule_detail",
+            "rule_id": "rule_1",
+            "rule_context_or_action": "review_request",
+            "replaced_unregistered_deadline_queries": [
+                "review_deadline(DeadlineId, response_to_review_request, Period)."
+            ],
+        }
+    ]
+    assert not any(item["query"].startswith("review_deadline(") for item in results)
+
+
+def test_evidence_bundle_planner_payload_includes_compiled_contracts(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_call_lmstudio_json_schema(**kwargs):
+        captured["messages"] = kwargs["messages"]
+        return {
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "test",
+            "support_bundles": [],
+            "warnings": [],
+        }
+
+    monkeypatch.setattr(qa_module, "call_lmstudio_json_schema", fake_call_lmstudio_json_schema)
+
+    qa_module.build_evidence_bundle_plan(
+        utterance="Who is the petitioner?",
+        kb_inventory=compiled_kb_inventory(
+            facts=["party_role_context(case_1, union_1, petitioner, src_1)."],
+            rules=[],
+        ),
+        facts=["party_role_context(case_1, union_1, petitioner, src_1)."],
+        rules=[],
+        predicate_contracts=compiled_kb_contracts(["party_role_context/4"]),
+        config=qa_module.SemanticIRCallConfig(),
+        sign_clean_strict=True,
+    )
+
+    messages = captured["messages"]
+    payload = json.loads(messages[-1]["content"].split("INPUT_JSON:\n", 1)[1])
+    contracts = {row["signature"]: row["args"] for row in payload["compiled_predicate_contracts"]}
+    assert contracts["party_role_context/4"] == [
+        "scope_or_context",
+        "party_or_person",
+        "role_or_status",
+        "source_or_scope",
+    ]
+    planning_policy = "\n".join(payload["planning_policy"])
+    assert "include registered carrier rows when present" in planning_policy
+    assert "Compact alias predicates" in planning_policy
+    assert "footnote-citation" in planning_policy
+    assert "claim_ground(Subject, Ground, ReferenceOrBasis, Outcome)" in planning_policy
+    assert "obligation_detail(ObligationId, DetailKind, DetailValue, RoleOrPurpose, SourceOrScope)" in planning_policy
+    assert "procedural_rule_detail(RuleId, DetailKind, DetailValue, RuleContextOrAction, SourceOrScope)" in planning_policy
+    assert "body-member, commissioner, board-member" in planning_policy
+    assert "person_role(Person, Role, Body)" in planning_policy
+
+
+def test_strict_claim_path_keeps_party_role_context_atoms() -> None:
+    kept, filtered = _filter_strict_claim_path_query_results(
+        [
+            {
+                "query": "party_role_context(Context, Petitioner, petitioner, direct).",
+                "result": {
+                    "predicate": "party_role_context",
+                    "result_type": "table",
+                    "status": "success",
+                    "rows": [
+                        {
+                            "Context": "case_1",
+                            "Petitioner": "union_1",
+                            "BoundArg3": "petitioner",
+                            "BoundArg4": "direct",
+                        }
+                    ],
+                    "variables": ["Context", "Petitioner"],
+                    "num_rows": 1,
+                },
+            }
+        ]
+    )
+
+    assert len(kept) == 1
+    assert filtered == []
+
+
+def test_named_role_anchor_filter_blocks_role_only_party_scan() -> None:
+    kept, filtered = qa_module._filter_unanchored_named_role_query_results(
+        query_intents=[
+            {
+                "intent_type": "named_role_roster",
+                "target_terms": ["Named Employer", "Petitioner"],
+            }
+        ],
+        query_results=[
+            {
+                "query": "party_role_context(Context, Petitioner, petitioner, Source).",
+                "result": {
+                    "predicate": "party_role_context",
+                    "status": "success",
+                    "rows": [{"Context": "case_a", "Petitioner": "union_one", "Source": "direct"}],
+                },
+            }
+        ],
+    )
+
+    assert kept == []
+    assert filtered == [
+        {
+            "query": "party_role_context(Context, Petitioner, petitioner, Source).",
+            "predicate": "party_role_context",
+            "reason": "missing_named_party_anchor",
+        }
+    ]
+
+
+def test_named_role_anchor_filter_keeps_anchored_party_join() -> None:
+    item = {
+        "query": (
+            "party_role_context(Context, named_employer_atom, NamedRole, NamedSource), "
+            "party_role_context(Context, Petitioner, petitioner, Source)."
+        ),
+        "result": {
+            "predicate": "party_role_context",
+            "status": "success",
+            "rows": [{"Context": "case_a", "Petitioner": "union_one", "Source": "direct"}],
+        },
+    }
+
+    kept, filtered = qa_module._filter_unanchored_named_role_query_results(
+        query_intents=[
+            {
+                "intent_type": "named_role_roster",
+                "target_terms": ["Named Employer", "Petitioner"],
+            }
+        ],
+        query_results=[item],
+    )
+
+    assert kept == [item]
+    assert filtered == []
+
+
+def test_anchor_filter_failure_surface_overrides_to_query_gap() -> None:
+    surface = qa_module._anchor_filter_failure_surface(
+        {
+            "reference_judge": {"verdict": "miss"},
+            "evidence_anchor_filter": {
+                "filtered_count": 1,
+                "filtered_queries": [
+                    {
+                        "predicate": "party_role_context",
+                        "query": "party_role_context(Context, Petitioner, petitioner, Source).",
+                        "reason": "missing_named_party_anchor",
+                    }
+                ],
+            },
+        }
+    )
+
+    assert surface["surface"] == "query_surface_gap"
+    assert surface["confidence"] == 1.0
+
+
+def test_evidence_bundle_anchor_binding_synthesizes_shared_context_query() -> None:
+    facts = [
+        "party_role_context(case_a, named_employer_atom, employer, direct).",
+        "party_role_context(case_a, union_one, petitioner, direct).",
+        "party_role_context(case_b, union_two, petitioner, direct).",
+    ]
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        evidence_plan={
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "petitioner for named employer",
+            "warnings": [],
+            "support_bundles": [
+                {
+                    "bundle_id": "bundle_1",
+                    "purpose": "Find petitioner through a named employer anchor.",
+                    "missing_if_empty": "No anchored petitioner row.",
+                    "query_templates": ["party_role_context(Context, Petitioner, petitioner, Source)."],
+                    "anchor_bindings": [
+                        {
+                            "predicate": "party_role_context",
+                            "arg_role": "party_or_person",
+                            "compiled_atom": "named_employer_atom",
+                            "why": "question names this employer atom",
+                        }
+                    ],
+                }
+            ],
+        },
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        sign_clean_strict=True,
+    )
+
+    anchored = [
+        item
+        for item in results
+        if "named_employer_atom" in str(item.get("query", ""))
+        and "party_role_context" in str(item.get("query", ""))
+    ]
+    assert anchored
+    rows = anchored[0]["result"]["rows"]
+    assert rows == [
+        {
+            "AnchorRole": "employer",
+            "AnchorSource": "direct",
+            "Context": "case_a",
+            "Petitioner": "union_one",
+            "Source": "direct",
+        }
+    ]
+
+
+def test_evidence_bundle_anchor_binding_accepts_role_label_and_bound_context() -> None:
+    facts = [
+        "party_role_context(case_a, named_employer_atom, employer, direct).",
+        "party_role_context(case_a, union_one, petitioner, direct).",
+    ]
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        evidence_plan={
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "petitioner for named employer",
+            "warnings": [],
+            "support_bundles": [
+                {
+                    "bundle_id": "bundle_1",
+                    "purpose": "Find petitioner through a named employer anchor.",
+                    "missing_if_empty": "No anchored petitioner row.",
+                    "query_templates": ["party_role_context(case_a, Petitioner, petitioner, direct)."],
+                    "anchor_bindings": [
+                        {
+                            "predicate": "party_role_context",
+                            "arg_role": "employer",
+                            "compiled_atom": "named_employer_atom",
+                            "why": "question names this employer atom",
+                        }
+                    ],
+                }
+            ],
+        },
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        sign_clean_strict=True,
+    )
+
+    anchored = [item for item in results if "named_employer_atom" in str(item.get("query", ""))]
+    assert anchored
+    assert anchored[0]["result"]["rows"] == [
+        {
+            "AnchorRole": "employer",
+            "AnchorSource": "direct",
+            "Petitioner": "union_one",
+        }
+    ]
+
+
+def test_evidence_bundle_plan_reduces_cover_page_aliases_to_registered_carriers() -> None:
+    facts = [
+        "registrant_name(drvn, driven_brands_holdings_inc).",
+        "registrant_identity(drvn, delaware).",
+        "document_identifier_occurrence(drvn, ein, 47_3595252, cover_page, 3).",
+    ]
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        evidence_plan={
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "registrant wrapper identity",
+            "warnings": [],
+            "support_bundles": [
+                {
+                    "bundle_id": "cover_page",
+                    "purpose": "Retrieve registered cover-page identity values.",
+                    "missing_if_empty": "No cover-page identity rows.",
+                    "query_templates": [
+                        "registrant_name(drvn, RegistrantName).",
+                        "incorporation_jurisdiction(drvn, IncorporationJurisdiction).",
+                        "ein(drvn, EIN).",
+                    ],
+                }
+            ],
+        },
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        sign_clean_strict=True,
+    )
+
+    queries = [str(item.get("query", "")).strip() for item in results]
+    assert "registrant_name(drvn, RegistrantName)." in queries
+    assert "registrant_identity(drvn, IncorporationJurisdiction)." in queries
+    assert "document_identifier_occurrence(drvn, ein, EIN, Scope, SourceOrder)." in queries
+    assert "incorporation_jurisdiction(drvn, IncorporationJurisdiction)." not in queries
+    assert "ein(drvn, EIN)." not in queries
+    reductions = [
+        repair
+        for item in results
+        for repair in item["result"]["reasoning_basis"].get("repairs", [])
+        if repair.get("kind") == "registered_carrier_query_reduction"
+    ]
+    assert {item["to_signature"] for item in reductions} == {
+        "registrant_identity/2",
+        "document_identifier_occurrence/5",
+    }
+
+
+def test_evidence_bundle_plan_adds_registered_reference_basis_sibling_query() -> None:
+    facts = [
+        "source_attributed_claim(claim_settlement_approval, public_service_commission, memorializes_approval, src_line_0022).",
+        "claim_ground(utah_psc_24_035_04_settlement_approval, just_and_reasonable_in_result, dec_16_2024_hr_g_tr_at_1364_22_1365_7, approved).",
+    ]
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in facts:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        evidence_plan={
+            "schema_version": "evidence_bundle_plan_v1",
+            "question_focus": "source citation",
+            "warnings": [],
+            "support_bundles": [
+                {
+                    "bundle_id": "citation_support",
+                    "purpose": "Retrieve source support for a cited finding.",
+                    "missing_if_empty": "No citation support rows.",
+                    "query_templates": [
+                        "source_attributed_claim(Claim, Source, ClaimText, SourceScope).",
+                    ],
+                }
+            ],
+        },
+        kb_inventory=compiled_kb_inventory(facts=facts, rules=[]),
+        sign_clean_strict=True,
+    )
+
+    sibling = [
+        item
+        for item in results
+        if item.get("query") == "claim_ground(Subject, Ground, ReferenceOrBasis, Outcome)."
+    ]
+    assert sibling
+    assert not [
+        item
+        for item in results
+        if str(item.get("query", "")).startswith("source_attributed_claim(")
+    ]
+    assert sibling[0]["result"]["status"] == "success"
+    assert sibling[0]["result"]["rows"][0]["ReferenceOrBasis"] == "dec_16_2024_hr_g_tr_at_1364_22_1365_7"
+    assert sibling[0]["result"]["reasoning_basis"]["repairs"] == [
+        {
+            "kind": "registered_reference_basis_sibling_query",
+            "source_predicates": ["source_attributed_claim"],
+            "replaced_context_queries": [
+                "source_attributed_claim(Claim, Source, ClaimText, SourceScope).",
+            ],
+        }
+    ]
 
 
 def test_query_strategy_keeps_source_coordinate_queries_variable_first() -> None:
@@ -704,6 +2406,10 @@ def test_query_strategy_keeps_source_coordinate_queries_variable_first() -> None
     assert "discover the source row with variables before binding a section or label" in strategy_text
     assert "Do not hardcode a guessed section/label atom" in strategy_text
     assert "Source-stated role lines are evidence" in strategy_text
+    official_guidance = "\n".join(qa_module.SIGN_CLEAN_STRICT_OFFICIAL_DOCUMENT_QUERY_GUIDANCE)
+    assert "party_role_context/4" in official_guidance
+    assert "conjunctive shared-Context query" in official_guidance
+    assert "Do not route through document_title/2 unless the question asks for the document title" in official_guidance
 
 
 def test_query_strategy_treats_title_as_slot_label_not_constant() -> None:
@@ -760,6 +2466,10 @@ def test_post_ingestion_qa_strategy_prefers_compiled_kb_surface() -> None:
     assert any("record id too early" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-owned record predicates" in item for item in strategy["arity_and_variable_policy"])
     assert any("institution, ledger, record, or source questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("official-document identifier questions" in item for item in strategy["arity_and_variable_policy"])
+    assert any("case_number" in item and "docket_number" in item for item in strategy["arity_and_variable_policy"])
+    assert any("prior_art_reference/4" in item and "document_date/3" in item for item in strategy["arity_and_variable_policy"])
+    assert any("document_date(ref_song_525, publication_date, Date)" in item for item in strategy["arity_and_variable_policy"])
     assert any("source-of-access questions" in item for item in strategy["arity_and_variable_policy"])
     assert any("access_source" in item and "authorized_party" in item for item in strategy["arity_and_variable_policy"])
     assert any("same-variable conjunctive query" in item for item in strategy["arity_and_variable_policy"])
@@ -856,6 +2566,8 @@ def test_reference_judge_policy_treats_normalized_purpose_atoms_as_answer_bearin
     assert "Causal support policy" in source
     assert "Identifier-display policy" in source
     assert "cn_2026_04_15" in source
+    assert "Date-display policy" in source
+    assert "2025_01_02" in source
     assert "Identifier-metadata policy" in source
     assert "driver_license/2" in source
 
@@ -1072,6 +2784,25 @@ def test_evidence_bundle_join_probe_ignores_unshared_bundle_queries() -> None:
     ) == []
 
 
+def test_evidence_bundle_join_probe_ignores_legal_citation_detail_list_queries() -> None:
+    assert _evidence_bundle_same_variable_join_queries(
+        [
+            "legal_citation_detail(sub_a, Citation, compliance_standard, Scope).",
+            "legal_citation_detail(sub_a, Citation, statutory_ground, Scope).",
+        ]
+    ) == []
+
+
+def test_evidence_bundle_join_probe_ignores_answer_slot_variables() -> None:
+    assert _evidence_bundle_same_variable_join_queries(
+        [
+            "monetary_payment(doc_a, Amount, gbl_349_d, Nature, Source).",
+            "monetary_payment(subject_b, Amount, gbl_349_d, Nature, Source).",
+            "monetary_penalty(penalty_a, Amount, Currency, Timing, Payee).",
+        ]
+    ) == []
+
+
 def test_evidence_bundle_plan_normalizes_simple_equality_constraints() -> None:
     runtime = CorePrologRuntime(max_depth=100)
     for fact in [
@@ -1109,6 +2840,193 @@ def test_evidence_bundle_plan_normalizes_simple_equality_constraints() -> None:
     assert results[0]["result"]["rows"] == [
         {"SourceLine": "src_1", "TextAtom": "correction_notice_a_reason_adjacent_tenant_complaints"}
     ]
+
+
+def test_evidence_bundle_plan_normalizes_underscore_variable_equality_constraints() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "legal_citation_detail(aod_24_102, executive_law_63_12, statutory_ground, src_line_0034).",
+        "legal_citation_detail(aod_24_102, unrelated_rule, statutory_ground, src_line_0099).",
+        "legal_citation_detail(aod_24_102, gbl_349_350_and_380_j, statutory_ground, src_line_0034).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={"signatures": ["legal_citation_detail/4"]},
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "paragraph_citations",
+                    "purpose": "Retrieve typed legal citations attached to a specific source line.",
+                    "query_templates": [
+                        "legal_citation_detail(aod_24_102, _Law, _Type, _SrcLine), "
+                        "_SrcLine = src_line_0034."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert results[0]["result"]["status"] == "success"
+    assert results[0]["derived_from_queries"] == [
+        "legal_citation_detail(aod_24_102, _Law, _Type, src_line_0034)."
+    ]
+    assert results[0]["result"]["reasoning_basis"]["repairs"] == [
+        {"kind": "variable_binding", "variable": "_SrcLine", "value": "src_line_0034"}
+    ]
+    assert [
+        {key: row[key] for key in ("_Law", "_Type", "BoundArg4")}
+        for row in results[0]["result"]["rows"]
+    ] == [
+        {"_Law": "executive_law_63_12", "_Type": "statutory_ground", "BoundArg4": "src_line_0034"},
+        {"_Law": "gbl_349_350_and_380_j", "_Type": "statutory_ground", "BoundArg4": "src_line_0034"},
+    ]
+
+
+def test_evidence_bundle_plan_replaces_overbound_query_with_relaxed_success() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    for fact in [
+        "legal_citation_detail(eq_aod_24_102_oms, 15_u_s_c_1681e_b, statutory_ground, agreement_6).",
+        "legal_citation_detail(eq_aod_24_102_oms, general_business_law_380_j, statutory_ground, agreement_6).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    original = "legal_citation_detail(aod_24_102, Citation, Role, agreement_6)."
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={
+            "signatures": ["legal_citation_detail/4"],
+            "arg_values": {
+                "legal_citation_detail/4": [
+                    {"aod_24_102": 1, "eq_aod_24_102_oms": 2},
+                    {"15_u_s_c_1681e_b": 1, "general_business_law_380_j": 1},
+                    {"statutory_ground": 2},
+                    {"agreement_6": 2},
+                ]
+            },
+        },
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "paragraph_citations",
+                    "purpose": "Retrieve paragraph-scoped typed legal citations.",
+                    "query_templates": [original],
+                }
+            ]
+        },
+        sign_clean_strict=True,
+    )
+
+    assert [item["query"] for item in results] == [
+        "legal_citation_detail(Relaxed1, Citation, Role, Relaxed4).",
+        "typed_legal_citation_inventory_composition(Subject, RoleGroup, ScopeGroup, CitationAtoms).",
+    ]
+    assert all(item["result"]["status"] == "success" for item in results)
+    relaxed_basis = results[0]["result"]["reasoning_basis"]
+    assert relaxed_basis["kind"] == "evidence-bundle-plan"
+    assert relaxed_basis["bundle_id"] == "paragraph_citations"
+    assert relaxed_basis["inner_basis"]["original_query"] == original
+    assert results[0]["derived_from_queries"] == [original]
+
+
+def test_evidence_bundle_absent_typed_constants_blocks_impossible_legal_citation_anchor() -> None:
+    absent = _evidence_bundle_absent_typed_constants(
+        [
+            (
+                "legal_citation_detail",
+                ["sub_24_102_equifax_compliance", "Citation", "Role", "agreement_5_14"],
+            )
+        ],
+        kb_inventory={
+            "arg_values": {
+                "legal_citation_detail/4": [
+                    {"sub_24_102_equifax_compliance": 4},
+                    {"n_y_exec_law_63_12": 1},
+                    {"compliance_standard": 4},
+                    {"agreement_5": 2, "agreement_5_7": 1, "agreement_5_8": 1},
+                ]
+            }
+        },
+    )
+
+    assert absent == [
+        {
+            "predicate": "legal_citation_detail",
+            "arg_index": 4,
+            "value": "agreement_5_14",
+            "signature": "legal_citation_detail/4",
+        }
+    ]
+
+
+def test_evidence_bundle_legal_citation_scope_expansion_uses_typed_scope_family() -> None:
+    expansion = _evidence_bundle_legal_citation_scope_expansion_query(
+        [
+            (
+                "legal_citation_detail",
+                ["sub_24_102_equifax_compliance", "Citation", "compliance_standard", "agreement_5"],
+            )
+        ],
+        kb_inventory={
+            "arg_values": {
+                "legal_citation_detail/4": [
+                    {"sub_24_102_equifax_compliance": 4},
+                    {"n_y_exec_law_63_12": 1},
+                    {"compliance_standard": 4},
+                    {"agreement_5": 2, "agreement_5_7": 1, "agreement_5_8": 1},
+                ]
+            }
+        },
+    )
+
+    assert expansion == {
+        "query": "legal_citation_detail(sub_24_102_equifax_compliance, Citation, compliance_standard, SourceOrScope).",
+        "repair": {
+            "kind": "legal_citation_scope_sibling_expansion",
+            "source_scope": "agreement_5",
+            "expanded_scope_variable": "SourceOrScope",
+        },
+    }
+
+
+def test_evidence_bundle_legal_citation_scope_expansion_drops_known_no_result_probe() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact(
+        "legal_citation_detail(sub_a, executive_law_63_12, statutory_ground, direct)."
+    ).get("status") == "success"
+
+    results = run_evidence_bundle_plan_queries(
+        runtime=runtime,
+        kb_inventory={
+            "signatures": ["legal_citation_detail/4"],
+            "arg_values": {
+                "legal_citation_detail/4": [
+                    {"sub_a": 1},
+                    {"executive_law_63_12": 1},
+                    {"statutory_ground": 1},
+                    {"agreement_5": 1, "agreement_5_7": 1, "direct": 1},
+                ]
+            },
+        },
+        evidence_plan={
+            "support_bundles": [
+                {
+                    "bundle_id": "laws",
+                    "purpose": "Retrieve legal citations.",
+                    "query_templates": [
+                        "legal_citation_detail(sub_a, Citation, statutory_ground, agreement_5)."
+                    ],
+                }
+            ]
+        },
+    )
+
+    assert [item["query"] for item in results] == [
+        "legal_citation_detail(sub_a, Citation, statutory_ground, SourceOrScope).",
+        "typed_legal_citation_inventory_composition(Subject, RoleGroup, ScopeGroup, CitationAtoms).",
+    ]
+    assert results[0]["result"]["status"] == "success"
 
 
 def test_evidence_bundle_plan_does_not_turn_alias_only_equality_into_broad_scan() -> None:
@@ -3189,6 +5107,110 @@ def test_filter_disabled_support_surfaces_removes_current_source_record_summarie
     assert [item["result"]["predicate"] for item in filtered] == [
         "status_timeline_summary_support",
         "roster_state_support",
+    ]
+
+
+def test_strict_claim_path_filter_redacts_prose_like_values_but_keeps_typed_atoms() -> None:
+    rows = [
+        {
+            "query": (
+                "compliance_obligation(Obligation, Description, Target, "
+                "prospective_relief_para_5)."
+            ),
+            "result": {
+                "status": "success",
+                "predicate": "compliance_obligation",
+                "rows": [
+                    {
+                        "Obligation": "obligation_compliance_laws",
+                        "Description": (
+                            "comply_with_executive_law_63_12_gbl_349_350_"
+                            "380_j_15_u_s_c_1681_et_seq"
+                        ),
+                        "Target": (
+                            "use_of_code_to_calculate_score_values_of_new_yorkers_and_"
+                            "representations_to_new_york_consumers_about_score_values"
+                        ),
+                        "BoundArg4": "prospective_relief_para_5",
+                    }
+                ],
+            },
+        },
+        {
+            "query": (
+                "legal_citation_detail(list_member_aod_24_102_5_requirement_src_line_0034, "
+                "Citation, Role, SourceOrScope)."
+            ),
+            "result": {
+                "status": "success",
+                "predicate": "legal_citation_detail",
+                "rows": [
+                    {
+                        "BoundArg1": "list_member_aod_24_102_5_requirement_src_line_0034",
+                        "Citation": "executive_law_63_12",
+                        "Role": "compliance_obligation",
+                        "SourceOrScope": "src_line_0034",
+                    }
+                ],
+            },
+        },
+    ]
+
+    kept, filtered = _filter_strict_claim_path_query_results(rows)
+
+    assert [item["result"]["predicate"] for item in kept] == ["compliance_obligation", "legal_citation_detail"]
+    assert kept[0]["result"]["rows"] == [
+        {
+            "Obligation": "obligation_compliance_laws",
+            "BoundArg4": "prospective_relief_para_5",
+        }
+    ]
+    assert kept[0]["result"]["reasoning_basis"]["strict_claim_path_redaction"]["redacted_fields"] == [
+        "Description",
+        "Target",
+    ]
+    assert filtered == [
+        {
+            "query": (
+                "compliance_obligation(Obligation, Description, Target, "
+                "prospective_relief_para_5)."
+            ),
+            "predicate": "compliance_obligation",
+            "reason": "prose_like_typed_values_redacted",
+            "redacted_fields": ["Description", "Target"],
+        }
+    ]
+
+
+def test_strict_claim_path_filter_blocks_rows_with_only_prose_like_values() -> None:
+    rows = [
+        {
+            "query": "narrative_summary(Subject, Summary).",
+            "result": {
+                "status": "success",
+                "predicate": "narrative_summary",
+                "rows": [
+                    {
+                        "Subject": "case_summary",
+                        "Summary": (
+                            "this_long_summary_value_contains_many_words_and_should_not_be_"
+                            "available_as_a_strict_claim_path_answer_surface"
+                        ),
+                    }
+                ],
+            },
+        }
+    ]
+
+    kept, filtered = _filter_strict_claim_path_query_results(rows)
+
+    assert kept == []
+    assert filtered == [
+        {
+            "query": "narrative_summary(Subject, Summary).",
+            "predicate": "narrative_summary",
+            "reason": "prose_like_typed_context_blocked",
+        }
     ]
 
 
@@ -9013,6 +11035,26 @@ def test_run_query_plan_falls_back_to_source_record_text_for_unsplit_line_field(
     assert "source-record field text fallback" in fallback[0]["result"]["reasoning_basis"]["note"]
 
 
+def test_sign_clean_strict_blocks_source_record_free_text_queries() -> None:
+    runtime = CorePrologRuntime(max_depth=100)
+    assert runtime.assert_fact("source_record_text_display(src_line_001, 'Printed answer text').").get("status") == "success"
+    assert runtime.assert_fact("source_record_field(src_line_001, docket, no_2025_1705).").get("status") == "success"
+
+    rows = run_query_plan(
+        runtime,
+        [
+            "source_record_text_display(Line, Text).",
+            "source_record_field(Line, docket, Docket).",
+        ],
+        sign_clean_strict=True,
+    )
+
+    assert rows[0]["result"]["status"] == "blocked_by_sign_clean_strict"
+    assert rows[0]["result"]["blocked_predicates"] == ["source_record_text_display"]
+    assert rows[1]["result"]["status"] == "blocked_by_sign_clean_strict"
+    assert rows[1]["result"]["blocked_predicates"] == ["source_record_field"]
+
+
 def test_run_query_plan_keeps_placeholder_repairs_before_relaxed_temporal_join() -> None:
     runtime = CorePrologRuntime(max_depth=200)
     for fact in [
@@ -9494,6 +11536,176 @@ def test_relaxed_constant_query_filters_token_subset_matches() -> None:
     assert relaxed["result"]["reasoning_basis"]["token_subset_filter"] is True
     assert relaxed["result"]["reasoning_basis"]["unfiltered_num_rows"] == 3
     assert relaxed["result"]["rows"] == [{"Item": "ex_001", "Relaxed2": "safestore_vault"}]
+
+
+def test_run_query_plan_replaces_overbound_parent_with_relaxed_success() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "legal_citation_detail(eq_aod_24_102_oms, 15_u_s_c_1681e_b, statutory_ground, agreement_6).",
+        "legal_citation_detail(eq_aod_24_102_oms, general_business_law_380_j, statutory_ground, agreement_6).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    original = "legal_citation_detail(aod_24_102, Citation, Role, agreement_6)."
+    results = _run_query_plan(
+        runtime,
+        [original],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+    )
+
+    assert [item["query"] for item in results] == [
+        "legal_citation_detail(Relaxed1, Citation, Role, Relaxed4).",
+        "typed_legal_citation_inventory_composition(Subject, RoleGroup, ScopeGroup, CitationAtoms).",
+    ]
+    relaxed = results[0]
+    assert relaxed["result"]["status"] == "success"
+    assert relaxed["derived_from_queries"] == [original]
+    assert relaxed["result"]["reasoning_basis"]["original_query"] == original
+    assert all(item["result"].get("status") != "no_results" for item in results)
+
+
+def test_run_query_plan_adds_typed_subject_identifier_sibling_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "assurance_id(aod_24_102, assurance_of_discontinuance_in_the_matter_of_equifax_information_services_llc).",
+        "assurance_effective_date(aod_24_102, 2025_01_02).",
+        "document_identifier_occurrence(aod_24_102, assurance_id, 24_102, assurance_no_24_102, 1).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = _run_query_plan(
+        runtime,
+        [
+            "assurance_id(aod_24_102, AssuranceNumber).",
+            "assurance_effective_date(aod_24_102, EffectiveDate).",
+        ],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        typed_support_companions=True,
+    )
+
+    identifier = next(
+        item
+        for item in results
+        if item["query"]
+        == "document_identifier_occurrence(aod_24_102, IdentifierKind, Identifier, SourceOrScope, OccurrenceOrder)."
+    )
+    assert identifier["result"]["status"] == "success"
+    assert identifier["result"]["rows"] == [
+        {
+            "BoundArg1": "aod_24_102",
+            "BoundArg1Display": "aod 24 102",
+            "Identifier": "24_102",
+            "IdentifierKind": "assurance_id",
+            "OccurrenceOrder": "1",
+            "SourceOrScope": "assurance_no_24_102",
+        }
+    ]
+    assert "no question text or source prose" in identifier["result"]["reasoning_basis"]["note"]
+
+
+def test_run_query_plan_adds_typed_subject_date_sibling_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "document_signatory(filing_8k_20260225, scott_o_melia, executive_vice_president_chief_legal_officer).",
+        "document_date(filing_8k_20260225, filing_date, february_25_2026).",
+        "filing_date(filing_8k_20260225, february_25_2026).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = _run_query_plan(
+        runtime,
+        ["document_signatory(filing_8k_20260225, SignatoryName, SignatoryTitle)."],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        typed_support_companions=True,
+    )
+
+    document_date = next(
+        item
+        for item in results
+        if item["query"] == "document_date(filing_8k_20260225, DateRole, DateValue)."
+    )
+    assert document_date["result"]["status"] == "success"
+    assert document_date["result"]["rows"] == [
+        {
+            "BoundArg1": "filing_8k_20260225",
+            "BoundArg1Display": "filing 8k 20260225",
+            "DateRole": "filing_date",
+            "DateValue": "february_25_2026",
+        }
+    ]
+    assert "no question text or source prose" in document_date["result"]["reasoning_basis"]["note"]
+
+
+def test_run_query_plan_adds_typed_subject_citation_sibling_rows() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "list_member(aod_24_102, 5, requirement, direct).",
+        "legal_citation_detail(aod_24_102, executive_law_63_12, statutory_ground, direct).",
+        "legal_citation_detail(aod_24_102, future_amendments_to_foregoing_laws_regulations_and_rules, amendment_scope, direct).",
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = _run_query_plan(
+        runtime,
+        ["list_member(aod_24_102, 5, requirement, direct)."],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        typed_support_companions=True,
+    )
+
+    citation = next(
+        item
+        for item in results
+        if item["query"] == "legal_citation_detail(aod_24_102, Citation, Role, direct)."
+    )
+    assert citation["result"]["status"] == "success"
+    assert [
+        (row["Citation"], row["Role"])
+        for row in citation["result"]["rows"]
+    ] == [
+        ("executive_law_63_12", "statutory_ground"),
+        ("future_amendments_to_foregoing_laws_regulations_and_rules", "amendment_scope"),
+    ]
+    assert "no question text or source prose" in citation["result"]["reasoning_basis"]["note"]
+
+
+def test_run_query_plan_maps_list_member_tuple_to_citation_subject_atom() -> None:
+    runtime = CorePrologRuntime(max_depth=200)
+    for fact in [
+        "list_member(aod_24_102, 6, requirement, src_line_0035).",
+        (
+            "legal_citation_detail("
+            "list_member_aod_24_102_6_requirement_src_line_0035, "
+            "15_u_s_c_1681e_b, compliance_obligation, src_line_0035)."
+        ),
+        (
+            "legal_citation_detail("
+            "list_member_aod_24_102_6_requirement_src_line_0035, "
+            "gbl_380_j_a, compliance_obligation, src_line_0035)."
+        ),
+    ]:
+        assert runtime.assert_fact(fact).get("status") == "success"
+
+    results = _run_query_plan(
+        runtime,
+        ["list_member(aod_24_102, 6, requirement, src_line_0035)."],
+        helper_companions_enabled=False,
+        sign_clean_strict=True,
+        typed_support_companions=True,
+    )
+
+    citation = next(
+        item
+        for item in results
+        if item["query"]
+        == "legal_citation_detail(list_member_aod_24_102_6_requirement_src_line_0035, Citation, Role, SourceOrScope)."
+    )
+    assert citation["result"]["status"] == "success"
+    assert [row["Citation"] for row in citation["result"]["rows"]] == ["15_u_s_c_1681e_b", "gbl_380_j_a"]
+    assert "governed list_member_* subject atom" in citation["result"]["reasoning_basis"]["note"]
 
 
 def test_run_query_plan_combines_split_start_date_time_for_duration() -> None:

@@ -1,0 +1,22 @@
+{
+  "groups": [
+    {
+      "id": "beta_anticipation_38_39_tail",
+      "any_of": [
+        {
+          "id": "source_range_segment",
+          "facts": [
+            "claim_range(SetBetaAnticipation, 38, 39, SrcBetaAnticipation)."
+          ]
+        },
+        {
+          "id": "adjacent_singletons",
+          "facts": [
+            "claim_range(SetBetaAnticipation, 38, 38, SrcBetaAnticipation).",
+            "claim_range(SetBetaAnticipation, 39, 39, SrcBetaAnticipation)."
+          ]
+        }
+      ]
+    }
+  ]
+}

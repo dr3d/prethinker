@@ -3259,6 +3259,8 @@ def _contract_role_kind(role: str) -> str:
         return "interval"
     if "scope" in value and ("date" in value or "time" in value or "source" in value or "basis" in value):
         return ""
+    if "date" in value and ("kind" in value or "role" in value or "type" in value):
+        return ""
     if value in {"date", "time", "date_filed", "decision_date", "filing_date"}:
         return "date"
     if value in {"timestamp", "datetime"}:
@@ -3305,11 +3307,11 @@ def _contract_role_kind(role: str) -> str:
 
 def _looks_like_date_atom(value: str) -> bool:
     atom = str(value or "").strip().lower()
-    if re.fullmatch(r"\d{4}(_\d{1,2}){0,2}", atom):
+    if re.fullmatch(r"(?:v_)?\d{4}(_\d{1,2}){0,2}", atom):
         return True
-    if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{2}(?:_\d{2})?", atom):
+    if re.fullmatch(r"(?:v_)?\d{4}_\d{1,2}_\d{1,2}_\d{1,2}_\d{2}(?:_\d{2})?", atom):
         return True
-    if re.fullmatch(r"\d{4}_\d{1,2}_\d{1,2}t\d{1,2}_\d{2}", atom):
+    if re.fullmatch(r"(?:v_)?\d{4}_\d{1,2}_\d{1,2}t\d{1,2}_\d{2}", atom):
         return True
     if re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)_", atom):
         return True
@@ -4575,10 +4577,7 @@ def _is_query_scoped_identity_premise(ir: dict[str, Any], predicate: str) -> boo
     if not _has_safe_query(ir):
         return False
     turn_type = str(ir.get("turn_type", "")).strip().lower()
-    text = flatten_semantic_text(ir)
-    if turn_type in {"query", "mixed"}:
-        return True
-    return any(marker in text for marker in ("hypothetical", "conditional question", " if ", "would"))
+    return turn_type in {"query", "mixed"}
 
 
 def _has_initialed_person_state_write(ir: dict[str, Any]) -> bool:
@@ -4627,20 +4626,8 @@ def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
     if _has_ambiguous_or_unresolved_referent(ir):
         return False
     turn_type = str(ir.get("turn_type", "")).strip().lower()
-    if turn_type not in {"query", "unknown"} and _normalize_decision(ir.get("decision")) != "answer":
-        text = " ".join(
-            [
-                str(ir.get("decision", "")),
-                json.dumps(ir.get("self_check", {}), ensure_ascii=False),
-                json.dumps(ir.get("unsafe_implications", []), ensure_ascii=False),
-            ]
-        ).lower()
-        if (
-            "hypothetical" not in text
-            and "counterfactual" not in text
-            and "conditional question" not in text
-        ):
-            return False
+    if turn_type not in {"query", "unknown", "mixed"} and _normalize_decision(ir.get("decision")) != "answer":
+        return False
     ops = _candidate_operations(ir)
     if not ops:
         return False
@@ -4661,14 +4648,7 @@ def _is_pure_hypothetical_query(ir: dict[str, Any]) -> bool:
     ]
     if unsafe_writes:
         return False
-    text = flatten_semantic_text(ir)
-    return (
-        "hypothetical" in text
-        or "counterfactual" in text
-        or "conditional question" in text
-        or "if " in text
-        or "would" in text
-    )
+    return turn_type in {"query", "unknown", "mixed"}
 
 
 def _has_ambiguous_or_unresolved_referent(ir: dict[str, Any]) -> bool:

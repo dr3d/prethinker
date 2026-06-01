@@ -34,86 +34,48 @@ propagation = visible recomputation, not hidden belief
 ## Read First
 
 - [Current research headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - the latest compact lab note.
-- [Audit grammar measurement note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_MEASUREMENT_NOTE.md) - the current public measurement claim, caveats included.
-- [Audit grammar technical note](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md) - methodology behind the current numbers and cleanliness counters.
-- [CTO architecture brief](https://github.com/dr3d/prethinker/blob/main/docs/CTO_ARCHITECTURE_BRIEF.md) - the current operating doctrine for new high-context collaborators.
-- [Semantic instrument](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - the public guide to artifact-first orchestration, lens facets, selector guards, and uncertainty vocabulary.
-- [Compiling Language](https://github.com/dr3d/prethinker/blob/main/docs/COMPILING_LANGUAGE.md) - visitor-friendly explanation of treating source language as compilable input.
+- [Domain tier strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - the current post-reset strategy: closed domain schemas, hard-clean gates, and visible trust tiers.
 - [Active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - compact map of current work without worksheet sediment.
+- [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for the docs that still describe the living project.
 - [Compiled KB artifact package](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - what a compiled document product contains and what Q&A may use.
 - [QA instrument](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - how governed QA uses LLM planning and judging inside deterministic constraints.
+- [Overlay architecture](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future overlays read evidence without mutating KB truth.
 - [Boundary probe method](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - how focused fixtures are designed without fixture-vocabulary leakage.
-- [Semantic lens roster](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - current lens vocabulary and calibration doctrine.
-- [Multi-pass semantic compiler](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax, safe-surface accumulation, and rule-lens work.
 - [Project state](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - compact status snapshot for the repo as it sits now.
-- [Public docs guide](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - reading order for deeper technical material.
-- [Full design explainer](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - the short conceptual tour.
+
+Historical scorecards and older public notes remain in Git history or are
+marked in-place as pre-reset context. They are not current claim-bearing docs.
 
 ## Current Research Headline
 
-The active frontier is **row-gated semantic parallax**. One compile is one
-viewpoint, and one broader prompt is rarely the answer. Prethinker now treats
-each lens, registry scaffold, deterministic ledger, query surface, and selector policy as a measured
-candidate surface over frozen artifacts.
+Prethinker is in a **sign-clean reset**. Earlier high scores were useful
+research signals, but they are no longer public claims because audits showed
+that some answer delivery depended on prose/source-record routing,
+question-shape routing, or judge-facing surface tokens.
 
-Rows are not where truth lives. Truth lives in the compiled KB. A row is the
-scored encounter where a question tests whether that state is present,
-retrievable, and safe to answer from. The selector is the steering wheel; guards
-are the rumble strips that stop tempting but wrong surfaces from winning.
+The current claim-bearing floor is deliberately harsher:
 
-The current public measurement claim is blocked under sign-clean reset. A
-2026-05-29 governance audit first removed Python-side semantic routing over raw
-English questions. The first post-correction English ugly regression, run
-no-cache over the May 29 public-document corpus using frozen compile artifacts,
-measured `161 / 22 / 17` over `200` rows (`80.5%` exact), with `0`
-compatibility rows, `0` runtime load errors, and `0` QA write proposals.
+```text
+Current 8-fixture English batch, model-redacted hard-road floor
 
-A sharper follow-up audit then found the deeper problem: Python still performs
-semantic routing over free-text source/display fields. That means even the
-80.5% result is a provisional research signal, not a sign-clean public claim.
-The source-ledger dependency audit found `0 / 197` direct-only exact rows in
-the pre-clean `98.5%` run, and only `47 / 200` direct-only exact rows in the
-post-raw-utterance-cut `80.5%` run. So `80.5%` is an upper bound on the
-still-contaminated path, not the typed-thesis floor. The score supersedes the
-prior 98-99% ugly-public figures for current engineering triage, but sign-clean
-claims remain blocked until free-text source-ledger routing is removed or
-proven structural.
+Product exact:                  88 / 200 = 44.0%
+Typed-plan exact:               84 / 200 = 42.0%
+Redaction-survived exact:       81 / 200 = 40.5%
+Atom-shape-clean product exact: 84 / 200 = 42.0%
+Hard-clean floor:               73 / 200 = 36.5%
+```
 
-The newest ceiling proxy is harsher and more useful: on the same 200-row May
-29 public-document corpus, ignoring `source_record_*` predicates leaves only
-`62 / 200` rows (`31.0%`) likely available in permissive non-source-record
-typed artifacts, and only `33 / 200` rows (`16.5%`) likely available in strict
-typed artifacts after excluding prose-like/display atoms. That is not a QA
-score. It is the current compile-recall wall.
+That number is not the product ambition. It is the honest research floor for
+the open general compiler after the old shortcuts are no longer allowed to
+score. The current product-shaped direction is a closed domain schema: one
+document family, a governed predicate pack, explicit omission/accountability,
+typed-plan replay, redaction survival, atom-shape cleanliness, and visible
+trust tiers.
 
-Earlier measurements remain useful as historical evidence, not current
-headline claims. The 2026-05-22 native restamp remains an internal anchor at
-`1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact). The
-May 28 and earlier ugly-public runs showed high QA under the pre-reset query
-surface, but the May 29 regression proved that some of that delivery was being
-carried by now-retired raw-utterance routing.
-
-The caveats are part of the claim: the native compile gate grew noisier
-(`26 / 30 -> 9 / 47` pass/hold under the old overloaded gate), the native corpus
-is same named fixtures rather than proven byte-identical to the prior stamp, and
-query-surface gaps rose even as compile-surface, hybrid-join, answer-surface,
-and judge-uncertain gaps improved. Current tooling also reports
-blocking/diagnostic/advisory gate tiers so future claims can distinguish
-release blockers from diagnostic noise. The May 28 fresh ugly compile also had a
-noisy gate (`2 / 6` old pass/hold; `4 / 6 / 0`
-blocking/diagnostic/advisory holds), so the high QA score should be read beside
-that compiler-coverage pressure.
-
-For the freshest orientation, read the
-[current headline](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md)
-and then the
-[active research lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
-External transfer, language transfer, instrument stamping, and direct-surface
-work are summarized there; detailed worksheets have been
-retired from the public docs surface.
-The active replacement lane is direct compile-surface stability:
-source-record ledgers preserve fidelity, but recurring answer-bearing surfaces
-should become direct admitted compile facts.
+The practical next target is not another broad public proclamation. It is a
+domain pack that can show Tier 1 verified answers on a bounded document type,
+with lower-trust general typed and RAG/retrieval fallbacks labeled instead of
+blended into the score.
 
 ## Current State
 
@@ -143,24 +105,17 @@ The short version:
 
 ## Useful Entry Points
 
-- [docs/EXPLAINER.md](https://github.com/dr3d/prethinker/blob/main/docs/EXPLAINER.md) - what Prethinker is and why the authority boundary matters.
-- [PROJECT_STATE.md](https://github.com/dr3d/prethinker/blob/main/PROJECT_STATE.md) - current architecture, demo status, and next frontiers.
-- [docs/CURRENT_RESEARCH_HEADLINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_RESEARCH_HEADLINE.md) - current research headline and newest public framing.
-- [docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md](https://github.com/dr3d/prethinker/blob/main/docs/AUDIT_GRAMMAR_TECHNICAL_NOTE.md) - public methodology note for audit grammar measurement.
-- [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - current work map and freeze readiness.
+- [docs/DOMAIN_TIER_STRATEGY.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md) - current post-reset strategy and trust-tier boundary.
+- [docs/ACTIVE_RESEARCH_LANES.md](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md) - current work map and reset readiness.
+- [docs/DOMAIN_TIER_WORKSHEET.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_WORKSHEET.md) - live lab notes for the domain-schema climb.
+- [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - maintained public-doc reading map.
 - [docs/BOUNDARY_PROBE_RESEARCH_METHOD.md](https://github.com/dr3d/prethinker/blob/main/docs/BOUNDARY_PROBE_RESEARCH_METHOD.md) - boundary-coordinate and transfer-safe fixture method.
 - [docs/COMPILED_KB_ARTIFACT_PACKAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILED_KB_ARTIFACT_PACKAGE.md) - current compiled-document product contract.
 - [docs/QA_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/QA_INSTRUMENT.md) - governed QA pipeline and failure-surface interpretation.
-- [docs/SEMANTIC_INSTRUMENT.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_INSTRUMENT.md) - public instrument spec for lenses, guards, uncertainty states, and calibration evidence.
-- [docs/COMPILING_LANGUAGE.md](https://github.com/dr3d/prethinker/blob/main/docs/COMPILING_LANGUAGE.md) - plain-language mental model for compiling documents into queryable KB artifacts.
-- [docs/SEMANTIC_LENS_ROSTER.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_LENS_ROSTER.md) - current semantic lens roster and transfer discipline.
-- [docs/MULTI_PASS_SEMANTIC_COMPILER.md](https://github.com/dr3d/prethinker/blob/main/docs/MULTI_PASS_SEMANTIC_COMPILER.md) - semantic parallax and safe-surface accumulation.
+- [docs/OVERLAY_ARCHITECTURE.md](https://github.com/dr3d/prethinker/blob/main/docs/OVERLAY_ARCHITECTURE.md) - how ACH and future overlays read compiled evidence without mutating the KB.
 - [AGENT-README.md](https://github.com/dr3d/prethinker/blob/main/AGENT-README.md) - fast onboarding for coding agents.
-- [docs/CURRENT_UTTERANCE_PIPELINE.md](https://github.com/dr3d/prethinker/blob/main/docs/CURRENT_UTTERANCE_PIPELINE.md) - current domain-aware, recent-context, KB-seeded utterance path.
-- [docs/PUBLIC_DOCS_GUIDE.md](https://github.com/dr3d/prethinker/blob/main/docs/PUBLIC_DOCS_GUIDE.md) - current public-doc reading map.
 - [docs/SEMANTIC_IR_MAPPER_SPEC.md](https://github.com/dr3d/prethinker/blob/main/docs/SEMANTIC_IR_MAPPER_SPEC.md) - deterministic mapper/admission contract.
 - [docs/DOMAIN_PROFILE_CATALOG.md](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PROFILE_CATALOG.md) - profile/skill-style context packages for domain-aware Semantic IR.
-- [docs/PRODUCT_AND_PALETTE_GOVERNANCE.md](https://github.com/dr3d/prethinker/blob/main/docs/PRODUCT_AND_PALETTE_GOVERNANCE.md) - current governance for palette priors and product-facing profile work.
 - [ui_gateway/README.md](https://github.com/dr3d/prethinker/blob/main/ui_gateway/README.md) - UI gateway notes.
 
 ## Run It
@@ -191,31 +146,20 @@ python scripts\audit_active_instrument_leakage.py
 
 Current high-signal evidence:
 
-- Semantic IR edge runtime A/B: `20/20` decision labels, `0.976` average score, `0` non-mapper parse rescues.
-- Native direct-surface restamp, 2026-05-22: `1997 exact / 46 partial / 120 miss` over `2163` rows (`92.33%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals.
-- Fresh ugly public 2026-05-29 typed-artifact recall proxy: permissive non-source-record likely availability `62 / 200` (`31.0%`), strict typed likely availability `33 / 200` (`16.5%`). This is the current compile-recall wall, not a QA score.
-- Fresh ugly public 2026-05-28 R2: historical pre-reset evidence only, `198 / 2 / 0` over `200` rows (`99.0%`), with `0` compatibility rows, `0` runtime load errors, and `0` QA write proposals. It is not a current sign-clean claim after the May 29 reset. Compile gate remained noisy at `2 / 6` old pass/hold and `4 / 6 / 0` blocking/diagnostic/advisory holds.
-- Fresh ugly public Batch 03, latest guarded slices: historical pre-reset regression evidence only. SEC subset `75 / 0 / 0` over `75` rows and non-SEC subset `216 / 6 / 3` over `225` rows (`96.0%`), giving a slice-combined view of `291 / 6 / 3` over `300` rows (`97.0%`). This is not a single fresh 300-row rerun and is not a current sign-clean claim.
-- Real-world external four-fixture spotcheck: latest fixture-level QA is `160 / 0 / 0`, with `4 / 4` compile gates clean, `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
-- Sealed unseen authored transfer: `152 / 1 / 6` over `160` rows (`95.0%` exact), with `0` compatibility rows, `0` runtime load errors, and `0` write proposals.
-- Earlier cold transfer baseline: six fresh transfer fixtures scored `177 / 10 / 53` over `240` rows (`73.75%` exact) before the current direct-surface work.
-- Weak-edge pass: `10/10` decision labels, `1.000` average score.
-- Multilingual router probe: `10/10` router choices and `10/10` compiler JSON on raw Spanish, French, German, Portuguese, Italian, Japanese, and code-switched turns.
-- Profile-owned predicate aliases now canonicalize candidate-operation predicate surfaces before palette admission, with an audit trail such as `dad_of/2 -> parent/2`; this is registry/context authority, not Python prose parsing.
-- Policy/reimbursement cross-turn demo: English policy installed executable rules, derived query answers without writing derived `violation/2` facts, then corrected state and changed the answer.
-- Anaplan Polaris enterprise-guidance fixture: multi-support safe-surface accumulation reached `42 exact / 1 partial / 0 miss` on a 43-question post-ingestion QA battery, with `0` runtime load errors and `0` QA write proposals.
-- Sable Creek Budget rule replay: a narrow rule lens plus admitted-fact signature support produced the first fresh-fixture promotion-ready public-hearing rule without gold KBs, answer keys, or Python prose interpretation.
-- Grant-committee rule replay: mapper-side rule gates skip raw Prolog negation/disjunction/comparison constructs, while body-supported matching-fund rules remain promotion-ready; post-gate rule union reached `27 exact / 10 partial / 3 miss`.
-- Clarification Eagerness source-context regression check: `40/40` correct, `0` unsafe candidates, `0` context-write violations, and `10/10` blocked-slot coverage after the rule-admission changes.
-- Cold generalization evidence: the 2026-05-07 sealed 10-fixture story batch has a row-gated high-water of `361 exact / 16 partial / 23 miss` across `400` QA rows (`90.25%`), with zero QA write proposals in the contributing runs.
-- Incoming-6 full-40 evidence remains useful history: six new 2026-05-08 fixtures moved from a cold baseline of `186 / 16 / 38` to a diagnostic row-gated high-water of `240 / 0 / 0` over `240` rows. This proves reachable surfaces, not one global compiler; the new row shapes remain selector-scoped until unlike transfer checks prove them.
-- Selector guard family rollup: `5` active guard return sites, `5` unique reasons, `4` semantic families, `0` unclassified reasons. Detailed retired/scar ledger output is generated under `tmp` when needed.
-- Temporal kernel slice: admitted `before/2` facts now support deterministic `after/2`, transitive `precedes/2`, and `follows/2` queries through Prolog rules; `temporal_graph_v1` remains proposal-only unless matching candidate operations pass admission.
-- Temporal correction guard: replacement `event_on/2`, `interval_start/2`, and `interval_end/2` anchors are blocked unless the model emits an explicit retract/correction plan.
-- Historical mixed-domain stress packs and detailed research worksheets were retired
-  from the public docs tree; Git history and the local cold archive preserve
-  calibration evidence, while the current frontier is summarized in compact
-  orientation docs.
+- Current 8-fixture English hard-road floor: product exact `88 / 200`
+  (`44.0%`), typed-plan exact `84 / 200` (`42.0%`), redaction-survived
+  exact `81 / 200` (`40.5%`), atom-shape-clean product exact `84 / 200`
+  (`42.0%`), hard-clean floor `73 / 200` (`36.5%`).
+- FDA warning-letter domain micro-fixture: the first domain-pack wedge is live
+  under `datasets/compile_micro_fixtures/fda_warning_letter_domain_v1/`, with
+  value-domain, atom-shape, omission/accountability, and carrier-contract gates
+  being tested before any public product claim.
+- Answer-judge governance now has null controls, redaction replay, and
+  typed-plan replay so judge exact rate is not allowed to become the thesis
+  metric by itself.
+- Historical high-score runs remain in Git history and marked docs as
+  calibration context. They are not current claim-bearing numbers after the
+  sign-clean reset.
 
 The UMLS Semantic Network and Metathesaurus-derived runtime assets are intentionally not committed because they depend on licensed source data. The public repo includes the builders, tests, docs, and profile code; outside reproduction of the UMLS lane requires obtaining the licensed UMLS files separately.
 

@@ -56,6 +56,92 @@ def test_build_command_forwards_profile_delivery_repair_pass() -> None:
     assert "--profile-delivery-repair-pass" in command
 
 
+def test_build_command_forwards_profile_identifier_occurrence_repair_pass() -> None:
+    args = SimpleNamespace(
+        domain_hint="",
+        profile_registry=None,
+        use_profile_registry_direct=False,
+        profile_registry_palette_prior=False,
+        allow_global_first_profile_registry_palette_prior=False,
+        compile_source=True,
+        compile_plan_passes=False,
+        compile_flat_plus_plan_passes=True,
+        focused_pass_ops_schema=True,
+        source_entity_ledger=False,
+        archival_identifier_ledger=False,
+        source_record_ledger=True,
+        source_record_ledger_facts=True,
+        profile_delivery_repair_pass=False,
+        profile_identifier_occurrence_repair_pass=True,
+        intake_registry_context=False,
+        review_profile=False,
+        profile_review_retry=False,
+        max_plan_passes=6,
+        extra_compile_context_line=[],
+    )
+    command = _build_command(
+        CompileJob(
+            fixture="fixture_a",
+            text_file=Path("datasets/fixture_a/source.md"),
+            out_dir=Path("tmp/out/fixture_a"),
+        ),
+        args=args,
+        model="model-a",
+        base_url="http://127.0.0.1:1234",
+        timeout=1200,
+    )
+
+    assert "--profile-identifier-occurrence-repair-pass" in command
+
+
+def test_build_command_forwards_governed_subject_repair_passes() -> None:
+    args = SimpleNamespace(
+        domain_hint="",
+        profile_registry=None,
+        use_profile_registry_direct=False,
+        profile_registry_palette_prior=False,
+        allow_global_first_profile_registry_palette_prior=False,
+        compile_source=True,
+        compile_plan_passes=False,
+        compile_flat_plus_plan_passes=True,
+        focused_pass_ops_schema=True,
+        source_entity_ledger=False,
+        archival_identifier_ledger=False,
+        source_record_ledger=True,
+        source_record_ledger_facts=False,
+        profile_delivery_repair_pass=False,
+        profile_identifier_occurrence_repair_pass=False,
+        profile_list_range_inventory_repair_pass=False,
+        profile_governed_subject_manifest_pass=True,
+        profile_legal_citation_repair_pass=True,
+        profile_review_outcome_repair_pass=True,
+        legal_citation_profile_extension=True,
+        list_range_inventory_profile_extension=True,
+        intake_registry_context=False,
+        review_profile=False,
+        profile_review_retry=False,
+        max_plan_passes=6,
+        extra_compile_context_line=[],
+    )
+    command = _build_command(
+        CompileJob(
+            fixture="fixture_a",
+            text_file=Path("datasets/fixture_a/source.md"),
+            out_dir=Path("tmp/out/fixture_a"),
+        ),
+        args=args,
+        model="model-a",
+        base_url="http://127.0.0.1:1234",
+        timeout=1200,
+    )
+
+    assert "--profile-governed-subject-manifest-pass" in command
+    assert "--profile-legal-citation-repair-pass" in command
+    assert "--profile-review-outcome-repair-pass" in command
+    assert "--legal-citation-profile-extension" in command
+    assert "--list-range-inventory-profile-extension" in command
+
+
 def test_compile_batch_command_forwards_openrouter_provider_controls() -> None:
     args = SimpleNamespace(
         domain_hint="",
@@ -215,6 +301,40 @@ def test_compile_batch_summary_flags_regulatory_violation_category_loss() -> Non
     assert "admitted_failure/2" in summary["violation_category_slot_loss_refs"]
     assert any(
         flag.startswith("violation_category_slot_loss:")
+        for flag in summary["profile_schema_contract_flags"]
+    )
+
+
+def test_compile_batch_summary_refreshes_list_range_inventory_slot_loss() -> None:
+    summary = _extract_compile_summary(
+        {
+            "parsed_ok": True,
+            "parsed": {
+                "schema_version": "profile_bootstrap_v1",
+                "domain_guess": "adjudicative_review",
+                "domain_scope": "Review records with numbered claim outcomes.",
+                "candidate_predicates": [
+                    {
+                        "signature": "claim_outcome/3",
+                        "args": ["claim_range", "ground", "outcome"],
+                        "description": "Outcome row.",
+                        "why": "Source states claim outcomes.",
+                        "admission_notes": [],
+                    },
+                ],
+                "starter_frontier_cases": [],
+                "entity_types": [{"name": "claim"}],
+                "admission_risks": ["range compression"],
+                "repeated_structures": [],
+            },
+            "source_compile": {"admitted_count": 1, "skipped_count": 0},
+            "score": {"rough_score": 0.1, "risk_count": 0},
+        }
+    )
+
+    assert summary["list_range_inventory_slot_loss_refs"] == ["claim_outcome/3"]
+    assert any(
+        flag.startswith("list_range_inventory_slot_loss:")
         for flag in summary["profile_schema_contract_flags"]
     )
 
@@ -1785,6 +1905,19 @@ def test_quality_retry_context_includes_violation_category_slot_loss() -> None:
 
     assert any("category-capable carrier" in line for line in lines)
     assert any("legal-basis rows, obligation rows, and violation/deficiency/finding" in line for line in lines)
+
+
+def test_quality_retry_context_includes_list_range_inventory_slot_loss() -> None:
+    lines = _quality_retry_context_lines(
+        {
+            "reasons": [
+                "profile_schema_contract:list_range_inventory_slot_loss:claim_outcome/3",
+            ]
+        }
+    )
+
+    assert any("compressed range/list atom" in line for line in lines)
+    assert any("Range/member boundaries must remain typed and queryable" in line for line in lines)
 
 
 def test_compile_quality_gate_holds_zero_yield_compile_health() -> None:

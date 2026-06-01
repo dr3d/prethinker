@@ -1055,6 +1055,76 @@ class SemanticIRRuntimeTests(unittest.TestCase):
         self.assertFalse(any("non-temporal atom" in warning for warning in warnings))
         self.assertEqual(parsed["admission_diagnostics"]["admitted_count"], 1)
 
+    def test_mapper_allows_date_kind_role_as_structural_role_slot(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "document_date",
+                    "args": ["doc_fed_cir_2025_1705", "decision_date", "february_18_2026"],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["document_date/3"],
+            predicate_contracts=[
+                {
+                    "signature": "document_date/3",
+                    "args": ["document_or_subject_id", "date_kind_or_role", "date_value"],
+                },
+            ],
+        )
+
+        assert parsed["facts"] == ["document_date(doc_fed_cir_2025_1705, decision_date, february_18_2026)."]
+        assert not any("non-temporal atom" in warning for warning in warnings)
+        assert parsed["admission_diagnostics"]["admitted_count"] == 1
+
+    def test_mapper_allows_version_prefixed_date_atoms(self) -> None:
+        ir = _ir(
+            candidate_operations=[
+                {
+                    "operation": "assert",
+                    "predicate": "fda_warning_letter",
+                    "args": [
+                        "letter_2025_05_14_marigold",
+                        "fda_office_pharmaceutical_quality_operations",
+                        "marigold_sterile_products_inc",
+                        "v_2025_05_14",
+                        "source_utterance",
+                    ],
+                    "polarity": "positive",
+                    "source": "direct",
+                    "safety": "safe",
+                }
+            ]
+        )
+        parsed, warnings = semantic_ir_to_legacy_parse(
+            ir,
+            allowed_predicates=["fda_warning_letter/5"],
+            predicate_contracts=[
+                {
+                    "signature": "fda_warning_letter/5",
+                    "args": [
+                        "letter_id",
+                        "issuing_office",
+                        "recipient_entity",
+                        "issue_date",
+                        "source_or_scope",
+                    ],
+                },
+            ],
+        )
+
+        assert parsed["facts"] == [
+            "fda_warning_letter(letter_2025_05_14_marigold, fda_office_pharmaceutical_quality_operations, marigold_sterile_products_inc, v_2025_05_14, source_utterance)."
+        ]
+        assert not any("non-temporal atom" in warning for warning in warnings)
+        assert parsed["admission_diagnostics"]["admitted_count"] == 1
+
     def test_mapper_allows_interval_label_as_label_not_temporal_span(self) -> None:
         ir = _ir(
             candidate_operations=[

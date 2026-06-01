@@ -81,6 +81,12 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertIn("direct document-update surface", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("current decision's disposition separately from procedural history", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("whether the matter is remanded/transferred or finally/directly resolved", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("do not collapse the action under review into the review outcome", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("underlying action type or status", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("review outcome, scope/effect", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("action_under_review/5", PROFILE_BOOTSTRAP_GUIDANCE)
+        self.assertIn("Flag action-under-review collapse", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
+        self.assertIn("underlying rejection/denial/citation/finding/recommendation/order", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("Flag recommendation-chain slot loss", PROFILE_BOOTSTRAP_REVIEW_GUIDANCE)
         self.assertIn("violation or deficiency categories separate from action type", PROFILE_BOOTSTRAP_GUIDANCE)
         self.assertIn("separate category rows for each stated area", PROFILE_BOOTSTRAP_GUIDANCE)
@@ -409,6 +415,124 @@ class ProfileBootstrapTests(unittest.TestCase):
         self.assertEqual(score["candidate_signature_arg_mismatch_refs"], ["record_action/4:args=3"])
         self.assertLess(score["rough_score"], 0.8)
 
+    def test_score_catches_provenance_predicate_with_prose_arg_role(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "source_record_governance",
+            "domain_scope": "Typed provenance should not carry prose.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "assertion", "description": "Assertion.", "examples": ["a1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "source_recorded/4",
+                    "args": ["assertion_id", "source_coord", "text_span", "record_type"],
+                    "description": "Unsafe provenance row with copied source prose.",
+                    "why": "This would make provenance a text carrier.",
+                    "admission_notes": ["Do not parse this prose downstream."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["source_recorded/4"],
+            "admission_risks": ["provenance/prose collapse"],
+            "clarification_policy": [],
+            "unsafe_transformations": ["do not route by copied source text"],
+            "starter_frontier_cases": [],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["provenance_prose_arg_role_count"], 1)
+        self.assertEqual(
+            score["provenance_prose_arg_role_refs"],
+            ["source_recorded/4:args=text_span"],
+        )
+        self.assertLess(score["rough_score"], 0.8)
+
+    def test_score_catches_duplicate_candidate_name_with_private_arity(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "claim_range_governance",
+            "domain_scope": "One predicate name should not drift across arities.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "claim", "description": "Claim.", "examples": ["c1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "claim_range/3",
+                    "args": ["set_id", "start", "end"],
+                    "description": "Private lower-arity range.",
+                    "why": "Underspecified source anchor.",
+                    "admission_notes": ["Should use governed carrier."],
+                },
+                {
+                    "signature": "claim_range/4",
+                    "args": ["set_id", "start", "end", "source_coord"],
+                    "description": "Governed range.",
+                    "why": "Preserves source coordinate.",
+                    "admission_notes": ["Preferred carrier."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["claim_range/4"],
+            "admission_risks": ["private arity drift"],
+            "clarification_policy": [],
+            "unsafe_transformations": [],
+            "starter_frontier_cases": [],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["candidate_duplicate_name_arity_count"], 1)
+        self.assertEqual(
+            score["candidate_duplicate_name_arity_refs"],
+            ["claim_range:claim_range/3,claim_range/4"],
+        )
+        self.assertLess(score["rough_score"], 0.8)
+
+    def test_score_catches_registered_carrier_role_redefinition(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "carrier_contract_governance",
+            "domain_scope": "Registered carriers keep their argument contracts.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "claim", "description": "Claim.", "examples": ["claim_1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "claim_range/4",
+                    "args": ["proceeding_id", "claim_start", "claim_end", "claim_label"],
+                    "description": "Reuses the governed name with different roles.",
+                    "why": "This would split the shared atom language.",
+                    "admission_notes": ["Should match the registry."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["claim_range/4"],
+            "admission_risks": ["carrier role drift"],
+            "clarification_policy": [],
+            "unsafe_transformations": [],
+            "starter_frontier_cases": [],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["governed_carrier_arg_role_mismatch_count"], 1)
+        self.assertEqual(
+            score["governed_carrier_arg_role_mismatch_refs"],
+            [
+                "claim_range/4:args=proceeding_id,claim_start,claim_end,claim_label "
+                "expected=claim_set_id,start_claim,end_claim,source_or_scope"
+            ],
+        )
+        self.assertLess(score["rough_score"], 0.8)
+
     def test_score_surfaces_recommendation_chain_without_recipient_slot(self) -> None:
         parsed = {
             "schema_version": "profile_bootstrap_v1",
@@ -619,6 +743,89 @@ class ProfileBootstrapTests(unittest.TestCase):
 
         self.assertEqual(score["violation_category_slot_loss_count"], 0)
         self.assertEqual(score["violation_category_slot_loss_refs"], [])
+
+    def test_score_surfaces_lossy_numbered_range_outcome_without_inventory_carrier(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "adjudicative_review",
+            "domain_scope": "Review records with numbered item outcomes.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "claim", "description": "Numbered claim.", "examples": ["claim_1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "claim_outcome/3",
+                    "args": ["claim_range", "ground", "outcome"],
+                    "description": "Records outcome for a claim range.",
+                    "why": "The source lists numbered claims with outcomes.",
+                    "admission_notes": ["Must not compress ranges into lossy atoms."],
+                }
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["claim_outcome/3"],
+            "admission_risks": ["range compression"],
+            "clarification_policy": ["clarify range boundaries when source omits them"],
+            "unsafe_transformations": ["do not infer missing members"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The record listed claims 1-3 as rejected.",
+                    "expected_boundary": "claim_outcome(claims_1_3, ground_a, rejected).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["list_range_inventory_slot_loss_count"], 1)
+        self.assertEqual(score["list_range_inventory_slot_loss_refs"], ["claim_outcome/3"])
+
+    def test_score_accepts_numbered_range_outcome_with_inventory_carrier(self) -> None:
+        parsed = {
+            "schema_version": "profile_bootstrap_v1",
+            "domain_guess": "adjudicative_review",
+            "domain_scope": "Review records with numbered item outcomes.",
+            "confidence": 0.9,
+            "source_summary": ["sample"],
+            "entity_types": [{"name": "claim", "description": "Numbered claim.", "examples": ["claim_1"]}],
+            "candidate_predicates": [
+                {
+                    "signature": "claim_outcome/3",
+                    "args": ["claim_set", "ground", "outcome"],
+                    "description": "Records outcome for a claim set.",
+                    "why": "The source lists numbered claims with outcomes.",
+                    "admission_notes": ["Use claim_range rows for members/bounds."],
+                },
+                {
+                    "signature": "claim_range/4",
+                    "args": ["claim_set", "start_number", "end_number", "source_ref"],
+                    "description": "Records each source-stated claim range.",
+                    "why": "Range boundaries must remain queryable.",
+                    "admission_notes": ["A singleton range uses the same start and end."],
+                },
+            ],
+            "repeated_structures": [],
+            "likely_functional_predicates": [],
+            "provenance_sensitive_predicates": ["claim_outcome/3", "claim_range/4"],
+            "admission_risks": ["range compression"],
+            "clarification_policy": ["clarify range boundaries when source omits them"],
+            "unsafe_transformations": ["do not infer missing members"],
+            "starter_frontier_cases": [
+                {
+                    "utterance": "The record listed claims 1-3 as rejected.",
+                    "expected_boundary": "claim_range(set_a, 1, 3, src_1).",
+                    "must_not_write": [],
+                }
+            ],
+            "self_check": {"profile_authority": "proposal_only", "notes": []},
+        }
+
+        score = profile_bootstrap_score(parsed)
+
+        self.assertEqual(score["list_range_inventory_slot_loss_count"], 0)
+        self.assertEqual(score["list_range_inventory_slot_loss_refs"], [])
 
     def test_score_catches_frontier_cases_using_unproposed_positive_predicates(self) -> None:
         parsed = {

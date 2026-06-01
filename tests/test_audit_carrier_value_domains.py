@@ -1,0 +1,55 @@
+import json
+from pathlib import Path
+
+from scripts.audit_carrier_value_domains import build_report
+
+
+def _write_compile(path: Path, facts: list[str]) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"source_compile": {"facts": facts}}, indent=2),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_carrier_value_domain_audit_passes_allowed_fda_values(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "fda" / "compile.json",
+        [
+            "fda_violation(v1, letter, violation_1, quality_unit_failure, src_line_1).",
+            "fda_response_requirement(letter, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, src_line_2).",
+            "fda_conclusion_scope(letter, cited_violations_not_exhaustive, not_all_inclusive, src_line_3).",
+            "domain_omission(letter, 'fda_correspondence_party/5', role_missing, signatory_not_stated, src_line_4).",
+        ],
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "pass"
+    assert report["summary"]["violation_count"] == 0
+    assert report["summary"]["checked_slot_count"] >= 5
+
+
+def test_carrier_value_domain_audit_blocks_off_palette_fda_values(tmp_path: Path) -> None:
+    compile_json = _write_compile(
+        tmp_path / "fda" / "compile.json",
+        [
+            "fda_violation(v1, letter, 1, quality_unit_review_failure, src_line_1).",
+            "fda_violation_citation(v1, 21_cfr_211_192, governing_regulation, src_line_2).",
+            "fda_conclusion_scope(letter, not_all_inclusive, not_intended_to_be_an_all_inclusive_list_of_violations, src_line_3).",
+        ],
+    )
+
+    report = build_report([compile_json])
+    violations = {(row["signature"], row["arg_name"], row["value"]) for row in report["violations"]}
+
+    assert report["summary"]["status"] == "fail"
+    assert ("fda_violation/5", "violation_category", "quality_unit_review_failure") in violations
+    assert ("fda_violation_citation/4", "citation_role", "governing_regulation") in violations
+    assert ("fda_conclusion_scope/4", "scope_kind", "not_all_inclusive") in violations
+    assert (
+        "fda_conclusion_scope/4",
+        "scope_value",
+        "not_intended_to_be_an_all_inclusive_list_of_violations",
+    ) in violations

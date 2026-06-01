@@ -288,6 +288,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--source-record-ledger", action="store_true")
     parser.add_argument("--source-record-ledger-facts", action="store_true")
     parser.add_argument("--profile-delivery-repair-pass", action="store_true")
+    parser.add_argument("--profile-identifier-occurrence-repair-pass", action="store_true")
+    parser.add_argument("--profile-document-date-repair-pass", action="store_true")
+    parser.add_argument("--profile-list-range-inventory-repair-pass", action="store_true")
+    parser.add_argument("--profile-governed-subject-manifest-pass", action="store_true")
+    parser.add_argument("--profile-legal-citation-repair-pass", action="store_true")
+    parser.add_argument("--profile-review-outcome-repair-pass", action="store_true")
+    parser.add_argument("--document-metadata-profile-extension", action="store_true")
+    parser.add_argument("--role-detail-profile-extension", action="store_true")
+    parser.add_argument("--legal-citation-profile-extension", action="store_true")
+    parser.add_argument("--document-checkbox-profile-extension", action="store_true")
+    parser.add_argument("--document-identifier-occurrence-profile-extension", action="store_true")
+    parser.add_argument("--list-range-inventory-profile-extension", action="store_true")
     parser.add_argument("--intake-registry-context", action="store_true")
     parser.add_argument("--review-profile", action="store_true")
     parser.add_argument("--profile-review-retry", action="store_true")
@@ -470,6 +482,18 @@ def _build_command(
         "source_record_ledger",
         "source_record_ledger_facts",
         "profile_delivery_repair_pass",
+        "profile_identifier_occurrence_repair_pass",
+        "profile_document_date_repair_pass",
+        "profile_list_range_inventory_repair_pass",
+        "profile_governed_subject_manifest_pass",
+        "profile_legal_citation_repair_pass",
+        "profile_review_outcome_repair_pass",
+        "document_metadata_profile_extension",
+        "role_detail_profile_extension",
+        "legal_citation_profile_extension",
+        "document_checkbox_profile_extension",
+        "document_identifier_occurrence_profile_extension",
+        "list_range_inventory_profile_extension",
         "intake_registry_context",
         "review_profile",
         "profile_review_retry",
@@ -657,8 +681,16 @@ def _extract_compile_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "risk_count": score.get("risk_count"),
         "candidate_signature_arg_mismatch_count": score.get("candidate_signature_arg_mismatch_count"),
         "candidate_signature_arg_mismatch_refs": score.get("candidate_signature_arg_mismatch_refs", []),
+        "candidate_duplicate_name_arity_count": score.get("candidate_duplicate_name_arity_count"),
+        "candidate_duplicate_name_arity_refs": score.get("candidate_duplicate_name_arity_refs", []),
+        "governed_carrier_arg_role_mismatch_count": score.get("governed_carrier_arg_role_mismatch_count"),
+        "governed_carrier_arg_role_mismatch_refs": score.get("governed_carrier_arg_role_mismatch_refs", []),
+        "provenance_prose_arg_role_count": score.get("provenance_prose_arg_role_count"),
+        "provenance_prose_arg_role_refs": score.get("provenance_prose_arg_role_refs", []),
         "violation_category_slot_loss_count": score.get("violation_category_slot_loss_count"),
         "violation_category_slot_loss_refs": score.get("violation_category_slot_loss_refs", []),
+        "list_range_inventory_slot_loss_count": score.get("list_range_inventory_slot_loss_count"),
+        "list_range_inventory_slot_loss_refs": score.get("list_range_inventory_slot_loss_refs", []),
         "repeated_structure_count": score.get("repeated_structure_count"),
         "repeated_structure_id_only_record_refs": score.get("repeated_structure_id_only_record_refs", []),
         "repeated_structure_role_mismatch_refs": score.get("repeated_structure_role_mismatch_refs", []),
@@ -707,6 +739,24 @@ def _profile_schema_contract_flags(score: dict[str, Any]) -> list[str]:
         if str(ref).strip()
     ] if isinstance(score.get("candidate_signature_arg_mismatch_refs"), list) else []
     flags.extend(f"candidate_signature_arg_mismatch:{ref}" for ref in candidate_mismatch_refs)
+    duplicate_name_arity_refs = [
+        str(ref).strip()
+        for ref in score.get("candidate_duplicate_name_arity_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("candidate_duplicate_name_arity_refs"), list) else []
+    flags.extend(f"candidate_duplicate_name_arity:{ref}" for ref in duplicate_name_arity_refs)
+    governed_carrier_refs = [
+        str(ref).strip()
+        for ref in score.get("governed_carrier_arg_role_mismatch_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("governed_carrier_arg_role_mismatch_refs"), list) else []
+    flags.extend(f"governed_carrier_arg_role_mismatch:{ref}" for ref in governed_carrier_refs)
+    provenance_prose_refs = [
+        str(ref).strip()
+        for ref in score.get("provenance_prose_arg_role_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("provenance_prose_arg_role_refs"), list) else []
+    flags.extend(f"provenance_prose_arg_role:{ref}" for ref in provenance_prose_refs)
     repeated_unknown_refs = [
         str(ref).strip()
         for ref in score.get("repeated_structure_unknown_predicate_refs", [])
@@ -737,6 +787,12 @@ def _profile_schema_contract_flags(score: dict[str, Any]) -> list[str]:
         if str(ref).strip()
     ] if isinstance(score.get("violation_category_slot_loss_refs"), list) else []
     flags.extend(f"violation_category_slot_loss:{ref}" for ref in violation_category_refs)
+    list_range_refs = [
+        str(ref).strip()
+        for ref in score.get("list_range_inventory_slot_loss_refs", [])
+        if str(ref).strip()
+    ] if isinstance(score.get("list_range_inventory_slot_loss_refs"), list) else []
+    flags.extend(f"list_range_inventory_slot_loss:{ref}" for ref in list_range_refs)
     return flags
 
 
@@ -1093,6 +1149,16 @@ def _quality_retry_context_lines(gate: dict[str, Any]) -> list[str]:
                 "domain-owned carrier with governed target, category/type/class/context, basis/source, and detail/status "
                 "slots. Do not treat order/request/citation/fine/warning type or legal_basis alone as the violation "
                 "category."
+            )
+        if reason.startswith("profile_schema_contract:list_range_inventory_slot_loss:"):
+            add(
+                "QUALITY GATE RETRY: the prior profile described numbered claims, counts, issues, products, "
+                "violations, requirements, order paragraphs, or item ranges with grounds/status/outcomes, but it "
+                "kept the item set only as a compressed range/list atom. In this retry, keep outcome/status rows "
+                "and add a direct member/range carrier such as list_member/4, claim_range/4, item_range/4, "
+                "item_ground/5, issue_ground/5, or a close domain-owned equivalent. Range/member boundaries must "
+                "remain typed and queryable; do not require later QA to recover hyphens or missing members from "
+                "source prose or display strings."
             )
         if "table_list_surface:distribution_state_table_underpreserved:" in reason:
             missing_states = _table_missing_states_from_reason(reason)

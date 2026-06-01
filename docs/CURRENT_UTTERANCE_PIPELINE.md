@@ -2,6 +2,12 @@
 
 Last updated: 2026-05-28
 
+> Status: historical pre-reset pipeline note. Do not use the score summary in
+> this document as current claim posture. Current direction is documented in
+> [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
+> and
+> [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
+
 This is the current live shape of Prethinker. The old English-first parser lane
 is historical context. The current instrument is a governed adapter: language
 proposes meaning, deterministic admission decides what becomes durable state,
