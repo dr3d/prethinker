@@ -8,11 +8,11 @@ Last updated: 2026-05-28
 > and
 > [Active Research Lanes](https://github.com/dr3d/prethinker/blob/main/docs/ACTIVE_RESEARCH_LANES.md).
 
-This is the current live shape of Prethinker. The old English-first parser lane
-is historical context. The current instrument is a governed adapter: language
-proposes meaning, deterministic admission decides what becomes durable state,
-and direct query planning tries to retrieve admitted state without granting
-the model write authority.
+This was the live pipeline shape at the time this note was written. The old
+English-first parser lane is historical context. The durable idea that remains
+current is the governed-adapter boundary: language proposes meaning,
+deterministic admission decides what becomes durable state, and query planning
+must retrieve admitted state without granting the model write authority.
 
 The project now has two closely related paths:
 
