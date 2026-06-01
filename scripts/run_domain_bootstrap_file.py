@@ -1070,6 +1070,14 @@ def parse_args() -> argparse.Namespace:
         help="Use --profile-registry directly as the draft profile palette instead of asking the LLM to rediscover it.",
     )
     parser.add_argument(
+        "--profile-registry-lens",
+        default="",
+        help=(
+            "Optional registry lens id. When set, only that lens' allowed signatures are offered from "
+            "--profile-registry to the profile, compile context, and registry follow-up passes."
+        ),
+    )
+    parser.add_argument(
         "--profile-registry-palette-prior",
         action="store_true",
         help=(
@@ -1476,6 +1484,9 @@ def main() -> int:
         ],
     }
     profile_registry = _load_profile_registry(args.profile_registry)
+    requested_profile_registry_lens = str(getattr(args, "profile_registry_lens", "") or "").strip()
+    if profile_registry and requested_profile_registry_lens:
+        profile_registry = _profile_registry_for_lens(profile_registry, requested_profile_registry_lens)
     unsafe_palette_prior_reason = _unsafe_profile_registry_palette_prior_reason(profile_registry)
     if (
         bool(args.profile_registry_palette_prior)
@@ -1495,6 +1506,13 @@ def main() -> int:
             "and notes only. It is not a gold fact set and it does not authorize writes. Prefer these signatures when "
             "they fit the source and preserve epistemic boundaries; omit registry predicates that the source does not need."
         )
+        active_lens = profile_registry.get("active_lens") if isinstance(profile_registry.get("active_lens"), dict) else {}
+        if active_lens:
+            sample["context"].append(
+                "Active profile-registry lens: "
+                f"{active_lens.get('id')} offers only the predicate signatures listed in its allowed_signatures. "
+                "Do not import predicate families from other lenses during this pass."
+            )
         if bool(args.profile_registry_palette_prior):
             sample["context"].append(
                 "Palette-stability prior: when candidate_profile_registry_v1 already contains a predicate name and arity "
@@ -1857,6 +1875,12 @@ def main() -> int:
             ),
         ),
         "profile_registry": str(args.profile_registry or ""),
+        "profile_registry_lens": str(getattr(args, "profile_registry_lens", "") or "").strip(),
+        "active_profile_registry_lens": (
+            profile_registry.get("active_lens", {})
+            if isinstance(profile_registry.get("active_lens"), dict)
+            else {}
+        ),
         "profile_registry_direct": bool(args.use_profile_registry_direct),
         "profile_registry_palette_prior": bool(args.profile_registry_palette_prior),
         "latency_ms": int((time.perf_counter() - started) * 1000),
@@ -2571,7 +2595,7 @@ def _profile_from_signature_roster(roster: dict[str, Any]) -> dict[str, Any] | N
 
 
 def _normalized_signature(value: str) -> str:
-    match = re.fullmatch(r"\s*([a-z][a-z0-9_]*)\s*/\s*([1-5])\s*", str(value or "").casefold())
+    match = re.fullmatch(r"\s*([a-z][a-z0-9_]*)\s*/\s*([1-6])\s*", str(value or "").casefold())
     if not match:
         return ""
     return f"{match.group(1)}/{match.group(2)}"
@@ -2664,15 +2688,90 @@ def _load_profile_registry(path: Path | None) -> dict[str, Any]:
             }
             if requirement["carrier_signature"] and requirement["omission_kind"] and requirement["reason_code"]:
                 accountability_requirements.append(requirement)
+    lenses: list[dict[str, Any]] = []
+    raw_lenses = parsed.get("lenses", [])
+    if isinstance(raw_lenses, list):
+        for item in raw_lenses:
+            if not isinstance(item, dict):
+                continue
+            allowed_signatures = [
+                str(signature).strip()
+                for signature in item.get("allowed_signatures", [])
+                if isinstance(item.get("allowed_signatures"), list) and str(signature).strip()
+            ]
+            lens_id = str(item.get("id", "")).strip()
+            if lens_id:
+                lenses.append(
+                    {
+                        "id": lens_id,
+                        "purpose": str(item.get("purpose", "")).strip(),
+                        "allowed_signatures": allowed_signatures,
+                    }
+                )
     return {
         "schema": str(parsed.get("schema", "")).strip(),
         "fixture": str(parsed.get("fixture", "")).strip(),
         "source": str(parsed.get("source", "")).strip(),
         "purpose": str(parsed.get("purpose", "")).strip(),
         "selection": parsed.get("selection", {}) if isinstance(parsed.get("selection"), dict) else {},
+        "lenses": lenses,
         "accountability_requirements": accountability_requirements,
         "predicates": compact_predicates,
     }
+
+
+def _profile_registry_for_lens(profile_registry: dict[str, Any], lens_id: str) -> dict[str, Any]:
+    requested = str(lens_id or "").strip()
+    if not requested:
+        return profile_registry
+    lenses = profile_registry.get("lenses") if isinstance(profile_registry.get("lenses"), list) else []
+    selected = next(
+        (
+            item
+            for item in lenses
+            if isinstance(item, dict) and str(item.get("id", "")).strip() == requested
+        ),
+        None,
+    )
+    if selected is None:
+        available = ", ".join(
+            sorted(
+                str(item.get("id", "")).strip()
+                for item in lenses
+                if isinstance(item, dict) and str(item.get("id", "")).strip()
+            )
+        )
+        raise ValueError(f"unknown profile registry lens {requested!r}; available lenses: {available or 'none'}")
+    allowed = {
+        _normalized_signature(str(signature))
+        for signature in selected.get("allowed_signatures", [])
+        if _normalized_signature(str(signature))
+    }
+    predicates = [
+        dict(item)
+        for item in profile_registry.get("predicates", [])
+        if isinstance(item, dict) and _normalized_signature(str(item.get("signature", ""))) in allowed
+    ]
+    accountability_requirements = [
+        dict(item)
+        for item in profile_registry.get("accountability_requirements", [])
+        if (
+            isinstance(item, dict)
+            and _normalized_signature(str(item.get("carrier_signature", ""))) in allowed
+            and "domain_omission/5" in allowed
+        )
+    ]
+    filtered = dict(profile_registry)
+    filtered["predicates"] = predicates
+    filtered["accountability_requirements"] = accountability_requirements
+    filtered["active_lens"] = {
+        "id": requested,
+        "purpose": str(selected.get("purpose", "")).strip(),
+        "allowed_signatures": sorted(allowed),
+        "predicate_count": len(predicates),
+        "accountability_requirement_count": len(accountability_requirements),
+    }
+    return filtered
 
 
 def _unsafe_profile_registry_palette_prior_reason(profile_registry: dict[str, Any]) -> str:

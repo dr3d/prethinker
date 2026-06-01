@@ -86,6 +86,7 @@ from scripts.run_domain_bootstrap_file import (
     _lmstudio_chat_completions_url,
     _pass_surface_contribution,
     _profile_from_signature_roster,
+    _profile_registry_for_lens,
     _profile_registry_palette_report,
     _profile_registry_palette_prior_context,
     _profile_registry_accountability_context,
@@ -6643,6 +6644,110 @@ def test_profile_registry_palette_report_counts_signature_and_arity_drift() -> N
             "profile_arities": [4],
         }
     ]
+
+
+def test_profile_registry_for_lens_filters_predicates_and_requirements() -> None:
+    filtered = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "wrapper",
+                    "purpose": "Wrapper facts only.",
+                    "allowed_signatures": [
+                        "fda_warning_letter/5",
+                        "fda_correspondence_party/5",
+                        "domain_omission/5",
+                    ],
+                },
+                {
+                    "id": "violation",
+                    "allowed_signatures": ["fda_violation_detail/5"],
+                },
+            ],
+            "predicates": [
+                {"signature": "fda_warning_letter/5"},
+                {"signature": "fda_correspondence_party/5"},
+                {"signature": "fda_violation_detail/5"},
+                {"signature": "domain_omission/5"},
+            ],
+            "accountability_requirements": [
+                {
+                    "id": "missing_signatory_role",
+                    "carrier_signature": "fda_correspondence_party/5",
+                    "omission_kind": "role_missing",
+                    "reason_code": "signatory_not_stated",
+                },
+                {
+                    "id": "missing_violation_detail",
+                    "carrier_signature": "fda_violation_detail/5",
+                    "omission_kind": "detail_missing",
+                    "reason_code": "not_found",
+                },
+            ],
+        },
+        "wrapper",
+    )
+
+    assert [item["signature"] for item in filtered["predicates"]] == [
+        "fda_warning_letter/5",
+        "fda_correspondence_party/5",
+        "domain_omission/5",
+    ]
+    assert [item["id"] for item in filtered["accountability_requirements"]] == ["missing_signatory_role"]
+    assert filtered["active_lens"]["id"] == "wrapper"
+    assert filtered["active_lens"]["predicate_count"] == 3
+
+
+def test_profile_registry_for_lens_requires_known_lens() -> None:
+    try:
+        _profile_registry_for_lens({"lenses": [{"id": "wrapper"}], "predicates": []}, "chronology")
+    except ValueError as exc:
+        assert "unknown profile registry lens" in str(exc)
+        assert "wrapper" in str(exc)
+    else:
+        raise AssertionError("unknown lens did not fail")
+
+
+def test_profile_registry_lens_limits_direct_profile_and_completion_context() -> None:
+    registry = _profile_registry_for_lens(
+        {
+            "lenses": [
+                {
+                    "id": "chronology",
+                    "allowed_signatures": [
+                        "fda_inspection_event/6",
+                        "fda_form483_response/4",
+                        "domain_omission/5",
+                    ],
+                }
+            ],
+            "predicates": [
+                {"signature": "fda_inspection_event/6", "category": "chronology"},
+                {"signature": "fda_form483_response/4", "category": "chronology"},
+                {"signature": "fda_violation_detail/5", "category": "violation"},
+                {"signature": "domain_omission/5", "category": "compile_accountability"},
+            ],
+        },
+        "chronology",
+    )
+
+    profile = domain_bootstrap_file._profile_from_registry(registry, domain_hint="fda")
+    profile_signatures = [
+        item["signature"]
+        for item in profile["candidate_predicates"]
+        if isinstance(item, dict)
+    ]
+    assert profile_signatures == [
+        "fda_inspection_event/6",
+        "fda_form483_response/4",
+        "domain_omission/5",
+    ]
+
+    context = _profile_registry_completion_context_lines(registry, {"facts": []})
+    joined = "\n".join(context)
+    assert "fda_inspection_event/6" in joined
+    assert "fda_form483_response/4" in joined
+    assert "fda_violation_detail/5" not in joined
 
 
 def test_profile_registry_palette_prior_context_is_vocabulary_only() -> None:

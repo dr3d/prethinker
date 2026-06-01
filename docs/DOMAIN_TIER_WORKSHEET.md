@@ -192,6 +192,19 @@ validation: 15 predicates, 0 blocking errors, 0 warnings
 artifact: C:\prethinker_tmp_archive\fda_warning_letter_v1_lens_schema_validation_20260601.md
 ```
 
+Lens-scoped compile offering:
+
+```text
+scripts\run_domain_bootstrap_file.py --profile-registry-lens <lens_id>
+```
+
+The compile runner now filters the active profile registry before it reaches
+direct profile generation, palette-prior context, registry accountability
+context, and registry completion follow-up. The test guard verifies that a
+chronology lens does not receive violation predicates. This makes
+`offered_predicates = f(domain_registry, lens)` an executable runner
+constraint, not just a schema note.
+
 Live compile sequence, Qwen 35B A3B via OpenRouter:
 
 ```text

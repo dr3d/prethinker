@@ -119,6 +119,18 @@ into a local one-off predicate language. It also validates lens allowlists:
 every `lenses[].allowed_signatures[]` entry must already exist in the domain
 registry, so a lens cannot acquire predicates that the domain did not offer.
 
+Use a lens-scoped registry in the compile runner with:
+
+```text
+python scripts\run_domain_bootstrap_file.py ... --profile-registry datasets\domain_profiles\fda_warning_letter_v1\ontology_registry.json --profile-registry-lens wrapper
+```
+
+When `--profile-registry-lens` is set, the runner filters the registry before
+profile generation, palette-prior context, registry accountability context, and
+registry completion follow-up. This is the executable boundary: a focused lens
+does not merely promise to avoid unrelated predicates; those predicates are not
+offered to that pass.
+
 ## Build Loop
 
 1. Pick the wedge.
