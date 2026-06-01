@@ -7763,6 +7763,9 @@ def _canonical_fda_facility_location(value: str) -> str:
     match = re.fullmatch(r"(.+?)_(?:\d{5})(?:_\d{4})?", text)
     if match:
         return match.group(1)
+    match = re.fullmatch(r"(.+?)_(?:united_states|usa|us)", text)
+    if match:
+        return match.group(1)
     return ""
 
 
@@ -7812,7 +7815,7 @@ def _apply_fda_facility_identity_atom_reduction(source_compile: dict[str, Any]) 
         "not_source_interpretation": True,
         "not_query_interpretation": True,
         "description": (
-            "Canonicalizes fda_facility_identity/5 location zipcode suffixes and bare numeric FEI identifiers. "
+            "Canonicalizes fda_facility_identity/5 location zipcode/country suffixes and bare numeric FEI identifiers. "
             "It does not infer facilities or inspect source prose."
         ),
     }

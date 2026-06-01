@@ -5,7 +5,7 @@
 
 % --- wrapper and facility ---
 fda_warning_letter(Letter, cder, apothecary_pharma_llc, v_2025_12_01, SrcLetter).
-fda_facility_identity(Facility, apothecary_pharma_llc, cary_nc, registered_outsourcing_facility, SrcFacility).
+fda_facility_identity(Facility, apothecary_pharma_llc, cary_nc, not_stated, SrcFacility).
 
 % --- correspondence parties ---
 fda_correspondence_party(Letter, Recipient, recipient, apothecary_pharma_llc, SrcRecip).
@@ -25,7 +25,7 @@ fda_violation(Viol2, Letter, violation_2, contamination_control, SrcViol2).
 fda_violation(Viol3, Letter, violation_3, contamination_control, SrcViol3).
 fda_violation(Viol4, Letter, violation_4, aseptic_processing, SrcViol4).
 fda_violation(Viol5, Letter, violation_5, aseptic_processing, SrcViol5).
-fda_violation(Viol6, Letter, violation_6, other_registered_category, SrcViol6).
+fda_violation(Viol6, Letter, violation_6, data_integrity, SrcViol6).
 
 % --- CFR citations ---
 fda_violation_citation(Viol1, cfr_21_211_22_d, cgmps_requirement, SrcCite1).
@@ -36,11 +36,11 @@ fda_violation_citation(Viol5, cfr_21_211_42_c_10_v, cgmps_requirement, SrcCite5)
 fda_violation_citation(Viol6, cfr_21_211_188, cgmps_requirement, SrcCite6).
 
 % --- second-layer violation details ---
-fda_violation_detail(Viol4, process_area, iso_5_aseptic_processing_area, sterile_drug_products, SrcDetail1).
-fda_violation_detail(Viol2, affected_product, tirzepatide_injection_10_mg_ml, violation_scope, SrcDetail2).
+fda_violation_detail(Viol4, process_area, iso_5_aseptic_processing_area, violation_scope, SrcDetail1).
+fda_violation_detail(Viol2, affected_product, tirzepatide_injection_10_mg_ml, product_release_record_review, SrcDetail2).
 
 % --- response and consultant ---
-fda_response_requirement(Letter, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, SrcReq).
+fda_response_requirement(Letter, written_response, fifteen_working_days, issuing_office, corrective_actions_and_documentation, SrcReq).
 fda_consultant_recommendation(Letter, qualified_third_party_consultant, system_assessment, SrcRec).
 
 % --- conclusion scope language ---

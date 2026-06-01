@@ -155,6 +155,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "Facility identity relation: the row links one regulated facility to its source-stated name, location, and identifier such as FEI.",
             "facility_location should be compact city/state/country or equivalent source-local location, not a full mailing paragraph.",
             "identifier_value is the source-stated facility identifier value; use not_stated when the source states the facility but no identifier.",
+            "Do not use warning-letter numbers, WL numbers, MARCS-CMS numbers, CMS numbers, or registration classes as facility identifiers.",
             "Do not infer a facility from the recipient name alone when the source distinguishes the recipient from an inspected facility.",
         ],
         "forbidden_uses": ["source_excerpt", "full_address_blob", "recipient_name_only", "unstated_identifier"],
@@ -258,6 +259,8 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "violation_category must come from the controlled FDA warning-letter category palette, such as quality_unit_failure, aseptic_processing, sterility_assurance, or data_integrity.",
             "Use violation_category=contamination_control for source language about written procedures or controls to prevent microbiological contamination, including sterile-drug contamination-prevention procedure failures.",
             "Use violation_category=aseptic_processing only when the source explicitly names aseptic processing, aseptic filling, aseptic operations, or a comparable aseptic-process failure.",
+            "Use violation_category=aseptic_processing for failures to clean, disinfect, maintain, or control rooms/equipment when the source says the purpose is to produce or maintain aseptic conditions.",
+            "Use violation_category=data_integrity for incomplete, missing, inaccurate, or inadequate batch production/control records or comparable record-completeness failures.",
             "Do not place the violation paragraph, CFR citation, affected lots, or response critique inside violation_category.",
         ],
         "value_domains": {

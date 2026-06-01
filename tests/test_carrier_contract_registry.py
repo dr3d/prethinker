@@ -282,6 +282,8 @@ def test_fda_violation_contract_disambiguates_contamination_control_from_aseptic
     assert "prevent microbiological contamination" in text
     assert "violation_category=aseptic_processing only" in text
     assert "explicitly names aseptic processing" in text
+    assert "clean, disinfect, maintain, or control rooms/equipment" in text
+    assert "batch production/control records" in text
 
 
 def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> None:
@@ -289,6 +291,14 @@ def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> Non
     text = "\n".join(lines)
 
     assert "adulteration_insanitary_conditions" in text
+
+
+def test_fda_facility_identity_contract_blocks_document_ids_as_facility_ids() -> None:
+    lines = carrier_contract_prompt_lines(["fda_facility_identity/5"])
+    text = "\n".join(lines)
+
+    assert "MARCS-CMS" in text
+    assert "not_stated" in text
 
 
 def test_fda_violation_citation_contract_allows_letter_level_consultant_citation() -> None:

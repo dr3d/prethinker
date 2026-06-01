@@ -24,3 +24,6 @@ fda_prior_warning_letter(W, L, v_2024_01_01, prior_letter, Src).
 
 % fabricated regulatory meeting / teleconference (none is source-stated)
 fda_regulatory_meeting(M, L, v_2025_07_01, Src).
+
+% MARCS/WL number must not be treated as a facility identifier such as FEI
+fda_facility_identity(Facility, apothecary_pharma_llc, Location, 717972, Src).

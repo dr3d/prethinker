@@ -7214,14 +7214,16 @@ def test_fda_facility_identity_atom_reduction_canonicalizes_location_and_fei() -
     source_compile = {
         "facts": [
             "fda_facility_identity(facility_1, marigold_sterile_products_inc, camden_new_jersey_08102, 3012345678, src_line_4).",
+            "fda_facility_identity(facility_2, apothecary_pharma_llc, cary_nc_united_states, not_stated, src_line_5).",
         ]
     }
 
     report = _apply_fda_facility_identity_atom_reduction(source_compile)
 
-    assert report["reduction_count"] == 1
+    assert report["reduction_count"] == 2
     assert source_compile["facts"] == [
         "fda_facility_identity(facility_1, marigold_sterile_products_inc, camden_new_jersey, fei_3012345678, src_line_4).",
+        "fda_facility_identity(facility_2, apothecary_pharma_llc, cary_nc, not_stated, src_line_5).",
     ]
     assert source_compile["deterministic_fda_facility_identity_atom_reduction_policy"]["not_source_interpretation"] is True
 

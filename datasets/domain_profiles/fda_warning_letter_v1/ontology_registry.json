@@ -80,7 +80,7 @@
       "signature": "fda_facility_identity/5",
       "args": ["facility_id", "facility_name", "facility_location", "identifier_value", "source_or_scope"],
       "category": "fda_facility_identity",
-      "notes": "Links one regulated facility to compact name, location, and identifier values such as FEI."
+      "notes": "Links one regulated facility to compact name, location, and identifier values such as FEI. Use not_stated when the facility is stated but no facility identifier is stated; do not use warning-letter, WL, MARCS-CMS, CMS, or registration-class values as facility identifiers."
     },
     {
       "signature": "fda_correspondence_party/5",

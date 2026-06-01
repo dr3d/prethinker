@@ -54,8 +54,9 @@ are concrete governed atoms.
 - Violation 5: 21 CFR 211.42(c)(10)(v), cleaning/disinfecting to produce
   aseptic conditions -> `aseptic_processing`.
 - Violation 6: 21 CFR 211.188, batch production and control records ->
-  `other_registered_category` because the current closed FDA category palette
-  does not yet include a more specific recordkeeping category.
+  `data_integrity`. The current closed FDA category palette includes
+  `data_integrity`, and incomplete batch production/control records fit that
+  compact category better than a generic fallback.
 
 ## Deliberate Omissions
 
@@ -70,13 +71,20 @@ are concrete governed atoms.
 ## Hard-To-Represent Facts
 
 - `fda_facility_identity/5` has an identifier slot, but this source excerpt does
-  not state FEI. The expected row uses `registered_outsourcing_facility`, drawn
-  from the source statement that the firm registered the facility as an
-  outsourcing facility under FDCA section 503B. This is a pressure point for the
-  current carrier shape.
+  not state FEI or another facility identifier. The expected row therefore uses
+  `not_stated`, following the current carrier contract. The MARCS/WL number
+  `717972` is a warning-letter/CMS identifier, not a source-stated facility
+  identifier, so it is listed as a forbidden facility-identifier value.
 - The signatory title chain is not represented because
   `fda_correspondence_party/5` preserves party role and party name, not title.
 - 501(a)(2)(A) insanitary-conditions adulteration required adding
   `adulteration_insanitary_conditions` to the closed
   `fda_adulteration_basis/5` basis-kind palette. This is a domain-pack extension
   from a real FDA warning-letter source, not a new predicate family.
+- The response requirement uses `issuing_office` rather than broad `fda`
+  because the source asks the recipient to notify "this office" in writing.
+- The second-layer detail rows use `product_release_record_review` for the
+  Tirzepatide released-batches detail and `violation_scope` for the ISO 5
+  process-area detail. These are source/contract adjudications made after the
+  first transfer run exposed that the original roles were less faithful to the
+  current carrier value domains.
