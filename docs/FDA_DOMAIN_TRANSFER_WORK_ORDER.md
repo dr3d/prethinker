@@ -158,3 +158,19 @@ Before zipping, run a self-check by inspection:
 - every expected fact is directly supported by `source.md`;
 - source text is real public FDA material, not synthetic;
 - the zip contains the top-level folder and the five required files.
+
+## Codex Preflight After Delivery
+
+Before any compile run, validate the unpacked package:
+
+```powershell
+python scripts\validate_domain_transfer_package.py `
+  --package-dir datasets\compile_micro_fixtures\fda_warning_letter_domain_transfer_001 `
+  --profile-registry datasets\domain_profiles\fda_warning_letter_v1\ontology_registry.json `
+  --out-md C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_preflight.md `
+  --out-json C:\prethinker_tmp_archive\fda_warning_letter_domain_transfer_001_preflight.json
+```
+
+If this preflight fails, fix the fixture package before compiling. Do not spend
+inference budget on a package with missing source citation, out-of-registry
+expected facts, or prose-shaped expected atoms.

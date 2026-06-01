@@ -155,6 +155,7 @@ scripts/audit_reference_judge_null_controls.py
 scripts/audit_typed_plan_replay.py
 scripts/summarize_hard_clean_answer_classes.py
 scripts/validate_domain_predicate_schema.py
+scripts/validate_domain_transfer_package.py
 ```
 
 Validation:
@@ -594,14 +595,17 @@ R27-R30 corrected-schema unsupported facts:
 1. Build or receive an unlike FDA warning-letter transfer micro using
    `docs\FDA_DOMAIN_TRANSFER_WORK_ORDER.md`. More same-fixture tuning is now
    high overfit risk.
-2. Run a same-condition N=3 cell only after the current code settles; use
+2. Run `scripts\validate_domain_transfer_package.py` on the unpacked package
+   before any compile. If it fails, fix the package rather than spending
+   inference.
+3. Run a same-condition N=3 cell only after the current code settles; use
    `scripts\summarize_typed_micro_series.py` and promote only support>=2 rows
    with clean gates. Use the same-predicate variant section to decide whether a
    remaining row is a normalizer candidate or a true compile-recall gap.
-3. Pressure second-layer detail completeness on the micro without allowing
+4. Pressure second-layer detail completeness on the micro without allowing
    prose-shaped values.
-4. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
+5. If the micro reaches stable clean coverage, run N>=3 same-condition compiles
    on the current FDA fixture and promote only rows with support>=2.
-5. If current FDA improves, test on at least one unlike FDA warning letter.
-6. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
+6. If current FDA improves, test on at least one unlike FDA warning letter.
+7. If FDA fails the reject criteria, do not rescue it by row-polishing; choose a
    different wedge or conclude no wedge is ready.
