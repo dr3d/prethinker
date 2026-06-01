@@ -284,6 +284,13 @@ def test_fda_violation_contract_disambiguates_contamination_control_from_aseptic
     assert "explicitly names aseptic processing" in text
 
 
+def test_fda_adulteration_basis_contract_includes_insanitary_conditions() -> None:
+    lines = carrier_contract_prompt_lines(["fda_adulteration_basis/5"])
+    text = "\n".join(lines)
+
+    assert "adulteration_insanitary_conditions" in text
+
+
 def test_fda_violation_citation_contract_allows_letter_level_consultant_citation() -> None:
     lines = carrier_contract_prompt_lines(["fda_violation_citation/4"])
     text = "\n".join(lines)

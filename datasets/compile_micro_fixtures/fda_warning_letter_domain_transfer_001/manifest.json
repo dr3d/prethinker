@@ -1,0 +1,7 @@
+{
+  "fixture_id": "fda_warning_letter_domain_transfer_001",
+  "source": "source.md",
+  "expected_facts": "expected_facts.pl",
+  "forbidden_facts": "forbidden_facts.pl",
+  "purpose": "Transfer-test the closed FDA warning-letter domain schema on an unlike real FDA warning letter without prose-shaped atom slots."
+}

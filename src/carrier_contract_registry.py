@@ -343,12 +343,18 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "Adulteration-basis relation: the row states a source-stated FDA adulteration basis for the warning letter.",
-            "basis_kind is from a controlled basis palette such as adulteration_cgmp, usp_enforceability, repeated_failure, or management_oversight.",
+            "basis_kind is from a controlled basis palette such as adulteration_cgmp, adulteration_insanitary_conditions, usp_enforceability, repeated_failure, or management_oversight.",
             "authority_or_scope is a compact citation or authority atom; product_scope is a compact source-stated scope such as drug_products.",
             "Do not pack the source's explanatory sentence into basis_kind, authority_or_scope, or product_scope.",
         ],
         "value_domains": {
-            "basis_kind": ["adulteration_cgmp", "usp_enforceability", "repeated_failure", "management_oversight"],
+            "basis_kind": [
+                "adulteration_cgmp",
+                "adulteration_insanitary_conditions",
+                "usp_enforceability",
+                "repeated_failure",
+                "management_oversight",
+            ],
             "product_scope": ["drug_products", "sterile_drug_products", "nonsterile_drug_products", "biological_products"],
         },
         "forbidden_uses": ["source_excerpt", "explanatory_sentence", "full_adulteration_paragraph"],
