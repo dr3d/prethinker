@@ -37,6 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile-root", type=Path, default=None)
     parser.add_argument("--fixture", action="append", default=[])
     parser.add_argument("--out-dir", type=Path, default=None)
+    parser.add_argument("--max-atom-shape-examples", type=int, default=1000)
     parser.add_argument("--skip-tests", action="store_true")
     parser.add_argument("--exit-zero", action="store_true", help="Write reports but return 0 even if a gate fails.")
     return parser.parse_args()
@@ -57,6 +58,7 @@ def main() -> int:
         fixtures=[str(item).strip() for item in args.fixture if str(item).strip()],
         out_dir=out_dir,
         include_tests=not bool(args.skip_tests),
+        max_atom_shape_examples=max(1, int(args.max_atom_shape_examples)),
     )
     rows: list[dict[str, Any]] = []
     for step in steps:
@@ -85,6 +87,7 @@ def build_steps(
     fixtures: list[str],
     out_dir: Path,
     include_tests: bool,
+    max_atom_shape_examples: int = 1000,
 ) -> list[dict[str, Any]]:
     steps: list[dict[str, Any]] = [
         {
@@ -112,6 +115,8 @@ def build_steps(
                         str(compile_root),
                         *fixture_args,
                         "--enforce-atom-shape",
+                        "--max-examples",
+                        str(max_atom_shape_examples),
                         "--out-json",
                         str(out_dir / "atom_inventory.json"),
                         "--out-md",

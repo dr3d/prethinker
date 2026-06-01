@@ -433,6 +433,34 @@ Research integrity gate:
     focused governance tests: 308 passed
   artifact:
     C:\prethinker_tmp_archive\research_integrity_gate_20260601_fda_r27_r30\research_integrity_gate.md
+
+Broad current-8 integrity check:
+  command:
+    python scripts\run_research_integrity_gate.py --compile-root C:\prethinker_tmp_archive\fresh_ugly_public_20260529_01_current_compile_20260531\compile_current --out-dir C:\prethinker_tmp_archive\research_integrity_gate_20260601_current_8_compile
+  result:
+    fail, 1/5 failed
+    sign-clean pass
+    carrier value-domain pass
+    domain omission accountability pass
+    focused governance tests pass
+    atom-shape audit fail
+  atom-shape blockers:
+    334 total
+    310 unregistered/open atom_value_prose_shaped
+    24 registered_carrier_prose_shaped_value
+  distribution:
+    fda_warning_ugly_007: 97
+    procurement_contract_ugly_003: 61
+    state_ag_settlement_ugly_003: 41
+    court_order_ugly_003: 39
+    osha_incident_ugly_007: 32
+    puc_order_ugly_003: 32
+    labor_board_ugly_003: 20
+    sec_material_event_ugly_007: 12
+  note: this confirms the broader open compiler is not Tier-1 clean. The FDA
+        micro/domain-pack path can be clean, but broad current-8 artifacts still
+        contain prose-shaped typed atoms and must stay below Tier 1 unless row
+        claim paths pass hard-clean gates.
 ```
 
 Artifacts:
