@@ -76,6 +76,10 @@ The main design test is whether domain predicates cover substance, not only
 scaffolding. A schema that verifies identifiers and dates but leaves findings
 and obligations in Tier 3 is not enough.
 
+The repeatable process for building and customizing a domain predicate pack is
+documented in
+[Domain Predicate Schema Process](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_PREDICATE_SCHEMA_PROCESS.md).
+
 ## RAG Policy
 
 RAG can coexist with the domain schema, but only as a tiered component.

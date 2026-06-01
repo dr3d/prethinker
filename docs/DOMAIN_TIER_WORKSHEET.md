@@ -12,7 +12,7 @@ typed fallback?
 
 The strategy is documented in:
 
-- [Domain Tier Strategy](DOMAIN_TIER_STRATEGY.md)
+- [Domain Tier Strategy](https://github.com/dr3d/prethinker/blob/main/docs/DOMAIN_TIER_STRATEGY.md)
 
 ## Current Floor
 
