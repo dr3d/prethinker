@@ -220,6 +220,15 @@ R6 self_check-is-not-enough guidance:
   value-domain violations: 0
   atom-shape blockers: 0
   domain omission accountability audit: 1 blocker
+
+R7 registry accountability requirement:
+  admitted facts: 20
+  strict expected match: 12 / 23
+  value-domain violations: 0
+  domain omission accountability audit v1: pass
+  domain omission accountability audit v2: 1 blocker
+  blocker: emitted domain_omission/5 but rewrote 'fda_correspondence_party/5'
+           as fda_correspondence_party_5
 ```
 
 Artifacts:
@@ -231,6 +240,7 @@ C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r3_contract_context
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r4_datefix
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r5_omission
 C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r6_selfcheck_omission
+C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r7_accountability_registry
 ```
 
 What this proved:
@@ -246,6 +256,8 @@ What this proved:
   prose-shaped values;
 - self-check omission notes are not sufficient accountability; the new
   `audit_domain_omission_accountability.py` gate flags this case.
+- omission-shaped rows are not sufficient either; the audit now requires the
+  `carrier_signature` slot to name an actual registered carrier signature.
 
 Current blocker:
 

@@ -6672,6 +6672,7 @@ def test_profile_registry_accountability_context_requires_typed_omission_rows() 
     assert "domain_omission(DomainOrSubjectId, 'fda_correspondence_party/5'" in joined
     assert "role_missing" in joined
     assert "signatory_not_stated" in joined
+    assert "do not rewrite it as an underscore atom" in joined
     assert "Do not leave this only in self_check" in joined
 
 

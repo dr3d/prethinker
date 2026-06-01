@@ -7697,6 +7697,8 @@ def _profile_registry_accountability_context(profile_registry: dict[str, Any]) -
             "Registry accountability requirement: if raw_source_text satisfies "
             f"{trigger or 'the stated omission trigger'}, emit domain_omission(DomainOrSubjectId, "
             f"'{carrier_signature}', {omission_kind}, {reason_code}, SourceOrScope). "
+            "The carrier_signature slot must keep the exact registered slash signature in quotes; "
+            "do not rewrite it as an underscore atom. "
             "Choose DomainOrSubjectId and SourceOrScope from the source-local domain object and source coordinate. "
             "Do not leave this only in self_check."
         )

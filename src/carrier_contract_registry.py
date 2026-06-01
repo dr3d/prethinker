@@ -434,7 +434,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "Domain omission relation: the row records an accountable compile omission for an expected carrier family or subject.",
-            "carrier_signature is the registered carrier signature, such as fda_violation_detail/5.",
+            "carrier_signature is the exact registered carrier signature, such as 'fda_violation_detail/5'. Because registered signatures contain '/', this slot should be a quoted atom/string; do not normalize the slash to an underscore form such as fda_violation_detail_5.",
             "omission_kind is compact, such as subject_missing, carrier_missing, role_missing, schema_rejected, uncertain, none_found, or not_applicable.",
             "reason_code is compact and must not contain source prose.",
             "When the source explicitly states that an expected role, carrier item, or detail is absent, unavailable, not shown, not stated, none found, or not applicable, emit a domain_omission/5 row instead of leaving the gap invisible.",

@@ -56,6 +56,24 @@ def test_domain_omission_accountability_passes_when_fact_exists(tmp_path: Path) 
     assert report["summary"]["blocker_count"] == 0
 
 
+def test_domain_omission_accountability_blocks_invalid_carrier_signature(tmp_path: Path) -> None:
+    compile_json = _write(
+        tmp_path / "fixture" / "compile.json",
+        _compile_payload(
+            facts=[
+                "domain_omission(letter, fda_correspondence_party_5, role_missing, signatory_not_stated, source_utterance)."
+            ],
+            notes=[],
+        ),
+    )
+
+    report = build_report([compile_json])
+
+    assert report["summary"]["status"] == "fail"
+    assert report["rows"][0]["class"] == "invalid_domain_omission_carrier_signature"
+    assert report["rows"][0]["carrier_signature"] == "fda_correspondence_party_5"
+
+
 def test_domain_omission_accountability_ignores_profiles_without_domain_omission(tmp_path: Path) -> None:
     compile_json = _write(
         tmp_path / "fixture" / "compile.json",

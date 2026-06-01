@@ -13,10 +13,19 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.carrier_contract_registry import carrier_contract  # noqa: E402
+
+
+FACT_RE = re.compile(r"^\s*([a-z][A-Za-z0-9_]*)\((.*)\)\.\s*$")
 OMISSION_TEXT_RE = re.compile(
     r"\b(absent|absence|missing|not\s+shown|not\s+stated|not\s+available|none\s+found|no\s+[a-z0-9_ -]+(?:shown|stated|provided|emitted))\b",
     re.IGNORECASE,
@@ -63,7 +72,20 @@ def build_report(paths: list[Path]) -> dict[str, Any]:
         if not _domain_omission_available(data):
             continue
         facts = [str(item).strip() for item in source_compile.get("facts", []) if str(item).strip()] if isinstance(source_compile.get("facts"), list) else []
-        has_domain_omission = any(fact.startswith("domain_omission(") for fact in facts)
+        domain_omission_rows = _domain_omission_rows(facts)
+        has_domain_omission = bool(domain_omission_rows)
+        for row in domain_omission_rows:
+            if carrier_contract(str(row.get("carrier_signature", ""))) is None:
+                rows.append(
+                    {
+                        "fixture": path.parent.name,
+                        "compile_json": str(path),
+                        "class": "invalid_domain_omission_carrier_signature",
+                        "fact": row.get("fact", ""),
+                        "carrier_signature": row.get("carrier_signature", ""),
+                        "self_check_omission_notes": [],
+                    }
+                )
         omission_notes = [
             text
             for text in _self_check_texts(source_compile.get("self_check"))
@@ -98,12 +120,13 @@ def render_markdown(report: dict[str, Any]) -> str:
         f"- Blockers: `{summary['blocker_count']}`",
         f"- Status: `{summary['status']}`",
         "",
-        "| Fixture | Class | Self-check omission notes |",
+        "| Fixture | Class | Detail |",
         "| --- | --- | --- |",
     ]
     for row in report.get("rows", []):
         notes = "; ".join(str(item).replace("|", "/") for item in row.get("self_check_omission_notes", []))
-        lines.append(f"| `{row.get('fixture', '')}` | `{row.get('class', '')}` | {notes} |")
+        detail = notes or str(row.get("carrier_signature", "")).replace("|", "/") or str(row.get("fact", "")).replace("|", "/")
+        lines.append(f"| `{row.get('fixture', '')}` | `{row.get('class', '')}` | {detail} |")
     return "\n".join(lines) + "\n"
 
 
@@ -129,6 +152,65 @@ def _self_check_texts(value: Any) -> list[str]:
         if text:
             out.append(text)
     return out
+
+
+def _domain_omission_rows(facts: list[str]) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    for fact in facts:
+        match = FACT_RE.match(str(fact).strip())
+        if not match or match.group(1) != "domain_omission":
+            continue
+        args = _split_args(match.group(2))
+        if len(args) != 5:
+            rows.append({"fact": fact, "carrier_signature": ""})
+            continue
+        rows.append({"fact": fact, "carrier_signature": _normalize_arg(args[1])})
+    return rows
+
+
+def _normalize_arg(value: str) -> str:
+    text = str(value or "").strip()
+    if len(text) >= 2 and text[0] == text[-1] and text[0] in {"'", '"'}:
+        text = text[1:-1]
+    return text.strip()
+
+
+def _split_args(raw: str) -> list[str]:
+    args: list[str] = []
+    current: list[str] = []
+    quote: str | None = None
+    escape = False
+    depth = 0
+    for char in raw:
+        if quote:
+            current.append(char)
+            if escape:
+                escape = False
+            elif char == "\\":
+                escape = True
+            elif char == quote:
+                quote = None
+            continue
+        if char in {"'", '"'}:
+            quote = char
+            current.append(char)
+            continue
+        if char == "(":
+            depth += 1
+            current.append(char)
+            continue
+        if char == ")":
+            depth = max(0, depth - 1)
+            current.append(char)
+            continue
+        if char == "," and depth == 0:
+            args.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    if current or raw.strip():
+        args.append("".join(current).strip())
+    return args
 
 
 def _compile_paths(*, compile_root: Path | None, compile_jsons: list[Path], fixtures: set[str] | None) -> list[Path]:

@@ -91,6 +91,7 @@ def test_fda_warning_letter_contracts_keep_domain_slots_compact() -> None:
     assert omission is not None
     omission_text = " ".join(omission["contract"] + omission["forbidden_uses"])
     assert "makes gaps visible" in omission_text
+    assert "do not normalize the slash to an underscore" in omission_text
     assert "answer_substitute" in omission_text
 
 
