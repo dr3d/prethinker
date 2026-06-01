@@ -375,6 +375,29 @@ R23-R25 same-condition support summary, explicit dated model:
     63 typed facts, 15 predicates, 15 signatures, 100% registered facts,
     0 unregistered signatures, 0 atom-shape blockers.
     artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_atom_inventory.md
+
+R23-R25 oracle/schema correction:
+  artifact: C:\prethinker_tmp_archive\fda_warning_letter_micro_20260601_r23_r25_oracle_corrected_summary.md
+  corrected expected facts:
+    - changed violation 1 record detail from `missing_record_type` to
+      `record_review_subject`, because the source states that batch production
+      records were not reviewed before release; it does not say the records
+      were missing.
+    - changed the recurrence conclusion from `repeat_observation_context` to
+      `recurrence_prevention`, because the source says the firm is responsible
+      for preventing recurrence; it does not say the item is a repeat
+      observation.
+    - removed the separate `documentation_submission` expected row, because
+      the source states one written-response requirement that identifies
+      corrective actions and supporting documentation; it does not clearly
+      state a separate documentation-submission action.
+  corrected support summary:
+    expected facts: 22
+    supported expected facts: 18 / 22
+    unsupported expected facts: 4 / 22
+  note: this is an oracle/schema correction, not a compiler repair. It keeps
+        the fixture from rewarding facts that are not actually stated in the
+        source.
 ```
 
 Artifacts:
@@ -455,15 +478,20 @@ What this proved:
   `qwen/qwen3.6-35b-a3b-20260415` explicitly and should supersede R19-R22 for
   this reducer checkpoint.
 - typed value reducers moved the current FDA micro baseline to 18/23
-  support>=2 with clean gates. The gain is narrow and governance-clean:
+  support>=2 before the oracle/schema correction, and 18/22 after it, with
+  clean gates. The gain is narrow and governance-clean:
   facility FEI/location normalization, affected-lot atom normalization, and
   consultant-citation scope normalization.
 - the micro-series summarizer now reports same-predicate typed variants for
   unsupported rows. This is a governance aid: it separates near-miss typed atom
   drift from true missing compile recall without re-reading source prose.
 - atom-shape enforcement passed on the latest R23-R25 cell. The current FDA
-  typed core is still incomplete, but it is not getting its 18/23 support by
+  typed core is still incomplete, but it is not getting its 18/22 support by
   hiding prose-shaped values or unregistered predicates.
+- the FDA micro expected facts needed one schema/oracle correction. After
+  correction, current support is 18/22. This is the number to use going
+  forward; the earlier 18/23 was over-penalizing one weakly supported expected
+  row and two misnamed source claims.
 
 Current blocker:
 
@@ -482,12 +510,11 @@ missing_signatory_role:
        role_missing, signatory_not_stated, SourceOrScope)
 ```
 
-R23-R25 unsupported facts:
+R23-R25 oracle-corrected unsupported facts:
 
-- one missing-record detail for violation 1;
 - procedure-scope detail for violation 2 remains only 1/3;
-- documentation-submission response row;
-- recurrence/responsibility conclusion row;
+- record-review-subject detail for violation 1 remains 0/3;
+- recurrence-prevention conclusion row remains 0/3;
 - warning-letter issuing office specificity remains only 1/3; the model often
   emits broad `fda` rather than the named office. Do not normalize this by fiat.
 - a few source/scope and compact-id normalization choices that may need

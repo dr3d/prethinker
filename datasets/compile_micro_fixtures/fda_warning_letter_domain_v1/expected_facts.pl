@@ -11,7 +11,7 @@ fda_violation(Violation1, Letter, violation_1, quality_unit_failure, SrcViolatio
 fda_violation_citation(Violation1, cfr_21_211_192, cgmps_requirement, SrcViolation1Citation).
 fda_violation_detail(Violation1, affected_lot, lot_a_104, product_release_record_review, SrcLotA104).
 fda_violation_detail(Violation1, affected_lot, lot_a_105, product_release_record_review, SrcLotA105).
-fda_violation_detail(Violation1, missing_record_type, batch_production_records, pre_release_quality_review, SrcRecords).
+fda_violation_detail(Violation1, record_review_subject, batch_production_records, pre_release_quality_review, SrcRecords).
 
 fda_violation(Violation2, Letter, violation_2, contamination_control, SrcViolation2).
 fda_violation_citation(Violation2, cfr_21_211_113_b, cgmps_requirement, SrcViolation2Citation).
@@ -19,10 +19,9 @@ fda_violation_detail(Violation2, procedure_scope, microbiological_contamination_
 
 fda_adulteration_basis(Letter, adulteration_cgmp, fdca_501_a_2_b, drug_products, SrcAdulteration).
 fda_response_requirement(Letter, written_response, fifteen_working_days, fda, corrective_actions_and_documentation, SrcResponseRequirement).
-fda_response_requirement(Letter, documentation_submission, fifteen_working_days, fda, supporting_documentation, SrcDocumentationRequirement).
 fda_consultant_recommendation(Letter, qualified_cgmp_consultant, consultant_engagement, SrcConsultant).
 fda_violation_citation(Letter, cfr_21_211_34, consultant_qualification, SrcConsultantCitation).
 fda_conclusion_scope(Letter, cited_violations_not_exhaustive, not_all_inclusive, SrcScope).
-fda_conclusion_scope(Letter, repeat_observation_context, prevent_recurrence, SrcRecurrence).
+fda_conclusion_scope(Letter, recurrence_prevention, prevent_recurrence, SrcRecurrence).
 
 domain_omission(Letter, 'fda_correspondence_party/5', role_missing, signatory_not_stated, SrcSignatoryOmission).

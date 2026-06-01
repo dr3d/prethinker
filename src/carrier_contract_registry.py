@@ -303,7 +303,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
             "FDA violation-detail relation: the row preserves one atomic detail about a warning-letter violation.",
-            "detail_kind is a compact structural role such as affected_lot, affected_product, missing_record_type, process_area, procedure_scope, or response_status.",
+            "detail_kind is a compact structural role such as affected_lot, affected_product, record_review_subject, missing_record_type, process_area, procedure_scope, or response_status.",
             "detail_value is a compact source-stated value for that one role, not a mini-paragraph.",
             "Emit separate rows for separate lots, products, scopes, or critique points instead of combining them into one value.",
             "Do not use this carrier for the controlled violation category or exact citation when fda_violation/5 and fda_violation_citation/4 are available.",
@@ -312,6 +312,7 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
             "detail_kind": [
                 "affected_lot",
                 "affected_product",
+                "record_review_subject",
                 "missing_record_type",
                 "process_area",
                 "procedure_scope",
@@ -408,14 +409,15 @@ CARRIER_CONTRACT_REGISTRY: dict[str, dict[str, Any]] = {
         "required_provenance": ["source_or_scope"],
         "omission_behavior": ["instances", "none_found", "uncertain", "not_applicable"],
         "contract": [
-            "Conclusion-scope relation: the row preserves one compact source-stated limitation, scope statement, repeat-observation context, ownership context, or responsibility statement from the conclusion.",
-            "scope_kind is a controlled compact value such as cited_violations_not_exhaustive, repeat_observation_context, ownership_change_context, or product_scope.",
-            "scope_value is compact, such as not_all_inclusive, responsibility_to_correct, or drug_products.",
+            "Conclusion-scope relation: the row preserves one compact source-stated limitation, scope statement, recurrence-prevention statement, repeat-observation context, ownership context, or responsibility statement from the conclusion.",
+            "scope_kind is a controlled compact value such as cited_violations_not_exhaustive, recurrence_prevention, repeat_observation_context, ownership_change_context, or product_scope.",
+            "scope_value is compact, such as not_all_inclusive, responsibility_to_correct, prevent_recurrence, or drug_products.",
             "Do not put the entire conclusion paragraph into scope_kind or scope_value.",
         ],
         "value_domains": {
             "scope_kind": [
                 "cited_violations_not_exhaustive",
+                "recurrence_prevention",
                 "repeat_observation_context",
                 "ownership_change_context",
                 "product_scope",

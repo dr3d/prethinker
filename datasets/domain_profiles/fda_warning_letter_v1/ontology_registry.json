@@ -76,7 +76,7 @@
       "signature": "fda_violation_detail/5",
       "args": ["violation_id", "detail_kind", "detail_value", "role_or_purpose", "source_or_scope"],
       "category": "fda_violation_detail",
-      "notes": "Preserves one atomic violation detail such as affected_lot, process_area, response_status, or procedure_scope."
+      "notes": "Preserves one atomic violation detail such as affected_lot, record_review_subject, process_area, response_status, or procedure_scope."
     },
     {
       "signature": "fda_adulteration_basis/5",
@@ -100,7 +100,7 @@
       "signature": "fda_conclusion_scope/4",
       "args": ["letter_id", "scope_kind", "scope_value", "source_or_scope"],
       "category": "fda_conclusion_scope",
-      "notes": "Preserves one compact conclusion-scope statement such as not_all_inclusive or responsibility_to_correct."
+      "notes": "Preserves one compact conclusion-scope statement such as not_all_inclusive, responsibility_to_correct, or recurrence_prevention."
     },
     {
       "signature": "domain_omission/5",
